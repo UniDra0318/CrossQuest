@@ -34,35 +34,6 @@ Corporate training providers increasingly store sensitive learner data (assessme
 
 ---
 
-## 🏗️ Architecture & Project Structure
-
-```
-CrossQuest/
-├── docker-compose.yml              # Multi-container orchestration (PostgreSQL, FastAPI, React PWA)
-├── .env.example                    # Sample environment configurations
-├── .gitignore                      # Git ignore rules
-│
-├── backend/                        # FastAPI Server & Cryptographic Engine
-│   ├── Dockerfile                  # Container build with PBC, GMP & Charm-Crypto
-│   ├── requirements.txt            # Python dependencies
-│   ├── main.py                     # Root entrypoint
-│   └── app/
-│       ├── core/                   # Configuration, Database engine, Security/JWT
-│       ├── models/                 # SQLAlchemy schemas (User, Trainee, TrainingRecord, etc.)
-│       ├── schemas/                # Pydantic request/response models
-│       ├── crypto/                 # CP-ABE engine (Waters11 / BSW07 scheme via Charm-Crypto)
-│       ├── anomaly/                # Rule- & Threshold-based Anomaly Detection Engine
-│       └── api/                    # RESTful endpoints (Auth, Trainees, Records, Gamification, Anomalies, Reports)
-│
-└── frontend/                       # React.js PWA Client
-    ├── Dockerfile                  # Development container for frontend
-    ├── package.json                # Dependencies & Vite scripts
-    ├── vite.config.js              # Vite bundler configuration
-    ├── index.html                  # Entry HTML with PWA tags
-    └── src/                        # React components & UI logic
-```
-
----
 
 ## 🔒 Core Security & Functional Modules
 
