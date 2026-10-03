@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Sparkles, 
   Plus, 
@@ -6,7 +6,6 @@ import {
   Save, 
   RotateCcw, 
   CheckCircle2, 
-  AlertCircle, 
   Clock, 
   Award, 
   Layers, 
@@ -18,12 +17,17 @@ import {
   ListOrdered,
   FileQuestion,
   FileText,
-  Eye
+  Eye,
+  Edit3,
+  Settings,
+  Pencil
 } from 'lucide-react';
 import { 
   getActiveQuizDatabase, 
   saveQuizToStorage, 
   addQuestionToQuizStorage, 
+  updateQuestionInQuizStorage,
+  updateQuizMetadataStorage,
   deleteQuestionFromQuizStorage, 
   resetQuizDatabaseToDefaults 
 } from '../data/quizDatabase';
@@ -39,11 +43,14 @@ const QUESTION_TYPES = [
 export default function QuizStudio() {
   const [quizDb, setQuizDb] = useState(() => getActiveQuizDatabase());
   const [selectedQuizId, setSelectedQuizId] = useState('act-1');
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
   const [showNewQuizModal, setShowNewQuizModal] = useState(false);
+  const [showEditQuizModal, setShowEditQuizModal] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // New question form state
+  // Question editing / creation state
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
+  const [editingQuestionNum, setEditingQuestionNum] = useState(null);
   const [qType, setQType] = useState('multiple_choice');
   const [qPrompt, setQPrompt] = useState('');
   const [qExplanation, setQExplanation] = useState('');
@@ -68,6 +75,16 @@ export default function QuizStudio() {
     { left: '', right: '' }
   ]);
 
+  // Quiz editing state
+  const [quizMetaForm, setQuizMetaForm] = useState({
+    title: '',
+    category: '',
+    timePerQuestion: 45,
+    passingScore: 80,
+    description: '',
+    headerColor: '#772ce8'
+  });
+
   // New Quiz state
   const [newQuizTitle, setNewQuizTitle] = useState('');
   const [newQuizCategory, setNewQuizCategory] = useState('Enterprise Security');
@@ -87,13 +104,104 @@ export default function QuizStudio() {
     setSelectedQuizId(quizId);
   };
 
+  // Open Question Modal for Creating
+  const handleOpenAddModal = () => {
+    setEditingQuestionId(null);
+    setEditingQuestionNum(null);
+    setQType('multiple_choice');
+    setQPrompt('');
+    setQExplanation('');
+    setMcOptions(['', '', '', '']);
+    setMcCorrectIdx(0);
+    setIdentAnswers('');
+    setIdentPlaceholder('Type your answer here...');
+    setSeqSteps(['', '', '', '']);
+    setMatchingPairs([
+      { left: '', right: '' },
+      { left: '', right: '' },
+      { left: '', right: '' },
+      { left: '', right: '' }
+    ]);
+    setShowQuestionModal(true);
+  };
+
+  // Open Question Modal for Editing
+  const handleOpenEditModal = (q, idx) => {
+    setEditingQuestionId(q.id);
+    setEditingQuestionNum(idx + 1);
+    setQType(q.type || 'multiple_choice');
+    setQPrompt(q.question || '');
+    setQExplanation(q.explanation || '');
+
+    if (q.type === 'multiple_choice' || q.type === 'diagram_analysis') {
+      const opts = Array.isArray(q.options) ? [...q.options] : ['', '', '', ''];
+      while (opts.length < 4) opts.push('');
+      setMcOptions(opts);
+      setMcCorrectIdx(typeof q.correctAnswer === 'number' ? q.correctAnswer : 0);
+      setDiagramType(q.diagramType || 'security_pipeline');
+    } else if (q.type === 'identification') {
+      setIdentAnswers(Array.isArray(q.acceptedAnswers) ? q.acceptedAnswers.join(', ') : '');
+      setIdentPlaceholder(q.placeholder || 'Type your answer here...');
+    } else if (q.type === 'sequence_order') {
+      const steps = Array.isArray(q.correctOrder) ? [...q.correctOrder] : ['', '', '', ''];
+      while (steps.length < 3) steps.push('');
+      setSeqSteps(steps);
+    } else if (q.type === 'matching') {
+      const pairs = Array.isArray(q.pairs) 
+        ? q.pairs.map(p => ({
+            left: p.left.replace(/^\d+\.\s*/, ''),
+            right: p.right.replace(/^[A-Z]\.\s*/, '')
+          }))
+        : [{ left: '', right: '' }, { left: '', right: '' }];
+      setMatchingPairs(pairs);
+    }
+
+    setShowQuestionModal(true);
+  };
+
+  // Open Quiz Metadata Edit Modal
+  const handleOpenEditQuizModal = () => {
+    if (!selectedQuiz) return;
+    setQuizMetaForm({
+      title: selectedQuiz.title || '',
+      category: selectedQuiz.category || '',
+      timePerQuestion: selectedQuiz.timePerQuestion || 45,
+      passingScore: selectedQuiz.passingScore || 80,
+      description: selectedQuiz.description || '',
+      headerColor: selectedQuiz.headerColor || '#772ce8'
+    });
+    setShowEditQuizModal(true);
+  };
+
+  // Save Quiz Metadata
+  const handleSaveQuizMetadata = (e) => {
+    e.preventDefault();
+    if (!quizMetaForm.title.trim()) {
+      alert("Please provide a quiz title.");
+      return;
+    }
+
+    updateQuizMetadataStorage(selectedQuizId, {
+      title: quizMetaForm.title.trim(),
+      category: quizMetaForm.category.trim(),
+      timePerQuestion: parseInt(quizMetaForm.timePerQuestion) || 45,
+      passingScore: parseInt(quizMetaForm.passingScore) || 80,
+      description: quizMetaForm.description.trim(),
+      headerColor: quizMetaForm.headerColor
+    });
+
+    setQuizDb(getActiveQuizDatabase());
+    setShowEditQuizModal(false);
+    showToast(`Updated assessment settings for "${quizMetaForm.title}"!`);
+  };
+
   // Delete question
   const handleDeleteQuestion = (questionId) => {
     if (window.confirm("Are you sure you want to remove this question from the assessment pool?")) {
       const updatedQuiz = deleteQuestionFromQuizStorage(selectedQuizId, questionId);
       if (updatedQuiz) {
         setQuizDb(getActiveQuizDatabase());
-        showToast("Question deleted from assessment pool.");
+        showToast("Question removed from assessment pool.");
       }
     }
   };
@@ -107,17 +215,16 @@ export default function QuizStudio() {
     }
   };
 
-  // Add question submission
-  const handleCreateQuestionSubmit = (e) => {
+  // Submit Question (Create or Edit)
+  const handleSaveQuestionSubmit = (e) => {
     e.preventDefault();
     if (!qPrompt.trim()) {
       alert("Please provide the question prompt.");
       return;
     }
 
-    const uniqueId = `q-${Date.now().toString(36)}`;
     let questionObj = {
-      id: uniqueId,
+      id: editingQuestionId || `q-${Date.now().toString(36)}`,
       type: qType,
       question: qPrompt.trim(),
       explanation: qExplanation.trim() || 'Verified by Lead Course Instructor.'
@@ -176,26 +283,19 @@ export default function QuizStudio() {
       questionObj.pairs = validPairs;
     }
 
-    addQuestionToQuizStorage(selectedQuizId, questionObj);
-    setQuizDb(getActiveQuizDatabase());
-    setShowAddModal(false);
-    showToast(`Added new ${qType} question to ${selectedQuiz.title}!`);
+    if (editingQuestionId) {
+      updateQuestionInQuizStorage(selectedQuizId, editingQuestionId, questionObj);
+      showToast(`Updated Question #${editingQuestionNum} successfully!`);
+    } else {
+      addQuestionToQuizStorage(selectedQuizId, questionObj);
+      showToast(`Added new ${qType} question to ${selectedQuiz.title}!`);
+    }
 
-    // Reset inputs
-    setQPrompt('');
-    setQExplanation('');
-    setMcOptions(['', '', '', '']);
-    setIdentAnswers('');
-    setSeqSteps(['', '', '', '']);
-    setMatchingPairs([
-      { left: '', right: '' },
-      { left: '', right: '' },
-      { left: '', right: '' },
-      { left: '', right: '' }
-    ]);
+    setQuizDb(getActiveQuizDatabase());
+    setShowQuestionModal(false);
   };
 
-  // Create New Quiz
+  // Create New Quiz Submit
   const handleCreateNewQuiz = (e) => {
     e.preventDefault();
     if (!newQuizTitle.trim()) {
@@ -228,7 +328,6 @@ export default function QuizStudio() {
     setShowNewQuizModal(false);
     showToast(`Created new assessment: "${newQuizObj.title}"`);
     
-    // Reset form
     setNewQuizTitle('');
     setNewQuizDesc('');
   };
@@ -252,7 +351,7 @@ export default function QuizStudio() {
             <span>Quiz & Assessment Creator Studio</span>
           </h2>
           <p className="studio-subtitle text-secondary text-sm">
-            Author custom quizzes, add questions across 5 interactive types (Matching, Kahoot tiles, Identification, etc.), and calibrate scoring.
+            Author and edit custom questions across all 5 interactive types (Matching, Kahoot tiles, Identification, Sequences, Diagrams).
           </p>
         </div>
 
@@ -269,7 +368,7 @@ export default function QuizStudio() {
 
           <button 
             type="button" 
-            className="btn btn-primary btn-sm"
+            className="btn btn-primary btn-sm flex-align gap-6"
             onClick={() => setShowNewQuizModal(true)}
           >
             <Plus size={15} />
@@ -331,11 +430,22 @@ export default function QuizStudio() {
                 <div className="flex-between mb-8">
                   <div className="flex-align gap-8">
                     <span className="badge badge-purple">{selectedQuiz.category}</span>
-                    <span className="badge badge-blue">Supervised by: {selectedQuiz.instructor}</span>
+                    <span className="badge badge-blue">Instructor: {selectedQuiz.instructor}</span>
                   </div>
-                  <span className="badge badge-green font-bold">
-                    {selectedQuiz.questions ? selectedQuiz.questions.length : 0} Questions Live in Bank
-                  </span>
+                  <div className="flex-align gap-8">
+                    <span className="badge badge-green font-bold">
+                      {selectedQuiz.questions ? selectedQuiz.questions.length : 0} Questions in Bank
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-xs flex-align gap-4"
+                      onClick={handleOpenEditQuizModal}
+                      title="Edit assessment title, duration & passing threshold"
+                    >
+                      <Settings size={12} />
+                      <span>Edit Quiz Settings</span>
+                    </button>
+                  </div>
                 </div>
 
                 <h3 className="quiz-banner-heading">{selectedQuiz.title}</h3>
@@ -356,7 +466,7 @@ export default function QuizStudio() {
                   <button 
                     type="button" 
                     className="btn btn-primary btn-sm flex-align gap-6"
-                    onClick={() => setShowAddModal(true)}
+                    onClick={handleOpenAddModal}
                   >
                     <Plus size={15} />
                     <span>Add Question to Assessment</span>
@@ -370,18 +480,18 @@ export default function QuizStudio() {
                   <h4 className="font-bold text-sm text-secondary uppercase tracking-wider">
                     Question Items Pool ({selectedQuiz.questions ? selectedQuiz.questions.length : 0})
                   </h4>
-                  <span className="text-xs text-secondary">Randomized order applied during trainee attempts</span>
+                  <span className="text-xs text-secondary">Interactive editing & real-time pool updates</span>
                 </div>
 
                 {(!selectedQuiz.questions || selectedQuiz.questions.length === 0) ? (
                   <div className="card text-center p-32 text-secondary">
                     <FileQuestion size={40} className="mx-auto mb-12 text-secondary opacity-50" />
-                    <h4>No Questions Yet</h4>
-                    <p className="text-sm mb-16">Click "Add Question to Assessment" above to create the first question item.</p>
+                    <h4>No Questions in This Assessment</h4>
+                    <p className="text-sm mb-16">Click below to author the first question item.</p>
                     <button 
                       type="button" 
                       className="btn btn-primary btn-sm"
-                      onClick={() => setShowAddModal(true)}
+                      onClick={handleOpenAddModal}
                     >
                       <Plus size={14} /> Add First Question
                     </button>
@@ -403,14 +513,25 @@ export default function QuizStudio() {
                               </span>
                             </div>
 
-                            <button 
-                              type="button" 
-                              className="btn-icon-danger"
-                              onClick={() => handleDeleteQuestion(q.id)}
-                              title="Delete question from quiz"
-                            >
-                              <Trash2 size={14} />
-                            </button>
+                            {/* EDIT AND DELETE ACTIONS */}
+                            <div className="flex-align gap-6">
+                              <button 
+                                type="button" 
+                                className="btn-icon-secondary"
+                                onClick={() => handleOpenEditModal(q, idx)}
+                                title="Edit this question"
+                              >
+                                <Edit3 size={14} />
+                              </button>
+                              <button 
+                                type="button" 
+                                className="btn-icon-danger"
+                                onClick={() => handleDeleteQuestion(q.id)}
+                                title="Delete question from quiz"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
                           </div>
 
                           <div className="question-prompt-text font-semibold text-sm mb-12 text-slate-800">
@@ -426,7 +547,7 @@ export default function QuizStudio() {
                                   className={`p-6 rounded border flex-between ${oIdx === q.correctAnswer ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold' : 'bg-slate-50 text-slate-600'}`}
                                 >
                                   <span>{String.fromCharCode(65 + oIdx)}. {opt}</span>
-                                  {oIdx === q.correctAnswer && <Check size={12} className="text-emerald" />}
+                                  {oIdx === q.correctAnswer && <Check size={12} className="text-emerald font-bold" />}
                                 </div>
                               ))}
                             </div>
@@ -435,7 +556,7 @@ export default function QuizStudio() {
                           {q.type === 'matching' && Array.isArray(q.pairs) && (
                             <div className="matching-preview-pairs mb-10 text-xs">
                               {q.pairs.map((p, pIdx) => (
-                                <div key={p.id || pIdx} className="matching-pair-row flex-align gap-8 p-6 bg-slate-50 rounded mb-4">
+                                <div key={p.id || pIdx} className="matching-pair-row flex-align gap-8 p-6 bg-slate-50 rounded mb-4 border border-slate-200">
                                   <span className="font-semibold text-purple">{pIdx + 1}. {p.left}</span>
                                   <span className="text-secondary font-bold">➔</span>
                                   <span className="font-semibold text-cyan">[{String.fromCharCode(65 + pIdx)}] {p.right}</span>
@@ -445,8 +566,8 @@ export default function QuizStudio() {
                           )}
 
                           {q.type === 'identification' && (
-                            <div className="ident-preview-box mb-10 text-xs p-8 bg-slate-50 rounded">
-                              <span className="text-secondary">Accepted Answers: </span>
+                            <div className="ident-preview-box mb-10 text-xs p-8 bg-slate-50 rounded border border-slate-200">
+                              <span className="text-secondary">Accepted Solutions: </span>
                               <strong className="text-purple">{(q.acceptedAnswers || []).join(' | ')}</strong>
                             </div>
                           )}
@@ -463,9 +584,9 @@ export default function QuizStudio() {
                           )}
 
                           {q.type === 'diagram_analysis' && (
-                            <div className="diagram-preview-box mb-10 text-xs p-6 bg-slate-50 rounded flex-between">
-                              <span className="text-secondary">Diagram Type: <strong>{q.diagramType || 'security_pipeline'}</strong></span>
-                              <span className="text-emerald font-semibold">Correct: {q.options ? q.options[q.correctAnswer] : ''}</span>
+                            <div className="diagram-preview-box mb-10 text-xs p-6 bg-slate-50 rounded border border-slate-200 flex-between">
+                              <span className="text-secondary">Diagram Architecture: <strong>{q.diagramType || 'security_pipeline'}</strong></span>
+                              <span className="text-emerald font-semibold">Correct Solution: {q.options ? q.options[q.correctAnswer] : ''}</span>
                             </div>
                           )}
 
@@ -488,35 +609,41 @@ export default function QuizStudio() {
       </div>
 
       {/* =========================================================================
-          MODAL: ADD QUESTION BUILDER
+          MODAL: ADD OR EDIT QUESTION BUILDER
           ========================================================================= */}
-      {showAddModal && (
+      {showQuestionModal && (
         <div className="modal-backdrop">
           <div className="modal-card modal-lg animate-scaleIn">
             <div className="modal-header flex-between">
               <div>
                 <h3 className="modal-title flex-align gap-8">
-                  <Sparkles size={18} className="text-purple" />
-                  <span>Add Question to {selectedQuiz?.title}</span>
+                  {editingQuestionId ? <Edit3 size={18} className="text-purple" /> : <Plus size={18} className="text-purple" />}
+                  <span>
+                    {editingQuestionId 
+                      ? `Edit Question #${editingQuestionNum} in "${selectedQuiz?.title}"` 
+                      : `Add Question to "${selectedQuiz?.title}"`}
+                  </span>
                 </h3>
                 <p className="text-secondary text-xs">
-                  Choose an interactive question mechanism and define answers.
+                  {editingQuestionId 
+                    ? 'Modify the prompt, question mechanism type, choices, or explanatory solution.' 
+                    : 'Select a question format, enter the prompt, and specify the correct solution.'}
                 </p>
               </div>
               <button 
                 type="button" 
                 className="btn-icon-ghost"
-                onClick={() => setShowAddModal(false)}
+                onClick={() => setShowQuestionModal(false)}
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateQuestionSubmit} className="modal-form-body p-20">
+            <form onSubmit={handleSaveQuestionSubmit} className="modal-form-body p-20">
               {/* 1. QUESTION TYPE SELECTOR */}
               <div className="form-group mb-16">
                 <label className="field-label mb-8 font-bold text-xs uppercase tracking-wider text-secondary">
-                  1. Select Question Mechanism / Format
+                  1. Question Mechanism / Format
                 </label>
                 <div className="grid-3-col gap-10">
                   {QUESTION_TYPES.map(t => {
@@ -573,7 +700,7 @@ export default function QuizStudio() {
                     </button>
                   </div>
                   <p className="text-xs text-secondary mb-12">
-                    Enter the term/component on the left, and its matching definition/function on the right. Both columns will be randomly scrambled for trainees.
+                    Enter the term/component on the left (Column A), and its matching definition/function on the right (Column B). Items are dynamically randomized when presented to trainees.
                   </p>
 
                   <div className="matching-builder-stack">
@@ -645,7 +772,7 @@ export default function QuizStudio() {
                   )}
 
                   <label className="font-bold text-xs uppercase tracking-wider text-blue mb-8 block">
-                    Choice Options (Select Radio for the Correct Answer)
+                    Choice Options (Select Radio Button for Correct Answer)
                   </label>
 
                   <div className="grid-2-col gap-10">
@@ -792,7 +919,7 @@ export default function QuizStudio() {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => setShowQuestionModal(false)}
                 >
                   Cancel
                 </button>
@@ -801,7 +928,140 @@ export default function QuizStudio() {
                   className="btn btn-primary flex-align gap-6"
                 >
                   <Save size={15} />
-                  <span>Save Question to Assessment Pool</span>
+                  <span>{editingQuestionId ? 'Save Changes to Question' : 'Save Question to Assessment Pool'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL: EDIT QUIZ SETTINGS / METADATA
+          ========================================================================= */}
+      {showEditQuizModal && (
+        <div className="modal-backdrop">
+          <div className="modal-card modal-md animate-scaleIn">
+            <div className="modal-header flex-between">
+              <div>
+                <h3 className="modal-title flex-align gap-8">
+                  <Settings size={18} className="text-purple" />
+                  <span>Edit Assessment Settings</span>
+                </h3>
+                <p className="text-secondary text-xs">
+                  Update syllabus details, countdown timers, and certification criteria.
+                </p>
+              </div>
+              <button 
+                type="button" 
+                className="btn-icon-ghost"
+                onClick={() => setShowEditQuizModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveQuizMetadata} className="modal-form-body p-20">
+              <div className="form-group mb-12">
+                <label className="field-label text-xs mb-4 font-bold text-secondary uppercase">
+                  Assessment Title
+                </label>
+                <input
+                  type="text"
+                  className="clean-input w-full"
+                  required
+                  value={quizMetaForm.title}
+                  onChange={(e) => setQuizMetaForm({ ...quizMetaForm, title: e.target.value })}
+                />
+              </div>
+
+              <div className="grid-2-col gap-12 mb-12">
+                <div>
+                  <label className="field-label text-xs mb-4 font-bold text-secondary uppercase">
+                    Category
+                  </label>
+                  <input
+                    type="text"
+                    className="clean-input w-full"
+                    value={quizMetaForm.category}
+                    onChange={(e) => setQuizMetaForm({ ...quizMetaForm, category: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="field-label text-xs mb-4 font-bold text-secondary uppercase">
+                    Color Accent
+                  </label>
+                  <select 
+                    className="clean-input w-full"
+                    value={quizMetaForm.headerColor}
+                    onChange={(e) => setQuizMetaForm({ ...quizMetaForm, headerColor: e.target.value })}
+                  >
+                    <option value="#772ce8">Purple (Security & Zero-Trust)</option>
+                    <option value="#1368ce">Blue (Enterprise Audit)</option>
+                    <option value="#06d6a0">Emerald (Access Control)</option>
+                    <option value="#e21b3c">Crimson (Privacy Management)</option>
+                    <option value="#d89e00">Gold (Compliance Standard)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid-2-col gap-12 mb-12">
+                <div>
+                  <label className="field-label text-xs mb-4 font-bold text-secondary uppercase">
+                    Time Per Question (Seconds)
+                  </label>
+                  <input
+                    type="number"
+                    min="15"
+                    max="180"
+                    className="clean-input w-full"
+                    value={quizMetaForm.timePerQuestion}
+                    onChange={(e) => setQuizMetaForm({ ...quizMetaForm, timePerQuestion: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="field-label text-xs mb-4 font-bold text-secondary uppercase">
+                    Passing Standard (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="50"
+                    max="100"
+                    className="clean-input w-full"
+                    value={quizMetaForm.passingScore}
+                    onChange={(e) => setQuizMetaForm({ ...quizMetaForm, passingScore: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group mb-16">
+                <label className="field-label text-xs mb-4 font-bold text-secondary uppercase">
+                  Assessment Background & Syllabus Scope
+                </label>
+                <textarea
+                  className="clean-input w-full"
+                  rows={3}
+                  value={quizMetaForm.description}
+                  onChange={(e) => setQuizMetaForm({ ...quizMetaForm, description: e.target.value })}
+                />
+              </div>
+
+              <div className="modal-actions flex-between pt-16 border-top">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowEditQuizModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary flex-align gap-6"
+                >
+                  <Save size={15} />
+                  <span>Save Assessment Settings</span>
                 </button>
               </div>
             </form>

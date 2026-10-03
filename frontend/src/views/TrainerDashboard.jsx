@@ -327,38 +327,38 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
       {(activeSubView === 'trainer_courses' || !activeSubView) && (
         <>
           {/* TRAINER KPI HEADER BAND */}
-          <div className="card p-20 mb-20 bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
-            <div className="flex-between flex-wrap gap-16">
-              <div className="flex-align gap-14">
-                <div className="stat-avatar-circle bg-purple-600 text-white">
-                  <GraduationCap size={28} />
+          <div className="card trainer-hero-banner mb-20">
+            <div className="trainer-hero-content">
+              <div className="trainer-profile-group">
+                <div className="trainer-avatar-box">
+                  <GraduationCap size={30} />
                 </div>
-                <div>
-                  <div className="flex-align gap-8 mb-4">
+                <div className="trainer-profile-info">
+                  <div className="trainer-badges-row">
                     <span className="badge badge-purple">Lead Trainer Workspace</span>
                     <span className="badge badge-blue">Crossworks Faculty</span>
                   </div>
-                  <h2 className="text-xl font-extrabold text-slate-900 m-0">
+                  <h2 className="trainer-welcome-title">
                     Welcome back, Lead Trainer David Lim
                   </h2>
-                  <p className="text-secondary text-sm m-0">
+                  <p className="trainer-welcome-desc">
                     Authorized Level 1 Faculty Member · Directing active client cohorts and certified CP-ABE score evaluations.
                   </p>
                 </div>
               </div>
 
-              <div className="flex-align gap-20">
-                <div className="text-center px-12 py-6 bg-white rounded-lg shadow-sm border border-slate-200">
-                  <div className="text-xl font-black text-purple">{cohorts.length}</div>
-                  <div className="text-xs text-secondary font-bold uppercase">Active Cohorts</div>
+              <div className="trainer-kpi-chips-container">
+                <div className="trainer-kpi-card">
+                  <div className="kpi-card-num text-purple">{cohorts.length}</div>
+                  <div className="kpi-card-label">Active Cohorts</div>
                 </div>
-                <div className="text-center px-12 py-6 bg-white rounded-lg shadow-sm border border-slate-200">
-                  <div className="text-xl font-black text-blue">{totalEnrolled}</div>
-                  <div className="text-xs text-secondary font-bold uppercase">Enrolled Trainees</div>
+                <div className="trainer-kpi-card">
+                  <div className="kpi-card-num text-blue">{totalEnrolled}</div>
+                  <div className="kpi-card-label">Enrolled Trainees</div>
                 </div>
-                <div className="text-center px-12 py-6 bg-white rounded-lg shadow-sm border border-slate-200">
-                  <div className="text-xl font-black text-emerald">{certifiedRate}%</div>
-                  <div className="text-xs text-secondary font-bold uppercase">Certification Rate</div>
+                <div className="trainer-kpi-card">
+                  <div className="kpi-card-num text-emerald">{certifiedRate}%</div>
+                  <div className="kpi-card-label">Certification Rate</div>
                 </div>
               </div>
             </div>

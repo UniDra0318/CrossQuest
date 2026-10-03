@@ -528,6 +528,44 @@ export function addQuestionToQuizStorage(quizId, questionObj) {
   return null;
 }
 
+export function updateQuestionInQuizStorage(quizId, questionId, updatedQuestionObj) {
+  try {
+    const current = getActiveQuizDatabase();
+    if (current[quizId] && Array.isArray(current[quizId].questions)) {
+      const idx = current[quizId].questions.findIndex(q => q.id === questionId);
+      if (idx !== -1) {
+        current[quizId].questions[idx] = {
+          ...current[quizId].questions[idx],
+          ...updatedQuestionObj
+        };
+        localStorage.setItem('crossquest_quiz_database', JSON.stringify(current));
+        return current[quizId];
+      }
+    }
+  } catch (e) {
+    console.error("Failed to update question:", e);
+  }
+  return null;
+}
+
+export function updateQuizMetadataStorage(quizId, metadataUpdates) {
+  try {
+    const current = getActiveQuizDatabase();
+    if (current[quizId]) {
+      current[quizId] = {
+        ...current[quizId],
+        ...metadataUpdates
+      };
+      localStorage.setItem('crossquest_quiz_database', JSON.stringify(current));
+      return current[quizId];
+    }
+  } catch (e) {
+    console.error("Failed to update quiz metadata:", e);
+  }
+  return null;
+}
+
+
 export function deleteQuestionFromQuizStorage(quizId, questionId) {
   try {
     const current = getActiveQuizDatabase();
