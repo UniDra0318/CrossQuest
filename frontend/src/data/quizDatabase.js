@@ -87,6 +87,18 @@ export const QUIZ_DATABASE = {
         ],
         correctAnswer: 1,
         explanation: 'An OUT_OF_SCOPE event is logged when a user attempts access to records belonging to a corporate tenant outside their assigned client account portfolio.'
+      },
+      {
+        id: 'q1-6',
+        type: 'matching',
+        question: 'Match each Security Architecture Component in Column A with its exact Enterprise Function in Column B:',
+        pairs: [
+          { id: 'm1-1', left: '1. CP-ABE Ciphertext Encryption', right: 'A. Cryptographic policy tree bound directly to payload' },
+          { id: 'm1-2', left: '2. API Perimeter Gateway', right: 'B. OAuth JWT bearer verification at network edge' },
+          { id: 'm1-3', left: '3. Row-Level Security (RLS)', right: 'C. Direct database-layer tenant record filtering' },
+          { id: 'm1-4', left: '4. Anomaly Daemon Monitor', right: 'D. Automated detection of off-hours & query bursts' }
+        ],
+        explanation: 'CP-ABE binds policies to data, API Gateways guard perimeter ingress, RLS isolates SQL rows by tenant, and Anomaly Daemons detect behavioral spikes.'
       }
     ]
   },
@@ -172,6 +184,18 @@ export const QUIZ_DATABASE = {
         ],
         correctAnswer: 1,
         explanation: 'Each record retains the company attribute active at completion time, ensuring historical isolation without requiring complex database-wide re-encryption.'
+      },
+      {
+        id: 'q2-6',
+        type: 'matching',
+        question: 'Match each Personnel Role in Column A with its exact Clearance Level & Access Scope in Column B:',
+        pairs: [
+          { id: 'm2-1', left: '1. System Administrator', right: 'A. Level 3 (Root authority across all corporate tenants)' },
+          { id: 'm2-2', left: '2. Client Account Manager', right: 'B. Level 2 (Restricted exclusively to assigned client accounts)' },
+          { id: 'm2-3', left: '3. Lead Course Instructor', right: 'C. Level 1 (Cohort grading and curriculum authoring)' },
+          { id: 'm2-4', left: '4. Trainee Analyst', right: 'D. Level 1 (Personal learning quest & self-progress viewing)' }
+        ],
+        explanation: 'System Administrators hold root Level 3 privileges across all accounts, Account Managers are isolated to Level 2 client portfolios, and Trainers/Trainees hold Level 1 educational access.'
       }
     ]
   },
@@ -257,6 +281,18 @@ export const QUIZ_DATABASE = {
         ],
         correctAnswer: 0,
         explanation: 'Access outside normal operating hours (e.g. 23:00 - 06:00 or weekends) triggers an OFF_HOURS anomaly flag for immediate compliance review.'
+      },
+      {
+        id: 'q3-6',
+        type: 'matching',
+        question: 'Match each Privacy Entity in Column A with its statutory classification under R.A. 10173 in Column B:',
+        pairs: [
+          { id: 'm3-1', left: '1. Trainee Learner', right: 'A. Data Subject (Owner of personal records & evaluation metrics)' },
+          { id: 'm3-2', left: '2. Corporate Client (Employer)', right: 'B. Personal Information Controller (PIC directing training)' },
+          { id: 'm3-3', left: '3. Crossworks Training Service', right: 'C. Personal Information Processor (PIP executing training under DPA)' },
+          { id: 'm3-4', left: '4. National Privacy Commission', right: 'D. Statutory regulatory authority enforcing compliance' }
+        ],
+        explanation: 'The individual is the Data Subject, their sponsoring employer acts as PIC, Crossworks acts as the contracted PIP, and the NPC is the regulatory oversight commission.'
       }
     ]
   },
@@ -342,6 +378,18 @@ export const QUIZ_DATABASE = {
         ],
         correctAnswer: 0,
         explanation: 'Volume bursts beyond configured thresholds trigger ABNORMAL_VOLUME alerts to prevent bulk credential scraping or data exfiltration attempts.'
+      },
+      {
+        id: 'q4-6',
+        type: 'matching',
+        question: 'Match each Multi-Tenant Anomaly Event in Column A with its Security Trigger Condition in Column B:',
+        pairs: [
+          { id: 'm4-1', left: '1. OUT_OF_SCOPE Trigger', right: 'A. User queries records belonging to an unassigned company' },
+          { id: 'm4-2', left: '2. ABNORMAL_VOLUME Trigger', right: 'B. Decryption requests exceed 25 operations in a 15-minute window' },
+          { id: 'm4-3', left: '3. OFF_HOURS Trigger', right: 'C. Query activity initiated between 23:00 and 06:00 or weekends' },
+          { id: 'm4-4', left: '4. INVALID_TOKEN Trigger', right: 'D. Cryptographic signature failure or revoked personnel credentials' }
+        ],
+        explanation: 'OUT_OF_SCOPE enforces company boundaries, ABNORMAL_VOLUME mitigates scraping, OFF_HOURS alerts on suspicious schedules, and INVALID_TOKEN stops expired credentials.'
       }
     ]
   }

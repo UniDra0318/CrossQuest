@@ -22,6 +22,7 @@ import {
   FileText
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
+import MatchingQuestion from './MatchingQuestion';
 
 const KAHOOT_TILES = [
   { key: 0, symbol: '▲', colorClass: 'tile-red', bg: '#e21b3c', shadow: '#a1122a' },
@@ -404,6 +405,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                           {q.type === 'identification' && 'Identification'}
                           {q.type === 'sequence_order' && 'Sequence Reordering'}
                           {q.type === 'diagram_analysis' && 'Diagram Analysis'}
+                          {q.type === 'matching' && 'Matching Pairs'}
                         </span>
                       </div>
                       <span className={`summary-status-tag ${isCorrect ? 'tag-correct' : 'tag-wrong'}`}>
@@ -520,6 +522,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             {currentQ.type === 'identification' && <span className="type-tag tag-input">Identification (Type the term)</span>}
             {currentQ.type === 'sequence_order' && <span className="type-tag tag-sequence">Interactive Sequence Ordering</span>}
             {currentQ.type === 'diagram_analysis' && <span className="type-tag tag-diagram">Architecture Diagram Analysis</span>}
+            {currentQ.type === 'matching' && <span className="type-tag tag-matching">Connect Matching Pairs (Column A ➔ Column B)</span>}
           </div>
 
           {/* Diagram render if applicable */}
@@ -642,6 +645,17 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 </div>
               )}
             </div>
+          )}
+
+          {/* 4. MATCHING PAIRS (COLUMN A TO COLUMN B) */}
+          {currentQ.type === 'matching' && (
+            <MatchingQuestion
+              question={currentQ}
+              answeredState={answeredState}
+              onSubmitMatches={(userMatches, isCorrect, submissionSummary) => {
+                evaluateAnswer(isCorrect, submissionSummary);
+              }}
+            />
           )}
 
           {/* Feedback Drawer */}
