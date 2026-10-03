@@ -17,7 +17,9 @@ import {
   HelpCircle, 
   Zap, 
   Sparkles,
-  Trophy
+  Trophy,
+  CheckCircle,
+  FileText
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
 
@@ -41,11 +43,15 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const [identificationInput, setIdentificationInput] = useState('');
   
-  // Interactive sequence ordering state
+  // Interactive sequence ordering state & swap animation tracking
   const [sequenceItems, setSequenceItems] = useState(() => {
     const q = quiz.questions[currentIndex];
     return q && q.type === 'sequence_order' ? [...(q.initialOrder || q.correctOrder)] : [];
   });
+  const [swappedIdx, setSwappedIdx] = useState(null);
+
+  // Detailed answers history for post-quiz summary
+  const [answersHistory, setAnswersHistory] = useState(() => initialSession?.answersHistory || {});
 
   const [timeLeft, setTimeLeft] = useState(() => initialSession?.timeLeft || quiz.timePerQuestion || 45);
   const [floatingPoint, setFloatingPoint] = useState(null);
@@ -65,6 +71,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       correctCount,
       timeLeft,
       pointsTotal,
+      answersHistory,
       savedAt: Date.now(),
       ...overrides
     };
@@ -109,8 +116,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
   const handleTimeExpire = () => {
     if (answeredState !== null) return;
-    setAnsweredState('wrong');
-    saveProgress({ answeredState: 'wrong', timeLeft: 0 });
+    evaluateAnswer(false, 'Time Expired');
   };
 
   const handleStartAssessment = () => {
@@ -118,7 +124,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     setCurrentIndex(0);
     setCorrectCount(0);
     setPointsTotal(0);
-    saveProgress({ stage: 'active', currentIndex: 0, correctCount: 0, pointsTotal: 0 });
+    setAnswersHistory({});
+    saveProgress({ stage: 'active', currentIndex: 0, correctCount: 0, pointsTotal: 0, answersHistory: {} });
   };
 
   const handleMultipleChoiceSelect = (optionIdx) => {
@@ -126,7 +133,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     setSelectedOption(optionIdx);
 
     const isCorrect = optionIdx === currentQ.correctAnswer;
-    evaluateAnswer(isCorrect);
+    const userAns = currentQ.options[optionIdx];
+    evaluateAnswer(isCorrect, userAns);
   };
 
   const handleIdentificationSubmit = (e) => {
@@ -138,7 +146,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       normalized === ans.toLowerCase() || normalized.includes(ans.toLowerCase())
     );
 
-    evaluateAnswer(isCorrect);
+    evaluateAnswer(isCorrect, identificationInput.trim());
   };
 
   const moveSequenceItem = (index, direction) => {
@@ -151,38 +159,69 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     updated[index] = updated[targetIdx];
     updated[targetIdx] = temp;
     setSequenceItems(updated);
+
+    // Trigger visual swap highlight animation
+    setSwappedIdx(targetIdx);
+    setTimeout(() => setSwappedIdx(null), 450);
   };
 
   const handleSequenceVerify = () => {
     if (answeredState !== null) return;
     const isCorrect = JSON.stringify(sequenceItems) === JSON.stringify(currentQ.correctOrder);
-    evaluateAnswer(isCorrect);
+    const userAns = sequenceItems.map((s, i) => `${i + 1}. ${s}`).join(' ➔ ');
+    evaluateAnswer(isCorrect, userAns);
   };
 
-  const evaluateAnswer = (isCorrect) => {
+  const evaluateAnswer = (isCorrect, userAns) => {
     if (timerRef.current) clearInterval(timerRef.current);
+
+    let finalCorrect = correctCount;
+    let finalPoints = pointsTotal;
 
     if (isCorrect) {
       setAnsweredState('correct');
       const timeBonus = Math.max(0, timeLeft * 5);
       const questionPoints = 200 + timeBonus;
-      const nextCorrect = correctCount + 1;
-      const nextPoints = pointsTotal + questionPoints;
+      finalCorrect = correctCount + 1;
+      finalPoints = pointsTotal + questionPoints;
 
-      setCorrectCount(nextCorrect);
-      setPointsTotal(nextPoints);
+      setCorrectCount(finalCorrect);
+      setPointsTotal(finalPoints);
       setFloatingPoint(`+${questionPoints} PTS!`);
       setTimeout(() => setFloatingPoint(null), 1200);
-
-      saveProgress({ 
-        correctCount: nextCorrect, 
-        pointsTotal: nextPoints, 
-        answeredState: 'correct' 
-      });
     } else {
       setAnsweredState('wrong');
-      saveProgress({ answeredState: 'wrong' });
     }
+
+    // Record question submission in answers history
+    const correctAns = currentQ.type === 'multiple_choice' || currentQ.type === 'diagram_analysis'
+      ? currentQ.options[currentQ.correctAnswer]
+      : currentQ.type === 'identification'
+      ? currentQ.acceptedAnswers[0]
+      : currentQ.correctOrder.map((s, i) => `${i + 1}. ${s}`).join(' ➔ ');
+
+    const newHistory = {
+      ...answersHistory,
+      [currentQ.id]: {
+        questionId: currentQ.id,
+        questionIndex: currentIndex + 1,
+        questionText: currentQ.question,
+        questionType: currentQ.type,
+        userAnswer: userAns || 'No Answer',
+        correctAnswer: correctAns,
+        isCorrect: isCorrect,
+        explanation: currentQ.explanation
+      }
+    };
+
+    setAnswersHistory(newHistory);
+
+    saveProgress({ 
+      correctCount: finalCorrect, 
+      pointsTotal: finalPoints, 
+      answeredState: isCorrect ? 'correct' : 'wrong',
+      answersHistory: newHistory
+    });
   };
 
   const handleNextQuestion = () => {
@@ -292,10 +331,11 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   }
 
   // ==========================================
-  // STAGE 3: RESULTS / COMPLETION SCREEN
+  // STAGE 3: RESULTS & DETAILED SUMMARY SCREEN
   // ==========================================
   if (stage === 'completed') {
     const passed = finalScorePct >= (quiz.passingScore || 80);
+    const historyList = Object.values(answersHistory);
 
     return (
       <div className="quiz-fullscreen-wrapper">
@@ -306,8 +346,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           </h2>
           <p className="results-subtext">
             {passed 
-              ? 'Congratulations! You have satisfied corporate compliance criteria and earned training credit.'
-              : 'You have completed the module. Review the explanations below to improve your score standard.'}
+              ? 'Congratulations! You have satisfied corporate compliance criteria and verified key competencies.'
+              : 'You have completed the module. Review your answers and explanations below to prepare for retake.'}
           </p>
 
           <div className="results-stat-band">
@@ -329,7 +369,72 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </div>
           </div>
 
-          <div className="flex-align gap-14 mt-20">
+          {/* QUESTION-BY-QUESTION REVIEW SUMMARY */}
+          <div className="results-summary-section">
+            <div className="results-summary-header">
+              <div className="summary-title-group">
+                <FileText size={20} className="text-purple" />
+                <h3>Question-by-Question Assessment Summary</h3>
+              </div>
+              <span className="summary-score-chip">
+                {correctCount} of {totalQuestions} Correct ({finalScorePct}%)
+              </span>
+            </div>
+
+            <div className="results-summary-list">
+              {quiz.questions.map((q, qIdx) => {
+                const rec = answersHistory[q.id];
+                const isCorrect = rec?.isCorrect;
+
+                return (
+                  <div key={q.id} className={`summary-item-card ${isCorrect ? 'item-correct' : 'item-wrong'}`}>
+                    <div className="summary-item-top">
+                      <div className="summary-q-meta">
+                        <span className="summary-q-num">Q{qIdx + 1}</span>
+                        <span className="summary-q-type-badge">
+                          {q.type === 'multiple_choice' && 'Multiple Choice'}
+                          {q.type === 'identification' && 'Identification'}
+                          {q.type === 'sequence_order' && 'Sequence Reordering'}
+                          {q.type === 'diagram_analysis' && 'Diagram Analysis'}
+                        </span>
+                      </div>
+                      <span className={`summary-status-tag ${isCorrect ? 'tag-correct' : 'tag-wrong'}`}>
+                        {isCorrect ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                        <span>{isCorrect ? 'Correct (+200 PTS)' : 'Incorrect (0 PTS)'}</span>
+                      </span>
+                    </div>
+
+                    <div className="summary-q-text">{q.question}</div>
+
+                    <div className="summary-answers-grid">
+                      <div className="summary-answer-col user-answer">
+                        <span className="ans-label">Your Submitted Answer:</span>
+                        <div className={`ans-value ${isCorrect ? 'ans-green' : 'ans-red'}`}>
+                          {rec?.userAnswer || '(No answer provided)'}
+                        </div>
+                      </div>
+
+                      {!isCorrect && (
+                        <div className="summary-answer-col correct-answer">
+                          <span className="ans-label">Correct Solution:</span>
+                          <div className="ans-value ans-solution">
+                            {rec?.correctAnswer}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="summary-explanation-box">
+                      <div className="explanation-title">Explanation & Analysis:</div>
+                      <p>{q.explanation}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="results-action-row">
             <button 
               className="btn-tactile btn-tactile-purple"
               onClick={handleStartAssessment}
@@ -480,26 +585,34 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           {/* 3. SEQUENCE ORDERING / DRAG-AND-DROP REORDER */}
           {currentQ.type === 'sequence_order' && (
             <div className="sequence-reorder-container">
+              <div className="sequence-instructions">
+                Use the <strong>Up (▲)</strong> and <strong>Down (▼)</strong> arrow buttons to reorder the items into the correct chronological or architectural sequence:
+              </div>
               <div className="sequence-items-list">
                 {sequenceItems.map((itemText, idx) => (
-                  <div key={idx} className="sequence-item-row">
+                  <div 
+                    key={idx} 
+                    className={`sequence-item-row ${swappedIdx === idx ? 'seq-item-swapped' : ''}`}
+                  >
                     <span className="seq-step-badge">{idx + 1}</span>
                     <span className="seq-step-text">{itemText}</span>
                     {answeredState === null && (
                       <div className="seq-controls">
                         <button 
+                          type="button"
                           className="seq-arrow-btn"
                           disabled={idx === 0}
                           onClick={() => moveSequenceItem(idx, 'up')}
-                          title="Move up"
+                          title="Move step up"
                         >
                           <ArrowUp size={16} />
                         </button>
                         <button 
+                          type="button"
                           className="seq-arrow-btn"
                           disabled={idx === sequenceItems.length - 1}
                           onClick={() => moveSequenceItem(idx, 'down')}
-                          title="Move down"
+                          title="Move step down"
                         >
                           <ArrowDown size={16} />
                         </button>
@@ -541,7 +654,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 className="btn-tactile btn-tactile-gold btn-next-q"
                 onClick={handleNextQuestion}
               >
-                <span>{currentIndex + 1 < totalQuestions ? 'Next Question' : 'View Final Results'}</span>
+                <span>{currentIndex + 1 < totalQuestions ? 'Next Question' : 'View Final Summary & Results'}</span>
                 <ArrowRight size={16} />
               </button>
             </div>
