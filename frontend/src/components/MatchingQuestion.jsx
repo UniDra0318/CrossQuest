@@ -10,7 +10,7 @@ const PAIR_COLORS = [
 ];
 
 export default function MatchingQuestion({ question, answeredState, onSubmitMatches }) {
-  const containerRef = useRef(null);
+  const svgRef = useRef(null);
   const leftRefs = useRef({});
   const rightRefs = useRef({});
 
@@ -54,10 +54,10 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
     }
   }, [question.id]);
 
-  // Recalculate SVG line coordinates whenever matches or window resize changes
+  // Recalculate SVG line coordinates directly against the SVG element coordinate system
   const updateLines = () => {
-    if (!containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
+    if (!svgRef.current) return;
+    const svgRect = svgRef.current.getBoundingClientRect();
 
     const computedLines = [];
 
@@ -70,10 +70,11 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
         const leftRect = leftEl.getBoundingClientRect();
         const rightRect = rightEl.getBoundingClientRect();
 
-        const x1 = leftRect.right - containerRect.left;
-        const y1 = leftRect.top + leftRect.height / 2 - containerRect.top;
-        const x2 = rightRect.left - containerRect.left;
-        const y2 = rightRect.top + rightRect.height / 2 - containerRect.top;
+        // Exact pin circle center coordinates relative to SVG canvas
+        const x1 = (leftRect.left + leftRect.width / 2) - svgRect.left;
+        const y1 = (leftRect.top + leftRect.height / 2) - svgRect.top;
+        const x2 = (rightRect.left + rightRect.width / 2) - svgRect.left;
+        const y2 = (rightRect.top + rightRect.height / 2) - svgRect.top;
 
         const isPairCorrect = leftId === rightId;
         const colorSet = PAIR_COLORS[(leftIdx >= 0 ? leftIdx : 0) % PAIR_COLORS.length];
@@ -98,10 +99,12 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
     updateLines();
     const handleResize = () => updateLines();
     window.addEventListener('resize', handleResize);
-    const timer = setTimeout(updateLines, 100);
+    const t1 = setTimeout(updateLines, 50);
+    const t2 = setTimeout(updateLines, 150);
     return () => {
       window.removeEventListener('resize', handleResize);
-      clearTimeout(timer);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
   }, [matches, shuffledLeftItems, shuffledRightItems, answeredState]);
 
@@ -180,7 +183,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
   const isAllConnected = matchedPairsCount === totalPairsCount;
 
   return (
-    <div className="matching-quiz-container" ref={containerRef}>
+    <div className="matching-quiz-container">
       {/* Top Helper Bar */}
       <div className="matching-instructions-bar">
         <div className="instruct-text">
@@ -206,7 +209,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
       {/* Main Matching Grid with Center SVG Line Canvas */}
       <div className="matching-board-layout">
         {/* SVG Connector Lines Canvas */}
-        <svg className="matching-svg-layer">
+        <svg ref={svgRef} className="matching-svg-layer">
           {lines.map((line, idx) => {
             const dx = Math.abs(line.x2 - line.x1) * 0.45;
             const pathData = `M ${line.x1} ${line.y1} C ${line.x1 + dx} ${line.y1}, ${line.x2 - dx} ${line.y2}, ${line.x2} ${line.y2}`;
