@@ -15,9 +15,16 @@ import {
   CheckCircle2, 
   HelpCircle, 
   Zap, 
-  Target 
+  Target,
+  Clock,
+  Layers,
+  AlertTriangle,
+  RotateCw,
+  FileQuestion,
+  ChevronRight
 } from 'lucide-react';
-import { QUIZ_QUESTIONS } from '../data/mockData';
+import { QUIZ_DATABASE } from '../data/quizDatabase';
+import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore } from '../services/api';
 
@@ -27,17 +34,33 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
   const [level, setLevel] = useState(4);
   const [streakDays, setStreakDays] = useState(7);
   const [pinCode, setPinCode] = useState('');
-  const [activeQuizTitle, setActiveQuizTitle] = useState('Interactive Knowledge Quest');
 
-  // Active quiz state
-  const [activeQuizRunning, setActiveQuizRunning] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [answeredState, setAnsweredState] = useState(null); // 'correct' | 'wrong' | null
-  const [quizScore, setQuizScore] = useState(0);
-  const [quizCompleted, setQuizCompleted] = useState(false);
+  // Active quiz & persistence session state
+  const [activeQuiz, setActiveQuiz] = useState(null);
+  const [savedSession, setSavedSession] = useState(null);
+  const [quizScoreStatus, setQuizScoreStatus] = useState({
+    'act-1': { completed: true, score: 94 },
+    'act-2': { completed: true, score: 100 },
+    'act-3': { completed: true, score: 88 },
+    'act-4': { completed: false, score: null }
+  });
 
-  // Sync with real backend gamification data
+  // Check for auto-saved quiz session on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('crossquest_quiz_session');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.quizId && parsed.stage !== 'completed') {
+          setSavedSession(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not retrieve saved quiz session:", e);
+    }
+  }, []);
+
+  // Sync with backend gamification data
   useEffect(() => {
     async function loadGamification() {
       if (currentUser?.id) {
@@ -51,51 +74,51 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
     loadGamification();
   }, [currentUser?.id]);
 
-  // Assigned Quizzes (Wayground / Quizizz style cards)
+  // Quizzes list aligned with QUIZ_DATABASE
   const assignedActivities = [
     {
       id: 'act-1',
       title: 'Enterprise Security Audit Challenge',
       instructor: 'Lead Trainer David Lim',
-      questionsCount: '15 Qs',
-      accuracy: '94% accuracy',
+      questionsCount: '5 Questions',
       headerColor: '#1368ce',
       category: 'Information Security',
-      completed: true,
-      score: 94
+      completed: quizScoreStatus['act-1']?.completed,
+      score: quizScoreStatus['act-1']?.score,
+      accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned'
     },
     {
       id: 'act-2',
       title: 'Role-Based Access & Policy Verification',
       instructor: 'Dr. Sarah Jenkins',
-      questionsCount: '10 Qs',
-      accuracy: '100% accuracy',
+      questionsCount: '5 Questions',
       headerColor: '#06d6a0',
       category: 'Access Control',
-      completed: true,
-      score: 100
+      completed: quizScoreStatus['act-2']?.completed,
+      score: quizScoreStatus['act-2']?.score,
+      accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned'
     },
     {
       id: 'act-3',
       title: 'Privacy Impact Assessment (PIA) Simulation',
       instructor: 'Lead Trainer David Lim',
-      questionsCount: '20 Qs',
-      accuracy: '88% accuracy',
+      questionsCount: '5 Questions',
       headerColor: '#e21b3c',
       category: 'Privacy Management',
-      completed: true,
-      score: 88
+      completed: quizScoreStatus['act-3']?.completed,
+      score: quizScoreStatus['act-3']?.score,
+      accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned'
     },
     {
       id: 'act-4',
       title: 'Multi-Tenant Data Isolation & Security',
       instructor: 'Prof. Roel Traballo',
-      questionsCount: '12 Qs',
-      accuracy: 'Assigned (Due in 3d)',
+      questionsCount: '5 Questions',
       headerColor: '#772ce8',
       category: 'Database Security',
-      completed: false,
-      score: null
+      completed: quizScoreStatus['act-4']?.completed,
+      score: quizScoreStatus['act-4']?.score,
+      accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned (Due in 3d)'
     }
   ];
 
@@ -129,61 +152,121 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
     }
   ];
 
-  // Kahoot 4-tile choices styling
-  const kahootTiles = [
-    { key: 0, symbol: '▲', colorClass: 'tile-red', bg: '#e21b3c', shadow: '#a1122a' },
-    { key: 1, symbol: '◆', colorClass: 'tile-blue', bg: '#1368ce', shadow: '#0c478f' },
-    { key: 2, symbol: '●', colorClass: 'tile-yellow', bg: '#d89e00', shadow: '#9e7300' },
-    { key: 3, symbol: '■', colorClass: 'tile-green', bg: '#26890c', shadow: '#185a08' }
-  ];
-
-  const currentQ = QUIZ_QUESTIONS[currentQuestionIndex] || QUIZ_QUESTIONS[0];
-
-  const handleStartQuiz = (topic = 'Interactive Knowledge Quest') => {
-    setActiveQuizTitle(topic);
-    setActiveQuizRunning(true);
-    setCurrentQuestionIndex(0);
-    setSelectedAnswer(null);
-    setAnsweredState(null);
-    setQuizScore(0);
-    setQuizCompleted(false);
-    if (setActiveView) setActiveView('trainee_quiz');
+  // Start quiz by ID (from assigned card or catalog)
+  const handleStartQuizById = (quizId) => {
+    const q = QUIZ_DATABASE[quizId] || QUIZ_DATABASE['act-1'];
+    setActiveQuiz(q);
   };
 
-  const handleExitQuiz = () => {
-    setActiveQuizRunning(false);
-    if (setActiveView) setActiveView('trainee_quest');
+  // Resume saved interrupted session
+  const handleResumeSession = (session) => {
+    const q = QUIZ_DATABASE[session.quizId] || QUIZ_DATABASE['act-1'];
+    setActiveQuiz(q);
   };
 
-  const handleAnswerSelect = (optionIndex) => {
-    if (answeredState !== null) return;
-    setSelectedAnswer(optionIndex);
+  // Discard saved session
+  const handleDiscardSession = () => {
+    localStorage.removeItem('crossquest_quiz_session');
+    setSavedSession(null);
+  };
 
-    const isCorrect = optionIndex === currentQ.correctAnswer;
-    setAnsweredState(isCorrect ? 'correct' : 'wrong');
+  // Pin Code Join
+  const handleJoinPin = () => {
+    let targetId = 'act-1';
+    if (pinCode.includes('2')) targetId = 'act-2';
+    else if (pinCode.includes('3')) targetId = 'act-3';
+    else if (pinCode.includes('4')) targetId = 'act-4';
+    handleStartQuizById(targetId);
+  };
 
-    if (isCorrect) {
-      setQuizScore(prev => prev + 100);
-      setPoints(prev => prev + 100);
+  // Quiz finish handler
+  const handleQuizFinish = async (resultData) => {
+    if (currentUser?.id) {
+      await submitQuizScore(currentUser.id, resultData.scorePercentage);
     }
-  };
 
-  const handleNextQuestion = async () => {
-    if (currentQuestionIndex + 1 < QUIZ_QUESTIONS.length) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setSelectedAnswer(null);
-      setAnsweredState(null);
-    } else {
-      setQuizCompleted(true);
-      if (currentUser?.id) {
-        await submitQuizScore(currentUser.id, quizScore + (answeredState === 'correct' ? 100 : 0));
+    setQuizScoreStatus(prev => ({
+      ...prev,
+      [resultData.quizId]: {
+        completed: true,
+        score: resultData.scorePercentage
       }
-    }
+    }));
+
+    setPoints(prev => prev + (resultData.pointsEarned || 250));
+    localStorage.removeItem('crossquest_quiz_session');
+    setSavedSession(null);
+    setActiveQuiz(null);
   };
+
+  // Quiz exit / save handler
+  const handleQuizExit = () => {
+    setActiveQuiz(null);
+    try {
+      const raw = localStorage.getItem('crossquest_quiz_session');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.stage !== 'completed') {
+          setSavedSession(parsed);
+        } else {
+          setSavedSession(null);
+        }
+      }
+    } catch (e) {}
+  };
+
+  // =========================================================================
+  // FULLSCREEN DISTRACTION-FREE QUIZ ARENA TAKEOVER
+  // When inside a quiz, sidebar, topbar, and dashboard are completely obscured
+  // =========================================================================
+  if (activeQuiz) {
+    return (
+      <QuizArena 
+        quiz={activeQuiz}
+        initialSession={savedSession?.quizId === activeQuiz.id ? savedSession : null}
+        onFinish={handleQuizFinish}
+        onExit={handleQuizExit}
+      />
+    );
+  }
 
   return (
     <div className="dashboard-content-layout">
-      {/* 1. QUEST & RECENT ACTIVITIES (WAYGROUND / QUIZIZZ DASHBOARD) */}
+      {/* OUTAGE / DISRUPTION RECOVERY BANNER */}
+      {savedSession && (
+        <div className="quiz-recovery-banner">
+          <div className="recovery-left">
+            <div className="recovery-icon-circle">
+              <RotateCw className="spin-slow text-amber" size={20} />
+            </div>
+            <div className="recovery-text-group">
+              <div className="recovery-title">
+                Unfinished Assessment Detected
+              </div>
+              <div className="recovery-desc">
+                Your progress in <strong>"{savedSession.quizTitle || 'Assigned Assessment'}"</strong> was saved at <strong>Question {savedSession.currentIndex + 1}</strong>. You can resume immediately without penalty.
+              </div>
+            </div>
+          </div>
+          <div className="recovery-actions">
+            <button 
+              className="btn-tactile btn-tactile-gold btn-sm"
+              onClick={() => handleResumeSession(savedSession)}
+            >
+              <Play size={14} />
+              <span>Resume Assessment Now</span>
+            </button>
+            <button 
+              className="btn-tactile btn-tactile-ghost btn-sm"
+              onClick={handleDiscardSession}
+            >
+              <span>Discard</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 1. MAIN TRAINEE QUEST VIEW */}
       {(activeSubView === 'trainee_quest' || !activeSubView) && (
         <>
           {/* Top Banner with Quizizz Purple & Kahoot Play Input */}
@@ -207,12 +290,12 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
                   value={pinCode}
                   onChange={(e) => setPinCode(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleStartQuiz(pinCode ? `PIN: ${pinCode}` : 'Interactive Quest Challenge');
+                    if (e.key === 'Enter') handleJoinPin();
                   }}
                 />
                 <button 
                   className="btn-tactile btn-tactile-purple btn-pin-enter"
-                  onClick={() => handleStartQuiz(pinCode ? `PIN: ${pinCode}` : 'Interactive Quest Challenge')}
+                  onClick={handleJoinPin}
                 >
                   <Play size={16} />
                   <span>Join Quest</span>
@@ -242,35 +325,38 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
             </div>
 
             <div className="activity-cards-scroller">
-              {assignedActivities.map((act) => (
-                <div key={act.id} className="card-gamified wayground-activity-card">
-                  {/* Top Colored Bar with Category Icon */}
-                  <div className="activity-card-header-bar" style={{ backgroundColor: act.headerColor }}>
-                    <span className="activity-header-label">{act.category}</span>
-                    <span className="activity-q-count">{act.questionsCount}</span>
-                  </div>
+              {assignedActivities.map((act) => {
+                const isSavedThis = savedSession?.quizId === act.id;
+                return (
+                  <div key={act.id} className="card-gamified wayground-activity-card">
+                    {/* Top Colored Bar with Category Icon */}
+                    <div className="activity-card-header-bar" style={{ backgroundColor: act.headerColor }}>
+                      <span className="activity-header-label">{act.category}</span>
+                      <span className="activity-q-count">{act.questionsCount}</span>
+                    </div>
 
-                  <div className="activity-card-body">
-                    <h4 className="activity-title">{act.title}</h4>
-                    <p className="activity-instructor">{act.instructor}</p>
+                    <div className="activity-card-body">
+                      <h4 className="activity-title">{act.title}</h4>
+                      <p className="activity-instructor">{act.instructor}</p>
 
-                    <div className="activity-card-footer">
-                      <span className={`accuracy-pill ${act.completed ? 'completed' : 'pending'}`}>
-                        {act.completed ? <CheckCircle2 size={13} /> : <Zap size={13} />}
-                        {act.accuracy}
-                      </span>
+                      <div className="activity-card-footer">
+                        <span className={`accuracy-pill ${act.completed ? 'completed' : 'pending'}`}>
+                          {act.completed ? <CheckCircle2 size={13} /> : <Zap size={13} />}
+                          {act.accuracy}
+                        </span>
 
-                      <button
-                        className="btn-tactile btn-tactile-purple btn-sm"
-                        onClick={() => handleStartQuiz(act.title)}
-                      >
-                        <span>{act.completed ? 'Replay' : 'Play Quest'}</span>
-                        <ArrowRight size={13} />
-                      </button>
+                        <button
+                          className={`btn-tactile ${isSavedThis ? 'btn-tactile-gold' : 'btn-tactile-purple'} btn-sm`}
+                          onClick={() => handleStartQuizById(act.id)}
+                        >
+                          <span>{isSavedThis ? 'Resume Quest' : (act.completed ? 'Replay' : 'Play Quest')}</span>
+                          <ArrowRight size={13} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -305,120 +391,83 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
         </>
       )}
 
-      {/* 2. KAHOOT INTERACTIVE QUIZ MODAL / VIEW */}
-      {(activeSubView === 'trainee_quiz' || activeQuizRunning) && (
-        <div className="kahoot-quiz-experience">
-          {!quizCompleted ? (
-            <div className="kahoot-arena card-gamified">
-              {/* Question Header & Points Bar */}
-              <div className="kahoot-arena-top">
-                <div className="arena-meta-left">
-                  <span className="badge-gamified badge-purple">
-                    Question {currentQuestionIndex + 1} of {QUIZ_QUESTIONS.length}
-                  </span>
-                  <span className="badge-gamified badge-gold">
-                    <Target size={12} /> Score: {quizScore}%
-                  </span>
-                </div>
-
-                <button 
-                  className="btn-tactile btn-tactile-ghost btn-sm"
-                  onClick={handleExitQuiz}
-                >
-                  Exit Quiz
-                </button>
+      {/* 2. DEDICATED KNOWLEDGE QUIZZES CATALOG VIEW (When clicking Quizzes tab) */}
+      {activeSubView === 'trainee_quiz' && (
+        <div className="quizzes-catalog-view">
+          <div className="catalog-header-banner">
+            <div>
+              <div className="catalog-badge-pill">
+                <FileQuestion size={14} className="text-cyan" />
+                <span>OFFICIAL EVALUATIONS</span>
               </div>
+              <h2>Enterprise Knowledge Quizzes</h2>
+              <p className="catalog-subtitle">
+                Select an assessment to enter the dedicated distraction-free testing arena. Each quiz includes interactive Kahoot-style questions, sequence ordering, term identification, and architecture diagrams.
+              </p>
+            </div>
+          </div>
 
-              {/* Big Kahoot Question Card */}
-              <div className="kahoot-question-box">
-                <h2>{currentQ.question}</h2>
-              </div>
+          <div className="quizzes-catalog-grid">
+            {Object.values(QUIZ_DATABASE).map((quizItem) => {
+              const status = quizScoreStatus[quizItem.id];
+              const isSaved = savedSession?.quizId === quizItem.id;
 
-              {/* 4 Colored Kahoot Answer Tiles */}
-              <div className="kahoot-tiles-grid">
-                {currentQ.options.map((opt, idx) => {
-                  const tileStyle = kahootTiles[idx];
-                  const isSelected = selectedAnswer === idx;
-                  const isCorrect = idx === currentQ.correctAnswer;
-                  let feedbackClass = '';
-                  
-                  if (answeredState !== null) {
-                    if (isCorrect) feedbackClass = 'tile-correct';
-                    else if (isSelected) feedbackClass = 'tile-wrong';
-                    else feedbackClass = 'tile-dimmed';
-                  }
-
-                  return (
-                    <button
-                      key={idx}
-                      className={`kahoot-tile-button ${tileStyle.colorClass} ${feedbackClass}`}
-                      style={{ backgroundColor: tileStyle.bg }}
-                      onClick={() => handleAnswerSelect(idx)}
-                      disabled={answeredState !== null}
-                    >
-                      <span className="tile-symbol">{tileStyle.symbol}</span>
-                      <span className="tile-text">{opt}</span>
-                      {answeredState !== null && isCorrect && (
-                        <CheckCircle2 size={24} className="tile-feedback-icon" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Feedback Drawer (Kahoot / Quizizz explanation) */}
-              {answeredState !== null && (
-                <div className={`kahoot-feedback-banner ${answeredState === 'correct' ? 'banner-correct' : 'banner-wrong'}`}>
-                  <div className="feedback-left">
-                    <div className="feedback-headline">
-                      {answeredState === 'correct' ? '🎉 Awesome! That is Correct!' : '❌ Not quite right!'}
+              return (
+                <div key={quizItem.id} className="quiz-catalog-card card-gamified">
+                  <div className="catalog-card-top" style={{ borderTop: `4px solid ${quizItem.headerColor}` }}>
+                    <div className="flex-between">
+                      <span className="catalog-category-tag" style={{ color: quizItem.headerColor }}>
+                        {quizItem.category}
+                      </span>
+                      <span className="catalog-time-tag">
+                        <Clock size={12} /> {quizItem.timePerQuestion}s / Q
+                      </span>
                     </div>
-                    <div className="feedback-explanation">
-                      {currentQ.explanation}
+                    <h3 className="catalog-card-title">{quizItem.title}</h3>
+                    <p className="catalog-instructor-tag">Instructor: {quizItem.instructor}</p>
+                  </div>
+
+                  <div className="catalog-card-body">
+                    <p className="catalog-quiz-desc">{quizItem.description}</p>
+
+                    <div className="catalog-types-row">
+                      <span className="qtype-badge">Kahoot 4-Choice</span>
+                      <span className="qtype-badge">Identification</span>
+                      <span className="qtype-badge">Sequence Order</span>
+                      <span className="qtype-badge">Diagram Analysis</span>
+                    </div>
+
+                    <div className="catalog-meta-row">
+                      <div className="catalog-meta-item">
+                        <span className="meta-k">Passing Grade:</span>
+                        <span className="meta-v">{quizItem.passingScore}%</span>
+                      </div>
+                      <div className="catalog-meta-item">
+                        <span className="meta-k">Items:</span>
+                        <span className="meta-v">{quizItem.questions.length} Questions</span>
+                      </div>
+                      <div className="catalog-meta-item">
+                        <span className="meta-k">Status:</span>
+                        <span className={`meta-v ${status?.completed ? 'text-emerald' : 'text-amber'}`}>
+                          {status?.completed ? `${status.score}% Passed` : 'Pending'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <button
-                    className="btn-tactile btn-tactile-gold btn-next-q"
-                    onClick={handleNextQuestion}
-                  >
-                    <span>{currentQuestionIndex + 1 < QUIZ_QUESTIONS.length ? 'Next Question' : 'View Results'}</span>
-                    <ArrowRight size={16} />
-                  </button>
+                  <div className="catalog-card-actions">
+                    <button
+                      className={`btn-tactile ${isSaved ? 'btn-tactile-gold' : 'btn-tactile-purple'} w-full`}
+                      onClick={() => handleStartQuizById(quizItem.id)}
+                    >
+                      <Play size={15} />
+                      <span>{isSaved ? 'Resume In-Progress Assessment' : (status?.completed ? 'Retake Assessment' : 'Start Assessment')}</span>
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          ) : (
-            /* Quiz Completion Screen */
-            <div className="kahoot-results-card card-gamified">
-              <Trophy size={64} className="trophy-victory text-gold" />
-              <h2>Quest Completed!</h2>
-              <p className="text-secondary text-sm">
-                You've mastered this knowledge challenge.
-              </p>
-
-              <div className="results-xp-box">
-                <div className="result-xp-value">{quizScore}%</div>
-                <div className="result-xp-label">ASSESSMENT SCORE</div>
-              </div>
-
-              <div className="flex-align gap-12 mt-16">
-                <button 
-                  className="btn-tactile btn-tactile-purple"
-                  onClick={() => handleStartQuiz(activeQuizTitle)}
-                >
-                  <RotateCcw size={16} />
-                  <span>Play Again</span>
-                </button>
-                <button 
-                  className="btn-tactile btn-tactile-gold"
-                  onClick={handleExitQuiz}
-                >
-                  <span>Back to Quests</span>
-                </button>
-              </div>
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
       )}
 
