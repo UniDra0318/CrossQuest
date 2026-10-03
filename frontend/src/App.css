@@ -64,15 +64,15 @@
 }
 
 .crumb-brand {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .crumb-divider {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .crumb-active {
-  color: var(--text-main);
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -145,18 +145,18 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   padding: 6px 12px;
   border-radius: var(--radius-md);
   cursor: pointer;
-  color: var(--text-main);
+  color: #ffffff;
   transition: all 0.15s ease;
 }
 
 .role-selector-trigger:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: var(--color-purple-primary);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .role-trigger-left {
@@ -183,19 +183,21 @@
 }
 
 .role-trigger-name {
-  font-size: 12px;
+  color: #ffffff;
+  font-size: 12.5px;
   font-weight: 700;
   line-height: 1.1;
 }
 
 .role-trigger-badge {
-  font-size: 10px;
-  color: var(--color-cyan);
+  font-size: 10.5px;
+  color: #00f5d4;
+  font-weight: 700;
   text-transform: capitalize;
 }
 
 .role-chevron {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.7);
   transition: transform 0.2s ease;
 }
 
@@ -337,12 +339,17 @@
    ENTERPRISE SIDEBAR
 ========================================= */
 .enterprise-sidebar {
-  width: 250px;
-  background: var(--bg-sidebar);
-  border-right: 2px solid var(--border-subtle);
+  width: 260px;
+  background-color: #220839 !important;
+  color: #ffffff !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .sidebar-brand {
@@ -353,8 +360,8 @@
 }
 
 .sidebar-brand .brand-logo {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-md);
   background: var(--color-purple-primary);
   display: flex;
@@ -366,24 +373,25 @@
 
 .sidebar-brand .brand-title {
   font-family: var(--font-fun);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 800;
   line-height: 1.1;
-  color: var(--text-main);
+  color: #ffffff !important;
 }
 
 .sidebar-brand .brand-sub {
-  font-size: 10px;
-  color: var(--text-dim);
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.65) !important;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  font-weight: 600;
 }
 
 .sidebar-role-banner {
   margin: 0 16px 16px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: var(--radius-md);
 }
 
@@ -391,14 +399,14 @@
   display: inline-block;
   font-family: var(--font-fun);
   font-size: 11px;
-  font-weight: 700;
-  color: var(--color-cyan);
-  letter-spacing: 0.04em;
+  font-weight: 800;
+  color: #00f5d4 !important;
+  letter-spacing: 0.05em;
 }
 
 .user-org-text {
-  font-size: 11px;
-  color: var(--text-muted);
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.8) !important;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -414,10 +422,10 @@
 .nav-group-title {
   font-family: var(--font-fun);
   font-size: 10px;
-  font-weight: 700;
-  color: var(--text-dim);
-  padding: 8px 10px 4px;
-  letter-spacing: 0.06em;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.45) !important;
+  padding: 8px 12px 4px;
+  letter-spacing: 0.08em;
 }
 
 .nav-list {
@@ -436,9 +444,9 @@
   border-radius: var(--radius-md);
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.8) !important;
   font-family: var(--font-fun);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   text-align: left;
@@ -446,19 +454,20 @@
 }
 
 .sidebar-nav-btn:hover {
-  background: var(--bg-card-hover);
-  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
 }
 
 .sidebar-nav-btn.active {
-  background: var(--color-purple-primary);
-  color: #ffffff;
-  box-shadow: 0 3px 0 #4c1285;
+  background: var(--color-purple-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 0 #4c1285, 0 4px 14px rgba(119, 44, 232, 0.4) !important;
+  font-weight: 700;
 }
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 2px solid var(--border-subtle);
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -491,6 +500,7 @@
 }
 
 .user-display-name {
+  color: #ffffff !important;
   font-family: var(--font-fun);
   font-size: 13px;
   font-weight: 700;
@@ -501,7 +511,7 @@
 
 .user-display-title {
   font-size: 11px;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.7) !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -513,19 +523,20 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 8px;
+  padding: 9px;
   border-radius: var(--radius-md);
-  background: rgba(247, 37, 133, 0.12);
-  border: 1px solid rgba(247, 37, 133, 0.3);
-  color: #ff66b2;
+  background: rgba(247, 37, 133, 0.18) !important;
+  border: 1px solid rgba(247, 37, 133, 0.4) !important;
+  color: #ff66b2 !important;
   font-family: var(--font-fun);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .logout-action-btn:hover {
-  background: rgba(247, 37, 133, 0.22);
+  background: rgba(247, 37, 133, 0.3) !important;
 }
 
 /* Viewport Area */
@@ -554,98 +565,149 @@
 }
 
 /* =========================================
-   WAYGROUND / QUIZIZZ STYLE HERO & ACTIVITIES
+   WAYGROUND / QUIZIZZ / KAHOOT TRAINEE EXPERIENCE
 ========================================= */
-.wayground-hero-card {
-  position: relative;
-  background: linear-gradient(135deg, #370c5e 0%, #58168f 60%, #772ce8 100%);
+
+/* Hero Banner */
+.wayground-hero-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #220839 0%, #3d1066 50%, #631ecc 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-lg);
-  padding: 40px 32px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  overflow: hidden;
-}
-
-.hero-pattern-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle at 80% 20%, rgba(247, 37, 133, 0.2) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.wayground-hero-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 20px;
-}
-
-.hero-title-main {
-  font-family: var(--font-fun);
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  padding: 32px 36px;
   color: #ffffff;
-  display: block;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(34, 8, 57, 0.25);
+  margin-bottom: 24px;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
-.hero-title-sub {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-/* Pin Join Bar (Wayground / Kahoot PIN input) */
-.pin-join-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 8px 12px 8px 18px;
-  border-radius: var(--radius-full);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  max-width: 600px;
-  width: 100%;
-}
-
-.pin-input {
+.banner-left-content {
   flex: 1;
-  background: transparent;
-  border: none;
-  color: #ffffff;
-  font-family: var(--font-fun);
-  font-size: 16px;
-  font-weight: 600;
-  outline: none;
+  min-width: 320px;
 }
 
-.pin-input::placeholder {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.pin-join-btn {
-  padding: 10px 24px;
-  font-size: 15px;
-}
-
-.coin-sack-pill {
-  display: flex;
+.hero-badge-tag {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 183, 3, 0.2);
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  border: 1.5px solid var(--color-gold);
   font-family: var(--font-fun);
-  font-weight: 700;
-  font-size: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ffd000;
+  background: rgba(255, 208, 0, 0.15);
+  border: 1px solid rgba(255, 208, 0, 0.35);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  margin-bottom: 8px;
 }
 
-/* Assigned Activities Section (Direct Wayground Screenshot Match) */
-.assigned-activities-section {
+.banner-left-content h1 {
+  color: #ffffff !important;
+  font-size: 26px;
+  font-weight: 800;
+  margin: 6px 0;
+}
+
+.hero-subtext {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.hero-subtext strong {
+  color: #ffbe0b;
+}
+
+/* Kahoot PIN Input Bar */
+.kahoot-join-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  padding: 6px 6px 6px 18px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  max-width: 480px;
+}
+
+.kahoot-pin-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--font-fun);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  background: transparent;
+}
+
+.kahoot-pin-input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.btn-pin-enter {
+  padding: 9px 20px;
+  font-size: 13.5px;
+}
+
+/* Banner Right Stats */
+.banner-right-stats {
+  display: flex;
+  align-items: center;
+}
+
+.hero-stat-card.streak-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  padding: 18px 26px;
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(8px);
+}
+
+.flame-pulse {
+  color: #ffbe0b;
+  filter: drop-shadow(0 0 8px rgba(255, 190, 11, 0.7));
+  animation: flameBounce 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes flameBounce {
+  from { transform: scale(0.95); }
+  to { transform: scale(1.08); }
+}
+
+.hero-stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-stat-value {
+  font-family: var(--font-fun);
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffbe0b;
+  line-height: 1.1;
+}
+
+.hero-stat-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.05em;
+  margin-top: 3px;
+}
+
+/* Section Blocks */
+.wayground-section-block {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -657,120 +719,79 @@
   align-items: center;
 }
 
-.section-title-row h3 {
+.section-title-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title-left h3 {
   font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
 }
 
-.see-all-link {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 13px;
+.view-all-link {
+  background: none;
+  border: none;
+  color: var(--color-purple-primary);
+  font-family: var(--font-fun);
+  font-size: 12.5px;
   font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
-.see-all-link:hover {
-  color: var(--color-cyan);
+.view-all-link:hover {
+  color: var(--color-purple-hover);
 }
 
+/* Activity Cards Grid */
 .activity-cards-scroller {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
 }
 
-/* Special Quest Booster Card (Wayground Quests Box) */
-.special-quest-card {
-  background: linear-gradient(135deg, #11031d 0%, #2b0847 100%);
-  border: 2px solid var(--color-gold);
+.wayground-activity-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
   border-radius: var(--radius-lg);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(255, 183, 3, 0.15);
-  transition: transform 0.15s ease;
-}
-
-.special-quest-card:hover {
-  transform: translateY(-2px);
-}
-
-.quest-mini-label {
-  font-family: var(--font-fun);
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--color-gold);
-  letter-spacing: 0.08em;
-}
-
-.quest-big-title {
-  font-family: var(--font-fun);
-  font-size: 26px;
-  font-weight: 900;
-  color: #ffffff;
-  margin: 6px 0;
-  text-shadow: 0 0 12px rgba(255, 183, 3, 0.4);
-}
-
-.quest-coins-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
-
-.quest-cta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--color-gold);
-  color: #1a052b;
-  font-family: var(--font-fun);
-  font-weight: 800;
-  font-size: 14px;
-  padding: 8px 18px;
-  border-radius: var(--radius-md);
-  border: none;
-  cursor: pointer;
-  box-shadow: var(--shadow-tactile-gold);
-}
-
-/* Quizizz Activity Cards */
-.quizizz-activity-card {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--border-subtle);
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.card-top-color-band {
-  height: 90px;
-  padding: 12px 14px;
+.wayground-activity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -2px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.activity-card-header-bar {
+  padding: 12px 18px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
+  align-items: center;
 }
 
-.band-badge-row {
-  display: flex;
-  gap: 6px;
-}
-
-.band-status-pill, .band-qs-pill {
+.activity-header-label {
+  color: #ffffff !important;
   font-family: var(--font-fun);
-  font-size: 11px;
   font-weight: 800;
-  padding: 3px 8px;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+}
+
+.activity-q-count {
+  color: #ffffff !important;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 8px;
   border-radius: var(--radius-full);
-  background: rgba(0, 0, 0, 0.45);
-  color: #ffffff;
 }
 
 .activity-card-body {
@@ -778,49 +799,256 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  justify-content: space-between;
+  gap: 12px;
+  background: #ffffff;
 }
 
 .activity-title {
   font-size: 15px;
-  margin-bottom: 4px;
+  font-weight: 700;
+  color: #0f172a;
   line-height: 1.3;
 }
 
 .activity-instructor {
   font-size: 12px;
-  color: var(--text-dim);
-  margin-bottom: 16px;
+  color: #64748b;
 }
 
 .activity-card-footer {
-  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .accuracy-pill {
-  font-family: var(--font-fun);
-  font-size: 12px;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
   padding: 4px 10px;
   border-radius: var(--radius-full);
 }
 
-.acc-green {
-  background: rgba(6, 214, 160, 0.2);
-  color: #06d6a0;
-  border: 1px solid rgba(6, 214, 160, 0.4);
+.accuracy-pill.completed {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
-.acc-purple {
-  background: rgba(119, 44, 232, 0.25);
-  color: #d1b3ff;
-  border: 1px solid rgba(119, 44, 232, 0.4);
+.accuracy-pill.pending {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
-.btn-play-activity {
-  padding: 6px 14px;
+/* Badges Showcase Row */
+.badges-showcase-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.badge-trophy-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease;
+}
+
+.badge-trophy-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+}
+
+.badge-emoji-container {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.badge-large-emoji {
+  font-size: 30px;
+}
+
+.badge-name {
+  font-family: var(--font-fun);
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.badge-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+/* Tier Chips */
+.tier-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-fun);
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tier-bronze { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+.tier-gold { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+.tier-ruby { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+.tier-diamond { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+/* =========================================
+   FULL BADGES GRID SUBVIEW
+========================================= */
+.badges-full-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 18px;
+}
+
+.badge-detail-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.badge-detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.badge-icon-bubble {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.badge-detail-card h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.badge-detail-card .badge-desc {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+  flex: 1;
+}
+
+.badge-footer {
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.badge-check {
+  font-family: var(--font-fun);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================================
+   CERTIFICATIONS GRID SUBVIEW
+========================================= */
+.certs-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.certificate-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cert-top-row h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.cert-meta-body {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cert-meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+}
+
+.meta-label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.meta-val {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.renewal-alert-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #92400e;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
   font-size: 12px;
 }
 
@@ -828,72 +1056,48 @@
    KAHOOT-STYLE 4-TILE INTERACTIVE QUIZ
 ========================================= */
 .kahoot-quiz-experience {
-  padding: 32px;
-  background: var(--bg-card);
+  max-width: 920px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.kahoot-header-bar {
+.kahoot-arena {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
+}
+
+.kahoot-arena-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.kahoot-q-count {
-  font-family: var(--font-fun);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.kahoot-streak-badge {
+.arena-meta-left {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--font-fun);
-  font-weight: 800;
-  font-size: 13px;
-  color: #ffbe0b;
+  gap: 10px;
 }
 
 .kahoot-question-box {
-  background: rgba(0, 0, 0, 0.35);
-  border: 2px solid var(--border-bold);
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
   border-radius: var(--radius-lg);
-  padding: 32px 24px;
+  padding: 38px 30px;
   text-align: center;
   margin-bottom: 24px;
+  box-shadow: 0 3px 0 #cbd5e1;
 }
 
 .kahoot-question-box h2 {
-  font-size: 24px;
-  line-height: 1.4;
-}
-
-.answer-feedback-banner {
-  padding: 14px;
-  border-radius: var(--radius-md);
-  margin-bottom: 16px;
-  text-align: center;
   font-family: var(--font-fun);
+  font-size: 22px;
   font-weight: 800;
-  font-size: 16px;
-  animation: feedbackPop 0.2s ease;
-}
-
-@keyframes feedbackPop {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.answer-feedback-banner.correct {
-  background: var(--kahoot-green);
-  color: #ffffff;
-}
-
-.answer-feedback-banner.wrong {
-  background: var(--kahoot-red);
-  color: #ffffff;
+  color: #0f172a !important;
+  line-height: 1.4;
 }
 
 /* 4-Tile Grid (Kahoot Iconic 2x2) */
@@ -907,16 +1111,21 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 24px 20px;
-  border-radius: var(--radius-md);
+  padding: 24px 22px;
+  border-radius: var(--radius-lg);
   border: none;
   cursor: pointer;
-  color: #ffffff;
+  color: #ffffff !important;
   text-align: left;
-  transition: all 0.1s ease;
+  transition: transform 0.1s ease, filter 0.1s ease;
   font-family: var(--font-fun);
   font-size: 16px;
   font-weight: 700;
+}
+
+.kahoot-tile-button:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
 }
 
 .kahoot-tile-button:active:not(:disabled) {
@@ -924,13 +1133,15 @@
 }
 
 .tile-symbol {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .tile-text {
   flex: 1;
-  font-size: 16px;
+  color: #ffffff !important;
+  font-size: 15px;
   line-height: 1.3;
 }
 
@@ -959,99 +1170,99 @@
 }
 .tile-green:active:not(:disabled) { box-shadow: 0 2px 0 var(--kahoot-green-shadow); }
 
-/* Celebration Screen */
-.kahoot-celebration-screen {
+.tile-correct {
+  filter: brightness(1.2) drop-shadow(0 0 12px rgba(16, 185, 129, 0.6));
+  animation: pulseGreen 0.5s ease;
+}
+
+.tile-wrong {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+}
+
+.tile-dimmed {
+  opacity: 0.45;
+}
+
+/* Feedback Drawer */
+.kahoot-feedback-banner {
+  margin-top: 24px;
+  padding: 18px 24px;
+  border-radius: var(--radius-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  animation: feedbackPop 0.2s ease;
+}
+
+@keyframes feedbackPop {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.kahoot-feedback-banner.banner-correct {
+  background: #dcfce7;
+  border: 1.5px solid #86efac;
+}
+
+.kahoot-feedback-banner.banner-correct .feedback-headline {
+  color: #15803d;
+  font-family: var(--font-fun);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.kahoot-feedback-banner.banner-correct .feedback-explanation {
+  color: #166534;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.kahoot-feedback-banner.banner-wrong {
+  background: #ffe4e6;
+  border: 1.5px solid #fecdd3;
+}
+
+.kahoot-feedback-banner.banner-wrong .feedback-headline {
+  color: #be123c;
+  font-family: var(--font-fun);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.kahoot-feedback-banner.banner-wrong .feedback-explanation {
+  color: #9f1239;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Quiz Completion Screen */
+.kahoot-results-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 48px 32px;
   text-align: center;
-  padding: 48px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
 }
 
-.celebration-title {
-  font-size: 36px;
-  font-weight: 900;
-  color: var(--color-gold);
-  text-shadow: 0 0 20px rgba(255, 183, 3, 0.5);
+.trophy-victory {
+  filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.4));
+  animation: bounce 1s infinite alternate;
 }
 
-.celebration-sub {
-  font-size: 16px;
-  color: var(--text-muted);
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
 }
 
-.reward-xp-pill {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 183, 3, 0.2);
-  border: 2px solid var(--color-gold);
-  padding: 10px 24px;
-  border-radius: var(--radius-full);
-  font-family: var(--font-fun);
-  font-size: 18px;
-  font-weight: 800;
-}
-
-/* Badges Hex Grid */
-.badges-hex-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 18px;
-}
-
-.gamified-badge-tile {
-  background: var(--bg-card-subtle);
-  border: 2px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 24px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.badge-tier-ribbon {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-family: var(--font-fun);
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--color-gold);
-}
-
-.badge-big-icon {
-  font-size: 40px;
-  margin: 10px 0;
-}
-
-.badge-title {
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-
-.badge-info {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-bottom: 12px;
-}
-
-.badge-unlocked-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-fun);
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--color-green);
-  background: rgba(6, 214, 160, 0.15);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
+.kahoot-results-card h2 {
+  font-size: 28px;
+  color: #0f172a;
 }
 
 /* =========================================

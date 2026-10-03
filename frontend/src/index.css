@@ -129,16 +129,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-tactile-ghost {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-main);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+  background: #f1f5f9;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 3px 0 #cbd5e1;
 }
 .btn-tactile-ghost:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: #e2e8f0;
+  color: #0f172a;
 }
 .btn-tactile-ghost:active {
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #cbd5e1;
 }
 
 /* Pill Badges */
