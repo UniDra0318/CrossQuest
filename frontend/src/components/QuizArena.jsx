@@ -230,20 +230,28 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       setCurrentIndex(nextIdx);
       saveProgress({ currentIndex: nextIdx, answeredState: null });
     } else {
-      // Quiz Finished!
+      // Quiz Finished! Transition to results stage within QuizArena
+      // Keep trainee on results screen so they can review their score and full question summary
       setStage('completed');
       localStorage.removeItem('crossquest_quiz_session');
-      const finalAccuracy = Math.round((correctCount / totalQuestions) * 100);
-      if (onFinish) {
-        onFinish({
-          quizId: quiz.id,
-          accuracy: finalAccuracy,
-          correctCount,
-          totalQuestions,
-          pointsEarned: pointsTotal,
-          passed: finalAccuracy >= (quiz.passingScore || 80)
-        });
-      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleFinishAndReturn = () => {
+    const finalAccuracy = Math.round((correctCount / totalQuestions) * 100);
+    if (onFinish) {
+      onFinish({
+        quizId: quiz.id,
+        scorePercentage: finalAccuracy,
+        accuracy: finalAccuracy,
+        correctCount,
+        totalQuestions,
+        pointsEarned: pointsTotal,
+        passed: finalAccuracy >= (quiz.passingScore || 80)
+      });
+    } else if (onExit) {
+      onExit();
     }
   };
 
@@ -444,7 +452,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </button>
             <button 
               className="btn-tactile btn-tactile-gold"
-              onClick={onExit}
+              onClick={handleFinishAndReturn}
             >
               <span>Return to Dashboard</span>
             </button>
