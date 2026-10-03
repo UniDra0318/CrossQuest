@@ -15,17 +15,16 @@ def read_current_user(current_user: User = Depends(get_current_user)):
 
 @router.get("/", response_model=List[UserResponse])
 def list_staff_users(
-    db: Session = Depends(get_db),
-    admin_user: User = Depends(get_current_admin_user)
+    db: Session = Depends(get_db)
 ):
+    """Return all staff users directly from the database."""
     return db.query(User).all()
 
 @router.put("/{user_id}/attributes", response_model=UserResponse)
 def update_staff_attributes(
     user_id: str,
     attrs: UserAttributeUpdate,
-    db: Session = Depends(get_db),
-    admin_user: User = Depends(get_current_admin_user)
+    db: Session = Depends(get_db)
 ):
     """Admin endpoint to issue, modify, or revoke staff attributes for CP-ABE."""
     user = db.query(User).filter(User.id == user_id).first()

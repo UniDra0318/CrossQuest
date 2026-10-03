@@ -1,39 +1,48 @@
 export const INITIAL_STAFF_PROFILES = [
   {
-    id: "user-1",
-    email: "sarah.admin@crossworks.ph",
-    name: "Sarah Jenkins (Security Admin)",
+    id: "ecfe6082-316b-4eef-afc6-4a8b1e42b5cd",
+    email: "admin@crossworks.ph",
+    name: "Dr. Sarah Jenkins",
     role: "admin",
     clearance_level: 3,
     assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
     avatar: "🛡️"
   },
   {
-    id: "user-2",
-    email: "marcus.am@crossworks.ph",
-    name: "Marcus Reyes (Account Manager - Alpha)",
-    role: "account_manager",
+    id: "0cfa35a8-71da-46fe-a29d-51dc263ddcf9",
+    email: "marcus.reyes@crossworks.ph",
+    name: "Marcus Reyes",
+    role: "crossworks_staff",
     clearance_level: 2,
     assigned_companies: ["CORP_ALPHA"],
     avatar: "💼"
   },
   {
-    id: "user-3",
-    email: "elena.am@crossworks.ph",
-    name: "Elena Santos (Account Manager - Beta)",
-    role: "account_manager",
-    clearance_level: 2,
-    assigned_companies: ["FINTECH_BETA"],
-    avatar: "📊"
-  },
-  {
-    id: "user-4",
-    email: "david.trainer@crossworks.ph",
-    name: "David Lim (Lead Cybersecurity Trainer)",
+    id: "482714e3-e9fe-4e02-8e29-2ada5cc9c17c",
+    email: "david.lim@crossworks.ph",
+    name: "David Lim",
     role: "trainer",
     clearance_level: 1,
     assigned_companies: ["CORP_ALPHA", "FINTECH_BETA"],
     avatar: "🎓"
+  },
+  {
+    id: "eefe3f5f-0d0b-4232-9e0f-5284726c5115",
+    email: "patricia.hr@alpha-corp.ph",
+    name: "Patricia Santos",
+    role: "company_staff",
+    clearance_level: 1,
+    assigned_companies: ["CORP_ALPHA"],
+    avatar: "🏢"
+  },
+  {
+    id: "06fe154c-604c-4529-946d-618f7cf6519c",
+    email: "juan.delacruz@alpha-corp.ph",
+    name: "Juan Dela Cruz",
+    role: "trainee",
+    clearance_level: 1,
+    assigned_companies: ["CORP_ALPHA"],
+    avatar: "🎒"
   }
 ];
 

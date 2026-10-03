@@ -1,23 +1,23 @@
 :root {
-  /* Rich Gamified Learning Palette (Inspired by Kahoot & Quizizz / Wayground) */
-  --bg-app: #180628;
+  /* Clean White Content Palette with Preserved Dark Purple Sidebar & Topbar */
+  --bg-app: #ffffff;
   --bg-sidebar: #220839;
   --bg-sidebar-active: #38125a;
   --bg-header: #2d0b4d;
-  --bg-card: #280b43;
-  --bg-card-subtle: #340f57;
-  --bg-card-hover: #41146d;
-  --bg-input: #1b072e;
+  --bg-card: #ffffff;
+  --bg-card-subtle: #f8fafc;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #ffffff;
 
   /* Kahoot & Quizizz Vibrant Accents */
   --color-purple-primary: #772ce8;
   --color-purple-hover: #631ecc;
   --color-magenta: #f72585;
-  --color-gold: #ffb703;
-  --color-gold-shadow: #d48b00;
-  --color-cyan: #00f5d4;
-  --color-cyan-hover: #00d2b5;
-  --color-green: #06d6a0;
+  --color-gold: #f59e0b;
+  --color-gold-shadow: #b45309;
+  --color-cyan: #0284c7;
+  --color-cyan-hover: #0369a1;
+  --color-green: #10b981;
 
   /* Kahoot 4-Tile Palette */
   --kahoot-red: #e21b3c;
@@ -29,26 +29,26 @@
   --kahoot-green: #26890c;
   --kahoot-green-shadow: #185a08;
 
-  /* Text */
-  --text-main: #ffffff;
-  --text-muted: #d8b4f8;
-  --text-dim: #9d7bb0;
+  /* High contrast text on white */
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
 
   /* Borders & Shadows */
-  --border-subtle: rgba(255, 255, 255, 0.12);
-  --border-bold: rgba(255, 255, 255, 0.22);
-  --shadow-tactile: 0 4px 0 rgba(0, 0, 0, 0.35);
-  --shadow-tactile-gold: 0 4px 0 var(--color-gold-shadow);
-  --shadow-tactile-purple: 0 4px 0 #4c1285;
-  --shadow-card: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+  --border-subtle: #e2e8f0;
+  --border-bold: #cbd5e1;
+  --shadow-tactile: 0 3px 0 rgba(0, 0, 0, 0.12);
+  --shadow-tactile-gold: 0 3px 0 var(--color-gold-shadow);
+  --shadow-tactile-purple: 0 3px 0 #4c1285;
+  --shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 
   /* Typography */
   --font-fun: 'Fredoka', 'Outfit', sans-serif;
   --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
 
   --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 }
 
@@ -66,10 +66,6 @@ body {
   line-height: 1.5;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(119, 44, 232, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(247, 37, 133, 0.12) 0%, transparent 45%);
-  background-attachment: fixed;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -160,33 +156,33 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .badge-gold {
-  background: rgba(255, 183, 3, 0.18);
-  color: #ffd000;
-  border: 1px solid rgba(255, 183, 3, 0.4);
+  background: #fef9c3;
+  color: #a16207;
+  border: 1px solid #fde047;
 }
 
 .badge-magenta {
-  background: rgba(247, 37, 133, 0.18);
-  color: #ff66b2;
-  border: 1px solid rgba(247, 37, 133, 0.4);
+  background: #fdf2f8;
+  color: #be185d;
+  border: 1px solid #fbcfe8;
 }
 
 .badge-cyan {
-  background: rgba(0, 245, 212, 0.16);
-  color: #00f5d4;
-  border: 1px solid rgba(0, 245, 212, 0.4);
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
 }
 
 .badge-green {
-  background: rgba(6, 214, 160, 0.18);
-  color: #06d6a0;
-  border: 1px solid rgba(6, 214, 160, 0.4);
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
 .badge-purple {
-  background: rgba(119, 44, 232, 0.25);
-  color: #d1b3ff;
-  border: 1px solid rgba(119, 44, 232, 0.5);
+  background: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
 }
 
 /* Card Container */

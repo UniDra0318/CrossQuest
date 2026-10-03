@@ -97,3 +97,33 @@ export async function submitQuizScore(traineeId, score) {
   }
   return null;
 }
+
+export async function fetchStaffUsers(token) {
+  try {
+    const res = await fetch(`${API_BASE}/users/`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for staff users:", err);
+  }
+  return null;
+}
+
+export async function updateStaffAttributes(userId, attrs, token) {
+  try {
+    const res = await fetch(`${API_BASE}/users/${userId}/attributes`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(attrs)
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error updating staff attributes:", err);
+  }
+  return null;
+}
+

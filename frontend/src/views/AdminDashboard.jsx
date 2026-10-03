@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { INITIAL_ANOMALIES, INITIAL_STAFF_PROFILES, INITIAL_TRAINING_RECORDS, CLIENT_COMPANIES } from '../data/mockData';
-import { fetchRecords, fetchAnomalies, fetchCompanies } from '../services/api';
+import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes } from '../services/api';
 
 export default function AdminDashboard({ activeSubView }) {
   const { token } = useAuth();
@@ -38,11 +38,23 @@ export default function AdminDashboard({ activeSubView }) {
   useEffect(() => {
     async function loadAdminData() {
       setIsLoading(true);
-      const [dbRecords, dbAnomalies, dbCompanies] = await Promise.all([
+      const [dbRecords, dbAnomalies, dbCompanies, dbStaff] = await Promise.all([
         fetchRecords(token),
         fetchAnomalies(token),
-        fetchCompanies(token)
+        fetchCompanies(token),
+        fetchStaffUsers(token)
       ]);
+
+      if (dbStaff && dbStaff.length > 0) {
+        setStaffList(dbStaff.map(u => ({
+          id: u.id,
+          name: u.full_name,
+          email: u.email,
+          role: u.role,
+          clearance_level: u.clearance_level || 1,
+          assigned_companies: u.assigned_client_accounts || []
+        })));
+      }
 
       if (dbCompanies && dbCompanies.length > 0) {
         setCompanies(dbCompanies.map(c => ({
@@ -95,8 +107,15 @@ export default function AdminDashboard({ activeSubView }) {
     setAnomalies(prev => prev.map(a => a.id === id ? { ...a, status: 'RESOLVED' } : a));
   };
 
-  const handleSaveAttributes = (e) => {
+  const handleSaveAttributes = async (e) => {
     e.preventDefault();
+    if (token && editingStaff.id) {
+      await updateStaffAttributes(editingStaff.id, {
+        role: editingStaff.role,
+        clearance_level: editingStaff.clearance_level,
+        assigned_client_accounts: editingStaff.assigned_companies
+      }, token);
+    }
     setStaffList(prev => prev.map(s => s.id === editingStaff.id ? editingStaff : s));
     setEditingStaff(null);
   };
