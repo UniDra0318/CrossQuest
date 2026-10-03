@@ -10,36 +10,97 @@ import {
   BookOpen, 
   Calendar, 
   AlertCircle,
-  Shield
+  Shield,
+  Coins,
+  Play,
+  CheckCircle2,
+  HelpCircle,
+  Zap,
+  Target
 } from 'lucide-react';
 import { QUIZ_QUESTIONS } from '../data/mockData';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function TraineeDashboard({ activeSubView }) {
   const { currentUser } = useAuth();
-  const [points, setPoints] = useState(380);
+  const [points, setPoints] = useState(12877);
   const [level, setLevel] = useState(4);
   const [streakDays, setStreakDays] = useState(7);
-  const [earnedBadges, setEarnedBadges] = useState([
-    { id: 'first_step', name: 'First Step', icon: '🚀', desc: 'Completed orientation modules', date: 'Earned Sep 2026' },
-    { id: 'sec_champ', name: 'Security Champion', icon: '🛡️', desc: 'Aced ISO/IEC 27001 Assessment', date: 'Earned Oct 2026' }
-  ]);
+  const [pinCode, setPinCode] = useState('');
 
+  // Active quiz state
+  const [activeQuizRunning, setActiveQuizRunning] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [answeredState, setAnsweredState] = useState(null); // 'correct' | 'wrong' | null
   const [quizScore, setQuizScore] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
+
+  // Assigned Quizzes (Inspired directly by Wayground / Quizizz screenshot)
+  const assignedActivities = [
+    {
+      id: 'act-1',
+      title: 'ISO/IEC 27001 Security Audit Challenge',
+      instructor: 'Lead Trainer David Lim',
+      questionsCount: '15 Qs',
+      accuracy: '94% accuracy',
+      headerColor: '#1368ce', // Blue
+      category: 'Information Security',
+      completed: true,
+      score: 94
+    },
+    {
+      id: 'act-2',
+      title: 'CP-ABE Attribute Policies & Decryption',
+      instructor: 'Dr. Sarah Jenkins',
+      questionsCount: '10 Qs',
+      accuracy: '100% accuracy',
+      headerColor: '#06d6a0', // Teal / Green
+      category: 'Cryptography',
+      completed: true,
+      score: 100
+    },
+    {
+      id: 'act-3',
+      title: 'Privacy Impact Assessment (PIA) Simulation',
+      instructor: 'Lead Trainer David Lim',
+      questionsCount: '20 Qs',
+      accuracy: '88% accuracy',
+      headerColor: '#e21b3c', // Red
+      category: 'ISO/IEC 27701',
+      completed: true,
+      score: 88
+    },
+    {
+      id: 'act-4',
+      title: 'PostgreSQL RLS & Cross-Client Isolation',
+      instructor: 'Prof. Roel Traballo',
+      questionsCount: '12 Qs',
+      accuracy: 'Assigned (Due in 3d)',
+      headerColor: '#772ce8', // Purple
+      category: 'Database Security',
+      completed: false,
+      score: null
+    }
+  ];
+
+  const earnedBadges = [
+    { id: 'first_step', name: 'First Step', icon: '🚀', desc: 'Completed orientation modules', tier: 'Bronze' },
+    { id: 'sec_champ', name: 'Security Champion', icon: '🛡️', desc: 'Aced ISO/IEC 27001 Assessment', tier: 'Gold' },
+    { id: 'streak_master', name: '7-Day Streak', icon: '🔥', desc: 'Active training 7 consecutive days', tier: 'Ruby' },
+    { id: 'crypto_knight', name: 'CP-ABE Decoder', icon: '⚡', desc: 'Verified policy attribute satisfaction', tier: 'Diamond' }
+  ];
 
   const certificates = [
     {
       id: 'cert-01',
-      title: 'ISO/IEC 27001 Information Security Lead Implementer',
+      title: 'ISO/IEC 27001 Lead Implementer',
       clientCompany: 'San Miguel Conglomerate Holdings',
       issuedOn: '2025-11-10',
       expiresOn: '2026-11-10',
       daysUntilExpiry: 38,
       isRenewalApproaching: true,
-      status: 'active'
+      hash: 'SHA256:e3b0c442...852b855'
     },
     {
       id: 'cert-02',
@@ -49,292 +110,321 @@ export default function TraineeDashboard({ activeSubView }) {
       expiresOn: '2027-04-15',
       daysUntilExpiry: 194,
       isRenewalApproaching: false,
-      status: 'active'
+      hash: 'SHA256:d4735e3a...13ab35'
     }
   ];
 
-  const handleSelectOption = (index) => {
-    setSelectedAnswer(index);
-  };
-
-  const handleNextQuestion = () => {
-    const isCorrect = selectedAnswer === QUIZ_QUESTIONS[currentQuestionIndex].answer;
-    if (isCorrect) {
-      setQuizScore(prev => prev + 1);
-    }
-
-    if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setSelectedAnswer(null);
-    } else {
-      const finalScore = isCorrect ? quizScore + 1 : quizScore;
-      const earnedXP = finalScore * 50;
-      setPoints(prev => prev + earnedXP);
-      setLevel(Math.floor((points + earnedXP) / 100) + 1);
-
-      if (finalScore === QUIZ_QUESTIONS.length && !earnedBadges.some(b => b.id === 'quiz_master')) {
-        setEarnedBadges(prev => [
-          ...prev,
-          { id: 'quiz_master', name: 'Quiz Master', icon: '👑', desc: 'Achieved 100% on Security Assessment', date: 'Earned Just Now' }
-        ]);
-      }
-      setQuizCompleted(true);
-    }
-  };
-
-  const handleRestart = () => {
-    setCurrentQuestionIndex(0);
-    setSelectedAnswer(null);
-    setQuizScore(0);
-    setQuizCompleted(false);
-  };
+  // Kahoot 4-tile choices styling
+  const kahootTiles = [
+    { key: 0, symbol: '▲', colorClass: 'tile-red', bg: '#e21b3c', shadow: '#a1122a' },
+    { key: 1, symbol: '◆', colorClass: 'tile-blue', bg: '#1368ce', shadow: '#0c478f' },
+    { key: 2, symbol: '●', colorClass: 'tile-yellow', bg: '#d89e00', shadow: '#9e7300' },
+    { key: 3, symbol: '■', colorClass: 'tile-green', bg: '#26890c', shadow: '#185a08' }
+  ];
 
   const currentQ = QUIZ_QUESTIONS[currentQuestionIndex];
-  const currentLevelXP = points % 100;
+
+  const handleTileClick = (index) => {
+    if (answeredState !== null) return; // Prevent multiple clicks
+
+    setSelectedAnswer(index);
+    const isCorrect = index === currentQ.answer;
+
+    if (isCorrect) {
+      setAnsweredState('correct');
+      setQuizScore(prev => prev + 1);
+      setPoints(prev => prev + 150);
+    } else {
+      setAnsweredState('wrong');
+    }
+
+    setTimeout(() => {
+      if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setSelectedAnswer(null);
+        setAnsweredState(null);
+      } else {
+        setQuizCompleted(true);
+      }
+    }, 1200);
+  };
+
+  const handleRestartQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setAnsweredState(null);
+    setQuizScore(0);
+    setQuizCompleted(false);
+    setActiveQuizRunning(true);
+  };
 
   return (
-    <div className="dashboard-content-layout">
-      {/* 1. QUEST & PROGRESS SUB-VIEW */}
+    <div className="gamified-dashboard-container">
+      {/* 1. TOP HERO: WAYGROUND / QUIZIZZ STYLE QUICK JOIN PIN BANNER */}
       {(activeSubView === 'trainee_quest' || !activeSubView) && (
         <>
-          <div className="card trainee-hero">
-            <div className="trainee-profile-info">
-              <div className="trainee-avatar">
-                {currentUser.name.split(' ').map(n => n[0]).join('')}
-              </div>
-              <div>
-                <div className="flex-align gap-8">
-                  <h2 className="trainee-title">{currentUser.name}</h2>
-                  <span className="badge badge-blue">Lvl {level} Analyst</span>
-                </div>
-                <p className="text-secondary text-xs">
-                  Company Affiliation: <strong>{currentUser.organization}</strong>
-                </p>
-              </div>
-            </div>
-
-            <div className="trainee-xp-stats">
-              <div className="stat-pill">
-                <Flame size={16} className="text-amber" />
-                <div>
-                  <div className="stat-value">{streakDays} Days</div>
-                  <div className="stat-sub">Study Streak</div>
-                </div>
+          <div className="wayground-hero-card">
+            <div className="hero-pattern-overlay" />
+            <div className="wayground-hero-content">
+              <div className="hero-logo-box">
+                <span className="hero-title-main">CROSSQUEST</span>
+                <span className="hero-title-sub">Gamified Security Training Arena</span>
               </div>
 
-              <div className="stat-pill">
-                <Trophy size={16} className="text-cyan" />
-                <div>
-                  <div className="stat-value">{points} XP</div>
-                  <div className="stat-sub">Total Quest XP</div>
+              {/* Pin Code Bar (Quizizz / Kahoot style) */}
+              <div className="pin-join-bar">
+                <input
+                  type="text"
+                  placeholder="Enter training quest code..."
+                  value={pinCode}
+                  onChange={(e) => setPinCode(e.target.value)}
+                  className="pin-input"
+                />
+                <button 
+                  className="btn-tactile btn-tactile-magenta pin-join-btn"
+                  onClick={() => setActiveQuizRunning(true)}
+                >
+                  Join Quest
+                </button>
+                <div className="coin-sack-pill">
+                  <Coins size={22} className="text-gold" />
+                  <span className="coin-val">{points} XP</span>
                 </div>
-              </div>
-            </div>
-
-            <div className="level-progress-box">
-              <div className="level-progress-labels">
-                <span>Progress to Level {level + 1}</span>
-                <span>{currentLevelXP} / 100 XP</span>
-              </div>
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${currentLevelXP}%` }} />
               </div>
             </div>
           </div>
 
-          <div className="dual-grid-section">
-            <div className="card section-card">
-              <div className="card-header-bar">
-                <h3 className="card-title">Enrolled Course Curriculum</h3>
-              </div>
-              <div className="p-20">
-                <div className="course-progress-item">
-                  <div className="flex-between mb-8">
-                    <strong>ISO/IEC 27001 Information Security Management</strong>
-                    <span className="badge badge-green">Completed (94.5%)</span>
-                  </div>
-                  <div className="progress-track"><div className="progress-fill" style={{ width: '100%' }} /></div>
-                </div>
-
-                <div className="course-progress-item mt-16">
-                  <div className="flex-between mb-8">
-                    <strong>DevSecOps Pipeline Security & CI/CD Guardrails</strong>
-                    <span className="badge badge-green">Completed (98.0%)</span>
-                  </div>
-                  <div className="progress-track"><div className="progress-fill" style={{ width: '100%' }} /></div>
-                </div>
-
-                <div className="course-progress-item mt-16">
-                  <div className="flex-between mb-8">
-                    <strong>Corporate Threat Modeling & Incident Handling</strong>
-                    <span className="badge badge-amber">In Progress (65%)</span>
-                  </div>
-                  <div className="progress-track"><div className="progress-fill" style={{ width: '65%' }} /></div>
-                </div>
-              </div>
+          {/* Assigned Activities & Quests Grid (Direct Wayground Reference) */}
+          <div className="assigned-activities-section">
+            <div className="section-title-row">
+              <h3>Assigned Activities & Security Challenges</h3>
+              <a href="#see-all" className="see-all-link">See all &gt;</a>
             </div>
 
-            <div className="card section-card">
-              <div className="card-header-bar">
-                <h3 className="card-title">Upcoming Renewal Deadlines</h3>
-              </div>
-              <div className="p-20">
-                <div className="cert-card nearing-renewal">
-                  <div className="cert-top">
-                    <h4>ISO/IEC 27001 Lead Implementer</h4>
-                    <span className="badge badge-amber">Renewal Window Open</span>
+            <div className="activity-cards-scroller">
+              {/* Special Quest Booster Card */}
+              <div className="special-quest-card" onClick={() => setActiveQuizRunning(true)}>
+                <div className="quest-card-content">
+                  <span className="quest-mini-label">EARN 1,000+ XP</span>
+                  <div className="quest-big-title">CP-ABE QUESTS</div>
+                  <div className="quest-coins-badge">
+                    <Coins size={18} className="text-gold" />
+                    <span>Daily XP Boost</span>
                   </div>
-                  <div className="text-secondary text-xs mt-8">
-                    Expires in <strong>38 days</strong>. Schedule recertification module with Crossworks.
-                  </div>
+                  <button className="quest-cta-btn">
+                    <span>Let's go!</span>
+                    <ArrowRight size={16} />
+                  </button>
                 </div>
               </div>
+
+              {/* Activity Cards with Colorful Banners */}
+              {assignedActivities.map((act) => (
+                <div key={act.id} className="quizizz-activity-card">
+                  <div className="card-top-color-band" style={{ backgroundColor: act.headerColor }}>
+                    <div className="band-badge-row">
+                      <span className="band-status-pill">{act.completed ? 'Completed' : 'Assigned'}</span>
+                      <span className="band-qs-pill">{act.questionsCount}</span>
+                    </div>
+                    <div className="band-category-icon">
+                      <Shield size={28} color="rgba(255,255,255,0.85)" />
+                    </div>
+                  </div>
+
+                  <div className="activity-card-body">
+                    <h4 className="activity-title">{act.title}</h4>
+                    <p className="activity-instructor">{act.instructor}</p>
+
+                    <div className="activity-card-footer">
+                      <span className={`accuracy-pill ${act.completed ? 'acc-green' : 'acc-purple'}`}>
+                        {act.accuracy}
+                      </span>
+                      <button 
+                        className="btn-tactile btn-tactile-purple btn-play-activity"
+                        onClick={() => setActiveQuizRunning(true)}
+                      >
+                        <Play size={13} /> Play
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </>
       )}
 
-      {/* 2. QUIZ QUEST SUB-VIEW */}
-      {activeSubView === 'trainee_quiz' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
-            <div>
-              <h3 className="card-title">Security & CP-ABE Knowledge Quest</h3>
-              <p className="card-subtitle">
-                Test your understanding of attribute-based access control and ISO standards.
-              </p>
-            </div>
-            {!quizCompleted && (
-              <span className="badge badge-blue">Question {currentQuestionIndex + 1} of {QUIZ_QUESTIONS.length}</span>
-            )}
-          </div>
-
+      {/* 2. KAHOOT-STYLE INTERACTIVE QUIZ MODAL / VIEW */}
+      {(activeSubView === 'trainee_quiz' || activeQuizRunning) && (
+        <div className="kahoot-quiz-experience card-gamified">
           {!quizCompleted ? (
-            <div className="quiz-content">
-              <h4 className="quiz-question">{currentQ.question}</h4>
-              <div className="quiz-options">
-                {currentQ.options.map((opt, i) => (
-                  <button
-                    key={i}
-                    className={`quiz-option-btn ${selectedAnswer === i ? 'selected' : ''}`}
-                    onClick={() => handleSelectOption(i)}
-                  >
-                    <span className="option-index">{String.fromCharCode(65 + i)}</span>
-                    <span className="option-text">{opt}</span>
-                    {selectedAnswer === i && <Check size={16} className="text-cyan" />}
+            <div className="kahoot-quiz-wrapper">
+              {/* Question Header Bar */}
+              <div className="kahoot-header-bar">
+                <div className="kahoot-q-count">
+                  <span>Question {currentQuestionIndex + 1} of {QUIZ_QUESTIONS.length}</span>
+                </div>
+                <div className="kahoot-streak-badge">
+                  <Flame size={18} className="text-amber" />
+                  <span>Streak Bonus Active!</span>
+                </div>
+                {activeQuizRunning && (
+                  <button className="btn-tactile btn-tactile-ghost btn-sm" onClick={() => setActiveQuizRunning(false)}>
+                    Exit Arena
                   </button>
-                ))}
+                )}
               </div>
 
-              <div className="quiz-actions">
-                <button
-                  className="btn btn-primary"
-                  disabled={selectedAnswer === null}
-                  onClick={handleNextQuestion}
-                >
-                  <span>{currentQuestionIndex === QUIZ_QUESTIONS.length - 1 ? 'Finish Quest' : 'Next Question'}</span>
-                  <ArrowRight size={16} />
-                </button>
+              {/* Question Box */}
+              <div className="kahoot-question-box">
+                <h2>{currentQ.question}</h2>
+              </div>
+
+              {/* Instant Feedback Notice */}
+              {answeredState && (
+                <div className={`answer-feedback-banner ${answeredState}`}>
+                  {answeredState === 'correct' ? (
+                    <div className="flex-align gap-8">
+                      <CheckCircle2 size={24} />
+                      <span>CORRECT! +150 XP AWARDED</span>
+                    </div>
+                  ) : (
+                    <div className="flex-align gap-8">
+                      <AlertCircle size={24} />
+                      <span>INCORRECT! Reviewing Annex A Controls</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Kahoot 4-Tile Answer Choices Grid (Iconic Red, Blue, Yellow, Green) */}
+              <div className="kahoot-tiles-grid">
+                {currentQ.options.map((optionText, idx) => {
+                  const tile = kahootTiles[idx];
+                  const isSelected = selectedAnswer === idx;
+                  const isCorrect = idx === currentQ.answer;
+
+                  return (
+                    <button
+                      key={idx}
+                      className={`kahoot-tile-button ${tile.colorClass} ${isSelected ? 'tile-selected' : ''}`}
+                      onClick={() => handleTileClick(idx)}
+                      disabled={answeredState !== null}
+                    >
+                      <div className="tile-symbol">{tile.symbol}</div>
+                      <div className="tile-text">{optionText}</div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : (
-            <div className="quiz-results-card">
-              <Trophy size={48} className="text-amber" />
-              <h3>Quest Complete!</h3>
-              <p className="text-secondary">
-                You scored <strong>{quizScore} / {QUIZ_QUESTIONS.length}</strong>!
-              </p>
-              <div className="xp-award-badge">
-                +{quizScore * 50} XP Awarded
+            /* Celebration Screen when Quiz Completed */
+            <div className="kahoot-celebration-screen">
+              <div className="celebration-confetti-badge">
+                <Trophy size={64} className="text-gold" />
               </div>
-              <button className="btn btn-secondary mt-16" onClick={handleRestart}>
-                <RotateCcw size={14} /> Retry Quest
-              </button>
+              <h2 className="celebration-title">PODIUM FINISH!</h2>
+              <p className="celebration-sub">
+                You mastered the challenge with <strong>{quizScore} / {QUIZ_QUESTIONS.length}</strong> correct answers!
+              </p>
+
+              <div className="reward-xp-pill">
+                <Coins size={24} className="text-gold" />
+                <span>+{quizScore * 150} Total XP Earned</span>
+              </div>
+
+              <div className="flex-align gap-12 mt-16">
+                <button className="btn-tactile btn-tactile-gold" onClick={handleRestartQuiz}>
+                  <RotateCcw size={16} /> Play Again
+                </button>
+                <button className="btn-tactile btn-tactile-purple" onClick={() => setActiveQuizRunning(false)}>
+                  Back to Quest Hub
+                </button>
+              </div>
             </div>
           )}
         </div>
       )}
 
-      {/* 3. BADGES SUB-VIEW */}
+      {/* 3. EARNED BADGES SHOWCASE */}
       {activeSubView === 'trainee_badges' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
+        <div className="card-gamified p-24">
+          <div className="section-title-row mb-16">
             <div>
-              <h3 className="card-title">Earned Competency Badges</h3>
-              <p className="card-subtitle">
-                Verified achievements issued for training milestones.
-              </p>
+              <h3>Earned Badges & Quest Achievements</h3>
+              <p className="text-muted text-xs">Unlock shiny badges by proving your knowledge in CP-ABE and ISO controls.</p>
             </div>
           </div>
 
-          <div className="badges-gallery">
-            {earnedBadges.map((badge) => (
-              <div key={badge.id} className="badge-item">
-                <div className="badge-icon-emoji">{badge.icon}</div>
-                <div className="badge-name">{badge.name}</div>
-                <div className="badge-desc">{badge.desc}</div>
-                <span className="text-xs text-secondary mt-4">{badge.date}</span>
+          <div className="badges-hex-grid">
+            {earnedBadges.map((b) => (
+              <div key={b.id} className="gamified-badge-tile">
+                <div className="badge-tier-ribbon">{b.tier}</div>
+                <div className="badge-big-icon">{b.icon}</div>
+                <h4 className="badge-title">{b.name}</h4>
+                <p className="badge-info">{b.desc}</p>
+                <div className="badge-unlocked-tag">
+                  <Check size={12} /> Unlocked
+                </div>
               </div>
             ))}
-            <div className="badge-item locked">
-              <div className="badge-icon-emoji">🔒</div>
-              <div className="badge-name">Policy Architect</div>
-              <div className="badge-desc">Pass all 5 advanced encryption scenarios</div>
+            <div className="gamified-badge-tile locked">
+              <div className="badge-big-icon">🔒</div>
+              <h4 className="badge-title">Policy Grandmaster</h4>
+              <p className="badge-info">Satisfy 5 complex multi-authority CP-ABE decryption challenges</p>
+              <div className="badge-locked-tag">Locked</div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 4. CERTS SUB-VIEW */}
+      {/* 4. CERTIFICATIONS & RENEWAL WATCH */}
       {activeSubView === 'trainee_certs' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
+        <div className="card-gamified p-24">
+          <div className="section-title-row mb-16">
             <div>
-              <h3 className="card-title">My Professional Certifications</h3>
-              <p className="card-subtitle">
-                Official credentials issued by Crossworks Training and Consulting.
-              </p>
+              <h3>Verifiable Certificates & Renewal Alerts</h3>
+              <p className="text-muted text-xs">Cryptographically signed credentials issued by Crossworks Corp.</p>
             </div>
           </div>
 
-          <div className="certs-grid p-24">
+          <div className="client-cards-grid">
             {certificates.map((cert) => (
-              <div key={cert.id} className={`cert-card ${cert.isRenewalApproaching ? 'nearing-renewal' : ''}`}>
-                <div className="cert-top">
-                  <div className="cert-title-group">
-                    <BookOpen size={16} className="text-cyan" />
+              <div key={cert.id} className="card-gamified p-20 cert-gamified-card">
+                <div className="cert-top-bar">
+                  <div className="flex-align gap-8">
+                    <Award size={22} className="text-gold" />
                     <h4>{cert.title}</h4>
                   </div>
-                  <span className={`badge ${cert.isRenewalApproaching ? 'badge-amber' : 'badge-green'}`}>
-                    {cert.isRenewalApproaching ? 'Renewal Approaching' : 'Active'}
+                  <span className={`badge-gamified ${cert.isRenewalApproaching ? 'badge-gold' : 'badge-green'}`}>
+                    {cert.isRenewalApproaching ? 'Renewal Approaching' : 'Verified'}
                   </span>
                 </div>
 
-                <div className="cert-company text-xs text-secondary">
-                  Organization at Completion: <strong>{cert.clientCompany}</strong>
-                </div>
-
-                <div className="cert-dates">
-                  <div>
-                    <span className="text-secondary text-xs">Issued</span>
-                    <div>{cert.issuedOn}</div>
+                <div className="cert-body-meta">
+                  <div className="meta-line">
+                    <span>Issued to:</span>
+                    <strong>{currentUser.name}</strong>
                   </div>
-                  <div>
-                    <span className="text-secondary text-xs">Expires</span>
-                    <div>{cert.expiresOn}</div>
+                  <div className="meta-line">
+                    <span>Organization:</span>
+                    <strong>{cert.clientCompany}</strong>
                   </div>
-                  <div>
-                    <span className="text-secondary text-xs">Remaining</span>
-                    <div className={cert.isRenewalApproaching ? 'text-amber font-bold' : ''}>
-                      {cert.daysUntilExpiry} days
-                    </div>
+                  <div className="meta-line">
+                    <span>Valid Until:</span>
+                    <strong>{cert.expiresOn} ({cert.daysUntilExpiry} days left)</strong>
+                  </div>
+                  <div className="meta-line">
+                    <span>Digital Proof:</span>
+                    <code>{cert.hash}</code>
                   </div>
                 </div>
 
                 {cert.isRenewalApproaching && (
-                  <div className="renewal-alert-bar">
-                    <AlertCircle size={14} />
-                    <span>Renewal Deadline Approaching: Recertify before expiry.</span>
+                  <div className="renewal-warning-box">
+                    <AlertCircle size={16} className="text-gold" />
+                    <span>Recertification window is open! Complete the renewal quest to extend.</span>
                   </div>
                 )}
               </div>
