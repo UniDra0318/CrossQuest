@@ -1,206 +1,158 @@
 import React, { useState } from 'react';
-import { Shield, Lock, Mail, ArrowRight, UserCheck, CheckCircle2, Building2, GraduationCap, Award, Key } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Shield, 
+  Lock, 
+  Mail, 
+  ArrowRight, 
+  User, 
+  Building2, 
+  GraduationCap, 
+  Award, 
+  Key 
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginView() {
-  const { login, loginWithCredentials, DEMO_USERS } = useAuth();
+  const { loginRole, loginWithCredentials, DEMO_USERS } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('credentials'); // 'credentials' | 'demo'
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      loginWithCredentials(email || 'admin@crossworks.ph', password);
-      setLoading(false);
-    }, 400);
+    await loginWithCredentials(email, password);
+    setLoading(false);
+    navigate('/dashboard');
   };
 
   const handleRoleQuickSelect = (roleKey) => {
-    setLoading(true);
-    setTimeout(() => {
-      login(roleKey);
-      setLoading(false);
-    }, 300);
+    loginRole(roleKey);
+    navigate('/dashboard');
   };
 
-  const roles = [
-    {
-      key: 'admin',
-      title: 'Administrator',
-      name: DEMO_USERS.admin.name,
-      org: DEMO_USERS.admin.organization,
-      icon: Shield,
-      badge: 'Security Authority',
-      desc: 'CP-ABE attribute issuance & access anomaly monitoring'
-    },
-    {
-      key: 'crossworks_staff',
-      title: 'Crossworks Staff',
-      name: DEMO_USERS.crossworks_staff.name,
-      org: 'Account Management',
-      icon: Key,
-      badge: 'Assigned Clients',
-      desc: 'Authorized multi-client records & reporting'
-    },
-    {
-      key: 'trainer',
-      title: 'Trainer',
-      name: DEMO_USERS.trainer.name,
-      org: 'Course Delivery',
-      icon: GraduationCap,
-      badge: 'Instruction',
-      desc: 'Grading, practical labs & encrypted record publishing'
-    },
-    {
-      key: 'company_staff',
-      title: 'Company Staff',
-      name: DEMO_USERS.company_staff.name,
-      org: DEMO_USERS.company_staff.organization,
-      icon: Building2,
-      badge: 'Client HR/L&D',
-      desc: 'Isolated client training records & compliance audits'
-    },
-    {
-      key: 'trainee',
-      title: 'Trainee',
-      name: DEMO_USERS.trainee.name,
-      org: 'San Miguel Trainee',
-      icon: Award,
-      badge: 'Learner Quest',
-      desc: 'Interactive quizzes, badges, and certification tracking'
-    }
+  const roleList = [
+    { key: 'admin', title: 'Administrator', name: 'Dr. Sarah Jenkins', org: 'Crossworks Admin', icon: Shield },
+    { key: 'crossworks_staff', title: 'Account Manager', name: 'Marcus Reyes', org: 'Crossworks Staff', icon: Key },
+    { key: 'trainer', title: 'Trainer', name: 'David Lim', org: 'Course Instructor', icon: GraduationCap },
+    { key: 'company_staff', title: 'Company Manager', name: 'Patricia Santos', org: 'San Miguel Corp HR', icon: Building2 },
+    { key: 'trainee', title: 'Trainee', name: 'Juan Dela Cruz', org: 'Enrolled Learner', icon: Award }
   ];
 
   return (
-    <div className="login-page-container">
-      <div className="login-backdrop-glow" />
-
-      {/* Brand Header */}
-      <header className="login-nav-header">
-        <div className="flex-align gap-12">
-          <div className="brand-logo-circle">
-            <Shield size={22} className="text-cyan" />
+    <div className="clean-login-viewport">
+      <div className="login-card-container">
+        {/* Brand Header */}
+        <div className="login-brand-center">
+          <div className="brand-badge-icon">
+            <Shield size={28} />
           </div>
-          <div>
-            <div className="login-brand-title">CrossQuest</div>
-            <div className="login-brand-subtitle">Crossworks Training & Consulting Corp.</div>
-          </div>
+          <h1>CrossQuest</h1>
+          <p className="login-subtext">Training & Learning Management Platform</p>
         </div>
-        <div className="login-header-pills">
-          <span className="badge badge-purple">ISO/IEC 27001:2022</span>
-          <span className="badge badge-blue">CP-ABE Waters11</span>
-        </div>
-      </header>
 
-      {/* Main Content: Split Card */}
-      <main className="login-content-box">
-        {/* Left Side: Standard Credentials Login */}
-        <div className="login-form-pane card">
-          <div className="form-header">
-            <h2>Welcome Back</h2>
-            <p className="text-secondary text-sm">
-              Sign in with your enterprise credentials to access your designated role portal.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-field">
-              <label className="field-label">Enterprise Email</label>
-              <div className="input-wrap">
-                <Mail size={16} className="input-icon" />
-                <input
-                  type="email"
-                  placeholder="name@organization.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="clean-input"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-field">
-              <div className="flex-between">
-                <label className="field-label">Password</label>
-                <a href="#forgot" className="forgot-link text-xs">Forgot password?</a>
-              </div>
-              <div className="input-wrap">
-                <Lock size={16} className="input-icon" />
-                <input
-                  type="password"
-                  placeholder="••••••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="clean-input"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-options">
-              <label className="checkbox-wrap">
-                <input type="checkbox" defaultChecked />
-                <span>Keep me signed in on this terminal</span>
-              </label>
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-              <span>{loading ? 'Authenticating...' : 'Sign In to Workspace'}</span>
-              <ArrowRight size={16} />
+        {/* Card */}
+        <div className="card-login-box">
+          {/* Tabs: Sign In vs Quick Demo Roles */}
+          <div className="login-toggle-tabs">
+            <button
+              type="button"
+              className={`toggle-tab-btn ${activeTab === 'credentials' ? 'active' : ''}`}
+              onClick={() => setActiveTab('credentials')}
+            >
+              Sign In
             </button>
-          </form>
+            <button
+              type="button"
+              className={`toggle-tab-btn ${activeTab === 'demo' ? 'active' : ''}`}
+              onClick={() => setActiveTab('demo')}
+            >
+              Quick Role Access
+            </button>
+          </div>
 
-          <div className="form-security-footer">
-            <div className="flex-align gap-8 text-xs text-secondary">
-              <CheckCircle2 size={14} className="text-emerald" />
-              <span>TLS 1.3 End-to-End Encryption • Hardware RLS Bound</span>
+          {activeTab === 'credentials' ? (
+            <form onSubmit={handleSubmit} className="clean-login-form">
+              <div className="login-input-group">
+                <label>Email Address</label>
+                <div className="input-field-wrap">
+                  <Mail size={16} className="input-field-icon" />
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="login-input-group">
+                <label>Password</label>
+                <div className="input-field-wrap">
+                  <Lock size={16} className="input-field-icon" />
+                  <input
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="login-form-extras">
+                <label className="remember-checkbox">
+                  <input type="checkbox" defaultChecked />
+                  <span>Remember me</span>
+                </label>
+                <a href="#forgot" className="forgot-pass-link">Forgot password?</a>
+              </div>
+
+              <button type="submit" className="login-submit-btn" disabled={loading}>
+                <span>{loading ? 'Signing in...' : 'Sign In'}</span>
+                <ArrowRight size={16} />
+              </button>
+
+              <div className="login-footer-hint">
+                <span>Want to test without typing? Switch to <strong>Quick Role Access</strong> above.</span>
+              </div>
+            </form>
+          ) : (
+            <div className="demo-roles-panel">
+              <p className="demo-intro-text">
+                Select any user to log in instantly and explore their designated portal:
+              </p>
+
+              <div className="demo-roles-stack">
+                {roleList.map((r) => {
+                  const Icon = r.icon;
+                  return (
+                    <button
+                      key={r.key}
+                      type="button"
+                      className="demo-role-card-btn"
+                      onClick={() => handleRoleQuickSelect(r.key)}
+                    >
+                      <div className="demo-role-icon">
+                        <Icon size={18} />
+                      </div>
+                      <div className="demo-role-details">
+                        <div className="demo-role-title">{r.title}</div>
+                        <div className="demo-role-person">{r.name} • {r.org}</div>
+                      </div>
+                      <ArrowRight size={15} className="demo-role-arrow" />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
-
-        {/* Right Side: Instant Role Selector */}
-        <div className="role-switch-pane card">
-          <div className="role-pane-header">
-            <h3>Quick Role Selector</h3>
-            <p className="text-secondary text-xs">
-              Test each role's distinct UI, permissions, and CP-ABE attribute scope:
-            </p>
-          </div>
-
-          <div className="role-buttons-grid">
-            {roles.map((r) => {
-              const Icon = r.icon;
-              return (
-                <button
-                  key={r.key}
-                  className="role-select-card"
-                  onClick={() => handleRoleQuickSelect(r.key)}
-                >
-                  <div className="role-card-top">
-                    <div className="role-icon-box">
-                      <Icon size={18} />
-                    </div>
-                    <span className="badge badge-blue">{r.badge}</span>
-                  </div>
-
-                  <div className="role-card-body">
-                    <div className="role-card-title">{r.title}</div>
-                    <div className="role-card-name">{r.name}</div>
-                    <p className="role-card-desc">{r.desc}</p>
-                  </div>
-
-                  <div className="role-card-footer">
-                    <span>Enter Portal</span>
-                    <ArrowRight size={13} />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

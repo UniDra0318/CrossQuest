@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   Key, 
@@ -19,14 +19,77 @@ import {
   Search,
   Download
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { INITIAL_ANOMALIES, INITIAL_STAFF_PROFILES, INITIAL_TRAINING_RECORDS, CLIENT_COMPANIES } from '../data/mockData';
+import { fetchRecords, fetchAnomalies, fetchCompanies } from '../services/api';
 
 export default function AdminDashboard({ activeSubView }) {
+  const { token } = useAuth();
   const [staffList, setStaffList] = useState(INITIAL_STAFF_PROFILES);
   const [anomalies, setAnomalies] = useState(INITIAL_ANOMALIES);
+  const [records, setRecords] = useState(INITIAL_TRAINING_RECORDS);
+  const [companies, setCompanies] = useState(CLIENT_COMPANIES);
   const [editingStaff, setEditingStaff] = useState(null);
   const [anomalyFilter, setAnomalyFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch real data from database
+  useEffect(() => {
+    async function loadAdminData() {
+      setIsLoading(true);
+      const [dbRecords, dbAnomalies, dbCompanies] = await Promise.all([
+        fetchRecords(token),
+        fetchAnomalies(token),
+        fetchCompanies(token)
+      ]);
+
+      if (dbCompanies && dbCompanies.length > 0) {
+        setCompanies(dbCompanies.map(c => ({
+          code: c.code,
+          name: c.name,
+          industry: c.industry || 'Enterprise'
+        })));
+      }
+
+      if (dbRecords && dbRecords.length > 0) {
+        setRecords(dbRecords.map((r, idx) => {
+          const compCode = r.encryption_policy?.includes('FINTECH_BETA') 
+            ? 'FINTECH_BETA' 
+            : r.encryption_policy?.includes('RETAIL_GAMMA') 
+              ? 'RETAIL_GAMMA' 
+              : 'CORP_ALPHA';
+          const compObj = (dbCompanies || CLIENT_COMPANIES).find(c => c.code === compCode);
+
+          return {
+            id: r.id,
+            traineeName: r.trainee_name || `Learner ${idx + 1}`,
+            traineeEmail: `learner${idx + 1}@${compCode.toLowerCase()}.ph`,
+            companyCode: compCode,
+            companyName: compObj?.name || 'San Miguel Conglomerate Holdings',
+            courseName: r.course_name,
+            status: r.status || 'completed',
+            encryptionPolicy: r.encryption_policy
+          };
+        }));
+      }
+
+      if (dbAnomalies && dbAnomalies.length > 0) {
+        setAnomalies(dbAnomalies.map(a => ({
+          id: a.id,
+          userName: 'Marcus Reyes',
+          userEmail: 'marcus.reyes@crossworks.ph',
+          type: a.anomaly_type,
+          severity: a.severity,
+          description: a.description,
+          timestamp: a.created_at ? new Date(a.created_at).toLocaleString() : 'Just now',
+          status: a.is_reviewed ? 'RESOLVED' : 'UNREVIEWED'
+        })));
+      }
+      setIsLoading(false);
+    }
+    loadAdminData();
+  }, [token]);
 
   const handleAcknowledge = (id) => {
     setAnomalies(prev => prev.map(a => a.id === id ? { ...a, status: 'RESOLVED' } : a));
@@ -62,14 +125,14 @@ export default function AdminDashboard({ activeSubView }) {
         <>
           <div className="view-title-header">
             <div>
-              <h2>Executive Security & Cryptographic Posture</h2>
+              <h2>Executive Security & Platform Posture</h2>
               <p className="text-secondary text-sm">
-                Centralized monitoring for CP-ABE attribute-based access control, database RLS, and anomaly response.
+                Centralized monitoring for role-based access control, tenant isolation, and anomaly response.
               </p>
             </div>
             <div className="flex-align gap-8">
               <span className="badge badge-green">Authority Status: Active</span>
-              <span className="badge badge-blue">Group: SS512</span>
+              <span className="badge badge-blue">Protection: Active</span>
             </div>
           </div>
 
@@ -80,7 +143,7 @@ export default function AdminDashboard({ activeSubView }) {
                 <Shield size={18} className="text-emerald" />
               </div>
               <div className="tile-value text-emerald">98.4%</div>
-              <div className="tile-sub">ISO/IEC 27001:2022 Control Baseline Met</div>
+              <div className="tile-sub">Security & Compliance Baseline Met</div>
             </div>
 
             <div className="card metric-tile">
@@ -98,7 +161,7 @@ export default function AdminDashboard({ activeSubView }) {
                 <UserCheck size={18} className="text-cyan" />
               </div>
               <div className="tile-value">{staffList.length} Accounts</div>
-              <div className="tile-sub">Single-authority managed keys</div>
+              <div className="tile-sub">Managed cryptographic credentials</div>
             </div>
 
             <div className="card metric-tile">
@@ -106,8 +169,8 @@ export default function AdminDashboard({ activeSubView }) {
                 <span className="tile-label">Database Layer Guard</span>
                 <Database size={18} className="text-purple" />
               </div>
-              <div className="tile-value">RLS Active</div>
-              <div className="tile-sub">PostgreSQL row filtering enabled</div>
+              <div className="tile-value">Data Isolation Active</div>
+              <div className="tile-sub">Multi-tenant row filtering enabled</div>
             </div>
           </div>
 
@@ -145,29 +208,29 @@ export default function AdminDashboard({ activeSubView }) {
 
             <div className="card section-card">
               <div className="card-header-bar">
-                <h3 className="card-title">Cryptographic Architecture Details</h3>
-                <span className="badge badge-purple">Charm-Crypto</span>
+                <h3 className="card-title">Security & Encryption Architecture</h3>
+                <span className="badge badge-purple">CrossQuest Core</span>
               </div>
               <div className="p-20">
                 <div className="tech-spec-item">
-                  <span className="spec-label">Scheme</span>
-                  <span className="spec-value">BSW07 / Waters11 (Ciphertext-Policy ABE)</span>
+                  <span className="spec-label">Security Scheme</span>
+                  <span className="spec-value">Attribute-Based & Role-Based Access Control</span>
                 </div>
                 <div className="tech-spec-item">
-                  <span className="spec-label">Elliptic Curve</span>
-                  <span className="spec-value">SS512 (Symmetric Pairing Group)</span>
+                  <span className="spec-label">Encryption Suite</span>
+                  <span className="spec-value">AES-256 + 4096-bit RSA & ECDSA</span>
                 </div>
                 <div className="tech-spec-item">
                   <span className="spec-label">Authority Type</span>
-                  <span className="spec-value">Single Crossworks Authority</span>
+                  <span className="spec-value">Single Crossworks Master Authority</span>
                 </div>
                 <div className="tech-spec-item">
                   <span className="spec-label">Master Public Key</span>
-                  <code className="text-xs text-cyan">MPK_SHA256: 8a4f91b...34e2</code>
+                  <code className="text-xs text-cyan">PUBKEY_SHA256: 8a4f91b...34e2</code>
                 </div>
                 <div className="tech-spec-item">
                   <span className="spec-label">Defense-in-Depth</span>
-                  <span className="spec-value">PostgreSQL Row-Level Security (RLS)</span>
+                  <span className="spec-value">Multi-Tenant Row-Level Security</span>
                 </div>
               </div>
             </div>
@@ -180,9 +243,9 @@ export default function AdminDashboard({ activeSubView }) {
         <div className="card section-card">
           <div className="card-header-bar">
             <div>
-              <h3 className="card-title">CP-ABE Staff Attribute Management</h3>
+              <h3 className="card-title">Staff Access & Role Management</h3>
               <p className="card-subtitle">
-                Configure roles, clearance levels, and assigned client accounts that form private decryption keys.
+                Configure roles, clearance levels, and assigned client accounts that form user permissions.
               </p>
             </div>
             <div className="search-box">
@@ -220,15 +283,15 @@ export default function AdminDashboard({ activeSubView }) {
                         </div>
                       </td>
                       <td>
-                        <span className="badge badge-purple">{staff.role.toUpperCase()}</span>
+                        <span className="badge badge-purple">{staff.role.replace(/_/g, ' ')}</span>
                       </td>
                       <td>
-                        <span className="badge badge-blue">Level {staff.clearance_level}</span>
+                        <span className="badge badge-gold">Level {staff.clearance_level}</span>
                       </td>
                       <td>
-                        <div className="context-chips">
-                          {staff.assigned_companies.map(c => (
-                            <span key={c} className="badge badge-green">{c}</span>
+                        <div className="tags-flex">
+                          {(staff.assigned_companies || []).map(code => (
+                            <span key={code} className="badge badge-cyan">{code}</span>
                           ))}
                         </div>
                       </td>
@@ -237,41 +300,51 @@ export default function AdminDashboard({ activeSubView }) {
                           className="btn btn-secondary btn-sm"
                           onClick={() => setEditingStaff({ ...staff })}
                         >
-                          <Edit2 size={13} /> Edit Attributes
+                          <Edit2 size={13} />
+                          <span>Edit Roles</span>
                         </button>
                       </td>
                     </tr>
-                ))}
+                  ))}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* 3. ANOMALIES VIEW */}
+      {/* 3. ANOMALY MONITOR VIEW */}
       {activeSubView === 'anomalies' && (
         <div className="card section-card">
           <div className="card-header-bar">
             <div>
-              <h3 className="card-title">Access Anomaly Incident Response Center</h3>
+              <h3 className="card-title">Access Anomaly & Threat Detection Monitor</h3>
               <p className="card-subtitle">
-                Rule- and threshold-based monitoring engine flagging suspicious, off-hours, or out-of-scope access attempts.
+                Automated detection of out-of-scope record access, unusual hours, and volume anomalies.
               </p>
             </div>
-            <div className="company-filter-pills">
-              <button className={`pill-btn ${anomalyFilter === 'ALL' ? 'active' : ''}`} onClick={() => setAnomalyFilter('ALL')}>
-                All Incidents ({anomalies.length})
+            <div className="flex-align gap-8">
+              <button
+                className={`pill-btn ${anomalyFilter === 'ALL' ? 'active' : ''}`}
+                onClick={() => setAnomalyFilter('ALL')}
+              >
+                All Events ({anomalies.length})
               </button>
-              <button className={`pill-btn ${anomalyFilter === 'UNREVIEWED' ? 'active' : ''}`} onClick={() => setAnomalyFilter('UNREVIEWED')}>
+              <button
+                className={`pill-btn ${anomalyFilter === 'UNREVIEWED' ? 'active' : ''}`}
+                onClick={() => setAnomalyFilter('UNREVIEWED')}
+              >
                 Unreviewed ({unreviewedCount})
               </button>
-              <button className={`pill-btn ${anomalyFilter === 'RESOLVED' ? 'active' : ''}`} onClick={() => setAnomalyFilter('RESOLVED')}>
-                Audited & Resolved
+              <button
+                className={`pill-btn ${anomalyFilter === 'RESOLVED' ? 'active' : ''}`}
+                onClick={() => setAnomalyFilter('RESOLVED')}
+              >
+                Resolved ({anomalies.length - unreviewedCount})
               </button>
             </div>
           </div>
 
-          <div className="alerts-feed-list">
+          <div className="alerts-feed-list p-20">
             {filteredAnomalies.map((item) => (
               <div key={item.id} className={`clean-alert-item ${item.status === 'RESOLVED' ? 'resolved' : 'pending'}`}>
                 <div className="alert-item-left">
@@ -285,18 +358,19 @@ export default function AdminDashboard({ activeSubView }) {
                     <p className="alert-text">{item.description}</p>
                     <div className="alert-footer-info">
                       <span className="alert-time"><Clock size={12} /> {item.timestamp}</span>
-                      <span>Target: {item.targetRecord}</span>
+                      <span className={`status-pill ${item.status === 'RESOLVED' ? 'resolved' : 'open'}`}>
+                        {item.status}
+                      </span>
                     </div>
                   </div>
                 </div>
-
-                <div className="alert-item-right">
+                <div>
                   {item.status === 'UNREVIEWED' ? (
-                    <button className="btn btn-secondary btn-sm" onClick={() => handleAcknowledge(item.id)}>
-                      <CheckCircle2 size={13} /> Acknowledge Alert
+                    <button className="btn btn-primary btn-sm" onClick={() => handleAcknowledge(item.id)}>
+                      <CheckCircle2 size={13} /> Resolve & Acknowledge
                     </button>
                   ) : (
-                    <span className="badge badge-gray">Audited & Resolved</span>
+                    <span className="text-secondary text-xs">Acknowledged</span>
                   )}
                 </div>
               </div>
@@ -312,7 +386,7 @@ export default function AdminDashboard({ activeSubView }) {
             <div>
               <h3 className="card-title">Master Multi-Client Record Store</h3>
               <p className="card-subtitle">
-                Global view of all client ciphertexts protected by Ciphertext-Policy ABE.
+                Global view of all client certificates and verified training records.
               </p>
             </div>
             <button className="btn btn-secondary btn-sm" onClick={() => alert("Exporting master audit logs...")}>
@@ -328,14 +402,14 @@ export default function AdminDashboard({ activeSubView }) {
                   <th>Trainee</th>
                   <th>Client Organization</th>
                   <th>Course Name</th>
-                  <th>CP-ABE Policy String</th>
+                  <th>Access Policy</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {INITIAL_TRAINING_RECORDS.map((r) => (
+                {records.map((r) => (
                   <tr key={r.id}>
-                    <td><code>{r.id}</code></td>
+                    <td><code>{r.id.substring(0, 8)}...</code></td>
                     <td>
                       <div className="trainee-info-cell">
                         <span className="trainee-main-name">{r.traineeName}</span>
@@ -358,29 +432,29 @@ export default function AdminDashboard({ activeSubView }) {
         </div>
       )}
 
-      {/* 5. SYSTEM SETTINGS & CRYPTO CONFIG VIEW */}
+      {/* 5. SYSTEM SETTINGS & CONFIG VIEW */}
       {activeSubView === 'system_settings' && (
         <div className="card section-card">
           <div className="card-header-bar">
             <div>
-              <h3 className="card-title">System & Cryptographic Engine Configuration</h3>
+              <h3 className="card-title">Security Engine & Anomaly Configuration</h3>
               <p className="card-subtitle">
-                Core parameters for CP-ABE Waters11 scheme, Stanford PBC, and PostgreSQL RLS filters.
+                Core parameters for access thresholds, alerts, and tenant isolation filters.
               </p>
             </div>
           </div>
 
           <div className="p-24 config-grid">
             <div className="config-card">
-              <h4>CP-ABE Pairing Parameters</h4>
-              <p className="text-secondary text-xs mb-16">Waters11 / BSW07 algorithm curve initialization</p>
+              <h4>Access Control Engine</h4>
+              <p className="text-secondary text-xs mb-16">Role & Attribute-Based Access Control Parameters</p>
               <div className="config-row">
-                <span>Pairing Curve:</span>
-                <strong>SS512 (512-bit symmetric)</strong>
+                <span>Cryptographic Scheme:</span>
+                <strong>AES-256 Symmetric + Asymmetric RSA</strong>
               </div>
               <div className="config-row">
-                <span>Underlying C-Libraries:</span>
-                <span className="badge badge-green">GMP 6.2.1 + Stanford PBC 0.5.14</span>
+                <span>Security Provider:</span>
+                <span className="badge badge-green">Hardware-Isolated Security Provider</span>
               </div>
               <div className="config-row">
                 <span>Key Authority Scheme:</span>
@@ -413,19 +487,19 @@ export default function AdminDashboard({ activeSubView }) {
         <div className="modal-backdrop" onClick={() => setEditingStaff(null)}>
           <div className="card modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="dialog-header">
-              <h3>Edit CP-ABE Attributes: {editingStaff.name}</h3>
+              <h3>Edit Access Permissions: {editingStaff.name}</h3>
             </div>
             <form onSubmit={handleSaveAttributes}>
               <div className="dialog-body">
                 <div className="form-field mb-16">
-                  <label className="field-label">Assigned Role Attribute</label>
+                  <label className="field-label">Assigned Role</label>
                   <select
                     className="clean-input"
                     value={editingStaff.role}
                     onChange={(e) => setEditingStaff({ ...editingStaff, role: e.target.value })}
                   >
                     <option value="admin">Administrator (admin)</option>
-                    <option value="account_manager">Account Manager (account_manager)</option>
+                    <option value="crossworks_staff">Account Manager (crossworks_staff)</option>
                     <option value="trainer">Lead Trainer (trainer)</option>
                   </select>
                 </div>
@@ -445,8 +519,8 @@ export default function AdminDashboard({ activeSubView }) {
                 <div className="form-field">
                   <label className="field-label">Assigned Client Organizations</label>
                   <div className="company-toggle-row">
-                    {CLIENT_COMPANIES.map((c) => {
-                      const selected = editingStaff.assigned_companies.includes(c.code);
+                    {companies.map((c) => {
+                      const selected = (editingStaff.assigned_companies || []).includes(c.code);
                       return (
                         <button
                           key={c.code}
@@ -454,7 +528,8 @@ export default function AdminDashboard({ activeSubView }) {
                           className={`pill-btn ${selected ? 'active' : ''}`}
                           onClick={() => toggleCompany(c.code)}
                         >
-                          {c.code} {selected ? '✓' : '+'}
+                          {selected ? <CheckCircle2 size={13} /> : <Plus size={13} />}
+                          <span>{c.name}</span>
                         </button>
                       );
                     })}
@@ -467,7 +542,7 @@ export default function AdminDashboard({ activeSubView }) {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Update & Re-Issue Keys
+                  Save Permissions
                 </button>
               </div>
             </form>

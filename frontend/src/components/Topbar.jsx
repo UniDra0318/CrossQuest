@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Shield, 
   Coins, 
@@ -6,9 +7,7 @@ import {
   ChevronDown, 
   Check, 
   LogOut, 
-  Sparkles, 
   User, 
-  Layers,
   GraduationCap,
   Building2,
   Key,
@@ -17,7 +16,8 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Topbar({ activeViewTitle }) {
-  const { currentUser, login, logout, DEMO_USERS } = useAuth();
+  const { currentUser, loginRole, logout, DEMO_USERS } = useAuth();
+  const navigate = useNavigate();
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
   const getRoleIcon = (role) => {
@@ -33,6 +33,11 @@ export default function Topbar({ activeViewTitle }) {
 
   const CurrentRoleIcon = getRoleIcon(currentUser.role);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <header className="gamified-topbar">
       {/* Left: Breadcrumbs & Page Title */}
@@ -44,29 +49,23 @@ export default function Topbar({ activeViewTitle }) {
         </div>
       </div>
 
-      {/* Center/Right: Gamified Currency & Stats (Inspired by Quizizz / Wayground) */}
+      {/* Right: Streak, XP Points, and User Dropdown */}
       <div className="topbar-right">
         {/* Streak Pill */}
         <div className="gamified-stat-pill streak-pill">
-          <Flame size={18} className="stat-flame-icon" />
+          <Flame size={16} className="stat-flame-icon" />
           <span className="stat-num">7</span>
           <span className="stat-label">DAY STREAK</span>
         </div>
 
         {/* Coins / Points Pill */}
         <div className="gamified-stat-pill coin-pill">
-          <Coins size={18} className="stat-coin-icon" />
+          <Coins size={16} className="stat-coin-icon" />
           <span className="stat-num">12,877</span>
           <span className="stat-label">XP</span>
         </div>
 
-        {/* Security Engine Badge */}
-        <div className="security-engine-pill">
-          <Shield size={14} className="text-cyan" />
-          <span>CP-ABE Waters11</span>
-        </div>
-
-        {/* Role Switcher Menu (Custom Polished Dropdown) */}
+        {/* Role Switcher Menu */}
         <div className="role-dropdown-wrapper">
           <button 
             type="button"
@@ -78,7 +77,7 @@ export default function Topbar({ activeViewTitle }) {
                 <CurrentRoleIcon size={16} />
               </div>
               <div className="role-trigger-info">
-                <span className="role-trigger-name">{currentUser.name.split(' ')[0]}</span>
+                <span className="role-trigger-name">{currentUser.name}</span>
                 <span className="role-trigger-badge">{currentUser.role.replace(/_/g, ' ')}</span>
               </div>
             </div>
@@ -90,8 +89,8 @@ export default function Topbar({ activeViewTitle }) {
               <div className="dropdown-backdrop" onClick={() => setRoleMenuOpen(false)} />
               <div className="role-popover-card">
                 <div className="role-popover-header">
-                  <div className="popover-title">Switch Testing Persona</div>
-                  <div className="popover-subtitle">Experience each separated role interface & CP-ABE attributes</div>
+                  <div className="popover-title">Switch Account View</div>
+                  <div className="popover-subtitle">Jump to another authorized portal</div>
                 </div>
 
                 <div className="role-options-list">
@@ -104,7 +103,7 @@ export default function Topbar({ activeViewTitle }) {
                         type="button"
                         className={`role-option-row ${isSelected ? 'active-role' : ''}`}
                         onClick={() => {
-                          login(key);
+                          loginRole(key);
                           setRoleMenuOpen(false);
                         }}
                       >
@@ -136,7 +135,7 @@ export default function Topbar({ activeViewTitle }) {
         <button 
           type="button" 
           className="gamified-logout-btn" 
-          onClick={logout} 
+          onClick={handleLogout} 
           title="Sign Out"
         >
           <LogOut size={16} />

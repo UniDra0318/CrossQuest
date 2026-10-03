@@ -27,10 +27,10 @@ export default function Sidebar({ activeView, setActiveView }) {
       case 'admin':
         return [
           { id: 'admin_overview', label: 'Security Overview', icon: LayoutDashboard },
-          { id: 'attribute_authority', label: 'CP-ABE Attributes', icon: Key },
+          { id: 'attribute_authority', label: 'Access Permissions', icon: Key },
           { id: 'anomalies', label: 'Anomaly Monitor', icon: AlertTriangle },
           { id: 'records_vault', label: 'Master Record Vault', icon: FileText },
-          { id: 'system_settings', label: 'Cryptography Config', icon: Settings }
+          { id: 'system_settings', label: 'Security Engine Settings', icon: Settings }
         ];
 
       case 'crossworks_staff':
@@ -44,14 +44,14 @@ export default function Sidebar({ activeView, setActiveView }) {
         return [
           { id: 'trainer_courses', label: 'Course Cohorts', icon: BookOpen },
           { id: 'trainee_roster', label: 'Trainee Roster', icon: Users },
-          { id: 'grade_entry', label: 'Grade & Encrypt Records', icon: CheckSquare }
+          { id: 'grade_entry', label: 'Grade & Certify Records', icon: CheckSquare }
         ];
 
       case 'company_staff':
         return [
           { id: 'company_overview', label: 'Company Compliance', icon: BarChart3 },
           { id: 'company_trainees', label: 'Employee Records', icon: Users },
-          { id: 'audit_certificate', label: 'Data Isolation Audit', icon: Shield }
+          { id: 'audit_certificate', label: 'Compliance & Audit Report', icon: Shield }
         ];
 
       case 'trainee':
@@ -78,7 +78,7 @@ export default function Sidebar({ activeView, setActiveView }) {
         </div>
         <div className="brand-text">
           <div className="brand-title">CrossQuest</div>
-          <div className="brand-sub">Enterprise Security</div>
+          <div className="brand-sub">Enterprise Learning</div>
         </div>
       </div>
 

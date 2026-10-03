@@ -65,7 +65,7 @@ export const INITIAL_TRAINING_RECORDS = [
     traineeEmail: "juan.delacruz@alpha-corp.ph",
     companyCode: "CORP_ALPHA",
     companyName: "San Miguel Conglomerate Holdings",
-    courseName: "ISO/IEC 27001 Information Security Management",
+    courseName: "Information Security Management & Governance",
     status: "completed",
     completionDate: "2026-08-15",
     encryptionPolicy: "(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:CORP_ALPHA)",
@@ -74,7 +74,7 @@ export const INITIAL_TRAINING_RECORDS = [
       traineeId: "TRN-9021",
       assessmentScore: "94.5%",
       practicalLab: "High Distinction (Vulnerability Remediation)",
-      assessorNotes: "Demonstrated advanced understanding of Annex A controls and internal audit protocols.",
+      assessorNotes: "Demonstrated advanced understanding of security controls and internal audit protocols.",
       certificateHash: "SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       isOfficialCredential: true
     }
@@ -85,7 +85,7 @@ export const INITIAL_TRAINING_RECORDS = [
     traineeEmail: "maria.clara@maya-fintech.ph",
     companyCode: "FINTECH_BETA",
     companyName: "Maya FinTech Digital Innovations",
-    courseName: "ISO/IEC 27701 Privacy Information Management & PIA",
+    courseName: "Privacy Information Management & GDPR",
     status: "completed",
     completionDate: "2026-09-02",
     encryptionPolicy: "(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:FINTECH_BETA)",
@@ -171,7 +171,7 @@ export const INITIAL_ANOMALIES = [
     severity: "HIGH",
     userEmail: "elena.am@crossworks.ph",
     userName: "Elena Santos",
-    description: "3 consecutive CP-ABE policy authorization rejections detected within 4 minutes.",
+    description: "3 consecutive access authorization rejections detected within 4 minutes.",
     targetRecord: "rec-104 (Beatrice Tan)",
     status: "RESOLVED"
   }
@@ -180,15 +180,16 @@ export const INITIAL_ANOMALIES = [
 export const QUIZ_QUESTIONS = [
   {
     id: 1,
-    question: "Under Ciphertext-Policy Attribute-Based Encryption (CP-ABE), where is the access control policy embedded?",
+    question: "In modern attribute-based access control, how is data protected to ensure zero-trust security?",
     options: [
       "In the central database user table",
-      "Directly into the ciphertext itself",
+      "Directly within the encrypted data payload and access policy",
       "Inside the client's session cookie",
       "In an external OAuth token provider"
     ],
     answer: 1,
-    explanation: "CP-ABE embeds the decryption policy directly into the ciphertext so that only private keys matching the required attributes can decrypt the payload."
+    correctAnswer: 1,
+    explanation: "Attribute-based policies are embedded directly with the encrypted records so that only users with matching authorized organization credentials can view the payload."
   },
   {
     id: 2,
@@ -200,19 +201,21 @@ export const QUIZ_QUESTIONS = [
       "By reissuing a single master key to all staff"
     ],
     answer: 1,
+    correctAnswer: 1,
     explanation: "Each training record retains the company attribute active at completion time, preserving historical data isolation without requiring bulk re-encryption."
   },
   {
     id: 3,
-    question: "Which of the following describes the role of Row-Level Security (RLS) in CrossQuest?",
+    question: "Which of the following describes the role of Multi-Tenant Isolation in CrossQuest?",
     options: [
       "It replaces the need for encryption entirely",
-      "It acts as a defense-in-depth database filter complementing CP-ABE",
+      "It acts as a defense-in-depth database filter preventing cross-client data leaks",
       "It generates gamification badges",
       "It handles client-side caching in the service worker"
     ],
     answer: 1,
-    explanation: "RLS operates at the PostgreSQL layer to filter visible rows, working alongside CP-ABE's ciphertext-level protection as defense-in-depth."
+    correctAnswer: 1,
+    explanation: "Multi-tenant isolation operates at the database and application layers to filter visible records, guaranteeing complete privacy between corporate clients."
   },
   {
     id: 4,
@@ -224,6 +227,8 @@ export const QUIZ_QUESTIONS = [
       "BUFFER_OVERFLOW"
     ],
     answer: 1,
-    explanation: "The Out-of-Scope rule flags attempts by staff to access or decrypt records belonging to organizations outside their assigned accounts."
+    correctAnswer: 1,
+    explanation: "Attempting to access client records outside of an assigned portfolio triggers an OUT_OF_SCOPE alert for immediate compliance review."
   }
 ];
+

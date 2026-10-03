@@ -1214,3 +1214,330 @@
   .kahoot-tiles-grid { grid-template-columns: 1fr; }
   .activity-cards-scroller { grid-template-columns: 1fr; }
 }
+
+/* =========================================
+   CLEAN GAMIFIED LOGIN VIEWPORT & CARDS
+========================================= */
+.clean-login-viewport {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: radial-gradient(circle at 50% 20%, #2f0e54 0%, #150426 60%, #0d0218 100%);
+  position: relative;
+  overflow-y: auto;
+}
+
+.login-card-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  animation: fadeInLogin 0.35s ease-out;
+}
+
+@keyframes fadeInLogin {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-brand-center {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.brand-badge-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #772ce8 0%, #f72585 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  margin: 0 auto 12px auto;
+  box-shadow: 0 8px 24px rgba(119, 44, 232, 0.45);
+}
+
+.login-brand-center h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.login-subtext {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.card-login-box {
+  width: 100%;
+  background: rgba(40, 11, 67, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  padding: 24px;
+}
+
+.login-toggle-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 22px;
+  gap: 4px;
+}
+
+.toggle-tab-btn {
+  flex: 1;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-fun);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.toggle-tab-btn:hover {
+  color: #ffffff;
+}
+
+.toggle-tab-btn.active {
+  background: var(--color-purple-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(119, 44, 232, 0.4);
+}
+
+.clean-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.login-input-group label {
+  font-family: var(--font-fun);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.input-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-field-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.input-field-wrap input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  background: rgba(18, 4, 32, 0.7);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-field-wrap input:focus {
+  border-color: var(--color-purple-primary);
+  box-shadow: 0 0 0 3px rgba(119, 44, 232, 0.25);
+}
+
+.login-form-extras {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-top: -2px;
+}
+
+.remember-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-checkbox input {
+  accent-color: var(--color-purple-primary);
+}
+
+.forgot-pass-link {
+  color: var(--color-cyan);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-pass-link:hover {
+  text-decoration: underline;
+}
+
+.login-submit-btn {
+  width: 100%;
+  padding: 13px 20px;
+  background: linear-gradient(135deg, #772ce8 0%, #a032f0 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-family: var(--font-fun);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 0 #4c1285, 0 6px 16px rgba(119, 44, 232, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  margin-top: 4px;
+}
+
+.login-submit-btn:hover {
+  filter: brightness(1.08);
+}
+
+.login-submit-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #4c1285;
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-footer-hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.login-footer-hint strong {
+  color: var(--color-gold);
+}
+
+/* Quick Role Access List */
+.demo-roles-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.demo-intro-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  text-align: center;
+}
+
+.demo-roles-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.demo-role-card-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  gap: 12px;
+}
+
+.demo-role-card-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateX(3px);
+}
+
+.demo-role-card-btn:active {
+  transform: translateX(1px);
+}
+
+.demo-role-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(119, 44, 232, 0.25);
+  border: 1px solid rgba(119, 44, 232, 0.5);
+  color: #cbb4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.demo-role-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.demo-role-title {
+  font-family: var(--font-fun);
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.demo-role-person {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demo-role-arrow {
+  color: var(--text-dim);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.demo-role-card-btn:hover .demo-role-arrow {
+  color: #ffffff;
+  transform: translateX(3px);
+}
+

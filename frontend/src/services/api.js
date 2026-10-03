@@ -1,0 +1,99 @@
+const API_BASE = 'http://localhost:8000/api/v1';
+
+export async function fetchCompanies(token) {
+  try {
+    const res = await fetch(`${API_BASE}/trainees/companies`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for companies:", err);
+  }
+  return null;
+}
+
+export async function fetchTrainees(token) {
+  try {
+    const res = await fetch(`${API_BASE}/trainees/`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for trainees:", err);
+  }
+  return null;
+}
+
+export async function fetchRecords(token) {
+  try {
+    const res = await fetch(`${API_BASE}/records/`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for records:", err);
+  }
+  return null;
+}
+
+export async function decryptRecordApi(recordId, token) {
+  try {
+    const res = await fetch(`${API_BASE}/records/${recordId}/decrypt`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      }
+    });
+    const data = await res.json();
+    return { ok: res.ok, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+export async function fetchAnomalies(token) {
+  try {
+    const res = await fetch(`${API_BASE}/anomalies/alerts`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for anomalies:", err);
+  }
+  return null;
+}
+
+export async function fetchLeaderboard() {
+  try {
+    const res = await fetch(`${API_BASE}/gamification/leaderboard`);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for leaderboard:", err);
+  }
+  return null;
+}
+
+export async function fetchTraineeGamification(traineeId) {
+  try {
+    const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for trainee gamification:", err);
+  }
+  return null;
+}
+
+export async function submitQuizScore(traineeId, score) {
+  try {
+    const res = await fetch(`${API_BASE}/gamification/submit-quiz`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trainee_id: traineeId, score })
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for submit-quiz:", err);
+  }
+  return null;
+}
