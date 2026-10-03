@@ -93,12 +93,33 @@ export const QUIZ_DATABASE = {
         type: 'matching',
         question: 'Match each Security Architecture Component in Column A with its exact Enterprise Function in Column B:',
         pairs: [
-          { id: 'm1-1', left: '1. CP-ABE Ciphertext Encryption', right: 'A. Cryptographic policy tree bound directly to payload' },
-          { id: 'm1-2', left: '2. API Perimeter Gateway', right: 'B. OAuth JWT bearer verification at network edge' },
-          { id: 'm1-3', left: '3. Row-Level Security (RLS)', right: 'C. Direct database-layer tenant record filtering' },
-          { id: 'm1-4', left: '4. Anomaly Daemon Monitor', right: 'D. Automated detection of off-hours & query bursts' }
+          { id: 'm1-1', left: 'CP-ABE Ciphertext Encryption', right: 'Cryptographic policy tree bound directly to payload' },
+          { id: 'm1-2', left: 'API Perimeter Gateway', right: 'OAuth JWT bearer verification at network edge' },
+          { id: 'm1-3', left: 'Row-Level Security (RLS)', right: 'Direct database-layer tenant record filtering' },
+          { id: 'm1-4', left: 'Anomaly Daemon Monitor', right: 'Automated detection of off-hours & query bursts' }
         ],
         explanation: 'CP-ABE binds policies to data, API Gateways guard perimeter ingress, RLS isolates SQL rows by tenant, and Anomaly Daemons detect behavioral spikes.'
+      },
+      {
+        id: 'q1-7',
+        type: 'identification',
+        question: 'What cryptographic primitive produces an immutable, fixed-size mathematical digest used to audit-proof security event records? (Hint: 2 words or standard acronym)',
+        acceptedAnswers: ['cryptographic hash', 'hash function', 'sha-256', 'sha256', 'hash', 'hashing'],
+        placeholder: 'Type the cryptographic term...',
+        explanation: 'SHA-256 cryptographic hashes produce unique fixed-length digests ensuring tamper-evident verification of audit logs.'
+      },
+      {
+        id: 'q1-8',
+        type: 'multiple_choice',
+        question: 'Under the Principle of Least Privilege, how should personnel roles be structured across enterprise systems?',
+        options: [
+          'Users are granted access exclusively to the specific resources and actions required for their role',
+          'Every authenticated staff member receives administrative query access by default',
+          'Access permissions are determined entirely by network IP addresses without authentication',
+          'All staff share a single master decryption key for operational efficiency'
+        ],
+        correctAnswer: 0,
+        explanation: 'Least Privilege dictates that users and services are granted only the minimum permissions necessary to perform their assigned business duties.'
       }
     ]
   },
@@ -190,12 +211,33 @@ export const QUIZ_DATABASE = {
         type: 'matching',
         question: 'Match each Personnel Role in Column A with its exact Clearance Level & Access Scope in Column B:',
         pairs: [
-          { id: 'm2-1', left: '1. System Administrator', right: 'A. Level 3 (Root authority across all corporate tenants)' },
-          { id: 'm2-2', left: '2. Client Account Manager', right: 'B. Level 2 (Restricted exclusively to assigned client accounts)' },
-          { id: 'm2-3', left: '3. Lead Course Instructor', right: 'C. Level 1 (Cohort grading and curriculum authoring)' },
-          { id: 'm2-4', left: '4. Trainee Analyst', right: 'D. Level 1 (Personal learning quest & self-progress viewing)' }
+          { id: 'm2-1', left: 'System Administrator', right: 'Level 3 (Root authority across all corporate tenants)' },
+          { id: 'm2-2', left: 'Client Account Manager', right: 'Level 2 (Restricted exclusively to assigned client accounts)' },
+          { id: 'm2-3', left: 'Lead Course Instructor', right: 'Level 1 (Cohort grading and curriculum authoring)' },
+          { id: 'm2-4', left: 'Trainee Analyst', right: 'Level 1 (Personal learning quest & self-progress viewing)' }
         ],
         explanation: 'System Administrators hold root Level 3 privileges across all accounts, Account Managers are isolated to Level 2 client portfolios, and Trainers/Trainees hold Level 1 educational access.'
+      },
+      {
+        id: 'q2-7',
+        type: 'multiple_choice',
+        question: 'What must occur immediately in an attribute-based system when an employee transfers from Department A to Department B?',
+        options: [
+          'Their cryptographic attributes are revoked and re-issued to reflect their new organizational scope',
+          'All historical encrypted databases must be deleted and restored',
+          'The employee retains both department privileges permanently',
+          'No changes are needed since all company departments share identical clearance'
+        ],
+        correctAnswer: 0,
+        explanation: 'Attribute lifecycle management requires immediate revocation of outdated attributes and issuance of updated credentials matching the new role.'
+      },
+      {
+        id: 'q2-8',
+        type: 'identification',
+        question: 'Name the security vulnerability that occurs when a user gains elevated access permissions beyond their authorized clearance level. (Hint: 2 words)',
+        acceptedAnswers: ['privilege escalation', 'privilege creep', 'escalation of privilege'],
+        placeholder: 'Type the security vulnerability...',
+        explanation: 'Privilege escalation occurs when an attacker or misconfigured user acquires higher-level rights than intended by organizational policy.'
       }
     ]
   },
@@ -287,12 +329,33 @@ export const QUIZ_DATABASE = {
         type: 'matching',
         question: 'Match each Privacy Entity in Column A with its statutory classification under R.A. 10173 in Column B:',
         pairs: [
-          { id: 'm3-1', left: '1. Trainee Learner', right: 'A. Data Subject (Owner of personal records & evaluation metrics)' },
-          { id: 'm3-2', left: '2. Corporate Client (Employer)', right: 'B. Personal Information Controller (PIC directing training)' },
-          { id: 'm3-3', left: '3. Crossworks Training Service', right: 'C. Personal Information Processor (PIP executing training under DPA)' },
-          { id: 'm3-4', left: '4. National Privacy Commission', right: 'D. Statutory regulatory authority enforcing compliance' }
+          { id: 'm3-1', left: 'Trainee Learner', right: 'Data Subject (Owner of personal records & evaluation metrics)' },
+          { id: 'm3-2', left: 'Corporate Client (Employer)', right: 'Personal Information Controller (PIC directing training)' },
+          { id: 'm3-3', left: 'Crossworks Training Service', right: 'Personal Information Processor (PIP executing training under DPA)' },
+          { id: 'm3-4', left: 'National Privacy Commission', right: 'Statutory regulatory authority enforcing compliance' }
         ],
         explanation: 'The individual is the Data Subject, their sponsoring employer acts as PIC, Crossworks acts as the contracted PIP, and the NPC is the regulatory oversight commission.'
+      },
+      {
+        id: 'q3-7',
+        type: 'multiple_choice',
+        question: "Which of the following data types is classified as 'Sensitive Personal Information' under the Data Privacy Act of 2012 (R.A. 10173)?",
+        options: [
+          'Individual health conditions, government-issued IDs, and religious affiliations',
+          'Publicly published office business telephone numbers',
+          'Company registered domain name',
+          'Standard corporate email domain suffix'
+        ],
+        correctAnswer: 0,
+        explanation: 'Under R.A. 10173, information about an individual health, race, religion, sexual life, and government-issued numbers constitutes Sensitive Personal Information requiring heightened security safeguards.'
+      },
+      {
+        id: 'q3-8',
+        type: 'identification',
+        question: 'What corporate officer is mandated by the National Privacy Commission to oversee data protection compliance within an enterprise? (Hint: 3 words or 3-letter acronym)',
+        acceptedAnswers: ['data protection officer', 'dpo', 'compliance officer for privacy', 'data privacy officer'],
+        placeholder: 'Type the official title or acronym...',
+        explanation: 'The Data Protection Officer (DPO) is the designated individual accountable for ensuring organizational adherence to privacy legislation and NPC mandates.'
       }
     ]
   },
@@ -384,12 +447,33 @@ export const QUIZ_DATABASE = {
         type: 'matching',
         question: 'Match each Multi-Tenant Anomaly Event in Column A with its Security Trigger Condition in Column B:',
         pairs: [
-          { id: 'm4-1', left: '1. OUT_OF_SCOPE Trigger', right: 'A. User queries records belonging to an unassigned company' },
-          { id: 'm4-2', left: '2. ABNORMAL_VOLUME Trigger', right: 'B. Decryption requests exceed 25 operations in a 15-minute window' },
-          { id: 'm4-3', left: '3. OFF_HOURS Trigger', right: 'C. Query activity initiated between 23:00 and 06:00 or weekends' },
-          { id: 'm4-4', left: '4. INVALID_TOKEN Trigger', right: 'D. Cryptographic signature failure or revoked personnel credentials' }
+          { id: 'm4-1', left: 'OUT_OF_SCOPE Trigger', right: 'User queries records belonging to an unassigned company' },
+          { id: 'm4-2', left: 'ABNORMAL_VOLUME Trigger', right: 'Decryption requests exceed 25 operations in a 15-minute window' },
+          { id: 'm4-3', left: 'OFF_HOURS Trigger', right: 'Query activity initiated between 23:00 and 06:00 or weekends' },
+          { id: 'm4-4', left: 'INVALID_TOKEN Trigger', right: 'Cryptographic signature failure or revoked personnel credentials' }
         ],
         explanation: 'OUT_OF_SCOPE enforces company boundaries, ABNORMAL_VOLUME mitigates scraping, OFF_HOURS alerts on suspicious schedules, and INVALID_TOKEN stops expired credentials.'
+      },
+      {
+        id: 'q4-7',
+        type: 'multiple_choice',
+        question: 'What security risk arises in multi-tenant SaaS architectures if tenant IDs are concatenated directly into raw SQL queries without parameterized binding?',
+        options: [
+          'SQL Injection allowing cross-tenant data leakage',
+          'Faster database query caching across all tenants',
+          'Automatic data redundancy backup',
+          'Decreased network bandwidth usage'
+        ],
+        correctAnswer: 0,
+        explanation: 'Raw SQL concatenation enables SQL injection, which can bypass tenant boundaries and expose confidential data across customer organizations.'
+      },
+      {
+        id: 'q4-8',
+        type: 'identification',
+        question: 'Identify the architectural principle where multiple clients share the same computing infrastructure while maintaining logical and cryptographic data segregation. (Hint: 2 words)',
+        acceptedAnswers: ['multi tenancy', 'multi-tenancy', 'multitenancy', 'logical isolation'],
+        placeholder: 'Type the architectural principle...',
+        explanation: 'Multi-tenancy enables shared infrastructure efficiencies while enforcing strict logical, cryptographic, and row-level boundaries between different corporate clients.'
       }
     ]
   }

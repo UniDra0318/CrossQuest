@@ -14,25 +14,41 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
   const leftRefs = useRef({});
   const rightRefs = useRef({});
 
-  // Shuffled right items on question mount
+  // Shuffled left and right items on question mount
+  const [shuffledLeftItems, setShuffledLeftItems] = useState([]);
   const [shuffledRightItems, setShuffledRightItems] = useState([]);
   const [selectedLeftId, setSelectedLeftId] = useState(null);
   // matches: { [leftId]: rightId }
   const [matches, setMatches] = useState({});
   const [lines, setLines] = useState([]);
 
-  // Initialize shuffled right column
+  // Initialize randomized columns
   useEffect(() => {
     if (question && question.pairs) {
-      const rightItems = question.pairs.map((p, idx) => ({
+      const leftItems = question.pairs.map((p, idx) => ({
         id: p.id,
-        text: p.right,
+        text: p.left.replace(/^\d+\.\s*/, ''),
         originalIndex: idx
       }));
 
-      // Predictable or pseudo-random shuffle
-      const shuffled = [...rightItems].sort(() => 0.5 - Math.random());
-      setShuffledRightItems(shuffled);
+      const rightItems = question.pairs.map((p, idx) => ({
+        id: p.id,
+        text: p.right.replace(/^[A-Z]\.\s*/, ''),
+        originalIndex: idx
+      }));
+
+      // Fisher-Yates array shuffle
+      const shuffle = (arr) => {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      };
+
+      setShuffledLeftItems(shuffle(leftItems));
+      setShuffledRightItems(shuffle(rightItems));
       setMatches({});
       setSelectedLeftId(null);
     }
@@ -45,9 +61,10 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
 
     const computedLines = [];
 
-    Object.entries(matches).forEach(([leftId, rightId], pairIdx) => {
+    Object.entries(matches).forEach(([leftId, rightId]) => {
       const leftEl = leftRefs.current[leftId];
       const rightEl = rightRefs.current[rightId];
+      const leftIdx = shuffledLeftItems.findIndex(l => l.id === leftId);
 
       if (leftEl && rightEl) {
         const leftRect = leftEl.getBoundingClientRect();
@@ -59,7 +76,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
         const y2 = rightRect.top + rightRect.height / 2 - containerRect.top;
 
         const isPairCorrect = leftId === rightId;
-        const colorSet = PAIR_COLORS[pairIdx % PAIR_COLORS.length];
+        const colorSet = PAIR_COLORS[(leftIdx >= 0 ? leftIdx : 0) % PAIR_COLORS.length];
 
         computedLines.push({
           leftId,
@@ -86,7 +103,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
       window.removeEventListener('resize', handleResize);
       clearTimeout(timer);
     };
-  }, [matches, shuffledRightItems, answeredState]);
+  }, [matches, shuffledLeftItems, shuffledRightItems, answeredState]);
 
   // Select Left Item
   const handleLeftClick = (leftId) => {
@@ -145,9 +162,12 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
     const isAllCorrect = question.pairs.every(p => matches[p.id] === p.id);
 
     // Form user submission string for review
-    const submissionParts = question.pairs.map(p => {
-      const matchedRight = shuffledRightItems.find(r => r.id === matches[p.id]);
-      return `${p.left} ➔ ${matchedRight ? matchedRight.text : '(Unmatched)'}`;
+    const submissionParts = shuffledLeftItems.map((leftItem, lIdx) => {
+      const matchedRightId = matches[leftItem.id];
+      const matchedRight = shuffledRightItems.find(r => r.id === matchedRightId);
+      const rightIdx = shuffledRightItems.findIndex(r => r.id === matchedRightId);
+      const rightLetter = rightIdx !== -1 ? String.fromCharCode(65 + rightIdx) : '?';
+      return `${lIdx + 1}. ${leftItem.text} ➔ [${rightLetter}] ${matchedRight ? matchedRight.text : 'Unmatched'}`;
     });
 
     if (onSubmitMatches) {
@@ -167,7 +187,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
           <Link2 size={16} className="text-purple" />
           <span>
             {answeredState === null 
-              ? 'Click an item in Column A, then click its corresponding match in Column B to connect them.'
+              ? 'Click an item in Column A (1–4), then click its corresponding match in Column B (A–D) to draw a connecting line.'
               : 'Review your connections below: Green lines indicate correct matches, Red lines indicate incorrect pairings.'}
           </span>
         </div>
@@ -230,14 +250,16 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
         {/* COLUMN A (LEFT) */}
         <div className="matching-column column-left">
           <div className="column-title-pill pill-col-a">
-            <span>COLUMN A (Mechanisms / Terms)</span>
+            <span>COLUMN A (Items 1–{shuffledLeftItems.length})</span>
           </div>
 
           <div className="matching-cards-stack">
-            {question.pairs.map((p, idx) => {
+            {shuffledLeftItems.map((p, idx) => {
               const isSelected = selectedLeftId === p.id;
               const matchedRightId = matches[p.id];
               const matchedRightItem = shuffledRightItems.find(r => r.id === matchedRightId);
+              const rightIdx = shuffledRightItems.findIndex(r => r.id === matchedRightId);
+              const rightLetter = rightIdx !== -1 ? String.fromCharCode(65 + rightIdx) : '';
               const colorSet = PAIR_COLORS[idx % PAIR_COLORS.length];
 
               let cardStateClass = '';
@@ -257,7 +279,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
                 >
                   <div className="card-content-left">
                     <span className="item-index-badge">{idx + 1}</span>
-                    <span className="item-main-text">{p.left}</span>
+                    <span className="item-main-text">{p.text}</span>
                   </div>
 
                   {/* Connected Match Pill if linked */}
@@ -275,7 +297,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
                       }}
                       title="Click to disconnect"
                     >
-                      <span>➔ {matchedRightItem.text.slice(0, 3)}</span>
+                      <span>➔ [{rightLetter}]</span>
                       {answeredState === null && <Unlink size={11} />}
                     </div>
                   )}
@@ -295,14 +317,14 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
         {/* COLUMN B (RIGHT) */}
         <div className="matching-column column-right">
           <div className="column-title-pill pill-col-b">
-            <span>COLUMN B (Functions / Roles)</span>
+            <span>COLUMN B (Options A–{String.fromCharCode(64 + shuffledRightItems.length)})</span>
           </div>
 
           <div className="matching-cards-stack">
             {shuffledRightItems.map((r, rIdx) => {
               const matchedLeftId = Object.keys(matches).find(k => matches[k] === r.id);
-              const matchedPairIndex = question.pairs.findIndex(p => p.id === matchedLeftId);
-              const colorSet = matchedPairIndex !== -1 ? PAIR_COLORS[matchedPairIndex % PAIR_COLORS.length] : null;
+              const matchedLeftIdx = shuffledLeftItems.findIndex(l => l.id === matchedLeftId);
+              const colorSet = matchedLeftIdx !== -1 ? PAIR_COLORS[matchedLeftIdx % PAIR_COLORS.length] : null;
 
               let cardStateClass = '';
               if (matchedLeftId) cardStateClass = 'card-matched';
@@ -342,7 +364,7 @@ export default function MatchingQuestion({ question, answeredState, onSubmitMatc
                         color: colorSet.text
                       }}
                     >
-                      <span>Item #{matchedPairIndex + 1}</span>
+                      <span>Item #{matchedLeftIdx + 1}</span>
                     </div>
                   )}
                 </div>

@@ -19,7 +19,8 @@ import {
   Sparkles,
   Trophy,
   CheckCircle,
-  FileText
+  FileText,
+  Shuffle
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
 import MatchingQuestion from './MatchingQuestion';
@@ -31,7 +32,58 @@ const KAHOOT_TILES = [
   { key: 3, symbol: '■', colorClass: 'tile-green', bg: '#26890c', shadow: '#185a08' }
 ];
 
+// Fisher-Yates array shuffle utility
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Generate randomized question sequence and randomized item choices
+function prepareQuizQuestions(quiz, initialSession) {
+  // If active session was restored from localStorage, retain its exact prepared questions array
+  if (initialSession && Array.isArray(initialSession.preparedQuestions) && initialSession.preparedQuestions.length > 0) {
+    return initialSession.preparedQuestions;
+  }
+
+  // 1. Shuffle overall question sequence
+  const shuffled = shuffleArray(quiz.questions || []);
+
+  // 2. Randomize items / choices within each question
+  return shuffled.map((q) => {
+    const cloned = JSON.parse(JSON.stringify(q));
+
+    // Multiple choice or Diagram analysis: shuffle options and remap correctAnswer index
+    if (cloned.type === 'multiple_choice' || cloned.type === 'diagram_analysis') {
+      if (Array.isArray(cloned.options) && typeof cloned.correctAnswer === 'number') {
+        const correctText = cloned.options[cloned.correctAnswer];
+        cloned.options = shuffleArray(cloned.options);
+        cloned.correctAnswer = cloned.options.indexOf(correctText);
+      }
+    }
+    // Sequence order: dynamically scramble initialOrder ensuring it doesn't match solved state
+    else if (cloned.type === 'sequence_order') {
+      if (Array.isArray(cloned.correctOrder)) {
+        let scrambled = shuffleArray(cloned.correctOrder);
+        let tries = 0;
+        while (tries < 5 && scrambled.every((item, idx) => item === cloned.correctOrder[idx])) {
+          scrambled = shuffleArray(cloned.correctOrder);
+          tries++;
+        }
+        cloned.initialOrder = scrambled;
+      }
+    }
+    return cloned;
+  });
+}
+
 export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
+  // Prepared questions with randomized question order & randomized choices
+  const [questions, setQuestions] = useState(() => prepareQuizQuestions(quiz, initialSession));
+
   // State: 'briefing' | 'active' | 'completed'
   const [stage, setStage] = useState(() => {
     if (initialSession && initialSession.stage) return initialSession.stage;
@@ -46,7 +98,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   
   // Interactive sequence ordering state & swap animation tracking
   const [sequenceItems, setSequenceItems] = useState(() => {
-    const q = quiz.questions[currentIndex];
+    const q = questions[currentIndex] || questions[0];
     return q && q.type === 'sequence_order' ? [...(q.initialOrder || q.correctOrder)] : [];
   });
   const [swappedIdx, setSwappedIdx] = useState(null);
@@ -59,8 +111,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const [pointsTotal, setPointsTotal] = useState(() => initialSession?.pointsTotal || 0);
   const timerRef = useRef(null);
 
-  const currentQ = quiz.questions[currentIndex] || quiz.questions[0];
-  const totalQuestions = quiz.questions.length;
+  const currentQ = questions[currentIndex] || questions[0];
+  const totalQuestions = questions.length;
 
   // Auto-save session progress to localStorage on any state change
   const saveProgress = (overrides = {}) => {
@@ -73,6 +125,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       timeLeft,
       pointsTotal,
       answersHistory,
+      preparedQuestions: questions,
       savedAt: Date.now(),
       ...overrides
     };
@@ -121,12 +174,21 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   };
 
   const handleStartAssessment = () => {
+    const freshlyPrepared = prepareQuizQuestions(quiz, null);
+    setQuestions(freshlyPrepared);
     setStage('active');
     setCurrentIndex(0);
     setCorrectCount(0);
     setPointsTotal(0);
     setAnswersHistory({});
-    saveProgress({ stage: 'active', currentIndex: 0, correctCount: 0, pointsTotal: 0, answersHistory: {} });
+    saveProgress({ 
+      stage: 'active', 
+      currentIndex: 0, 
+      correctCount: 0, 
+      pointsTotal: 0, 
+      answersHistory: {},
+      preparedQuestions: freshlyPrepared
+    });
   };
 
   const handleMultipleChoiceSelect = (optionIdx) => {
@@ -199,6 +261,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       ? currentQ.options[currentQ.correctAnswer]
       : currentQ.type === 'identification'
       ? currentQ.acceptedAnswers[0]
+      : currentQ.type === 'matching'
+      ? currentQ.pairs.map((p, i) => `${i + 1}. ${p.left.replace(/^\d+\.\s*/, '')} ➔ ${p.right.replace(/^[A-Z]\.\s*/, '')}`).join(' | ')
       : currentQ.correctOrder.map((s, i) => `${i + 1}. ${s}`).join(' ➔ ');
 
     const newHistory = {
@@ -293,7 +357,13 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               </div>
 
               <div className="briefing-stat-tile">
-                <Clock size={22} className="text-cyan" />
+                <Shuffle size={22} className="text-cyan" />
+                <div className="stat-num">Randomized</div>
+                <div className="stat-label">Questions & Choices</div>
+              </div>
+
+              <div className="briefing-stat-tile">
+                <Clock size={22} className="text-purple" />
                 <div className="stat-num">{quiz.timePerQuestion}s / Item</div>
                 <div className="stat-label">Countdown Timer</div>
               </div>
@@ -391,7 +461,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </div>
 
             <div className="results-summary-list">
-              {quiz.questions.map((q, qIdx) => {
+              {questions.map((q, qIdx) => {
                 const rec = answersHistory[q.id];
                 const isCorrect = rec?.isCorrect;
 
