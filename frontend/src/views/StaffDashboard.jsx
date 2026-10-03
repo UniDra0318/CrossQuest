@@ -9,22 +9,24 @@ import {
   ShieldAlert, 
   Download, 
   CheckCircle2, 
-  Info,
+  BarChart3,
+  Users,
+  TrendingUp,
   X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { CLIENT_COMPANIES, INITIAL_TRAINING_RECORDS } from '../data/mockData';
 
-export default function StaffDashboard() {
+export default function StaffDashboard({ activeSubView }) {
   const { currentUser } = useAuth();
   const [records] = useState(INITIAL_TRAINING_RECORDS);
   const [search, setSearch] = useState('');
   const [activeCompanyFilter, setActiveCompanyFilter] = useState('ALL');
   const [activeRecord, setActiveRecord] = useState(null);
   const [denialDetails, setDenialDetails] = useState(null);
+  const [reportCompany, setReportCompany] = useState('CORP_ALPHA');
   const [reportExported, setReportExported] = useState(false);
 
-  // Check if staff's assigned accounts cover the record
   const isAuthorized = (record) => {
     return (currentUser.assigned_companies || []).includes(record.companyCode);
   };
@@ -36,7 +38,7 @@ export default function StaffDashboard() {
     } else {
       setDenialDetails({
         record,
-        reason: `Access Denied: Your staff profile (${currentUser.name}) is only assigned to [${currentUser.assigned_companies.join(', ')}]. This record belongs to ${record.companyName}. An out-of-scope anomaly event has been logged for security compliance.`
+        reason: `Access Denied by CP-ABE Engine: Your staff profile (${currentUser.name}) is only authorized for [${currentUser.assigned_companies.join(', ')}]. This record belongs to ${record.companyName}. An out-of-scope access event was recorded for compliance monitoring.`
       });
       setActiveRecord(null);
     }
@@ -49,114 +51,239 @@ export default function StaffDashboard() {
     return matchesComp && matchesSearch;
   });
 
+  const selectedReportComp = CLIENT_COMPANIES.find(c => c.code === reportCompany) || CLIENT_COMPANIES[0];
+  const compRecords = records.filter(r => r.companyCode === reportCompany);
+  const compCompleted = compRecords.filter(r => r.status === 'completed').length;
+  const compAvg = compRecords.length > 0 
+    ? (compRecords.reduce((acc, r) => acc + (r.score || 0), 0) / compRecords.length).toFixed(1)
+    : '0.0';
+
   return (
     <div className="dashboard-content-layout">
-      {/* Account Manager Portfolio Bar */}
-      <div className="card view-toolbar">
-        <div>
-          <div className="flex-align gap-8">
-            <Building2 size={20} className="text-cyan" />
-            <h3>Assigned Portfolio Records</h3>
-          </div>
-          <p className="text-secondary text-xs">
-            Viewing training records with CP-ABE attribute authorization.
-          </p>
-        </div>
-
-        <div className="company-filter-pills">
-          <button
-            className={`pill-btn ${activeCompanyFilter === 'ALL' ? 'active' : ''}`}
-            onClick={() => setActiveCompanyFilter('ALL')}
-          >
-            All Accounts
-          </button>
-          {CLIENT_COMPANIES.map(c => (
-            <button
-              key={c.code}
-              className={`pill-btn ${activeCompanyFilter === c.code ? 'active' : ''}`}
-              onClick={() => setActiveCompanyFilter(c.code)}
-            >
-              {c.name.split(' ')[0]}
-              {currentUser.assigned_companies.includes(c.code) && ' (Assigned)'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Records Vault */}
-      <div className="card section-card">
-        <div className="card-header-bar">
-          <div>
-            <h3 className="card-title">Multi-Client Encrypted Training Vault</h3>
-            <p className="card-subtitle">
-              Only records matching your assigned client account attributes will decrypt.
-            </p>
+      {/* 1. RECORDS VAULT SUB-VIEW */}
+      {(activeSubView === 'staff_records' || !activeSubView) && (
+        <>
+          <div className="view-title-header">
+            <div>
+              <h2>Assigned Client Records Vault</h2>
+              <p className="text-secondary text-sm">
+                Decrypt and manage training records matching your assigned CP-ABE organization attributes.
+              </p>
+            </div>
+            <div className="flex-align gap-8">
+              <span className="badge badge-purple">Role: Account Manager</span>
+              <span className="badge badge-green">Authorized: {currentUser.assigned_companies.join(', ')}</span>
+            </div>
           </div>
 
-          <div className="search-box">
-            <Search size={14} className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search records..."
-              className="search-input"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
+          <div className="card view-toolbar">
+            <div className="search-box">
+              <Search size={14} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search trainee or course..."
+                className="search-input"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
-        <div className="table-responsive">
-          <table className="clean-table">
-            <thead>
-              <tr>
-                <th>Trainee</th>
-                <th>Client Company</th>
-                <th>Course Name</th>
-                <th>Policy Scope</th>
-                <th style={{ textAlign: 'right' }}>Authorization & Decrypt</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRecords.map((r) => {
-                const canAccess = isAuthorized(r);
-                return (
-                  <tr key={r.id}>
-                    <td>
-                      <div className="trainee-info-cell">
-                        <span className="trainee-main-name">{r.traineeName}</span>
-                        <span className="trainee-email-text">{r.traineeEmail}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge badge-purple">{r.companyName}</span>
-                    </td>
-                    <td>
-                      <div className="course-title-cell">{r.courseName}</div>
-                      <span className={`badge ${r.status === 'completed' ? 'badge-green' : 'badge-amber'}`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="friendly-policy-text">
-                        {r.companyCode} Assigned Staff & Admins
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        className={`btn btn-sm ${canAccess ? 'btn-primary' : 'btn-secondary'}`}
-                        onClick={() => handleDecrypt(r)}
-                      >
-                        {canAccess ? <Unlock size={13} /> : <Lock size={13} />}
-                        <span>{canAccess ? 'Decrypt Record' : 'Attempt (Out-of-Scope)'}</span>
-                      </button>
-                    </td>
+            <div className="company-filter-pills">
+              <button
+                className={`pill-btn ${activeCompanyFilter === 'ALL' ? 'active' : ''}`}
+                onClick={() => setActiveCompanyFilter('ALL')}
+              >
+                All Portfolios
+              </button>
+              {CLIENT_COMPANIES.map(c => (
+                <button
+                  key={c.code}
+                  className={`pill-btn ${activeCompanyFilter === c.code ? 'active' : ''}`}
+                  onClick={() => setActiveCompanyFilter(c.code)}
+                >
+                  {c.name.split(' ')[0]}
+                  {currentUser.assigned_companies.includes(c.code) && ' ★'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="card section-card">
+            <div className="table-responsive">
+              <table className="clean-table">
+                <thead>
+                  <tr>
+                    <th>Trainee</th>
+                    <th>Client Organization</th>
+                    <th>Course Name</th>
+                    <th>Access Policy</th>
+                    <th style={{ textAlign: 'right' }}>Authorization & Decrypt</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {filteredRecords.map((r) => {
+                    const canAccess = isAuthorized(r);
+                    return (
+                      <tr key={r.id}>
+                        <td>
+                          <div className="trainee-info-cell">
+                            <span className="trainee-main-name">{r.traineeName}</span>
+                            <span className="trainee-email-text">{r.traineeEmail}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge badge-purple">{r.companyName}</span>
+                        </td>
+                        <td>
+                          <div className="course-title-cell">{r.courseName}</div>
+                          <span className={`badge ${r.status === 'completed' ? 'badge-green' : 'badge-amber'}`}>
+                            {r.status}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="friendly-policy-text">
+                            {r.companyCode} Staff & Admins
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            className={`btn btn-sm ${canAccess ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => handleDecrypt(r)}
+                          >
+                            {canAccess ? <Unlock size={13} /> : <Lock size={13} />}
+                            <span>{canAccess ? 'Decrypt Record' : 'Attempt (Out-of-Scope)'}</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* 2. ASSIGNED CLIENTS PORTFOLIO SUB-VIEW */}
+      {activeSubView === 'assigned_clients' && (
+        <>
+          <div className="view-title-header">
+            <div>
+              <h2>Assigned Client Organization Portfolios</h2>
+              <p className="text-secondary text-sm">
+                Corporate client organizations under your active account management.
+              </p>
+            </div>
+          </div>
+
+          <div className="client-cards-grid">
+            {CLIENT_COMPANIES.map(c => {
+              const isAssigned = currentUser.assigned_companies.includes(c.code);
+              return (
+                <div key={c.code} className="card client-portfolio-card">
+                  <div className="client-card-header">
+                    <Building2 size={24} className={isAssigned ? 'text-cyan' : 'text-secondary'} />
+                    <span className={`badge ${isAssigned ? 'badge-green' : 'badge-gray'}`}>
+                      {isAssigned ? 'Assigned Account' : 'Other Account Manager'}
+                    </span>
+                  </div>
+                  <h3>{c.name}</h3>
+                  <div className="text-secondary text-xs mb-16">Industry: {c.industry}</div>
+                  
+                  <div className="client-stat-line">
+                    <span>Enrolled Trainees:</span>
+                    <strong>{c.activeLearners}</strong>
+                  </div>
+                  <div className="client-stat-line">
+                    <span>CP-ABE Scope Code:</span>
+                    <code>{c.code}</code>
+                  </div>
+                  <div className="client-stat-line">
+                    <span>Status:</span>
+                    <span className="text-emerald font-bold">Active Agreement</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* 3. COMPLIANCE AUDIT REPORTS SUB-VIEW */}
+      {activeSubView === 'compliance_reports' && (
+        <div className="card section-card">
+          <div className="card-header-bar">
+            <div>
+              <h3 className="card-title">Generate Client Audit & Compliance Report</h3>
+              <p className="card-subtitle">
+                Crossworks verified report backed by cryptographic data separation.
+              </p>
+            </div>
+            <div className="flex-align gap-8">
+              <select
+                className="clean-input"
+                style={{ width: 'auto' }}
+                value={reportCompany}
+                onChange={(e) => setReportCompany(e.target.value)}
+              >
+                {CLIENT_COMPANIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.name}</option>
+                ))}
+              </select>
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  setReportExported(true);
+                  setTimeout(() => setReportExported(false), 3000);
+                }}
+              >
+                <Download size={13} />
+                {reportExported ? 'Report Exported!' : 'Export PDF Summary'}
+              </button>
+            </div>
+          </div>
+
+          <div className="p-24">
+            <div className="metrics-summary-row mb-16">
+              <div className="card metric-tile">
+                <span className="tile-label">Total Trainees</span>
+                <div className="tile-value">{compRecords.length}</div>
+              </div>
+              <div className="card metric-tile">
+                <span className="tile-label">Completion Rate</span>
+                <div className="tile-value text-emerald">
+                  {compRecords.length > 0 ? `${Math.round((compCompleted / compRecords.length) * 100)}%` : '0%'}
+                </div>
+              </div>
+              <div className="card metric-tile">
+                <span className="tile-label">Average Score</span>
+                <div className="tile-value text-cyan">{compAvg}%</div>
+              </div>
+            </div>
+
+            <table className="clean-table">
+              <thead>
+                <tr>
+                  <th>Trainee</th>
+                  <th>Course</th>
+                  <th>Status</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {compRecords.map(r => (
+                  <tr key={r.id}>
+                    <td><strong>{r.traineeName}</strong></td>
+                    <td>{r.courseName}</td>
+                    <td><span className="badge badge-green">{r.status}</span></td>
+                    <td><strong>{r.score}%</strong></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Decrypted Record Modal */}
       {activeRecord && (
