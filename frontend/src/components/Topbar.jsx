@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, 
-  Coins, 
   Flame, 
   ChevronDown, 
   Check, 
@@ -49,21 +48,16 @@ export default function Topbar({ activeViewTitle }) {
         </div>
       </div>
 
-      {/* Right: Streak, XP Points, and User Dropdown */}
+      {/* Right: Streak (Trainees only) and User Dropdown */}
       <div className="topbar-right">
-        {/* Streak Pill */}
-        <div className="gamified-stat-pill streak-pill">
-          <Flame size={16} className="stat-flame-icon" />
-          <span className="stat-num">7</span>
-          <span className="stat-label">DAY STREAK</span>
-        </div>
-
-        {/* Coins / Points Pill */}
-        <div className="gamified-stat-pill coin-pill">
-          <Coins size={16} className="stat-coin-icon" />
-          <span className="stat-num">12,877</span>
-          <span className="stat-label">XP</span>
-        </div>
+        {/* Streak Pill - Trainees only */}
+        {currentUser?.role === 'trainee' && (
+          <div className="gamified-stat-pill streak-pill">
+            <Flame size={16} className="stat-flame-icon" />
+            <span className="stat-num">7</span>
+            <span className="stat-label">DAY STREAK</span>
+          </div>
+        )}
 
         {/* Role Switcher Menu */}
         <div className="role-dropdown-wrapper">

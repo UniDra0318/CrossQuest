@@ -11,7 +11,6 @@ import {
   Calendar, 
   AlertCircle, 
   Shield, 
-  Coins, 
   Play, 
   CheckCircle2, 
   HelpCircle, 
@@ -218,14 +217,6 @@ export default function TraineeDashboard({ activeSubView }) {
                   <div className="hero-stat-label">ACTIVE STREAK</div>
                 </div>
               </div>
-
-              <div className="hero-stat-card points-card">
-                <Coins size={32} className="coin-spin" />
-                <div className="hero-stat-info">
-                  <div className="hero-stat-value">{points.toLocaleString()}</div>
-                  <div className="hero-stat-label">TOTAL XP COINS</div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -310,7 +301,7 @@ export default function TraineeDashboard({ activeSubView }) {
                     Question {currentQuestionIndex + 1} of {QUIZ_QUESTIONS.length}
                   </span>
                   <span className="badge-gamified badge-gold">
-                    <Coins size={12} /> Score: {quizScore} XP
+                    <Target size={12} /> Score: {quizScore}%
                   </span>
                 </div>
 
@@ -387,12 +378,12 @@ export default function TraineeDashboard({ activeSubView }) {
               <Trophy size={64} className="trophy-victory text-gold" />
               <h2>Quest Completed!</h2>
               <p className="text-secondary text-sm">
-                You've mastered this knowledge challenge and earned XP coins.
+                You've mastered this knowledge challenge.
               </p>
 
               <div className="results-xp-box">
-                <div className="result-xp-value">+{quizScore} XP</div>
-                <div className="result-xp-label">EXPERIENCE POINTS ADDED</div>
+                <div className="result-xp-value">{quizScore}%</div>
+                <div className="result-xp-label">ASSESSMENT SCORE</div>
               </div>
 
               <div className="flex-align gap-12 mt-16">
