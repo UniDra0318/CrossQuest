@@ -25,7 +25,16 @@ function MainAppShell({ activeSubPage }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState(() => {
-    if (activeSubPage) return activeSubPage;
+    if (activeSubPage === 'quizzes') return 'trainee_quiz';
+    if (activeSubPage === 'badges') return 'trainee_badges';
+    if (activeSubPage === 'certifications') return 'trainee_certs';
+    if (activeSubPage === 'records') return currentUser?.role === 'admin' ? 'records_vault' : 'staff_records';
+    if (activeSubPage === 'trainees') return currentUser?.role === 'trainer' ? 'trainee_roster' : 'company_trainees';
+    if (activeSubPage === 'courses') return currentUser?.role === 'trainer' ? 'trainer_courses' : 'trainee_quest';
+    if (activeSubPage === 'anomalies') return 'anomalies';
+    if (activeSubPage === 'compliance') return currentUser?.role === 'company_staff' ? 'audit_certificate' : 'compliance_reports';
+    if (activeSubPage === 'settings') return 'system_settings';
+
     switch (currentUser?.role) {
       case 'admin': return 'admin_overview';
       case 'crossworks_staff': return 'staff_records';
@@ -36,40 +45,51 @@ function MainAppShell({ activeSubPage }) {
     }
   });
 
-  // Keep activeView in sync with activeSubPage prop
+  // Keep activeView in sync with activeSubPage prop without reverting user choices
   useEffect(() => {
-    if (activeSubPage) {
-      // Map generic page routes to role-specific subviews if needed
-      if (activeSubPage === 'records') {
-        setActiveView(currentUser?.role === 'admin' ? 'records_vault' : 'staff_records');
-      } else if (activeSubPage === 'trainees') {
-        setActiveView(currentUser?.role === 'trainer' ? 'trainee_roster' : 'company_trainees');
-      } else if (activeSubPage === 'courses') {
-        setActiveView(currentUser?.role === 'trainer' ? 'trainer_courses' : 'trainee_quest');
-      } else if (activeSubPage === 'anomalies') {
-        setActiveView('anomalies');
-      } else if (activeSubPage === 'compliance' || activeSubPage === 'audit') {
-        setActiveView(currentUser?.role === 'company_staff' ? 'audit_certificate' : 'compliance_reports');
-      } else if (activeSubPage === 'settings') {
-        setActiveView('system_settings');
-      } else {
-        // default dashboard view
+    if (!activeSubPage) return;
+    if (activeSubPage === 'quizzes') {
+      setActiveView('trainee_quiz');
+    } else if (activeSubPage === 'badges') {
+      setActiveView('trainee_badges');
+    } else if (activeSubPage === 'certifications') {
+      setActiveView('trainee_certs');
+    } else if (activeSubPage === 'records') {
+      setActiveView(currentUser?.role === 'admin' ? 'records_vault' : 'staff_records');
+    } else if (activeSubPage === 'trainees') {
+      setActiveView(currentUser?.role === 'trainer' ? 'trainee_roster' : 'company_trainees');
+    } else if (activeSubPage === 'courses') {
+      setActiveView(currentUser?.role === 'trainer' ? 'trainer_courses' : 'trainee_quest');
+    } else if (activeSubPage === 'anomalies') {
+      setActiveView('anomalies');
+    } else if (activeSubPage === 'compliance' || activeSubPage === 'audit') {
+      setActiveView(currentUser?.role === 'company_staff' ? 'audit_certificate' : 'compliance_reports');
+    } else if (activeSubPage === 'settings') {
+      setActiveView('system_settings');
+    } else if (activeSubPage === 'dashboard') {
+      setActiveView(prev => {
+        if (prev) return prev;
         switch (currentUser?.role) {
-          case 'admin': setActiveView('admin_overview'); break;
-          case 'crossworks_staff': setActiveView('staff_records'); break;
-          case 'trainer': setActiveView('trainer_courses'); break;
-          case 'company_staff': setActiveView('company_overview'); break;
-          case 'trainee': setActiveView('trainee_quest'); break;
-          default: setActiveView('overview');
+          case 'admin': return 'admin_overview';
+          case 'crossworks_staff': return 'staff_records';
+          case 'trainer': return 'trainer_courses';
+          case 'company_staff': return 'company_overview';
+          case 'trainee': return 'trainee_quest';
+          default: return 'overview';
         }
-      }
+      });
     }
   }, [activeSubPage, currentUser?.role]);
 
   const handleNavChange = (viewId) => {
     setActiveView(viewId);
-    // Also push meaningful route if applicable
-    if (viewId === 'staff_records' || viewId === 'records_vault') {
+    if (viewId === 'trainee_quiz') {
+      navigate('/quizzes');
+    } else if (viewId === 'trainee_badges') {
+      navigate('/badges');
+    } else if (viewId === 'trainee_certs') {
+      navigate('/certifications');
+    } else if (viewId === 'staff_records' || viewId === 'records_vault') {
       navigate('/records');
     } else if (viewId === 'trainee_roster' || viewId === 'company_trainees') {
       navigate('/trainees');
@@ -108,23 +128,23 @@ function MainAppShell({ activeSubPage }) {
 
         <main className="enterprise-page-area">
           {currentUser?.role === 'admin' && (
-            <AdminDashboard activeSubView={activeView} />
+            <AdminDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'crossworks_staff' && (
-            <StaffDashboard activeSubView={activeView} />
+            <StaffDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'trainer' && (
-            <TrainerDashboard activeSubView={activeView} />
+            <TrainerDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'company_staff' && (
-            <CompanyDashboard activeSubView={activeView} />
+            <CompanyDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'trainee' && (
-            <TraineeDashboard activeSubView={activeView} />
+            <TraineeDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
         </main>
       </div>
@@ -149,6 +169,38 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="dashboard" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/quizzes" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="quizzes" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/quiz" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="quizzes" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/badges" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="badges" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/certifications" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="certifications" />
           </ProtectedRoute>
         } 
       />

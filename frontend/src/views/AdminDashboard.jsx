@@ -23,7 +23,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { INITIAL_ANOMALIES, INITIAL_STAFF_PROFILES, INITIAL_TRAINING_RECORDS, CLIENT_COMPANIES } from '../data/mockData';
 import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes } from '../services/api';
 
-export default function AdminDashboard({ activeSubView }) {
+export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token } = useAuth();
   const [staffList, setStaffList] = useState(INITIAL_STAFF_PROFILES);
   const [anomalies, setAnomalies] = useState(INITIAL_ANOMALIES);
@@ -165,22 +165,30 @@ export default function AdminDashboard({ activeSubView }) {
               <div className="tile-sub">Security & Compliance Baseline Met</div>
             </div>
 
-            <div className="card metric-tile">
+            <div 
+              className="card metric-tile interactive-tile" 
+              onClick={() => setActiveView && setActiveView('anomalies')}
+              title="View all access anomalies"
+            >
               <div className="metric-tile-header">
                 <span className="tile-label">Pending Anomaly Incidents</span>
                 <AlertTriangle size={18} className="text-rose" />
               </div>
               <div className="tile-value text-rose">{unreviewedCount} Alerts</div>
-              <div className="tile-sub">Rule- & Threshold-based active flags</div>
+              <div className="tile-sub">Rule- & Threshold-based active flags (Click to view)</div>
             </div>
 
-            <div className="card metric-tile">
+            <div 
+              className="card metric-tile interactive-tile" 
+              onClick={() => setActiveView && setActiveView('attribute_authority')}
+              title="Manage staff access permissions"
+            >
               <div className="metric-tile-header">
                 <span className="tile-label">Managed Staff Profiles</span>
                 <UserCheck size={18} className="text-cyan" />
               </div>
               <div className="tile-value">{staffList.length} Accounts</div>
-              <div className="tile-sub">Managed cryptographic credentials</div>
+              <div className="tile-sub">Managed cryptographic credentials (Click to view)</div>
             </div>
 
             <div className="card metric-tile">

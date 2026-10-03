@@ -21,12 +21,13 @@ import { QUIZ_QUESTIONS } from '../data/mockData';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore } from '../services/api';
 
-export default function TraineeDashboard({ activeSubView }) {
+export default function TraineeDashboard({ activeSubView, setActiveView }) {
   const { currentUser } = useAuth();
   const [points, setPoints] = useState(12877);
   const [level, setLevel] = useState(4);
   const [streakDays, setStreakDays] = useState(7);
   const [pinCode, setPinCode] = useState('');
+  const [activeQuizTitle, setActiveQuizTitle] = useState('Interactive Knowledge Quest');
 
   // Active quiz state
   const [activeQuizRunning, setActiveQuizRunning] = useState(false);
@@ -138,13 +139,20 @@ export default function TraineeDashboard({ activeSubView }) {
 
   const currentQ = QUIZ_QUESTIONS[currentQuestionIndex] || QUIZ_QUESTIONS[0];
 
-  const handleStartQuiz = () => {
+  const handleStartQuiz = (topic = 'Interactive Knowledge Quest') => {
+    setActiveQuizTitle(topic);
     setActiveQuizRunning(true);
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setAnsweredState(null);
     setQuizScore(0);
     setQuizCompleted(false);
+    if (setActiveView) setActiveView('trainee_quiz');
+  };
+
+  const handleExitQuiz = () => {
+    setActiveQuizRunning(false);
+    if (setActiveView) setActiveView('trainee_quest');
   };
 
   const handleAnswerSelect = (optionIndex) => {
@@ -198,10 +206,13 @@ export default function TraineeDashboard({ activeSubView }) {
                   className="kahoot-pin-input"
                   value={pinCode}
                   onChange={(e) => setPinCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleStartQuiz(pinCode ? `PIN: ${pinCode}` : 'Interactive Quest Challenge');
+                  }}
                 />
                 <button 
                   className="btn-tactile btn-tactile-purple btn-pin-enter"
-                  onClick={() => handleStartQuiz()}
+                  onClick={() => handleStartQuiz(pinCode ? `PIN: ${pinCode}` : 'Interactive Quest Challenge')}
                 >
                   <Play size={16} />
                   <span>Join Quest</span>
@@ -251,7 +262,7 @@ export default function TraineeDashboard({ activeSubView }) {
 
                       <button
                         className="btn-tactile btn-tactile-purple btn-sm"
-                        onClick={handleStartQuiz}
+                        onClick={() => handleStartQuiz(act.title)}
                       >
                         <span>{act.completed ? 'Replay' : 'Play Quest'}</span>
                         <ArrowRight size={13} />
@@ -270,7 +281,12 @@ export default function TraineeDashboard({ activeSubView }) {
                 <Trophy size={20} className="text-gold" />
                 <h3>Your Earned Badges</h3>
               </div>
-              <button className="view-all-link" onClick={() => {}}>View All ({earnedBadges.length})</button>
+              <button 
+                className="view-all-link" 
+                onClick={() => setActiveView && setActiveView('trainee_badges')}
+              >
+                View All ({earnedBadges.length})
+              </button>
             </div>
 
             <div className="badges-showcase-row">
@@ -307,7 +323,7 @@ export default function TraineeDashboard({ activeSubView }) {
 
                 <button 
                   className="btn-tactile btn-tactile-ghost btn-sm"
-                  onClick={() => setActiveQuizRunning(false)}
+                  onClick={handleExitQuiz}
                 >
                   Exit Quiz
                 </button>
@@ -389,14 +405,14 @@ export default function TraineeDashboard({ activeSubView }) {
               <div className="flex-align gap-12 mt-16">
                 <button 
                   className="btn-tactile btn-tactile-purple"
-                  onClick={handleStartQuiz}
+                  onClick={() => handleStartQuiz(activeQuizTitle)}
                 >
                   <RotateCcw size={16} />
                   <span>Play Again</span>
                 </button>
                 <button 
                   className="btn-tactile btn-tactile-gold"
-                  onClick={() => setActiveQuizRunning(false)}
+                  onClick={handleExitQuiz}
                 >
                   <span>Back to Quests</span>
                 </button>

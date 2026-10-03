@@ -2199,6 +2199,41 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
+.metric-tile.interactive-tile {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.metric-tile.interactive-tile:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+.floating-points-pill {
+  position: absolute;
+  top: 24px;
+  right: 120px;
+  background: #f59e0b;
+  color: #1a052b;
+  font-family: var(--font-fun);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  animation: floatUpFade 1.2s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes floatUpFade {
+  0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+  25% { transform: translateY(-5px) scale(1.15); opacity: 1; }
+  75% { transform: translateY(-16px) scale(1); opacity: 1; }
+  100% { transform: translateY(-28px) scale(0.9); opacity: 0; }
+}
+
 .metric-tile-header {
   display: flex;
   justify-content: space-between;
