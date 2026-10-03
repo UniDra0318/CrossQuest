@@ -34,41 +34,94 @@ Corporate training providers increasingly store sensitive learner data (assessme
 
 ---
 
-## ✨ Key Features
+## 🏗️ Architecture & Project Structure
 
-### 🔐 Security
-- **Fine-grained CP-ABE encryption.** Only staff whose attributes satisfy a record's policy can decrypt it, wherever the ciphertext is stored or copied.
-- **Attribute and access-policy management.** Administrators issue, modify, and revoke staff attributes as roles and client assignments change.
-- **Access anomaly detection.** Rules cover:
-  - Out-of-scope decryption attempts
-  - Off-hours access
-  - Repeated failed attempts
-  - Abnormally high record-access volume
-- **Row-Level Security (RLS).** A second enforcement layer at the database.
-- **Time-aware company attribution.** Each record keeps the company attribute in effect when the training was completed, so historical records never need re-encryption when an attendee changes client companies.
-
-### 📊 Training Management
-- **Multi-client trainee and training-record management.** Company affiliation is an attribute of the attendee, not a separate client login.
-- **Per-trainee progress tracking.** Shows courses in progress, completed, or not started, plus score history across attempts.
-- **Certification lifecycle tracking.** Covers issue and expiry dates, with flags for certifications nearing renewal.
-- **Company-specific reporting.** Crossworks generates reports for each client company, with no direct client access to the system.
-
-### 🎮 Engagement
-- **Gamification.** Quizzes, points, badges, and leaderboards layered on the core progress-tracking system.
-- **Installable, offline-capable PWA.** Built with Service Workers and a Web App Manifest, so records and progress remain accessible under intermittent connectivity.
+```
+CrossQuest/
+├── docker-compose.yml              # Multi-container orchestration (PostgreSQL, FastAPI, React PWA)
+├── .env.example                    # Sample environment configurations
+├── .gitignore                      # Git ignore rules
+│
+├── backend/                        # FastAPI Server & Cryptographic Engine
+│   ├── Dockerfile                  # Container build with PBC, GMP & Charm-Crypto
+│   ├── requirements.txt            # Python dependencies
+│   ├── main.py                     # Root entrypoint
+│   └── app/
+│       ├── core/                   # Configuration, Database engine, Security/JWT
+│       ├── models/                 # SQLAlchemy schemas (User, Trainee, TrainingRecord, etc.)
+│       ├── schemas/                # Pydantic request/response models
+│       ├── crypto/                 # CP-ABE engine (Waters11 / BSW07 scheme via Charm-Crypto)
+│       ├── anomaly/                # Rule- & Threshold-based Anomaly Detection Engine
+│       └── api/                    # RESTful endpoints (Auth, Trainees, Records, Gamification, Anomalies, Reports)
+│
+└── frontend/                       # React.js PWA Client
+    ├── Dockerfile                  # Development container for frontend
+    ├── package.json                # Dependencies & Vite scripts
+    ├── vite.config.js              # Vite bundler configuration
+    ├── index.html                  # Entry HTML with PWA tags
+    └── src/                        # React components & UI logic
+```
 
 ---
 
-## 🏗️ Tech Stack
+## 🔒 Core Security & Functional Modules
 
-| Component | Technology |
-|---|---|
-| **Frontend** | React.js, Service Workers, Web App Manifest (Progressive Web App) |
-| **Backend** | Python, FastAPI (RESTful API) |
-| **Database** | PostgreSQL with Row-Level Security |
-| **Cryptography** | Charm-Crypto (Ciphertext-Policy Attribute-Based Encryption) |
-| **Transport Security** | HTTPS / TLS |
-| **Cloud Deployment** | AWS / Azure / GCP: VPC isolation, security groups, encrypted storage, managed database, and compute instances for FastAPI and CP-ABE operations |
+1. **Multi-Client Trainee Management**:
+   - Company affiliation is an attribute of the attendee rather than separate siloed accounts.
+   - Historical records retain the company attribute that was in effect at completion time to avoid mass re-encryption.
+
+2. **Ciphertext-Policy Attribute-Based Encryption (CP-ABE)**:
+   - Uses `Charm-Crypto` (BSW07 / Waters11 scheme) to embed policies directly into record ciphertexts.
+   - Policy format: `(ROLE:ACCOUNT_MANAGER AND COMPANY:CORP_ALPHA) OR ROLE:ADMIN`.
+   - Built-in development fallback simulation for environments without C-pairing libraries.
+
+3. **Access Anomaly Detection Engine**:
+   - **Out-of-Scope Access**: Detects staff requesting records from non-assigned client accounts.
+   - **Off-Hours Access**: Flags attempts outside business hours (08:00 - 19:00 UTC) or weekends.
+   - **Repeated Failed Attempts**: Triggers alert when consecutive policy decryption failures exceed threshold.
+   - **Abnormal Volume**: Flags burst access attempts within a sliding time window.
+
+4. **Gamification & Progress Tracking**:
+   - Tracks course status (`not_started`, `in_progress`, `completed`), assessment scores, quizzes, and renewal dates.
+   - Awards XP points, levels, badges (`FIRST_STEP`, `QUIZ_MASTER`, `PERFECT_SCORE`), and leaderboards.
+
+5. **Defense-in-Depth Row-Level Security (RLS)**:
+   - Database-layer policies complementing ciphertext-level CP-ABE encryption.
+
+---
+
+## 🚀 Getting Started
+
+### Option 1: Running with Docker (Recommended for Charm-Crypto)
+Ensure [Docker Desktop](https://www.docker.com/products/docker-desktop/) is installed and running on your system, then run:
+
+```bash
+docker compose up --build
+```
+
+- **Frontend PWA**: `http://localhost:5173`
+- **FastAPI Backend**: `http://localhost:8000`
+- **Interactive Swagger Docs**: `http://localhost:8000/docs`
+- **PostgreSQL Database**: `localhost:5432`
+
+---
+
+### Option 2: Running Locally
+
+#### 1. Backend:
+```bash
+# Activate your virtual environment
+.\.venv\Scripts\Activate.ps1
+
+# Start the FastAPI server
+uvicorn app.main:app --app-dir backend --reload --port 8000
+```
+
+#### 2. Frontend:
+```bash
+cd frontend
+npm run dev
+```
 
 ---
 
@@ -101,7 +154,7 @@ CrossQuest is evaluated against:
 | Kurt Luis E. Llanes | Proponent |
 | Tracy Carmelo M. Del Villar | Proponent |
 
-**Institution:** University of Makati, College of Computing and Information Sciences
+**Institution:** University of Makati, College of Computing and Information Sciences  
 **Client / Setting:** Crossworks Training and Consulting Corp.
 
 ---
