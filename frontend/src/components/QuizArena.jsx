@@ -224,7 +224,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   if (stage === 'briefing') {
     return (
       <div className="quiz-fullscreen-wrapper">
-        <div className="quiz-briefing-modal card-gamified">
+        <div className="briefing-card">
           <div className="briefing-header-bar" style={{ backgroundColor: quiz.headerColor }}>
             <span className="briefing-category-tag">{quiz.category}</span>
             <h1 className="briefing-title">{quiz.title}</h1>
@@ -239,32 +239,32 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
             <div className="briefing-metrics-grid">
               <div className="briefing-stat-tile">
-                <Target size={20} className="text-purple" />
+                <Target size={22} className="text-purple" />
                 <div className="stat-num">{totalQuestions} Questions</div>
                 <div className="stat-label">Assessment Items</div>
               </div>
 
               <div className="briefing-stat-tile">
-                <Clock size={20} className="text-cyan" />
+                <Clock size={22} className="text-cyan" />
                 <div className="stat-num">{quiz.timePerQuestion}s / Item</div>
                 <div className="stat-label">Countdown Timer</div>
               </div>
 
               <div className="briefing-stat-tile">
-                <Award size={20} className="text-gold" />
+                <Award size={22} className="text-gold" />
                 <div className="stat-num">{quiz.passingScore}% Needed</div>
                 <div className="stat-label">Passing Standard</div>
               </div>
 
               <div className="briefing-stat-tile">
-                <Shield size={20} className="text-green" />
+                <Shield size={22} className="text-green" />
                 <div className="stat-num">Zero-Trust</div>
                 <div className="stat-label">Security Focus</div>
               </div>
             </div>
 
             <div className="briefing-protection-alert">
-              <Sparkles size={16} className="text-gold" />
+              <Sparkles size={18} className="text-emerald flex-shrink-0" />
               <div>
                 <strong>Auto-Save Disruption Protection:</strong> If you experience a lost connection, power cut, or accidental browser closure, your answers and question progress are saved automatically so you can resume immediately without penalty.
               </div>
@@ -299,7 +299,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
     return (
       <div className="quiz-fullscreen-wrapper">
-        <div className="quiz-results-modal card-gamified">
+        <div className="results-card">
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
             {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
@@ -354,7 +354,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // ==========================================
   return (
     <div className="quiz-fullscreen-wrapper">
-      <div className="quiz-focused-arena card-gamified">
+      <div className="quiz-arena-card">
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
