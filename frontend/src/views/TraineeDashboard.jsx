@@ -23,7 +23,7 @@ import {
   FileQuestion,
   ChevronRight
 } from 'lucide-react';
-import { QUIZ_DATABASE } from '../data/quizDatabase';
+import { QUIZ_DATABASE, getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore } from '../services/api';
@@ -154,13 +154,15 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
 
   // Start quiz by ID (from assigned card or catalog)
   const handleStartQuizById = (quizId) => {
-    const q = QUIZ_DATABASE[quizId] || QUIZ_DATABASE['act-1'];
+    const db = getActiveQuizDatabase();
+    const q = db[quizId] || db['act-1'];
     setActiveQuiz(q);
   };
 
   // Resume saved interrupted session
   const handleResumeSession = (session) => {
-    const q = QUIZ_DATABASE[session.quizId] || QUIZ_DATABASE['act-1'];
+    const db = getActiveQuizDatabase();
+    const q = db[session.quizId] || db['act-1'];
     setActiveQuiz(q);
   };
 
@@ -408,7 +410,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
           </div>
 
           <div className="quizzes-catalog-grid">
-            {Object.values(QUIZ_DATABASE).map((quizItem) => {
+            {Object.values(getActiveQuizDatabase()).map((quizItem) => {
               const status = quizScoreStatus[quizItem.id];
               const isSaved = savedSession?.quizId === quizItem.id;
 

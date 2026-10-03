@@ -478,3 +478,78 @@ export const QUIZ_DATABASE = {
     ]
   }
 };
+
+// =========================================================================
+// TRAINER QUIZ AUTHORING & PERSISTENCE HELPERS
+// =========================================================================
+
+export function getActiveQuizDatabase() {
+  try {
+    const raw = localStorage.getItem('crossquest_quiz_database');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return { ...QUIZ_DATABASE, ...parsed };
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load custom quizzes from localStorage:", e);
+  }
+  return { ...QUIZ_DATABASE };
+}
+
+export function saveQuizToStorage(quizObj) {
+  try {
+    const current = getActiveQuizDatabase();
+    current[quizObj.id] = quizObj;
+    localStorage.setItem('crossquest_quiz_database', JSON.stringify(current));
+    return current;
+  } catch (e) {
+    console.error("Failed to save quiz:", e);
+    return null;
+  }
+}
+
+export function addQuestionToQuizStorage(quizId, questionObj) {
+  try {
+    const current = getActiveQuizDatabase();
+    if (current[quizId]) {
+      const updatedQuestions = [...(current[quizId].questions || []), questionObj];
+      current[quizId] = {
+        ...current[quizId],
+        questions: updatedQuestions
+      };
+      localStorage.setItem('crossquest_quiz_database', JSON.stringify(current));
+      return current[quizId];
+    }
+  } catch (e) {
+    console.error("Failed to add question:", e);
+  }
+  return null;
+}
+
+export function deleteQuestionFromQuizStorage(quizId, questionId) {
+  try {
+    const current = getActiveQuizDatabase();
+    if (current[quizId]) {
+      const filtered = (current[quizId].questions || []).filter(q => q.id !== questionId);
+      current[quizId] = {
+        ...current[quizId],
+        questions: filtered
+      };
+      localStorage.setItem('crossquest_quiz_database', JSON.stringify(current));
+      return current[quizId];
+    }
+  } catch (e) {
+    console.error("Failed to delete question:", e);
+  }
+  return null;
+}
+
+export function resetQuizDatabaseToDefaults() {
+  try {
+    localStorage.removeItem('crossquest_quiz_database');
+  } catch (e) {}
+  return { ...QUIZ_DATABASE };
+}
+

@@ -14,7 +14,8 @@ import {
   BookOpen, 
   BarChart3,
   Flame,
-  LayoutDashboard
+  LayoutDashboard,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -44,7 +45,9 @@ export default function Sidebar({ activeView, setActiveView }) {
         return [
           { id: 'trainer_courses', label: 'Course Cohorts', icon: BookOpen },
           { id: 'trainee_roster', label: 'Trainee Roster', icon: Users },
-          { id: 'grade_entry', label: 'Grade & Certify Records', icon: CheckSquare }
+          { id: 'grade_entry', label: 'Grade & Certify Records', icon: CheckSquare },
+          { id: 'quiz_creator', label: 'Quiz & Question Studio', icon: Sparkles },
+          { id: 'trainer_analytics', label: 'Cohort Performance', icon: BarChart3 }
         ];
 
       case 'company_staff':

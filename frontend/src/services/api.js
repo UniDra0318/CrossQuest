@@ -36,6 +36,24 @@ export async function fetchRecords(token) {
   return null;
 }
 
+export async function createEncryptedRecordApi(recordData, token) {
+  try {
+    const res = await fetch(`${API_BASE}/records/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(recordData)
+    });
+    const data = await res.json();
+    return { ok: res.ok, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+
 export async function decryptRecordApi(recordId, token) {
   try {
     const res = await fetch(`${API_BASE}/records/${recordId}/decrypt`, {

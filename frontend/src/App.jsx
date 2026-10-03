@@ -25,7 +25,7 @@ function MainAppShell({ activeSubPage }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState(() => {
-    if (activeSubPage === 'quizzes') return 'trainee_quiz';
+    if (activeSubPage === 'quizzes') return currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz';
     if (activeSubPage === 'badges') return 'trainee_badges';
     if (activeSubPage === 'certifications') return 'trainee_certs';
     if (activeSubPage === 'records') return currentUser?.role === 'admin' ? 'records_vault' : 'staff_records';
@@ -33,6 +33,7 @@ function MainAppShell({ activeSubPage }) {
     if (activeSubPage === 'courses') return currentUser?.role === 'trainer' ? 'trainer_courses' : 'trainee_quest';
     if (activeSubPage === 'anomalies') return 'anomalies';
     if (activeSubPage === 'compliance') return currentUser?.role === 'company_staff' ? 'audit_certificate' : 'compliance_reports';
+    if (activeSubPage === 'analytics') return 'trainer_analytics';
     if (activeSubPage === 'settings') return 'system_settings';
 
     switch (currentUser?.role) {
@@ -49,7 +50,7 @@ function MainAppShell({ activeSubPage }) {
   useEffect(() => {
     if (!activeSubPage) return;
     if (activeSubPage === 'quizzes') {
-      setActiveView('trainee_quiz');
+      setActiveView(currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz');
     } else if (activeSubPage === 'badges') {
       setActiveView('trainee_badges');
     } else if (activeSubPage === 'certifications') {
@@ -64,6 +65,8 @@ function MainAppShell({ activeSubPage }) {
       setActiveView('anomalies');
     } else if (activeSubPage === 'compliance' || activeSubPage === 'audit') {
       setActiveView(currentUser?.role === 'company_staff' ? 'audit_certificate' : 'compliance_reports');
+    } else if (activeSubPage === 'analytics') {
+      setActiveView('trainer_analytics');
     } else if (activeSubPage === 'settings') {
       setActiveView('system_settings');
     } else if (activeSubPage === 'dashboard') {
@@ -83,7 +86,7 @@ function MainAppShell({ activeSubPage }) {
 
   const handleNavChange = (viewId) => {
     setActiveView(viewId);
-    if (viewId === 'trainee_quiz') {
+    if (viewId === 'trainee_quiz' || viewId === 'quiz_creator') {
       navigate('/quizzes');
     } else if (viewId === 'trainee_badges') {
       navigate('/badges');
@@ -95,6 +98,8 @@ function MainAppShell({ activeSubPage }) {
       navigate('/trainees');
     } else if (viewId === 'trainer_courses' || viewId === 'trainee_quest') {
       navigate('/courses');
+    } else if (viewId === 'trainer_analytics') {
+      navigate('/analytics');
     } else if (viewId === 'anomalies') {
       navigate('/anomalies');
     } else if (viewId === 'compliance_reports' || viewId === 'audit_certificate') {
@@ -110,7 +115,12 @@ function MainAppShell({ activeSubPage }) {
     switch (currentUser?.role) {
       case 'admin': return 'Administrator Control Center';
       case 'crossworks_staff': return 'Crossworks Client Account Management';
-      case 'trainer': return 'Lead Trainer Course Delivery';
+      case 'trainer': 
+        if (activeView === 'quiz_creator') return 'Quiz & Assessment Creator Studio';
+        if (activeView === 'trainer_analytics') return 'Cohort Performance Analytics';
+        if (activeView === 'grade_entry') return 'Evaluation & Certification Workbench';
+        if (activeView === 'trainee_roster') return 'Enrolled Trainee Master Roster';
+        return 'Lead Trainer Course Delivery';
       case 'company_staff': return 'Client Organization Portal';
       case 'trainee': return 'Trainee Learning & Gamification Quest';
       default: return 'Workspace';
@@ -241,6 +251,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="compliance" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/analytics" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="analytics" />
           </ProtectedRoute>
         } 
       />
