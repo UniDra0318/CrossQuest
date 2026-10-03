@@ -486,6 +486,13 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
                     <div className="summary-q-text">{q.question}</div>
 
+                    {q.imageUrl && (
+                      <div className="summary-image-thumbnail-box">
+                        <img src={q.imageUrl} alt="Reference Diagram" className="summary-thumbnail-img" />
+                        {q.imageCaption && <span className="summary-thumbnail-caption">{q.imageCaption}</span>}
+                      </div>
+                    )}
+
                     <div className="summary-answers-grid">
                       <div className="summary-answer-col user-answer">
                         <span className="ans-label">Your Submitted Answer:</span>
@@ -596,8 +603,33 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           </div>
 
           {/* Diagram render if applicable */}
-          {currentQ.type === 'diagram_analysis' && currentQ.diagramType && (
-            <QuizDiagram type={currentQ.diagramType} />
+          {currentQ.type === 'diagram_analysis' && (
+            <QuizDiagram 
+              type={currentQ.diagramType} 
+              customNodes={currentQ.customNodes}
+              customTitle={currentQ.customTitle}
+              imageUrl={currentQ.imageUrl || currentQ.diagramImage}
+              imageCaption={currentQ.imageCaption}
+            />
+          )}
+
+          {/* Attached Reference Image for Multiple Choice & other questions */}
+          {currentQ.imageUrl && currentQ.type !== 'diagram_analysis' && (
+            <div className="question-attached-image-wrapper">
+              <div className="attached-image-frame">
+                <img 
+                  src={currentQ.imageUrl} 
+                  alt={currentQ.imageCaption || 'Question Reference Graphic'} 
+                  className="question-reference-img" 
+                />
+                {currentQ.imageCaption && (
+                  <div className="question-image-caption">
+                    <Sparkles size={12} className="text-purple flex-shrink-0" />
+                    <span>{currentQ.imageCaption}</span>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           <div className="arena-question-heading">

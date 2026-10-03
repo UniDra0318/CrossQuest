@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Shield, 
   Lock, 
@@ -12,10 +12,138 @@ import {
   Award,
   ChevronDown,
   Building,
-  Sparkles
+  Sparkles,
+  Maximize2,
+  X,
+  Cpu,
+  Server,
+  Cloud,
+  Globe,
+  Radio,
+  FileCode
 } from 'lucide-react';
 
-export default function QuizDiagram({ type }) {
+export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, imageCaption }) {
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  // If an uploaded or URL image is provided for the diagram
+  if (imageUrl) {
+    return (
+      <div className="diagram-card-container diagram-image-container">
+        <div className="diagram-header-strip flex-between">
+          <div className="flex-align gap-8">
+            <Layers size={16} className="text-purple" />
+            <span>{customTitle || 'EXAMINATION ARCHITECTURAL DIAGRAM'}</span>
+          </div>
+          <button 
+            type="button" 
+            className="diagram-zoom-btn"
+            onClick={() => setIsZoomed(true)}
+            title="Click to view full-resolution diagram"
+          >
+            <Maximize2 size={13} />
+            <span>Enlarge Diagram</span>
+          </button>
+        </div>
+
+        <div className="diagram-image-frame" onClick={() => setIsZoomed(true)}>
+          <img 
+            src={imageUrl} 
+            alt={imageCaption || 'Architectural Diagram'} 
+            className="diagram-rendered-img" 
+          />
+          <div className="diagram-image-hover-hint">
+            <Maximize2 size={18} />
+            <span>Click to expand full size</span>
+          </div>
+        </div>
+
+        {imageCaption && (
+          <div className="diagram-caption-footer">
+            <Sparkles size={13} className="text-purple flex-shrink-0" />
+            <span>{imageCaption}</span>
+          </div>
+        )}
+
+        {/* Fullscreen Lightbox Zoom Modal */}
+        {isZoomed && (
+          <div className="diagram-lightbox-backdrop" onClick={() => setIsZoomed(false)}>
+            <div className="diagram-lightbox-content" onClick={(e) => e.stopPropagation()}>
+              <div className="diagram-lightbox-header flex-between">
+                <span className="font-bold text-sm text-slate-800">{customTitle || imageCaption || 'Diagram View'}</span>
+                <button 
+                  type="button" 
+                  className="btn-icon-ghost" 
+                  onClick={() => setIsZoomed(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="diagram-lightbox-body">
+                <img src={imageUrl} alt="Enlarged Diagram" className="diagram-lightbox-img" />
+              </div>
+              {imageCaption && (
+                <div className="diagram-lightbox-footer text-xs text-secondary">
+                  {imageCaption}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // If a custom node flow was authored
+  if (customNodes && Array.isArray(customNodes) && customNodes.length > 0) {
+    return (
+      <div className="diagram-card-container">
+        <div className="diagram-header-strip">
+          <Sparkles size={16} className="text-purple" />
+          <span>{customTitle || 'CUSTOM ARCHITECTURAL SEQUENCE PIPELINE'}</span>
+        </div>
+
+        <div className="diagram-pipeline-wrapper custom-flow-wrapper">
+          {customNodes.map((node, nIdx) => {
+            const isTarget = node.isTarget;
+            const nodeColor = node.color || 'purple';
+
+            return (
+              <React.Fragment key={node.id || nIdx}>
+                <div className={`pipeline-node node-${nodeColor} ${isTarget ? 'node-active-guard custom-target-node' : ''}`}>
+                  <div className={`node-icon-bubble bg-${nodeColor}-subtle ${isTarget ? 'pulse-slow' : ''}`}>
+                    {node.iconType === 'database' ? <Database size={22} className={`text-${nodeColor}`} /> :
+                     node.iconType === 'server' ? <Server size={22} className={`text-${nodeColor}`} /> :
+                     node.iconType === 'cloud' ? <Cloud size={22} className={`text-${nodeColor}`} /> :
+                     node.iconType === 'lock' ? <Lock size={22} className={`text-${nodeColor}`} /> :
+                     node.iconType === 'shield' ? <Shield size={22} className={`text-${nodeColor}`} /> :
+                     node.iconType === 'code' ? <FileCode size={22} className={`text-${nodeColor}`} /> :
+                     <Cpu size={22} className={`text-${nodeColor}`} />}
+                  </div>
+                  <div className="node-title">{node.title || `Stage ${nIdx + 1}`}</div>
+                  {node.badge && (
+                    <div className={`node-badge-tag ${isTarget ? 'badge-gold-glow' : ''}`}>
+                      {node.badge}
+                    </div>
+                  )}
+                  {node.subtitle && <div className="node-desc">{node.subtitle}</div>}
+                </div>
+
+                {nIdx < customNodes.length - 1 && (
+                  <div className="pipeline-connector">
+                    <div className="connector-line">
+                      <div className={`connector-pulse-dot delay-${(nIdx % 3) + 1}`} />
+                    </div>
+                    <ArrowRight size={16} className="connector-arrow text-purple" />
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
   // 1. Zero-Trust Security & Encryption Pipeline
   if (type === 'security_pipeline') {
     return (

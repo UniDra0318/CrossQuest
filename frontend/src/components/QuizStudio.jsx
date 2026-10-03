@@ -20,7 +20,18 @@ import {
   Eye,
   Edit3,
   Settings,
-  Pencil
+  Pencil,
+  Upload,
+  Image as ImageIcon,
+  FileUp,
+  X,
+  Maximize2,
+  Cpu,
+  Server,
+  Database,
+  Lock,
+  Shield,
+  Palette
 } from 'lucide-react';
 import { 
   getActiveQuizDatabase, 
@@ -38,6 +49,13 @@ const QUESTION_TYPES = [
   { id: 'identification', label: 'Identification (Direct Term)', icon: FileText, badgeClass: 'tag-input' },
   { id: 'sequence_order', label: 'Sequence Reordering', icon: ListOrdered, badgeClass: 'tag-sequence' },
   { id: 'diagram_analysis', label: 'Diagram Hotspot Analysis', icon: Eye, badgeClass: 'tag-diagram' }
+];
+
+const DEFAULT_CUSTOM_NODES = [
+  { id: 'node-1', title: 'Trainee Client', subtitle: 'HTTPS Browser', badge: 'Client', color: 'cyan', iconType: 'cpu', isTarget: false },
+  { id: 'node-2', title: 'API Gateway', subtitle: 'OAuth Bearer Guard', badge: 'Perimeter', color: 'purple', iconType: 'shield', isTarget: false },
+  { id: 'node-3', title: 'CP-ABE Policy Engine', subtitle: 'Decryption Hotspot', badge: 'Target Component', color: 'gold', iconType: 'lock', isTarget: true },
+  { id: 'node-4', title: 'Encrypted Vault', subtitle: 'PostgreSQL Ciphertext', badge: 'Database', color: 'emerald', iconType: 'database', isTarget: false }
 ];
 
 export default function QuizStudio() {
@@ -59,6 +77,16 @@ export default function QuizStudio() {
   const [mcOptions, setMcOptions] = useState(['', '', '', '']);
   const [mcCorrectIdx, setMcCorrectIdx] = useState(0);
   const [diagramType, setDiagramType] = useState('security_pipeline');
+
+  // Image attachment state (for multiple choice and diagram questions)
+  const [qImageUrl, setQImageUrl] = useState('');
+  const [qImageCaption, setQImageCaption] = useState('');
+  const [imageInputMode, setImageInputMode] = useState('upload'); // 'upload' | 'url'
+
+  // Custom diagram builder state
+  const [qDiagramSource, setQDiagramSource] = useState('template'); // 'template' | 'custom_flow' | 'image'
+  const [qCustomTitle, setQCustomTitle] = useState('Custom Architecture Flow');
+  const [qCustomNodes, setQCustomNodes] = useState(DEFAULT_CUSTOM_NODES);
 
   // For identification
   const [identAnswers, setIdentAnswers] = useState('');
@@ -104,6 +132,20 @@ export default function QuizStudio() {
     setSelectedQuizId(quizId);
   };
 
+  const handleImageFileUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be under 5MB for smooth browser storage.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setQImageUrl(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Open Question Modal for Creating
   const handleOpenAddModal = () => {
     setEditingQuestionId(null);
@@ -113,6 +155,13 @@ export default function QuizStudio() {
     setQExplanation('');
     setMcOptions(['', '', '', '']);
     setMcCorrectIdx(0);
+    setDiagramType('security_pipeline');
+    setQImageUrl('');
+    setQImageCaption('');
+    setImageInputMode('upload');
+    setQDiagramSource('template');
+    setQCustomTitle('Zero-Trust Cryptographic Pipeline Architecture');
+    setQCustomNodes(JSON.parse(JSON.stringify(DEFAULT_CUSTOM_NODES)));
     setIdentAnswers('');
     setIdentPlaceholder('Type your answer here...');
     setSeqSteps(['', '', '', '']);
@@ -132,6 +181,21 @@ export default function QuizStudio() {
     setQType(q.type || 'multiple_choice');
     setQPrompt(q.question || '');
     setQExplanation(q.explanation || '');
+
+    // Restore Image
+    const img = q.imageUrl || q.diagramImage || '';
+    setQImageUrl(img);
+    setQImageCaption(q.imageCaption || '');
+    setImageInputMode(img.startsWith('data:') ? 'upload' : 'url');
+
+    // Restore Diagram settings
+    setQDiagramSource(q.diagramSource || (img ? 'image' : (Array.isArray(q.customNodes) && q.customNodes.length > 0) ? 'custom_flow' : 'template'));
+    setQCustomTitle(q.customTitle || 'Custom Architectural Sequence');
+    if (Array.isArray(q.customNodes) && q.customNodes.length > 0) {
+      setQCustomNodes(JSON.parse(JSON.stringify(q.customNodes)));
+    } else {
+      setQCustomNodes(JSON.parse(JSON.stringify(DEFAULT_CUSTOM_NODES)));
+    }
 
     if (q.type === 'multiple_choice' || q.type === 'diagram_analysis') {
       const opts = Array.isArray(q.options) ? [...q.options] : ['', '', '', ''];
@@ -238,15 +302,34 @@ export default function QuizStudio() {
       }
       questionObj.options = filtered;
       questionObj.correctAnswer = Math.min(mcCorrectIdx, filtered.length - 1);
+      if (qImageUrl.trim()) {
+        questionObj.imageUrl = qImageUrl.trim();
+        if (qImageCaption.trim()) questionObj.imageCaption = qImageCaption.trim();
+      }
     } else if (qType === 'diagram_analysis') {
       const filtered = mcOptions.map(o => o.trim()).filter(Boolean);
       if (filtered.length < 2) {
         alert("Please provide at least 2 choice options.");
         return;
       }
-      questionObj.diagramType = diagramType;
       questionObj.options = filtered;
       questionObj.correctAnswer = Math.min(mcCorrectIdx, filtered.length - 1);
+      questionObj.diagramSource = qDiagramSource;
+
+      if (qDiagramSource === 'image') {
+        if (!qImageUrl.trim()) {
+          alert("Please upload or provide an image URL for the diagram analysis.");
+          return;
+        }
+        questionObj.imageUrl = qImageUrl.trim();
+        if (qImageCaption.trim()) questionObj.imageCaption = qImageCaption.trim();
+        if (qCustomTitle.trim()) questionObj.customTitle = qCustomTitle.trim();
+      } else if (qDiagramSource === 'custom_flow') {
+        questionObj.customTitle = qCustomTitle.trim() || 'Custom Architectural Sequence';
+        questionObj.customNodes = qCustomNodes;
+      } else {
+        questionObj.diagramType = diagramType;
+      }
     } else if (qType === 'identification') {
       const answersList = identAnswers
         .split(',')
@@ -538,6 +621,17 @@ export default function QuizStudio() {
                             {q.question}
                           </div>
 
+                          {/* Attached image preview in question pool card */}
+                          {q.imageUrl && (
+                            <div className="pool-image-preview flex-align gap-10 p-8 bg-slate-50 rounded border border-slate-200 mb-10">
+                              <img src={q.imageUrl} alt="Reference Graphic" className="pool-thumbnail-img" />
+                              <div className="text-xs text-secondary">
+                                <span className="font-bold text-purple">Attached Graphic: </span>
+                                <span>{q.imageCaption || (q.type === 'diagram_analysis' ? 'Custom Diagram Image' : 'Question Image Reference')}</span>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Preview Details Based on Type */}
                           {q.type === 'multiple_choice' && Array.isArray(q.options) && (
                             <div className="grid-2-col gap-8 mb-10 text-xs">
@@ -584,8 +678,16 @@ export default function QuizStudio() {
                           )}
 
                           {q.type === 'diagram_analysis' && (
-                            <div className="diagram-preview-box mb-10 text-xs p-6 bg-slate-50 rounded border border-slate-200 flex-between">
-                              <span className="text-secondary">Diagram Architecture: <strong>{q.diagramType || 'security_pipeline'}</strong></span>
+                            <div className="diagram-preview-box mb-10 text-xs p-6 bg-slate-50 rounded border border-slate-200 flex-between flex-wrap gap-6">
+                              <span className="text-secondary">
+                                Diagram Architecture: <strong>
+                                  {q.diagramSource === 'image' || q.imageUrl
+                                    ? 'Uploaded Custom Graphic' 
+                                    : q.diagramSource === 'custom_flow' || q.customNodes
+                                    ? `Custom Pipeline (${q.customNodes?.length || 4} Nodes)`
+                                    : (q.diagramType || 'security_pipeline')}
+                                </strong>
+                              </span>
                               <span className="text-emerald font-semibold">Correct Solution: {q.options ? q.options[q.correctAnswer] : ''}</span>
                             </div>
                           )}
@@ -751,13 +853,188 @@ export default function QuizStudio() {
                 </div>
               )}
 
-              {/* CASE B: MULTIPLE CHOICE 4-TILE BUILDER */}
-              {(qType === 'multiple_choice' || qType === 'diagram_analysis') && (
-                <div className="form-group mb-16 bg-slate-50 p-14 rounded-lg border border-slate-200">
-                  {qType === 'diagram_analysis' && (
-                    <div className="mb-12">
-                      <label className="field-label text-xs font-bold text-secondary mb-4">
-                        Architectural Diagram Focus
+              {/* CASE B: MULTIPLE CHOICE 4-TILE BUILDER & ATTACHED IMAGE */}
+              {qType === 'multiple_choice' && (
+                <div className="form-group mb-16 bg-slate-50 p-16 rounded-lg border border-slate-200">
+                  <label className="font-bold text-xs uppercase tracking-wider text-blue mb-10 block">
+                    Choice Options (Select Radio Button for Correct Answer)
+                  </label>
+
+                  <div className="grid-2-col gap-10 mb-16">
+                    {mcOptions.map((opt, oIdx) => {
+                      const colors = [
+                        { label: 'Red ▲', color: '#e21b3c' },
+                        { label: 'Blue ◆', color: '#1368ce' },
+                        { label: 'Yellow ●', color: '#d89e00' },
+                        { label: 'Green ■', color: '#26890c' }
+                      ];
+
+                      return (
+                        <div key={oIdx} className="choice-option-input-box p-8 bg-white rounded border flex-align gap-8">
+                          <input
+                            type="radio"
+                            name="mc_correct_choice"
+                            checked={mcCorrectIdx === oIdx}
+                            onChange={() => setMcCorrectIdx(oIdx)}
+                            className="radio-accent"
+                            title="Mark as correct answer"
+                          />
+                          <span className="font-bold text-xs flex-shrink-0" style={{ color: colors[oIdx].color }}>
+                            {colors[oIdx].label}:
+                          </span>
+                          <input
+                            type="text"
+                            className="clean-input flex-1"
+                            placeholder={`Option ${oIdx + 1}...`}
+                            value={opt}
+                            onChange={(e) => {
+                              const updated = [...mcOptions];
+                              updated[oIdx] = e.target.value;
+                              setMcOptions(updated);
+                            }}
+                            required
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* OPTIONAL ATTACHED REFERENCE IMAGE */}
+                  <div className="border-top pt-12">
+                    <div className="flex-between mb-8">
+                      <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
+                        <ImageIcon size={14} />
+                        <span>Attached Reference Graphic / Image (Optional)</span>
+                      </label>
+                      {qImageUrl && (
+                        <button
+                          type="button"
+                          className="btn-icon-danger text-xs flex-align gap-4"
+                          onClick={() => {
+                            setQImageUrl('');
+                            setQImageCaption('');
+                          }}
+                          title="Remove attached image"
+                        >
+                          <X size={12} />
+                          <span>Remove Image</span>
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-secondary mb-10">
+                      You can attach an architectural diagram, screenshot, or code graphic to accompany this multiple choice question.
+                    </p>
+
+                    {!qImageUrl ? (
+                      <div className="image-authoring-input-zone bg-white p-12 rounded border border-slate-200">
+                        <div className="flex-align gap-10 mb-8">
+                          <button
+                            type="button"
+                            className={`btn btn-xs ${imageInputMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setImageInputMode('upload')}
+                          >
+                            <Upload size={12} /> Upload File (PNG/JPG/SVG)
+                          </button>
+                          <button
+                            type="button"
+                            className={`btn btn-xs ${imageInputMode === 'url' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setImageInputMode('url')}
+                          >
+                            <Link2 size={12} /> Enter Image URL
+                          </button>
+                        </div>
+
+                        {imageInputMode === 'upload' ? (
+                          <div className="upload-dropzone">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              id="mc-image-file-input"
+                              className="hidden-file-input"
+                              onChange={handleImageFileUpload}
+                            />
+                            <label htmlFor="mc-image-file-input" className="file-upload-label flex-column align-center justify-center p-16 cursor-pointer">
+                              <FileUp size={24} className="text-purple mb-6" />
+                              <span className="font-bold text-xs text-slate-800">Choose an image file from your computer</span>
+                              <span className="text-2xs text-secondary mt-2">Supports PNG, JPG, WebP, SVG up to 5MB (Saved directly in browser)</span>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="url-input-group">
+                            <input
+                              type="url"
+                              className="clean-input w-full text-xs"
+                              placeholder="https://example.com/diagram.png or data:image/..."
+                              value={qImageUrl}
+                              onChange={(e) => setQImageUrl(e.target.value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="image-preview-card p-10 bg-white rounded border border-slate-200 flex-align gap-14">
+                        <img src={qImageUrl} alt="Preview" className="builder-thumbnail-img" />
+                        <div className="flex-1">
+                          <label className="field-label text-xs font-bold text-secondary mb-2 block">
+                            Image Caption / Reference Title
+                          </label>
+                          <input
+                            type="text"
+                            className="clean-input w-full text-xs"
+                            placeholder="e.g. Figure 1: Network Traffic Inspection Topology"
+                            value={qImageCaption}
+                            onChange={(e) => setQImageCaption(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* CASE E: DIAGRAM HOTSPOT ANALYSIS BUILDER */}
+              {qType === 'diagram_analysis' && (
+                <div className="form-group mb-16 bg-slate-50 p-16 rounded-lg border border-slate-200">
+                  <div className="flex-between mb-8">
+                    <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
+                      <Layers size={14} />
+                      <span>Diagram Architecture Source</span>
+                    </label>
+                  </div>
+
+                  {/* DIAGRAM SOURCE SELECTOR TABS */}
+                  <div className="diagram-source-selector grid-3-col gap-8 mb-14">
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${qDiagramSource === 'template' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
+                      onClick={() => setQDiagramSource('template')}
+                    >
+                      <Layers size={13} />
+                      <span>Built-in Templates</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${qDiagramSource === 'custom_flow' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
+                      onClick={() => setQDiagramSource('custom_flow')}
+                    >
+                      <Sparkles size={13} />
+                      <span>Custom Sequence Flow</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${qDiagramSource === 'image' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
+                      onClick={() => setQDiagramSource('image')}
+                    >
+                      <Upload size={13} />
+                      <span>Upload Diagram Image</span>
+                    </button>
+                  </div>
+
+                  {/* SUB-SOURCE 1: BUILT-IN TEMPLATES */}
+                  {qDiagramSource === 'template' && (
+                    <div className="mb-14 p-12 bg-white rounded border border-slate-200">
+                      <label className="field-label text-xs font-bold text-secondary mb-4 block">
+                        Select Standard Architecture Diagram
                       </label>
                       <select 
                         className="clean-input w-full"
@@ -765,14 +1042,260 @@ export default function QuizStudio() {
                         onChange={(e) => setDiagramType(e.target.value)}
                       >
                         <option value="security_pipeline">Zero-Trust Pipeline (Network ➔ CP-ABE ➔ Database)</option>
-                        <option value="access_hierarchy">Authority Key Hierarchy (Master Key ➔ Staff Clearance)</option>
-                        <option value="tenant_partition">Multi-Tenant Partition (Tenant Isolation & RLS Boundary)</option>
+                        <option value="clearance_hierarchy">Clearance Level Pyramid (Root Admin ➔ Account Mgr ➔ Staff)</option>
+                        <option value="data_flow">Data Privacy Relationship Flow (Subject ➔ PIC ➔ PIP)</option>
+                        <option value="tenant_partition">Multi-Tenant Cryptographic Partition (Tenant Alpha / Beta Wall)</option>
                       </select>
                     </div>
                   )}
 
+                  {/* SUB-SOURCE 2: CUSTOM SEQUENCE FLOW BUILDER */}
+                  {qDiagramSource === 'custom_flow' && (
+                    <div className="mb-14 p-12 bg-white rounded border border-slate-200">
+                      <div className="mb-10">
+                        <label className="field-label text-xs font-bold text-secondary mb-4 block">
+                          Custom Diagram Title / Header Strip
+                        </label>
+                        <input
+                          type="text"
+                          className="clean-input w-full text-xs font-bold"
+                          placeholder="e.g. Distributed Authentication & Access Token Pipeline"
+                          value={qCustomTitle}
+                          onChange={(e) => setQCustomTitle(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="flex-between mb-8">
+                        <label className="font-bold text-xs uppercase tracking-wider text-purple">
+                          Sequence Flow Nodes ({qCustomNodes.length})
+                        </label>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-xs flex-align gap-4"
+                          disabled={qCustomNodes.length >= 5}
+                          onClick={() => {
+                            const newId = `node-${Date.now().toString(36)}`;
+                            setQCustomNodes([
+                              ...qCustomNodes,
+                              {
+                                id: newId,
+                                title: `Component ${qCustomNodes.length + 1}`,
+                                subtitle: 'Process Description',
+                                badge: 'Service',
+                                color: 'cyan',
+                                iconType: 'server',
+                                isTarget: false
+                              }
+                            ]);
+                          }}
+                        >
+                          <Plus size={12} /> Add Node
+                        </button>
+                      </div>
+
+                      <div className="custom-flow-builder-stack space-y-3 mb-10">
+                        {qCustomNodes.map((node, nIdx) => (
+                          <div key={node.id || nIdx} className={`custom-node-builder-card p-10 rounded border flex-between gap-10 ${node.isTarget ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200'}`}>
+                            <div className="flex-align gap-8 flex-1 flex-wrap">
+                              <span className="badge badge-purple flex-shrink-0 font-bold">{nIdx + 1}</span>
+                              
+                              <input
+                                type="text"
+                                className="clean-input text-xs font-bold w-120"
+                                placeholder="Component Name"
+                                value={node.title}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].title = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              />
+
+                              <input
+                                type="text"
+                                className="clean-input text-xs w-130"
+                                placeholder="Function / Subtitle"
+                                value={node.subtitle}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].subtitle = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              />
+
+                              <input
+                                type="text"
+                                className="clean-input text-xs w-90"
+                                placeholder="Badge Tag"
+                                value={node.badge}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].badge = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              />
+
+                              <select
+                                className="clean-input text-xs"
+                                value={node.color}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].color = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              >
+                                <option value="purple">Purple</option>
+                                <option value="cyan">Cyan</option>
+                                <option value="emerald">Emerald</option>
+                                <option value="gold">Gold</option>
+                                <option value="rose">Rose</option>
+                              </select>
+
+                              <select
+                                className="clean-input text-xs"
+                                value={node.iconType}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].iconType = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              >
+                                <option value="cpu">CPU / Process</option>
+                                <option value="server">Server</option>
+                                <option value="database">Database</option>
+                                <option value="cloud">Cloud</option>
+                                <option value="shield">Shield</option>
+                                <option value="lock">Lock</option>
+                                <option value="code">Code</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-align gap-8 flex-shrink-0">
+                              <label className="flex-align gap-4 text-xs font-bold text-amber-700 cursor-pointer" title="Make this the highlighted/focus component">
+                                <input
+                                  type="radio"
+                                  name="custom_target_node_radio"
+                                  checked={!!node.isTarget}
+                                  onChange={() => {
+                                    const updated = qCustomNodes.map((nd, idx) => ({
+                                      ...nd,
+                                      isTarget: idx === nIdx
+                                    }));
+                                    setQCustomNodes(updated);
+                                  }}
+                                />
+                                <span>Target</span>
+                              </label>
+
+                              {qCustomNodes.length > 2 && (
+                                <button
+                                  type="button"
+                                  className="btn-icon-danger"
+                                  onClick={() => {
+                                    const updated = qCustomNodes.filter((_, idx) => idx !== nIdx);
+                                    setQCustomNodes(updated);
+                                  }}
+                                  title="Delete node"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SUB-SOURCE 3: UPLOAD DIAGRAM IMAGE OR URL */}
+                  {qDiagramSource === 'image' && (
+                    <div className="mb-14 p-12 bg-white rounded border border-slate-200">
+                      <div className="flex-between mb-8">
+                        <label className="field-label text-xs font-bold text-secondary">
+                          Upload Diagram Graphic File or Paste Link
+                        </label>
+                        {qImageUrl && (
+                          <button
+                            type="button"
+                            className="btn-icon-danger text-xs flex-align gap-4"
+                            onClick={() => {
+                              setQImageUrl('');
+                              setQImageCaption('');
+                            }}
+                          >
+                            <X size={12} />
+                            <span>Clear Diagram</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {!qImageUrl ? (
+                        <div>
+                          <div className="flex-align gap-10 mb-8">
+                            <button
+                              type="button"
+                              className={`btn btn-xs ${imageInputMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
+                              onClick={() => setImageInputMode('upload')}
+                            >
+                              <Upload size={12} /> Upload File (PNG/JPG/SVG)
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn btn-xs ${imageInputMode === 'url' ? 'btn-primary' : 'btn-secondary'}`}
+                              onClick={() => setImageInputMode('url')}
+                            >
+                              <Link2 size={12} /> Enter Image URL
+                            </button>
+                          </div>
+
+                          {imageInputMode === 'upload' ? (
+                            <div className="upload-dropzone">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                id="diagram-image-file-input"
+                                className="hidden-file-input"
+                                onChange={handleImageFileUpload}
+                              />
+                              <label htmlFor="diagram-image-file-input" className="file-upload-label flex-column align-center justify-center p-20 cursor-pointer">
+                                <FileUp size={28} className="text-purple mb-6" />
+                                <span className="font-bold text-xs text-slate-800">Select diagram file from computer</span>
+                                <span className="text-2xs text-secondary mt-2">Any architectural diagram (PNG, JPG, WebP, SVG) up to 5MB</span>
+                              </label>
+                            </div>
+                          ) : (
+                            <input
+                              type="url"
+                              className="clean-input w-full text-xs"
+                              placeholder="https://example.com/network-diagram.png"
+                              value={qImageUrl}
+                              onChange={(e) => setQImageUrl(e.target.value)}
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="image-preview-card p-10 bg-slate-50 rounded border flex-align gap-14">
+                          <img src={qImageUrl} alt="Diagram Preview" className="builder-thumbnail-img" />
+                          <div className="flex-1">
+                            <label className="field-label text-xs font-bold text-secondary mb-2 block">
+                              Diagram Caption / Assessment Prompt Header
+                            </label>
+                            <input
+                              type="text"
+                              className="clean-input w-full text-xs"
+                              placeholder="e.g. Figure 3: Enterprise Zero-Trust Data Flow"
+                              value={qImageCaption}
+                              onChange={(e) => setQImageCaption(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 4-CHOICE OPTIONS FOR DIAGRAM QUESTION */}
                   <label className="font-bold text-xs uppercase tracking-wider text-blue mb-8 block">
-                    Choice Options (Select Radio Button for Correct Answer)
+                    Analysis Choice Options (Select Radio Button for Correct Answer)
                   </label>
 
                   <div className="grid-2-col gap-10">
