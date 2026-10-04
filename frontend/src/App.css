@@ -5742,6 +5742,168 @@
   max-height: 180px;
 }
 
+/* =========================================
+   EXECUTIVE COHORT & ASSESSMENT ANALYTICS
+   ========================================= */
+
+.trainer-analytics-view {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+.analytics-filter-toolbar {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.grid-5-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.analytics-tabs-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 6px;
+}
+
+.analytics-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-family: var(--font-fun);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.analytics-tab-btn:hover {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+.analytics-tab-btn.active {
+  background: #ffffff;
+  color: #772ce8;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.format-metric-card {
+  min-height: 130px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.format-metric-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.competency-row-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: all 0.15s ease;
+}
+
+.competency-row-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.competency-benchmark-line {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2.5px;
+  background: #0f172a;
+  z-index: 2;
+  border-radius: 2px;
+}
+
+.competency-benchmark-line::after {
+  content: 'Target';
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.remediation-trainee-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px 22px;
+  transition: all 0.15s ease;
+}
+
+.remediation-trainee-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.text-rose-600 {
+  color: #e11d48 !important;
+}
+
+.bg-rose-600 {
+  background-color: #e11d48 !important;
+}
+
+.w-80 {
+  width: 80px;
+}
+
+.h-6 {
+  height: 6px;
+}
+
+.h-10 {
+  height: 10px;
+}
+
+.h-20 {
+  height: 20px;
+}
+
+.w-40 {
+  width: 40px;
+}
+
+.h-40 {
+  height: 40px;
+}
+
+.border-left {
+  border-left: 1.5px solid #e2e8f0;
+}
+
+
 
 
 
