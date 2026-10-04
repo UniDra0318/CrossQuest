@@ -6450,6 +6450,312 @@
   font-weight: 600;
 }
 
+/* =========================================================================
+   WORKBENCH & EVALUATION TAB POLISH
+   ========================================================================= */
+
+.workbench-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+}
+
+.workbench-header-bar {
+  padding: 22px 28px;
+  background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  border-bottom: 1.5px solid #edf2f7;
+}
+
+.workbench-layout-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .workbench-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Candidate Profile Banner */
+.candidate-profile-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fbfaff 0%, #f1f5f9 100%);
+  border: 1.5px solid #e9d5ff;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.candidate-avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  color: #ffffff;
+  font-family: var(--font-fun);
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(119, 44, 232, 0.2);
+}
+
+/* Spacious Assessment Score & Distinction Card */
+.workbench-score-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.workbench-score-card:focus-within {
+  border-color: #c084fc;
+}
+
+.score-distinction-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .score-distinction-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.score-input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 6px 14px;
+  transition: all 0.2s ease;
+}
+
+.score-input-container:focus-within {
+  border-color: #772ce8;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(119, 44, 232, 0.12);
+}
+
+.score-big-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font-fun);
+  font-size: 26px;
+  font-weight: 800;
+  color: #772ce8;
+  outline: none;
+  padding: 4px 0;
+}
+
+.score-percent-badge {
+  font-family: var(--font-fun);
+  font-size: 16px;
+  font-weight: 800;
+  color: #64748b;
+  margin-left: 6px;
+}
+
+.distinction-display-box {
+  padding: 14px 18px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.distinction-display-box.tier-perfect {
+  background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+  border: 1.5px solid #fde68a;
+  color: #92400e;
+}
+
+.distinction-display-box.tier-high {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  border: 1.5px solid #ddd6fe;
+  color: #6b21a8;
+}
+
+.distinction-display-box.tier-merit {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1.5px solid #bae6fd;
+  color: #0369a1;
+}
+
+.distinction-display-box.tier-pass {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1.5px solid #a7f3d0;
+  color: #065f46;
+}
+
+.distinction-display-box.tier-review {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1.5px solid #fed7aa;
+  color: #9a3412;
+}
+
+.score-range-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  outline: none;
+  -webkit-appearance: none;
+  background: linear-gradient(to right, #ef4444 0%, #f59e0b 60%, #10b981 75%, #772ce8 90%, #a855f7 100%);
+  cursor: pointer;
+  margin: 12px 0 8px 0;
+}
+
+.score-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #772ce8;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease;
+}
+
+.score-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.score-presets-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.score-preset-chip {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.score-preset-chip:hover {
+  background: #f3e8ff;
+  border-color: #c084fc;
+  color: #772ce8;
+}
+
+/* Competency Verification Rubric Cards */
+.rubric-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.rubric-tile {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rubric-tile:hover {
+  border-color: #c084fc;
+  background: #fbf9ff;
+}
+
+.rubric-tile.active {
+  border-color: #772ce8;
+  background: #fbf7ff;
+}
+
+.rubric-tile input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #772ce8;
+  cursor: pointer;
+}
+
+/* Cryptographic Envelope Blueprint Card */
+.crypto-blueprint-card {
+  background: #0f172a;
+  border: 1.5px solid #1e293b;
+  border-radius: 14px;
+  padding: 22px;
+  color: #e2e8f0;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+}
+
+.crypto-blueprint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.crypto-policy-box {
+  background: #020617;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: monospace;
+  font-size: 12px;
+  color: #fde047;
+  word-break: break-all;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.crypto-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #1e293b;
+  font-size: 12.5px;
+}
+
+.crypto-spec-row:last-child {
+  border-bottom: none;
+}
+
 
 
 

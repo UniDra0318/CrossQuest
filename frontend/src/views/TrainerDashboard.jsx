@@ -160,8 +160,9 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
       if (dbTrainees && dbTrainees.length > 0) {
         setTrainees(dbTrainees.map((t, idx) => {
           const email = (t.email || '').toLowerCase();
-          const compCode = t.company_code || (email.includes('maya-fintech') ? 'FINTECH_BETA' : email.includes('ayala-retail') ? 'RETAIL_GAMMA' : 'CORP_ALPHA');
-          const compName = t.company_name || (compCode === 'FINTECH_BETA' ? 'Maya FinTech Innovations' : compCode === 'RETAIL_GAMMA' ? 'Ayala Retail Omnichannel' : 'San Miguel Conglomerate');
+          const compFromDb = dbCompanies?.find(c => c.id === t.current_company_id);
+          const compCode = compFromDb?.code || t.current_company?.code || t.company_code || (email.includes('maya-fintech') ? 'FINTECH_BETA' : email.includes('ayala-retail') ? 'RETAIL_GAMMA' : 'CORP_ALPHA');
+          const compName = compFromDb?.name || t.current_company?.name || t.company_name || (compCode === 'FINTECH_BETA' ? 'Maya FinTech Innovations' : compCode === 'RETAIL_GAMMA' ? 'Ayala Retail Omnichannel' : 'San Miguel Conglomerate');
           const compId = t.current_company_id || (compCode === 'FINTECH_BETA' ? 'comp-beta' : compCode === 'RETAIL_GAMMA' ? 'comp-gamma' : 'comp-alpha');
 
           return {
@@ -240,15 +241,28 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
     }
   ];
 
-  // Helper for distinction tier
-  const getDistinctionTier = (val) => {
-    if (val === null || val === undefined || isNaN(val)) return 'Pending Evaluation';
+  // Helper for distinction tier & details
+  const getDistinctionDetails = (val) => {
+    if (val === null || val === undefined || val === '' || isNaN(val)) {
+      return { tier: 'Pending Evaluation', badgeClass: 'tier-review', desc: 'Awaiting laboratory evaluation and score submission.' };
+    }
     const num = parseFloat(val);
-    if (num >= 95) return 'High Distinction (Summa Cum Laude)';
-    if (num >= 85) return 'Pass with Merit';
-    if (num >= 75) return 'Certified Passing';
-    return 'Conditional / Needs Review';
+    if (num >= 98) {
+      return { tier: 'Perfect Score (100%)', badgeClass: 'tier-perfect', desc: 'Flawless execution · Recommended for Senior Security Architect.' };
+    }
+    if (num >= 90) {
+      return { tier: 'High Distinction', badgeClass: 'tier-high', desc: 'Exceptional mastery · Eligible for CP-ABE Key Authority clearance.' };
+    }
+    if (num >= 80) {
+      return { tier: 'Pass with Merit', badgeClass: 'tier-merit', desc: 'Strong competence · Meets and exceeds enterprise security standards.' };
+    }
+    if (num >= 75) {
+      return { tier: 'Certified Passing', badgeClass: 'tier-pass', desc: 'Standard security accreditation granted (Baseline >= 75%).' };
+    }
+    return { tier: 'Remediation Required', badgeClass: 'tier-review', desc: 'Below certification passing threshold (75%). Retake required.' };
   };
+
+  const getDistinctionTier = (val) => getDistinctionDetails(val).tier;
 
   // Grade & Certify Record Handler (CP-ABE Encryption)
   const handleSaveGradeAndCertify = async (e) => {
@@ -769,28 +783,30 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
 
                           {/* Course Curriculum */}
                           <td>
-                            <div>
-                              <span className="text-xs font-bold text-slate-900 block flex-align gap-6">
-                                <BookOpen size={13} className="text-purple flex-shrink-0" />
-                                <span>{t.enrolledCourse}</span>
-                              </span>
-                              <span className="text-2xs text-secondary block mt-2">
-                                {t.cohortId === 'c-1' ? 'SEC-201 · Cohort Alpha' : t.cohortId === 'c-2' ? 'PRV-202 · Cohort Beta' : 'THM-301 · Cohort Gamma'}
-                              </span>
+                            <div className="flex-align gap-8" style={{ alignItems: 'flex-start' }}>
+                              <BookOpen size={14} className="text-purple flex-shrink-0" style={{ marginTop: '2px' }} />
+                              <div>
+                                <span className="text-xs font-bold text-slate-900 block">
+                                  {t.enrolledCourse}
+                                </span>
+                                <span className="text-2xs text-secondary block mt-2">
+                                  {t.cohortId === 'c-1' ? 'SEC-201 · Cohort Alpha' : t.cohortId === 'c-2' ? 'PRV-202 · Cohort Beta' : 'THM-301 · Cohort Gamma'}
+                                </span>
+                              </div>
                             </div>
                           </td>
 
                           {/* Assessment Score */}
-                          <td>
+                          <td style={{ minWidth: '180px' }}>
                             {t.score !== null ? (
                               <div>
-                                <div className="flex-align gap-6 mb-2">
-                                  <span className="text-sm font-black text-slate-900">{t.score}%</span>
+                                <div className="flex-align gap-8 mb-4">
+                                  <span className="text-sm font-black text-slate-900" style={{ minWidth: '46px' }}>{t.score}%</span>
                                   <span className={`badge ${t.score >= 80 ? 'badge-green' : 'badge-amber'} text-2xs font-bold`}>
-                                    {t.score >= 80 ? 'Passed' : 'Needs Review'}
+                                    {t.score >= 80 ? 'PASSED' : 'NEEDS REVIEW'}
                                   </span>
                                 </div>
-                                <div className="progress-bar-bg w-80 h-6">
+                                <div className="progress-bar-bg" style={{ width: '130px', height: '6px' }}>
                                   <div 
                                     className={`progress-bar-fill ${t.score >= 80 ? 'bg-emerald' : 'bg-amber'}`} 
                                     style={{ width: `${t.score}%` }} 
@@ -856,237 +872,424 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
       {/* =========================================================================
           VIEW 3: ASSESSMENT EVALUATION & CRYPTOGRAPHIC CERTIFICATION WORKBENCH
           ========================================================================= */}
-      {activeSubView === 'grade_entry' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
-            <div>
-              <h3 className="card-title flex-align gap-8">
-                <ShieldCheck size={20} className="text-purple" />
-                <span>Assessment Evaluation & Cryptographic Certification Workbench</span>
-              </h3>
-              <p className="card-subtitle">
-                Enter exam and practical lab scores. Upon submission, records are bound to the client organization via CP-ABE encryption.
-              </p>
+      {activeSubView === 'grade_entry' && (() => {
+        const activeTrainee = gradingTrainee || trainees[0];
+
+        return (
+          <div className="card workbench-card">
+            {/* WORKBENCH TOP BAR */}
+            <div className="workbench-header-bar">
+              <div className="flex-align gap-12">
+                <div className="roster-header-icon-box">
+                  <ShieldCheck size={22} className="text-purple" />
+                </div>
+                <div>
+                  <div className="flex-align gap-8">
+                    <h3 className="card-title font-bold text-slate-900 m-0">
+                      Assessment Evaluation & Cryptographic Certification Workbench
+                    </h3>
+                    <span className="badge badge-purple text-2xs font-bold font-mono">
+                      WATERS-11 CP-ABE
+                    </span>
+                  </div>
+                  <p className="card-subtitle text-secondary text-xs mt-4 mb-0">
+                    Enter practical lab scores, verify rubric criteria, and cryptographically seal records bound to client tenancy.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex-align gap-10">
+                <button
+                  type="button"
+                  className="btn btn-secondary flex-align gap-6"
+                  onClick={() => setActiveView && setActiveView('trainee_roster')}
+                  title="Return to Master Roster"
+                >
+                  <Users size={14} className="text-purple" />
+                  <span className="font-bold text-xs">Back to Roster</span>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="p-24">
-            {gradingTrainee ? (
-              <div className="grid-2-col gap-24">
-                {/* LEFT COLUMN: EVALUATION FORM */}
-                <form onSubmit={handleSaveGradeAndCertify} className="grade-form-card">
-                  <div className="grade-form-header flex-between mb-16 p-12 bg-slate-50 rounded border border-slate-200">
-                    <div>
-                      <span className="text-xs text-secondary font-bold uppercase">Candidate Under Evaluation</span>
-                      <h4 className="text-base font-bold text-slate-900 m-0">{gradingTrainee.name}</h4>
-                      <span className="text-xs text-secondary">{gradingTrainee.email}</span>
+            <div className="p-24">
+              {/* CANDIDATE SELECTOR TABS */}
+              <div className="flex-align gap-8 flex-wrap mb-20 p-12 bg-slate-50 border border-slate-200 rounded-lg">
+                <span className="text-xs font-bold text-secondary flex-align gap-6 mr-6">
+                  <Users size={14} className="text-purple" />
+                  <span>Select Candidate:</span>
+                </span>
+                {trainees.map((t) => {
+                  const isCurrent = activeTrainee && activeTrainee.id === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={`btn btn-xs flex-align gap-6 ${
+                        isCurrent ? 'btn-primary' : 'btn-secondary'
+                      }`}
+                      style={{ borderRadius: '8px' }}
+                      onClick={() => handleStartGrading(t)}
+                    >
+                      <span>{t.name}</span>
+                      <span className={`badge ${
+                        t.companyCode === 'FINTECH_BETA' ? 'badge-cyan' :
+                        t.companyCode === 'RETAIL_GAMMA' ? 'badge-amber' : 'badge-purple'
+                      } text-3xs font-mono py-0`}>
+                        {t.companyCode}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {activeTrainee ? (
+                <div className="workbench-layout-grid">
+                  {/* LEFT COLUMN: EVALUATION FORM */}
+                  <form onSubmit={handleSaveGradeAndCertify} className="grade-form-card">
+                    {/* CANDIDATE PROFILE BANNER */}
+                    <div className="candidate-profile-banner">
+                      <div className="flex-align gap-14">
+                        <div 
+                          className="candidate-avatar-large"
+                          style={{
+                            background: activeTrainee.companyCode === 'FINTECH_BETA'
+                              ? 'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)'
+                              : activeTrainee.companyCode === 'RETAIL_GAMMA'
+                              ? 'linear-gradient(135deg, #d97706 0%, #fbbf24 100%)'
+                              : 'linear-gradient(135deg, #772ce8 0%, #a855f7 100%)'
+                          }}
+                        >
+                          {activeTrainee.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex-align gap-8">
+                            <h4 className="text-base font-bold text-slate-900 m-0">{activeTrainee.name}</h4>
+                            <span className="badge badge-purple text-2xs font-bold font-mono">
+                              {activeTrainee.companyCode || 'CORP_ALPHA'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-secondary block mt-2">{activeTrainee.email}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex-align gap-10">
+                        <span className={`badge ${
+                          activeTrainee.companyCode === 'FINTECH_BETA' ? 'badge-cyan' :
+                          activeTrainee.companyCode === 'RETAIL_GAMMA' ? 'badge-amber' : 'badge-purple'
+                        } font-bold text-xs`}>
+                          {activeTrainee.company}
+                        </span>
+                        <span className="badge badge-blue text-xs font-bold">
+                          {activeTrainee.cohortId === 'c-1' ? 'SEC-201 · Cohort Alpha' : activeTrainee.cohortId === 'c-2' ? 'PRV-202 · Cohort Beta' : 'THM-301 · Cohort Gamma'}
+                        </span>
+                      </div>
                     </div>
-                    <span className="badge badge-purple">{gradingTrainee.company}</span>
-                  </div>
 
-                  <div className="form-field mb-14">
-                    <label className="field-label text-xs font-bold text-secondary uppercase mb-4">
-                      Course Curriculum
-                    </label>
-                    <input 
-                      type="text" 
-                      className="clean-input w-full bg-slate-100" 
-                      value={gradingTrainee.enrolledCourse} 
-                      disabled 
-                    />
-                  </div>
-
-                  <div className="grid-2-col gap-12 mb-14">
-                    <div className="form-field">
-                      <label className="field-label text-xs font-bold text-secondary uppercase mb-4">
-                        Assessment Score (0–100%)
+                    {/* COURSE CURRICULUM INFO */}
+                    <div className="form-field mb-18">
+                      <label className="field-label text-xs font-bold text-slate-700 uppercase mb-6 block">
+                        Assigned Course Curriculum & Cohort
                       </label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        max="100"
-                        required
-                        className="clean-input w-full text-lg font-bold text-purple"
-                        value={inputScore}
-                        onChange={(e) => setInputScore(e.target.value)}
-                        placeholder="e.g. 94.5"
+                      <div className="p-12 bg-slate-50 border border-slate-200 rounded-lg flex-between">
+                        <div className="flex-align gap-10">
+                          <BookOpen size={16} className="text-purple" />
+                          <span className="text-sm font-bold text-slate-900">{activeTrainee.enrolledCourse}</span>
+                        </div>
+                        <span className="text-2xs font-mono font-bold text-secondary">CLEARANCE LVL 1</span>
+                      </div>
+                    </div>
+
+                    {/* SPACIOUS SCORE & DISTINCTION CARD (NO SQUISHING) */}
+                    <div className="workbench-score-card">
+                      <div className="score-distinction-grid">
+                        {/* SCORE INPUT */}
+                        <div>
+                          <label className="field-label text-xs font-bold text-slate-700 uppercase mb-6 block">
+                            Official Assessment Score (0–100%)
+                          </label>
+                          <div className="score-input-container">
+                            <input
+                              type="number"
+                              step="0.5"
+                              min="0"
+                              max="100"
+                              required
+                              className="score-big-input"
+                              value={inputScore}
+                              onChange={(e) => setInputScore(e.target.value)}
+                              placeholder="0.0"
+                            />
+                            <span className="score-percent-badge">%</span>
+                          </div>
+                        </div>
+
+                        {/* ACCREDITATION DISTINCTION TIER */}
+                        <div>
+                          <label className="field-label text-xs font-bold text-slate-700 uppercase mb-6 block">
+                            Calculated Distinction Tier
+                          </label>
+                          {(() => {
+                            const details = getDistinctionDetails(inputScore);
+                            return (
+                              <div className={`distinction-display-box ${details.badgeClass}`}>
+                                <div className="flex-align gap-8">
+                                  <Award size={18} className="flex-shrink-0" />
+                                  <span className="font-bold text-sm">{details.tier}</span>
+                                </div>
+                                <span className="text-2xs opacity-85 block mt-2">
+                                  {details.desc}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      {/* INTERACTIVE SCORE SLIDER & PRESET CHIPS */}
+                      <div>
+                        <div className="flex-between text-2xs text-secondary font-bold mb-4">
+                          <span>0% Fail</span>
+                          <span className="text-purple font-black">75% Passing Threshold</span>
+                          <span>100% Perfect</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="0.5"
+                          value={inputScore || 0}
+                          onChange={(e) => setInputScore(e.target.value)}
+                          className="score-range-slider"
+                          aria-label="Score range slider"
+                        />
+                        <div className="score-presets-row">
+                          <span className="text-2xs text-secondary font-bold mr-4 self-center">Presets:</span>
+                          <button 
+                            type="button" 
+                            className="score-preset-chip"
+                            onClick={() => setInputScore('75')}
+                          >
+                            75% (Passing)
+                          </button>
+                          <button 
+                            type="button" 
+                            className="score-preset-chip"
+                            onClick={() => setInputScore('88')}
+                          >
+                            88% (Merit)
+                          </button>
+                          <button 
+                            type="button" 
+                            className="score-preset-chip"
+                            onClick={() => setInputScore('94.5')}
+                          >
+                            94.5% (High Dist.)
+                          </button>
+                          <button 
+                            type="button" 
+                            className="score-preset-chip"
+                            onClick={() => setInputScore('98')}
+                          >
+                            98% (Perfect)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* COMPETENCY VERIFICATION RUBRIC CHECKLIST */}
+                    <div className="form-field mb-20">
+                      <div className="flex-between mb-8">
+                        <label className="field-label text-xs font-bold text-slate-700 uppercase m-0">
+                          Competency Verification Rubric
+                        </label>
+                        <span className="text-2xs text-purple font-bold">
+                          {[rubricChecks.zeroTrust, rubricChecks.cpabeTheory, rubricChecks.isolationBoundaries, rubricChecks.complianceAudit].filter(Boolean).length} of 4 Criteria Verified
+                        </span>
+                      </div>
+                      <div className="rubric-grid">
+                        <label className={`rubric-tile ${rubricChecks.zeroTrust ? 'active' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={rubricChecks.zeroTrust}
+                            onChange={(e) => setRubricChecks({ ...rubricChecks, zeroTrust: e.target.checked })}
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 block">Demonstrated Zero-Trust Access & Policy Tree Validation</span>
+                            <span className="text-2xs text-secondary block mt-2">Verified least-privilege attribute scope and identity attestation across simulated perimeter.</span>
+                          </div>
+                        </label>
+
+                        <label className={`rubric-tile ${rubricChecks.cpabeTheory ? 'active' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={rubricChecks.cpabeTheory}
+                            onChange={(e) => setRubricChecks({ ...rubricChecks, cpabeTheory: e.target.checked })}
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 block">Verified CP-ABE Ciphertext Decryption & Attribute Scope</span>
+                            <span className="text-2xs text-secondary block mt-2">Correctly solved pairing-based mathematical access tree under Waters11 CP-ABE envelope.</span>
+                          </div>
+                        </label>
+
+                        <label className={`rubric-tile ${rubricChecks.isolationBoundaries ? 'active' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={rubricChecks.isolationBoundaries}
+                            onChange={(e) => setRubricChecks({ ...rubricChecks, isolationBoundaries: e.target.checked })}
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 block">Audited Row-Level Security (RLS) & Multi-Tenant Boundaries</span>
+                            <span className="text-2xs text-secondary block mt-2">Confirmed cross-tenant data isolation preventing unauthorized tenant data leakage.</span>
+                          </div>
+                        </label>
+
+                        <label className={`rubric-tile ${rubricChecks.complianceAudit ? 'active' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={rubricChecks.complianceAudit}
+                            onChange={(e) => setRubricChecks({ ...rubricChecks, complianceAudit: e.target.checked })}
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 block">Compliance with R.A. 10173 and NPC Audit Trail Mandates</span>
+                            <span className="text-2xs text-secondary block mt-2">Enforced Philippine Data Privacy Act audit logging requirements and tamper-evident tracing.</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* INSTRUCTOR EVALUATION & OFFICIAL REMARKS */}
+                    <div className="form-field mb-20">
+                      <div className="flex-between mb-6">
+                        <label className="field-label text-xs font-bold text-slate-700 uppercase m-0">
+                          Instructor Evaluation & Official Remarks
+                        </label>
+                        <div className="flex-align gap-6">
+                          <button
+                            type="button"
+                            className="text-2xs text-purple font-bold hover:underline cursor-pointer bg-transparent border-none p-0"
+                            onClick={() => setInputRemarks("Candidate demonstrated exemplary practical proficiency in enterprise cryptography. Practical competencies verified under live simulation.")}
+                          >
+                            + Auto-Fill Recommendation
+                          </button>
+                        </div>
+                      </div>
+                      <textarea
+                        rows={3}
+                        className="clean-input w-full text-xs"
+                        style={{ borderRadius: '10px', padding: '12px 14px', border: '1.5px solid #cbd5e1' }}
+                        value={inputRemarks}
+                        onChange={(e) => setInputRemarks(e.target.value)}
+                        placeholder="Enter instructor remarks, feedback notes, or laboratory certification recommendations..."
                       />
                     </div>
 
-                    <div className="form-field">
-                      <label className="field-label text-xs font-bold text-secondary uppercase mb-4">
-                        Calculated Distinction Tier
-                      </label>
-                      <div className="p-10 bg-slate-50 border rounded text-xs font-bold text-emerald flex-align gap-6 h-42">
-                        <Award size={15} />
-                        <span>{getDistinctionTier(inputScore)}</span>
-                      </div>
+                    {/* ACTION BUTTONS */}
+                    <div className="flex-align gap-12">
+                      <button 
+                        type="submit" 
+                        className="btn btn-primary flex-align gap-8 flex-1 py-12"
+                        disabled={isSubmittingRecord}
+                      >
+                        <Lock size={16} /> 
+                        <span className="font-bold text-sm">
+                          {isSubmittingRecord ? 'Encrypting & Binding Record...' : 'Sign & Encrypt Record (CP-ABE)'}
+                        </span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary py-12 px-20" 
+                        onClick={() => setActiveView && setActiveView('trainee_roster')}
+                      >
+                        Cancel
+                      </button>
                     </div>
-                  </div>
+                  </form>
 
-                  {/* COMPETENCY RUBRIC CHECKLIST */}
-                  <div className="form-field mb-14">
-                    <label className="field-label text-xs font-bold text-secondary uppercase mb-6">
-                      Competency Verification Rubric
-                    </label>
-                    <div className="space-y-2 bg-slate-50 p-12 rounded border border-slate-200 text-xs">
-                      <label className="flex-align gap-8 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={rubricChecks.zeroTrust}
-                          onChange={(e) => setRubricChecks({ ...rubricChecks, zeroTrust: e.target.checked })}
-                          className="checkbox-accent"
-                        />
-                        <span>Demonstrated Zero-Trust Access & Policy Tree Validation</span>
-                      </label>
-                      <label className="flex-align gap-8 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={rubricChecks.cpabeTheory}
-                          onChange={(e) => setRubricChecks({ ...rubricChecks, cpabeTheory: e.target.checked })}
-                          className="checkbox-accent"
-                        />
-                        <span>Verified CP-ABE Ciphertext Decryption & Attribute Scope</span>
-                      </label>
-                      <label className="flex-align gap-8 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={rubricChecks.isolationBoundaries}
-                          onChange={(e) => setRubricChecks({ ...rubricChecks, isolationBoundaries: e.target.checked })}
-                          className="checkbox-accent"
-                        />
-                        <span>Audited Row-Level Security (RLS) & Multi-Tenant Boundaries</span>
-                      </label>
-                      <label className="flex-align gap-8 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={rubricChecks.complianceAudit}
-                          onChange={(e) => setRubricChecks({ ...rubricChecks, complianceAudit: e.target.checked })}
-                          className="checkbox-accent"
-                        />
-                        <span>Compliance with R.A. 10173 and NPC Audit Trail Mandates</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="form-field mb-16">
-                    <label className="field-label text-xs font-bold text-secondary uppercase mb-4">
-                      Instructor Evaluation & Official Remarks
-                    </label>
-                    <textarea
-                      rows={3}
-                      className="clean-input w-full text-xs"
-                      value={inputRemarks}
-                      onChange={(e) => setInputRemarks(e.target.value)}
-                      placeholder="Candidate demonstrated exceptional mastery in security compliance lab..."
-                    />
-                  </div>
-
-                  <div className="flex-align gap-12">
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary flex-align gap-6 flex-1"
-                      disabled={isSubmittingRecord}
-                    >
-                      <Lock size={14} /> 
-                      <span>{isSubmittingRecord ? 'Encrypting with CP-ABE...' : 'Sign & Encrypt Record (CP-ABE)'}</span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
-                      onClick={() => setGradingTrainee(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-
-                {/* RIGHT COLUMN: CP-ABE CRYPTOGRAPHIC POLICY PREVIEW & CERTIFICATION CONFIRMATION */}
-                <div className="crypto-preview-pane">
-                  <div className="card p-16 bg-slate-900 text-white rounded-lg mb-16 shadow-lg border border-slate-700">
-                    <div className="flex-between mb-10 pb-8 border-b border-slate-700">
-                      <div className="flex-align gap-6 text-purple-400 font-mono text-xs font-bold uppercase">
-                        <Lock size={14} />
-                        <span>CP-ABE Encryption Envelope Preview</span>
+                  {/* RIGHT COLUMN: CP-ABE CRYPTOGRAPHIC POLICY BLUEPRINT & RESULTS */}
+                  <div className="crypto-preview-pane">
+                    <div className="crypto-blueprint-card mb-20">
+                      <div className="crypto-blueprint-header">
+                        <div className="flex-align gap-8 text-purple-400 font-mono text-xs font-bold uppercase">
+                          <Lock size={16} />
+                          <span>CP-ABE Encryption Envelope Preview</span>
+                        </div>
+                        <span className="badge badge-purple font-mono text-2xs">Waters11 / BSW07</span>
                       </div>
-                      <span className="badge badge-purple font-mono text-2xs">Waters11 / BSW07</span>
-                    </div>
 
-                    <div className="text-xs text-slate-300 space-y-3 font-mono">
-                      <div>
-                        <span className="text-slate-400">Target Tenant: </span>
-                        <span className="text-cyan-400 font-bold">{gradingTrainee.companyCode}</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400">Access Policy: </span>
-                        <div className="p-8 bg-slate-800 rounded text-amber-300 font-bold break-all mt-1">
-                          (ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:{gradingTrainee.companyCode})
+                      <div className="space-y-3 font-mono text-xs text-slate-300">
+                        <div className="crypto-spec-row">
+                          <span className="text-slate-400">Target Tenant:</span>
+                          <span className="text-cyan-400 font-bold">
+                            {activeTrainee.company} ({activeTrainee.companyCode})
+                          </span>
+                        </div>
+
+                        <div className="crypto-spec-row">
+                          <span className="text-slate-400">Clearance Required:</span>
+                          <span className="text-emerald-400 font-bold">Level 1 (Educational) · Level 2 (Tenant Vault)</span>
+                        </div>
+
+                        <div className="crypto-spec-row">
+                          <span className="text-slate-400">Signing Authority:</span>
+                          <span className="text-slate-200">Crossworks Central Key Authority (Lead Trainer)</span>
+                        </div>
+
+                        <div className="crypto-spec-row">
+                          <span className="text-slate-400">Pairing Curve:</span>
+                          <span className="text-purple-300">BN254 / Optimal Ate Pairing (Type-3)</span>
+                        </div>
+
+                        <div className="mt-14">
+                          <span className="text-slate-400 text-xs block mb-4">Access Tree Policy Constraint:</span>
+                          <div className="crypto-policy-box">
+                            (ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:{activeTrainee.companyCode})
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <span className="text-slate-400">Clearance Required: </span>
-                        <span className="text-emerald-400">Level 1 (Educational) · Level 2 (Tenant Vault)</span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400">Signing Authority: </span>
-                        <span className="text-slate-200">Crossworks Central Key Authority (Lead Trainer)</span>
-                      </div>
                     </div>
-                  </div>
 
-                  {/* CERTIFIED RESULT NOTICE */}
-                  {certifiedResult && (
-                    <div className="card p-16 bg-emerald-50 border-emerald-300 rounded-lg animate-fadeIn">
-                      <div className="flex-align gap-8 text-emerald-800 font-bold text-sm mb-6">
-                        <CheckCircle2 size={18} className="text-emerald-600" />
-                        <span>Record Successfully Certified & Encrypted</span>
+                    {/* CERTIFIED RESULT NOTICE */}
+                    {certifiedResult && (
+                      <div className="card p-18 bg-emerald-50 border-emerald-300 rounded-lg animate-fadeIn shadow-sm">
+                        <div className="flex-align gap-8 text-emerald-800 font-bold text-sm mb-8">
+                          <CheckCircle2 size={20} className="text-emerald-600" />
+                          <span>Record Sealed & Cryptographically Bound</span>
+                        </div>
+                        <p className="text-xs text-emerald-900 mb-10 leading-relaxed">
+                          The cryptographic evaluation payload for <strong>{certifiedResult.trainee.name}</strong> ({certifiedResult.score}%) has been successfully signed and stored under tenant isolation policy.
+                        </p>
+                        <div className="p-8 bg-white rounded border border-emerald-200 text-2xs font-mono text-emerald-800 break-all mb-10">
+                          Digest: {certifiedResult.hash}
+                        </div>
+                        <div className="flex-between">
+                          <span className="badge badge-green font-bold text-xs">
+                            Distinction: {certifiedResult.tier}
+                          </span>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-secondary text-xs"
+                            onClick={() => setActiveView && setActiveView('trainee_roster')}
+                          >
+                            View in Master Roster →
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-emerald-900 mb-8">
-                        The evaluation payload for <strong>{certifiedResult.trainee.name}</strong> ({certifiedResult.score}%) is now sealed with CP-ABE and stored in the database.
-                      </p>
-                      <div className="p-6 bg-white rounded border border-emerald-200 text-2xs font-mono text-emerald-800 break-all mb-8">
-                        Digest: {certifiedResult.hash}
-                      </div>
-                      <span className="badge badge-green font-bold text-xs">
-                        Distinction: {certifiedResult.tier}
-                      </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="empty-workbench-placeholder text-center p-36">
-                <GraduationCap size={56} className="text-purple opacity-40 mx-auto mb-16" />
-                <h3 className="text-lg font-bold text-slate-800 mb-6">No Trainee Currently Selected for Evaluation</h3>
-                <p className="text-secondary text-sm max-w-md mx-auto mb-20">
-                  Select an enrolled trainee from the master roster to enter laboratory scores, execute rubric checks, and issue an encrypted CP-ABE completion record.
-                </p>
-                <div className="flex-align justify-center gap-10">
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => {
-                      const first = trainees[0];
-                      if (first) handleStartGrading(first);
-                    }}
-                  >
-                    <CheckSquare size={15} />
-                    <span>Grade First Trainee ({trainees[0]?.name})</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setActiveView && setActiveView('trainee_roster')}
-                  >
-                    <span>Browse Trainee Roster</span>
-                  </button>
+              ) : (
+                <div className="empty-workbench-placeholder text-center p-36">
+                  <GraduationCap size={56} className="text-purple opacity-40 mx-auto mb-16" />
+                  <h3 className="text-lg font-bold text-slate-800 mb-6">No Trainees Available for Evaluation</h3>
+                  <p className="text-secondary text-sm max-w-md mx-auto mb-20">
+                    All enrolled cohort candidates have been graded, or no roster data has been loaded.
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* =========================================================================
           VIEW 4: COHORT PERFORMANCE & ASSESSMENT ANALYTICS (EXECUTIVE SUITE)
