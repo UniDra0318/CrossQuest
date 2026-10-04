@@ -1069,7 +1069,7 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
 
                 {/* Course Filter */}
                 <select
-                  className="clean-input text-xs py-4 px-8"
+                  className="analytics-select"
                   value={analyticsCourseFilter}
                   onChange={(e) => setAnalyticsCourseFilter(e.target.value)}
                 >
@@ -1084,7 +1084,7 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
               <div className="flex-align gap-6 text-xs text-secondary">
                 <span className="font-semibold">Timeframe:</span>
                 <select
-                  className="clean-input text-xs py-4 px-8"
+                  className="analytics-select"
                   value={analyticsTimeframe}
                   onChange={(e) => setAnalyticsTimeframe(e.target.value)}
                 >
@@ -1096,54 +1096,64 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
             </div>
 
             {/* 5 EXECUTIVE KPI TILES */}
-            <div className="grid-5-col gap-14 mb-24">
-              <div className="card metric-card p-16">
-                <div className="flex-between mb-4">
-                  <span className="text-xs text-secondary font-bold uppercase">Enrolled Learners</span>
-                  <Users size={16} className="text-purple" />
+            <div className="analytics-kpi-grid mb-24">
+              <div className="analytics-kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-label">Enrolled Learners</span>
+                  <div className="kpi-icon-pill kpi-icon-purple">
+                    <Users size={16} />
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-slate-900 mb-2">{aTotalEnrolled} Active</div>
-                <span className="text-2xs text-purple font-semibold">100% Cohort Participation</span>
+                <div className="kpi-value text-slate-900">{aTotalEnrolled} Active</div>
+                <div className="kpi-sub text-purple">100% Cohort Participation</div>
               </div>
 
-              <div className="card metric-card p-16">
-                <div className="flex-between mb-4">
-                  <span className="text-xs text-secondary font-bold uppercase">Certified Passing Rate</span>
-                  <ShieldCheck size={16} className="text-emerald" />
+              <div className="analytics-kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-label">Certified Passing Rate</span>
+                  <div className="kpi-icon-pill kpi-icon-emerald">
+                    <ShieldCheck size={16} />
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-emerald mb-2">{aCertifiedRate}%</div>
-                <span className="text-2xs text-emerald font-semibold">
+                <div className="kpi-value text-emerald">{aCertifiedRate}%</div>
+                <div className="kpi-sub text-emerald">
                   {aCertifiedTrainees.length} of {aTotalEnrolled} Certified (Target: 80%)
-                </span>
+                </div>
               </div>
 
-              <div className="card metric-card p-16">
-                <div className="flex-between mb-4">
-                  <span className="text-xs text-secondary font-bold uppercase">Cohort Mean Score</span>
-                  <TrendingUp size={16} className="text-blue" />
+              <div className="analytics-kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-label">Cohort Mean Score</span>
+                  <div className="kpi-icon-pill kpi-icon-blue">
+                    <TrendingUp size={16} />
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-blue mb-2">{aAvgScore}%</div>
-                <span className="text-2xs text-blue font-semibold">
+                <div className="kpi-value text-blue">{aAvgScore}%</div>
+                <div className="kpi-sub text-blue">
                   Standard Benchmark: 75% Passing
-                </span>
+                </div>
               </div>
 
-              <div className="card metric-card p-16">
-                <div className="flex-between mb-4">
-                  <span className="text-xs text-secondary font-bold uppercase">Average Velocity</span>
-                  <Clock size={16} className="text-amber" />
+              <div className="analytics-kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-label">Average Velocity</span>
+                  <div className="kpi-icon-pill kpi-icon-amber">
+                    <Clock size={16} />
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-amber mb-2">3m 48s</div>
-                <span className="text-2xs text-amber font-semibold">+18% Faster than Cohort Q2</span>
+                <div className="kpi-value text-amber">3m 48s</div>
+                <div className="kpi-sub text-amber">+18% Faster than Cohort Q2</div>
               </div>
 
-              <div className="card metric-card p-16">
-                <div className="flex-between mb-4">
-                  <span className="text-xs text-secondary font-bold uppercase">Needs Remediation</span>
-                  <AlertTriangle size={16} className="text-rose-600" />
+              <div className="analytics-kpi-card">
+                <div className="kpi-top">
+                  <span className="kpi-label">Needs Remediation</span>
+                  <div className="kpi-icon-pill kpi-icon-rose">
+                    <AlertTriangle size={16} />
+                  </div>
                 </div>
-                <div className="text-2xl font-black text-rose-600 mb-2">{aRemediationTrainees.length}</div>
-                <span className="text-2xs text-rose-600 font-semibold">Action Required by Trainer</span>
+                <div className="kpi-value text-rose-600">{aRemediationTrainees.length}</div>
+                <div className="kpi-sub text-rose-600">Action Required by Trainer</div>
               </div>
             </div>
 
@@ -1412,37 +1422,37 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
                         action: 'Add 2 additional diagram hotspot analysis items in Quiz Studio.'
                       }
                     ].map((comp, cIdx) => (
-                      <div key={cIdx} className="competency-row-card p-16 rounded-xl border border-slate-200 bg-slate-50">
-                        <div className="flex-between mb-8 flex-wrap gap-8">
-                          <div className="flex-align gap-8">
-                            <span className="badge badge-purple font-black">{cIdx + 1}</span>
-                            <h4 className="font-bold text-sm text-slate-900 m-0">{comp.title}</h4>
+                      <div key={cIdx} className="competency-row-card">
+                        <div className="competency-header-row">
+                          <div className="competency-title-group">
+                            <span className="competency-num-pill">{cIdx + 1}</span>
+                            <h4 className="competency-title-text">{comp.title}</h4>
                           </div>
-                          <div className="flex-align gap-8">
+                          <div className="competency-score-group">
                             <span className={`badge ${comp.badgeClass} font-bold text-2xs`}>{comp.status}</span>
-                            <span className="font-black text-sm text-slate-800">{comp.mastery}% / 100%</span>
+                            <span className="competency-score-val">{comp.mastery}% / 100%</span>
                           </div>
                         </div>
 
-                        {/* Benchmark Bar with Marker */}
-                        <div className="relative mb-8">
-                          <div className="progress-bar-bg h-10">
+                        {/* Dedicated Visual Gauge with Target Indicator */}
+                        <div className="competency-gauge-wrapper">
+                          <div className="competency-gauge-track">
                             <div 
-                              className={`progress-bar-fill ${comp.mastery >= comp.benchmark ? 'bg-emerald' : 'bg-rose-600'}`} 
+                              className={`competency-gauge-fill ${comp.mastery >= comp.benchmark ? 'fill-passed' : 'fill-deficit'}`} 
                               style={{ width: `${comp.mastery}%` }} 
                             />
+                            <div 
+                              className="competency-gauge-target-pin" 
+                              style={{ left: `${comp.benchmark}%` }}
+                              title={`Passing Standard: ${comp.benchmark}%`}
+                            />
                           </div>
-                          <div 
-                            className="competency-benchmark-line" 
-                            style={{ left: `${comp.benchmark}%` }}
-                            title={`Passing Standard: ${comp.benchmark}%`}
-                          />
                         </div>
 
-                        <p className="text-xs text-secondary mb-8">{comp.description}</p>
+                        <p className="text-xs text-secondary mt-8 mb-6">{comp.description}</p>
 
-                        <div className="p-8 rounded bg-white border border-slate-200 text-2xs text-purple font-semibold flex-align gap-6">
-                          <Zap size={13} className="text-purple flex-shrink-0" />
+                        <div className="competency-action-box">
+                          <Zap size={14} className="text-purple flex-shrink-0" />
                           <span><strong>Trainer Recommendation: </strong>{comp.action}</span>
                         </div>
                       </div>
