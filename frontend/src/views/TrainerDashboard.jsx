@@ -158,24 +158,31 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
       }
 
       if (dbTrainees && dbTrainees.length > 0) {
-        setTrainees(dbTrainees.map((t, idx) => ({
-          id: t.id,
-          name: `${t.first_name} ${t.last_name}`,
-          company: t.company_name || 'San Miguel Conglomerate',
-          companyCode: t.company_code || 'CORP_ALPHA',
-          companyId: t.current_company_id || 'comp-alpha',
-          email: t.email,
-          score: idx === 0 ? 94.5 : idx === 1 ? 88.0 : idx === 2 ? 98.0 : idx === 3 ? null : 68.5,
-          labGrade: idx === 0 ? 'High Distinction' : idx === 1 ? 'Pass with Merit' : idx === 2 ? 'Perfect Score' : idx === 3 ? 'Pending' : 'Needs Review',
-          status: idx < 3 ? 'Submitted & Certified' : idx === 3 ? 'Drafting' : 'Pending Review',
-          enrolledCourse: idx % 3 === 0 
-            ? 'Enterprise Security Audit & Zero-Trust' 
-            : idx % 3 === 1 
-            ? 'Privacy Impact Assessment & DPA R.A. 10173'
-            : 'Multi-Tenant Data Isolation & RLS',
-          cohortId: `c-${(idx % 3) + 1}`,
-          dateCompleted: idx < 3 ? '2026-10-01' : null
-        })));
+        setTrainees(dbTrainees.map((t, idx) => {
+          const email = (t.email || '').toLowerCase();
+          const compCode = t.company_code || (email.includes('maya-fintech') ? 'FINTECH_BETA' : email.includes('ayala-retail') ? 'RETAIL_GAMMA' : 'CORP_ALPHA');
+          const compName = t.company_name || (compCode === 'FINTECH_BETA' ? 'Maya FinTech Innovations' : compCode === 'RETAIL_GAMMA' ? 'Ayala Retail Omnichannel' : 'San Miguel Conglomerate');
+          const compId = t.current_company_id || (compCode === 'FINTECH_BETA' ? 'comp-beta' : compCode === 'RETAIL_GAMMA' ? 'comp-gamma' : 'comp-alpha');
+
+          return {
+            id: t.id,
+            name: `${t.first_name} ${t.last_name}`,
+            company: compName,
+            companyCode: compCode,
+            companyId: compId,
+            email: t.email,
+            score: idx === 0 ? 94.5 : idx === 1 ? 88.0 : idx === 2 ? 98.0 : idx === 3 ? null : 68.5,
+            labGrade: idx === 0 ? 'High Distinction' : idx === 1 ? 'Pass with Merit' : idx === 2 ? 'Perfect Score' : idx === 3 ? 'Pending' : 'Needs Review',
+            status: idx < 3 ? 'Submitted & Certified' : idx === 3 ? 'Drafting' : 'Pending Review',
+            enrolledCourse: compCode === 'CORP_ALPHA'
+              ? 'Enterprise Security Audit & Zero-Trust' 
+              : compCode === 'FINTECH_BETA' 
+              ? 'Privacy Impact Assessment & DPA R.A. 10173'
+              : 'Multi-Tenant Data Isolation & RLS',
+            cohortId: compCode === 'CORP_ALPHA' ? 'c-1' : compCode === 'FINTECH_BETA' ? 'c-2' : 'c-3',
+            dateCompleted: idx < 3 ? '2026-10-01' : null
+          };
+        }));
       }
     }
     loadData();
@@ -321,6 +328,31 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
     const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
     return matchesSearch && matchesCompany && matchesStatus;
   });
+
+  // Export Roster CSV
+  const handleExportRosterCsv = () => {
+    const headers = ["Trainee Name", "Email", "Company", "Company Code", "Course", "Score", "Distinction Tier", "Status"];
+    const rows = filteredTrainees.map(t => [
+      `"${t.name}"`,
+      `"${t.email}"`,
+      `"${t.company}"`,
+      `"${t.companyCode}"`,
+      `"${t.enrolledCourse}"`,
+      t.score !== null ? `${t.score}%` : 'Not Evaluated',
+      `"${t.labGrade}"`,
+      `"${t.status}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Trainee_Master_Roster_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setSuccessToast("Exported Trainee Master Roster CSV file.");
+    setTimeout(() => setSuccessToast(null), 4000);
+  };
 
   // Calculate cohort summary stats
   const totalEnrolled = trainees.length;
@@ -494,129 +526,303 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
       )}
 
       {/* =========================================================================
-          VIEW 2: ENROLLED TRAINEE MASTER ROSTER
+          VIEW 2: ENROLLED TRAINEE MASTER ROSTER (POLISHED WORKBENCH)
           ========================================================================= */}
       {activeSubView === 'trainee_roster' && (
-        <div className="card section-card">
-          <div className="card-header-bar flex-between flex-wrap gap-12">
-            <div>
-              <h3 className="card-title flex-align gap-8">
-                <Users size={20} className="text-purple" />
-                <span>Enrolled Trainee Master Roster</span>
-              </h3>
-              <p className="card-subtitle">
-                Attendees across client organizations enrolled in certified security programs.
-              </p>
+        <div className="trainee-roster-layout animate-fadeIn">
+          {/* TOP METRIC CARDS RIBBON */}
+          <div className="roster-metrics-grid mb-20">
+            <div className="card roster-metric-card p-16">
+              <div className="flex-between mb-4">
+                <span className="text-xs text-secondary font-bold uppercase">Total Enrolled</span>
+                <div className="kpi-icon-pill kpi-icon-purple">
+                  <Users size={16} />
+                </div>
+              </div>
+              <div className="text-2xl font-black text-slate-900 mb-1">{trainees.length} Learners</div>
+              <span className="text-2xs text-purple font-semibold">Across 3 Corporate Portfolios</span>
             </div>
 
-            {/* FILTERS & SEARCH */}
-            <div className="flex-align gap-10 flex-wrap">
-              <select
-                className="clean-input text-xs"
-                value={companyFilter}
-                onChange={(e) => setCompanyFilter(e.target.value)}
-              >
-                <option value="ALL">All Client Companies</option>
-                <option value="CORP_ALPHA">San Miguel Conglomerate (CORP_ALPHA)</option>
-                <option value="FINTECH_BETA">Maya FinTech Innovations (FINTECH_BETA)</option>
-                <option value="RETAIL_GAMMA">Ayala Retail Omnichannel (RETAIL_GAMMA)</option>
-              </select>
-
-              <select
-                className="clean-input text-xs"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="ALL">All Certification Statuses</option>
-                <option value="Submitted & Certified">Submitted & Certified</option>
-                <option value="Drafting">Drafting / In Progress</option>
-                <option value="Pending Review">Pending Evaluation</option>
-              </select>
-
-              <div className="search-box">
-                <Search size={14} className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="Search trainee name or email..."
-                  className="search-input"
-                  value={rosterSearch}
-                  onChange={(e) => setRosterSearch(e.target.value)}
-                />
+            <div className="card roster-metric-card p-16">
+              <div className="flex-between mb-4">
+                <span className="text-xs text-secondary font-bold uppercase">Certified Passing</span>
+                <div className="kpi-icon-pill kpi-icon-emerald">
+                  <ShieldCheck size={16} />
+                </div>
               </div>
+              <div className="text-2xl font-black text-emerald mb-1">
+                {trainees.filter(t => t.status === 'Submitted & Certified').length} Certified
+              </div>
+              <span className="text-2xs text-emerald font-semibold">
+                {Math.round((trainees.filter(t => t.status === 'Submitted & Certified').length / Math.max(1, trainees.length)) * 100)}% Compliance Passing
+              </span>
+            </div>
+
+            <div className="card roster-metric-card p-16">
+              <div className="flex-between mb-4">
+                <span className="text-xs text-secondary font-bold uppercase">Average Score</span>
+                <div className="kpi-icon-pill kpi-icon-blue">
+                  <TrendingUp size={16} />
+                </div>
+              </div>
+              <div className="text-2xl font-black text-blue mb-1">{avgOverallScore}%</div>
+              <span className="text-2xs text-blue font-semibold">Requirement Standard: 75%</span>
+            </div>
+
+            <div className="card roster-metric-card p-16">
+              <div className="flex-between mb-4">
+                <span className="text-xs text-secondary font-bold uppercase">Pending Evaluation</span>
+                <div className="kpi-icon-pill kpi-icon-amber">
+                  <AlertTriangle size={16} />
+                </div>
+              </div>
+              <div className="text-2xl font-black text-amber mb-1">
+                {trainees.filter(t => t.score === null || t.status === 'Pending Review').length} Trainees
+              </div>
+              <span className="text-2xs text-amber font-semibold">Needs Grade & Sign</span>
             </div>
           </div>
 
-          <div className="table-responsive">
-            <table className="clean-table">
-              <thead>
-                <tr>
-                  <th>Trainee Details</th>
-                  <th>Client Company</th>
-                  <th>Course Curriculum</th>
-                  <th>Assessment Score</th>
-                  <th>Distinction Tier</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Evaluation Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTrainees.length === 0 ? (
+          {/* MAIN ROSTER CARD */}
+          <div className="card roster-main-card">
+            {/* CARD HEADER & FILTER CONTROLS */}
+            <div className="roster-toolbar p-20 flex-between flex-wrap gap-16 border-bottom">
+              <div>
+                <div className="flex-align gap-10">
+                  <div className="roster-header-icon-box">
+                    <Users size={20} className="text-purple" />
+                  </div>
+                  <div>
+                    <div className="flex-align gap-8">
+                      <h3 className="card-title font-bold text-slate-900 m-0">Enrolled Trainee Master Roster</h3>
+                      <span className="badge badge-purple text-2xs font-bold">
+                        {filteredTrainees.length} of {trainees.length} Trainees
+                      </span>
+                    </div>
+                    <p className="card-subtitle text-secondary text-xs mt-2 mb-0">
+                      Live candidate enrollment, scoring diagnostics, and cryptographic certificate statuses.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* FILTERS & SEARCH */}
+              <div className="flex-align gap-10 flex-wrap">
+                <select
+                  className="analytics-select"
+                  value={companyFilter}
+                  onChange={(e) => setCompanyFilter(e.target.value)}
+                >
+                  <option value="ALL">All Client Companies</option>
+                  <option value="CORP_ALPHA">San Miguel Conglomerate (CORP_ALPHA)</option>
+                  <option value="FINTECH_BETA">Maya FinTech Innovations (FINTECH_BETA)</option>
+                  <option value="RETAIL_GAMMA">Ayala Retail Omnichannel (RETAIL_GAMMA)</option>
+                </select>
+
+                <select
+                  className="analytics-select"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="ALL">All Certification Statuses</option>
+                  <option value="Submitted & Certified">Submitted & Certified</option>
+                  <option value="Drafting">Drafting / In Progress</option>
+                  <option value="Pending Review">Pending Evaluation</option>
+                </select>
+
+                <div className="search-box">
+                  <Search size={14} className="search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search name or email..."
+                    className="search-input text-xs"
+                    value={rosterSearch}
+                    onChange={(e) => setRosterSearch(e.target.value)}
+                  />
+                  {rosterSearch && (
+                    <button
+                      type="button"
+                      className="btn-icon-ghost text-xs"
+                      onClick={() => setRosterSearch('')}
+                      style={{ width: '18px', height: '18px', padding: 0 }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm flex-align gap-6"
+                  onClick={handleExportRosterCsv}
+                  title="Export filtered roster to CSV"
+                >
+                  <Download size={13} className="text-purple" />
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {/* TABLE CONTENT */}
+            <div className="table-responsive">
+              <table className="clean-table roster-table">
+                <thead>
                   <tr>
-                    <td colSpan={7} className="text-center p-24 text-secondary">
-                      No trainees found matching current search and filter criteria.
-                    </td>
+                    <th>Trainee Details</th>
+                    <th>Client Organization</th>
+                    <th>Course Curriculum</th>
+                    <th>Assessment Score</th>
+                    <th>Distinction Tier</th>
+                    <th>Certification Status</th>
+                    <th style={{ textAlign: 'right' }}>Evaluation Action</th>
                   </tr>
-                ) : (
-                  filteredTrainees.map(t => (
-                    <tr key={t.id}>
-                      <td>
-                        <div className="trainee-info-cell">
-                          <span className="trainee-main-name font-bold text-slate-900">{t.name}</span>
-                          <span className="trainee-email-text text-secondary text-xs">{t.email}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="badge badge-purple">{t.company}</span>
-                      </td>
-                      <td>
-                        <span className="text-xs font-semibold text-slate-800">{t.enrolledCourse}</span>
-                      </td>
-                      <td>
-                        {t.score !== null ? (
-                          <span className="text-sm font-extrabold text-emerald">{t.score}%</span>
-                        ) : (
-                          <span className="text-xs text-secondary italic">Not Evaluated</span>
-                        )}
-                      </td>
-                      <td>
-                        <span className="text-xs font-medium text-slate-700">{t.labGrade}</span>
-                      </td>
-                      <td>
-                        <span className={`badge ${
-                          t.status === 'Submitted & Certified' 
-                            ? 'badge-green' 
-                            : t.status === 'Pending Review' 
-                            ? 'badge-amber' 
-                            : 'badge-blue'
-                        }`}>
-                          {t.status}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm flex-align gap-4 ml-auto"
-                          onClick={() => handleStartGrading(t)}
-                        >
-                          <CheckSquare size={13} className="text-purple" />
-                          <span>{t.score !== null ? 'Re-Grade & Certify' : 'Grade & Sign'}</span>
-                        </button>
+                </thead>
+                <tbody>
+                  {filteredTrainees.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center p-32 text-secondary">
+                        <Users size={36} className="mx-auto mb-8 text-secondary opacity-40" />
+                        <h4 className="font-bold text-slate-800">No Trainees Found</h4>
+                        <p className="text-xs">No trainees match the selected organization or status filter.</p>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredTrainees.map((t, idx) => {
+                      // Accurate company branding & badge
+                      const compInfo = t.companyCode === 'FINTECH_BETA' 
+                        ? { name: 'Maya FinTech Innovations', badgeClass: 'badge-cyan', code: 'FINTECH_BETA' }
+                        : t.companyCode === 'RETAIL_GAMMA'
+                        ? { name: 'Ayala Retail Omnichannel', badgeClass: 'badge-amber', code: 'RETAIL_GAMMA' }
+                        : { name: 'San Miguel Conglomerate', badgeClass: 'badge-purple', code: 'CORP_ALPHA' };
+
+                      // Initials avatar
+                      const initials = t.name
+                        .split(' ')
+                        .map(n => n[0])
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase();
+
+                      const avatarGradients = [
+                        'linear-gradient(135deg, #772ce8 0%, #a855f7 100%)',
+                        'linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)',
+                        'linear-gradient(135deg, #059669 0%, #34d399 100%)',
+                        'linear-gradient(135deg, #d97706 0%, #fbbf24 100%)',
+                        'linear-gradient(135deg, #e11d48 0%, #fb7185 100%)'
+                      ];
+
+                      return (
+                        <tr key={t.id} className="roster-table-row">
+                          {/* Trainee Details */}
+                          <td>
+                            <div className="flex-align gap-12">
+                              <div 
+                                className="roster-avatar-pill" 
+                                style={{ background: avatarGradients[idx % avatarGradients.length] }}
+                              >
+                                {initials}
+                              </div>
+                              <div className="trainee-info-cell">
+                                <span className="trainee-main-name font-bold text-slate-900">{t.name}</span>
+                                <span className="trainee-email-text text-secondary text-xs">{t.email}</span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Client Company */}
+                          <td>
+                            <div>
+                              <span className={`badge ${compInfo.badgeClass} font-bold text-2xs`}>
+                                {compInfo.name}
+                              </span>
+                              <span className="text-2xs text-secondary block mt-2 font-mono">
+                                {compInfo.code}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Course Curriculum */}
+                          <td>
+                            <div>
+                              <span className="text-xs font-bold text-slate-900 block flex-align gap-6">
+                                <BookOpen size={13} className="text-purple flex-shrink-0" />
+                                <span>{t.enrolledCourse}</span>
+                              </span>
+                              <span className="text-2xs text-secondary block mt-2">
+                                {t.cohortId === 'c-1' ? 'SEC-201 · Cohort Alpha' : t.cohortId === 'c-2' ? 'PRV-202 · Cohort Beta' : 'THM-301 · Cohort Gamma'}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Assessment Score */}
+                          <td>
+                            {t.score !== null ? (
+                              <div>
+                                <div className="flex-align gap-6 mb-2">
+                                  <span className="text-sm font-black text-slate-900">{t.score}%</span>
+                                  <span className={`badge ${t.score >= 80 ? 'badge-green' : 'badge-amber'} text-2xs font-bold`}>
+                                    {t.score >= 80 ? 'Passed' : 'Needs Review'}
+                                  </span>
+                                </div>
+                                <div className="progress-bar-bg w-80 h-6">
+                                  <div 
+                                    className={`progress-bar-fill ${t.score >= 80 ? 'bg-emerald' : 'bg-amber'}`} 
+                                    style={{ width: `${t.score}%` }} 
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-2xs text-secondary italic p-4 bg-slate-50 rounded border border-slate-200 inline-flex align-items-center gap-4">
+                                <Clock size={11} /> Not Evaluated
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Distinction Tier */}
+                          <td>
+                            <span className="text-xs font-bold text-slate-800 flex-align gap-6">
+                              <Award size={14} className={t.score >= 90 ? 'text-amber' : t.score >= 80 ? 'text-blue' : 'text-secondary'} />
+                              <span>{t.labGrade}</span>
+                            </span>
+                          </td>
+
+                          {/* Certification Status */}
+                          <td>
+                            <span className={`badge ${
+                              t.status === 'Submitted & Certified' 
+                                ? 'badge-green' 
+                                : t.status === 'Pending Review' 
+                                ? 'badge-amber' 
+                                : 'badge-blue'
+                            } font-bold text-2xs flex-align gap-4`}>
+                              {t.status === 'Submitted & Certified' && <CheckCircle2 size={12} />}
+                              {t.status === 'Pending Review' && <AlertTriangle size={12} />}
+                              {t.status === 'Drafting' && <Clock size={12} />}
+                              <span>{t.status}</span>
+                            </span>
+                          </td>
+
+                          {/* Evaluation Action */}
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              className={`btn btn-sm flex-align gap-6 ml-auto ${
+                                t.score === null ? 'btn-primary' : 'btn-secondary'
+                              }`}
+                              onClick={() => handleStartGrading(t)}
+                              title={t.score === null ? 'Evaluate and sign official certificate' : 'Re-evaluate score & update certificate'}
+                            >
+                              <CheckSquare size={14} className={t.score !== null ? 'text-purple' : ''} />
+                              <span>{t.score !== null ? 'Re-Grade & Certify' : 'Grade & Sign'}</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
