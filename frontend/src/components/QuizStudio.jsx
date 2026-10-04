@@ -14,6 +14,7 @@ import {
   Link2, 
   Check, 
   ArrowRight,
+  ArrowLeft,
   ListOrdered,
   FileQuestion,
   FileText,
@@ -42,6 +43,7 @@ import {
   deleteQuestionFromQuizStorage, 
   resetQuizDatabaseToDefaults 
 } from '../data/quizDatabase';
+import QuizDiagram from './QuizDiagram';
 
 const QUESTION_TYPES = [
   { id: 'multiple_choice', label: 'Kahoot 4-Tile Choices', icon: Layers, badgeClass: 'tag-choice' },
@@ -61,7 +63,7 @@ const DEFAULT_CUSTOM_NODES = [
 export default function QuizStudio() {
   const [quizDb, setQuizDb] = useState(() => getActiveQuizDatabase());
   const [selectedQuizId, setSelectedQuizId] = useState('act-1');
-  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [viewMode, setViewMode] = useState('overview'); // 'overview' | 'question_editor'
   const [showNewQuizModal, setShowNewQuizModal] = useState(false);
   const [showEditQuizModal, setShowEditQuizModal] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
@@ -171,7 +173,8 @@ export default function QuizStudio() {
       { left: '', right: '' },
       { left: '', right: '' }
     ]);
-    setShowQuestionModal(true);
+    setViewMode('question_editor');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Open Question Modal for Editing
@@ -220,7 +223,8 @@ export default function QuizStudio() {
       setMatchingPairs(pairs);
     }
 
-    setShowQuestionModal(true);
+    setViewMode('question_editor');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Open Quiz Metadata Edit Modal
@@ -375,7 +379,8 @@ export default function QuizStudio() {
     }
 
     setQuizDb(getActiveQuizDatabase());
-    setShowQuestionModal(false);
+    setViewMode('overview');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Create New Quiz Submit
@@ -415,6 +420,1004 @@ export default function QuizStudio() {
     setNewQuizDesc('');
   };
 
+  // =========================================================================
+  // DEDICATED FULL-PAGE QUESTION AUTHORING & EDITING WORKBENCH
+  // Replaces the cramped popup modal with a spacious, professional editor
+  // =========================================================================
+  if (viewMode === 'question_editor') {
+    const isEditing = !!editingQuestionId;
+    const currentTypeConfig = QUESTION_TYPES.find(t => t.id === qType) || QUESTION_TYPES[0];
+    const TypeIcon = currentTypeConfig.icon;
+    const nextQuestionNum = (selectedQuiz?.questions ? selectedQuiz.questions.length : 0) + 1;
+    const displayQuestionNum = editingQuestionNum || nextQuestionNum;
+
+    return (
+      <div className="quiz-studio-layout question-editor-page animate-fadeIn">
+        {toastMessage && (
+          <div className="card notice-box mb-16 flex-between animate-fadeIn">
+            <div className="flex-align gap-8">
+              <CheckCircle2 size={16} className="text-emerald" />
+              <span className="font-semibold text-sm">{toastMessage}</span>
+            </div>
+          </div>
+        )}
+
+        {/* TOP BREADCRUMB & CONTROL BANNER */}
+        <div className="card editor-top-banner mb-24">
+          <div className="flex-between flex-wrap gap-16">
+            <div>
+              <div className="editor-breadcrumbs flex-align gap-8 text-xs text-secondary mb-8">
+                <button
+                  type="button"
+                  className="breadcrumb-nav-btn"
+                  onClick={() => setViewMode('overview')}
+                >
+                  <ArrowLeft size={13} />
+                  <span>Course Assessments</span>
+                </button>
+                <span className="text-secondary">/</span>
+                <span className="font-semibold text-slate-700">{selectedQuiz?.title}</span>
+                <span className="text-secondary">/</span>
+                <span className="text-purple font-bold">
+                  {isEditing ? `Edit Question #${displayQuestionNum}` : `Author Question #${displayQuestionNum}`}
+                </span>
+              </div>
+
+              <div className="flex-align gap-12 flex-wrap">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm flex-align gap-6"
+                  onClick={() => setViewMode('overview')}
+                  title="Return to assessment overview without saving"
+                >
+                  <ArrowLeft size={15} />
+                  <span>Back to Assessment</span>
+                </button>
+                <h2 className="editor-page-heading m-0">
+                  {isEditing 
+                    ? `Editing Question #${displayQuestionNum}` 
+                    : `Authoring Question #${displayQuestionNum}`}
+                </h2>
+                <span className={`badge ${currentTypeConfig.badgeClass} font-bold`}>
+                  <TypeIcon size={13} />
+                  <span>{currentTypeConfig.label}</span>
+                </span>
+              </div>
+              <p className="text-secondary text-xs mt-6 mb-0">
+                Course: <strong>{selectedQuiz?.title}</strong> ({selectedQuiz?.category}) · Supervised by {selectedQuiz?.instructor}
+              </p>
+            </div>
+
+            <div className="flex-align gap-10">
+              <button
+                type="button"
+                className="btn btn-secondary btn-md"
+                onClick={() => setViewMode('overview')}
+              >
+                Cancel & Return
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary btn-md flex-align gap-6"
+                onClick={handleSaveQuestionSubmit}
+              >
+                <Save size={16} />
+                <span>{isEditing ? 'Save Question Changes' : 'Save Question to Assessment'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 2-COLUMN SPACIOUS WORKBENCH */}
+        <div className="editor-workbench-layout">
+          {/* LEFT COLUMN: MAIN CONFIGURATION FORM */}
+          <form onSubmit={handleSaveQuestionSubmit} className="editor-main-form-col">
+            {/* STEP 1: QUESTION MECHANISM */}
+            <div className="card editor-section-card mb-20">
+              <div className="editor-section-header mb-16">
+                <span className="step-badge">Step 1</span>
+                <div>
+                  <h3 className="editor-section-title">Select Interaction Mechanism</h3>
+                  <p className="text-secondary text-xs">
+                    Choose how trainees will analyze and interact with this examination item.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid-3-col gap-12">
+                {QUESTION_TYPES.map(t => {
+                  const isTypeSelected = qType === t.id;
+                  const Icon = t.icon;
+
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={`qtype-card-select ${isTypeSelected ? 'qtype-card-active' : ''}`}
+                      onClick={() => setQType(t.id)}
+                    >
+                      <div className="flex-between mb-8">
+                        <div className={`qtype-icon-box ${isTypeSelected ? 'icon-box-active' : ''}`}>
+                          <Icon size={20} />
+                        </div>
+                        {isTypeSelected && <Check size={16} className="text-purple font-bold" />}
+                      </div>
+                      <h4 className="qtype-card-heading">{t.label}</h4>
+                      <p className="qtype-card-sub">
+                        {t.id === 'multiple_choice' && 'Fast-paced Kahoot 4-tile multiple choice selection with attached image option.'}
+                        {t.id === 'matching' && 'Pairwise matching between Column A terms and Column B definitions.'}
+                        {t.id === 'identification' && 'Direct term entry with flexible synonym acceptance matching.'}
+                        {t.id === 'sequence_order' && 'Interactive step reordering into chronological or logical order.'}
+                        {t.id === 'diagram_analysis' && 'Architecture hotspot evaluation with custom pipeline builder or image.'}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* STEP 2: PROMPT & SCENARIO */}
+            <div className="card editor-section-card mb-20">
+              <div className="editor-section-header mb-16">
+                <span className="step-badge">Step 2</span>
+                <div>
+                  <h3 className="editor-section-title">Question Prompt & Operational Scenario</h3>
+                  <p className="text-secondary text-xs">
+                    Formulate the challenge, problem statement, or scenario presented to the trainee.
+                  </p>
+                </div>
+              </div>
+
+              <textarea
+                className="clean-input w-full editor-prompt-textarea"
+                rows={3}
+                required
+                placeholder="e.g. Which cryptographic component is responsible for evaluating the user's attribute credentials against the ciphertext policy tree in a Zero-Trust architecture?"
+                value={qPrompt}
+                onChange={(e) => setQPrompt(e.target.value)}
+              />
+            </div>
+
+            {/* STEP 3: MECHANISM CONFIGURATION */}
+            <div className="card editor-section-card mb-20">
+              <div className="editor-section-header mb-16">
+                <span className="step-badge">Step 3</span>
+                <div>
+                  <h3 className="editor-section-title">Configure Options, Solutions & Media</h3>
+                  <p className="text-secondary text-xs">
+                    Define the correct solution, choices, sequence steps, matching pairs, or diagram architecture.
+                  </p>
+                </div>
+              </div>
+
+              {/* CASE A: MATCHING QUESTION BUILDER */}
+              {qType === 'matching' && (
+                <div className="p-16 bg-slate-50 rounded-xl border border-slate-200">
+                  <div className="flex-between mb-12">
+                    <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
+                      <Link2 size={15} />
+                      <span>Configure Column A and Column B Pairs</span>
+                    </label>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-xs flex-align gap-4"
+                      onClick={() => setMatchingPairs([...matchingPairs, { left: '', right: '' }])}
+                      disabled={matchingPairs.length >= 6}
+                    >
+                      <Plus size={13} /> Add Pair
+                    </button>
+                  </div>
+                  <p className="text-xs text-secondary mb-14">
+                    Enter the term/component on the left (Column A), and its matching definition/function on the right (Column B). Items are dynamically randomized when presented to trainees.
+                  </p>
+
+                  <div className="matching-builder-stack space-y-3">
+                    {matchingPairs.map((pair, pIdx) => (
+                      <div key={pIdx} className="matching-pair-input-row flex-align gap-10 p-10 bg-white rounded-lg border border-slate-200">
+                        <span className="badge badge-purple flex-shrink-0 font-bold">{pIdx + 1}</span>
+                        <input
+                          type="text"
+                          className="clean-input flex-1"
+                          placeholder={`Column A #${pIdx + 1} (e.g. CP-ABE Ciphertext Encryption)`}
+                          value={pair.left}
+                          onChange={(e) => {
+                            const updated = [...matchingPairs];
+                            updated[pIdx].left = e.target.value;
+                            setMatchingPairs(updated);
+                          }}
+                          required
+                        />
+                        <span className="text-secondary font-bold text-base">➔</span>
+                        <input
+                          type="text"
+                          className="clean-input flex-1"
+                          placeholder={`Column B [${String.fromCharCode(65 + pIdx)}] (e.g. Cryptographic policy tree bound to payload)`}
+                          value={pair.right}
+                          onChange={(e) => {
+                            const updated = [...matchingPairs];
+                            updated[pIdx].right = e.target.value;
+                            setMatchingPairs(updated);
+                          }}
+                          required
+                        />
+                        {matchingPairs.length > 2 && (
+                          <button
+                            type="button"
+                            className="btn-icon-danger flex-shrink-0"
+                            onClick={() => {
+                              const updated = matchingPairs.filter((_, idx) => idx !== pIdx);
+                              setMatchingPairs(updated);
+                            }}
+                            title="Remove pair"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* CASE B: MULTIPLE CHOICE 4-TILE BUILDER & ATTACHED IMAGE */}
+              {qType === 'multiple_choice' && (
+                <div className="p-16 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="font-bold text-xs uppercase tracking-wider text-blue mb-12 block">
+                    Choice Options (Select Radio Button for Correct Answer)
+                  </label>
+
+                  <div className="grid-2-col gap-12 mb-20">
+                    {mcOptions.map((opt, oIdx) => {
+                      const colors = [
+                        { label: 'Red ▲', color: '#e21b3c' },
+                        { label: 'Blue ◆', color: '#1368ce' },
+                        { label: 'Yellow ●', color: '#d89e00' },
+                        { label: 'Green ■', color: '#26890c' }
+                      ];
+
+                      return (
+                        <div key={oIdx} className="choice-option-input-box p-10 bg-white rounded-lg border flex-align gap-10">
+                          <input
+                            type="radio"
+                            name="mc_correct_choice"
+                            checked={mcCorrectIdx === oIdx}
+                            onChange={() => setMcCorrectIdx(oIdx)}
+                            className="radio-accent"
+                            title="Mark as correct answer"
+                          />
+                          <span className="font-bold text-xs flex-shrink-0" style={{ color: colors[oIdx].color }}>
+                            {colors[oIdx].label}:
+                          </span>
+                          <input
+                            type="text"
+                            className="clean-input flex-1"
+                            placeholder={`Option ${oIdx + 1}...`}
+                            value={opt}
+                            onChange={(e) => {
+                              const updated = [...mcOptions];
+                              updated[oIdx] = e.target.value;
+                              setMcOptions(updated);
+                            }}
+                            required
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* OPTIONAL ATTACHED REFERENCE IMAGE */}
+                  <div className="border-top pt-16">
+                    <div className="flex-between mb-8">
+                      <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
+                        <ImageIcon size={15} />
+                        <span>Attached Reference Graphic / Image (Optional)</span>
+                      </label>
+                      {qImageUrl && (
+                        <button
+                          type="button"
+                          className="btn-icon-danger text-xs flex-align gap-4"
+                          onClick={() => {
+                            setQImageUrl('');
+                            setQImageCaption('');
+                          }}
+                          title="Remove attached image"
+                        >
+                          <X size={13} />
+                          <span>Remove Image</span>
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-xs text-secondary mb-12">
+                      Attach an architectural diagram, screenshot, or code graphic to accompany this multiple choice question.
+                    </p>
+
+                    {!qImageUrl ? (
+                      <div className="image-authoring-input-zone bg-white p-14 rounded-lg border border-slate-200">
+                        <div className="flex-align gap-10 mb-10">
+                          <button
+                            type="button"
+                            className={`btn btn-xs ${imageInputMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setImageInputMode('upload')}
+                          >
+                            <Upload size={12} /> Upload File (PNG/JPG/SVG)
+                          </button>
+                          <button
+                            type="button"
+                            className={`btn btn-xs ${imageInputMode === 'url' ? 'btn-primary' : 'btn-secondary'}`}
+                            onClick={() => setImageInputMode('url')}
+                          >
+                            <Link2 size={12} /> Enter Image URL
+                          </button>
+                        </div>
+
+                        {imageInputMode === 'upload' ? (
+                          <div className="upload-dropzone">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              id="mc-image-file-input"
+                              className="hidden-file-input"
+                              onChange={handleImageFileUpload}
+                            />
+                            <label htmlFor="mc-image-file-input" className="file-upload-label flex-column align-center justify-center p-20 cursor-pointer">
+                              <FileUp size={28} className="text-purple mb-6" />
+                              <span className="font-bold text-xs text-slate-800">Select an image file from your computer</span>
+                              <span className="text-2xs text-secondary mt-2">Supports PNG, JPG, WebP, SVG up to 5MB (Saved directly in browser)</span>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="url-input-group">
+                            <input
+                              type="url"
+                              className="clean-input w-full text-xs"
+                              placeholder="https://example.com/diagram.png or data:image/..."
+                              value={qImageUrl}
+                              onChange={(e) => setQImageUrl(e.target.value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="image-preview-card p-12 bg-white rounded-lg border border-slate-200 flex-align gap-16">
+                        <img src={qImageUrl} alt="Preview" className="builder-thumbnail-img" />
+                        <div className="flex-1">
+                          <label className="field-label text-xs font-bold text-secondary mb-4 block">
+                            Image Caption / Reference Title
+                          </label>
+                          <input
+                            type="text"
+                            className="clean-input w-full text-xs"
+                            placeholder="e.g. Figure 1: Network Traffic Inspection Topology"
+                            value={qImageCaption}
+                            onChange={(e) => setQImageCaption(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* CASE C: DIAGRAM HOTSPOT ANALYSIS BUILDER */}
+              {qType === 'diagram_analysis' && (
+                <div className="p-16 bg-slate-50 rounded-xl border border-slate-200">
+                  <div className="flex-between mb-10">
+                    <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
+                      <Layers size={15} />
+                      <span>Diagram Architecture Source</span>
+                    </label>
+                  </div>
+
+                  {/* DIAGRAM SOURCE SELECTOR TABS */}
+                  <div className="diagram-source-selector grid-3-col gap-10 mb-16">
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${qDiagramSource === 'template' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
+                      onClick={() => setQDiagramSource('template')}
+                    >
+                      <Layers size={14} />
+                      <span>Built-in Templates</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${qDiagramSource === 'custom_flow' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
+                      onClick={() => setQDiagramSource('custom_flow')}
+                    >
+                      <Sparkles size={14} />
+                      <span>Custom Sequence Flow</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${qDiagramSource === 'image' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
+                      onClick={() => setQDiagramSource('image')}
+                    >
+                      <Upload size={14} />
+                      <span>Upload Diagram Image</span>
+                    </button>
+                  </div>
+
+                  {/* SUB-SOURCE 1: BUILT-IN TEMPLATES */}
+                  {qDiagramSource === 'template' && (
+                    <div className="mb-16 p-14 bg-white rounded-lg border border-slate-200">
+                      <label className="field-label text-xs font-bold text-secondary mb-4 block">
+                        Select Standard Architecture Diagram
+                      </label>
+                      <select 
+                        className="clean-input w-full"
+                        value={diagramType}
+                        onChange={(e) => setDiagramType(e.target.value)}
+                      >
+                        <option value="security_pipeline">Zero-Trust Pipeline (Network ➔ CP-ABE ➔ Database)</option>
+                        <option value="clearance_hierarchy">Clearance Level Pyramid (Root Admin ➔ Account Mgr ➔ Staff)</option>
+                        <option value="data_flow">Data Privacy Relationship Flow (Subject ➔ PIC ➔ PIP)</option>
+                        <option value="tenant_partition">Multi-Tenant Cryptographic Partition (Tenant Alpha / Beta Wall)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* SUB-SOURCE 2: CUSTOM SEQUENCE FLOW BUILDER */}
+                  {qDiagramSource === 'custom_flow' && (
+                    <div className="mb-16 p-14 bg-white rounded-lg border border-slate-200">
+                      <div className="mb-12">
+                        <label className="field-label text-xs font-bold text-secondary mb-4 block">
+                          Custom Diagram Title / Header Strip
+                        </label>
+                        <input
+                          type="text"
+                          className="clean-input w-full text-xs font-bold"
+                          placeholder="e.g. Distributed Authentication & Access Token Pipeline"
+                          value={qCustomTitle}
+                          onChange={(e) => setQCustomTitle(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="flex-between mb-10">
+                        <label className="font-bold text-xs uppercase tracking-wider text-purple">
+                          Sequence Flow Nodes ({qCustomNodes.length})
+                        </label>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-xs flex-align gap-4"
+                          disabled={qCustomNodes.length >= 5}
+                          onClick={() => {
+                            const newId = `node-${Date.now().toString(36)}`;
+                            setQCustomNodes([
+                              ...qCustomNodes,
+                              {
+                                id: newId,
+                                title: `Component ${qCustomNodes.length + 1}`,
+                                subtitle: 'Process Description',
+                                badge: 'Service',
+                                color: 'cyan',
+                                iconType: 'server',
+                                isTarget: false
+                              }
+                            ]);
+                          }}
+                        >
+                          <Plus size={12} /> Add Node
+                        </button>
+                      </div>
+
+                      <div className="custom-flow-builder-stack space-y-3 mb-10">
+                        {qCustomNodes.map((node, nIdx) => (
+                          <div key={node.id || nIdx} className={`custom-node-builder-card p-12 rounded-lg border flex-between gap-10 ${node.isTarget ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200'}`}>
+                            <div className="flex-align gap-8 flex-1 flex-wrap">
+                              <span className="badge badge-purple flex-shrink-0 font-bold">{nIdx + 1}</span>
+                              
+                              <input
+                                type="text"
+                                className="clean-input text-xs font-bold w-130"
+                                placeholder="Component Name"
+                                value={node.title}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].title = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              />
+
+                              <input
+                                type="text"
+                                className="clean-input text-xs w-140"
+                                placeholder="Function / Subtitle"
+                                value={node.subtitle}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].subtitle = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              />
+
+                              <input
+                                type="text"
+                                className="clean-input text-xs w-100"
+                                placeholder="Badge Tag"
+                                value={node.badge}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].badge = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              />
+
+                              <select
+                                className="clean-input text-xs"
+                                value={node.color}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].color = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              >
+                                <option value="purple">Purple</option>
+                                <option value="cyan">Cyan</option>
+                                <option value="emerald">Emerald</option>
+                                <option value="gold">Gold</option>
+                                <option value="rose">Rose</option>
+                              </select>
+
+                              <select
+                                className="clean-input text-xs"
+                                value={node.iconType}
+                                onChange={(e) => {
+                                  const updated = [...qCustomNodes];
+                                  updated[nIdx].iconType = e.target.value;
+                                  setQCustomNodes(updated);
+                                }}
+                              >
+                                <option value="cpu">CPU / Process</option>
+                                <option value="server">Server</option>
+                                <option value="database">Database</option>
+                                <option value="cloud">Cloud</option>
+                                <option value="shield">Shield</option>
+                                <option value="lock">Lock</option>
+                                <option value="code">Code</option>
+                              </select>
+                            </div>
+
+                            <div className="flex-align gap-8 flex-shrink-0">
+                              <label className="flex-align gap-4 text-xs font-bold text-amber-700 cursor-pointer" title="Make this the highlighted/focus component">
+                                <input
+                                  type="radio"
+                                  name="custom_target_node_radio"
+                                  checked={!!node.isTarget}
+                                  onChange={() => {
+                                    const updated = qCustomNodes.map((nd, idx) => ({
+                                      ...nd,
+                                      isTarget: idx === nIdx
+                                    }));
+                                    setQCustomNodes(updated);
+                                  }}
+                                />
+                                <span>Target</span>
+                              </label>
+
+                              {qCustomNodes.length > 2 && (
+                                <button
+                                  type="button"
+                                  className="btn-icon-danger"
+                                  onClick={() => {
+                                    const updated = qCustomNodes.filter((_, idx) => idx !== nIdx);
+                                    setQCustomNodes(updated);
+                                  }}
+                                  title="Delete node"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SUB-SOURCE 3: UPLOAD DIAGRAM IMAGE OR URL */}
+                  {qDiagramSource === 'image' && (
+                    <div className="mb-16 p-14 bg-white rounded-lg border border-slate-200">
+                      <div className="flex-between mb-8">
+                        <label className="field-label text-xs font-bold text-secondary">
+                          Upload Diagram Graphic File or Paste Link
+                        </label>
+                        {qImageUrl && (
+                          <button
+                            type="button"
+                            className="btn-icon-danger text-xs flex-align gap-4"
+                            onClick={() => {
+                              setQImageUrl('');
+                              setQImageCaption('');
+                            }}
+                          >
+                            <X size={12} />
+                            <span>Clear Diagram</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {!qImageUrl ? (
+                        <div>
+                          <div className="flex-align gap-10 mb-10">
+                            <button
+                              type="button"
+                              className={`btn btn-xs ${imageInputMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
+                              onClick={() => setImageInputMode('upload')}
+                            >
+                              <Upload size={12} /> Upload File (PNG/JPG/SVG)
+                            </button>
+                            <button
+                              type="button"
+                              className={`btn btn-xs ${imageInputMode === 'url' ? 'btn-primary' : 'btn-secondary'}`}
+                              onClick={() => setImageInputMode('url')}
+                            >
+                              <Link2 size={12} /> Enter Image URL
+                            </button>
+                          </div>
+
+                          {imageInputMode === 'upload' ? (
+                            <div className="upload-dropzone">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                id="diagram-image-file-input"
+                                className="hidden-file-input"
+                                onChange={handleImageFileUpload}
+                              />
+                              <label htmlFor="diagram-image-file-input" className="file-upload-label flex-column align-center justify-center p-24 cursor-pointer">
+                                <FileUp size={32} className="text-purple mb-6" />
+                                <span className="font-bold text-xs text-slate-800">Select diagram file from computer</span>
+                                <span className="text-2xs text-secondary mt-2">Any architectural diagram (PNG, JPG, WebP, SVG) up to 5MB</span>
+                              </label>
+                            </div>
+                          ) : (
+                            <input
+                              type="url"
+                              className="clean-input w-full text-xs"
+                              placeholder="https://example.com/network-diagram.png"
+                              value={qImageUrl}
+                              onChange={(e) => setQImageUrl(e.target.value)}
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="image-preview-card p-12 bg-slate-50 rounded-lg border flex-align gap-16">
+                          <img src={qImageUrl} alt="Diagram Preview" className="builder-thumbnail-img" />
+                          <div className="flex-1">
+                            <label className="field-label text-xs font-bold text-secondary mb-2 block">
+                              Diagram Caption / Assessment Prompt Header
+                            </label>
+                            <input
+                              type="text"
+                              className="clean-input w-full text-xs"
+                              placeholder="e.g. Figure 3: Enterprise Zero-Trust Data Flow"
+                              value={qImageCaption}
+                              onChange={(e) => setQImageCaption(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 4-CHOICE OPTIONS FOR DIAGRAM QUESTION */}
+                  <label className="font-bold text-xs uppercase tracking-wider text-blue mb-10 block">
+                    Analysis Choice Options (Select Radio Button for Correct Answer)
+                  </label>
+
+                  <div className="grid-2-col gap-12">
+                    {mcOptions.map((opt, oIdx) => {
+                      const colors = [
+                        { label: 'Red ▲', color: '#e21b3c' },
+                        { label: 'Blue ◆', color: '#1368ce' },
+                        { label: 'Yellow ●', color: '#d89e00' },
+                        { label: 'Green ■', color: '#26890c' }
+                      ];
+
+                      return (
+                        <div key={oIdx} className="choice-option-input-box p-10 bg-white rounded-lg border flex-align gap-10">
+                          <input
+                            type="radio"
+                            name="mc_correct_choice"
+                            checked={mcCorrectIdx === oIdx}
+                            onChange={() => setMcCorrectIdx(oIdx)}
+                            className="radio-accent"
+                            title="Mark as correct answer"
+                          />
+                          <span className="font-bold text-xs flex-shrink-0" style={{ color: colors[oIdx].color }}>
+                            {colors[oIdx].label}:
+                          </span>
+                          <input
+                            type="text"
+                            className="clean-input flex-1"
+                            placeholder={`Option ${oIdx + 1}...`}
+                            value={opt}
+                            onChange={(e) => {
+                              const updated = [...mcOptions];
+                              updated[oIdx] = e.target.value;
+                              setMcOptions(updated);
+                            }}
+                            required
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* CASE D: IDENTIFICATION BUILDER */}
+              {qType === 'identification' && (
+                <div className="p-16 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="font-bold text-xs uppercase tracking-wider text-purple mb-10 block">
+                    Accepted Answers & Input Hint
+                  </label>
+                  <div className="mb-10">
+                    <label className="field-label text-xs mb-2 block font-semibold text-slate-700">
+                      Accepted Answers (Comma-separated variations)
+                    </label>
+                    <input
+                      type="text"
+                      className="clean-input w-full"
+                      placeholder="e.g. zero trust, zta, zero-trust architecture"
+                      value={identAnswers}
+                      onChange={(e) => setIdentAnswers(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label text-xs mb-2 block font-semibold text-slate-700">
+                      Input Field Placeholder / Hint
+                    </label>
+                    <input
+                      type="text"
+                      className="clean-input w-full"
+                      placeholder="e.g. Type the security model name..."
+                      value={identPlaceholder}
+                      onChange={(e) => setIdentPlaceholder(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* CASE E: SEQUENCE ORDERING BUILDER */}
+              {qType === 'sequence_order' && (
+                <div className="p-16 bg-slate-50 rounded-xl border border-slate-200">
+                  <div className="flex-between mb-10">
+                    <label className="font-bold text-xs uppercase tracking-wider text-green flex-align gap-6">
+                      <ListOrdered size={15} />
+                      <span>Enter Steps in Correct Chronological Order</span>
+                    </label>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-xs flex-align gap-4"
+                      onClick={() => setSeqSteps([...seqSteps, ''])}
+                      disabled={seqSteps.length >= 6}
+                    >
+                      <Plus size={12} /> Add Step
+                    </button>
+                  </div>
+                  <p className="text-xs text-secondary mb-12">
+                    Define the steps in solved order. The system will automatically scramble them when presenting to trainees.
+                  </p>
+                  <div className="seq-builder-stack space-y-3">
+                    {seqSteps.map((step, sIdx) => (
+                      <div key={sIdx} className="seq-step-input-row flex-align gap-10 p-8 bg-white rounded-lg border border-slate-200">
+                        <span className="step-num-pill">{sIdx + 1}</span>
+                        <input
+                          type="text"
+                          className="clean-input flex-1"
+                          placeholder={`Step #${sIdx + 1} description...`}
+                          value={step}
+                          onChange={(e) => {
+                            const updated = [...seqSteps];
+                            updated[sIdx] = e.target.value;
+                            setSeqSteps(updated);
+                          }}
+                          required
+                        />
+                        {seqSteps.length > 2 && (
+                          <button
+                            type="button"
+                            className="btn-icon-danger flex-shrink-0"
+                            onClick={() => {
+                              const updated = seqSteps.filter((_, idx) => idx !== sIdx);
+                              setSeqSteps(updated);
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* STEP 4: EXPLANATION & ANALYSIS */}
+            <div className="card editor-section-card mb-20">
+              <div className="editor-section-header mb-16">
+                <span className="step-badge">Step 4</span>
+                <div>
+                  <h3 className="editor-section-title">Instructional Solution Explanation & Technical Analysis</h3>
+                  <p className="text-secondary text-xs">
+                    Displayed immediately after trainees answer to reinforce zero-trust theory and statutory standards.
+                  </p>
+                </div>
+              </div>
+
+              <textarea
+                className="clean-input w-full text-sm"
+                rows={3}
+                placeholder="Explain why this answer is correct, citing CP-ABE policy attributes, zero-trust principles, or DPA compliance..."
+                value={qExplanation}
+                onChange={(e) => setQExplanation(e.target.value)}
+              />
+            </div>
+
+            {/* BOTTOM ACTIONS BAR */}
+            <div className="editor-bottom-bar card p-18 flex-between">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setViewMode('overview')}
+              >
+                Cancel & Return
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary btn-md flex-align gap-6"
+              >
+                <Save size={16} />
+                <span>{isEditing ? 'Save Question Changes' : 'Save Question to Assessment Pool'}</span>
+              </button>
+            </div>
+          </form>
+
+          {/* RIGHT COLUMN: REAL-TIME TRAINEE PREVIEW & CONTEXT INSPECTOR */}
+          <div className="editor-sidebar-col">
+            <div className="editor-sticky-panel">
+              {/* LIVE TRAINEE PREVIEW CARD */}
+              <div className="card preview-card p-18 mb-16">
+                <div className="flex-between mb-12 pb-10 border-bottom">
+                  <div className="flex-align gap-6 text-xs font-bold text-secondary uppercase tracking-wider">
+                    <Eye size={14} className="text-purple" />
+                    <span>Live Trainee Viewport Preview</span>
+                  </div>
+                  <span className={`badge ${currentTypeConfig.badgeClass} font-bold text-2xs`}>
+                    {currentTypeConfig.label}
+                  </span>
+                </div>
+
+                <div className="preview-question-meta mb-10 flex-align gap-6">
+                  <span className="question-seq-num">Q#{displayQuestionNum}</span>
+                </div>
+
+                <div className="preview-prompt-text font-bold text-sm text-slate-900 mb-12">
+                  {qPrompt || 'Your question prompt will appear here as you type...'}
+                </div>
+
+                {/* Multiple choice reference image preview */}
+                {qType === 'multiple_choice' && qImageUrl && (
+                  <div className="preview-attached-image mb-12">
+                    <img src={qImageUrl} alt="Reference Preview" className="w-full rounded border max-h-180 object-contain bg-slate-50" />
+                    {qImageCaption && <div className="text-2xs text-secondary mt-2 text-center italic">{qImageCaption}</div>}
+                  </div>
+                )}
+
+                {/* Diagram render preview */}
+                {qType === 'diagram_analysis' && (
+                  <div className="preview-diagram-render mb-12">
+                    <QuizDiagram 
+                      type={diagramType} 
+                      customNodes={qCustomNodes} 
+                      customTitle={qCustomTitle} 
+                      imageUrl={qImageUrl} 
+                      imageCaption={qImageCaption} 
+                    />
+                  </div>
+                )}
+
+                {/* Multiple Choice Tiles Preview */}
+                {(qType === 'multiple_choice' || qType === 'diagram_analysis') && (
+                  <div className="grid-2-col gap-6 mb-12 text-2xs">
+                    {mcOptions.map((opt, oIdx) => (
+                      <div 
+                        key={oIdx} 
+                        className={`p-6 rounded border flex-between ${oIdx === mcCorrectIdx ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-bold' : 'bg-slate-50 text-slate-600'}`}
+                      >
+                        <span className="truncate">{String.fromCharCode(65 + oIdx)}. {opt || `Option ${oIdx + 1}`}</span>
+                        {oIdx === mcCorrectIdx && <Check size={12} className="text-emerald font-bold flex-shrink-0" />}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Matching Preview */}
+                {qType === 'matching' && (
+                  <div className="preview-matching-list space-y-2 mb-12 text-2xs">
+                    {matchingPairs.filter(p => p.left || p.right).map((p, pIdx) => (
+                      <div key={pIdx} className="p-6 bg-slate-50 rounded border flex-align gap-6">
+                        <span className="font-bold text-purple">{pIdx + 1}. {p.left || 'Term'}</span>
+                        <span className="text-secondary font-bold">➔</span>
+                        <span className="font-bold text-cyan">[{String.fromCharCode(65 + pIdx)}] {p.right || 'Definition'}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Identification Preview */}
+                {qType === 'identification' && (
+                  <div className="preview-ident-box mb-12">
+                    <input 
+                      type="text" 
+                      className="clean-input w-full text-xs bg-slate-100" 
+                      placeholder={identPlaceholder || "Type answer..."} 
+                      disabled 
+                    />
+                    {identAnswers && (
+                      <div className="text-2xs text-secondary mt-4">
+                        Accepted: <strong className="text-purple">{identAnswers}</strong>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Sequence Preview */}
+                {qType === 'sequence_order' && (
+                  <div className="preview-seq-list space-y-2 mb-12 text-2xs">
+                    {seqSteps.filter(Boolean).map((s, sIdx) => (
+                      <div key={sIdx} className="p-6 bg-slate-50 rounded border flex-align gap-6">
+                        <span className="step-num-pill">{sIdx + 1}</span>
+                        <span>{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Explanation Snippet */}
+                {qExplanation && (
+                  <div className="p-8 bg-purple-50 rounded border border-purple-200 text-2xs text-purple-900 flex-align gap-6">
+                    <HelpCircle size={14} className="text-purple flex-shrink-0" />
+                    <span>{qExplanation}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* ASSESSMENT RULES & SCORING */}
+              <div className="card p-16 mb-16 bg-slate-50 border border-slate-200 text-xs">
+                <h4 className="font-bold text-slate-800 mb-8 uppercase tracking-wider text-2xs">
+                  Assessment Context & Scoring Rules
+                </h4>
+                <div className="space-y-2 text-secondary">
+                  <div className="flex-between">
+                    <span>Curriculum Module:</span>
+                    <strong className="text-slate-800">{selectedQuiz?.title}</strong>
+                  </div>
+                  <div className="flex-between">
+                    <span>Countdown per Question:</span>
+                    <strong className="text-purple">{selectedQuiz?.timePerQuestion}s</strong>
+                  </div>
+                  <div className="flex-between">
+                    <span>Passing Standard:</span>
+                    <strong className="text-emerald">{selectedQuiz?.passingScore}%</strong>
+                  </div>
+                  <div className="flex-between">
+                    <span>Question Base Points:</span>
+                    <strong className="text-amber">+200 PTS (+ Speed Bonus)</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // STANDARD ASSESSMENT OVERVIEW VIEW (Quiz Selection & Question Pool)
+  // =========================================================================
   return (
     <div className="quiz-studio-layout">
       {toastMessage && (
@@ -710,754 +1713,7 @@ export default function QuizStudio() {
         </div>
       </div>
 
-      {/* =========================================================================
-          MODAL: ADD OR EDIT QUESTION BUILDER
-          ========================================================================= */}
-      {showQuestionModal && (
-        <div className="modal-backdrop">
-          <div className="modal-card modal-lg animate-scaleIn">
-            <div className="modal-header flex-between">
-              <div>
-                <h3 className="modal-title flex-align gap-8">
-                  {editingQuestionId ? <Edit3 size={18} className="text-purple" /> : <Plus size={18} className="text-purple" />}
-                  <span>
-                    {editingQuestionId 
-                      ? `Edit Question #${editingQuestionNum} in "${selectedQuiz?.title}"` 
-                      : `Add Question to "${selectedQuiz?.title}"`}
-                  </span>
-                </h3>
-                <p className="text-secondary text-xs">
-                  {editingQuestionId 
-                    ? 'Modify the prompt, question mechanism type, choices, or explanatory solution.' 
-                    : 'Select a question format, enter the prompt, and specify the correct solution.'}
-                </p>
-              </div>
-              <button 
-                type="button" 
-                className="btn-icon-ghost"
-                onClick={() => setShowQuestionModal(false)}
-              >
-                ✕
-              </button>
-            </div>
 
-            <form onSubmit={handleSaveQuestionSubmit} className="modal-form-body p-20">
-              {/* 1. QUESTION TYPE SELECTOR */}
-              <div className="form-group mb-16">
-                <label className="field-label mb-8 font-bold text-xs uppercase tracking-wider text-secondary">
-                  1. Question Mechanism / Format
-                </label>
-                <div className="grid-3-col gap-10">
-                  {QUESTION_TYPES.map(t => {
-                    const isTypeSelected = qType === t.id;
-                    const Icon = t.icon;
-
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        className={`qtype-select-btn ${isTypeSelected ? 'qtype-active' : ''}`}
-                        onClick={() => setQType(t.id)}
-                      >
-                        <Icon size={16} />
-                        <span>{t.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 2. QUESTION PROMPT */}
-              <div className="form-group mb-16">
-                <label className="field-label mb-6 font-bold text-xs uppercase tracking-wider text-secondary">
-                  2. Question Prompt / Scenario
-                </label>
-                <textarea
-                  className="clean-input w-full"
-                  rows={2}
-                  required
-                  placeholder="e.g. Match each Security Architecture Component in Column A with its exact Enterprise Function in Column B:"
-                  value={qPrompt}
-                  onChange={(e) => setQPrompt(e.target.value)}
-                />
-              </div>
-
-              {/* 3. DYNAMIC TYPE FIELDS */}
-
-              {/* CASE A: MATCHING QUESTION BUILDER */}
-              {qType === 'matching' && (
-                <div className="form-group mb-16 bg-slate-50 p-14 rounded-lg border border-slate-200">
-                  <div className="flex-between mb-10">
-                    <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
-                      <Link2 size={14} />
-                      <span>Configure Column A and Column B Pairs</span>
-                    </label>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-xs flex-align gap-4"
-                      onClick={() => setMatchingPairs([...matchingPairs, { left: '', right: '' }])}
-                      disabled={matchingPairs.length >= 6}
-                    >
-                      <Plus size={12} /> Add Pair
-                    </button>
-                  </div>
-                  <p className="text-xs text-secondary mb-12">
-                    Enter the term/component on the left (Column A), and its matching definition/function on the right (Column B). Items are dynamically randomized when presented to trainees.
-                  </p>
-
-                  <div className="matching-builder-stack">
-                    {matchingPairs.map((pair, pIdx) => (
-                      <div key={pIdx} className="matching-pair-input-row flex-align gap-8 mb-8">
-                        <span className="badge badge-purple flex-shrink-0 font-bold">{pIdx + 1}</span>
-                        <input
-                          type="text"
-                          className="clean-input flex-1"
-                          placeholder={`Column A #${pIdx + 1} (e.g. CP-ABE Ciphertext Encryption)`}
-                          value={pair.left}
-                          onChange={(e) => {
-                            const updated = [...matchingPairs];
-                            updated[pIdx].left = e.target.value;
-                            setMatchingPairs(updated);
-                          }}
-                          required
-                        />
-                        <span className="text-secondary font-bold">➔</span>
-                        <input
-                          type="text"
-                          className="clean-input flex-1"
-                          placeholder={`Column B [${String.fromCharCode(65 + pIdx)}] (e.g. Cryptographic policy tree bound to payload)`}
-                          value={pair.right}
-                          onChange={(e) => {
-                            const updated = [...matchingPairs];
-                            updated[pIdx].right = e.target.value;
-                            setMatchingPairs(updated);
-                          }}
-                          required
-                        />
-                        {matchingPairs.length > 2 && (
-                          <button
-                            type="button"
-                            className="btn-icon-danger flex-shrink-0"
-                            onClick={() => {
-                              const updated = matchingPairs.filter((_, idx) => idx !== pIdx);
-                              setMatchingPairs(updated);
-                            }}
-                            title="Remove pair"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* CASE B: MULTIPLE CHOICE 4-TILE BUILDER & ATTACHED IMAGE */}
-              {qType === 'multiple_choice' && (
-                <div className="form-group mb-16 bg-slate-50 p-16 rounded-lg border border-slate-200">
-                  <label className="font-bold text-xs uppercase tracking-wider text-blue mb-10 block">
-                    Choice Options (Select Radio Button for Correct Answer)
-                  </label>
-
-                  <div className="grid-2-col gap-10 mb-16">
-                    {mcOptions.map((opt, oIdx) => {
-                      const colors = [
-                        { label: 'Red ▲', color: '#e21b3c' },
-                        { label: 'Blue ◆', color: '#1368ce' },
-                        { label: 'Yellow ●', color: '#d89e00' },
-                        { label: 'Green ■', color: '#26890c' }
-                      ];
-
-                      return (
-                        <div key={oIdx} className="choice-option-input-box p-8 bg-white rounded border flex-align gap-8">
-                          <input
-                            type="radio"
-                            name="mc_correct_choice"
-                            checked={mcCorrectIdx === oIdx}
-                            onChange={() => setMcCorrectIdx(oIdx)}
-                            className="radio-accent"
-                            title="Mark as correct answer"
-                          />
-                          <span className="font-bold text-xs flex-shrink-0" style={{ color: colors[oIdx].color }}>
-                            {colors[oIdx].label}:
-                          </span>
-                          <input
-                            type="text"
-                            className="clean-input flex-1"
-                            placeholder={`Option ${oIdx + 1}...`}
-                            value={opt}
-                            onChange={(e) => {
-                              const updated = [...mcOptions];
-                              updated[oIdx] = e.target.value;
-                              setMcOptions(updated);
-                            }}
-                            required
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* OPTIONAL ATTACHED REFERENCE IMAGE */}
-                  <div className="border-top pt-12">
-                    <div className="flex-between mb-8">
-                      <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
-                        <ImageIcon size={14} />
-                        <span>Attached Reference Graphic / Image (Optional)</span>
-                      </label>
-                      {qImageUrl && (
-                        <button
-                          type="button"
-                          className="btn-icon-danger text-xs flex-align gap-4"
-                          onClick={() => {
-                            setQImageUrl('');
-                            setQImageCaption('');
-                          }}
-                          title="Remove attached image"
-                        >
-                          <X size={12} />
-                          <span>Remove Image</span>
-                        </button>
-                      )}
-                    </div>
-                    <p className="text-xs text-secondary mb-10">
-                      You can attach an architectural diagram, screenshot, or code graphic to accompany this multiple choice question.
-                    </p>
-
-                    {!qImageUrl ? (
-                      <div className="image-authoring-input-zone bg-white p-12 rounded border border-slate-200">
-                        <div className="flex-align gap-10 mb-8">
-                          <button
-                            type="button"
-                            className={`btn btn-xs ${imageInputMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setImageInputMode('upload')}
-                          >
-                            <Upload size={12} /> Upload File (PNG/JPG/SVG)
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn btn-xs ${imageInputMode === 'url' ? 'btn-primary' : 'btn-secondary'}`}
-                            onClick={() => setImageInputMode('url')}
-                          >
-                            <Link2 size={12} /> Enter Image URL
-                          </button>
-                        </div>
-
-                        {imageInputMode === 'upload' ? (
-                          <div className="upload-dropzone">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              id="mc-image-file-input"
-                              className="hidden-file-input"
-                              onChange={handleImageFileUpload}
-                            />
-                            <label htmlFor="mc-image-file-input" className="file-upload-label flex-column align-center justify-center p-16 cursor-pointer">
-                              <FileUp size={24} className="text-purple mb-6" />
-                              <span className="font-bold text-xs text-slate-800">Choose an image file from your computer</span>
-                              <span className="text-2xs text-secondary mt-2">Supports PNG, JPG, WebP, SVG up to 5MB (Saved directly in browser)</span>
-                            </label>
-                          </div>
-                        ) : (
-                          <div className="url-input-group">
-                            <input
-                              type="url"
-                              className="clean-input w-full text-xs"
-                              placeholder="https://example.com/diagram.png or data:image/..."
-                              value={qImageUrl}
-                              onChange={(e) => setQImageUrl(e.target.value)}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="image-preview-card p-10 bg-white rounded border border-slate-200 flex-align gap-14">
-                        <img src={qImageUrl} alt="Preview" className="builder-thumbnail-img" />
-                        <div className="flex-1">
-                          <label className="field-label text-xs font-bold text-secondary mb-2 block">
-                            Image Caption / Reference Title
-                          </label>
-                          <input
-                            type="text"
-                            className="clean-input w-full text-xs"
-                            placeholder="e.g. Figure 1: Network Traffic Inspection Topology"
-                            value={qImageCaption}
-                            onChange={(e) => setQImageCaption(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* CASE E: DIAGRAM HOTSPOT ANALYSIS BUILDER */}
-              {qType === 'diagram_analysis' && (
-                <div className="form-group mb-16 bg-slate-50 p-16 rounded-lg border border-slate-200">
-                  <div className="flex-between mb-8">
-                    <label className="font-bold text-xs uppercase tracking-wider text-purple flex-align gap-6">
-                      <Layers size={14} />
-                      <span>Diagram Architecture Source</span>
-                    </label>
-                  </div>
-
-                  {/* DIAGRAM SOURCE SELECTOR TABS */}
-                  <div className="diagram-source-selector grid-3-col gap-8 mb-14">
-                    <button
-                      type="button"
-                      className={`btn btn-sm ${qDiagramSource === 'template' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
-                      onClick={() => setQDiagramSource('template')}
-                    >
-                      <Layers size={13} />
-                      <span>Built-in Templates</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn btn-sm ${qDiagramSource === 'custom_flow' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
-                      onClick={() => setQDiagramSource('custom_flow')}
-                    >
-                      <Sparkles size={13} />
-                      <span>Custom Sequence Flow</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn btn-sm ${qDiagramSource === 'image' ? 'btn-primary' : 'btn-secondary'} flex-align justify-center gap-6`}
-                      onClick={() => setQDiagramSource('image')}
-                    >
-                      <Upload size={13} />
-                      <span>Upload Diagram Image</span>
-                    </button>
-                  </div>
-
-                  {/* SUB-SOURCE 1: BUILT-IN TEMPLATES */}
-                  {qDiagramSource === 'template' && (
-                    <div className="mb-14 p-12 bg-white rounded border border-slate-200">
-                      <label className="field-label text-xs font-bold text-secondary mb-4 block">
-                        Select Standard Architecture Diagram
-                      </label>
-                      <select 
-                        className="clean-input w-full"
-                        value={diagramType}
-                        onChange={(e) => setDiagramType(e.target.value)}
-                      >
-                        <option value="security_pipeline">Zero-Trust Pipeline (Network ➔ CP-ABE ➔ Database)</option>
-                        <option value="clearance_hierarchy">Clearance Level Pyramid (Root Admin ➔ Account Mgr ➔ Staff)</option>
-                        <option value="data_flow">Data Privacy Relationship Flow (Subject ➔ PIC ➔ PIP)</option>
-                        <option value="tenant_partition">Multi-Tenant Cryptographic Partition (Tenant Alpha / Beta Wall)</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {/* SUB-SOURCE 2: CUSTOM SEQUENCE FLOW BUILDER */}
-                  {qDiagramSource === 'custom_flow' && (
-                    <div className="mb-14 p-12 bg-white rounded border border-slate-200">
-                      <div className="mb-10">
-                        <label className="field-label text-xs font-bold text-secondary mb-4 block">
-                          Custom Diagram Title / Header Strip
-                        </label>
-                        <input
-                          type="text"
-                          className="clean-input w-full text-xs font-bold"
-                          placeholder="e.g. Distributed Authentication & Access Token Pipeline"
-                          value={qCustomTitle}
-                          onChange={(e) => setQCustomTitle(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="flex-between mb-8">
-                        <label className="font-bold text-xs uppercase tracking-wider text-purple">
-                          Sequence Flow Nodes ({qCustomNodes.length})
-                        </label>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-xs flex-align gap-4"
-                          disabled={qCustomNodes.length >= 5}
-                          onClick={() => {
-                            const newId = `node-${Date.now().toString(36)}`;
-                            setQCustomNodes([
-                              ...qCustomNodes,
-                              {
-                                id: newId,
-                                title: `Component ${qCustomNodes.length + 1}`,
-                                subtitle: 'Process Description',
-                                badge: 'Service',
-                                color: 'cyan',
-                                iconType: 'server',
-                                isTarget: false
-                              }
-                            ]);
-                          }}
-                        >
-                          <Plus size={12} /> Add Node
-                        </button>
-                      </div>
-
-                      <div className="custom-flow-builder-stack space-y-3 mb-10">
-                        {qCustomNodes.map((node, nIdx) => (
-                          <div key={node.id || nIdx} className={`custom-node-builder-card p-10 rounded border flex-between gap-10 ${node.isTarget ? 'bg-amber-50 border-amber-300' : 'bg-slate-50 border-slate-200'}`}>
-                            <div className="flex-align gap-8 flex-1 flex-wrap">
-                              <span className="badge badge-purple flex-shrink-0 font-bold">{nIdx + 1}</span>
-                              
-                              <input
-                                type="text"
-                                className="clean-input text-xs font-bold w-120"
-                                placeholder="Component Name"
-                                value={node.title}
-                                onChange={(e) => {
-                                  const updated = [...qCustomNodes];
-                                  updated[nIdx].title = e.target.value;
-                                  setQCustomNodes(updated);
-                                }}
-                              />
-
-                              <input
-                                type="text"
-                                className="clean-input text-xs w-130"
-                                placeholder="Function / Subtitle"
-                                value={node.subtitle}
-                                onChange={(e) => {
-                                  const updated = [...qCustomNodes];
-                                  updated[nIdx].subtitle = e.target.value;
-                                  setQCustomNodes(updated);
-                                }}
-                              />
-
-                              <input
-                                type="text"
-                                className="clean-input text-xs w-90"
-                                placeholder="Badge Tag"
-                                value={node.badge}
-                                onChange={(e) => {
-                                  const updated = [...qCustomNodes];
-                                  updated[nIdx].badge = e.target.value;
-                                  setQCustomNodes(updated);
-                                }}
-                              />
-
-                              <select
-                                className="clean-input text-xs"
-                                value={node.color}
-                                onChange={(e) => {
-                                  const updated = [...qCustomNodes];
-                                  updated[nIdx].color = e.target.value;
-                                  setQCustomNodes(updated);
-                                }}
-                              >
-                                <option value="purple">Purple</option>
-                                <option value="cyan">Cyan</option>
-                                <option value="emerald">Emerald</option>
-                                <option value="gold">Gold</option>
-                                <option value="rose">Rose</option>
-                              </select>
-
-                              <select
-                                className="clean-input text-xs"
-                                value={node.iconType}
-                                onChange={(e) => {
-                                  const updated = [...qCustomNodes];
-                                  updated[nIdx].iconType = e.target.value;
-                                  setQCustomNodes(updated);
-                                }}
-                              >
-                                <option value="cpu">CPU / Process</option>
-                                <option value="server">Server</option>
-                                <option value="database">Database</option>
-                                <option value="cloud">Cloud</option>
-                                <option value="shield">Shield</option>
-                                <option value="lock">Lock</option>
-                                <option value="code">Code</option>
-                              </select>
-                            </div>
-
-                            <div className="flex-align gap-8 flex-shrink-0">
-                              <label className="flex-align gap-4 text-xs font-bold text-amber-700 cursor-pointer" title="Make this the highlighted/focus component">
-                                <input
-                                  type="radio"
-                                  name="custom_target_node_radio"
-                                  checked={!!node.isTarget}
-                                  onChange={() => {
-                                    const updated = qCustomNodes.map((nd, idx) => ({
-                                      ...nd,
-                                      isTarget: idx === nIdx
-                                    }));
-                                    setQCustomNodes(updated);
-                                  }}
-                                />
-                                <span>Target</span>
-                              </label>
-
-                              {qCustomNodes.length > 2 && (
-                                <button
-                                  type="button"
-                                  className="btn-icon-danger"
-                                  onClick={() => {
-                                    const updated = qCustomNodes.filter((_, idx) => idx !== nIdx);
-                                    setQCustomNodes(updated);
-                                  }}
-                                  title="Delete node"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* SUB-SOURCE 3: UPLOAD DIAGRAM IMAGE OR URL */}
-                  {qDiagramSource === 'image' && (
-                    <div className="mb-14 p-12 bg-white rounded border border-slate-200">
-                      <div className="flex-between mb-8">
-                        <label className="field-label text-xs font-bold text-secondary">
-                          Upload Diagram Graphic File or Paste Link
-                        </label>
-                        {qImageUrl && (
-                          <button
-                            type="button"
-                            className="btn-icon-danger text-xs flex-align gap-4"
-                            onClick={() => {
-                              setQImageUrl('');
-                              setQImageCaption('');
-                            }}
-                          >
-                            <X size={12} />
-                            <span>Clear Diagram</span>
-                          </button>
-                        )}
-                      </div>
-
-                      {!qImageUrl ? (
-                        <div>
-                          <div className="flex-align gap-10 mb-8">
-                            <button
-                              type="button"
-                              className={`btn btn-xs ${imageInputMode === 'upload' ? 'btn-primary' : 'btn-secondary'}`}
-                              onClick={() => setImageInputMode('upload')}
-                            >
-                              <Upload size={12} /> Upload File (PNG/JPG/SVG)
-                            </button>
-                            <button
-                              type="button"
-                              className={`btn btn-xs ${imageInputMode === 'url' ? 'btn-primary' : 'btn-secondary'}`}
-                              onClick={() => setImageInputMode('url')}
-                            >
-                              <Link2 size={12} /> Enter Image URL
-                            </button>
-                          </div>
-
-                          {imageInputMode === 'upload' ? (
-                            <div className="upload-dropzone">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                id="diagram-image-file-input"
-                                className="hidden-file-input"
-                                onChange={handleImageFileUpload}
-                              />
-                              <label htmlFor="diagram-image-file-input" className="file-upload-label flex-column align-center justify-center p-20 cursor-pointer">
-                                <FileUp size={28} className="text-purple mb-6" />
-                                <span className="font-bold text-xs text-slate-800">Select diagram file from computer</span>
-                                <span className="text-2xs text-secondary mt-2">Any architectural diagram (PNG, JPG, WebP, SVG) up to 5MB</span>
-                              </label>
-                            </div>
-                          ) : (
-                            <input
-                              type="url"
-                              className="clean-input w-full text-xs"
-                              placeholder="https://example.com/network-diagram.png"
-                              value={qImageUrl}
-                              onChange={(e) => setQImageUrl(e.target.value)}
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <div className="image-preview-card p-10 bg-slate-50 rounded border flex-align gap-14">
-                          <img src={qImageUrl} alt="Diagram Preview" className="builder-thumbnail-img" />
-                          <div className="flex-1">
-                            <label className="field-label text-xs font-bold text-secondary mb-2 block">
-                              Diagram Caption / Assessment Prompt Header
-                            </label>
-                            <input
-                              type="text"
-                              className="clean-input w-full text-xs"
-                              placeholder="e.g. Figure 3: Enterprise Zero-Trust Data Flow"
-                              value={qImageCaption}
-                              onChange={(e) => setQImageCaption(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* 4-CHOICE OPTIONS FOR DIAGRAM QUESTION */}
-                  <label className="font-bold text-xs uppercase tracking-wider text-blue mb-8 block">
-                    Analysis Choice Options (Select Radio Button for Correct Answer)
-                  </label>
-
-                  <div className="grid-2-col gap-10">
-                    {mcOptions.map((opt, oIdx) => {
-                      const colors = [
-                        { label: 'Red ▲', color: '#e21b3c' },
-                        { label: 'Blue ◆', color: '#1368ce' },
-                        { label: 'Yellow ●', color: '#d89e00' },
-                        { label: 'Green ■', color: '#26890c' }
-                      ];
-
-                      return (
-                        <div key={oIdx} className="choice-option-input-box p-8 bg-white rounded border flex-align gap-8">
-                          <input
-                            type="radio"
-                            name="mc_correct_choice"
-                            checked={mcCorrectIdx === oIdx}
-                            onChange={() => setMcCorrectIdx(oIdx)}
-                            className="radio-accent"
-                            title="Mark as correct answer"
-                          />
-                          <span className="font-bold text-xs flex-shrink-0" style={{ color: colors[oIdx].color }}>
-                            {colors[oIdx].label}:
-                          </span>
-                          <input
-                            type="text"
-                            className="clean-input flex-1"
-                            placeholder={`Option ${oIdx + 1}...`}
-                            value={opt}
-                            onChange={(e) => {
-                              const updated = [...mcOptions];
-                              updated[oIdx] = e.target.value;
-                              setMcOptions(updated);
-                            }}
-                            required
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* CASE C: IDENTIFICATION BUILDER */}
-              {qType === 'identification' && (
-                <div className="form-group mb-16 bg-slate-50 p-14 rounded-lg border border-slate-200">
-                  <label className="font-bold text-xs uppercase tracking-wider text-purple mb-8 block">
-                    Accepted Answers & Input Hint
-                  </label>
-                  <div className="mb-8">
-                    <label className="field-label text-xs mb-2">Accepted Answers (Comma-separated variations)</label>
-                    <input
-                      type="text"
-                      className="clean-input w-full"
-                      placeholder="e.g. zero trust, zta, zero-trust architecture"
-                      value={identAnswers}
-                      onChange={(e) => setIdentAnswers(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="field-label text-xs mb-2">Input Field Placeholder / Hint</label>
-                    <input
-                      type="text"
-                      className="clean-input w-full"
-                      placeholder="e.g. Type the security model name..."
-                      value={identPlaceholder}
-                      onChange={(e) => setIdentPlaceholder(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* CASE D: SEQUENCE ORDERING BUILDER */}
-              {qType === 'sequence_order' && (
-                <div className="form-group mb-16 bg-slate-50 p-14 rounded-lg border border-slate-200">
-                  <div className="flex-between mb-8">
-                    <label className="font-bold text-xs uppercase tracking-wider text-green flex-align gap-6">
-                      <ListOrdered size={14} />
-                      <span>Enter Steps in Correct Chronological Order</span>
-                    </label>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-xs flex-align gap-4"
-                      onClick={() => setSeqSteps([...seqSteps, ''])}
-                      disabled={seqSteps.length >= 6}
-                    >
-                      <Plus size={12} /> Add Step
-                    </button>
-                  </div>
-                  <p className="text-xs text-secondary mb-10">
-                    Define the steps in solved order. The system will automatically scramble them when presenting to trainees.
-                  </p>
-                  <div className="seq-builder-stack">
-                    {seqSteps.map((step, sIdx) => (
-                      <div key={sIdx} className="seq-step-input-row flex-align gap-8 mb-6">
-                        <span className="step-num-pill">{sIdx + 1}</span>
-                        <input
-                          type="text"
-                          className="clean-input flex-1"
-                          placeholder={`Step #${sIdx + 1} description...`}
-                          value={step}
-                          onChange={(e) => {
-                            const updated = [...seqSteps];
-                            updated[sIdx] = e.target.value;
-                            setSeqSteps(updated);
-                          }}
-                          required
-                        />
-                        {seqSteps.length > 2 && (
-                          <button
-                            type="button"
-                            className="btn-icon-danger flex-shrink-0"
-                            onClick={() => {
-                              const updated = seqSteps.filter((_, idx) => idx !== sIdx);
-                              setSeqSteps(updated);
-                            }}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 4. EXPLANATION & ANALYSIS */}
-              <div className="form-group mb-20">
-                <label className="field-label mb-6 font-bold text-xs uppercase tracking-wider text-secondary">
-                  4. Solution Explanation & Technical Analysis
-                </label>
-                <textarea
-                  className="clean-input w-full"
-                  rows={2}
-                  placeholder="Explain why this answer is correct, referencing cryptographic policy, zero-trust principles, or DPA compliance..."
-                  value={qExplanation}
-                  onChange={(e) => setQExplanation(e.target.value)}
-                />
-              </div>
-
-              {/* MODAL ACTIONS */}
-              <div className="modal-actions flex-between pt-16 border-top">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowQuestionModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary flex-align gap-6"
-                >
-                  <Save size={15} />
-                  <span>{editingQuestionId ? 'Save Changes to Question' : 'Save Question to Assessment Pool'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* =========================================================================
           MODAL: EDIT QUIZ SETTINGS / METADATA
