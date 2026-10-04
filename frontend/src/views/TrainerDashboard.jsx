@@ -585,81 +585,107 @@ export default function TrainerDashboard({ activeSubView, setActiveView }) {
 
           {/* MAIN ROSTER CARD */}
           <div className="card roster-main-card">
-            {/* CARD HEADER & FILTER CONTROLS */}
-            <div className="roster-toolbar p-20 flex-between flex-wrap gap-16 border-bottom">
-              <div>
-                <div className="flex-align gap-10">
-                  <div className="roster-header-icon-box">
-                    <Users size={20} className="text-purple" />
+            {/* TIER 1: HEADER & PRIMARY ACTIONS */}
+            <div className="roster-header-tier">
+              <div className="flex-align gap-14">
+                <div className="roster-header-icon-box">
+                  <Users size={22} className="text-purple" />
+                </div>
+                <div>
+                  <div className="flex-align gap-10">
+                    <h3 className="card-title font-bold text-slate-900 m-0">Enrolled Trainee Master Roster</h3>
+                    <span className="badge badge-purple text-2xs font-bold">
+                      {filteredTrainees.length} of {trainees.length} Trainees
+                    </span>
                   </div>
-                  <div>
-                    <div className="flex-align gap-8">
-                      <h3 className="card-title font-bold text-slate-900 m-0">Enrolled Trainee Master Roster</h3>
-                      <span className="badge badge-purple text-2xs font-bold">
-                        {filteredTrainees.length} of {trainees.length} Trainees
-                      </span>
-                    </div>
-                    <p className="card-subtitle text-secondary text-xs mt-2 mb-0">
-                      Live candidate enrollment, scoring diagnostics, and cryptographic certificate statuses.
-                    </p>
-                  </div>
+                  <p className="card-subtitle text-secondary text-xs mt-4 mb-0">
+                    Live candidate enrollment, scoring diagnostics, and cryptographic certificate statuses.
+                  </p>
                 </div>
               </div>
 
-              {/* FILTERS & SEARCH */}
-              <div className="flex-align gap-10 flex-wrap">
-                <select
-                  className="analytics-select"
-                  value={companyFilter}
-                  onChange={(e) => setCompanyFilter(e.target.value)}
-                >
-                  <option value="ALL">All Client Companies</option>
-                  <option value="CORP_ALPHA">San Miguel Conglomerate (CORP_ALPHA)</option>
-                  <option value="FINTECH_BETA">Maya FinTech Innovations (FINTECH_BETA)</option>
-                  <option value="RETAIL_GAMMA">Ayala Retail Omnichannel (RETAIL_GAMMA)</option>
-                </select>
-
-                <select
-                  className="analytics-select"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="ALL">All Certification Statuses</option>
-                  <option value="Submitted & Certified">Submitted & Certified</option>
-                  <option value="Drafting">Drafting / In Progress</option>
-                  <option value="Pending Review">Pending Evaluation</option>
-                </select>
-
-                <div className="search-box">
-                  <Search size={14} className="search-icon" />
-                  <input
-                    type="text"
-                    placeholder="Search name or email..."
-                    className="search-input text-xs"
-                    value={rosterSearch}
-                    onChange={(e) => setRosterSearch(e.target.value)}
-                  />
-                  {rosterSearch && (
-                    <button
-                      type="button"
-                      className="btn-icon-ghost text-xs"
-                      onClick={() => setRosterSearch('')}
-                      style={{ width: '18px', height: '18px', padding: 0 }}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-
+              <div className="flex-align gap-10">
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm flex-align gap-6"
+                  className="btn btn-secondary flex-align gap-8"
                   onClick={handleExportRosterCsv}
                   title="Export filtered roster to CSV"
                 >
-                  <Download size={13} className="text-purple" />
-                  <span>Export CSV</span>
+                  <Download size={14} className="text-purple" />
+                  <span className="font-bold text-xs">Export CSV</span>
                 </button>
+              </div>
+            </div>
+
+            {/* TIER 2: FILTER & SEARCH CONTROL STRIP */}
+            <div className="roster-filter-strip">
+              {/* SEARCH INPUT */}
+              <div className="roster-search-container">
+                <Search size={15} className="roster-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by trainee name, email, or company..."
+                  className="roster-search-input"
+                  value={rosterSearch}
+                  onChange={(e) => setRosterSearch(e.target.value)}
+                />
+                {rosterSearch && (
+                  <button
+                    type="button"
+                    className="roster-search-clear"
+                    onClick={() => setRosterSearch('')}
+                    title="Clear search input"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* FILTER DROPDOWNS & RESET */}
+              <div className="roster-filter-group">
+                <div className="roster-filter-item">
+                  <select
+                    className="roster-filter-select"
+                    value={companyFilter}
+                    onChange={(e) => setCompanyFilter(e.target.value)}
+                    aria-label="Filter by client company"
+                  >
+                    <option value="ALL">🏢 All Client Companies</option>
+                    <option value="CORP_ALPHA">San Miguel Conglomerate (CORP_ALPHA)</option>
+                    <option value="FINTECH_BETA">Maya FinTech Innovations (FINTECH_BETA)</option>
+                    <option value="RETAIL_GAMMA">Ayala Retail Omnichannel (RETAIL_GAMMA)</option>
+                  </select>
+                </div>
+
+                <div className="roster-filter-item">
+                  <select
+                    className="roster-filter-select"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    aria-label="Filter by certification status"
+                  >
+                    <option value="ALL">🛡️ All Certification Statuses</option>
+                    <option value="Submitted & Certified">Submitted & Certified</option>
+                    <option value="Drafting">Drafting / In Progress</option>
+                    <option value="Pending Review">Pending Evaluation</option>
+                  </select>
+                </div>
+
+                {(companyFilter !== 'ALL' || statusFilter !== 'ALL' || rosterSearch) && (
+                  <button
+                    type="button"
+                    className="roster-reset-btn"
+                    onClick={() => {
+                      setCompanyFilter('ALL');
+                      setStatusFilter('ALL');
+                      setRosterSearch('');
+                    }}
+                    title="Reset all filters"
+                  >
+                    <RefreshCw size={12} />
+                    <span>Reset</span>
+                  </button>
+                )}
               </div>
             </div>
 
