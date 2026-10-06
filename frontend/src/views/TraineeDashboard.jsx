@@ -27,6 +27,13 @@ import { QUIZ_DATABASE, getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore } from '../services/api';
+import mascotRobot from '../assets/mascot-robot.png';
+import { 
+  IsometricCube3D, 
+  IsometricLock3D, 
+  IsometricSphere3D, 
+  IsometricDatabase3D 
+} from '../components/IsometricIcons';
 
 export default function TraineeDashboard({ activeSubView, setActiveView }) {
   const { currentUser } = useAuth();
@@ -80,9 +87,11 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       id: 'act-1',
       title: 'Enterprise Security Audit Challenge',
       instructor: 'Lead Trainer David Lim',
-      questionsCount: '5 Questions',
-      headerColor: '#1368ce',
+      questionsCount: '5 QUESTIONS',
+      headerColor: '#2563eb',
       category: 'Information Security',
+      Icon3D: IsometricCube3D,
+      progressSegments: [true, true, true, false],
       completed: quizScoreStatus['act-1']?.completed,
       score: quizScoreStatus['act-1']?.score,
       accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned'
@@ -91,9 +100,11 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       id: 'act-2',
       title: 'Role-Based Access & Policy Verification',
       instructor: 'Dr. Sarah Jenkins',
-      questionsCount: '5 Questions',
-      headerColor: '#06d6a0',
+      questionsCount: '5 QUESTIONS',
+      headerColor: '#059669',
       category: 'Access Control',
+      Icon3D: IsometricLock3D,
+      progressSegments: [true, true, true, true],
       completed: quizScoreStatus['act-2']?.completed,
       score: quizScoreStatus['act-2']?.score,
       accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned'
@@ -102,9 +113,11 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       id: 'act-3',
       title: 'Privacy Impact Assessment (PIA) Simulation',
       instructor: 'Lead Trainer David Lim',
-      questionsCount: '5 Questions',
-      headerColor: '#e21b3c',
+      questionsCount: '5 QUESTIONS',
+      headerColor: '#e11d48',
       category: 'Privacy Management',
+      Icon3D: IsometricSphere3D,
+      progressSegments: [true, true, true, false],
       completed: quizScoreStatus['act-3']?.completed,
       score: quizScoreStatus['act-3']?.score,
       accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned'
@@ -113,20 +126,58 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       id: 'act-4',
       title: 'Multi-Tenant Data Isolation & Security',
       instructor: 'Prof. Roel Traballo',
-      questionsCount: '5 Questions',
-      headerColor: '#772ce8',
+      questionsCount: '5 QUESTIONS',
+      headerColor: '#7c3aed',
       category: 'Database Security',
+      Icon3D: IsometricDatabase3D,
+      progressSegments: [false, false, false, false],
       completed: quizScoreStatus['act-4']?.completed,
       score: quizScoreStatus['act-4']?.score,
-      accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned (Due in 3d)'
+      accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned · Due in 3d'
     }
   ];
 
   const earnedBadges = [
-    { id: 'first_step', name: 'First Step', icon: '🚀', desc: 'Completed orientation modules', tier: 'Bronze' },
-    { id: 'sec_champ', name: 'Security Champion', icon: '🛡️', desc: 'Aced Security & Compliance Assessment', tier: 'Gold' },
-    { id: 'streak_master', name: '7-Day Streak', icon: '🔥', desc: 'Active training 7 consecutive days', tier: 'Ruby' },
-    { id: 'crypto_knight', name: 'Security Decoder', icon: '⚡', desc: 'Verified policy attribute satisfaction', tier: 'Diamond' }
+    { 
+      id: 'first_step', 
+      name: 'First Step', 
+      icon: '⭐', 
+      iconBg: '#fef9c3',
+      iconBorder: '#fef08a',
+      iconColor: '#ca8a04',
+      desc: 'Completed orientation modules', 
+      tier: 'Bronze' 
+    },
+    { 
+      id: 'sec_champ', 
+      name: 'Security Champion', 
+      icon: '🛡️', 
+      iconBg: '#dbeafe',
+      iconBorder: '#bfdbfe',
+      iconColor: '#2563eb',
+      desc: 'Aced Security & Compliance Assessment', 
+      tier: 'Gold' 
+    },
+    { 
+      id: 'streak_master', 
+      name: '7-Day Streak', 
+      icon: '🔥', 
+      iconBg: '#ffedd5',
+      iconBorder: '#fed7aa',
+      iconColor: '#ea580c',
+      desc: 'Active training 7 consecutive days', 
+      tier: 'Ruby' 
+    },
+    { 
+      id: 'crypto_knight', 
+      name: 'Security Decoder', 
+      icon: '⚡', 
+      iconBg: '#f3e8ff',
+      iconBorder: '#e9d5ff',
+      iconColor: '#9333ea',
+      desc: 'Verified policy attribute satisfaction', 
+      tier: 'Diamond' 
+    }
   ];
 
   const certificates = [
@@ -271,24 +322,24 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       {/* 1. MAIN TRAINEE QUEST VIEW */}
       {(activeSubView === 'trainee_quest' || !activeSubView) && (
         <>
-          {/* Top Banner with Quizizz Purple & Kahoot Play Input */}
-          <div className="wayground-hero-banner">
-            <div className="banner-left-content">
-              <div className="hero-badge-tag">
-                <Sparkles size={14} className="text-gold" />
+          {/* 1. HERO BANNER WITH 3D MASCOT */}
+          <div className="template-hero-banner">
+            <div className="template-hero-left">
+              <div className="template-hero-badge">
+                <Sparkles size={13} className="text-gold" />
                 <span>CROSSQUEST GAMIFIED LEARNING</span>
               </div>
-              <h1>Welcome back, {currentUser?.name}!</h1>
-              <p className="hero-subtext">
-                Complete today's interactive quest to extend your <strong>7-Day Streak</strong> and climb the corporate leaderboard.
+              <h1 className="template-hero-title">Welcome back, {currentUser?.name}!</h1>
+              <p className="template-hero-subtitle">
+                Complete today's interactive quest to extend your <strong>7-day streak</strong> and climb the corporate leaderboard.
               </p>
 
-              {/* Pin Code Joiner (Kahoot Style) */}
-              <div className="kahoot-join-bar">
+              {/* Pin Code Joiner Pill */}
+              <div className="template-join-pill-bar">
                 <input
                   type="text"
                   placeholder="Enter Game PIN / Quest Code..."
-                  className="kahoot-pin-input"
+                  className="template-join-input"
                   value={pinCode}
                   onChange={(e) => setPinCode(e.target.value)}
                   onKeyDown={(e) => {
@@ -296,64 +347,111 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
                   }}
                 />
                 <button 
-                  className="btn-tactile btn-tactile-purple btn-pin-enter"
+                  className="template-join-btn"
                   onClick={handleJoinPin}
                 >
-                  <Play size={16} />
+                  <Play size={15} fill="currentColor" />
                   <span>Join Quest</span>
                 </button>
               </div>
             </div>
 
-            <div className="banner-right-stats">
-              <div className="hero-stat-card streak-card">
-                <Flame size={32} className="flame-pulse" />
-                <div className="hero-stat-info">
-                  <div className="hero-stat-value">{streakDays} Days</div>
-                  <div className="hero-stat-label">ACTIVE STREAK</div>
+            <div className="template-hero-right">
+              {/* Floating streak pill */}
+              <div className="template-hero-streak-badge">
+                <div className="streak-flame-circle">
+                  <Flame size={16} className="text-orange" fill="#ff6a00" />
                 </div>
+                <div className="streak-text-group">
+                  <span className="streak-val">{streakDays} Days</span>
+                  <span className="streak-lbl">ACTIVE STREAK</span>
+                </div>
+              </div>
+
+              {/* 3D Cute Robot Mascot */}
+              <div className="template-mascot-container">
+                <img 
+                  src={mascotRobot} 
+                  alt="CrossQuest 3D Mascot" 
+                  className="template-mascot-img" 
+                />
               </div>
             </div>
           </div>
 
-          {/* Section: Assigned Activities (Wayground Style Cards with colored header tabs) */}
-          <div className="wayground-section-block">
-            <div className="section-title-row">
-              <div className="section-title-left">
-                <Target size={20} className="text-magenta" />
+          {/* 2. ASSIGNED COURSE ACTIVITIES (4 CARDS WITH 3D ISOMETRIC GRAPHICS) */}
+          <div className="template-section-block">
+            <div className="template-section-header">
+              <div className="template-section-title-wrap">
                 <h3>Assigned Course Activities</h3>
               </div>
-              <span className="text-secondary text-xs">Assigned by Crossworks Instructors</span>
+              <span className="template-section-instructor-tag">ASSIGNED BY CROSSWORKS INSTRUCTORS</span>
             </div>
 
-            <div className="activity-cards-scroller">
+            <div className="template-activities-grid">
               {assignedActivities.map((act) => {
                 const isSavedThis = savedSession?.quizId === act.id;
+                const IconComponent = act.Icon3D;
+
                 return (
-                  <div key={act.id} className="card-gamified wayground-activity-card">
-                    {/* Top Colored Bar with Category Icon */}
-                    <div className="activity-card-header-bar" style={{ backgroundColor: act.headerColor }}>
-                      <span className="activity-header-label">{act.category}</span>
-                      <span className="activity-q-count">{act.questionsCount}</span>
+                  <div key={act.id} className="template-activity-card">
+                    {/* Top Colored Banner with 3D Graphic */}
+                    <div className="activity-card-banner" style={{ backgroundColor: act.headerColor }}>
+                      <div className="activity-banner-left">
+                        <span className="activity-q-pill">{act.questionsCount}</span>
+                        <h4 className="activity-category-title">{act.category}</h4>
+                      </div>
+                      <div className="activity-banner-icon-slot">
+                        {IconComponent && <IconComponent size={46} />}
+                      </div>
                     </div>
 
+                    {/* Card Body */}
                     <div className="activity-card-body">
                       <h4 className="activity-title">{act.title}</h4>
                       <p className="activity-instructor">{act.instructor}</p>
 
-                      <div className="activity-card-footer">
-                        <span className={`accuracy-pill ${act.completed ? 'completed' : 'pending'}`}>
-                          {act.completed ? <CheckCircle2 size={13} /> : <Zap size={13} />}
-                          {act.accuracy}
-                        </span>
+                      {/* Segmented Progress Indicator (4 pills) */}
+                      <div className="activity-segmented-bar">
+                        {act.progressSegments.map((isFilled, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`activity-segment-pill ${isFilled ? 'filled' : 'empty'}`}
+                            style={{ backgroundColor: isFilled ? act.headerColor : '#e2e8f0' }}
+                          />
+                        ))}
+                      </div>
 
-                        <button
-                          className={`btn-tactile ${isSavedThis ? 'btn-tactile-gold' : 'btn-tactile-purple'} btn-sm`}
-                          onClick={() => handleStartQuizById(act.id)}
-                        >
-                          <span>{isSavedThis ? 'Resume Quest' : (act.completed ? 'Replay' : 'Play Quest')}</span>
-                          <ArrowRight size={13} />
-                        </button>
+                      {/* Card Footer Actions */}
+                      <div className="activity-card-footer">
+                        {act.completed ? (
+                          <>
+                            <span className="activity-accuracy-pill">
+                              <Check size={12} strokeWidth={3} />
+                              <span>{act.score}% accuracy</span>
+                            </span>
+                            <button
+                              className="activity-btn-replay"
+                              onClick={() => handleStartQuizById(act.id)}
+                            >
+                              <span>Replay</span>
+                              <ArrowRight size={13} />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span className="activity-pending-pill">
+                              <span>Assigned · Due in 3d</span>
+                            </span>
+                            <button
+                              className="activity-btn-play"
+                              onClick={() => handleStartQuizById(act.id)}
+                            >
+                              <span>{isSavedThis ? 'Resume' : 'Play Quest'}</span>
+                              <Play size={12} fill="currentColor" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -362,32 +460,114 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
             </div>
           </div>
 
-          {/* Recent Badges Showcase */}
-          <div className="wayground-section-block">
-            <div className="section-title-row">
-              <div className="section-title-left">
-                <Trophy size={20} className="text-gold" />
-                <h3>Your Earned Badges</h3>
+          {/* 3. LOWER SPLIT SECTION: BADGES SHOWCASE + RIGHT WIDGETS */}
+          <div className="template-lower-split">
+            {/* Left: Your Earned Badges */}
+            <div className="template-badges-container">
+              <div className="template-section-header mb-16">
+                <div className="template-section-title-wrap">
+                  <h3>Your Earned Badges</h3>
+                </div>
+                <button 
+                  className="template-view-all-link"
+                  onClick={() => setActiveView && setActiveView('trainee_badges')}
+                >
+                  View All ({earnedBadges.length})
+                </button>
               </div>
-              <button 
-                className="view-all-link" 
-                onClick={() => setActiveView && setActiveView('trainee_badges')}
-              >
-                View All ({earnedBadges.length})
-              </button>
+
+              <div className="template-badges-grid">
+                {earnedBadges.map((badge) => (
+                  <div key={badge.id} className="template-badge-card">
+                    <div 
+                      className="template-badge-icon-bubble"
+                      style={{ 
+                        backgroundColor: badge.iconBg, 
+                        borderColor: badge.iconBorder,
+                        color: badge.iconColor 
+                      }}
+                    >
+                      <span className="badge-symbol">{badge.icon}</span>
+                    </div>
+                    <div className="template-badge-name">{badge.name}</div>
+                    <div className="template-badge-desc">{badge.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="badges-showcase-row">
-              {earnedBadges.map((badge) => (
-                <div key={badge.id} className="badge-trophy-card card-gamified">
-                  <div className="badge-emoji-container">
-                    <span className="badge-large-emoji">{badge.icon}</span>
-                  </div>
-                  <div className="badge-name">{badge.name}</div>
-                  <div className="badge-desc">{badge.desc}</div>
-                  <span className={`tier-chip tier-${badge.tier.toLowerCase()}`}>{badge.tier}</span>
+            {/* Right: Streak This Week + Corporate Leaderboard */}
+            <div className="template-right-widgets">
+              {/* This Week Streak Tracker */}
+              <div className="template-this-week-card">
+                <div className="this-week-header flex-between">
+                  <h4>This week</h4>
+                  <span className="this-week-counter">7 / 7 DAYS</span>
                 </div>
-              ))}
+                <div className="this-week-days-row">
+                  {[
+                    { day: 'M', active: true },
+                    { day: 'T', active: true },
+                    { day: 'W', active: true },
+                    { day: 'T', active: true },
+                    { day: 'F', active: true },
+                    { day: 'S', active: true },
+                    { day: 'S', active: true }
+                  ].map((item, idx) => (
+                    <div key={idx} className="this-week-day-item">
+                      <div className={`day-flame-circle ${item.active ? 'active' : ''}`}>
+                        <Flame size={14} fill="#ea580c" className="text-orange" />
+                      </div>
+                      <span className="day-label">{item.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Corporate Leaderboard Podium Card */}
+              <div className="template-leaderboard-card">
+                <div className="leaderboard-card-title">Corporate leaderboard</div>
+                
+                {/* 3D Podium Graphic */}
+                <div className="podium-container">
+                  {/* Rank 2 (Purple) */}
+                  <div className="podium-col rank-2">
+                    <span className="podium-name-tag">[Name]</span>
+                    <div className="podium-bar bar-rank-2">
+                      <span className="podium-num">2</span>
+                    </div>
+                  </div>
+
+                  {/* Rank 1 (Orange/Gold - Taller) */}
+                  <div className="podium-col rank-1">
+                    <span className="podium-name-tag">[Name]</span>
+                    <div className="podium-bar bar-rank-1">
+                      <span className="podium-num">1</span>
+                    </div>
+                  </div>
+
+                  {/* Rank 3 (Blue) */}
+                  <div className="podium-col rank-3">
+                    <span className="podium-name-tag">[Name]</span>
+                    <div className="podium-bar bar-rank-3">
+                      <span className="podium-num">3</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom User Pill */}
+                <div className="leaderboard-user-pill">
+                  <div className="user-pill-left flex-align gap-8">
+                    <div className="leaderboard-avatar-circle">
+                      {currentUser?.initials || 'JD'}
+                    </div>
+                    <span className="leaderboard-user-name">
+                      You · {currentUser?.name || 'Juan Dela Cruz'}
+                    </span>
+                  </div>
+                  <span className="leaderboard-rank-badge">RANK [#1]</span>
+                </div>
+              </div>
             </div>
           </div>
         </>

@@ -76,8 +76,11 @@ export default function Sidebar({ activeView, setActiveView }) {
   return (
     <aside className="enterprise-sidebar">
       {/* Brand Top */}
-      <div className="sidebar-brand" style={{ justifyContent: 'center', padding: '24px 20px 12px' }}>
-        <img src={logoStacked} alt="CrossQuest Logo" style={{ width: '85%', maxWidth: '200px', height: 'auto' }} />
+      <div className="sidebar-brand" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 20px 12px', gap: '6px' }}>
+        <img src={logoStacked} alt="CrossQuest Logo" style={{ width: '85%', maxWidth: '190px', height: 'auto' }} />
+        <span className="sidebar-brand-sub-badge" style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.12em', color: 'rgba(255, 255, 255, 0.55)', textTransform: 'uppercase' }}>
+          ENTERPRISE LEARNING
+        </span>
       </div>
 
       {/* Role Pill Banner */}
