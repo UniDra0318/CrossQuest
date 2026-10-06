@@ -28,6 +28,12 @@ import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore } from '../services/api';
 import mascotRobot from '../assets/mascot-robot.png';
+import Mascot from '../components/Mascot';
+import IsoCube from '../components/IsoCube';
+import BadgeCoin from '../components/BadgeCoin';
+import Podium from '../components/Podium';
+import { TRACKS } from '../data/tracks';
+import { badges as designBadges, leaderboard as designLeaderboard } from '../data/mock';
 import { 
   IsometricCube3D, 
   IsometricLock3D, 
@@ -81,16 +87,16 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
     loadGamification();
   }, [currentUser?.id]);
 
-  // Quizzes list aligned with QUIZ_DATABASE
+  // Quizzes list aligned with QUIZ_DATABASE and TRACKS
   const assignedActivities = [
     {
       id: 'act-1',
       title: 'Enterprise Security Audit Challenge',
       instructor: 'Lead Trainer David Lim',
       questionsCount: '5 QUESTIONS',
-      headerColor: '#2563eb',
-      category: 'Information Security',
-      Icon3D: IsometricCube3D,
+      headerColor: TRACKS.infosec.color,
+      category: TRACKS.infosec.name,
+      track: TRACKS.infosec,
       progressSegments: [true, true, true, false],
       completed: quizScoreStatus['act-1']?.completed,
       score: quizScoreStatus['act-1']?.score,
@@ -101,9 +107,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       title: 'Role-Based Access & Policy Verification',
       instructor: 'Dr. Sarah Jenkins',
       questionsCount: '5 QUESTIONS',
-      headerColor: '#059669',
-      category: 'Access Control',
-      Icon3D: IsometricLock3D,
+      headerColor: TRACKS.access.color,
+      category: TRACKS.access.name,
+      track: TRACKS.access,
       progressSegments: [true, true, true, true],
       completed: quizScoreStatus['act-2']?.completed,
       score: quizScoreStatus['act-2']?.score,
@@ -114,9 +120,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       title: 'Privacy Impact Assessment (PIA) Simulation',
       instructor: 'Lead Trainer David Lim',
       questionsCount: '5 QUESTIONS',
-      headerColor: '#e11d48',
-      category: 'Privacy Management',
-      Icon3D: IsometricSphere3D,
+      headerColor: TRACKS.privacy.color,
+      category: TRACKS.privacy.name,
+      track: TRACKS.privacy,
       progressSegments: [true, true, true, false],
       completed: quizScoreStatus['act-3']?.completed,
       score: quizScoreStatus['act-3']?.score,
@@ -127,9 +133,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       title: 'Multi-Tenant Data Isolation & Security',
       instructor: 'Prof. Roel Traballo',
       questionsCount: '5 QUESTIONS',
-      headerColor: '#7c3aed',
-      category: 'Database Security',
-      Icon3D: IsometricDatabase3D,
+      headerColor: TRACKS.database.color,
+      category: TRACKS.database.name,
+      track: TRACKS.database,
       progressSegments: [false, false, false, false],
       completed: quizScoreStatus['act-4']?.completed,
       score: quizScoreStatus['act-4']?.score,
@@ -137,48 +143,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
     }
   ];
 
-  const earnedBadges = [
-    { 
-      id: 'first_step', 
-      name: 'First Step', 
-      icon: '⭐', 
-      iconBg: '#fef9c3',
-      iconBorder: '#fef08a',
-      iconColor: '#ca8a04',
-      desc: 'Completed orientation modules', 
-      tier: 'Bronze' 
-    },
-    { 
-      id: 'sec_champ', 
-      name: 'Security Champion', 
-      icon: '🛡️', 
-      iconBg: '#dbeafe',
-      iconBorder: '#bfdbfe',
-      iconColor: '#2563eb',
-      desc: 'Aced Security & Compliance Assessment', 
-      tier: 'Gold' 
-    },
-    { 
-      id: 'streak_master', 
-      name: '7-Day Streak', 
-      icon: '🔥', 
-      iconBg: '#ffedd5',
-      iconBorder: '#fed7aa',
-      iconColor: '#ea580c',
-      desc: 'Active training 7 consecutive days', 
-      tier: 'Ruby' 
-    },
-    { 
-      id: 'crypto_knight', 
-      name: 'Security Decoder', 
-      icon: '⚡', 
-      iconBg: '#f3e8ff',
-      iconBorder: '#e9d5ff',
-      iconColor: '#9333ea',
-      desc: 'Verified policy attribute satisfaction', 
-      tier: 'Diamond' 
-    }
-  ];
+  const earnedBadges = designBadges;
 
   const certificates = [
     {
@@ -368,13 +333,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
                 </div>
               </div>
 
-              {/* 3D Cute Robot Mascot */}
+              {/* Pure CSS 3D Quest Bot Mascot */}
               <div className="template-mascot-container">
-                <img 
-                  src={mascotRobot} 
-                  alt="CrossQuest 3D Mascot" 
-                  className="template-mascot-img" 
-                />
+                <Mascot />
               </div>
             </div>
           </div>
@@ -391,7 +352,6 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
             <div className="template-activities-grid">
               {assignedActivities.map((act) => {
                 const isSavedThis = savedSession?.quizId === act.id;
-                const IconComponent = act.Icon3D;
 
                 return (
                   <div key={act.id} className="template-activity-card">
@@ -402,7 +362,13 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
                         <h4 className="activity-category-title">{act.category}</h4>
                       </div>
                       <div className="activity-banner-icon-slot">
-                        {IconComponent && <IconComponent size={46} />}
+                        <IsoCube 
+                          size={46} 
+                          color={act.track.color} 
+                          top={act.track.top} 
+                          right={act.track.right} 
+                          label={act.track.face.label} 
+                        />
                       </div>
                     </div>
 
@@ -479,18 +445,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
               <div className="template-badges-grid">
                 {earnedBadges.map((badge) => (
                   <div key={badge.id} className="template-badge-card">
-                    <div 
-                      className="template-badge-icon-bubble"
-                      style={{ 
-                        backgroundColor: badge.iconBg, 
-                        borderColor: badge.iconBorder,
-                        color: badge.iconColor 
-                      }}
-                    >
-                      <span className="badge-symbol">{badge.icon}</span>
-                    </div>
-                    <div className="template-badge-name">{badge.name}</div>
-                    <div className="template-badge-desc">{badge.desc}</div>
+                    <BadgeCoin badge={badge} />
+                    <div className="template-badge-name" style={{ marginTop: '16px' }}>{badge.title}</div>
+                    <div className="template-badge-desc">{badge.description}</div>
                   </div>
                 ))}
               </div>
@@ -529,30 +486,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
                 <div className="leaderboard-card-title">Corporate leaderboard</div>
                 
                 {/* 3D Podium Graphic */}
-                <div className="podium-container">
-                  {/* Rank 2 (Purple) */}
-                  <div className="podium-col rank-2">
-                    <span className="podium-name-tag">[Name]</span>
-                    <div className="podium-bar bar-rank-2">
-                      <span className="podium-num">2</span>
-                    </div>
-                  </div>
-
-                  {/* Rank 1 (Orange/Gold - Taller) */}
-                  <div className="podium-col rank-1">
-                    <span className="podium-name-tag">[Name]</span>
-                    <div className="podium-bar bar-rank-1">
-                      <span className="podium-num">1</span>
-                    </div>
-                  </div>
-
-                  {/* Rank 3 (Blue) */}
-                  <div className="podium-col rank-3">
-                    <span className="podium-name-tag">[Name]</span>
-                    <div className="podium-bar bar-rank-3">
-                      <span className="podium-num">3</span>
-                    </div>
-                  </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <Podium top={designLeaderboard.top} small={true} />
                 </div>
 
                 {/* Bottom User Pill */}

@@ -1,0 +1,158 @@
+@keyframes cq-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes cq-sway {
+  0%, 100% {
+    transform: rotateY(-4deg) rotateZ(1deg);
+  }
+  50% {
+    transform: rotateY(4deg) rotateZ(-1deg);
+  }
+}
+@keyframes cq-spin {
+  from {
+    transform: rotateX(-24deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(-24deg) rotateY(360deg);
+  }
+}
+@keyframes cq-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes cq-pulse {
+  0%,
+  100% {
+    box-shadow: 0 6px 0 #b9b2d6, 0 0 0 0 rgba(255, 255, 255, 0.55);
+  }
+  50% {
+    box-shadow: 0 6px 0 #b9b2d6, 0 0 0 16px rgba(255, 255, 255, 0);
+  }
+}
+@keyframes cq-glow {
+  0%,
+  100% {
+    box-shadow: 0 4px 0 var(--cq-orange-dk), 0 0 0 0 rgba(255, 122, 26, 0.55);
+  }
+  50% {
+    box-shadow: 0 4px 0 var(--cq-orange-dk), 0 0 0 12px rgba(255, 122, 26, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------- Type helpers ---------- */
+.cq-eyebrow {
+  font: 700 12px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--cq-ink-soft);
+}
+
+.cq-h2 {
+  margin-top: 16px;
+  font: 800 clamp(32px, 4.4vw, 56px) / 1.05 var(--font-display);
+  letter-spacing: -0.02em;
+  max-width: 820px;
+}
+
+/* ---------- Buttons ---------- */
+.cq-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  cursor: pointer;
+  font: 700 15px var(--font-body);
+  border-radius: 12px;
+  padding: 12px 22px;
+  transition: transform 0.15s;
+  text-decoration: none;
+}
+.cq-btn:hover {
+  transform: translateY(-2px);
+}
+.cq-btn--orange {
+  background: var(--cq-orange);
+  color: var(--cq-ink);
+  box-shadow: 0 4px 0 var(--cq-orange-dk);
+}
+.cq-btn--purple {
+  background: var(--cq-purple);
+  color: #fff;
+  box-shadow: 0 4px 0 var(--cq-purple-dk);
+}
+.cq-btn--sm {
+  font-size: 13px;
+  padding: 10px 14px;
+  gap: 6px;
+  box-shadow: 0 3px 0 var(--cq-purple-dk);
+}
+.cq-btn--play {
+  background: var(--cq-orange);
+  color: var(--cq-ink);
+  font-size: 13px;
+  padding: 10px 14px;
+  gap: 6px;
+  animation: cq-glow 2s infinite;
+}
+
+/* ---------- Game PIN field ---------- */
+.cq-pin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 460px;
+  padding: 6px 6px 6px 22px;
+  background: #fff;
+  border-radius: 999px;
+  border: 1px solid rgba(23, 16, 43, 0.12);
+  box-shadow: 0 12px 30px rgba(42, 15, 87, 0.14);
+}
+.cq-pin--on-dark {
+  border: 0;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+.cq-pin input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 500 15px var(--font-body);
+  color: var(--cq-ink);
+}
+.cq-pin:focus-within {
+  outline: 3px solid var(--cq-amber);
+  outline-offset: 2px;
+}
+.cq-pin .cq-btn {
+  border-radius: 999px;
+  padding: 14px 22px;
+}
+
+/* ---------- Hover tilt ---------- */
+.cq-tilt {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s;
+}
+.cq-tilt:hover {
+  transform: perspective(900px) rotateX(5deg) rotateY(-9deg) translateY(-8px);
+}
