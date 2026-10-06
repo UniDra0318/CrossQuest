@@ -9,7 +9,9 @@ import {
   Building2, 
   GraduationCap, 
   Award, 
-  Key 
+  Key,
+  ArrowLeft,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
@@ -36,20 +38,36 @@ export default function LoginView() {
   };
 
   const roleList = [
-    { key: 'admin', title: 'Administrator', name: 'Dr. Sarah Jenkins', org: 'Crossworks Admin', icon: Shield },
-    { key: 'crossworks_staff', title: 'Account Manager', name: 'Marcus Reyes', org: 'Crossworks Staff', icon: Key },
-    { key: 'trainer', title: 'Trainer', name: 'David Lim', org: 'Course Instructor', icon: GraduationCap },
-    { key: 'company_staff', title: 'Company Manager', name: 'Patricia Santos', org: 'San Miguel Corp HR', icon: Building2 },
-    { key: 'trainee', title: 'Trainee', name: 'Juan Dela Cruz', org: 'Enrolled Learner', icon: Award }
+    { key: 'admin', title: 'Administrator', name: 'Dr. Sarah Jenkins', org: 'Crossworks Admin', icon: Shield, badgeClass: 'admin' },
+    { key: 'crossworks_staff', title: 'Account Manager', name: 'Marcus Reyes', org: 'Crossworks Staff', icon: Key, badgeClass: 'staff' },
+    { key: 'trainer', title: 'Trainer', name: 'David Lim', org: 'Course Instructor', icon: GraduationCap, badgeClass: 'trainer' },
+    { key: 'company_staff', title: 'Company Manager', name: 'Patricia Santos', org: 'San Miguel Corp HR', icon: Building2, badgeClass: 'company' },
+    { key: 'trainee', title: 'Trainee', name: 'Juan Dela Cruz', org: 'Enrolled Learner', icon: Award, badgeClass: 'trainee' }
   ];
 
   return (
     <div className="clean-login-viewport">
+      {/* Top Bar with Return to Landing Page */}
+      <div className="login-top-bar">
+        <button type="button" className="login-back-btn" onClick={() => navigate('/')}>
+          <ArrowLeft size={15} />
+          <span>Back to Landing Page</span>
+        </button>
+        <div className="login-badge-pill">
+          <Sparkles size={12} />
+          <span>ENTERPRISE LMS</span>
+        </div>
+      </div>
+
       <div className="login-card-container">
         {/* Brand Header */}
         <div className="login-brand-center">
-          <img src={logoStacked} alt="CrossQuest Logo" style={{ height: '140px', marginBottom: '24px' }} />
-          <p className="login-subtext">Training & Learning Management Platform</p>
+          <div className="login-brand-logo-wrap" onClick={() => navigate('/')} title="Go to CrossQuest Home">
+            <img src={logoStacked} alt="CrossQuest Logo" className="login-brand-logo-img" />
+            <span className="logo__tag">ENTERPRISE LEARNING</span>
+          </div>
+          <h1 className="login-brand-heading">Sign In to CrossQuest</h1>
+          <p className="login-brand-subtext">Access your training quests, track skill streaks, and unlock certifications.</p>
         </div>
 
         {/* Card */}
@@ -116,13 +134,13 @@ export default function LoginView() {
               </button>
 
               <div className="login-footer-hint">
-                <span>Want to test without typing? Switch to <strong>Quick Role Access</strong> above.</span>
+                <span>Want instant demo access? Switch to <strong onClick={() => setActiveTab('demo')}>Quick Role Access</strong> above.</span>
               </div>
             </form>
           ) : (
             <div className="demo-roles-panel">
               <p className="demo-intro-text">
-                Select any user to log in instantly and explore their designated portal:
+                Select any user persona to sign in instantly and explore their designated portal:
               </p>
 
               <div className="demo-roles-stack">
@@ -135,7 +153,7 @@ export default function LoginView() {
                       className="demo-role-card-btn"
                       onClick={() => handleRoleQuickSelect(r.key)}
                     >
-                      <div className="demo-role-icon">
+                      <div className={`demo-role-icon ${r.badgeClass}`}>
                         <Icon size={18} />
                       </div>
                       <div className="demo-role-details">
