@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 export default function Sidebar({ activeView, setActiveView }) {
   const { currentUser, logout } = useAuth();
@@ -75,14 +76,8 @@ export default function Sidebar({ activeView, setActiveView }) {
   return (
     <aside className="enterprise-sidebar">
       {/* Brand Top */}
-      <div className="sidebar-brand">
-        <div className="brand-logo">
-          <Shield size={20} />
-        </div>
-        <div className="brand-text">
-          <div className="brand-title">CrossQuest</div>
-          <div className="brand-sub">Enterprise Learning</div>
-        </div>
+      <div className="sidebar-brand" style={{ justifyContent: 'center', padding: '24px 20px 12px' }}>
+        <img src={logoStacked} alt="CrossQuest Logo" style={{ width: '85%', maxWidth: '200px', height: 'auto' }} />
       </div>
 
       {/* Role Pill Banner */}

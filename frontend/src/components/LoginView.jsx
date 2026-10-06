@@ -12,6 +12,7 @@ import {
   Key 
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 export default function LoginView() {
   const { loginRole, loginWithCredentials, DEMO_USERS } = useAuth();
@@ -47,10 +48,7 @@ export default function LoginView() {
       <div className="login-card-container">
         {/* Brand Header */}
         <div className="login-brand-center">
-          <div className="brand-badge-icon">
-            <Shield size={28} />
-          </div>
-          <h1>CrossQuest</h1>
+          <img src={logoStacked} alt="CrossQuest Logo" style={{ height: '140px', marginBottom: '24px' }} />
           <p className="login-subtext">Training & Learning Management Platform</p>
         </div>
 

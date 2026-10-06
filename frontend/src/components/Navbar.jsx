@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Sparkles, UserCheck, Wifi, WifiOff, Lock, ChevronDown } from 'lucide-react';
+import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 export default function Navbar({
   activeTab,
@@ -33,13 +34,8 @@ export default function Navbar({
       {/* Main Navigation Bar */}
       <nav className="main-nav glass-panel">
         <div className="brand-section">
-          <div className="logo-icon pulse-glow">
-            <Shield className="logo-glyph" size={24} />
-          </div>
+          <img src={logoStacked} alt="CrossQuest Logo" style={{ height: '72px', marginRight: '16px' }} />
           <div>
-            <h1 className="brand-title">
-              Cross<span className="text-gradient">Quest</span>
-            </h1>
             <p className="brand-subtitle">Secure Multi-Client Training Record Management</p>
           </div>
         </div>
