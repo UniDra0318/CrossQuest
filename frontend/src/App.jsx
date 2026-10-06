@@ -9,6 +9,7 @@ import StaffDashboard from './views/StaffDashboard';
 import TrainerDashboard from './views/TrainerDashboard';
 import CompanyDashboard from './views/CompanyDashboard';
 import TraineeDashboard from './views/TraineeDashboard';
+import LandingView from './views/LandingView';
 import InstallPwaModal from './components/InstallPwaModal';
 import './App.css';
 
@@ -271,19 +272,15 @@ function AppRoutes() {
         } 
       />
 
-      {/* Root Route: If logged in, go to dashboard, else go to login */}
-      <Route 
-        path="/" 
-        element={
-          currentUser ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
-        } 
-      />
+      {/* Landing Page Route (Page 1 of Template) */}
+      <Route path="/" element={<LandingView />} />
+      <Route path="/landing" element={<LandingView />} />
 
       {/* Fallback Catch-all */}
       <Route 
         path="*" 
         element={
-          currentUser ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          currentUser ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
         } 
       />
     </Routes>

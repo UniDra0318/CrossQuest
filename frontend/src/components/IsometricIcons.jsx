@@ -167,3 +167,162 @@ export function IsometricDatabase3D({ size = 48, className = '' }) {
     </svg>
   );
 }
+
+// 3D Isometric Purple Triangular Prism / Play (Step 01: Join with a PIN)
+export function IsometricPrismPlay3D({ size = 56, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <linearGradient id="prismTop" x1="16" y1="12" x2="48" y2="28" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#c084fc" />
+          <stop offset="1" stopColor="#a855f7" />
+        </linearGradient>
+        <linearGradient id="prismLeft" x1="12" y1="28" x2="32" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#7e22ce" />
+          <stop offset="1" stopColor="#581c87" />
+        </linearGradient>
+        <linearGradient id="prismRight" x1="32" y1="28" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#9333ea" />
+          <stop offset="1" stopColor="#6b21a8" />
+        </linearGradient>
+        <filter id="prismGlow" x="0" y="0" width="64" height="64" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#3b0764" floodOpacity="0.35" />
+        </filter>
+      </defs>
+      <g filter="url(#prismGlow)">
+        {/* Play Prism Geometry */}
+        <polygon points="32,10 54,24 32,36 10,24" fill="url(#prismTop)" />
+        <polygon points="10,24 32,36 32,54 10,42" fill="url(#prismLeft)" />
+        <polygon points="32,36 54,24 54,42 32,54" fill="url(#prismRight)" />
+        {/* Play Icon Glyphs on Top Face */}
+        <polygon points="30,20 37,24 30,28" fill="#ffffff" fillOpacity="0.9" />
+      </g>
+    </svg>
+  );
+}
+
+// 3D Isometric Orange Cube / Diamond (Step 02: Play the scenario)
+export function IsometricDiamond3D({ size = 56, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <linearGradient id="diaTop" x1="16" y1="12" x2="48" y2="28" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#fdba74" />
+          <stop offset="1" stopColor="#fb923c" />
+        </linearGradient>
+        <linearGradient id="diaLeft" x1="12" y1="28" x2="32" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ea580c" />
+          <stop offset="1" stopColor="#c2410c" />
+        </linearGradient>
+        <linearGradient id="diaRight" x1="32" y1="28" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f97316" />
+          <stop offset="1" stopColor="#9a3412" />
+        </linearGradient>
+        <filter id="diaGlow" x="0" y="0" width="64" height="64" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="6" stdDeviation="5" floodColor="#7c2d12" floodOpacity="0.35" />
+        </filter>
+      </defs>
+      <g filter="url(#diaGlow)">
+        <polygon points="32,10 52,22 32,34 12,22" fill="url(#diaTop)" />
+        <polygon points="12,22 32,34 32,54 12,42" fill="url(#diaLeft)" />
+        <polygon points="32,34 52,22 52,42 32,54" fill="url(#diaRight)" />
+        {/* Lightning glyph on top face */}
+        <path d="M33 16 L29 23 H33 L31 28 L37 21 H33 Z" fill="#ffffff" fillOpacity="0.9" />
+      </g>
+    </svg>
+  );
+}
+
+// 3D Isometric Yellow Ribbon / Medal (Step 03: Earn, streak, climb)
+export function IsometricMedal3D({ size = 56, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <linearGradient id="goldCoin" x1="20" y1="12" x2="44" y2="36" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#fef08a" />
+          <stop offset="0.6" stopColor="#facc15" />
+          <stop offset="1" stopColor="#ca8a04" />
+        </linearGradient>
+        <linearGradient id="ribbonLeft" x1="22" y1="32" x2="16" y2="54" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#f97316" />
+          <stop offset="1" stopColor="#c2410c" />
+        </linearGradient>
+        <linearGradient id="ribbonRight" x1="42" y1="32" x2="48" y2="54" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ea580c" />
+          <stop offset="1" stopColor="#9a3412" />
+        </linearGradient>
+        <filter id="medalGlow" x="0" y="0" width="64" height="64" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="5" stdDeviation="4" floodColor="#854d0e" floodOpacity="0.3" />
+        </filter>
+      </defs>
+      <g filter="url(#medalGlow)">
+        {/* Ribbons */}
+        <polygon points="26,30 18,52 26,48 30,52 28,32" fill="url(#ribbonLeft)" />
+        <polygon points="38,30 46,52 38,48 34,52 36,32" fill="url(#ribbonRight)" />
+        {/* 3D Coin Badge */}
+        <ellipse cx="32" cy="24" rx="16" ry="14" fill="#a16207" />
+        <ellipse cx="32" cy="22" rx="16" ry="14" fill="url(#goldCoin)" />
+        <ellipse cx="32" cy="22" rx="12" ry="10.5" stroke="#fef9c3" strokeWidth="1.5" />
+        {/* Star */}
+        <polygon points="32,16 34,20 38.5,21 35,24 36,28.5 32,26 28,28.5 29,24 25.5,21 30,20" fill="#ffffff" />
+      </g>
+    </svg>
+  );
+}
+
+// 3D Isometric Blue INFOSEC Blueprint Box
+export function IsometricInfosecBox3D({ size = 80, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <linearGradient id="boxBlueTop" x1="20" y1="16" x2="60" y2="36" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#60a5fa" />
+          <stop offset="1" stopColor="#3b82f6" />
+        </linearGradient>
+        <linearGradient id="boxBlueLeft" x1="16" y1="36" x2="40" y2="70" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#1d4ed8" />
+          <stop offset="1" stopColor="#1e3a8a" />
+        </linearGradient>
+        <linearGradient id="boxBlueRight" x1="40" y1="36" x2="64" y2="70" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#2563eb" />
+          <stop offset="1" stopColor="#1d4ed8" />
+        </linearGradient>
+        <filter id="boxGlow" x="0" y="0" width="80" height="80" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#172554" floodOpacity="0.5" />
+        </filter>
+      </defs>
+      <g filter="url(#boxGlow)">
+        {/* Top Face */}
+        <polygon points="40,14 66,28 40,42 14,28" fill="url(#boxBlueTop)" />
+        <polygon points="40,14 66,28 40,42 14,28" stroke="#93c5fd" strokeWidth="1" strokeOpacity="0.7" />
+        {/* Left Face */}
+        <polygon points="14,28 40,42 40,68 14,54" fill="url(#boxBlueLeft)" />
+        {/* Right Face */}
+        <polygon points="40,42 66,28 66,54 40,68" fill="url(#boxBlueRight)" />
+        {/* Orange Warning Tape Accent on Top Edge */}
+        <polygon points="40,14 50,19.5 44,22.8 34,17.3" fill="#ff6a00" />
+        <polygon points="56,22.7 66,28 60,31.3 50,26" fill="#ff6a00" />
+        {/* Text 'INFOSEC' in white on right facet */}
+        <text 
+          x="53" 
+          y="50" 
+          fill="#ffffff" 
+          fontSize="7" 
+          fontWeight="900" 
+          fontFamily="monospace" 
+          letterSpacing="0.08em" 
+          transform="rotate(-26 53 50)" 
+          textAnchor="middle" 
+          fillOpacity="0.9"
+        >
+          INFOSEC
+        </text>
+        {/* Corner Viewfinder Markers */}
+        <path d="M 8 16 H 12 V 20" stroke="#60a5fa" strokeWidth="1.5" />
+        <path d="M 72 16 H 68 V 20" stroke="#60a5fa" strokeWidth="1.5" />
+        <path d="M 8 72 H 12 V 68" stroke="#60a5fa" strokeWidth="1.5" />
+        <path d="M 72 72 H 68 V 68" stroke="#60a5fa" strokeWidth="1.5" />
+      </g>
+    </svg>
+  );
+}
