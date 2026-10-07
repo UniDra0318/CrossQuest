@@ -29,6 +29,11 @@ function MainAppShell({ activeSubPage }) {
     if (activeSubPage === 'admin_overview') return 'admin_overview';
     if (activeSubPage === 'attribute_authority') return 'attribute_authority';
     if (activeSubPage === 'records_vault') return 'records_vault';
+    if (activeSubPage === 'trainer_courses') return 'trainer_courses';
+    if (activeSubPage === 'trainee_roster') return 'trainee_roster';
+    if (activeSubPage === 'grade_entry') return 'grade_entry';
+    if (activeSubPage === 'quiz_creator') return 'quiz_creator';
+    if (activeSubPage === 'trainer_analytics') return 'trainer_analytics';
     if (activeSubPage === 'quizzes') return currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz';
     if (activeSubPage === 'badges') return 'trainee_badges';
     if (activeSubPage === 'certifications') return 'trainee_certs';
@@ -59,6 +64,16 @@ function MainAppShell({ activeSubPage }) {
       setActiveView('attribute_authority');
     } else if (activeSubPage === 'records_vault') {
       setActiveView('records_vault');
+    } else if (activeSubPage === 'trainer_courses') {
+      setActiveView('trainer_courses');
+    } else if (activeSubPage === 'trainee_roster') {
+      setActiveView('trainee_roster');
+    } else if (activeSubPage === 'grade_entry') {
+      setActiveView('grade_entry');
+    } else if (activeSubPage === 'quiz_creator') {
+      setActiveView('quiz_creator');
+    } else if (activeSubPage === 'trainer_analytics') {
+      setActiveView('trainer_analytics');
     } else if (activeSubPage === 'quizzes') {
       setActiveView(currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz');
     } else if (activeSubPage === 'badges') {
@@ -118,12 +133,20 @@ function MainAppShell({ activeSubPage }) {
       navigate('/staff/portfolios');
     } else if (viewId === 'compliance_reports' && currentUser?.role === 'crossworks_staff') {
       navigate('/staff/reports');
+    } else if (viewId === 'trainer_courses') {
+      navigate('/trainer');
+    } else if (viewId === 'trainee_roster' && currentUser?.role === 'trainer') {
+      navigate('/trainer/roster');
+    } else if (viewId === 'grade_entry') {
+      navigate('/trainer/grade');
+    } else if (viewId === 'quiz_creator') {
+      navigate('/trainer/quiz');
+    } else if (viewId === 'trainer_analytics') {
+      navigate('/trainer/analytics');
     } else if (viewId === 'trainee_roster' || viewId === 'company_trainees') {
       navigate('/trainees');
-    } else if (viewId === 'trainer_courses' || viewId === 'trainee_quest') {
+    } else if (viewId === 'trainee_quest') {
       navigate('/courses');
-    } else if (viewId === 'trainer_analytics') {
-      navigate('/analytics');
     } else if (viewId === 'anomalies') {
       navigate('/anomalies');
     } else if (viewId === 'compliance_reports' || viewId === 'audit_certificate') {
@@ -359,6 +382,48 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="compliance_reports" />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Crossworks Trainer Specific Portal Routes */}
+      <Route 
+        path="/trainer" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="trainer_courses" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/roster" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="trainee_roster" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/grade" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="grade_entry" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/quiz" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="quiz_creator" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/analytics" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="trainer_analytics" />
           </ProtectedRoute>
         } 
       />

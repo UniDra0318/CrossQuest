@@ -1,9 +1,10 @@
-// Standalone Node.js mock API for the admin console and staff portal.
+// Standalone Node.js mock API for the admin console.
 //   cd mock-api && npm install && npm start      -> http://localhost:3000
 // vite.config.js already proxies /api to port 3000.
 import express from 'express';
 import { admin, overview, staff, clients, anomalies, records, settings } from './adminData.js';
 import * as staffPortal from './staffData.js';
+import * as trainerPortal from './trainerData.js';
 
 const app = express();
 app.use(express.json());
@@ -86,5 +87,28 @@ app.get('/api/staff/reports/:scope', (req, res) => {
   res.json(report);
 });
 
+// ---------- Trainer portal (/api/trainer/*) ----------
+// DEMO ONLY: the signed-in trainer is fixed. In your real server, derive the trainer and the
+// cohorts they may grade from the session, and check that on EVERY route below.
+const trainerStore = trainerPortal.createStore();
+const guard = (fn) => (req, res) => {
+  try {
+    res.json(fn(req) ?? { ok: true });
+  } catch (e) {
+    res.status(e.status || 500).json({ ok: false, message: e.status ? e.message : 'Server error.' });
+  }
+};
+app.get('/api/trainer/me', (_req, res) => res.json(trainerPortal.me));
+app.get('/api/trainer/cohorts', guard(() => trainerStore.cohorts()));
+app.get('/api/trainer/roster', guard(() => trainerStore.roster()));
+app.post('/api/trainer/roster/:id/grade', guard((req) => trainerStore.grade(req.params.id, req.body)));
+app.get('/api/trainer/quizzes', guard(() => trainerStore.quizzes()));
+app.post('/api/trainer/quizzes/reset', guard(() => trainerStore.resetQuizzes()));
+app.post('/api/trainer/quizzes', guard((req) => trainerStore.createQuiz(req.body?.title)));
+app.post('/api/trainer/quizzes/:id/questions', guard((req) => trainerStore.addQuestion(req.params.id, req.body)));
+app.delete('/api/trainer/quizzes/:id/questions/:qid', guard((req) => trainerStore.deleteQuestion(req.params.id, req.params.qid)));
+app.patch('/api/trainer/quizzes/:id', guard((req) => trainerStore.updateSettings(req.params.id, req.body)));
+app.get('/api/trainer/analytics', guard((req) => trainerStore.analytics(String(req.query.scope || 'ALL'))));
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`CrossQuest admin & staff mock API on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`CrossQuest mock API on http://localhost:${PORT}`));
