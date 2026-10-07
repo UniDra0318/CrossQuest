@@ -273,7 +273,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         <div className="adm-hero__cube">
           <span className="adm-float adm-float--tl">AES-256 + RSA</span>
           <span className="adm-float adm-float--br adm-float--orange">ROW-LEVEL SECURITY</span>
-          <BitMascot size={180} />
+          <BitMascot size={210} />
         </div>
       </div>
 
