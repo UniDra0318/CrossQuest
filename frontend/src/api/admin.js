@@ -1,9 +1,35 @@
-import { admin, overview, staff as staffSeed, clients, anomalies as anomalySeed, records, settings } from '../data/adminData.js';
+import {
+  admin,
+  anomalies as anomalySeed,
+  clients,
+  overview,
+  records,
+  settings,
+  staff as staffSeed,
+} from '../data/adminData.js';
 
+/**
+ * Data access for the admin console.
+ *
+ * MODE
+ *   mock (default) : returns data from mock-api/adminData.js, no server needed.
+ *   live           : calls the Node.js API (mock-api/server.js, or your own).
+ * Switch with VITE_API_MODE=live in a .env file. Vite proxies /api to :3000.
+ */
 const LIVE = import.meta.env.VITE_API_MODE === 'live';
-const http = (path, options) => fetch(`/api/admin${path}`, options);
-const json = (path, options) => http(path, options).then((res) => res.json());
-const later = (val) => new Promise((resolve) => setTimeout(() => resolve(val), 50));
+
+const later = (value) => new Promise((done) => setTimeout(() => done(structuredClone(value)), 0));
+
+async function http(path, options) {
+  const res = await fetch(`/api/admin${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return res;
+}
+const json = async (path, options) => (await http(path, options)).json();
 
 // Mock-mode state so edits survive page changes within one session.
 const mem = { staff: structuredClone(staffSeed), anomalies: structuredClone(anomalySeed) };
@@ -25,6 +51,19 @@ export async function updateStaff(id, patch) {
     Object.assign(user, patch);
   }
   return later(user);
+}
+
+/**
+ * Mock mode only: lets the staff API log an out-of-scope attempt so it shows up in the
+ * Anomaly Monitor. In live mode your server records the event itself (see mock-api/server.js).
+ */
+export function reportAnomalyMock(event) {
+  mem.anomalies.unshift({
+    id: `an-${Date.now()}`,
+    status: 'UNREVIEWED',
+    at: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    ...event,
+  });
 }
 
 /** GET /api/admin/anomalies */

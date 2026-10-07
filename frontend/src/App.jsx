@@ -113,7 +113,11 @@ function MainAppShell({ activeSubPage }) {
     } else if (viewId === 'trainee_certs') {
       navigate('/certifications');
     } else if (viewId === 'staff_records') {
-      navigate('/records');
+      navigate('/staff');
+    } else if (viewId === 'assigned_clients') {
+      navigate('/staff/portfolios');
+    } else if (viewId === 'compliance_reports' && currentUser?.role === 'crossworks_staff') {
+      navigate('/staff/reports');
     } else if (viewId === 'trainee_roster' || viewId === 'company_trainees') {
       navigate('/trainees');
     } else if (viewId === 'trainer_courses' || viewId === 'trainee_quest') {
@@ -329,6 +333,32 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="settings" />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Crossworks Staff Specific Portal Routes */}
+      <Route 
+        path="/staff" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="staff_records" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/staff/portfolios" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="assigned_clients" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/staff/reports" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="compliance_reports" />
           </ProtectedRoute>
         } 
       />
