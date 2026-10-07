@@ -36,6 +36,7 @@ import {
 import { exportAuditLogs } from '../api/admin';
 import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes } from '../services/api';
 import SpinCube from '../components/SpinCube';
+import BitMascot from '../components/BitMascot/BitMascot';
 import '../styles/admin.css';
 
 export default function AdminDashboard({ activeSubView, setActiveView }) {
@@ -268,11 +269,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           </div>
         </div>
 
-        {/* 3D Floating Scene */}
+        {/* Mascot Scene */}
         <div className="adm-hero__cube">
           <span className="adm-float adm-float--tl">AES-256 + RSA</span>
           <span className="adm-float adm-float--br adm-float--orange">ROW-LEVEL SECURITY</span>
-          <SpinCube size={76} />
+          <BitMascot size={180} />
         </div>
       </div>
 

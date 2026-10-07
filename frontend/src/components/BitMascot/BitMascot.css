@@ -1,0 +1,82 @@
+/* Animations for <BitMascot />. All classes/keyframes are prefixed with "cqbit"
+   so they won't collide with the rest of your styles. */
+
+.cqbit {
+  display: inline-block;
+  overflow: visible;
+}
+
+/* Head floats up while the body sinks, then they come back together */
+.cqbit--animated .cqbit-head { animation: cqbit-head-bob 3.2s ease-in-out infinite; }
+.cqbit--animated .cqbit-body { animation: cqbit-body-bob 3.2s ease-in-out infinite; }
+@keyframes cqbit-head-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-13px); } }
+@keyframes cqbit-body-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+
+/* Shadow shrinks a little at the top of the float */
+.cqbit--animated .cqbit-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cqbit-shadow 3.2s ease-in-out infinite;
+}
+@keyframes cqbit-shadow {
+  0%, 100% { transform: scale(1); opacity: .16; }
+  50% { transform: scale(.88); opacity: .1; }
+}
+
+/* Waving arm + hand (pivots at the shoulder) */
+.cqbit--animated .cqbit-wave {
+  transform-origin: 222px 272px;
+  animation: cqbit-wave 1.6s ease-in-out infinite;
+}
+@keyframes cqbit-wave { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-14deg); } }
+
+/* Antenna flag flutter */
+.cqbit--animated .cqbit-flag {
+  transform-origin: 170px 52px;
+  animation: cqbit-flag 1.6s ease-in-out infinite;
+}
+@keyframes cqbit-flag {
+  0%, 100% { transform: scaleX(1) skewY(0deg); }
+  50% { transform: scaleX(.82) skewY(-6deg); }
+}
+
+/* Blink */
+.cqbit--animated .cqbit-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cqbit-blink 4s infinite;
+}
+@keyframes cqbit-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+
+/* Keyhole core glow */
+.cqbit--animated .cqbit-pulse { animation: cqbit-pulse 1.6s ease-in-out infinite; }
+@keyframes cqbit-pulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+
+/* Sparkles */
+.cqbit--animated .cqbit-tw {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cqbit-twinkle 2.4s ease-in-out infinite;
+}
+.cqbit--animated .cqbit-tw2 { animation-delay: 1.2s; }
+@keyframes cqbit-twinkle {
+  0%, 100% { transform: scale(.6) rotate(0deg); opacity: .5; }
+  50% { transform: scale(1.1) rotate(20deg); opacity: 1; }
+}
+
+/* Motion lines by the waving hand */
+.cqbit--animated .cqbit-lines { animation: cqbit-lines 1.6s ease-in-out infinite; }
+@keyframes cqbit-lines { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+
+/* Background aura */
+.cqbit--animated .cqbit-aura {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cqbit-aura 3.2s ease-in-out infinite;
+}
+@keyframes cqbit-aura { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+/* Respect users who turned off motion in their OS settings */
+@media (prefers-reduced-motion: reduce) {
+  .cqbit--animated * { animation: none !important; }
+}
