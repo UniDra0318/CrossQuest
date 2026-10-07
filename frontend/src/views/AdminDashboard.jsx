@@ -12,121 +12,172 @@ import {
   Plus,
   RefreshCw,
   Edit2,
-  Lock,
-  Unlock,
-  Server,
-  Layers,
-  Search,
-  Download
+  Lock, 
+  Unlock, 
+  Server, 
+  Layers, 
+  Search, 
+  Download,
+  Copy,
+  Check,
+  Eye,
+  CheckSquare
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { INITIAL_ANOMALIES, INITIAL_STAFF_PROFILES, INITIAL_TRAINING_RECORDS, CLIENT_COMPANIES } from '../data/mockData';
+import { 
+  admin as defaultAdmin, 
+  overview as defaultOverview, 
+  staff as defaultStaff, 
+  clients as defaultClients, 
+  anomalies as defaultAnomalies, 
+  records as defaultRecords, 
+  settings as defaultSettings 
+} from '../data/adminData';
+import { exportAuditLogs } from '../api/admin';
 import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes } from '../services/api';
+import SpinCube from '../components/SpinCube';
+import '../styles/admin.css';
 
 export default function AdminDashboard({ activeSubView, setActiveView }) {
-  const { token } = useAuth();
-  const [staffList, setStaffList] = useState(INITIAL_STAFF_PROFILES);
-  const [anomalies, setAnomalies] = useState(INITIAL_ANOMALIES);
-  const [records, setRecords] = useState(INITIAL_TRAINING_RECORDS);
-  const [companies, setCompanies] = useState(CLIENT_COMPANIES);
-  const [editingStaff, setEditingStaff] = useState(null);
-  const [anomalyFilter, setAnomalyFilter] = useState('ALL');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { token, currentUser } = useAuth();
+  const [adminProfile] = useState(defaultAdmin);
+  const [overview] = useState(defaultOverview);
+  const [clients] = useState(defaultClients);
+  const [staffList, setStaffList] = useState(defaultStaff);
+  const [anomalies, setAnomalies] = useState(defaultAnomalies);
+  const [records, setRecords] = useState(defaultRecords);
+  const [settings] = useState(defaultSettings);
 
-  // Fetch real data from database
+  const [editingStaffId, setEditingStaffId] = useState(null);
+  const [editForm, setEditForm] = useState({ role: '', level: 1, clients: [] });
+  const [anomalyFilter, setAnomalyFilter] = useState('ALL');
+  const [staffSearch, setStaffSearch] = useState('');
+  const [recordSearch, setRecordSearch] = useState('');
+  const [copiedKey, setCopiedKey] = useState(false);
+
+  // Sync real data from database if available
   useEffect(() => {
     async function loadAdminData() {
-      setIsLoading(true);
-      const [dbRecords, dbAnomalies, dbCompanies, dbStaff] = await Promise.all([
-        fetchRecords(token),
-        fetchAnomalies(token),
-        fetchCompanies(token),
-        fetchStaffUsers(token)
-      ]);
+      if (!token) return;
+      try {
+        const [dbRecords, dbAnomalies, dbCompanies, dbStaff] = await Promise.all([
+          fetchRecords(token),
+          fetchAnomalies(token),
+          fetchCompanies(token),
+          fetchStaffUsers(token)
+        ]);
 
-      if (dbStaff && dbStaff.length > 0) {
-        setStaffList(dbStaff.map(u => ({
-          id: u.id,
-          name: u.full_name,
-          email: u.email,
-          role: u.role,
-          clearance_level: u.clearance_level || 1,
-          assigned_companies: u.assigned_client_accounts || []
-        })));
+        if (dbStaff && dbStaff.length > 0) {
+          setStaffList(dbStaff.map(u => ({
+            id: u.id,
+            name: u.full_name || u.name,
+            initials: (u.full_name || u.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+            email: u.email,
+            role: (u.role || 'STAFF').replace(/_/g, ' ').toUpperCase(),
+            level: u.clearance_level || 1,
+            clients: u.assigned_client_accounts || ['CORP_ALPHA'],
+            tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : 'orange'
+          })));
+        }
+
+        if (dbRecords && dbRecords.length > 0) {
+          setRecords(dbRecords.map((r, idx) => {
+            const compCode = r.encryption_policy?.includes('FINTECH_BETA') 
+              ? 'FINTECH_BETA' 
+              : r.encryption_policy?.includes('RETAIL_GAMMA') 
+                ? 'RETAIL_GAMMA' 
+                : 'CORP_ALPHA';
+            const compObj = (dbCompanies || []).find(c => c.code === compCode);
+
+            return {
+              id: r.id || `rec-${100 + idx}`,
+              trainee: r.trainee_name || `Learner ${idx + 1}`,
+              email: `learner${idx + 1}@${compCode.toLowerCase().replace(/_/g, '-')}.ph`,
+              org: compObj?.name || (compCode === 'CORP_ALPHA' ? 'SAN MIGUEL CONGLOMERATE HOLDINGS' : compCode),
+              course: r.course_name || 'Enterprise Security Training',
+              policy: r.encryption_policy || `(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:${compCode})`,
+              status: (r.status || 'COMPLETED').toUpperCase()
+            };
+          }));
+        }
+
+        if (dbAnomalies && dbAnomalies.length > 0) {
+          setAnomalies(dbAnomalies.map(a => ({
+            id: a.id,
+            type: a.anomaly_type || 'OUT_OF_SCOPE',
+            name: 'Marcus Reyes',
+            email: 'marcus.am@crossworks.ph',
+            message: a.description || 'Unauthorized decryption attempt detected outside scope.',
+            at: a.created_at ? new Date(a.created_at).toLocaleString() : '2026-10-03 14:18:22',
+            status: a.is_reviewed ? 'RESOLVED' : 'UNREVIEWED'
+          })));
+        }
+      } catch (err) {
+        console.warn("Could not load backend admin data, using robust local state:", err);
       }
-
-      if (dbCompanies && dbCompanies.length > 0) {
-        setCompanies(dbCompanies.map(c => ({
-          code: c.code,
-          name: c.name,
-          industry: c.industry || 'Enterprise'
-        })));
-      }
-
-      if (dbRecords && dbRecords.length > 0) {
-        setRecords(dbRecords.map((r, idx) => {
-          const compCode = r.encryption_policy?.includes('FINTECH_BETA') 
-            ? 'FINTECH_BETA' 
-            : r.encryption_policy?.includes('RETAIL_GAMMA') 
-              ? 'RETAIL_GAMMA' 
-              : 'CORP_ALPHA';
-          const compObj = (dbCompanies || CLIENT_COMPANIES).find(c => c.code === compCode);
-
-          return {
-            id: r.id,
-            traineeName: r.trainee_name || `Learner ${idx + 1}`,
-            traineeEmail: `learner${idx + 1}@${compCode.toLowerCase()}.ph`,
-            companyCode: compCode,
-            companyName: compObj?.name || 'San Miguel Conglomerate Holdings',
-            courseName: r.course_name,
-            status: r.status || 'completed',
-            encryptionPolicy: r.encryption_policy
-          };
-        }));
-      }
-
-      if (dbAnomalies && dbAnomalies.length > 0) {
-        setAnomalies(dbAnomalies.map(a => ({
-          id: a.id,
-          userName: 'Marcus Reyes',
-          userEmail: 'marcus.reyes@crossworks.ph',
-          type: a.anomaly_type,
-          severity: a.severity,
-          description: a.description,
-          timestamp: a.created_at ? new Date(a.created_at).toLocaleString() : 'Just now',
-          status: a.is_reviewed ? 'RESOLVED' : 'UNREVIEWED'
-        })));
-      }
-      setIsLoading(false);
     }
     loadAdminData();
   }, [token]);
 
-  const handleAcknowledge = (id) => {
+  // Acknowledge / resolve anomaly
+  const handleResolveAnomaly = (id) => {
     setAnomalies(prev => prev.map(a => a.id === id ? { ...a, status: 'RESOLVED' } : a));
   };
 
-  const handleSaveAttributes = async (e) => {
-    e.preventDefault();
-    if (token && editingStaff.id) {
-      await updateStaffAttributes(editingStaff.id, {
-        role: editingStaff.role,
-        clearance_level: editingStaff.clearance_level,
-        assigned_client_accounts: editingStaff.assigned_companies
-      }, token);
-    }
-    setStaffList(prev => prev.map(s => s.id === editingStaff.id ? editingStaff : s));
-    setEditingStaff(null);
+  // Start inline editing staff
+  const startEditStaff = (user) => {
+    setEditingStaffId(user.id);
+    setEditForm({
+      role: user.role,
+      level: user.level || 1,
+      clients: [...(user.clients || [])]
+    });
   };
 
-  const toggleCompany = (companyCode) => {
-    if (!editingStaff) return;
-    const current = editingStaff.assigned_companies || [];
-    const next = current.includes(companyCode)
-      ? current.filter(c => c !== companyCode)
-      : [...current, companyCode];
-    setEditingStaff({ ...editingStaff, assigned_companies: next });
+  // Save staff attributes
+  const handleSaveStaff = async (id) => {
+    if (token) {
+      try {
+        await updateStaffAttributes(id, {
+          role: editForm.role.toLowerCase().replace(/ /g, '_'),
+          clearance_level: editForm.level,
+          assigned_client_accounts: editForm.clients
+        }, token);
+      } catch (e) {
+        console.warn("Error persisting staff update:", e);
+      }
+    }
+
+    setStaffList(prev => prev.map(s => {
+      if (s.id === id) {
+        return {
+          ...s,
+          role: editForm.role,
+          level: editForm.level,
+          clients: editForm.clients
+        };
+      }
+      return s;
+    }));
+    setEditingStaffId(null);
+  };
+
+  const toggleClientInEdit = (clientCode) => {
+    setEditForm(prev => {
+      const exists = prev.clients.includes(clientCode);
+      return {
+        ...prev,
+        clients: exists ? prev.clients.filter(c => c !== clientCode) : [...prev.clients, clientCode]
+      };
+    });
+  };
+
+  const handleCopyPublicKey = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(overview.architecture.publicKey);
+      setCopiedKey(true);
+      setTimeout(() => setCopiedKey(false), 2000);
+    }
   };
 
   const unreviewedCount = anomalies.filter(a => a.status === 'UNREVIEWED').length;
@@ -137,233 +188,516 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     return true;
   });
 
+  const filteredStaff = staffList.filter(s => 
+    s.name.toLowerCase().includes(staffSearch.toLowerCase()) || 
+    s.email.toLowerCase().includes(staffSearch.toLowerCase())
+  );
+
+  const filteredRecords = records.filter(r => 
+    r.trainee.toLowerCase().includes(recordSearch.toLowerCase()) || 
+    r.course.toLowerCase().includes(recordSearch.toLowerCase()) ||
+    r.org.toLowerCase().includes(recordSearch.toLowerCase()) ||
+    r.id.toLowerCase().includes(recordSearch.toLowerCase())
+  );
+
   return (
-    <div className="dashboard-content-layout">
-      {/* 1. OVERVIEW VIEW */}
-      {(activeSubView === 'admin_overview' || !activeSubView) && (
-        <>
-          <div className="view-title-header">
-            <div>
-              <h2>Executive Security & Platform Posture</h2>
-              <p className="text-secondary text-sm">
-                Centralized monitoring for role-based access control, tenant isolation, and anomaly response.
-              </p>
-            </div>
-            <div className="flex-align gap-8">
-              <span className="badge badge-green">Authority Status: Active</span>
-              <span className="badge badge-blue">Protection: Active</span>
-            </div>
+    <div className="adm-main">
+      {/* 1. TOP STATUS BAR */}
+      <div className="adm-top">
+        <div className="adm-crumbs">
+          CROSSQUEST ENTERPRISE / <strong>ADMIN SECURITY CONSOLE</strong>
+        </div>
+        <div className="adm-chip-user">
+          <div className="adm-chip-user__av">
+            {adminProfile.initials || 'SJ'}
           </div>
+          <div>
+            <strong>{currentUser?.name || adminProfile.name}</strong>
+            <small>{adminProfile.role}</small>
+          </div>
+        </div>
+      </div>
 
-          <div className="metrics-summary-row">
-            <div className="card metric-tile">
-              <div className="metric-tile-header">
-                <span className="tile-label">Security Posture Score</span>
-                <Shield size={18} className="text-emerald" />
-              </div>
-              <div className="tile-value text-emerald">98.4%</div>
-              <div className="tile-sub">Security & Compliance Baseline Met</div>
-            </div>
+      {/* 2. 3D HERO BANNER WITH VIEW NAVIGATION TABS */}
+      <div className="adm-hero">
+        <div className="adm-hero__text">
+          <span className="adm-pill">
+            <span className="adm-live" /> ACTIVE AUTHORITY
+          </span>
+          <h1>Executive Security & Platform Posture</h1>
+          <p>
+            Centralized monitoring for role-based access control, tenant isolation, and anomaly response across all enterprise cohorts.
+          </p>
 
-            <div 
-              className="card metric-tile interactive-tile" 
-              onClick={() => setActiveView && setActiveView('anomalies')}
-              title="View all access anomalies"
+          <div className="adm-tabs">
+            <button 
+              type="button"
+              className={(!activeSubView || activeSubView === 'admin_overview') ? 'on' : ''} 
+              onClick={() => setActiveView && setActiveView('admin_overview')}
             >
-              <div className="metric-tile-header">
-                <span className="tile-label">Pending Anomaly Incidents</span>
-                <AlertTriangle size={18} className="text-rose" />
-              </div>
-              <div className="tile-value text-rose">{unreviewedCount} Alerts</div>
-              <div className="tile-sub">Rule- & Threshold-based active flags (Click to view)</div>
-            </div>
-
-            <div 
-              className="card metric-tile interactive-tile" 
+              Security Overview
+            </button>
+            <button 
+              type="button"
+              className={activeSubView === 'attribute_authority' ? 'on' : ''} 
               onClick={() => setActiveView && setActiveView('attribute_authority')}
-              title="Manage staff access permissions"
             >
-              <div className="metric-tile-header">
-                <span className="tile-label">Managed Staff Profiles</span>
-                <UserCheck size={18} className="text-cyan" />
-              </div>
-              <div className="tile-value">{staffList.length} Accounts</div>
-              <div className="tile-sub">Managed cryptographic credentials (Click to view)</div>
-            </div>
-
-            <div className="card metric-tile">
-              <div className="metric-tile-header">
-                <span className="tile-label">Database Layer Guard</span>
-                <Database size={18} className="text-purple" />
-              </div>
-              <div className="tile-value">Data Isolation Active</div>
-              <div className="tile-sub">Multi-tenant row filtering enabled</div>
-            </div>
+              Access Permissions
+            </button>
+            <button 
+              type="button"
+              className={activeSubView === 'anomalies' ? 'on' : ''} 
+              onClick={() => setActiveView && setActiveView('anomalies')}
+            >
+              Anomaly Monitor {unreviewedCount > 0 ? `(${unreviewedCount})` : ''}
+            </button>
+            <button 
+              type="button"
+              className={activeSubView === 'records_vault' ? 'on' : ''} 
+              onClick={() => setActiveView && setActiveView('records_vault')}
+            >
+              Master Record Vault
+            </button>
+            <button 
+              type="button"
+              className={activeSubView === 'system_settings' ? 'on' : ''} 
+              onClick={() => setActiveView && setActiveView('system_settings')}
+            >
+              Engine Settings
+            </button>
           </div>
+        </div>
 
-          {/* Dual Panel: Recent Incidents & Key Authority Status */}
-          <div className="dual-grid-section">
-            <div className="card section-card">
-              <div className="card-header-bar">
-                <h3 className="card-title">Recent Access Anomaly Alerts</h3>
-                <span className="badge badge-rose">{unreviewedCount} Unreviewed</span>
+        {/* 3D Floating Scene */}
+        <div className="adm-hero__cube">
+          <span className="adm-float adm-float--tl">AES-256 + RSA</span>
+          <span className="adm-float adm-float--br adm-float--orange">ROW-LEVEL SECURITY</span>
+          <SpinCube size={76} />
+        </div>
+      </div>
+
+      {/* =====================================================================
+          VIEW 1: SECURITY OVERVIEW
+          ===================================================================== */}
+      {(!activeSubView || activeSubView === 'admin_overview') && (
+        <>
+          {/* Executive KPI Tiles */}
+          <div className="adm-tiles">
+            {/* Tile 1: Security Posture Score */}
+            <div className="adm-kpi">
+              <div className="adm-kpi__top">
+                <span className="adm-label">SECURITY POSTURE</span>
+                <span className="adm-pill adm-pill--green">STABLE</span>
               </div>
-              <div className="alerts-feed-list">
-                {anomalies.slice(0, 3).map((item) => (
-                  <div key={item.id} className={`clean-alert-item ${item.status === 'RESOLVED' ? 'resolved' : 'pending'}`}>
-                    <div className="alert-item-left">
-                      <span className={`badge ${item.severity === 'HIGH' ? 'badge-rose' : 'badge-amber'}`}>
-                        {item.type.replace(/_/g, ' ')}
-                      </span>
-                      <div className="alert-main-content">
-                        <div className="alert-heading"><strong>{item.userName}</strong> ({item.userEmail})</div>
-                        <p className="alert-text">{item.description}</p>
-                        <div className="alert-footer-info">
-                          <span className="alert-time"><Clock size={12} /> {item.timestamp}</span>
-                        </div>
-                      </div>
-                    </div>
-                    {item.status === 'UNREVIEWED' && (
-                      <button className="btn btn-secondary btn-sm" onClick={() => handleAcknowledge(item.id)}>
-                        <CheckCircle2 size={13} /> Acknowledge
-                      </button>
-                    )}
-                  </div>
+              <div className="adm-kpi__num">{overview.postureScore}%</div>
+              <div className="adm-progress">
+                <i style={{ width: `${overview.postureScore}%` }} />
+              </div>
+              <div className="adm-kpi__note">
+                <CheckCircle2 size={13} /> {overview.postureNote}
+              </div>
+            </div>
+
+            {/* Tile 2: Pending Anomaly Incidents */}
+            <div 
+              className="adm-kpi" 
+              style={{ cursor: 'pointer' }}
+              onClick={() => setActiveView && setActiveView('anomalies')}
+              title="Click to inspect anomaly monitor"
+            >
+              <div className="adm-kpi__top">
+                <span className="adm-label">PENDING ANOMALIES</span>
+                <span className="adm-dot" />
+              </div>
+              <div className="adm-kpi__num" style={{ color: unreviewedCount > 0 ? '#d12a43' : 'inherit' }}>
+                {unreviewedCount} Alerts
+              </div>
+              <div className="adm-bars">
+                <span style={{ background: '#ff5a6e' }} />
+                <span style={{ background: '#ff7a1a' }} />
+                <span style={{ background: unreviewedCount > 2 ? '#ff5a6e' : '#ddd6f0' }} />
+              </div>
+              <div className="adm-kpi__note">
+                Rule- & threshold-based active flags (Click to view)
+              </div>
+            </div>
+
+            {/* Tile 3: Managed Staff Profiles */}
+            <div 
+              className="adm-kpi"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setActiveView && setActiveView('attribute_authority')}
+              title="Click to view staff permissions"
+            >
+              <div className="adm-kpi__top">
+                <span className="adm-label">STAFF CLEARANCES</span>
+                <span className="adm-pill adm-pill--blue">{clients.length} CLIENTS</span>
+              </div>
+              <div className="adm-kpi__num">{staffList.length} Accounts</div>
+              <div className="adm-avatars">
+                {staffList.slice(0, 5).map((s, idx) => (
+                  <span 
+                    key={s.id || idx} 
+                    style={{ 
+                      background: s.tone === 'purple' ? '#6a2bd9' : s.tone === 'orange' ? '#ff7a1a' : s.tone === 'green' ? '#087a54' : '#1d6fe0' 
+                    }} 
+                    title={s.name}
+                  />
                 ))}
               </div>
+              <div className="adm-kpi__note">
+                Managed cryptographic credentials (Click to edit)
+              </div>
             </div>
 
-            <div className="card section-card">
-              <div className="card-header-bar">
-                <h3 className="card-title">Security & Encryption Architecture</h3>
-                <span className="badge badge-purple">CrossQuest Core</span>
+            {/* Tile 4: Database Layer Guard */}
+            <div className="adm-kpi">
+              <div className="adm-kpi__top">
+                <span className="adm-label">DATABASE LAYER</span>
+                <span className="adm-pill adm-pill--green">ACTIVE</span>
               </div>
-              <div className="p-20">
-                <div className="tech-spec-item">
-                  <span className="spec-label">Security Scheme</span>
-                  <span className="spec-value">Attribute-Based & Role-Based Access Control</span>
+              <div className="adm-kpi__num adm-kpi__num--sm">
+                Data Isolation Active
+              </div>
+              <div className="adm-bars">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div className="adm-kpi__note">
+                <CheckCircle2 size={13} /> {overview.isolationNote}
+              </div>
+            </div>
+          </div>
+
+          {/* Dual Split: Recent Alerts & 3D Security Architecture */}
+          <div className="adm-split">
+            {/* Left: Recent Alerts */}
+            <div className="adm-split__main">
+              <div className="adm-panel">
+                <div className="adm-panel__head">
+                  <h2>Recent Access Anomaly Alerts</h2>
+                  <span className="adm-chip adm-chip--red">{unreviewedCount} Unreviewed</span>
                 </div>
-                <div className="tech-spec-item">
-                  <span className="spec-label">Encryption Suite</span>
-                  <span className="spec-value">AES-256 + 4096-bit RSA & ECDSA</span>
+                <div className="adm-stack">
+                  {anomalies.slice(0, 3).map((item) => (
+                    <div 
+                      key={item.id} 
+                      className={`adm-alert ${item.status === 'RESOLVED' ? 'adm-alert--done' : item.type === 'OUT_OF_SCOPE' ? 'adm-alert--red' : 'adm-alert--amber'}`}
+                    >
+                      <div className="adm-alert__icon">
+                        <AlertTriangle size={20} />
+                      </div>
+                      <div className="adm-alert__body">
+                        <div className="adm-alert__head">
+                          <strong>{item.name}</strong>
+                          <span className="adm-mono">({item.email})</span>
+                          <span className={`adm-chip ${item.status === 'RESOLVED' ? 'adm-chip--green' : item.type === 'OUT_OF_SCOPE' ? 'adm-chip--red' : 'adm-chip--amber'}`}>
+                            {item.type.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                        <p>{item.message}</p>
+                        <div className="adm-alert__meta">
+                          <span className="adm-mono">
+                            <Clock size={12} /> {item.at}
+                          </span>
+                          {item.status === 'RESOLVED' && (
+                            <span className="adm-ack">
+                              <CheckCircle2 size={13} /> Acknowledged
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {item.status === 'UNREVIEWED' && (
+                        <button 
+                          type="button" 
+                          className="adm-btn adm-btn-solid adm-chip--solid"
+                          onClick={() => handleResolveAnomaly(item.id)}
+                        >
+                          <CheckCircle2 size={13} /> Acknowledge
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div className="tech-spec-item">
-                  <span className="spec-label">Authority Type</span>
-                  <span className="spec-value">Single Crossworks Master Authority</span>
+              </div>
+            </div>
+
+            {/* Right: 3D Stacked Layers & Specs */}
+            <div className="adm-split__side">
+              <div className="adm-panel">
+                <div className="adm-panel__head">
+                  <h2>Security Architecture</h2>
+                  <span className="adm-pill adm-pill--blue">CROSSWORKS CORE</span>
                 </div>
-                <div className="tech-spec-item">
-                  <span className="spec-label">Master Public Key</span>
-                  <code className="text-xs text-cyan">PUBKEY_SHA256: 8a4f91b...34e2</code>
+
+                <div className="adm-pad">
+                  {/* 3D Preserved-3D Isometric Layers */}
+                  <div className="adm-stack3d">
+                    <div className="adm-stack3d__scene">
+                      <div className="adm-layers">
+                        <div className="adm-layer adm-layer--1" title="Row-Level Isolation Layer" />
+                        <div className="adm-layer adm-layer--2" title="Access Control Policy Layer" />
+                        <div className="adm-layer adm-layer--3" title="AES-256 + RSA Encryption Top Layer" />
+                      </div>
+                    </div>
+                    <ul className="adm-legend">
+                      <li>
+                        <i style={{ background: '#ff7a1a' }} />
+                        <div>
+                          <strong>Top Layer</strong>
+                          <span>AES-256 + RSA Suite</span>
+                        </div>
+                      </li>
+                      <li>
+                        <i style={{ background: '#1d6fe0' }} />
+                        <div>
+                          <strong>Policy Engine</strong>
+                          <span>Attribute-Based (CP-ABE)</span>
+                        </div>
+                      </li>
+                      <li>
+                        <i style={{ background: '#6a2bd9' }} />
+                        <div>
+                          <strong>Base Guard</strong>
+                          <span>Multi-Tenant Row Isolation</span>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-                <div className="tech-spec-item">
-                  <span className="spec-label">Defense-in-Depth</span>
-                  <span className="spec-value">Multi-Tenant Row-Level Security</span>
-                </div>
+
+                {/* Definition List */}
+                <dl className="adm-dl">
+                  <div>
+                    <dt>Scheme</dt>
+                    <dd>{overview.architecture.scheme}</dd>
+                  </div>
+                  <div>
+                    <dt>Encryption Suite</dt>
+                    <dd>{overview.architecture.encryption}</dd>
+                  </div>
+                  <div>
+                    <dt>Authority</dt>
+                    <dd>{overview.architecture.authority}</dd>
+                  </div>
+                  <div>
+                    <dt>Master Public Key</dt>
+                    <dd>
+                      <div className="adm-key">
+                        <code>{overview.architecture.publicKey}</code>
+                        <button 
+                          type="button" 
+                          className="adm-iconbtn" 
+                          onClick={handleCopyPublicKey}
+                          title="Copy public key"
+                        >
+                          {copiedKey ? <Check size={13} /> : <Copy size={13} />}
+                        </button>
+                      </div>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Defense Layer</dt>
+                    <dd>{overview.architecture.defense}</dd>
+                  </div>
+                </dl>
               </div>
             </div>
           </div>
         </>
       )}
 
-      {/* 2. ATTRIBUTE AUTHORITY VIEW */}
+      {/* =====================================================================
+          VIEW 2: ACCESS PERMISSIONS & STAFF ROLES
+          ===================================================================== */}
       {activeSubView === 'attribute_authority' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
+        <div className="adm-panel" style={{ marginTop: '32px' }}>
+          <div className="adm-panel__head">
             <div>
-              <h3 className="card-title">Staff Access & Role Management</h3>
-              <p className="card-subtitle">
-                Configure roles, clearance levels, and assigned client accounts that form user permissions.
-              </p>
+              <h2>Staff Access & Role Management</h2>
+              <span className="adm-mono">Configure roles, clearance levels, and assigned tenant scope</span>
             </div>
-            <div className="search-box">
-              <Search size={14} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search staff members..."
-                className="search-input"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+            <div className="adm-search">
+              <Search size={15} />
+              <input 
+                type="text" 
+                placeholder="Search staff members..." 
+                value={staffSearch}
+                onChange={(e) => setStaffSearch(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="table-responsive">
-            <table className="clean-table">
-              <thead>
-                <tr>
-                  <th>Staff Member</th>
-                  <th>Current Role</th>
-                  <th>Clearance Level</th>
-                  <th>Assigned Client Accounts</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {staffList
-                  .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.email.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .map((staff) => (
-                    <tr key={staff.id}>
-                      <td>
-                        <div className="trainee-info-cell">
-                          <span className="trainee-main-name">{staff.name}</span>
-                          <span className="trainee-email-text">{staff.email}</span>
+          <div className="adm-scroll">
+            <div className="adm-table">
+              {/* Table Header */}
+              <div className="adm-grid adm-grid--access adm-th">
+                <div>STAFF MEMBER</div>
+                <div>ASSIGNED ROLE</div>
+                <div>CLEARANCE LEVEL</div>
+                <div>ASSIGNED CLIENT TENANTS</div>
+                <div style={{ textAlign: 'right' }}>ACTIONS</div>
+              </div>
+
+              {/* Table Rows */}
+              {filteredStaff.map((user) => {
+                const isEditing = editingStaffId === user.id;
+
+                return (
+                  <div key={user.id} className="adm-row">
+                    <div className="adm-grid adm-grid--access">
+                      <div className="adm-person">
+                        <div 
+                          className="adm-av" 
+                          style={{ 
+                            background: user.tone === 'purple' ? '#6a2bd9' : user.tone === 'orange' ? '#ff7a1a' : user.tone === 'green' ? '#087a54' : '#1d6fe0',
+                            color: '#ffffff'
+                          }}
+                        >
+                          {user.initials || 'U'}
                         </div>
-                      </td>
-                      <td>
-                        <span className="badge badge-purple">{staff.role.replace(/_/g, ' ')}</span>
-                      </td>
-                      <td>
-                        <span className="badge badge-gold">Level {staff.clearance_level}</span>
-                      </td>
-                      <td>
-                        <div className="tags-flex">
-                          {(staff.assigned_companies || []).map(code => (
-                            <span key={code} className="badge badge-cyan">{code}</span>
+                        <div>
+                          <strong>{user.name}</strong>
+                          <span className="adm-mono">{user.email}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className={`adm-chip ${user.role.includes('ADMIN') ? 'adm-chip--violet' : user.role.includes('STAFF') ? 'adm-chip--orange' : user.role.includes('TRAINER') ? 'adm-chip--green' : 'adm-chip--blue'}`}>
+                          {user.role}
+                        </span>
+                      </div>
+
+                      <div>
+                        <div className="adm-level">
+                          <span>
+                            <i className="on" style={{ height: '10px' }} />
+                            <i className={user.level >= 2 ? 'on' : ''} style={{ height: '15px' }} />
+                            <i className={user.level >= 3 ? 'on' : ''} style={{ height: '20px' }} />
+                          </span>
+                          <b>Level {user.level}</b>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="adm-wrap">
+                          {(user.clients || []).map((code) => (
+                            <span key={code} className="adm-org">{code}</span>
                           ))}
                         </div>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => setEditingStaff({ ...staff })}
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <button 
+                          type="button" 
+                          className="adm-btn adm-btn--light"
+                          onClick={() => isEditing ? setEditingStaffId(null) : startEditStaff(user)}
                         >
                           <Edit2 size={13} />
-                          <span>Edit Roles</span>
+                          <span>{isEditing ? 'Close' : 'Edit Roles'}</span>
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+
+                    {/* Inline Editor */}
+                    {isEditing && (
+                      <div className="adm-edit">
+                        <label>
+                          <span className="adm-label">ASSIGNED ROLE</span>
+                          <select 
+                            value={editForm.role}
+                            onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                          >
+                            <option value="ADMIN">ADMIN</option>
+                            <option value="CROSSWORKS STAFF">CROSSWORKS STAFF</option>
+                            <option value="TRAINER">TRAINER</option>
+                            <option value="COMPANY STAFF">COMPANY STAFF</option>
+                            <option value="TRAINEE">TRAINEE</option>
+                          </select>
+                        </label>
+
+                        <label>
+                          <span className="adm-label">CLEARANCE LEVEL (1–3)</span>
+                          <select 
+                            value={editForm.level}
+                            onChange={(e) => setEditForm({ ...editForm, level: Number(e.target.value) })}
+                          >
+                            <option value={1}>Level 1 (Standard)</option>
+                            <option value={2}>Level 2 (Supervisor)</option>
+                            <option value={3}>Level 3 (Executive Master)</option>
+                          </select>
+                        </label>
+
+                        <fieldset>
+                          <legend className="adm-label">ASSIGNED CLIENT ORGANIZATIONS</legend>
+                          {clients.map((c) => (
+                            <label key={c} className="adm-check">
+                              <input 
+                                type="checkbox" 
+                                checked={editForm.clients.includes(c)}
+                                onChange={() => toggleClientInEdit(c)}
+                              />
+                              <span>{c}</span>
+                            </label>
+                          ))}
+                        </fieldset>
+
+                        <div className="adm-edit__act">
+                          <button 
+                            type="button" 
+                            className="adm-btn"
+                            onClick={() => setEditingStaffId(null)}
+                          >
+                            Cancel
+                          </button>
+                          <button 
+                            type="button" 
+                            className="adm-btn adm-btn-solid adm-chip--solid"
+                            onClick={() => handleSaveStaff(user.id)}
+                          >
+                            <Check size={13} /> Save Permissions
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
-      {/* 3. ANOMALY MONITOR VIEW */}
+      {/* =====================================================================
+          VIEW 3: ANOMALY MONITOR & RADAR SCANNER
+          ===================================================================== */}
       {activeSubView === 'anomalies' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
+        <div className="adm-panel" style={{ marginTop: '32px' }}>
+          <div className="adm-panel__head">
             <div>
-              <h3 className="card-title">Access Anomaly & Threat Detection Monitor</h3>
-              <p className="card-subtitle">
-                Automated detection of out-of-scope record access, unusual hours, and volume anomalies.
-              </p>
+              <h2>Access Anomaly & Threat Detection Monitor</h2>
+              <span className="adm-mono">Real-time threat monitoring and cryptographic boundary enforcement</span>
             </div>
-            <div className="flex-align gap-8">
-              <button
-                className={`pill-btn ${anomalyFilter === 'ALL' ? 'active' : ''}`}
+            <div className="adm-tabs">
+              <button 
+                type="button"
+                className={anomalyFilter === 'ALL' ? 'on' : ''} 
                 onClick={() => setAnomalyFilter('ALL')}
               >
                 All Events ({anomalies.length})
               </button>
-              <button
-                className={`pill-btn ${anomalyFilter === 'UNREVIEWED' ? 'active' : ''}`}
+              <button 
+                type="button"
+                className={anomalyFilter === 'UNREVIEWED' ? 'on' : ''} 
                 onClick={() => setAnomalyFilter('UNREVIEWED')}
               >
                 Unreviewed ({unreviewedCount})
               </button>
-              <button
-                className={`pill-btn ${anomalyFilter === 'RESOLVED' ? 'active' : ''}`}
+              <button 
+                type="button"
+                className={anomalyFilter === 'RESOLVED' ? 'on' : ''} 
                 onClick={() => setAnomalyFilter('RESOLVED')}
               >
                 Resolved ({anomalies.length - unreviewedCount})
@@ -371,208 +705,279 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             </div>
           </div>
 
-          <div className="alerts-feed-list p-20">
-            {filteredAnomalies.map((item) => (
-              <div key={item.id} className={`clean-alert-item ${item.status === 'RESOLVED' ? 'resolved' : 'pending'}`}>
-                <div className="alert-item-left">
-                  <span className={`badge ${item.severity === 'HIGH' ? 'badge-rose' : 'badge-amber'}`}>
-                    {item.type.replace(/_/g, ' ')}
-                  </span>
-                  <div className="alert-main-content">
-                    <div className="alert-heading">
-                      <strong>{item.userName}</strong> ({item.userEmail})
+          {/* Live Radar Scanner Banner */}
+          <div className="adm-pad" style={{ background: '#170b2e', padding: '32px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <div className="adm-radar-wrap">
+              <div className="adm-radar">
+                <i className="adm-radar__rings" />
+                <i className="adm-radar__x" />
+                <i className="adm-radar__y" />
+                <i className="adm-radar__sweep" />
+
+                {/* Radar Blips */}
+                <span className="adm-blip" style={{ left: '42%', top: '35%' }} title="Out of Scope Attempt" />
+                <span className="adm-blip" style={{ left: '72%', top: '65%' }} title="Off Hours Decryption" />
+                <span className="adm-blip adm-blip--ok" style={{ left: '25%', top: '78%' }} title="Resolved" />
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '14px' }}>
+              <span className="adm-pill adm-pill--green">
+                <span className="adm-live" /> REAL-TIME RADAR TELEMETRY ACTIVE
+              </span>
+            </div>
+          </div>
+
+          {/* Timeline Feed */}
+          <div className="adm-timeline">
+            {filteredAnomalies.map((item) => {
+              const isResolved = item.status === 'RESOLVED';
+              return (
+                <div key={item.id} className="adm-timeline__item">
+                  <span className={`adm-timeline__dot ${isResolved ? 'adm-timeline__dot--ok' : item.type === 'OUT_OF_SCOPE' ? '' : 'adm-timeline__dot--amber'}`} />
+                  <div className={`adm-alert ${isResolved ? 'adm-alert--done' : item.type === 'OUT_OF_SCOPE' ? 'adm-alert--red' : 'adm-alert--amber'}`}>
+                    <div className="adm-alert__icon">
+                      <AlertTriangle size={20} />
                     </div>
-                    <p className="alert-text">{item.description}</p>
-                    <div className="alert-footer-info">
-                      <span className="alert-time"><Clock size={12} /> {item.timestamp}</span>
-                      <span className={`status-pill ${item.status === 'RESOLVED' ? 'resolved' : 'open'}`}>
-                        {item.status}
-                      </span>
+                    <div className="adm-alert__body">
+                      <div className="adm-alert__head">
+                        <strong>{item.name}</strong>
+                        <span className="adm-mono">({item.email})</span>
+                        <span className={`adm-chip ${isResolved ? 'adm-chip--green' : item.type === 'OUT_OF_SCOPE' ? 'adm-chip--red' : 'adm-chip--amber'}`}>
+                          {item.type.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      <p>{item.message}</p>
+                      <div className="adm-alert__meta">
+                        <span className="adm-mono"><Clock size={12} /> {item.at}</span>
+                        {isResolved && (
+                          <span className="adm-ack">
+                            <CheckCircle2 size={13} /> Resolved & Acknowledged
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {!isResolved && (
+                      <button 
+                        type="button" 
+                        className="adm-btn adm-btn-solid adm-chip--solid"
+                        onClick={() => handleResolveAnomaly(item.id)}
+                      >
+                        <CheckCircle2 size={13} /> Resolve & Acknowledge
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          VIEW 4: MASTER RECORD VAULT & EXPORT AUDIT LOGS
+          ===================================================================== */}
+      {activeSubView === 'records_vault' && (
+        <div className="adm-panel" style={{ marginTop: '32px' }}>
+          <div className="adm-panel__head">
+            <div>
+              <h2>Master Record Vault</h2>
+              <span className="adm-mono">Global store of multi-tenant cryptographic certificates & training records</span>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div className="adm-search">
+                <Search size={15} />
+                <input 
+                  type="text" 
+                  placeholder="Filter records or courses..." 
+                  value={recordSearch}
+                  onChange={(e) => setRecordSearch(e.target.value)}
+                />
+              </div>
+              <button 
+                type="button" 
+                className="adm-btn adm-btn--light"
+                onClick={exportAuditLogs}
+                title="Download CSV audit log"
+              >
+                <Download size={14} />
+                <span>Export Master Audit Logs (CSV)</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="adm-scroll">
+            <div className="adm-table">
+              <div className="adm-grid adm-grid--vault adm-th">
+                <div>RECORD ID</div>
+                <div>TRAINEE</div>
+                <div>CLIENT ORGANIZATION</div>
+                <div>COURSE PROGRAM</div>
+                <div>ACCESS CONTROL POLICY</div>
+                <div style={{ textAlign: 'right' }}>STATUS</div>
+              </div>
+
+              {filteredRecords.map((r) => (
+                <div key={r.id} className="adm-row adm-grid adm-grid--vault">
+                  <div className="adm-recid">
+                    <FileText size={13} />
+                    <span>{r.id}</span>
+                  </div>
+
+                  <div className="adm-person">
+                    <div className="adm-av adm-av--sq" style={{ background: '#6a2bd9', color: '#fff' }}>
+                      {(r.trainee || 'U').slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <strong>{r.trainee}</strong>
+                      <span className="adm-mono">{r.email}</span>
                     </div>
                   </div>
+
+                  <div>
+                    <span className="adm-org">{r.org}</span>
+                  </div>
+
+                  <div className="adm-course">
+                    {r.course}
+                  </div>
+
+                  <div>
+                    <code className="adm-policy">{r.policy}</code>
+                  </div>
+
+                  <div style={{ textAlign: 'right' }}>
+                    <span className={`adm-chip ${r.status === 'COMPLETED' ? 'adm-chip--green' : 'adm-chip--amber'}`}>
+                      {r.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          VIEW 5: SECURITY ENGINE SETTINGS & CONFIGURATION
+          ===================================================================== */}
+      {activeSubView === 'system_settings' && (
+        <div style={{ marginTop: '32px' }}>
+          <div className="adm-cols">
+            {/* Card 1: Access Control Engine */}
+            <div className="adm-card">
+              <div className="adm-ptitle">
+                <span style={{ background: '#6a2bd9' }}>
+                  <Key size={22} />
+                </span>
+                <div>
+                  <h2>Access Control Engine</h2>
+                  <p>Cryptographic parameters & master authority specs</p>
+                </div>
+              </div>
+
+              <div className="adm-field" style={{ marginBottom: '16px' }}>
+                <div className="adm-field__icon">
+                  <Shield size={20} />
                 </div>
                 <div>
-                  {item.status === 'UNREVIEWED' ? (
-                    <button className="btn btn-primary btn-sm" onClick={() => handleAcknowledge(item.id)}>
-                      <CheckCircle2 size={13} /> Resolve & Acknowledge
-                    </button>
-                  ) : (
-                    <span className="text-secondary text-xs">Acknowledged</span>
-                  )}
+                  <span className="adm-label">CRYPTOGRAPHIC SCHEME</span>
+                  <div className="adm-field__val">{settings.accessControl.cryptoScheme}</div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* 4. MASTER RECORDS VAULT VIEW */}
-      {activeSubView === 'records_vault' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
-            <div>
-              <h3 className="card-title">Master Multi-Client Record Store</h3>
-              <p className="card-subtitle">
-                Global view of all client certificates and verified training records.
-              </p>
-            </div>
-            <button className="btn btn-secondary btn-sm" onClick={() => alert("Exporting master audit logs...")}>
-              <Download size={13} /> Export Master Audit Logs
-            </button>
-          </div>
-
-          <div className="table-responsive">
-            <table className="clean-table">
-              <thead>
-                <tr>
-                  <th>Record ID</th>
-                  <th>Trainee</th>
-                  <th>Client Organization</th>
-                  <th>Course Name</th>
-                  <th>Access Policy</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((r) => (
-                  <tr key={r.id}>
-                    <td><code>{r.id.substring(0, 8)}...</code></td>
-                    <td>
-                      <div className="trainee-info-cell">
-                        <span className="trainee-main-name">{r.traineeName}</span>
-                        <span className="trainee-email-text">{r.traineeEmail}</span>
-                      </div>
-                    </td>
-                    <td><span className="badge badge-purple">{r.companyName}</span></td>
-                    <td>{r.courseName}</td>
-                    <td><code className="text-xs text-cyan">{r.encryptionPolicy}</code></td>
-                    <td>
-                      <span className={`badge ${r.status === 'completed' ? 'badge-green' : 'badge-amber'}`}>
-                        {r.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* 5. SYSTEM SETTINGS & CONFIG VIEW */}
-      {activeSubView === 'system_settings' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
-            <div>
-              <h3 className="card-title">Security Engine & Anomaly Configuration</h3>
-              <p className="card-subtitle">
-                Core parameters for access thresholds, alerts, and tenant isolation filters.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-24 config-grid">
-            <div className="config-card">
-              <h4>Access Control Engine</h4>
-              <p className="text-secondary text-xs mb-16">Role & Attribute-Based Access Control Parameters</p>
-              <div className="config-row">
-                <span>Cryptographic Scheme:</span>
-                <strong>AES-256 Symmetric + Asymmetric RSA</strong>
+              <div className="adm-field" style={{ marginBottom: '16px' }}>
+                <div className="adm-field__icon">
+                  <Server size={20} />
+                </div>
+                <div>
+                  <span className="adm-label">SECURITY PROVIDER</span>
+                  <div className="adm-field__val">{settings.accessControl.provider}</div>
+                </div>
               </div>
-              <div className="config-row">
-                <span>Security Provider:</span>
-                <span className="badge badge-green">Hardware-Isolated Security Provider</span>
-              </div>
-              <div className="config-row">
-                <span>Key Authority Scheme:</span>
-                <strong>Single-Authority (Crossworks Corp)</strong>
+
+              <div className="adm-field">
+                <div className="adm-field__icon">
+                  <Lock size={20} />
+                </div>
+                <div>
+                  <span className="adm-label">KEY AUTHORITY SCHEME</span>
+                  <div className="adm-field__val">{settings.accessControl.keyAuthority}</div>
+                </div>
               </div>
             </div>
 
-            <div className="config-card">
-              <h4>Anomaly Detection Thresholds</h4>
-              <p className="text-secondary text-xs mb-16">Rule- and threshold-based trigger levels</p>
-              <div className="config-row">
-                <span>Standard Business Window:</span>
-                <strong>08:00 – 19:00 UTC (Mon–Fri)</strong>
+            {/* Card 2: Anomaly Detection Thresholds */}
+            <div className="adm-card">
+              <div className="adm-ptitle">
+                <span style={{ background: '#ff7a1a' }}>
+                  <Sliders size={22} />
+                </span>
+                <div>
+                  <h2>Anomaly Detection Thresholds</h2>
+                  <p>Rule- & threshold-based trigger levels</p>
+                </div>
               </div>
-              <div className="config-row">
-                <span>Consecutive Failed Attempts:</span>
-                <strong>3 failed requests / 15 mins</strong>
-              </div>
-              <div className="config-row">
-                <span>Burst Volume Threshold:</span>
-                <strong>25 records / 15 mins</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Attribute Edit Modal */}
-      {editingStaff && (
-        <div className="modal-backdrop" onClick={() => setEditingStaff(null)}>
-          <div className="card modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="dialog-header">
-              <h3>Edit Access Permissions: {editingStaff.name}</h3>
-            </div>
-            <form onSubmit={handleSaveAttributes}>
-              <div className="dialog-body">
-                <div className="form-field mb-16">
-                  <label className="field-label">Assigned Role</label>
-                  <select
-                    className="clean-input"
-                    value={editingStaff.role}
-                    onChange={(e) => setEditingStaff({ ...editingStaff, role: e.target.value })}
-                  >
-                    <option value="admin">Administrator (admin)</option>
-                    <option value="crossworks_staff">Account Manager (crossworks_staff)</option>
-                    <option value="trainer">Lead Trainer (trainer)</option>
-                  </select>
+              {/* Operating Window */}
+              <div className="adm-field adm-field--window" style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className="adm-label">STANDARD BUSINESS WINDOW</span>
+                  <strong style={{ fontSize: '13px' }}>
+                    {settings.anomaly.window.start} – {settings.anomaly.window.end} {settings.anomaly.window.tz}
+                  </strong>
                 </div>
 
-                <div className="form-field mb-16">
-                  <label className="field-label">Clearance Level (1–3)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="3"
-                    className="clean-input"
-                    value={editingStaff.clearance_level}
-                    onChange={(e) => setEditingStaff({ ...editingStaff, clearance_level: parseInt(e.target.value) || 1 })}
-                  />
+                <div className="adm-window">
+                  <i style={{ left: '33.3%', width: '45.8%' }} />
+                </div>
+                <div className="adm-ticks">
+                  <span>00:00</span>
+                  <span>06:00</span>
+                  <span>12:00</span>
+                  <span>18:00</span>
+                  <span>24:00</span>
                 </div>
 
-                <div className="form-field">
-                  <label className="field-label">Assigned Client Organizations</label>
-                  <div className="company-toggle-row">
-                    {companies.map((c) => {
-                      const selected = (editingStaff.assigned_companies || []).includes(c.code);
-                      return (
-                        <button
-                          key={c.code}
-                          type="button"
-                          className={`pill-btn ${selected ? 'active' : ''}`}
-                          onClick={() => toggleCompany(c.code)}
-                        >
-                          {selected ? <CheckCircle2 size={13} /> : <Plus size={13} />}
-                          <span>{c.name}</span>
-                        </button>
-                      );
-                    })}
+                <div className="adm-wrap" style={{ marginTop: '14px' }}>
+                  {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((d) => (
+                    <span 
+                      key={d} 
+                      className={`adm-day ${settings.anomaly.window.days.includes(d) ? 'on' : ''}`}
+                    >
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Threshold 1: Failed Attempts */}
+              <div className="adm-field adm-field--thr" style={{ marginBottom: '16px' }}>
+                <div className="adm-thr__icon" style={{ background: '#d12a43' }}>
+                  <AlertTriangle size={20} />
+                </div>
+                <div>
+                  <span className="adm-label">CONSECUTIVE FAILED ATTEMPTS TRIGGER</span>
+                  <div className="adm-thr__val">
+                    <b>{settings.anomaly.failedAttempts.count}</b>
+                    <span>failed requests within {settings.anomaly.failedAttempts.minutes} minutes</span>
                   </div>
                 </div>
               </div>
 
-              <div className="dialog-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setEditingStaff(null)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Save Permissions
-                </button>
+              {/* Threshold 2: Burst Volume */}
+              <div className="adm-field adm-field--thr">
+                <div className="adm-thr__icon" style={{ background: '#ff7a1a' }}>
+                  <Layers size={20} />
+                </div>
+                <div>
+                  <span className="adm-label">BURST DECRYPTION VOLUME THRESHOLD</span>
+                  <div className="adm-thr__val">
+                    <b>{settings.anomaly.burstVolume.records}</b>
+                    <span>record decryptions within {settings.anomaly.burstVolume.minutes} minutes</span>
+                  </div>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

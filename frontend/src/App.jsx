@@ -26,6 +26,9 @@ function MainAppShell({ activeSubPage }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState(() => {
+    if (activeSubPage === 'admin_overview') return 'admin_overview';
+    if (activeSubPage === 'attribute_authority') return 'attribute_authority';
+    if (activeSubPage === 'records_vault') return 'records_vault';
     if (activeSubPage === 'quizzes') return currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz';
     if (activeSubPage === 'badges') return 'trainee_badges';
     if (activeSubPage === 'certifications') return 'trainee_certs';
@@ -50,7 +53,13 @@ function MainAppShell({ activeSubPage }) {
   // Keep activeView in sync with activeSubPage prop without reverting user choices
   useEffect(() => {
     if (!activeSubPage) return;
-    if (activeSubPage === 'quizzes') {
+    if (activeSubPage === 'admin_overview') {
+      setActiveView('admin_overview');
+    } else if (activeSubPage === 'attribute_authority') {
+      setActiveView('attribute_authority');
+    } else if (activeSubPage === 'records_vault') {
+      setActiveView('records_vault');
+    } else if (activeSubPage === 'quizzes') {
       setActiveView(currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz');
     } else if (activeSubPage === 'badges') {
       setActiveView('trainee_badges');
@@ -87,13 +96,23 @@ function MainAppShell({ activeSubPage }) {
 
   const handleNavChange = (viewId) => {
     setActiveView(viewId);
-    if (viewId === 'trainee_quiz' || viewId === 'quiz_creator') {
+    if (viewId === 'admin_overview') {
+      navigate('/admin');
+    } else if (viewId === 'attribute_authority') {
+      navigate('/admin/access');
+    } else if (viewId === 'anomalies' && currentUser?.role === 'admin') {
+      navigate('/admin/anomalies');
+    } else if (viewId === 'records_vault') {
+      navigate('/admin/vault');
+    } else if (viewId === 'system_settings' && currentUser?.role === 'admin') {
+      navigate('/admin/settings');
+    } else if (viewId === 'trainee_quiz' || viewId === 'quiz_creator') {
       navigate('/quizzes');
     } else if (viewId === 'trainee_badges') {
       navigate('/badges');
     } else if (viewId === 'trainee_certs') {
       navigate('/certifications');
-    } else if (viewId === 'staff_records' || viewId === 'records_vault') {
+    } else if (viewId === 'staff_records') {
       navigate('/records');
     } else if (viewId === 'trainee_roster' || viewId === 'company_trainees') {
       navigate('/trainees');
@@ -265,6 +284,48 @@ function AppRoutes() {
       />
       <Route 
         path="/settings" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="settings" />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Admin Specific Console Routes */}
+      <Route 
+        path="/admin" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="admin_overview" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/access" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="attribute_authority" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/anomalies" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="anomalies" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/vault" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="records_vault" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/settings" 
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="settings" />
