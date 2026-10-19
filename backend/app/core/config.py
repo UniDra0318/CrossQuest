@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
 class Settings(BaseSettings):
@@ -22,8 +22,6 @@ class Settings(BaseSettings):
     ANOMALY_WINDOW_MINUTES: int = 15
     ANOMALY_VOLUME_BURST_THRESHOLD: int = 25 # records requested in window
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()

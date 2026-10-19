@@ -38,9 +38,9 @@ function MainAppShell({ activeSubPage }) {
 
     switch (currentUser?.role) {
       case 'admin': return 'admin_overview';
-      case 'crossworks_staff': return 'staff_records';
+      case 'account_manager':
+      case 'finance': return 'staff_records';
       case 'trainer': return 'trainer_courses';
-      case 'company_staff': return 'company_overview';
       case 'trainee': return 'trainee_quest';
       default: return 'overview';
     }
@@ -54,17 +54,17 @@ function MainAppShell({ activeSubPage }) {
     } else if (activeSubPage === 'badges') {
       setActiveView('trainee_badges');
     } else if (activeSubPage === 'certifications') {
-      setActiveView('trainee_certs');
+      setActiveView(currentUser?.role === 'trainee' ? 'trainee_certs' : 'cert_expiry');
     } else if (activeSubPage === 'records') {
       setActiveView(currentUser?.role === 'admin' ? 'records_vault' : 'staff_records');
     } else if (activeSubPage === 'trainees') {
-      setActiveView(currentUser?.role === 'trainer' ? 'trainee_roster' : 'company_trainees');
+      setActiveView(currentUser?.role === 'trainer' ? 'trainee_roster' : 'assigned_clients');
     } else if (activeSubPage === 'courses') {
       setActiveView(currentUser?.role === 'trainer' ? 'trainer_courses' : 'trainee_quest');
     } else if (activeSubPage === 'anomalies') {
       setActiveView('anomalies');
     } else if (activeSubPage === 'compliance' || activeSubPage === 'audit') {
-      setActiveView(currentUser?.role === 'company_staff' ? 'audit_certificate' : 'compliance_reports');
+      setActiveView('compliance_reports');
     } else if (activeSubPage === 'analytics') {
       setActiveView('trainer_analytics');
     } else if (activeSubPage === 'settings') {
@@ -74,9 +74,9 @@ function MainAppShell({ activeSubPage }) {
         if (prev) return prev;
         switch (currentUser?.role) {
           case 'admin': return 'admin_overview';
-          case 'crossworks_staff': return 'staff_records';
+          case 'account_manager':
+          case 'finance': return 'staff_records';
           case 'trainer': return 'trainer_courses';
-          case 'company_staff': return 'company_overview';
           case 'trainee': return 'trainee_quest';
           default: return 'overview';
         }
@@ -90,11 +90,11 @@ function MainAppShell({ activeSubPage }) {
       navigate('/quizzes');
     } else if (viewId === 'trainee_badges') {
       navigate('/badges');
-    } else if (viewId === 'trainee_certs') {
+    } else if (viewId === 'trainee_certs' || viewId === 'cert_expiry') {
       navigate('/certifications');
     } else if (viewId === 'staff_records' || viewId === 'records_vault') {
       navigate('/records');
-    } else if (viewId === 'trainee_roster' || viewId === 'company_trainees') {
+    } else if (viewId === 'trainee_roster' || viewId === 'assigned_clients') {
       navigate('/trainees');
     } else if (viewId === 'trainer_courses' || viewId === 'trainee_quest') {
       navigate('/courses');
@@ -102,7 +102,7 @@ function MainAppShell({ activeSubPage }) {
       navigate('/analytics');
     } else if (viewId === 'anomalies') {
       navigate('/anomalies');
-    } else if (viewId === 'compliance_reports' || viewId === 'audit_certificate') {
+    } else if (viewId === 'compliance_reports') {
       navigate('/compliance');
     } else if (viewId === 'system_settings') {
       navigate('/settings');
@@ -113,15 +113,15 @@ function MainAppShell({ activeSubPage }) {
 
   const getViewTitle = () => {
     switch (currentUser?.role) {
-      case 'admin': return 'Administrator Control Center';
-      case 'crossworks_staff': return 'Crossworks Client Account Management';
+      case 'admin': return 'Administrator Control Center (Full Record & Anomaly Management)';
+      case 'account_manager': return 'Account Manager Workspace (Assigned Clients Only)';
+      case 'finance': return 'Finance Records Management (Add & Edit Records)';
       case 'trainer': 
         if (activeView === 'quiz_creator') return 'Quiz & Assessment Creator Studio';
         if (activeView === 'trainer_analytics') return 'Cohort Performance Analytics';
         if (activeView === 'grade_entry') return 'Evaluation & Certification Workbench';
         if (activeView === 'trainee_roster') return 'Enrolled Trainee Master Roster';
         return 'Lead Trainer Course Delivery';
-      case 'company_staff': return 'Client Organization Portal';
       case 'trainee': return 'Trainee Learning & Gamification Quest';
       default: return 'Workspace';
     }
@@ -141,16 +141,12 @@ function MainAppShell({ activeSubPage }) {
             <AdminDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
-          {currentUser?.role === 'crossworks_staff' && (
+          {(currentUser?.role === 'account_manager' || currentUser?.role === 'finance') && (
             <StaffDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'trainer' && (
             <TrainerDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-          )}
-
-          {currentUser?.role === 'company_staff' && (
-            <CompanyDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'trainee' && (

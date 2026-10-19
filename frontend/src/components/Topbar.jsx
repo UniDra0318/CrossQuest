@@ -22,9 +22,9 @@ export default function Topbar({ activeViewTitle }) {
   const getRoleIcon = (role) => {
     switch(role) {
       case 'admin': return Shield;
-      case 'crossworks_staff': return Key;
+      case 'account_manager': return Key;
+      case 'finance': return Building2;
       case 'trainer': return GraduationCap;
-      case 'company_staff': return Building2;
       case 'trainee': return Award;
       default: return User;
     }

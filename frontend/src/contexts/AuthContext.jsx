@@ -8,41 +8,38 @@ export const DEMO_USERS = {
     title: "System Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
-    clearance_level: 3,
     assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
     initials: "SJ"
   },
-  crossworks_staff: {
-    id: "usr-staff-02",
+  account_manager: {
+    id: "usr-am-02",
     email: "marcus.reyes@crossworks.ph",
     name: "Marcus Reyes",
-    title: "Client Account Manager",
-    role: "crossworks_staff",
+    title: "Account Manager (Assigned: San Miguel)",
+    role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    clearance_level: 2,
     assigned_companies: ["CORP_ALPHA"],
     initials: "MR"
   },
+  finance: {
+    id: "usr-fin-03",
+    email: "elena.santos@crossworks.ph",
+    name: "Elena Santos",
+    title: "Finance & Operations Specialist",
+    role: "finance",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
+    initials: "ES"
+  },
   trainer: {
-    id: "usr-trainer-03",
+    id: "usr-trainer-04",
     email: "david.lim@crossworks.ph",
     name: "David Lim",
     title: "Lead Training Instructor",
     role: "trainer",
     organization: "Crossworks Training & Consulting",
-    clearance_level: 1,
     assigned_companies: ["CORP_ALPHA", "FINTECH_BETA"],
     initials: "DL"
-  },
-  company_staff: {
-    id: "usr-comp-04",
-    email: "patricia.hr@alpha-corp.ph",
-    name: "Patricia Santos",
-    title: "Corporate HR & L&D Director",
-    role: "company_staff",
-    organization: "San Miguel Conglomerate Holdings",
-    company_code: "CORP_ALPHA",
-    initials: "PS"
   },
   trainee: {
     id: "usr-trainee-05",
@@ -51,7 +48,10 @@ export const DEMO_USERS = {
     title: "Trainee Analyst",
     role: "trainee",
     organization: "San Miguel Conglomerate Holdings",
+    trainee_code: "TRN-9021",
+    display_name: "CyberKnight9021",
     company_code: "CORP_ALPHA",
+    assigned_companies: ["CORP_ALPHA"],
     initials: "JD"
   }
 };
@@ -59,7 +59,6 @@ export const DEMO_USERS = {
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Never default to admin! Start with null or verified localStorage session
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('crossquest_auth_user');
@@ -98,7 +97,6 @@ export function AuthProvider({ children }) {
 
   const loginWithCredentials = async (email, password) => {
     try {
-      // Attempt backend authentication
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
@@ -114,7 +112,6 @@ export function AuthProvider({ children }) {
         setToken(data.access_token);
         localStorage.setItem('crossquest_auth_token', data.access_token);
 
-        // Fetch user profile from backend
         const userRes = await fetch('http://localhost:8000/api/v1/users/me', {
           headers: { 'Authorization': `Bearer ${data.access_token}` }
         });
@@ -124,7 +121,7 @@ export function AuthProvider({ children }) {
             ...profile,
             name: profile.full_name,
             initials: profile.full_name.split(' ').map(n => n[0]).join(''),
-            organization: profile.role === 'company_staff' || profile.role === 'trainee' 
+            organization: profile.role === 'trainee' 
               ? 'San Miguel Conglomerate' 
               : 'Crossworks Training & Consulting',
             assigned_companies: profile.assigned_client_accounts || ['CORP_ALPHA']
@@ -138,7 +135,6 @@ export function AuthProvider({ children }) {
       console.warn("Backend login fallback to local simulation:", err);
     }
 
-    // Match demo user or fallback gracefully
     const found = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
     const fallbackUser = found || DEMO_USERS.admin;
     setCurrentUser(fallbackUser);

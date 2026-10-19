@@ -1,12 +1,16 @@
 from datetime import datetime
 from typing import List, Optional, Any, Dict
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 
 # Auth & Token
 class Token(BaseModel):
     access_token: str
     token_type: str
+    role: str
+    user_id: str
+    full_name: str
+    assigned_client_accounts: List[str] = []
 
 class TokenData(BaseModel):
     user_id: Optional[str] = None
@@ -16,8 +20,7 @@ class TokenData(BaseModel):
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str
-    role: str
-    clearance_level: int = 1
+    role: str # admin, account_manager, finance, trainer, trainee
     assigned_client_accounts: List[str] = []
 
 class UserCreate(UserBase):
@@ -28,12 +31,10 @@ class UserResponse(UserBase):
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserAttributeUpdate(BaseModel):
     role: Optional[str] = None
-    clearance_level: Optional[int] = None
     assigned_client_accounts: Optional[List[str]] = None
 
 
@@ -50,15 +51,17 @@ class ClientCompanyResponse(ClientCompanyBase):
     id: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Trainee
 class TraineeBase(BaseModel):
+    trainee_code: str
     first_name: str
     last_name: str
     email: EmailStr
+    display_name: Optional[str] = None
+    phone: Optional[str] = None
     current_company_id: Optional[str] = None
 
 class TraineeCreate(TraineeBase):
@@ -69,56 +72,94 @@ class TraineeResponse(TraineeBase):
     created_at: datetime
     current_company: Optional[ClientCompanyResponse] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+class TraineeProfileUpdate(BaseModel):
+    display_name: Optional[str] = None
+    phone: Optional[str] = None
 
 
 # Training Record
 class TrainingRecordCreate(BaseModel):
     trainee_id: str
+    session_id: Optional[str] = None
     company_at_completion_id: str
     course_name: str
-    status: str = "in_progress"
+    status: str = "In progress" # Enrolled, In progress, Completed, Not completed
     score: Optional[float] = None
-    # CP-ABE policy attributes to bind: e.g. "ROLE:ACCOUNT_MANAGER AND COMPANY:CORP_A"
-    required_role: str
-    required_company: str
-    required_clearance: int = 1
+    # Sensitive attributes for hybrid CP-ABE payload
+    assessment_notes: Optional[str] = None
+    practical_lab: Optional[str] = None
+    certificate_reference: Optional[str] = None
+    extension_fields: Optional[Dict[str, Any]] = None
+
+class TrainingRecordUpdate(BaseModel):
+    status: Optional[str] = None
+    score: Optional[float] = None
+    completion_date: Optional[datetime] = None
+    assessment_notes: Optional[str] = None
 
 class TrainingRecordResponse(BaseModel):
     id: str
     trainee_id: str
+    session_id: Optional[str] = None
+    company_at_completion_id: str
     course_name: str
     status: str
     score: Optional[float] = None
+    completion_date: Optional[datetime] = None
     encryption_policy: str
+    policy_version: int
     is_encrypted: bool
+    deleted_at: Optional[datetime] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DecryptedRecordResponse(BaseModel):
     record_id: str
     course_name: str
     status: str
     score: Optional[float] = None
+    completion_date: Optional[datetime] = None
     decrypted_content: Dict[str, Any]
     decryption_status: str
 
 
-# Certificate
+# Certification
+class CertificationTypeResponse(BaseModel):
+    code: str
+    name: str
+    validity_months: int
+    validity_basis: str
+
+    model_config = ConfigDict(from_attributes=True)
+
 class CertificateResponse(BaseModel):
     id: str
     trainee_id: str
+    record_id: Optional[str] = None
+    cert_type_code: Optional[str] = None
     title: str
     issue_date: datetime
     expiry_date: datetime
+    expiry_basis: str
+    status: str # Valid, Expiring soon, Expired
     is_nearing_renewal: bool
-    status: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+class NotificationResponse(BaseModel):
+    id: str
+    recipient_user_id: str
+    certification_id: str
+    offset_days: int
+    title: str
+    message: str
+    is_read: bool
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Gamification
@@ -130,38 +171,54 @@ class GamificationResponse(BaseModel):
     badges: List[str]
     quizzes_completed: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class QuizSubmitRequest(BaseModel):
+    attempt_id: Optional[str] = None # Client-generated UUID for offline idempotency
     trainee_id: str
     quiz_id: str
-    score: float
-    total_questions: int
+    answers: Optional[Dict[str, int]] = None
+    score: Optional[float] = None
+    total_questions: Optional[int] = None
+    submitted_offline: bool = False
 
 
-# Anomalies & Audit
+# Anomalies & Audit (with full alert lifecycle)
+class AnomalyAlertReviewRequest(BaseModel):
+    status: str # UNDER_REVIEW or CLOSED
+    disposition: Optional[str] = None # CLOSED_EXPECTED_ACTIVITY or CLOSED_FOLLOW_UP_REQUIRED
+    review_note: Optional[str] = None
+
 class AnomalyAlertResponse(BaseModel):
     id: str
-    user_id: str
-    anomaly_type: str
+    subject_user_id: Optional[str] = None
+    rule_code: str
     severity: str
+    status: str # NEW, UNDER_REVIEW, CLOSED
+    disposition: Optional[str] = None
+    review_note: Optional[str] = None
+    reviewed_by_user_id: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    tags: List[str] = []
+    event_count: int
     description: str
     metadata_info: Dict[str, Any]
-    is_reviewed: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AccessLogResponse(BaseModel):
     id: str
-    user_id: str
-    target_record_id: Optional[str] = None
-    access_type: str
-    timestamp: datetime
-    status: str
-    requested_company_code: Optional[str] = None
+    occurred_at: datetime
+    actor_user_id: Optional[str] = None
+    actor_role: Optional[str] = None
+    event_type: str
+    resource_type: Optional[str] = None
+    resource_id: Optional[str] = None
+    company_id: Optional[str] = None
+    outcome: str
+    reason_code: Optional[str] = None
+    source_ip: Optional[str] = None
+    details: Dict[str, Any]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

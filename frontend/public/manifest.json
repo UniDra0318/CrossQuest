@@ -3,6 +3,11 @@
   "name": "CrossQuest - Secure Multi-Client Training Record Management",
   "icons": [
     {
+      "src": "/crossquest-logo-stacked.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
       "src": "/icon-192.png",
       "type": "image/png",
       "sizes": "192x192"

@@ -36,10 +36,10 @@ export default function LoginView() {
 
   const roleList = [
     { key: 'admin', title: 'Administrator', name: 'Dr. Sarah Jenkins', org: 'Crossworks Admin', icon: Shield },
-    { key: 'crossworks_staff', title: 'Account Manager', name: 'Marcus Reyes', org: 'Crossworks Staff', icon: Key },
+    { key: 'account_manager', title: 'Account Manager', name: 'Marcus Reyes', org: 'Assigned: CORP_ALPHA', icon: Key },
+    { key: 'finance', title: 'Finance Personnel', name: 'Elena Santos', org: 'Crossworks Finance', icon: Building2 },
     { key: 'trainer', title: 'Trainer', name: 'David Lim', org: 'Course Instructor', icon: GraduationCap },
-    { key: 'company_staff', title: 'Company Manager', name: 'Patricia Santos', org: 'San Miguel Corp HR', icon: Building2 },
-    { key: 'trainee', title: 'Trainee', name: 'Juan Dela Cruz', org: 'Enrolled Learner', icon: Award }
+    { key: 'trainee', title: 'Trainee', name: 'Juan Dela Cruz', org: 'Learner (TRN-9021)', icon: Award }
   ];
 
   return (
