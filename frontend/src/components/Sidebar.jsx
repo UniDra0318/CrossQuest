@@ -23,9 +23,11 @@ import logoStacked from '../assets/crossquest-logo-stacked.svg';
 export default function Sidebar({ activeView, setActiveView }) {
   const { currentUser, logout } = useAuth();
 
+  const userRole = currentUser?.role || 'trainee';
+
   // Role-specific navigation items
   const getNavItems = () => {
-    switch (currentUser.role) {
+    switch (userRole) {
       case 'admin':
         return [
           { id: 'admin_overview', label: 'Security Overview', icon: LayoutDashboard },
@@ -88,9 +90,9 @@ export default function Sidebar({ activeView, setActiveView }) {
       {/* Role Pill Banner */}
       <div className="sidebar-role-banner">
         <span className="role-chip">
-          {currentUser.role.replace(/_/g, ' ').toUpperCase()}
+          {userRole.replace(/_/g, ' ').toUpperCase()}
         </span>
-        <div className="user-org-text">{currentUser.organization}</div>
+        <div className="user-org-text">{currentUser?.organization || 'CrossQuest Enterprise'}</div>
       </div>
 
       {/* Navigation List */}

@@ -32,7 +32,8 @@ export default function Topbar({ activeViewTitle }) {
     }
   };
 
-  const CurrentRoleIcon = getRoleIcon(currentUser.role);
+  const userRole = currentUser?.role || 'trainee';
+  const CurrentRoleIcon = getRoleIcon(userRole);
 
   const handleLogout = () => {
     logout();
@@ -70,11 +71,11 @@ export default function Topbar({ activeViewTitle }) {
           >
             <div className="role-trigger-left">
               <div className="topbar-user-avatar">
-                {currentUser.initials || <CurrentRoleIcon size={16} />}
+                {currentUser?.initials || <CurrentRoleIcon size={16} />}
               </div>
               <div className="role-trigger-info">
-                <span className="role-trigger-name">{currentUser.name}</span>
-                <span className="role-trigger-badge">{currentUser.role === 'trainee' ? 'Trainee' : currentUser.role.replace(/_/g, ' ')}</span>
+                <span className="role-trigger-name">{currentUser?.name || 'User'}</span>
+                <span className="role-trigger-badge">{userRole === 'trainee' ? 'Trainee' : userRole.replace(/_/g, ' ')}</span>
               </div>
             </div>
             <ChevronDown size={14} className={`role-chevron ${roleMenuOpen ? 'open' : ''}`} />

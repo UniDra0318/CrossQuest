@@ -285,7 +285,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       )}
 
       {/* 1. MAIN TRAINEE QUEST VIEW */}
-      {(activeSubView === 'trainee_quest' || !activeSubView) && (
+      {(activeSubView === 'trainee_quest' || !activeSubView || !['trainee_quiz', 'trainee_badges', 'trainee_certs'].includes(activeSubView)) && (
         <>
           {/* 1. HERO BANNER WITH 3D MASCOT */}
           <div className="template-hero-banner">
@@ -590,28 +590,40 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
 
       {/* 3. EARNED BADGES SUB-VIEW */}
       {activeSubView === 'trainee_badges' && (
-        <div className="card section-card p-24">
-          <div className="card-header-bar mb-16" style={{ padding: 0 }}>
+        <div className="card section-card p-24" style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+          <div className="card-header-bar mb-16" style={{ padding: '0 0 16px', borderBottom: '1px solid #f1f5f9' }}>
             <div>
-              <h3 className="card-title">Badge Showcase & Achievements</h3>
-              <p className="text-muted text-xs">Unlock shiny badges by proving your knowledge in security and access controls.</p>
+              <h3 className="card-title" style={{ fontSize: '20px', fontWeight: '800', color: '#1e1b4b', marginBottom: '4px' }}>
+                Badge Showcase & Achievements
+              </h3>
+              <p className="text-muted text-xs" style={{ color: '#64748b' }}>
+                Unlock shiny 3D collectible badges by proving your knowledge across security frameworks and policy access controls.
+              </p>
             </div>
           </div>
 
-          <div className="badges-full-grid">
-            {earnedBadges.map((badge) => (
-              <div key={badge.id} className="badge-detail-card card-gamified">
-                <div className="badge-icon-bubble">{badge.icon}</div>
-                <h4>{badge.name}</h4>
-                <p className="badge-desc">{badge.desc}</p>
-                <div className="badge-footer flex-between">
-                  <span className={`tier-chip tier-${badge.tier.toLowerCase()}`}>{badge.tier}</span>
-                  <span className="badge-check flex-align gap-4 text-emerald">
-                    <Check size={14} /> Unlocked
-                  </span>
+          <div className="badges-full-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px', marginTop: '16px' }}>
+            {earnedBadges.map((badge) => {
+              const tierName = badge.tier || (badge.id === 'seven-day-streak' ? 'Legendary' : badge.id === 'security-champion' ? 'Master' : 'Adept');
+              const tierClass = tierName.toLowerCase();
+              return (
+                <div key={badge.id} className="badge-detail-card card-gamified" style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                  <div style={{ marginBottom: '16px', transform: 'scale(1.1)' }}>
+                    <BadgeCoin badge={badge} />
+                  </div>
+                  <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{badge.title || badge.name}</h4>
+                  <p className="badge-desc" style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', flex: 1, lineHeight: '1.4' }}>{badge.description || badge.desc}</p>
+                  <div className="badge-footer flex-between" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+                    <span className={`tier-chip tier-${tierClass}`} style={{ fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '999px', background: tierClass === 'legendary' ? '#fef3c7' : tierClass === 'master' ? '#dbeafe' : '#e0e7ff', color: tierClass === 'legendary' ? '#b45309' : tierClass === 'master' ? '#1d4ed8' : '#4338ca' }}>
+                      {tierName.toUpperCase()}
+                    </span>
+                    <span className="badge-check flex-align gap-4 text-emerald" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '700', color: '#059669' }}>
+                      <Check size={14} /> Unlocked
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

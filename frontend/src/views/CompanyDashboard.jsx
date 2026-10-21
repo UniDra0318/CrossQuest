@@ -56,7 +56,7 @@ export default function CompanyDashboard({ activeSubView }) {
   return (
     <div className="dashboard-content-layout">
       {/* 1. COMPANY OVERVIEW */}
-      {(activeSubView === 'company_overview' || !activeSubView) && (
+      {(activeSubView === 'company_overview' || !activeSubView || !['company_trainees', 'audit_certificate'].includes(activeSubView)) && (
         <>
           <div className="view-title-header">
             <div>

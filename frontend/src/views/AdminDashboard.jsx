@@ -280,7 +280,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       {/* =====================================================================
           VIEW 1: SECURITY OVERVIEW
           ===================================================================== */}
-      {(!activeSubView || activeSubView === 'admin_overview') && (
+      {(!activeSubView || activeSubView === 'admin_overview' || !['attribute_authority', 'anomalies', 'records_vault', 'system_settings'].includes(activeSubView)) && (
         <>
           {/* Executive KPI Tiles */}
           <div className="adm-tiles">
