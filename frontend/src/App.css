@@ -6626,6 +6626,7 @@
   border-radius: 4px;
   outline: none;
   -webkit-appearance: none;
+  appearance: none;
   background: linear-gradient(to right, #ef4444 0%, #f59e0b 60%, #10b981 75%, #772ce8 90%, #a855f7 100%);
   cursor: pointer;
   margin: 12px 0 8px 0;

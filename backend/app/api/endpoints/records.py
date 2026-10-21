@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.entities import (
