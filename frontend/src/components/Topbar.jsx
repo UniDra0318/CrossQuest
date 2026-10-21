@@ -22,8 +22,10 @@ export default function Topbar({ activeViewTitle }) {
   const getRoleIcon = (role) => {
     switch(role) {
       case 'admin': return Shield;
-      case 'account_manager': return Key;
-      case 'finance': return Building2;
+      case 'account_manager':
+      case 'crossworks_staff': return Key;
+      case 'finance':
+      case 'company_staff': return Building2;
       case 'trainer': return GraduationCap;
       case 'trainee': return Award;
       default: return User;
@@ -67,12 +69,12 @@ export default function Topbar({ activeViewTitle }) {
             onClick={() => setRoleMenuOpen(!roleMenuOpen)}
           >
             <div className="role-trigger-left">
-              <div className="role-trigger-icon-box">
-                <CurrentRoleIcon size={16} />
+              <div className="topbar-user-avatar">
+                {currentUser.initials || <CurrentRoleIcon size={16} />}
               </div>
               <div className="role-trigger-info">
                 <span className="role-trigger-name">{currentUser.name}</span>
-                <span className="role-trigger-badge">{currentUser.role.replace(/_/g, ' ')}</span>
+                <span className="role-trigger-badge">{currentUser.role === 'trainee' ? 'Trainee' : currentUser.role.replace(/_/g, ' ')}</span>
               </div>
             </div>
             <ChevronDown size={14} className={`role-chevron ${roleMenuOpen ? 'open' : ''}`} />
@@ -88,7 +90,9 @@ export default function Topbar({ activeViewTitle }) {
                 </div>
 
                 <div className="role-options-list">
-                  {Object.entries(DEMO_USERS).map(([key, u]) => {
+                  {Object.entries(DEMO_USERS)
+                    .filter(([key]) => key !== 'crossworks_staff' && key !== 'company_staff')
+                    .map(([key, u]) => {
                     const RoleIcon = getRoleIcon(u.role);
                     const isSelected = u.role === currentUser.role;
                     return (

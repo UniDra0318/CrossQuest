@@ -9,6 +9,7 @@ import StaffDashboard from './views/StaffDashboard';
 import TrainerDashboard from './views/TrainerDashboard';
 import CompanyDashboard from './views/CompanyDashboard';
 import TraineeDashboard from './views/TraineeDashboard';
+import LandingView from './views/LandingView';
 import InstallPwaModal from './components/InstallPwaModal';
 import './App.css';
 
@@ -25,6 +26,14 @@ function MainAppShell({ activeSubPage }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState(() => {
+    if (activeSubPage === 'admin_overview') return 'admin_overview';
+    if (activeSubPage === 'attribute_authority') return 'attribute_authority';
+    if (activeSubPage === 'records_vault') return 'records_vault';
+    if (activeSubPage === 'trainer_courses') return 'trainer_courses';
+    if (activeSubPage === 'trainee_roster') return 'trainee_roster';
+    if (activeSubPage === 'grade_entry') return 'grade_entry';
+    if (activeSubPage === 'quiz_creator') return 'quiz_creator';
+    if (activeSubPage === 'trainer_analytics') return 'trainer_analytics';
     if (activeSubPage === 'quizzes') return currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz';
     if (activeSubPage === 'badges') return 'trainee_badges';
     if (activeSubPage === 'certifications') return 'trainee_certs';
@@ -39,8 +48,10 @@ function MainAppShell({ activeSubPage }) {
     switch (currentUser?.role) {
       case 'admin': return 'admin_overview';
       case 'account_manager':
-      case 'finance': return 'staff_records';
+      case 'crossworks_staff': return 'staff_records';
       case 'trainer': return 'trainer_courses';
+      case 'finance':
+      case 'company_staff': return 'company_overview';
       case 'trainee': return 'trainee_quest';
       default: return 'overview';
     }
@@ -49,22 +60,38 @@ function MainAppShell({ activeSubPage }) {
   // Keep activeView in sync with activeSubPage prop without reverting user choices
   useEffect(() => {
     if (!activeSubPage) return;
-    if (activeSubPage === 'quizzes') {
+    if (activeSubPage === 'admin_overview') {
+      setActiveView('admin_overview');
+    } else if (activeSubPage === 'attribute_authority') {
+      setActiveView('attribute_authority');
+    } else if (activeSubPage === 'records_vault') {
+      setActiveView('records_vault');
+    } else if (activeSubPage === 'trainer_courses') {
+      setActiveView('trainer_courses');
+    } else if (activeSubPage === 'trainee_roster') {
+      setActiveView('trainee_roster');
+    } else if (activeSubPage === 'grade_entry') {
+      setActiveView('grade_entry');
+    } else if (activeSubPage === 'quiz_creator') {
+      setActiveView('quiz_creator');
+    } else if (activeSubPage === 'trainer_analytics') {
+      setActiveView('trainer_analytics');
+    } else if (activeSubPage === 'quizzes') {
       setActiveView(currentUser?.role === 'trainer' ? 'quiz_creator' : 'trainee_quiz');
     } else if (activeSubPage === 'badges') {
       setActiveView('trainee_badges');
     } else if (activeSubPage === 'certifications') {
-      setActiveView(currentUser?.role === 'trainee' ? 'trainee_certs' : 'cert_expiry');
+      setActiveView('trainee_certs');
     } else if (activeSubPage === 'records') {
       setActiveView(currentUser?.role === 'admin' ? 'records_vault' : 'staff_records');
     } else if (activeSubPage === 'trainees') {
-      setActiveView(currentUser?.role === 'trainer' ? 'trainee_roster' : 'assigned_clients');
+      setActiveView(currentUser?.role === 'trainer' ? 'trainee_roster' : 'company_trainees');
     } else if (activeSubPage === 'courses') {
       setActiveView(currentUser?.role === 'trainer' ? 'trainer_courses' : 'trainee_quest');
     } else if (activeSubPage === 'anomalies') {
       setActiveView('anomalies');
     } else if (activeSubPage === 'compliance' || activeSubPage === 'audit') {
-      setActiveView('compliance_reports');
+      setActiveView(currentUser?.role === 'company_staff' ? 'audit_certificate' : 'compliance_reports');
     } else if (activeSubPage === 'analytics') {
       setActiveView('trainer_analytics');
     } else if (activeSubPage === 'settings') {
@@ -75,8 +102,10 @@ function MainAppShell({ activeSubPage }) {
         switch (currentUser?.role) {
           case 'admin': return 'admin_overview';
           case 'account_manager':
-          case 'finance': return 'staff_records';
+          case 'crossworks_staff': return 'staff_records';
           case 'trainer': return 'trainer_courses';
+          case 'finance':
+          case 'company_staff': return 'company_overview';
           case 'trainee': return 'trainee_quest';
           default: return 'overview';
         }
@@ -86,23 +115,45 @@ function MainAppShell({ activeSubPage }) {
 
   const handleNavChange = (viewId) => {
     setActiveView(viewId);
-    if (viewId === 'trainee_quiz' || viewId === 'quiz_creator') {
+    if (viewId === 'admin_overview') {
+      navigate('/admin');
+    } else if (viewId === 'attribute_authority') {
+      navigate('/admin/access');
+    } else if (viewId === 'anomalies' && currentUser?.role === 'admin') {
+      navigate('/admin/anomalies');
+    } else if (viewId === 'records_vault') {
+      navigate('/admin/vault');
+    } else if (viewId === 'system_settings' && currentUser?.role === 'admin') {
+      navigate('/admin/settings');
+    } else if (viewId === 'trainee_quiz' || viewId === 'quiz_creator') {
       navigate('/quizzes');
     } else if (viewId === 'trainee_badges') {
       navigate('/badges');
-    } else if (viewId === 'trainee_certs' || viewId === 'cert_expiry') {
+    } else if (viewId === 'trainee_certs') {
       navigate('/certifications');
-    } else if (viewId === 'staff_records' || viewId === 'records_vault') {
-      navigate('/records');
-    } else if (viewId === 'trainee_roster' || viewId === 'assigned_clients') {
-      navigate('/trainees');
-    } else if (viewId === 'trainer_courses' || viewId === 'trainee_quest') {
-      navigate('/courses');
+    } else if (viewId === 'staff_records') {
+      navigate('/staff');
+    } else if (viewId === 'assigned_clients') {
+      navigate('/staff/portfolios');
+    } else if (viewId === 'compliance_reports' && (currentUser?.role === 'crossworks_staff' || currentUser?.role === 'account_manager')) {
+      navigate('/staff/reports');
+    } else if (viewId === 'trainer_courses') {
+      navigate('/trainer');
+    } else if (viewId === 'trainee_roster' && currentUser?.role === 'trainer') {
+      navigate('/trainer/roster');
+    } else if (viewId === 'grade_entry') {
+      navigate('/trainer/grade');
+    } else if (viewId === 'quiz_creator') {
+      navigate('/trainer/quiz');
     } else if (viewId === 'trainer_analytics') {
-      navigate('/analytics');
+      navigate('/trainer/analytics');
+    } else if (viewId === 'trainee_roster' || viewId === 'company_trainees') {
+      navigate('/trainees');
+    } else if (viewId === 'trainee_quest') {
+      navigate('/courses');
     } else if (viewId === 'anomalies') {
       navigate('/anomalies');
-    } else if (viewId === 'compliance_reports') {
+    } else if (viewId === 'compliance_reports' || viewId === 'audit_certificate') {
       navigate('/compliance');
     } else if (viewId === 'system_settings') {
       navigate('/settings');
@@ -113,15 +164,17 @@ function MainAppShell({ activeSubPage }) {
 
   const getViewTitle = () => {
     switch (currentUser?.role) {
-      case 'admin': return 'Administrator Control Center (Full Record & Anomaly Management)';
-      case 'account_manager': return 'Account Manager Workspace (Assigned Clients Only)';
-      case 'finance': return 'Finance Records Management (Add & Edit Records)';
+      case 'admin': return 'Administrator Control Center';
+      case 'account_manager':
+      case 'crossworks_staff': return 'Crossworks Client Account Management';
       case 'trainer': 
         if (activeView === 'quiz_creator') return 'Quiz & Assessment Creator Studio';
         if (activeView === 'trainer_analytics') return 'Cohort Performance Analytics';
         if (activeView === 'grade_entry') return 'Evaluation & Certification Workbench';
         if (activeView === 'trainee_roster') return 'Enrolled Trainee Master Roster';
         return 'Lead Trainer Course Delivery';
+      case 'finance':
+      case 'company_staff': return 'Client Organization Portal';
       case 'trainee': return 'Trainee Learning & Gamification Quest';
       default: return 'Workspace';
     }
@@ -141,12 +194,16 @@ function MainAppShell({ activeSubPage }) {
             <AdminDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
-          {(currentUser?.role === 'account_manager' || currentUser?.role === 'finance') && (
+          {(currentUser?.role === 'crossworks_staff' || currentUser?.role === 'account_manager') && (
             <StaffDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'trainer' && (
             <TrainerDashboard activeSubView={activeView} setActiveView={handleNavChange} />
+          )}
+
+          {(currentUser?.role === 'company_staff' || currentUser?.role === 'finance') && (
+            <CompanyDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
 
           {currentUser?.role === 'trainee' && (
@@ -267,19 +324,125 @@ function AppRoutes() {
         } 
       />
 
-      {/* Root Route: If logged in, go to dashboard, else go to login */}
+      {/* Admin Specific Console Routes */}
       <Route 
-        path="/" 
+        path="/admin" 
         element={
-          currentUser ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="admin_overview" />
+          </ProtectedRoute>
         } 
       />
+      <Route 
+        path="/admin/access" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="attribute_authority" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/anomalies" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="anomalies" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/vault" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="records_vault" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/settings" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="settings" />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Crossworks Staff Specific Portal Routes */}
+      <Route 
+        path="/staff" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="staff_records" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/staff/portfolios" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="assigned_clients" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/staff/reports" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="compliance_reports" />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Crossworks Trainer Specific Portal Routes */}
+      <Route 
+        path="/trainer" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="trainer_courses" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/roster" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="trainee_roster" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/grade" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="grade_entry" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/quiz" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="quiz_creator" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/trainer/analytics" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="trainer_analytics" />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Landing Page Route (Page 1 of Template) */}
+      <Route path="/" element={<LandingView />} />
+      <Route path="/landing" element={<LandingView />} />
 
       {/* Fallback Catch-all */}
       <Route 
         path="*" 
         element={
-          currentUser ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          currentUser ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
         } 
       />
     </Routes>

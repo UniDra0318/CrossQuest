@@ -56,6 +56,10 @@ export const DEMO_USERS = {
   }
 };
 
+// Aliases for backward compatibility with early prototype keys
+DEMO_USERS.crossworks_staff = DEMO_USERS.account_manager;
+DEMO_USERS.company_staff = DEMO_USERS.finance;
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {

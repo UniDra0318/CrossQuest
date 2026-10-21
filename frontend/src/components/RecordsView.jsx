@@ -38,12 +38,9 @@ export default function RecordsView({
 
   // Helper: does current staff have permission?
   const isAuthorized = (record) => {
-    if (currentStaff.role === 'admin' || currentStaff.role === 'finance') return true;
+    if (currentStaff.role === 'admin') return true;
     if (currentStaff.role === 'account_manager') {
-      return (currentStaff.assigned_companies || []).includes(record.companyCode);
-    }
-    if (currentStaff.role === 'trainee') {
-      return record.traineeCode === currentStaff.trainee_code || record.traineeEmail === currentStaff.email;
+      return currentStaff.assigned_companies.includes(record.companyCode);
     }
     return false;
   };

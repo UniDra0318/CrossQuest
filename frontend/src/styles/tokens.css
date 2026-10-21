@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Unbounded:wght@400;600;700;800;900&display=swap');
+
+:root {
+  /* Ink + text */
+  --cq-ink: #17102b;
+  --cq-ink-soft: #4a3f6b;
+  --cq-body: #3a3057;
+
+  /* Brand purples */
+  --cq-purple: #6a2bd9;
+  --cq-purple-dk: #3b1590;
+  --cq-purple-deep: #2a0f57;
+  --cq-purple-night: #1e0b45;
+  --cq-lilac: #c4b5fd;
+
+  /* Grounds */
+  --cq-lav: #ece8f6;
+  --cq-lav-2: #f4f1fb;
+  --cq-line: rgba(23, 16, 43, 0.14);
+
+  /* Accents */
+  --cq-orange: #ff7a1a;
+  --cq-orange-dk: #b84f00;
+  --cq-amber: #ffc53d;
+
+  /* Quest track colors (AA contrast with white text) */
+  --cq-blue: #1d6fe0;
+  --cq-green: #087a54;
+  --cq-rose: #d12a43;
+
+  /* Type */
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}

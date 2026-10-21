@@ -1,0 +1,367 @@
+/* =====================================================
+   Shared widgets: Quest Bot, cubes, coins, podium,
+   streak card, logo
+   ===================================================== */
+
+/* ---------- Logo ---------- */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo__mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--cq-purple);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 var(--cq-purple-dk);
+}
+.logo__name {
+  font: 700 18px/1 var(--font-display);
+}
+.logo__tag {
+  margin-top: 4px;
+  font: 500 10px var(--font-mono);
+  letter-spacing: 0.14em;
+  color: var(--cq-ink-soft);
+}
+.logo--dark .logo__name {
+  font-size: 17px;
+}
+.logo--dark .logo__tag {
+  font-size: 9px;
+  margin-top: 5px;
+  color: var(--cq-lilac);
+}
+
+/* ---------- Quest Bot mascot ---------- */
+.qb {
+  width: 300px;
+  height: 420px;
+  perspective: 900px;
+}
+.qb__float {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: cq-float 6s ease-in-out infinite;
+}
+.qb__pedestal {
+  position: absolute;
+  left: 70px;
+  top: 215px;
+  width: 160px;
+  height: 220px;
+  border-radius: 30px 30px 0 0;
+  background: linear-gradient(#efebfa, #cfc7e8);
+  box-shadow: inset 0 10px 20px rgba(42, 15, 87, 0.12);
+}
+.qb__head {
+  position: absolute;
+  left: 30px;
+  top: 20px;
+  width: 240px;
+  height: 230px;
+  transform-style: preserve-3d;
+  animation: cq-sway 7s ease-in-out infinite;
+}
+.qb__head > * {
+  position: absolute;
+}
+.qb__antenna {
+  left: 50%;
+  top: -34px;
+  width: 6px;
+  height: 44px;
+  margin-left: -3px;
+  background: #9c8dc4;
+  transform: translateZ(-20px);
+}
+.qb__ball {
+  left: 50%;
+  top: -46px;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  border-radius: 50%;
+  background: var(--cq-orange);
+  box-shadow: 0 0 18px rgba(255, 122, 26, 0.8);
+  transform: translateZ(-20px);
+}
+.qb__back {
+  inset: 0;
+  border-radius: 52px;
+  background: #8f80ba;
+  transform: translateZ(-44px);
+}
+.qb__mid {
+  inset: 0;
+  border-radius: 52px;
+  background: #c2b8e3;
+  transform: translateZ(-22px);
+}
+.qb__ear {
+  top: 84px;
+  width: 26px;
+  height: 62px;
+  border-radius: 14px;
+  background: #c2b8e3;
+  transform: translateZ(-10px);
+}
+.qb__ear--l {
+  left: -16px;
+}
+.qb__ear--r {
+  right: -16px;
+}
+.qb__shell {
+  inset: 0;
+  border-radius: 52px;
+  background: linear-gradient(150deg, #ffffff, #dad3ee);
+  box-shadow: inset 0 -10px 18px rgba(106, 43, 217, 0.14), 0 30px 40px rgba(42, 15, 87, 0.25);
+}
+.qb__glow {
+  left: 22px;
+  top: 26px;
+  right: 22px;
+  bottom: 34px;
+  border-radius: 34px;
+  background: linear-gradient(135deg, #ffb02e, #ff7a1a 55%, #c026d3);
+  box-shadow: 0 0 44px rgba(255, 122, 26, 0.6);
+  transform: translateZ(12px);
+}
+.qb__screen {
+  left: 36px;
+  top: 40px;
+  right: 36px;
+  bottom: 48px;
+  border-radius: 24px;
+  background-color: #1b1033;
+  background-image: linear-gradient(rgba(167, 139, 250, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.28) 1px, transparent 1px);
+  background-size: 20px 20px;
+  transform: translateZ(26px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+}
+.qb__eye {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.8);
+  animation: cq-blink 5s infinite;
+}
+
+/* ---------- Spinning cube ---------- */
+.spin-cube {
+  position: relative;
+  width: var(--s);
+  height: var(--s);
+  transform-style: preserve-3d;
+  animation: cq-spin 12s linear infinite;
+}
+.spin-cube__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.78);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.spin-cube__face--1 {
+  transform: translateZ(calc(var(--s) / 2));
+}
+.spin-cube__face--2 {
+  transform: rotateY(90deg) translateZ(calc(var(--s) / 2));
+}
+.spin-cube__face--3 {
+  transform: rotateY(180deg) translateZ(calc(var(--s) / 2));
+}
+.spin-cube__face--4 {
+  transform: rotateY(-90deg) translateZ(calc(var(--s) / 2));
+}
+.spin-cube__face--5 {
+  transform: rotateX(90deg) translateZ(calc(var(--s) / 2));
+}
+.spin-cube__face--6 {
+  transform: rotateX(-90deg) translateZ(calc(var(--s) / 2));
+}
+
+/* ---------- Isometric icon cube (3 visible faces) ---------- */
+.iso-scene {
+  perspective: 700px;
+}
+.iso-float {
+  animation: cq-float 6s ease-in-out infinite;
+}
+.iso {
+  position: relative;
+  width: var(--s);
+  height: var(--s);
+  transform-style: preserve-3d;
+  transform: rotateX(-24deg) rotateY(-36deg);
+}
+.iso__f {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(var(--s) * 0.175);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.iso__f--front {
+  transform: translateZ(calc(var(--s) / 2));
+}
+.iso__f--right {
+  transform: rotateY(90deg) translateZ(calc(var(--s) / 2));
+}
+.iso__f--top {
+  transform: rotateX(90deg) translateZ(calc(var(--s) / 2));
+}
+
+/* ---------- Badge coin ---------- */
+.coin {
+  width: var(--d, 88px);
+  height: var(--d, 88px);
+  margin: 0 auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);
+  background: radial-gradient(circle at 30% 25%, var(--hi), var(--lo) 60%);
+  box-shadow: 0 8px 0 var(--rim), 0 18px 24px rgba(42, 15, 87, 0.2);
+}
+.coin--sm {
+  --d: 72px;
+  box-shadow: 0 6px 0 var(--rim), 0 14px 20px rgba(42, 15, 87, 0.18);
+}
+
+/* ---------- Streak card ---------- */
+.streak-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 20px;
+  padding: 14px 20px;
+  color: #fff;
+}
+.streak-card--solid {
+  background: linear-gradient(135deg, #2a0f57, #4b1ca3);
+  box-shadow: 0 18px 36px rgba(42, 15, 87, 0.35);
+}
+.streak-card--glass {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+.streak-card__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--cq-orange);
+  color: var(--cq-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.streak-card__days {
+  font: 700 22px/1.1 var(--font-display);
+}
+.streak-card--glass .streak-card__days {
+  font-size: 20px;
+}
+.streak-card__label {
+  margin-top: 4px;
+  font: 700 10px var(--font-mono);
+  letter-spacing: 0.12em;
+  color: var(--cq-lilac);
+}
+
+/* ---------- Podium ---------- */
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+}
+.podium__col {
+  flex: 1;
+  text-align: center;
+}
+.podium__name {
+  margin-bottom: 8px;
+  font: 500 11px var(--font-mono);
+  color: var(--cq-lilac);
+}
+.podium__step {
+  height: var(--h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 12px solid var(--edge);
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(var(--from), var(--to));
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs);
+  color: #fff;
+}
+.podium__col--1 {
+  --h: 180px;
+  --from: #ff9a4d;
+  --to: #d45a00;
+  --edge: #ffc08a;
+  --fs: 40px;
+}
+.podium__col--1 .podium__name {
+  color: var(--cq-amber);
+}
+.podium__col--1 .podium__step {
+  color: var(--cq-ink);
+}
+.podium__col--2 {
+  --h: 130px;
+  --from: #7c4de0;
+  --to: #4b1ca3;
+  --edge: #a97cf5;
+  --fs: 32px;
+}
+.podium__col--3 {
+  --h: 100px;
+  --from: #5e3ab8;
+  --to: #3a1c7a;
+  --edge: #8f6be0;
+  --fs: 28px;
+}
+.podium--sm {
+  gap: 8px;
+}
+.podium--sm .podium__name {
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.podium--sm .podium__step {
+  border-top-width: 10px;
+}
+.podium--sm .podium__col--1 {
+  --h: 100px;
+  --fs: 26px;
+}
+.podium--sm .podium__col--2 {
+  --h: 70px;
+  --fs: 22px;
+}
+.podium--sm .podium__col--3 {
+  --h: 50px;
+  --fs: 20px;
+}

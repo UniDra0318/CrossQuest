@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, ChevronDown, Check, User, Wifi, WifiOff } from 'lucide-react';
+import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 export default function Header({
   activeTab,
@@ -24,11 +25,8 @@ export default function Header({
       <div className="header-top">
         {/* Brand */}
         <div className="header-brand">
-          <div className="brand-logo">
-            <Shield size={20} />
-          </div>
+          <img src={logoStacked} alt="CrossQuest Logo" style={{ height: '64px', marginRight: '16px' }} />
           <div>
-            <div className="brand-title">CrossQuest</div>
             <div className="brand-org">Crossworks Training & Consulting</div>
           </div>
         </div>
