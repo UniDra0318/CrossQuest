@@ -24,7 +24,7 @@ services:
     container_name: crossquest-backend
     restart: always
     environment:
-      DATABASE_URL: postgresql://crossquest_admin:crossquest_secret_password@postgres:5432/crossquest_db
+      DATABASE_URL: postgresql+psycopg2://crossquest_admin:crossquest_secret_password@postgres:5432/crossquest_db
       SECRET_KEY: supersecretjwtkeyforcrossquestplatformchangeinproduction
       ACCESS_TOKEN_EXPIRE_MINUTES: 1440
     ports:
