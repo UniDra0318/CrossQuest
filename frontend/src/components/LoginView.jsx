@@ -81,16 +81,18 @@ export default function LoginView() {
             >
               Sign In
             </button>
-            <button
-              type="button"
-              className={`toggle-tab-btn ${activeTab === 'demo' ? 'active' : ''}`}
-              onClick={() => setActiveTab('demo')}
-            >
-              Quick Role Access
-            </button>
+            {import.meta.env.DEV && (
+              <button
+                type="button"
+                className={`toggle-tab-btn ${activeTab === 'demo' ? 'active' : ''}`}
+                onClick={() => setActiveTab('demo')}
+              >
+                Quick Role Access (Dev)
+              </button>
+            )}
           </div>
 
-          {activeTab === 'credentials' ? (
+          {activeTab === 'credentials' || !import.meta.env.DEV ? (
             <form onSubmit={handleSubmit} className="clean-login-form">
               <div className="login-input-group">
                 <label>Email Address</label>
@@ -133,9 +135,11 @@ export default function LoginView() {
                 <ArrowRight size={16} />
               </button>
 
-              <div className="login-footer-hint">
-                <span>Want instant demo access? Switch to <strong onClick={() => setActiveTab('demo')}>Quick Role Access</strong> above.</span>
-              </div>
+              {import.meta.env.DEV && (
+                <div className="login-footer-hint">
+                  <span>Development mode active. Switch to <strong onClick={() => setActiveTab('demo')}>Quick Role Access</strong> above to test personas.</span>
+                </div>
+              )}
             </form>
           ) : (
             <div className="demo-roles-panel">

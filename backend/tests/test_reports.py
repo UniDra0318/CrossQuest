@@ -1,0 +1,161 @@
+"""Tests for Client Report Generation (TC-RPT-01 to TC-RPT-04).
+
+Meets requirements:
+- FR-20: On-demand client-specific training report generation.
+- SEC-10: Client reports strictly scoped to assigned client companies for Account Managers.
+- Table 17 & Chapter III Section 3.8.4: Role-based report permissions:
+  * Admin & Finance: all client companies.
+  * Account Manager: assigned client companies only.
+  * Trainer & Trainee: forbidden (403).
+"""
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+from app.core.security import get_password_hash, create_access_token
+from app.models.entities import User, ClientCompany, Trainee, TrainingRecord, AccessLog
+
+
+@pytest.fixture
+def report_test_data(db_session: Session):
+    """Seeds test data for report testing."""
+    db = db_session
+
+    # Companies
+    c_alpha = db.query(ClientCompany).filter_by(code="CORP_RPT_ALPHA").first()
+    if not c_alpha:
+        c_alpha = ClientCompany(name="Report Alpha Corp", code="CORP_RPT_ALPHA")
+        db.add(c_alpha)
+
+    c_beta = db.query(ClientCompany).filter_by(code="CORP_RPT_BETA").first()
+    if not c_beta:
+        c_beta = ClientCompany(name="Report Beta Corp", code="CORP_RPT_BETA")
+        db.add(c_beta)
+    db.commit()
+
+    # Users
+    def get_or_create(email, username, role, assigned=None):
+        u = db.query(User).filter_by(email=email).first()
+        if not u:
+            u = User(
+                email=email,
+                username=username,
+                full_name=username.title(),
+                hashed_password=get_password_hash("TestPass123!"),
+                role=role,
+                assigned_client_accounts=assigned or [],
+                is_active=True,
+                is_superuser=(role == "admin")
+            )
+            db.add(u)
+            db.commit()
+            db.refresh(u)
+        return u
+
+    admin = get_or_create("rpt_admin@test.ph", "rpt_admin", "admin")
+    finance = get_or_create("rpt_finance@test.ph", "rpt_finance", "finance")
+    am_alpha = get_or_create("rpt_am_alpha@test.ph", "rpt_am_alpha", "account_manager", ["CORP_RPT_ALPHA"])
+    trainer = get_or_create("rpt_trainer@test.ph", "rpt_trainer", "trainer")
+    trainee_u = get_or_create("rpt_trainee@test.ph", "rpt_trainee", "trainee")
+
+    # Trainee
+    tr = db.query(Trainee).filter_by(trainee_code="TRN_RPT_01").first()
+    if not tr:
+        tr = Trainee(
+            user_id=trainee_u.id,
+            current_company_id=c_alpha.id,
+            first_name="Rpt",
+            last_name="Trainee",
+            email=trainee_u.email,
+            trainee_code="TRN_RPT_01"
+        )
+        db.add(tr)
+        db.commit()
+        db.refresh(tr)
+
+    # Training records under Alpha
+    rec1 = db.query(TrainingRecord).filter_by(trainee_id=tr.id, course_name="Course Alpha 1").first()
+    if not rec1:
+        rec1 = TrainingRecord(
+            trainee_id=tr.id,
+            company_at_completion_id=c_alpha.id,
+            course_name="Course Alpha 1",
+            status="Completed",
+            score=95.0,
+            encryption_policy="ROLEADMIN",
+            policy_version=1,
+            payload_ciphertext="dummy_cipher",
+            is_encrypted=True
+        )
+        db.add(rec1)
+        db.commit()
+
+    return {
+        "c_alpha": c_alpha,
+        "c_beta": c_beta,
+        "admin": admin,
+        "finance": finance,
+        "am_alpha": am_alpha,
+        "trainer": trainer,
+        "trainee": trainee_u,
+    }
+
+
+def test_tc_rpt_01_account_manager_assigned_company_report(client: TestClient, report_test_data):
+    """TC-RPT-01: Account Manager generates report for assigned client company."""
+    am = report_test_data["am_alpha"]
+    token = create_access_token(subject=am.id)
+
+    resp = client.get(
+        f"/api/v1/reports/company/CORP_RPT_ALPHA",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["header"]["client_code"] == "CORP_RPT_ALPHA"
+    assert "summary" in data
+    assert data["summary"]["total_records"] >= 1
+    assert data["summary"]["completed_trainings"] >= 1
+    assert "trainees" in data
+
+
+def test_tc_rpt_02_account_manager_unassigned_company_denied(client: TestClient, report_test_data):
+    """TC-RPT-02: Account Manager attempting to generate report for unassigned client company gets 403."""
+    am = report_test_data["am_alpha"]
+    token = create_access_token(subject=am.id)
+
+    resp = client.get(
+        f"/api/v1/reports/company/CORP_RPT_BETA",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 403
+    assert "Not authorized" in resp.json()["detail"]
+
+
+def test_tc_rpt_03_admin_and_finance_cross_client_reports(client: TestClient, report_test_data):
+    """TC-RPT-03: Admin and Finance can generate reports for any client company."""
+    admin = report_test_data["admin"]
+    finance = report_test_data["finance"]
+
+    admin_token = create_access_token(subject=admin.id)
+    fin_token = create_access_token(subject=finance.id)
+
+    # Admin generates for Alpha and Beta
+    assert client.get("/api/v1/reports/company/CORP_RPT_ALPHA", headers={"Authorization": f"Bearer {admin_token}"}).status_code == 200
+    assert client.get("/api/v1/reports/company/CORP_RPT_BETA", headers={"Authorization": f"Bearer {admin_token}"}).status_code == 200
+
+    # Finance generates for Alpha and Beta
+    assert client.get("/api/v1/reports/company/CORP_RPT_ALPHA", headers={"Authorization": f"Bearer {fin_token}"}).status_code == 200
+    assert client.get("/api/v1/reports/company/CORP_RPT_BETA", headers={"Authorization": f"Bearer {fin_token}"}).status_code == 200
+
+
+def test_tc_rpt_04_trainer_and_trainee_forbidden(client: TestClient, report_test_data):
+    """TC-RPT-04: Trainer and Trainee roles are strictly forbidden from generating company reports."""
+    trainer = report_test_data["trainer"]
+    trainee = report_test_data["trainee"]
+
+    trainer_token = create_access_token(subject=trainer.id)
+    trainee_token = create_access_token(subject=trainee.id)
+
+    assert client.get("/api/v1/reports/company/CORP_RPT_ALPHA", headers={"Authorization": f"Bearer {trainer_token}"}).status_code == 403
+    assert client.get("/api/v1/reports/company/CORP_RPT_ALPHA", headers={"Authorization": f"Bearer {trainee_token}"}).status_code == 403

@@ -55,10 +55,10 @@ def generate_client_report(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Not authorized to generate reports for unassigned company '{company.code}'."
             )
-    elif current_user.role != "admin" and not current_user.is_superuser:
+    elif current_user.role not in ("admin", "finance") and not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Report generation is restricted to authorized Account Managers."
+            detail="Report generation is restricted to authorized Account Managers, Finance, and Administrators."
         )
 
     # Query training records for this client company under RLS / scoping logic

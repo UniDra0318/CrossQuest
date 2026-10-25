@@ -55,12 +55,9 @@ export default function LandingView() {
           <button
             type="button"
             className="cq-btn cq-btn--orange"
-            onClick={() => {
-              const input = document.getElementById('hero-pin-input');
-              if (input) input.focus();
-            }}
+            onClick={() => navigate('/login')}
           >
-            Join a quest
+            Enter Portal
           </button>
         </div>
       </header>
@@ -91,30 +88,29 @@ export default function LandingView() {
                 Complete today's interactive quest to extend your <strong>7-day streak</strong> and climb the corporate leaderboard.
               </p>
 
-              {/* Game PIN Field */}
-              <div className="cq-pin">
-                <input
-                  id="hero-pin-input"
-                  type="text"
-                  placeholder="Enter Game PIN / Quest Code..."
-                  value={pinCode}
-                  onChange={(e) => setPinCode(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleJoinPin(pinCode);
-                  }}
-                />
+              {/* Enterprise Action Buttons */}
+              <div className="hero__actions" style={{ display: 'flex', gap: '12px', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   className="cq-btn cq-btn--purple"
-                  onClick={() => handleJoinPin(pinCode)}
+                  style={{ padding: '0.85rem 1.75rem', fontSize: '1rem', fontWeight: 700 }}
+                  onClick={() => navigate('/login')}
                 >
-                  <Play size={14} fill="currentColor" />
-                  <span>Join Quest</span>
+                  <Play size={16} fill="currentColor" />
+                  <span>Start Your Quest</span>
+                </button>
+                <button
+                  type="button"
+                  className="cq-btn cq-btn--orange"
+                  style={{ padding: '0.85rem 1.5rem', fontSize: '0.95rem' }}
+                  onClick={() => scrollTo('quest-map')}
+                >
+                  <span>Explore Curriculum</span>
                 </button>
               </div>
 
-              <div className="hero__hint" onClick={() => navigate('/login')}>
-                NO PIN? SIGN IN TO SEE YOUR ASSIGNED QUESTS &rarr;
+              <div className="hero__hint" onClick={() => navigate('/login')} style={{ cursor: 'pointer', marginTop: '1rem' }}>
+                LOG IN WITH YOUR ORGANIZATIONAL ACCOUNT &rarr;
               </div>
             </div>
 
@@ -284,26 +280,21 @@ export default function LandingView() {
       <div className="cta-wrap">
         <div className="cta">
           <div className="cta__copy">
-            <span className="cta__eyebrow">[ READY PLAYER ? ]</span>
-            <h2>Your next quest is waiting.</h2>
+            <span className="cta__eyebrow">[ ENTERPRISE LEARNING PORTAL ]</span>
+            <h2>Your training quest is waiting.</h2>
+            <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '1.5rem', maxWidth: '480px' }}>
+              Access corporate learning paths, verify cryptographic certificates, and track team progress securely.
+            </p>
 
-            <div className="cq-pin cq-pin--on-dark">
-              <input
-                type="text"
-                placeholder="Enter Game PIN / Quest Code..."
-                value={ctaPinCode}
-                onChange={(e) => setCtaPinCode(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleJoinPin(ctaPinCode);
-                }}
-              />
+            <div>
               <button
                 type="button"
                 className="cq-btn cq-btn--orange"
-                onClick={() => handleJoinPin(ctaPinCode)}
+                style={{ padding: '0.85rem 2rem', fontSize: '1rem', fontWeight: 700 }}
+                onClick={() => navigate('/login')}
               >
-                <Play size={14} fill="currentColor" />
-                <span>Join Quest</span>
+                <Play size={16} fill="currentColor" />
+                <span>Log In to Enterprise Portal</span>
               </button>
             </div>
           </div>
