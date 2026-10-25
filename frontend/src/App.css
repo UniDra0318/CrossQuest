@@ -340,7 +340,7 @@
 ========================================= */
 .enterprise-sidebar {
   width: 260px;
-  background-color: #220839 !important;
+  background-color: #002236 !important;
   color: #ffffff !important;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
@@ -6890,9 +6890,9 @@
   margin: 0 auto;
 }
 
-/* Sidebar Modern Polish */
+/* Sidebar Modern Polish (Crossworks Corporate) */
 .enterprise-sidebar {
-  background-color: #13092b !important;
+  background-color: #002236 !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -6903,18 +6903,18 @@
 
 .sidebar-role-banner {
   background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(240, 96, 93, 0.3) !important;
   border-radius: 12px !important;
 }
 
 .role-chip {
-  color: #00f5d4 !important;
+  color: #f0605d !important;
   font-weight: 800;
 }
 
 .sidebar-nav-btn {
   border-radius: 12px !important;
-  color: rgba(255, 255, 255, 0.75) !important;
+  color: rgba(255, 255, 255, 0.78) !important;
 }
 
 .sidebar-nav-btn:hover {
@@ -6923,9 +6923,9 @@
 }
 
 .sidebar-nav-btn.active {
-  background: #6320ee !important;
+  background: #f0605d !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(99, 32, 238, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(240, 96, 93, 0.38) !important;
   font-weight: 700;
 }
 
@@ -7002,12 +7002,15 @@
 /* ==========================================================================
    TEMPLATE HERO BANNER (WELCOME BACK JUAN DELA CRUZ)
    ========================================================================== */
+/* ==========================================================================
+   CROSSWORKS BRANDED HERO BANNER (WELCOME BACK JUAN DELA CRUZ)
+   ========================================================================== */
 .template-hero-banner {
-  background: linear-gradient(135deg, #271052 0%, #3e1673 100%);
-  border-radius: 22px;
+  background: linear-gradient(135deg, #002236 0%, #00314d 55%, #07456b 100%);
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 36px rgba(39, 16, 82, 0.18);
-  padding: 32px 36px;
+  box-shadow: 0 16px 36px rgba(0, 34, 54, 0.22);
+  padding: 34px 38px;
   position: relative;
   display: flex;
   align-items: center;
@@ -7015,6 +7018,17 @@
   color: #ffffff;
   margin-bottom: 28px;
   overflow: hidden;
+}
+
+.template-hero-banner::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(240, 96, 93, 0.18) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .template-hero-left {
@@ -7027,13 +7041,13 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(240, 96, 93, 0.45);
+  color: #ff9b99;
   border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 10.5px;
-  font-weight: 800;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.06em;
   font-family: var(--font-fun);
 }
@@ -7042,7 +7056,7 @@
   font-family: var(--font-fun);
   font-size: 32px;
   font-weight: 800;
-  margin: 12px 0 8px;
+  margin: 14px 0 8px;
   line-height: 1.15;
   color: #ffffff;
   letter-spacing: -0.02em;
@@ -7050,59 +7064,59 @@
 
 .template-hero-subtitle {
   color: rgba(255, 255, 255, 0.85);
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.5;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .template-hero-subtitle strong {
   color: #ffffff;
 }
 
-.template-join-pill-bar {
+.template-hero-actions {
   display: flex;
   align-items: center;
-  background: #ffffff;
-  border-radius: 9999px;
-  padding: 4px 5px 4px 18px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
-  max-width: 440px;
-  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.template-join-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 13.5px;
-  color: #0f172a;
-  font-family: var(--font-body);
-}
-
-.template-join-input::placeholder {
-  color: #94a3b8;
-}
-
-.template-join-btn {
-  background: #6320ee;
-  color: #ffffff;
-  border: none;
-  border-radius: 9999px;
-  padding: 10px 20px;
+.template-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 13.5px;
   font-family: var(--font-fun);
-  display: flex;
-  align-items: center;
-  gap: 6px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 3px 10px rgba(99, 32, 238, 0.35);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: none;
 }
 
-.template-join-btn:hover {
-  background: #5318cc;
+.template-cta-btn--primary {
+  background: #f0605d;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(240, 96, 93, 0.35);
+}
+
+.template-cta-btn--primary:hover {
+  background: #e04f4c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(240, 96, 93, 0.45);
+}
+
+.template-cta-btn--secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+}
+
+.template-cta-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
 }
 
@@ -7119,13 +7133,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(30, 11, 62, 0.85);
+  background: rgba(0, 34, 54, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 9999px;
-  padding: 5px 14px;
+  padding: 6px 16px;
   backdrop-filter: blur(8px);
   margin-bottom: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   z-index: 10;
 }
 

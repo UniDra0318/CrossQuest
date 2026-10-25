@@ -46,7 +46,6 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
   const [points, setPoints] = useState(12877);
   const [level, setLevel] = useState(4);
   const [streakDays, setStreakDays] = useState(7);
-  const [pinCode, setPinCode] = useState('');
 
   // Active quiz & persistence session state
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -188,15 +187,6 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
     setSavedSession(null);
   };
 
-  // Pin Code Join
-  const handleJoinPin = () => {
-    let targetId = 'act-1';
-    if (pinCode.includes('2')) targetId = 'act-2';
-    else if (pinCode.includes('3')) targetId = 'act-3';
-    else if (pinCode.includes('4')) targetId = 'act-4';
-    handleStartQuizById(targetId);
-  };
-
   // Quiz finish handler
   const handleQuizFinish = async (resultData) => {
     if (currentUser?.id) {
@@ -299,24 +289,24 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
                 Complete today's interactive quest to extend your <strong>7-day streak</strong> and climb the corporate leaderboard.
               </p>
 
-              {/* Pin Code Joiner Pill */}
-              <div className="template-join-pill-bar">
-                <input
-                  type="text"
-                  placeholder="Enter Game PIN / Quest Code..."
-                  className="template-join-input"
-                  value={pinCode}
-                  onChange={(e) => setPinCode(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleJoinPin();
-                  }}
-                />
+              {/* Enterprise Learning Action Buttons (No PIN) */}
+              <div className="template-hero-actions">
                 <button 
-                  className="template-join-btn"
-                  onClick={handleJoinPin}
+                  className="template-cta-btn template-cta-btn--primary"
+                  onClick={() => handleStartQuizById('act-1')}
                 >
-                  <Play size={15} fill="currentColor" />
-                  <span>Join Quest</span>
+                  <Play size={16} fill="currentColor" />
+                  <span>Start Assigned Quest</span>
+                </button>
+                <button 
+                  className="template-cta-btn template-cta-btn--secondary"
+                  onClick={() => {
+                    const el = document.getElementById('assigned-activities-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <BookOpen size={15} />
+                  <span>View All Modules</span>
                 </button>
               </div>
             </div>
@@ -341,7 +331,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
           </div>
 
           {/* 2. ASSIGNED COURSE ACTIVITIES (4 CARDS WITH 3D ISOMETRIC GRAPHICS) */}
-          <div className="template-section-block">
+          <div id="assigned-activities-section" className="template-section-block">
             <div className="template-section-header">
               <div className="template-section-title-wrap">
                 <h3>Assigned Course Activities</h3>

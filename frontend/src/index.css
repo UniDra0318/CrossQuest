@@ -1,50 +1,51 @@
 :root {
-  /* Clean White Content Palette with Preserved Dark Purple Sidebar & Topbar */
-  --bg-app: #ffffff;
-  --bg-sidebar: #220839;
-  --bg-sidebar-active: #38125a;
-  --bg-header: #2d0b4d;
+  /* Crossworks Corporate Identity (matching crossworks.ph) */
+  --bg-app: #f4f7fa;
+  --bg-sidebar: #002236;
+  --bg-sidebar-active: #003b5c;
+  --bg-sidebar-hover: #002d45;
+  --bg-header: #00314d;
   --bg-card: #ffffff;
   --bg-card-subtle: #f8fafc;
   --bg-card-hover: #f1f5f9;
   --bg-input: #ffffff;
 
-  /* Kahoot & Quizizz Vibrant Accents */
-  --color-purple-primary: #772ce8;
-  --color-purple-hover: #631ecc;
-  --color-magenta: #f72585;
+  /* Crossworks Signature Brand Palette */
+  --color-brand-navy: #00314d;
+  --color-brand-navy-dark: #002236;
+  --color-brand-navy-light: #07456b;
+  --color-brand-coral: #f0605d;
+  --color-brand-coral-hover: #e04f4c;
+  --color-brand-coral-subtle: rgba(240, 96, 93, 0.08);
+
+  /* Primary Accent & Action Colors */
+  --color-purple-primary: #00314d;
+  --color-purple-hover: #004368;
+  --color-coral: #f0605d;
+  --color-coral-hover: #e04f4c;
+  --color-magenta: #f0605d;
   --color-gold: #f59e0b;
   --color-gold-shadow: #b45309;
   --color-cyan: #0284c7;
   --color-cyan-hover: #0369a1;
   --color-green: #10b981;
 
-  /* Kahoot 4-Tile Palette */
-  --kahoot-red: #e21b3c;
-  --kahoot-red-shadow: #a1122a;
-  --kahoot-blue: #1368ce;
-  --kahoot-blue-shadow: #0c478f;
-  --kahoot-yellow: #d89e00;
-  --kahoot-yellow-shadow: #9e7300;
-  --kahoot-green: #26890c;
-  --kahoot-green-shadow: #185a08;
-
-  /* High contrast text on white */
-  --text-main: #0f172a;
+  /* High-Contrast Corporate Typography */
+  --text-main: #00314d;
   --text-muted: #475569;
   --text-dim: #64748b;
 
   /* Borders & Shadows */
   --border-subtle: #e2e8f0;
   --border-bold: #cbd5e1;
-  --shadow-tactile: 0 3px 0 rgba(0, 0, 0, 0.12);
+  --shadow-tactile: 0 3px 0 rgba(0, 49, 77, 0.15);
   --shadow-tactile-gold: 0 3px 0 var(--color-gold-shadow);
-  --shadow-tactile-purple: 0 3px 0 #4c1285;
-  --shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-tactile-purple: 0 3px 0 #002236;
+  --shadow-card: 0 4px 18px -2px rgba(0, 49, 77, 0.07), 0 2px 6px -1px rgba(0, 49, 77, 0.04);
 
-  /* Typography */
-  --font-fun: 'Fredoka', 'Outfit', sans-serif;
-  --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Typography matching crossworks.ph */
+  --font-fun: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
   --radius-sm: 8px;
   --radius-md: 12px;

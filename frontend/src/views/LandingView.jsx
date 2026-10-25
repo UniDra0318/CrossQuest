@@ -184,12 +184,12 @@ export default function LandingView() {
           {/* Step 1 */}
           <div className="step cq-tilt">
             <div className="step__scene">
-              <IsoCube size={68} color="#6a2bd9" top="#c4b5fd" right="#9333ea" label="PIN" />
+              <IsoCube size={68} color="#00314d" top="#07456b" right="#002236" label="QUEST" />
             </div>
             <div className="step__no">STEP 01</div>
-            <h3>Join with a PIN</h3>
+            <h3>Open your quest</h3>
             <p>
-              Enter the Game PIN your instructor shares, or open one of the quests already assigned to you on your dashboard.
+              Log in with your organizational account and open the training modules and quizzes scheduled by your trainer.
             </p>
           </div>
 

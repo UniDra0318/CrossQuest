@@ -92,7 +92,7 @@
 }
 .cq-btn--orange {
   background: var(--cq-orange);
-  color: var(--cq-ink);
+  color: #ffffff;
   box-shadow: 0 4px 0 var(--cq-orange-dk);
 }
 .cq-btn--purple {
@@ -108,7 +108,7 @@
 }
 .cq-btn--play {
   background: var(--cq-orange);
-  color: var(--cq-ink);
+  color: #ffffff;
   font-size: 13px;
   padding: 10px 14px;
   gap: 6px;
