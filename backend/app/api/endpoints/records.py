@@ -31,7 +31,7 @@ def create_training_record(
 ):
     """Creates a new training record.
     
-    Permissions (Table 16):
+    Permissions (Table 17):
     - Admin: allowed.
     - Finance: allowed.
     - Account Manager: allowed only for assigned client companies.
@@ -60,8 +60,8 @@ def create_training_record(
     if record_in.session_id:
         session = db.query(TrainingSession).filter(TrainingSession.id == record_in.session_id).first()
 
-    # Construct CP-ABE Policy (DD-01, DD-04, Section 3.6.4)
-    # ROLEADMIN or ROLEFINANCE or (ROLEACCTMGR and CLIENT<comp>V1) or (ROLETRAINER and TRAINING<sess>V1) or TRAINEE<trainee_code>
+    # Construct CP-ABE Policy (DD-01, DD-04, DD-05, Section 3.6.4)
+    # ROLEADMINV1 or ROLEFINANCEV1 or (ROLEACCTMGRV1 and CLIENT<comp>V1) or (ROLETRAINERV1 and TRAINING<sess>V1) or TRAINEE<trainee_code>V1
     policy_str = cpabe_engine.build_record_policy(
         company_code=company.code,
         session_code=session.session_code if session else None,
@@ -126,7 +126,7 @@ def list_training_records(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Lists training records scoped by role (Table 16):
+    """Lists training records scoped by role (Table 17):
     - Admin & Finance: all records.
     - Account Manager: assigned clients only.
     - Trainer: assigned sessions only.
@@ -315,7 +315,7 @@ def edit_training_record(
 ):
     """Edits a training record.
     
-    Permissions (Table 16, FR-07):
+    Permissions (Table 17, FR-07):
     - Admin: allowed.
     - Finance: allowed.
     - Account Manager, Trainer, Trainee: DENIED.
@@ -327,12 +327,14 @@ def edit_training_record(
     if not record or record.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Training record not found")
 
-    # Save previous version to version history before modifying (DD-06)
+    # Save previous version to version history before modifying (DD-06, Section 3.5.2, p. 33)
     version_count = db.query(func.count(TrainingRecordVersion.id)).filter(TrainingRecordVersion.record_id == record.id).scalar() or 0
     prev_version = TrainingRecordVersion(
         record_id=record.id,
         version_no=version_count + 1,
+        abe_ciphertext=record.abe_ciphertext,
         payload_ciphertext=record.payload_ciphertext,
+        policy_tokens=record.encryption_policy,
         edited_by_user_id=current_user.id
     )
     db.add(prev_version)
@@ -379,9 +381,9 @@ def delete_training_record(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Soft deletion of a training record (DD-06, FR-08).
+    """Soft deletion of a training record (DD-06, FR-08, Section 3.5.3).
     
-    Permissions (Table 16):
+    Permissions (Table 17):
     - Admin: ONLY.
     - All other roles: DENIED.
     Immediately triggers Rule R4-a High Alert!
@@ -397,6 +399,7 @@ def delete_training_record(
     company_code = company.code if company else ""
 
     record.deleted_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    record.deleted_by = current_user.id
     db.commit()
 
     # Log to audit log

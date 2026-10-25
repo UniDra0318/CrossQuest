@@ -188,8 +188,9 @@ class TrainingRecord(Base):
     nonce = Column(String(64), nullable=True) # 12-byte GCM nonce (base64)
     is_encrypted = Column(Boolean, default=True)
 
-    # Soft deletion: hidden from non-Admins, audited immediately (DD-06, FR-08)
+    # Soft deletion: hidden from non-Admins, audited immediately (DD-06, FR-08, Section 3.5.3)
     deleted_at = Column(DateTime, nullable=True)
+    deleted_by = Column(String(36), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -199,20 +200,25 @@ class TrainingRecord(Base):
     company_at_completion = relationship("ClientCompany", back_populates="training_records")
     versions = relationship("TrainingRecordVersion", back_populates="record", cascade="all, delete-orphan")
     certificates = relationship("Certificate", back_populates="record")
+    deleted_by_user = relationship("User", foreign_keys=[deleted_by])
 
 
 class TrainingRecordVersion(Base):
-    """Maintains version history of encrypted record content on edit (DD-06, Table 15)."""
+    """Maintains version history of encrypted record content on edit (DD-06, Section 3.5.2, p. 33)."""
     __tablename__ = "training_record_versions"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     record_id = Column(String(36), ForeignKey("training_records.id"), nullable=False)
     version_no = Column(Integer, nullable=False)
+    abe_ciphertext = Column(Text, nullable=True)
     payload_ciphertext = Column(Text, nullable=False)
+    policy_tokens = Column(String(500), nullable=True)
     edited_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     edited_at = Column(DateTime, default=datetime.utcnow)
 
     record = relationship("TrainingRecord", back_populates="versions")
+    edited_by_user = relationship("User", foreign_keys=[edited_by_user_id])
+
 
 
 class CertificationType(Base):
@@ -381,7 +387,7 @@ class AccessLog(Base):
 
 
 class AnomalyAlert(Base):
-    """Access Anomaly Alert entity with full lifecycle support (Table 20, Section 3.7.5).
+    """Access Anomaly Alert entity with full lifecycle support (Table 22, Section 3.7.5, Figure 10).
     
     Lifecycle:
     - NEW: freshly triggered by rule evaluator or immediate trigger (e.g. deletion)
@@ -390,7 +396,8 @@ class AnomalyAlert(Base):
         * CLOSED_EXPECTED_ACTIVITY
         * CLOSED_FOLLOW_UP_REQUIRED
     
-    Alerts are immutable and cannot be deleted (Table 15).
+    Alerts are immutable and cannot be deleted (Table 15, p. 33).
+    Severity scale: LOW, MEDIUM, HIGH (High is the maximum per Chapter III Section 3.7.3).
     No automatic account lock-out or restriction is triggered (SEC-15).
     """
     __tablename__ = "anomaly_alerts"
@@ -401,7 +408,16 @@ class AnomalyAlert(Base):
     # Rule codes: R1_OUT_OF_SCOPE, R1_REPEATED_OUT_OF_SCOPE, R2_FAILED_LOGINS_ACCOUNT, R2_FAILED_LOGINS_IP,
     # R3_HIGH_RECORD_ACCESS, R3_REPORT_BURSTS, R4_RECORD_DELETION, R4_RECORD_EDIT, R4_BULK_EDIT
     rule_code = Column(String(50), nullable=False)
-    severity = Column(String(20), default="MEDIUM") # LOW, MEDIUM, HIGH, CRITICAL
+    
+    # Severity tracking (Chapter III Section 3.7.3, p. 53-54, 56)
+    severity_base = Column(String(20), default="MEDIUM") # LOW, MEDIUM, HIGH
+    severity_final = Column(String(20), default="MEDIUM") # LOW, MEDIUM, HIGH (max is HIGH)
+    severity = Column(String(20), default="MEDIUM") # Kept for backward compatibility
+    
+    # Supporting indicator & episode tracking (Table 22, Section 3.7.4)
+    after_hours_tag = Column(Boolean, default=False)
+    episode_start = Column(DateTime, default=datetime.utcnow)
+    client_reviewed = Column(Boolean, default=False)
     
     # Alert lifecycle (Section 3.7.5)
     status = Column(String(20), default="NEW") # NEW, UNDER_REVIEW, CLOSED
@@ -418,3 +434,108 @@ class AnomalyAlert(Base):
 
     subject_user = relationship("User", foreign_keys=[subject_user_id])
     reviewed_by = relationship("User", foreign_keys=[reviewed_by_user_id])
+    events = relationship("AlertEvent", back_populates="alert", cascade="all, delete-orphan")
+
+
+class AlertEvent(Base):
+    """Junction linking AnomalyAlert to the AccessLog events that caused or joined it (Figure 10, p. 27, 33)."""
+    __tablename__ = "alert_events"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    alert_id = Column(String(36), ForeignKey("anomaly_alerts.id"), nullable=False)
+    log_id = Column(String(36), ForeignKey("access_logs.id"), nullable=False)
+    linked_at = Column(DateTime, default=datetime.utcnow)
+
+    alert = relationship("AnomalyAlert", back_populates="events")
+    log = relationship("AccessLog")
+
+
+class AnomalyRule(Base):
+    """Rule definition and thresholds (Figure 10, Table 22, Section 3.7.3)."""
+    __tablename__ = "anomaly_rules"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    rule_code = Column(String(50), unique=True, nullable=False) # e.g. 'R1_a', 'R1_b', 'R2_a', 'R3_a'
+    parameters = Column(JSON, default=dict)
+    version_no = Column(Integer, default=1)
+    client_reviewed = Column(Boolean, default=False)
+    description = Column(Text, nullable=True)
+
+
+class AbeAttribute(Base):
+    """Attribute tokens with versions and status (Figure 11, Section 3.6.4, p. 28, 33)."""
+    __tablename__ = "abe_attributes"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    token = Column(String(100), unique=True, nullable=False, index=True) # e.g. 'ROLEADMINV1'
+    attribute_type = Column(String(50), nullable=False) # ROLE, CLIENT, TRAINING, TRAINEE
+    ref_code = Column(String(100), nullable=True)
+    version = Column(Integer, default=1)
+    status = Column(String(20), default="active") # active, staged, retired
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class UserAbeKey(Base):
+    """User CP-ABE private key wrapped under KMS envelope encryption (Figure 11, Section 3.6.7, DD-09)."""
+    __tablename__ = "user_abe_keys"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    status = Column(String(20), default="active") # active, revoked, retired
+    wrapped_dek = Column(Text, nullable=True) # KMS-wrapped data key
+    nonce = Column(String(64), nullable=True)
+    key_ciphertext = Column(Text, nullable=False) # AES-GCM encrypted serialized private key
+    kms_key_arn = Column(String(255), nullable=True)
+    issued_at = Column(DateTime, default=datetime.utcnow)
+    revoked_at = Column(DateTime, nullable=True)
+    material_deleted_at = Column(DateTime, nullable=True)
+
+    user = relationship("User")
+    attributes = relationship("UserKeyAttribute", back_populates="key", cascade="all, delete-orphan")
+
+
+class UserKeyAttribute(Base):
+    """Attributes bound to a UserAbeKey (Figure 11, p. 28, 33)."""
+    __tablename__ = "user_key_attributes"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    key_id = Column(String(36), ForeignKey("user_abe_keys.id"), nullable=False)
+    token = Column(String(100), nullable=False, index=True)
+
+    key = relationship("UserAbeKey", back_populates="attributes")
+
+
+class ImportBatch(Base):
+    """Batch of imported anonymized training data (Figure 12, Section 3.5.2, p. 29, 33)."""
+    __tablename__ = "import_batches"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    file_hash = Column(String(64), nullable=False)
+    source_file_name = Column(String(255), nullable=False)
+    record_count = Column(Integer, default=0)
+    loaded_at = Column(DateTime, default=datetime.utcnow)
+    loaded_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+
+
+class ImportStagingRow(Base):
+    """Staged raw row during pilot-data preparation (Figure 12, p. 29, 33)."""
+    __tablename__ = "import_staging_rows"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    batch_id = Column(String(36), ForeignKey("import_batches.id"), nullable=False)
+    source_row_no = Column(Integer, nullable=False)
+    raw_data = Column(JSON, default=dict)
+    validation_status = Column(String(50), default="PENDING")
+
+
+class ImportDiscrepancy(Base):
+    """Tracked data discrepancies in pilot data (Figure 12, Section 3.5.4, p. 29, 33)."""
+    __tablename__ = "import_discrepancies"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    batch_id = Column(String(36), ForeignKey("import_batches.id"), nullable=False)
+    source_row_no = Column(Integer, nullable=False)
+    issue_type = Column(String(100), nullable=False)
+    field_name = Column(String(100), nullable=True)
+    resolution = Column(String(255), nullable=True)
+

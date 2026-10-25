@@ -20,7 +20,7 @@ def get_anomaly_alerts(
     admin_user: User = Depends(get_current_admin_user)
 ):
     """Lists anomaly alerts for Administrator review (Section 3.7.5).
-    Only Administrators can view or review alerts (FR-21, Table 16).
+    Only Administrators can view or review alerts (FR-21, Table 17).
     """
     query = db.query(AnomalyAlert)
     if unreviewed_only:

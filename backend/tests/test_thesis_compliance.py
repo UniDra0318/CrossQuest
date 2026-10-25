@@ -103,10 +103,10 @@ def test_cpabe_tamper_detection():
 
 def test_anomaly_s1_never_alerts_alone():
     """SEC-16 & Table 20: S1 After-hours is a supporting indicator and NEVER creates an alert alone."""
-    # escalate_severity verifies severity elevation
+    # escalate_severity verifies severity elevation (capped at HIGH per Section 3.7.3)
     assert escalate_severity("LOW") == "MEDIUM"
     assert escalate_severity("MEDIUM") == "HIGH"
-    assert escalate_severity("HIGH") == "CRITICAL"
+    assert escalate_severity("HIGH") == "HIGH"
 
     # Specific off-hours timestamp (Sunday 23:00 UTC = Monday 07:00 PHT -> before 09:00 PHT)
     sunday_night = datetime(2026, 10, 18, 23, 0, tzinfo=timezone.utc)
@@ -132,3 +132,69 @@ def test_certification_dynamic_status():
     # 3. Expired (< 0 days)
     past_date = now - timedelta(days=5)
     assert compute_dynamic_cert_status(past_date) == "Expired"
+
+
+def test_versioned_cpabe_tokens():
+    """DD-04, DD-05 & Section 3.6.4: Versioned token formatting across role, client, training, trainee."""
+    policy = cpabe_engine.build_record_policy(
+        company_code="CORP_ALPHA",
+        session_code="SESS_01",
+        trainee_code="TRN_9021"
+    )
+    assert "ROLEADMINV1" in policy
+    assert "ROLEFINANCEV1" in policy
+    assert "ROLEACCTMGRV1 and CLIENTCORPALPHAV1" in policy
+    assert "ROLETRAINERV1 and TRAININGSESS01V1" in policy
+    assert "TRAINEETRN9021V1" in policy
+
+    # Verify decryption with versioned attributes
+    admin_attrs = cpabe_engine.build_user_attributes(role="admin")
+    assert "ROLEADMINV1" in admin_attrs
+
+    am_attrs = cpabe_engine.build_user_attributes(role="account_manager", assigned_companies=["CORP_ALPHA"])
+    assert "ROLEACCTMGRV1" in am_attrs
+    assert "CLIENTCORPALPHAV1" in am_attrs
+
+    trainee_attrs = cpabe_engine.build_user_attributes(role="trainee", trainee_code="TRN_9021")
+    assert "TRAINEETRN9021V1" in trainee_attrs
+
+    payload = {"grade": "A+", "certificate": "ISO31000"}
+    pkg = cpabe_engine.encrypt_record(payload, policy, record_id="rec-ver-1", version=1)
+
+    am_key = cpabe_engine.generate_user_private_key(am_attrs)
+    decrypted = cpabe_engine.decrypt_record(pkg, am_key, record_id="rec-ver-1", version=1)
+    assert decrypted is not None
+    assert decrypted["grade"] == "A+"
+
+
+def test_thesis_schema_models():
+    """Verify presence of thesis ERD models and fields (Figures 10, 11, 12)."""
+    from app.models.entities import (
+        AnomalyAlert, AlertEvent, AnomalyRule,
+        AbeAttribute, UserAbeKey, UserKeyAttribute,
+        ImportBatch, ImportStagingRow, ImportDiscrepancy,
+        TrainingRecord, TrainingRecordVersion
+    )
+
+    # Check AnomalyAlert thesis fields
+    assert hasattr(AnomalyAlert, "severity_base")
+    assert hasattr(AnomalyAlert, "severity_final")
+    assert hasattr(AnomalyAlert, "after_hours_tag")
+    assert hasattr(AnomalyAlert, "episode_start")
+    assert hasattr(AnomalyAlert, "client_reviewed")
+
+    # Check TrainingRecord & TrainingRecordVersion
+    assert hasattr(TrainingRecord, "deleted_by")
+    assert hasattr(TrainingRecordVersion, "abe_ciphertext")
+    assert hasattr(TrainingRecordVersion, "policy_tokens")
+
+    # Check ERD models
+    assert AlertEvent.__tablename__ == "alert_events"
+    assert AnomalyRule.__tablename__ == "anomaly_rules"
+    assert AbeAttribute.__tablename__ == "abe_attributes"
+    assert UserAbeKey.__tablename__ == "user_abe_keys"
+    assert UserKeyAttribute.__tablename__ == "user_key_attributes"
+    assert ImportBatch.__tablename__ == "import_batches"
+    assert ImportStagingRow.__tablename__ == "import_staging_rows"
+    assert ImportDiscrepancy.__tablename__ == "import_discrepancies"
+

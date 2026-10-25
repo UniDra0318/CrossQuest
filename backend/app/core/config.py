@@ -15,12 +15,12 @@ class Settings(BaseSettings):
     CPABE_MASTER_PUBLIC_KEY_PATH: Optional[str] = "keys/mpk.key"
     CPABE_MASTER_SECRET_KEY_PATH: Optional[str] = "keys/msk.key"
 
-    # Anomaly Detection Thresholds (Rule- & Threshold-based)
-    ANOMALY_WORK_HOURS_START: int = 8   # 08:00
-    ANOMALY_WORK_HOURS_END: int = 19    # 19:00
-    ANOMALY_FAILED_ATTEMPT_THRESHOLD: int = 3 # 3 failed attempts in window
+    # Anomaly Detection Thresholds (Chapter III Table 22, Section 3.7.3)
+    ANOMALY_WORK_HOURS_START: int = 9   # 09:00 PHT
+    ANOMALY_WORK_HOURS_END: int = 18    # 18:00 PHT
+    ANOMALY_FAILED_ATTEMPT_THRESHOLD: int = 5 # 5 failed logins (R2-a)
     ANOMALY_WINDOW_MINUTES: int = 15
-    ANOMALY_VOLUME_BURST_THRESHOLD: int = 25 # records requested in window
+    ANOMALY_VOLUME_BURST_THRESHOLD: int = 25 # records requested in window (R3-a AcctMgr/Trainer)
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 

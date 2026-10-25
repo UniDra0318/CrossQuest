@@ -112,6 +112,7 @@ class TrainingRecordResponse(BaseModel):
     policy_version: int
     is_encrypted: bool
     deleted_at: Optional[datetime] = None
+    deleted_by: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -194,6 +195,11 @@ class AnomalyAlertResponse(BaseModel):
     subject_user_id: Optional[str] = None
     rule_code: str
     severity: str
+    severity_base: Optional[str] = "MEDIUM"
+    severity_final: Optional[str] = "MEDIUM"
+    after_hours_tag: Optional[bool] = False
+    episode_start: Optional[datetime] = None
+    client_reviewed: Optional[bool] = False
     status: str # NEW, UNDER_REVIEW, CLOSED
     disposition: Optional[str] = None
     review_note: Optional[str] = None

@@ -29,7 +29,7 @@ from app.core.config import settings
 from app.models.entities import AccessLog, AnomalyAlert, User, TrainingRecord
 
 
-# Role-based thresholds for distinct record-detail views within 15 minutes (Table 20, R3-a)
+# Role-based thresholds for distinct record-detail views within 15 minutes (Table 22, R3-a)
 R3_A_THRESHOLDS = {
     "account_manager": 25,
     "trainer": 25,
@@ -38,12 +38,13 @@ R3_A_THRESHOLDS = {
     "trainee": 15
 }
 
-SEVERITY_LEVELS = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+# Chapter III Section 3.7.3: Severity scale has Low, Medium, and High (High is the maximum; no CRITICAL).
+SEVERITY_LEVELS = ["LOW", "MEDIUM", "HIGH"]
 
 
 def is_after_hours(dt: Optional[datetime] = None) -> bool:
     """Checks if a given UTC datetime falls outside Philippine business hours (Mon-Fri 09:00 - 18:00 UTC+8).
-    Chapter III Section 3.7.3: S1 After-hours indicator.
+    Chapter III Section 3.7.3 & Table 22: S1 After-hours indicator.
     """
     if dt is None:
         dt = datetime.now(timezone.utc)
@@ -65,18 +66,21 @@ def is_after_hours(dt: Optional[datetime] = None) -> bool:
 
 
 def escalate_severity(base_severity: str) -> str:
-    """Raises severity by one level when S1 after-hours indicator applies."""
+    """Raises severity by one level when S1 after-hours or volume escalation applies.
+    Capped strictly at HIGH per Chapter III Section 3.7.3 (p. 53, 56):
+    'There are three levels, Low, Medium, and High, and High is the maximum. There is no higher level.'
+    """
     try:
         idx = SEVERITY_LEVELS.index(base_severity.upper())
         if idx < len(SEVERITY_LEVELS) - 1:
             return SEVERITY_LEVELS[idx + 1]
     except ValueError:
         pass
-    return base_severity
+    return "HIGH" if base_severity.upper() == "CRITICAL" else base_severity
 
 
 class AccessAnomalyDetector:
-    """Evaluates access events against Chapter III Table 20 rules."""
+    """Evaluates access events against Chapter III Table 22 rules."""
 
     @staticmethod
     def _create_or_update_alert(
@@ -92,12 +96,12 @@ class AccessAnomalyDetector:
         metadata = metadata_info or {}
         now = event_time or datetime.now(timezone.utc).replace(tzinfo=None)
         
-        # Evaluate S1 after-hours indicator
+        # Evaluate S1 after-hours indicator (Table 22, Section 3.7.3)
         after_hours = is_after_hours(now)
-        severity = base_severity
+        final_sev = base_severity
         tags = []
         if after_hours:
-            severity = escalate_severity(base_severity)
+            final_sev = escalate_severity(base_severity)
             tags.append("after_hours")
 
         # Check for open alert to aggregate within today (R1-a, R4-b daily aggregation)
@@ -118,16 +122,23 @@ class AccessAnomalyDetector:
             existing_alert.metadata_info = {**(existing_alert.metadata_info or {}), **metadata}
             if after_hours and "after_hours" not in (existing_alert.tags or []):
                 existing_alert.tags = list(existing_alert.tags or []) + ["after_hours"]
-                existing_alert.severity = escalate_severity(existing_alert.severity)
+                existing_alert.after_hours_tag = True
+                existing_alert.severity_final = escalate_severity(existing_alert.severity_final or existing_alert.severity)
+                existing_alert.severity = existing_alert.severity_final
             db.commit()
             db.refresh(existing_alert)
             return existing_alert
 
-        # Create new alert
+        # Create new alert with full thesis fields (Figure 10, Table 22)
         alert = AnomalyAlert(
             subject_user_id=subject_user_id,
             rule_code=rule_code,
-            severity=severity,
+            severity_base=base_severity,
+            severity_final=final_sev,
+            severity=final_sev,
+            after_hours_tag=after_hours,
+            episode_start=now,
+            client_reviewed=False,
             status="NEW",
             description=description,
             tags=tags,

@@ -22,7 +22,7 @@ def generate_client_report(
 ) -> Dict[str, Any]:
     """Generates an on-demand client-specific training report (FR-20, DAT-06, Section 3.8.4).
     
-    Permissions (Table 16, OI-04):
+    Permissions (Table 17, OI-04):
     - Account Manager: permitted ONLY for currently assigned client companies.
     - Admin: permitted for oversight.
     - Other roles: denied.

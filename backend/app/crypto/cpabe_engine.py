@@ -243,8 +243,8 @@ class CPABEEngine:
         """Evaluates Boolean policy expressions with AND / OR / parentheses against user attributes."""
         # Sanitize uppercase
         poly = policy.upper()
-        # Admin or Finance have universal authority clause in policy
-        if "ROLEADMIN" in user_attrs or "ROLEFINANCE" in user_attrs:
+        # Admin or Finance have universal authority clause in policy (DD-01, Section 3.6.4)
+        if any(r in user_attrs for r in ("ROLEADMIN", "ROLEADMINV1", "ROLEFINANCE", "ROLEFINANCEV1")):
             return True
 
         # Tokenize policy
@@ -277,25 +277,26 @@ class CPABEEngine:
         session_code: Optional[str] = None,
         trainee_code: Optional[str] = None,
         client_version: int = 1,
-        training_version: int = 1
+        training_version: int = 1,
+        role_version: int = 1
     ) -> str:
-        """Constructs an official Chapter III Section 3.6.4 compliant CP-ABE policy.
+        """Constructs an official Chapter III Section 3.6.4 compliant CP-ABE policy with versioned tokens.
         
         Example output:
-        ROLEADMIN or ROLEFINANCE or (ROLEACCTMGR and CLIENTCORPALPHAV1) or (ROLETRAINER and TRAININGSESS01V1) or TRAINEETRN9021
+        ROLEADMINV1 or ROLEFINANCEV1 or (ROLEACCTMGRV1 and CLIENTCORPALPHAV1) or (ROLETRAINERV1 and TRAININGSESS01V1) or TRAINEETRN9021V1
         """
-        clauses = ["ROLEADMIN", "ROLEFINANCE"]
+        clauses = [f"ROLEADMINV{role_version}", f"ROLEFINANCEV{role_version}"]
         
         if company_code:
             c_tok = f"CLIENT{sanitize_token(company_code)}V{client_version}"
-            clauses.append(f"(ROLEACCTMGR and {c_tok})")
+            clauses.append(f"(ROLEACCTMGRV{role_version} and {c_tok})")
             
         if session_code:
             s_tok = f"TRAINING{sanitize_token(session_code)}V{training_version}"
-            clauses.append(f"(ROLETRAINER and {s_tok})")
+            clauses.append(f"(ROLETRAINERV{role_version} and {s_tok})")
             
         if trainee_code:
-            t_tok = f"TRAINEE{sanitize_token(trainee_code)}"
+            t_tok = f"TRAINEE{sanitize_token(trainee_code)}V1"
             clauses.append(t_tok)
 
         return " or ".join(clauses)
@@ -307,27 +308,30 @@ class CPABEEngine:
         assigned_sessions: Optional[List[str]] = None,
         trainee_code: Optional[str] = None,
         client_version: int = 1,
-        training_version: int = 1
+        training_version: int = 1,
+        role_version: int = 1
     ) -> List[str]:
-        """Constructs attribute set for a user based on role and assignments (Table 4)."""
+        """Constructs attribute set for a user based on role and assignments (Section 3.6.4, DD-04, DD-05)."""
         attrs = []
         role_clean = sanitize_token(role)
 
-        if role_clean in ("ADMIN", "ROLEADMIN"):
-            attrs.append("ROLEADMIN")
-        elif role_clean in ("FINANCE", "ROLEFINANCE"):
-            attrs.append("ROLEFINANCE")
-        elif role_clean in ("ACCOUNTMANAGER", "ROLEACCTMGR", "ACCTMGR"):
-            attrs.append("ROLEACCTMGR")
+        if role_clean in ("ADMIN", "ROLEADMIN", "ROLEADMINV1"):
+            attrs.extend([f"ROLEADMINV{role_version}", "ROLEADMIN"])
+        elif role_clean in ("FINANCE", "ROLEFINANCE", "ROLEFINANCEV1"):
+            attrs.extend([f"ROLEFINANCEV{role_version}", "ROLEFINANCE"])
+        elif role_clean in ("ACCOUNTMANAGER", "ROLEACCTMGR", "ROLEACCTMGRV1", "ACCTMGR"):
+            attrs.extend([f"ROLEACCTMGRV{role_version}", "ROLEACCTMGR"])
             for comp in (assigned_companies or []):
                 attrs.append(f"CLIENT{sanitize_token(comp)}V{client_version}")
-        elif role_clean in ("TRAINER", "ROLETRAINER"):
-            attrs.append("ROLETRAINER")
+        elif role_clean in ("TRAINER", "ROLETRAINER", "ROLETRAINERV1"):
+            attrs.extend([f"ROLETRAINERV{role_version}", "ROLETRAINER"])
             for sess in (assigned_sessions or []):
                 attrs.append(f"TRAINING{sanitize_token(sess)}V{training_version}")
-        elif role_clean in ("TRAINEE", "ROLETRAINEE"):
+        elif role_clean in ("TRAINEE", "ROLETRAINEE", "ROLETRAINEEV1"):
+            attrs.extend([f"ROLETRAINEEV{role_version}", "ROLETRAINEE"])
             if trainee_code:
-                attrs.append(f"TRAINEE{sanitize_token(trainee_code)}")
+                t_clean = sanitize_token(trainee_code)
+                attrs.extend([f"TRAINEE{t_clean}V1", f"TRAINEE{t_clean}"])
 
         return attrs
 

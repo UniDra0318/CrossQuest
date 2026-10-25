@@ -28,7 +28,7 @@ Corporate training providers increasingly store sensitive learner data (assessme
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| **Ciphertext-level access control** | CP-ABE (Charm-Crypto) | Binds the decryption policy to each record, built from staff role, assigned client accounts, and clearance level |
+| **Ciphertext-level access control** | CP-ABE (Charm-Crypto) | Binds the decryption policy to each record, built from staff role, assigned client accounts, and trainee identity |
 | **Database-level access control** | PostgreSQL Row-Level Security | Defense-in-depth filtering of record visibility based on user attributes |
 | **Monitoring** | Rule- and threshold-based anomaly detection | Flags suspicious access for administrator review |
 
