@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from app.core.config import settings
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import get_password_hash
 from app.models.entities import (
@@ -26,8 +27,13 @@ from app.models.entities import (
 from app.crypto.cpabe_engine import cpabe_engine
 
 def seed_database():
+    if settings.ENVIRONMENT != "development":
+        raise RuntimeError(
+            f"Database seeding with hardcoded demo credentials is prohibited in '{settings.ENVIRONMENT}' environment (SEC-01)."
+        )
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
+
 
     try:
         # Check if already seeded

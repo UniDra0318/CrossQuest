@@ -47,6 +47,7 @@ class User(Base):
     
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    force_password_change = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -54,6 +55,9 @@ class User(Base):
     trainee_profile = relationship("Trainee", uselist=False, back_populates="user_account")
     am_assignments = relationship("AccountManagerAssignment", back_populates="user", foreign_keys="AccountManagerAssignment.user_id")
     trainer_assignments = relationship("TrainerAssignment", back_populates="user", foreign_keys="TrainerAssignment.user_id")
+    sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
+    reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
+
 
 
 class Trainee(Base):
@@ -538,4 +542,33 @@ class ImportDiscrepancy(Base):
     issue_type = Column(String(100), nullable=False)
     field_name = Column(String(100), nullable=True)
     resolution = Column(String(255), nullable=True)
+
+
+class UserSession(Base):
+    """Server-side session tracking for refresh tokens (SEC-01, TC-AUT-08)."""
+    __tablename__ = "user_sessions"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    refresh_token_hash = Column(String(64), index=True, nullable=False)
+    is_revoked = Column(Boolean, default=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="sessions")
+
+
+class PasswordResetToken(Base):
+    """Single-use, expiring activation or reset token (FR-02, SEC-01)."""
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    token_hash = Column(String(64), index=True, nullable=False)
+    is_used = Column(Boolean, default=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="reset_tokens")
+
 

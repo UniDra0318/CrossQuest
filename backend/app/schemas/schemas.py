@@ -26,9 +26,30 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+class UserCreateAdmin(UserBase):
+    temporary_password: Optional[str] = None
+
+class UserActivationResponse(BaseModel):
+    user: "UserResponse"
+    activation_token: str
+    activation_link: str
+    expires_at: datetime
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
 class UserResponse(UserBase):
     id: str
     is_active: bool
+    force_password_change: bool = False
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -36,6 +57,7 @@ class UserResponse(UserBase):
 class UserAttributeUpdate(BaseModel):
     role: Optional[str] = None
     assigned_client_accounts: Optional[List[str]] = None
+
 
 
 # Client Company
