@@ -7,7 +7,8 @@ from app.api.endpoints import (
     certifications,
     gamification,
     anomalies,
-    reports
+    reports,
+    imports
 )
 
 api_router = APIRouter()
@@ -20,3 +21,5 @@ api_router.include_router(certifications.router, prefix="/certifications", tags=
 api_router.include_router(gamification.router, prefix="/gamification", tags=["Gamification"])
 api_router.include_router(anomalies.router, prefix="/anomalies", tags=["Access Anomaly Detection"])
 api_router.include_router(reports.router, prefix="/reports", tags=["Client Reports"])
+api_router.include_router(imports.router, prefix="/imports", tags=["Pilot CSV Import"])
+
