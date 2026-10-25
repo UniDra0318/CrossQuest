@@ -21,7 +21,11 @@ class Settings(BaseSettings):
     ANOMALY_FAILED_ATTEMPT_THRESHOLD: int = 5 # 5 failed logins (R2-a)
     ANOMALY_WINDOW_MINUTES: int = 15
     ANOMALY_VOLUME_BURST_THRESHOLD: int = 25 # records requested in window (R3-a AcctMgr/Trainer)
+    # Environment & Context Signing (SEC-24, OI-14)
+    ENVIRONMENT: str = "development"
+    CONTEXT_SIGNING_SECRET: str = "crossquest_internal_context_signing_secret_key_change_in_prod"
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+
 
 settings = Settings()

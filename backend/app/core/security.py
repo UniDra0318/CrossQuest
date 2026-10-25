@@ -4,8 +4,12 @@ from jose import jwt
 from passlib.context import CryptContext
 from app.core.config import settings
 
-# Use pbkdf2_sha256 for robust, cross-platform password hashing
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+# Configure Argon2id as primary scheme (SEC-01, Table 23), with pbkdf2 and bcrypt for migration
+pwd_context = CryptContext(
+    schemes=["argon2", "pbkdf2_sha256", "bcrypt"],
+    deprecated=["pbkdf2_sha256", "bcrypt"]
+)
+
 
 def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     if expires_delta:

@@ -31,8 +31,20 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is disabled. Contact system administrator.")
+
+    # Determine trainee_id if user is a trainee (DD-01, Section 3.6.6)
+    from app.models.entities import Trainee
+    trainee_obj = db.query(Trainee).filter(Trainee.user_id == user.id).first()
+    trainee_id = trainee_obj.id if trainee_obj else None
+
+    # Generate and inject HMAC-signed context for PostgreSQL RLS (SEC-08, SEC-24, OI-14)
+    from app.core.database import sign_context, request_context_var
+    signed_ctx = sign_context(user_id=user.id, role=user.role, trainee_id=trainee_id)
+    request_context_var.set(signed_ctx)
+
     return user
+
 
 def get_current_admin_user(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "admin" and not current_user.is_superuser:

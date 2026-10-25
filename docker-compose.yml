@@ -27,6 +27,9 @@ services:
       DATABASE_URL: postgresql+psycopg2://crossquest_admin:crossquest_secret_password@postgres:5432/crossquest_db
       SECRET_KEY: supersecretjwtkeyforcrossquestplatformchangeinproduction
       ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      CONTEXT_SIGNING_SECRET: crossquest_internal_context_signing_secret_key_change_in_prod
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_DEFAULT_REGION: ap-southeast-1
     ports:
       - "8000:8000"
     volumes:
@@ -34,6 +37,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: crossquest-localstack
+    restart: always
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=kms,secretsmanager
+      - DEFAULT_REGION=ap-southeast-1
+
 
   frontend:
     build:
