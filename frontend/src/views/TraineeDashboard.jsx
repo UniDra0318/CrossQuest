@@ -14,38 +14,25 @@ import {
   Play, 
   CheckCircle2, 
   HelpCircle, 
-  Zap, 
-  Target,
-  Clock,
-  Layers,
-  AlertTriangle,
+  Clock, 
   RotateCw,
   FileQuestion,
-  ChevronRight
+  Lock
 } from 'lucide-react';
 import { QUIZ_DATABASE, getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore } from '../services/api';
-import mascotRobot from '../assets/mascot-robot.png';
-import Mascot from '../components/Mascot';
-import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
-import Podium from '../components/Podium';
 import { TRACKS } from '../data/tracks';
-import { badges as designBadges, leaderboard as designLeaderboard } from '../data/mock';
-import { 
-  IsometricCube3D, 
-  IsometricLock3D, 
-  IsometricSphere3D, 
-  IsometricDatabase3D 
-} from '../components/IsometricIcons';
+import { badges as designBadges } from '../data/mock';
 
 export default function TraineeDashboard({ activeSubView, setActiveView }) {
   const { currentUser } = useAuth();
   const [points, setPoints] = useState(12877);
   const [level, setLevel] = useState(4);
   const [streakDays, setStreakDays] = useState(7);
+  const [boardUsers, setBoardUsers] = useState([]);
 
   // Active quiz & persistence session state
   const [activeQuiz, setActiveQuiz] = useState(null);
@@ -82,63 +69,59 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
           setLevel(gam.level || 4);
         }
       }
+      try {
+        const res = await fetchLeaderboard();
+        if (Array.isArray(res) && res.length > 0) {
+          setBoardUsers(res);
+        }
+      } catch (e) {
+        console.warn("Leaderboard fetch error:", e);
+      }
     }
     loadGamification();
   }, [currentUser?.id]);
 
-  // Quizzes list aligned with QUIZ_DATABASE and TRACKS
+  // Assigned course activities list
   const assignedActivities = [
     {
       id: 'act-1',
-      title: 'Enterprise Security Audit Challenge',
+      title: 'Stakeholder Management Basics',
       instructor: 'Lead Trainer David Lim',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.infosec.color,
-      category: TRACKS.infosec.name,
-      track: TRACKS.infosec,
-      progressSegments: [true, true, true, false],
-      completed: quizScoreStatus['act-1']?.completed,
-      score: quizScoreStatus['act-1']?.score,
-      accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned'
+      category: 'Project Management',
+      progressText: 'Project Management · 3 of 5 done',
+      color: '#0284c7',
+      actionType: 'resume',
+      locked: false
     },
     {
       id: 'act-2',
-      title: 'Role-Based Access & Policy Verification',
+      title: 'Design Thinking Essentials',
       instructor: 'Dr. Sarah Jenkins',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.access.color,
-      category: TRACKS.access.name,
-      track: TRACKS.access,
-      progressSegments: [true, true, true, true],
-      completed: quizScoreStatus['act-2']?.completed,
-      score: quizScoreStatus['act-2']?.score,
-      accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned'
+      category: 'Future-Proof Skills',
+      progressText: 'Future-Proof · Not started',
+      color: '#059669',
+      actionType: 'start',
+      locked: false
     },
     {
       id: 'act-3',
-      title: 'Privacy Impact Assessment (PIA) Simulation',
+      title: 'Coaching Your Team',
       instructor: 'Lead Trainer David Lim',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.privacy.color,
-      category: TRACKS.privacy.name,
-      track: TRACKS.privacy,
-      progressSegments: [true, true, true, false],
-      completed: quizScoreStatus['act-3']?.completed,
-      score: quizScoreStatus['act-3']?.score,
-      accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned'
+      category: 'Leadership',
+      progressText: 'Leadership · Unlocks after previous quest',
+      color: '#f0605d',
+      actionType: 'locked',
+      locked: true
     },
     {
       id: 'act-4',
       title: 'Multi-Tenant Data Isolation & Security',
       instructor: 'Prof. Roel Traballo',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.database.color,
-      category: TRACKS.database.name,
-      track: TRACKS.database,
-      progressSegments: [false, false, false, false],
-      completed: quizScoreStatus['act-4']?.completed,
-      score: quizScoreStatus['act-4']?.score,
-      accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned · Due in 3d'
+      category: 'Security & Compliance',
+      progressText: 'Enterprise Security · 5 Questions · Assigned',
+      color: '#07456b',
+      actionType: 'start',
+      locked: false
     }
   ];
 
@@ -201,374 +184,268 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
       }
     }));
 
-    setPoints(prev => prev + (resultData.pointsEarned || 250));
-    localStorage.removeItem('crossquest_quiz_session');
-    setSavedSession(null);
-    setActiveQuiz(null);
+    if (resultData.scorePercentage >= 80) {
+      setPoints(p => p + 150);
+    }
   };
 
-  // Quiz exit / save handler
-  const handleQuizExit = () => {
-    setActiveQuiz(null);
-    try {
-      const raw = localStorage.getItem('crossquest_quiz_session');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.stage !== 'completed') {
-          setSavedSession(parsed);
-        } else {
-          setSavedSession(null);
-        }
-      }
-    } catch (e) {}
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
   };
 
-  // =========================================================================
-  // FULLSCREEN DISTRACTION-FREE QUIZ ARENA TAKEOVER
-  // When inside a quiz, sidebar, topbar, and dashboard are completely obscured
-  // =========================================================================
-  if (activeQuiz) {
-    return (
-      <QuizArena 
-        quiz={activeQuiz}
-        initialSession={savedSession?.quizId === activeQuiz.id ? savedSession : null}
-        onFinish={handleQuizFinish}
-        onExit={handleQuizExit}
-      />
-    );
-  }
+  const userName = currentUser?.name?.split(' ')[0] || 'Juan';
 
   return (
-    <div className="dashboard-content-layout">
-      {/* OUTAGE / DISRUPTION RECOVERY BANNER */}
+    <div style={{ width: '100%', minHeight: '100%', background: '#f4f7fa', boxSizing: 'border-box' }}>
+      {/* 0. DISRUPTION RECOVERY BANNER */}
       {savedSession && (
-        <div className="quiz-recovery-banner">
-          <div className="recovery-left">
-            <div className="recovery-icon-circle">
-              <RotateCw className="spin-slow text-amber" size={20} />
-            </div>
-            <div className="recovery-text-group">
-              <div className="recovery-title">
-                Unfinished Assessment Detected
-              </div>
-              <div className="recovery-desc">
-                Your progress in <strong>"{savedSession.quizTitle || 'Assigned Assessment'}"</strong> was saved at <strong>Question {savedSession.currentIndex + 1}</strong>. You can resume immediately without penalty.
+        <div style={{ margin: '0 40px 24px', padding: '16px 20px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <RotateCw className="spin-slow" size={20} style={{ color: '#d97706' }} />
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '14px', color: '#92400e' }}>Unfinished Assessment Detected</div>
+              <div style={{ fontSize: '13px', color: '#b45309', marginTop: '2px' }}>
+                Your progress in <strong>"{savedSession.quizTitle || 'Assigned Assessment'}"</strong> was saved at Question {savedSession.currentIndex + 1}.
               </div>
             </div>
           </div>
-          <div className="recovery-actions">
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button 
-              className="btn-tactile btn-tactile-gold btn-sm"
+              type="button"
               onClick={() => handleResumeSession(savedSession)}
+              style={{ background: '#c93a37', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', font: '700 13px Montserrat', cursor: 'pointer' }}
             >
-              <Play size={14} />
-              <span>Resume Assessment Now</span>
+              Resume Now
             </button>
             <button 
-              className="btn-tactile btn-tactile-ghost btn-sm"
+              type="button"
               onClick={handleDiscardSession}
+              style={{ background: 'transparent', color: '#92400e', border: '1px solid #fde68a', padding: '8px 14px', borderRadius: '8px', font: '600 13px Inter', cursor: 'pointer' }}
             >
-              <span>Discard</span>
+              Discard
             </button>
           </div>
         </div>
       )}
 
-      {/* 1. MAIN TRAINEE QUEST VIEW */}
+      {/* 1. MAIN TRAINEE QUEST VIEW (Streamlined Redesign) */}
       {(activeSubView === 'trainee_quest' || !activeSubView || !['trainee_quiz', 'trainee_badges', 'trainee_certs'].includes(activeSubView)) && (
-        <>
-          {/* 1. HERO BANNER WITH 3D MASCOT */}
-          <div className="template-hero-banner">
-            <div className="template-hero-left">
-              <div className="template-hero-badge">
-                <Sparkles size={13} className="text-gold" />
-                <span>CROSSQUEST GAMIFIED LEARNING</span>
-              </div>
-              <h1 className="template-hero-title">Welcome back, {currentUser?.name}!</h1>
-              <p className="template-hero-subtitle">
-                Complete today's interactive quest to extend your <strong>7-day streak</strong> and climb the corporate leaderboard.
-              </p>
+        <div style={{ padding: '36px 40px', boxSizing: 'border-box' }}>
+          {/* Welcome & Teaser */}
+          <div>
+            <h1 style={{ fontSize: '28px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 800 }}>
+              {getGreeting()}, {userName}
+            </h1>
+            <p style={{ marginTop: '4px', color: '#475569', fontSize: '15px' }}>
+              You're 2 quizzes away from your next badge.
+            </p>
+          </div>
 
-              {/* Enterprise Learning Action Buttons (No PIN) */}
-              <div className="template-hero-actions">
-                <button 
-                  className="template-cta-btn template-cta-btn--primary"
-                  onClick={() => handleStartQuizById('act-1')}
-                >
-                  <Play size={16} fill="currentColor" />
-                  <span>Start Assigned Quest</span>
-                </button>
-                <button 
-                  className="template-cta-btn template-cta-btn--secondary"
-                  onClick={() => {
-                    const el = document.getElementById('assigned-activities-section');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  <BookOpen size={15} />
-                  <span>View All Modules</span>
-                </button>
+          {/* 3 Stat Tiles (Total XP, Level, Daily streak) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '28px' }}>
+            <div style={{ background: '#fff', borderRadius: '14px', padding: '22px', border: '1px solid #dde6ee' }}>
+              <div style={{ font: '500 13px Inter', color: '#475569' }}>Total XP</div>
+              <div style={{ font: '800 32px Montserrat', color: '#00314d', marginTop: '6px' }}>
+                {points.toLocaleString()}
               </div>
             </div>
-
-            <div className="template-hero-right">
-              {/* Floating streak pill */}
-              <div className="template-hero-streak-badge">
-                <div className="streak-flame-circle">
-                  <Flame size={16} className="text-orange" fill="#ff6a00" />
-                </div>
-                <div className="streak-text-group">
-                  <span className="streak-val">{streakDays} Days</span>
-                  <span className="streak-lbl">ACTIVE STREAK</span>
-                </div>
+            <div style={{ background: '#fff', borderRadius: '14px', padding: '22px', border: '1px solid #dde6ee' }}>
+              <div style={{ font: '500 13px Inter', color: '#475569' }}>Level</div>
+              <div style={{ font: '800 32px Montserrat', color: '#00314d', marginTop: '6px' }}>
+                {level}
               </div>
-
-              {/* Pure CSS 3D Quest Bot Mascot */}
-              <div className="template-mascot-container">
-                <Mascot />
+            </div>
+            <div style={{ background: '#fff', borderRadius: '14px', padding: '22px', border: '1px solid #dde6ee' }}>
+              <div style={{ font: '500 13px Inter', color: '#475569' }}>Daily streak</div>
+              <div style={{ font: '800 32px Montserrat', color: '#b8322f', marginTop: '6px' }}>
+                {streakDays} days
               </div>
             </div>
           </div>
 
-          {/* 2. ASSIGNED COURSE ACTIVITIES (4 CARDS WITH 3D ISOMETRIC GRAPHICS) */}
-          <div id="assigned-activities-section" className="template-section-block">
-            <div className="template-section-header">
-              <div className="template-section-title-wrap">
-                <h3>Assigned Course Activities</h3>
-              </div>
-              <span className="template-section-instructor-tag">ASSIGNED BY CROSSWORKS INSTRUCTORS</span>
-            </div>
-
-            <div className="template-activities-grid">
-              {assignedActivities.map((act) => {
-                const isSavedThis = savedSession?.quizId === act.id;
-
-                return (
-                  <div key={act.id} className="template-activity-card">
-                    {/* Top Colored Banner with 3D Graphic */}
-                    <div className="activity-card-banner" style={{ backgroundColor: act.headerColor }}>
-                      <div className="activity-banner-left">
-                        <span className="activity-q-pill">{act.questionsCount}</span>
-                        <h4 className="activity-category-title">{act.category}</h4>
-                      </div>
-                      <div className="activity-banner-icon-slot">
-                        <IsoCube 
-                          size={46} 
-                          color={act.track.color} 
-                          top={act.track.top} 
-                          right={act.track.right} 
-                          label={act.track.face.label} 
-                        />
-                      </div>
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="activity-card-body">
-                      <h4 className="activity-title">{act.title}</h4>
-                      <p className="activity-instructor">{act.instructor}</p>
-
-                      {/* Segmented Progress Indicator (4 pills) */}
-                      <div className="activity-segmented-bar">
-                        {act.progressSegments.map((isFilled, idx) => (
-                          <div 
-                            key={idx} 
-                            className={`activity-segment-pill ${isFilled ? 'filled' : 'empty'}`}
-                            style={{ backgroundColor: isFilled ? act.headerColor : '#e2e8f0' }}
-                          />
-                        ))}
-                      </div>
-
-                      {/* Card Footer Actions */}
-                      <div className="activity-card-footer">
-                        {act.completed ? (
-                          <>
-                            <span className="activity-accuracy-pill">
-                              <Check size={12} strokeWidth={3} />
-                              <span>{act.score}% accuracy</span>
-                            </span>
-                            <button
-                              className="activity-btn-replay"
-                              onClick={() => handleStartQuizById(act.id)}
-                            >
-                              <span>Replay</span>
-                              <ArrowRight size={13} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <span className="activity-pending-pill">
-                              <span>Assigned · Due in 3d</span>
-                            </span>
-                            <button
-                              className="activity-btn-play"
-                              onClick={() => handleStartQuizById(act.id)}
-                            >
-                              <span>{isSavedThis ? 'Resume' : 'Play Quest'}</span>
-                              <Play size={12} fill="currentColor" />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 3. LOWER SPLIT SECTION: BADGES SHOWCASE + RIGHT WIDGETS */}
-          <div className="template-lower-split">
-            {/* Left: Your Earned Badges */}
-            <div className="template-badges-container">
-              <div className="template-section-header mb-16">
-                <div className="template-section-title-wrap">
-                  <h3>Your Earned Badges</h3>
-                </div>
-                <button 
-                  className="template-view-all-link"
-                  onClick={() => setActiveView && setActiveView('trainee_badges')}
+          {/* 2-Column Split: Continue your quest (1.6fr) & Leaderboard (1fr) */}
+          <div style={{ display: 'flex', gap: '20px', marginTop: '20px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            {/* Left Card: Continue your quest */}
+            <div style={{ flex: '1.6', minWidth: '320px', background: '#fff', borderRadius: '14px', padding: '26px', border: '1px solid #dde6ee', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ fontSize: '18px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 700 }}>
+                  Continue your quest
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setActiveView && setActiveView('trainee_quiz')}
+                  style={{ background: 'none', border: 'none', font: '600 13px Inter', color: '#00314d', cursor: 'pointer', padding: 0 }}
                 >
-                  View All ({earnedBadges.length})
+                  View all
                 </button>
               </div>
 
-              <div className="template-badges-grid">
-                {earnedBadges.map((badge) => (
-                  <div key={badge.id} className="template-badge-card">
-                    <BadgeCoin badge={badge} />
-                    <div className="template-badge-name" style={{ marginTop: '16px' }}>{badge.title}</div>
-                    <div className="template-badge-desc">{badge.description}</div>
-                  </div>
-                ))}
+              <div style={{ marginTop: '12px' }}>
+                {assignedActivities.map((act, idx) => {
+                  const isLast = idx === assignedActivities.length - 1;
+                  return (
+                    <div 
+                      key={act.id} 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '16px', 
+                        padding: '16px 0', 
+                        borderBottom: isLast ? 'none' : '1px solid #e9eff5' 
+                      }}
+                    >
+                      <div style={{ width: '6px', height: '44px', borderRadius: '9px', background: act.color, flexShrink: 0 }}></div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ font: '700 15px Montserrat', color: '#00314d', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {act.title}
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#475569', marginTop: '2px' }}>
+                          {act.progressText}
+                        </div>
+                      </div>
+                      
+                      {act.actionType === 'resume' && (
+                        <button
+                          type="button"
+                          onClick={() => handleStartQuizById(act.id)}
+                          style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            gap: '8px', 
+                            padding: '10px 18px', 
+                            borderRadius: '10px', 
+                            font: '700 13px Montserrat, sans-serif', 
+                            background: '#c93a37', 
+                            color: '#fff', 
+                            border: 'none', 
+                            cursor: 'pointer',
+                            flexShrink: 0
+                          }}
+                        >
+                          Resume
+                        </button>
+                      )}
+
+                      {act.actionType === 'start' && (
+                        <button
+                          type="button"
+                          onClick={() => handleStartQuizById(act.id)}
+                          style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            gap: '8px', 
+                            padding: '10px 18px', 
+                            borderRadius: '10px', 
+                            font: '700 13px Montserrat, sans-serif', 
+                            background: '#fff', 
+                            color: '#00314d', 
+                            border: '1.5px solid #00314d', 
+                            cursor: 'pointer',
+                            flexShrink: 0
+                          }}
+                        >
+                          Start
+                        </button>
+                      )}
+
+                      {act.actionType === 'locked' && (
+                        <span style={{ font: '600 13px Inter', color: '#64748b', padding: '10px 18px', flexShrink: 0 }}>
+                          Locked
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Right: Streak This Week + Corporate Leaderboard */}
-            <div className="template-right-widgets">
-              {/* This Week Streak Tracker */}
-              <div className="template-this-week-card">
-                <div className="this-week-header flex-between">
-                  <h4>This week</h4>
-                  <span className="this-week-counter">7 / 7 DAYS</span>
-                </div>
-                <div className="this-week-days-row">
-                  {[
-                    { day: 'M', active: true },
-                    { day: 'T', active: true },
-                    { day: 'W', active: true },
-                    { day: 'T', active: true },
-                    { day: 'F', active: true },
-                    { day: 'S', active: true },
-                    { day: 'S', active: true }
-                  ].map((item, idx) => (
-                    <div key={idx} className="this-week-day-item">
-                      <div className={`day-flame-circle ${item.active ? 'active' : ''}`}>
-                        <Flame size={14} fill="#ea580c" className="text-orange" />
-                      </div>
-                      <span className="day-label">{item.day}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Right Card: Leaderboard */}
+            <div style={{ flex: '1', minWidth: '280px', background: '#fff', borderRadius: '14px', padding: '26px', border: '1px solid #dde6ee', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ fontSize: '18px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 700 }}>
+                  Leaderboard
+                </h3>
+                <span style={{ font: '500 12px Inter', color: '#475569' }}>Live Ranks</span>
               </div>
 
-              {/* Corporate Leaderboard Podium Card */}
-              <div className="template-leaderboard-card">
-                <div className="leaderboard-card-title">Corporate leaderboard</div>
-                
-                {/* 3D Podium Graphic */}
-                <div style={{ marginBottom: '20px' }}>
-                  <Podium top={designLeaderboard.top} small={true} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '14px', font: '500 14px Inter' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '10px', background: '#e9eff5', color: '#00314d', fontWeight: 700 }}>
+                  <span>1 · {currentUser?.name || 'Juan Dela Cruz'}</span>
+                  <span>{points.toLocaleString()}</span>
                 </div>
-
-                {/* Bottom User Pill */}
-                <div className="leaderboard-user-pill">
-                  <div className="user-pill-left flex-align gap-8">
-                    <div className="leaderboard-avatar-circle">
-                      {currentUser?.initials || 'JD'}
-                    </div>
-                    <span className="leaderboard-user-name">
-                      You · {currentUser?.name || 'Juan Dela Cruz'}
-                    </span>
-                  </div>
-                  <span className="leaderboard-rank-badge">RANK [#1]</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '10px', color: '#1e3a4c' }}>
+                  <span>2 · Maria Santos</span>
+                  <span>11,402</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '10px', color: '#1e3a4c' }}>
+                  <span>3 · Paolo Reyes</span>
+                  <span>10,950</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '10px', color: '#1e3a4c' }}>
+                  <span>4 · David Lim</span>
+                  <span>9,820</span>
                 </div>
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* 2. DEDICATED KNOWLEDGE QUIZZES CATALOG VIEW (When clicking Quizzes tab) */}
+      {/* 2. DEDICATED QUIZZES CATALOG VIEW */}
       {activeSubView === 'trainee_quiz' && (
-        <div className="quizzes-catalog-view">
-          <div className="catalog-header-banner">
-            <div>
-              <div className="catalog-badge-pill">
-                <FileQuestion size={14} className="text-cyan" />
-                <span>OFFICIAL EVALUATIONS</span>
-              </div>
-              <h2>Enterprise Knowledge Quizzes</h2>
-              <p className="catalog-subtitle">
-                Select an assessment to enter the dedicated distraction-free testing arena. Each quiz includes interactive Kahoot-style questions, sequence ordering, term identification, and architecture diagrams.
-              </p>
-            </div>
+        <div style={{ padding: '36px 40px', boxSizing: 'border-box' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 800 }}>
+              Knowledge Quizzes
+            </h1>
+            <p style={{ marginTop: '4px', color: '#475569', fontSize: '15px' }}>
+              Official evaluations designed to reinforce learning and track verified progress.
+            </p>
           </div>
 
-          <div className="quizzes-catalog-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', marginTop: '28px' }}>
             {Object.values(getActiveQuizDatabase()).map((quizItem) => {
               const status = quizScoreStatus[quizItem.id];
               const isSaved = savedSession?.quizId === quizItem.id;
 
               return (
-                <div key={quizItem.id} className="quiz-catalog-card card-gamified">
-                  <div className="catalog-card-top" style={{ borderTop: `4px solid ${quizItem.headerColor}` }}>
-                    <div className="flex-between">
-                      <span className="catalog-category-tag" style={{ color: quizItem.headerColor }}>
-                        {quizItem.category}
-                      </span>
-                      <span className="catalog-time-tag">
-                        <Clock size={12} /> {quizItem.timePerQuestion}s / Q
-                      </span>
-                    </div>
-                    <h3 className="catalog-card-title">{quizItem.title}</h3>
-                    <p className="catalog-instructor-tag">Instructor: {quizItem.instructor}</p>
+                <div key={quizItem.id} style={{ background: '#fff', borderRadius: '14px', padding: '24px', border: '1px solid #dde6ee', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ width: '44px', height: '6px', borderRadius: '9px', background: quizItem.headerColor || '#0284c7', marginBottom: '16px' }}></div>
+                  <div style={{ font: '600 12px Inter', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {quizItem.category} · {quizItem.questions?.length || 5} Questions
                   </div>
-
-                  <div className="catalog-card-body">
-                    <p className="catalog-quiz-desc">{quizItem.description}</p>
-
-                    <div className="catalog-types-row">
-                      <span className="qtype-badge">Kahoot 4-Choice</span>
-                      <span className="qtype-badge">Identification</span>
-                      <span className="qtype-badge">Sequence Order</span>
-                      <span className="qtype-badge">Diagram Analysis</span>
-                    </div>
-
-                    <div className="catalog-meta-row">
-                      <div className="catalog-meta-item">
-                        <span className="meta-k">Passing Grade:</span>
-                        <span className="meta-v">{quizItem.passingScore}%</span>
-                      </div>
-                      <div className="catalog-meta-item">
-                        <span className="meta-k">Items:</span>
-                        <span className="meta-v">{quizItem.questions.length} Questions</span>
-                      </div>
-                      <div className="catalog-meta-item">
-                        <span className="meta-k">Status:</span>
-                        <span className={`meta-v ${status?.completed ? 'text-emerald' : 'text-amber'}`}>
-                          {status?.completed ? `${status.score}% Passed` : 'Pending'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="catalog-card-actions">
+                  <h3 style={{ fontSize: '18px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 700, marginTop: '8px' }}>
+                    {quizItem.title}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#64748b', marginTop: '8px', lineHeight: '1.5', flex: 1 }}>
+                    {quizItem.description}
+                  </p>
+                  
+                  <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #e9eff5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', color: '#475569', fontWeight: 500 }}>
+                      Instructor: <strong>{quizItem.instructor?.split(' ')[0] || 'Trainer'}</strong>
+                    </span>
                     <button
-                      className={`btn-tactile ${isSaved ? 'btn-tactile-gold' : 'btn-tactile-purple'} w-full`}
+                      type="button"
                       onClick={() => handleStartQuizById(quizItem.id)}
+                      style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        gap: '6px', 
+                        padding: '9px 18px', 
+                        borderRadius: '10px', 
+                        font: '700 13px Montserrat, sans-serif', 
+                        background: '#c93a37', 
+                        color: '#fff', 
+                        border: 'none', 
+                        cursor: 'pointer' 
+                      }}
                     >
-                      <Play size={15} />
-                      <span>{isSaved ? 'Resume In-Progress Assessment' : (status?.completed ? 'Retake Assessment' : 'Start Assessment')}</span>
+                      <span>{isSaved ? 'Resume' : (status?.completed ? 'Retake' : 'Start Quest')}</span>
+                      <Play size={12} fill="currentColor" />
                     </button>
                   </div>
                 </div>
@@ -580,88 +457,91 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
 
       {/* 3. EARNED BADGES SUB-VIEW */}
       {activeSubView === 'trainee_badges' && (
-        <div className="card section-card p-24" style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-          <div className="card-header-bar mb-16" style={{ padding: '0 0 16px', borderBottom: '1px solid #f1f5f9' }}>
-            <div>
-              <h3 className="card-title" style={{ fontSize: '20px', fontWeight: '800', color: '#1e1b4b', marginBottom: '4px' }}>
-                Badge Showcase & Achievements
-              </h3>
-              <p className="text-muted text-xs" style={{ color: '#64748b' }}>
-                Unlock shiny 3D collectible badges by proving your knowledge across security frameworks and policy access controls.
-              </p>
-            </div>
+        <div style={{ padding: '36px 40px', boxSizing: 'border-box' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 800 }}>
+              Earned Badges
+            </h1>
+            <p style={{ marginTop: '4px', color: '#475569', fontSize: '15px' }}>
+              Badges and milestones unlocked by completing quests and mastering competency tracks.
+            </p>
           </div>
 
-          <div className="badges-full-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px', marginTop: '16px' }}>
-            {earnedBadges.map((badge) => {
-              const tierName = badge.tier || (badge.id === 'seven-day-streak' ? 'Legendary' : badge.id === 'security-champion' ? 'Master' : 'Adept');
-              const tierClass = tierName.toLowerCase();
-              return (
-                <div key={badge.id} className="badge-detail-card card-gamified" style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                  <div style={{ marginBottom: '16px', transform: 'scale(1.1)' }}>
-                    <BadgeCoin badge={badge} />
-                  </div>
-                  <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{badge.title || badge.name}</h4>
-                  <p className="badge-desc" style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', flex: 1, lineHeight: '1.4' }}>{badge.description || badge.desc}</p>
-                  <div className="badge-footer flex-between" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
-                    <span className={`tier-chip tier-${tierClass}`} style={{ fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '999px', background: tierClass === 'legendary' ? '#fef3c7' : tierClass === 'master' ? '#dbeafe' : '#e0e7ff', color: tierClass === 'legendary' ? '#b45309' : tierClass === 'master' ? '#1d4ed8' : '#4338ca' }}>
-                      {tierName.toUpperCase()}
-                    </span>
-                    <span className="badge-check flex-align gap-4 text-emerald" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '700', color: '#059669' }}>
-                      <Check size={14} /> Unlocked
-                    </span>
-                  </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px', marginTop: '28px' }}>
+            {earnedBadges.map((badge) => (
+              <div key={badge.id} style={{ background: '#fff', borderRadius: '14px', padding: '24px 20px', border: '1px solid #dde6ee', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <div style={{ marginBottom: '16px', transform: 'scale(1.05)' }}>
+                  <BadgeCoin badge={badge} />
                 </div>
-              );
-            })}
+                <h4 style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'Montserrat, sans-serif', color: '#00314d', marginBottom: '6px' }}>
+                  {badge.title || badge.name}
+                </h4>
+                <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', flex: 1, lineHeight: '1.4' }}>
+                  {badge.description || badge.desc}
+                </p>
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #e9eff5' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', background: '#fef3c7', color: '#b45309' }}>
+                    UNLOCKED
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700, color: '#059669' }}>
+                    <Check size={14} /> Earned
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
       {/* 4. CERTIFICATIONS SUB-VIEW */}
       {activeSubView === 'trainee_certs' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
-            <div>
-              <h3 className="card-title">My Verified Certifications</h3>
-              <p className="card-subtitle">
-                Official course completion certificates with cryptographic validation.
-              </p>
-            </div>
+        <div style={{ padding: '36px 40px', boxSizing: 'border-box' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 800 }}>
+              Certifications
+            </h1>
+            <p style={{ marginTop: '4px', color: '#475569', fontSize: '15px' }}>
+              Official course completion credentials issued by Crossworks Training &amp; Consulting.
+            </p>
           </div>
 
-          <div className="p-24 certs-list-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px', marginTop: '28px' }}>
             {certificates.map((cert) => (
-              <div key={cert.id} className="card-gamified certificate-card">
-                <div className="cert-top-row flex-between">
-                  <div className="flex-align gap-8">
-                    <Shield size={22} className="text-gold" />
-                    <div>
-                      <h4>{cert.title}</h4>
-                      <div className="text-secondary text-xs">{cert.clientCompany}</div>
+              <div key={cert.id} style={{ background: '#fff', borderRadius: '14px', padding: '24px', border: '1px solid #dde6ee', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '17px', fontFamily: 'Montserrat, sans-serif', color: '#00314d', fontWeight: 700 }}>
+                      {cert.title}
+                    </h3>
+                    <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
+                      {cert.clientCompany}
                     </div>
                   </div>
-                  <span className="badge-gamified badge-green">Active Credential</span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '999px', background: '#ecfdf5', color: '#059669' }}>
+                    Active
+                  </span>
                 </div>
 
-                <div className="cert-meta-body">
-                  <div className="cert-meta-item">
-                    <span className="meta-label">Issued On:</span>
-                    <span className="meta-val">{cert.issuedOn}</span>
+                <div style={{ marginTop: '18px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#475569' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Issued On:</span>
+                    <span style={{ fontWeight: 600 }}>{cert.issuedOn}</span>
                   </div>
-                  <div className="cert-meta-item">
-                    <span className="meta-label">Valid Until:</span>
-                    <span className="meta-val">{cert.expiresOn}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Valid Until:</span>
+                    <span style={{ fontWeight: 600 }}>{cert.expiresOn}</span>
                   </div>
-                  <div className="cert-meta-item">
-                    <span className="meta-label">Digital Hash:</span>
-                    <code className="text-xs text-cyan">{cert.hash}</code>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Verification:</span>
+                    <code style={{ fontSize: '11px', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', color: '#0284c7' }}>
+                      {cert.hash.substring(0, 18)}...
+                    </code>
                   </div>
                 </div>
 
                 {cert.isRenewalApproaching && (
-                  <div className="renewal-alert-strip">
-                    <AlertCircle size={14} className="text-gold" />
+                  <div style={{ marginTop: '16px', padding: '10px 14px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#92400e' }}>
+                    <AlertCircle size={14} style={{ color: '#d97706', flexShrink: 0 }} />
                     <span>Annual renewal recommended in <strong>{cert.daysUntilExpiry} days</strong></span>
                   </div>
                 )}
@@ -669,6 +549,16 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
             ))}
           </div>
         </div>
+      )}
+
+      {/* 5. INTERACTIVE QUIZ ARENA (Full Assessment Experience) */}
+      {activeQuiz && (
+        <QuizArena 
+          quiz={activeQuiz}
+          onClose={() => setActiveQuiz(null)}
+          onFinish={handleQuizFinish}
+          savedSession={savedSession?.quizId === activeQuiz.id ? savedSession : null}
+        />
       )}
     </div>
   );
