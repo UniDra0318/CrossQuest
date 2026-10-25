@@ -184,7 +184,7 @@ class CPABEEngine:
         encrypted_record: Dict[str, Any],
         user_key_info: Dict[str, Any],
         record_id: str = "default_rec",
-        version: int = 1
+        version: Optional[int] = None
     ) -> Optional[Dict[str, Any]]:
         """Decrypts a record if the user's attribute key satisfies the CP-ABE policy.
         
@@ -192,7 +192,7 @@ class CPABEEngine:
         Returns decrypted dict if valid, or None if policy is unsatisfied or tamper is detected (TC-CRY-03, TC-CRY-04).
         """
         policy = encrypted_record.get("policy", "")
-        policy_ver = encrypted_record.get("policy_version", version)
+        policy_ver = version if version is not None else encrypted_record.get("policy_version", 1)
         aad = f"{record_id}:{policy_ver}:{policy}".encode("utf-8")
         user_attrs = set(user_key_info.get("attributes", []))
 

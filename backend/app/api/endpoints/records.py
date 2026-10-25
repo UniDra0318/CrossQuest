@@ -233,9 +233,18 @@ def decrypt_training_record(
     user_trainee = db.query(Trainee).filter(Trainee.user_id == current_user.id).first()
     my_trainee_code = user_trainee.trainee_code if user_trainee else None
 
+    trainer_sessions = []
+    if current_user.role == "trainer":
+        assignments = db.query(TrainerAssignment).filter(TrainerAssignment.user_id == current_user.id).all()
+        session_ids = [a.session_id for a in assignments]
+        if session_ids:
+            sessions = db.query(TrainingSession).filter(TrainingSession.id.in_(session_ids)).all()
+            trainer_sessions = [s.session_code for s in sessions]
+
     user_attrs = cpabe_engine.build_user_attributes(
         role=current_user.role,
         assigned_companies=current_user.assigned_client_accounts,
+        assigned_sessions=trainer_sessions,
         trainee_code=my_trainee_code
     )
 
