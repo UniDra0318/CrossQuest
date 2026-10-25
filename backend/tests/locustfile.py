@@ -11,7 +11,22 @@ Usage:
     locust -f backend/tests/locustfile.py --headless -u 100 -r 20 --run-time 30s --host http://localhost:8000
 """
 
-from locust import HttpUser, task, between
+try:
+    from locust import HttpUser, task, between
+except ImportError:
+    # Fallback definitions when locust is not yet installed in local environment
+    class HttpUser:  # type: ignore
+        wait_time = None
+        client = None
+
+    def task(weight=1):  # type: ignore
+        def decorator(f):
+            return f
+        return decorator
+
+    def between(a, b):  # type: ignore
+        return None
+
 import random
 
 class CrossQuestUser(HttpUser):
