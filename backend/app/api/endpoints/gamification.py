@@ -18,7 +18,7 @@ def get_trainee_gamification(
 ):
     progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee_id).first()
     if not progress:
-        progress = GamificationProgress(trainee_id=trainee_id)
+        progress = GamificationProgress(trainee_id=trainee_id, points=0, quizzes_completed=0, level=1, badges=[])
         db.add(progress)
         db.commit()
         db.refresh(progress)
@@ -35,13 +35,29 @@ def submit_quiz_attempt(
     
     Adheres to:
     - PWA-04, REL-03: Offline responses synced with client UUID attempt_id for exactly-once idempotency.
-    - DD-07: Scoring is strictly performed on the server.
+    - DD-07: Scoring is strictly performed on the server. Client-provided score is ignored.
+    - TC-GAM-08: Non-trainees (Trainers/Account Managers/Finance) cannot submit quiz attempts.
     """
+    # Role gating & identity verification
     trainee = db.query(Trainee).filter(Trainee.id == quiz_data.trainee_id).first()
     if not trainee:
         raise HTTPException(status_code=404, detail="Trainee not found")
 
-    # Idempotency check: if attempt_id is provided, check if already processed
+    if current_user.role == "trainee":
+        if trainee.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Trainees can only submit quiz attempts for their own account."
+            )
+    elif current_user.role == "admin":
+        pass  # Admin allowed for test/admin purposes
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only trainees can submit quiz attempts."
+        )
+
+    # Idempotency check: if attempt_id is provided, check if already processed (PWA-04)
     if quiz_data.attempt_id:
         existing_attempt = db.query(QuizAttempt).filter(QuizAttempt.id == quiz_data.attempt_id).first()
         if existing_attempt:
@@ -50,28 +66,32 @@ def submit_quiz_attempt(
             return progress
 
     quiz = db.query(Quiz).filter(Quiz.id == quiz_data.quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
     earned_score = 0.0
     earned_points = 0
 
-    if quiz and quiz.questions and quiz_data.answers:
-        # Server-side scoring against stored questions (DD-07)
+    # Strictly server-side scoring against stored questions (DD-07, TC-GAM-01, TC-GAM-02)
+    if quiz.questions:
         correct_count = 0
         total_q = len(quiz.questions)
+        answers = quiz_data.answers or {}
         for q in quiz.questions:
-            user_choice = quiz_data.answers.get(str(q.id))
+            user_choice = answers.get(str(q.id))
             if user_choice is not None and user_choice == q.correct_answer:
                 correct_count += 1
-                earned_points += q.points
+                earned_points += (q.points if q.points is not None else 10)
         earned_score = (correct_count / max(1, total_q)) * 100.0
     else:
-        # Fallback if submitted with calculated score
-        earned_score = quiz_data.score or 0.0
-        earned_points = int(earned_score * 10)
+        earned_score = 0.0
+        earned_points = 0
 
-    # Record attempt
+    # Record attempt with attempt_id for future idempotent replay
+    attempt_id = quiz_data.attempt_id or str(uuid.uuid4())
     attempt = QuizAttempt(
-        id=quiz_data.attempt_id,
-        quiz_id=quiz_data.quiz_id,
+        id=attempt_id,
+        quiz_id=quiz.id,
         trainee_id=trainee.id,
         submitted_offline=quiz_data.submitted_offline,
         score=earned_score,
@@ -82,8 +102,15 @@ def submit_quiz_attempt(
     # Update Gamification Progress
     progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
     if not progress:
-        progress = GamificationProgress(trainee_id=trainee.id)
+        progress = GamificationProgress(trainee_id=trainee.id, points=0, quizzes_completed=0, level=1, badges=[])
         db.add(progress)
+
+    if progress.points is None:
+        progress.points = 0
+    if progress.quizzes_completed is None:
+        progress.quizzes_completed = 0
+    if progress.level is None:
+        progress.level = 1
 
     progress.points += earned_points
     progress.quizzes_completed += 1
@@ -108,26 +135,42 @@ def submit_quiz_attempt(
 def get_leaderboard(
     session_id: Optional[str] = None,
     team_id: Optional[str] = None,
+    company_only: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Fetches class or team leaderboard (GAM-04, Section 3.8.6).
     
-    STRICT PRIVACY ENFORCEMENT:
-    Returns display names / nicknames and points ONLY.
-    Never exposes real trainee names, trainee codes, or trainee IDs (GAM-04, TC-GAM-06).
+    STRICT PRIVACY ENFORCEMENT (TC-GAM-06, TC-GAM-07):
+    - Real trainee names, emails, and trainee codes are NEVER returned.
+    - Trainee company scoping: if company_only is True, filters to fellow trainees of the same company.
+    - Global cross-company view: participants outside the trainee's company are strictly pseudonymized.
     """
     query = (
         db.query(GamificationProgress, Trainee)
         .join(Trainee, GamificationProgress.trainee_id == Trainee.id)
     )
 
+    viewer_trainee = None
+    if current_user.role == "trainee":
+        viewer_trainee = db.query(Trainee).filter(Trainee.user_id == current_user.id).first()
+        if company_only and viewer_trainee and viewer_trainee.current_company_id:
+            query = query.filter(Trainee.current_company_id == viewer_trainee.current_company_id)
+
     top_entries = query.order_by(desc(GamificationProgress.points)).limit(10).all()
 
     leaderboard = []
     for rank, (gam, trainee) in enumerate(top_entries, start=1):
-        # Expose display name only (fallback to pseudonymous rank identifier)
-        safe_nickname = trainee.display_name or f"Participant #{rank}"
+        # Determine pseudonymization based on viewing role and company boundary
+        if current_user.role == "trainee" and not company_only:
+            # Trainee looking at global cross-company leaderboard
+            if viewer_trainee and trainee.current_company_id == viewer_trainee.current_company_id:
+                safe_nickname = trainee.display_name or f"Colleague #{rank}"
+            else:
+                safe_nickname = f"Participant #{rank}"
+        else:
+            safe_nickname = trainee.display_name or f"Participant #{rank}"
+
         leaderboard.append({
             "rank": rank,
             "display_name": safe_nickname,
@@ -137,3 +180,4 @@ def get_leaderboard(
             "quizzes_completed": gam.quizzes_completed
         })
     return leaderboard
+

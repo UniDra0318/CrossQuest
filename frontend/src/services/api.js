@@ -116,6 +116,22 @@ export async function submitQuizScore(traineeId, score) {
   return null;
 }
 
+export async function submitQuizAttempt(payload, token) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}/gamification/submit-quiz`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error submitting quiz attempt:", err);
+  }
+  return null;
+}
+
 export async function fetchStaffUsers(token) {
   try {
     const res = await fetch(`${API_BASE}/users/`, {
