@@ -70,7 +70,12 @@ def setup_test_database():
             "ALTER TABLE anomaly_alerts ADD COLUMN severity_final VARCHAR(20) DEFAULT 'MEDIUM'",
             "ALTER TABLE anomaly_alerts ADD COLUMN after_hours_tag BOOLEAN DEFAULT 0",
             "ALTER TABLE anomaly_alerts ADD COLUMN episode_start DATETIME",
-            "ALTER TABLE anomaly_alerts ADD COLUMN client_reviewed BOOLEAN DEFAULT 0"
+            "ALTER TABLE anomaly_alerts ADD COLUMN client_reviewed BOOLEAN DEFAULT 0",
+            "ALTER TABLE training_record_versions ADD COLUMN abe_ciphertext TEXT",
+            "ALTER TABLE training_record_versions ADD COLUMN payload_ciphertext TEXT",
+            "ALTER TABLE training_record_versions ADD COLUMN policy_tokens VARCHAR(500)",
+            "ALTER TABLE training_record_versions ADD COLUMN edited_by_user_id VARCHAR(36)",
+            "ALTER TABLE training_record_versions ADD COLUMN edited_at DATETIME"
         ]:
             try:
                 conn.execute(text(stmt))
