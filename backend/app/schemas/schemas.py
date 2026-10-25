@@ -250,3 +250,21 @@ class AccessLogResponse(BaseModel):
     details: Dict[str, Any]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AnomalyRuleResponse(BaseModel):
+    id: str
+    rule_code: str
+    parameters: Dict[str, Any]
+    version_no: int
+    client_reviewed: bool
+    description: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AnomalyRuleUpdate(BaseModel):
+    parameters: Optional[Dict[str, Any]] = None
+    client_reviewed: Optional[bool] = None
+    description: Optional[str] = None
+

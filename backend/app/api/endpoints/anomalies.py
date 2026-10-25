@@ -108,3 +108,89 @@ def delete_alert_forbidden():
         status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
         detail="Alerts cannot be deleted by design. They must be reviewed and closed with an auditable disposition."
     )
+
+
+# --- Rule Parameter & Approval Management (TC-ANO-20) ---
+from app.models.entities import AnomalyRule
+from app.schemas.schemas import AnomalyRuleResponse, AnomalyRuleUpdate
+
+
+DEFAULT_RULES = [
+    {"rule_code": "R1_OUT_OF_SCOPE", "parameters": {"threshold": 1, "window_minutes": 1440, "severity": "LOW"}, "description": "Single out-of-scope attempt aggregated daily"},
+    {"rule_code": "R1_REPEATED_OUT_OF_SCOPE", "parameters": {"threshold": 3, "window_minutes": 15, "severity": "MEDIUM"}, "description": "Repeated out-of-scope attempts in 15 min"},
+    {"rule_code": "R2_FAILED_LOGINS_ACCOUNT", "parameters": {"threshold": 5, "window_minutes": 10, "severity": "MEDIUM"}, "description": "Failed logins for single account"},
+    {"rule_code": "R2_FAILED_LOGINS_IP", "parameters": {"threshold": 10, "window_minutes": 10, "severity": "MEDIUM"}, "description": "Failed logins for single IP"},
+    {"rule_code": "R3_HIGH_RECORD_ACCESS", "parameters": {"thresholds": {"account_manager": 25, "trainer": 25, "finance": 50, "admin": 50, "trainee": 15}, "window_minutes": 15}, "description": "High distinct record access"},
+    {"rule_code": "R3_REPORT_BURSTS", "parameters": {"threshold": 5, "window_minutes": 60, "severity": "MEDIUM"}, "description": "Report generation bursts"},
+    {"rule_code": "R4_RECORD_DELETION", "parameters": {"threshold": 1, "severity": "HIGH"}, "description": "Soft deletion of client data"},
+    {"rule_code": "R4_RECORD_EDIT", "parameters": {"threshold": 1, "severity": "LOW"}, "description": "Edit of client data"},
+    {"rule_code": "R4_BULK_EDIT", "parameters": {"threshold": 10, "window_minutes": 15, "severity": "MEDIUM"}, "description": "Bulk record edits in 15 min"},
+    {"rule_code": "S1_AFTER_HOURS", "parameters": {"start_hour": 9, "end_hour": 18, "tz": "UTC+8"}, "description": "After-hours supporting indicator"}
+]
+
+
+@router.get("/rules", response_model=List[AnomalyRuleResponse])
+def get_anomaly_rules(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Lists anomaly detection rules and their approval status (Figure 10, Table 22)."""
+    rules = db.query(AnomalyRule).all()
+    if not rules:
+        # Seed default rules
+        for r_data in DEFAULT_RULES:
+            rule = AnomalyRule(
+                rule_code=r_data["rule_code"],
+                parameters=r_data["parameters"],
+                version_no=1,
+                client_reviewed=True,
+                description=r_data["description"]
+            )
+            db.add(rule)
+        db.commit()
+        rules = db.query(AnomalyRule).all()
+    return rules
+
+
+@router.put("/rules/{rule_code}", response_model=AnomalyRuleResponse)
+def update_anomaly_rule(
+    rule_code: str,
+    update_in: AnomalyRuleUpdate,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Administrator updates rule thresholds/parameters and manages review approval (TC-ANO-20)."""
+    rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == rule_code).first()
+    if not rule:
+        # Create if not existing
+        rule = AnomalyRule(
+            rule_code=rule_code,
+            parameters=update_in.parameters or {},
+            version_no=1,
+            client_reviewed=update_in.client_reviewed if update_in.client_reviewed is not None else False,
+            description=update_in.description
+        )
+        db.add(rule)
+    else:
+        if update_in.parameters is not None:
+            rule.parameters = update_in.parameters
+            rule.version_no += 1
+        if update_in.client_reviewed is not None:
+            rule.client_reviewed = update_in.client_reviewed
+        if update_in.description is not None:
+            rule.description = update_in.description
+
+    # Audit log
+    log = AccessLog(
+        actor_user_id=admin_user.id,
+        actor_role=admin_user.role,
+        event_type="RULE_MODIFIED",
+        resource_type="ANOMALY_RULE",
+        resource_id=rule.id,
+        outcome="SUCCESS",
+        details={"rule_code": rule_code, "version": rule.version_no, "client_reviewed": rule.client_reviewed}
+    )
+    db.add(log)
+    db.commit()
+    db.refresh(rule)
+    return rule
