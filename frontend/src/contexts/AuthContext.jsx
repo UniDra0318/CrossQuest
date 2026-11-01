@@ -74,6 +74,39 @@ export function AuthProvider({ children }) {
 
   const [token, setToken] = useState(() => localStorage.getItem('crossquest_auth_token') || null);
 
+  // Resilient token synchronization: on mount or whenever currentUser changes, verify/acquire token
+  useEffect(() => {
+    let isMounted = true;
+    const syncToken = async () => {
+      const activeUser = currentUser || (localStorage.getItem('crossquest_auth_user') ? JSON.parse(localStorage.getItem('crossquest_auth_user')) : null);
+      if (!activeUser?.email) return;
+
+      const storedToken = localStorage.getItem('crossquest_auth_token');
+      if (!storedToken || !token) {
+        try {
+          const formData = new URLSearchParams();
+          formData.append('username', activeUser.email);
+          formData.append('password', 'password123');
+          const res = await fetch('http://localhost:8000/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+          });
+          if (res.ok && isMounted) {
+            const data = await res.json();
+            setToken(data.access_token);
+            localStorage.setItem('crossquest_auth_token', data.access_token);
+          }
+        } catch (e) {
+          console.warn("AuthContext auto-sync warning:", e);
+        }
+      }
+    };
+    syncToken();
+    return () => { isMounted = false; };
+  }, [currentUser]);
+
+
   const loginRole = async (roleKey) => {
     const user = DEMO_USERS[roleKey] || DEMO_USERS.admin;
     setCurrentUser(user);

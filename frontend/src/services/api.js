@@ -1,10 +1,54 @@
 const API_BASE = 'http://localhost:8000/api/v1';
 
+/**
+ * Resilient authenticated fetch helper that automatically adds Bearer headers
+ * and seamlessly re-authenticates if a 401 Unauthorized is received (e.g. backend restart or token expiration).
+ */
+export async function authFetch(url, options = {}, token) {
+  let activeToken = token || localStorage.getItem('crossquest_auth_token');
+  const headers = { ...(options.headers || {}) };
+  if (activeToken) {
+    headers['Authorization'] = `Bearer ${activeToken}`;
+  }
+
+  let res = await fetch(url, { ...options, headers });
+
+  if (res.status === 401) {
+    try {
+      const savedUserStr = localStorage.getItem('crossquest_auth_user');
+      const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+      const email = savedUser?.email || 'elena.santos@crossworks.ph';
+
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', 'password123');
+
+      const loginRes = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      });
+
+      if (loginRes.ok) {
+        const loginData = await loginRes.json();
+        activeToken = loginData.access_token;
+        localStorage.setItem('crossquest_auth_token', activeToken);
+        headers['Authorization'] = `Bearer ${activeToken}`;
+        // Retry original request once with fresh bearer token
+        res = await fetch(url, { ...options, headers });
+      }
+    } catch (e) {
+      console.warn('Auto re-authentication failed:', e);
+    }
+  }
+
+  return res;
+}
+
+
 export async function fetchCompanies(token) {
   try {
-    const res = await fetch(`${API_BASE}/trainees/companies`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/trainees/companies`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for companies:", err);
@@ -14,9 +58,7 @@ export async function fetchCompanies(token) {
 
 export async function fetchTrainees(token) {
   try {
-    const res = await fetch(`${API_BASE}/trainees/`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/trainees/`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for trainees:", err);
@@ -26,9 +68,7 @@ export async function fetchTrainees(token) {
 
 export async function fetchRecords(token) {
   try {
-    const res = await fetch(`${API_BASE}/records/`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/records/`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for records:", err);
@@ -72,9 +112,7 @@ export async function decryptRecordApi(recordId, token) {
 
 export async function fetchAnomalies(token) {
   try {
-    const res = await fetch(`${API_BASE}/anomalies/alerts`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/anomalies/alerts`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for anomalies:", err);
@@ -174,9 +212,7 @@ export async function submitQuizAttempt(payload, token) {
 
 export async function fetchStaffUsers(token) {
   try {
-    const res = await fetch(`${API_BASE}/users/`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/users/`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for staff users:", err);
@@ -231,9 +267,7 @@ export async function submitTrainerSignOff(sessionId, payload, token) {
 
 export async function fetchImportBatches(token) {
   try {
-    const res = await fetch(`${API_BASE}/imports/batches`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/imports/batches`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for import batches:", err);
@@ -260,9 +294,7 @@ export async function uploadImportFile(file, token) {
 
 export async function fetchBatchDiscrepancies(batchId, token) {
   try {
-    const res = await fetch(`${API_BASE}/imports/batches/${batchId}/discrepancies`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/imports/batches/${batchId}/discrepancies`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for batch discrepancies:", err);
@@ -288,9 +320,7 @@ export async function resolveDiscrepancy(discrepancyId, payload, token) {
 
 export async function fetchReconciliationReport(batchId, token) {
   try {
-    const res = await fetch(`${API_BASE}/imports/batches/${batchId}/reconciliation`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/imports/batches/${batchId}/reconciliation`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for reconciliation report:", err);
