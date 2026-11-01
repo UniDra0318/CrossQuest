@@ -97,6 +97,15 @@ def seed_database():
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
             is_superuser=True
         )
+        u_admin_2 = User(
+            email="admin2@crossworks.ph",
+            username="admin_roel",
+            full_name="Prof. Roel Traballo",
+            hashed_password=default_pwd,
+            role="admin",
+            assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
+            is_superuser=True
+        )
         u_acct_mgr = User(
             email="marcus.reyes@crossworks.ph",
             username="am_marcus",
@@ -129,9 +138,10 @@ def seed_database():
             role="trainee",
             assigned_client_accounts=[]
         )
-        db.add_all([u_admin, u_acct_mgr, u_finance, u_trainer, u_trainee])
+        users_to_seed = [u_admin, u_admin_2, u_acct_mgr, u_finance, u_trainer, u_trainee]
+        db.add_all(users_to_seed)
         db.commit()
-        for u in [u_admin, u_acct_mgr, u_finance, u_trainer, u_trainee]:
+        for u in users_to_seed:
             db.refresh(u)
 
         # Link Account Manager Assignment

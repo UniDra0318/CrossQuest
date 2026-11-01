@@ -1,12 +1,41 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
+from typing import Optional, List
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "CrossQuest"
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = "supersecretjwtkeyforcrossquestplatformchangeinproduction"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+
+    # Token Lifetimes (OI-17)
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 10       # 10-minute access token
+    REFRESH_TOKEN_EXPIRE_HOURS: int = 8         # 8-hour refresh token
+    MAX_SESSION_LIFETIME_HOURS: int = 12        # 12-hour maximum session lifetime
+
+    # Role-based Idle Timeouts in Seconds (SEC-07)
+    IDLE_TIMEOUT_ADMIN_FINANCE: int = 900       # 15 minutes
+    IDLE_TIMEOUT_STAFF_TRAINER: int = 1800      # 30 minutes
+    IDLE_TIMEOUT_TRAINEE: int = 3600            # 60 minutes
+
+    # Email Delivery (crossquest@xworks.ph)
+    EMAILS_FROM_EMAIL: str = "crossquest@xworks.ph"
+    SMTP_HOST: Optional[str] = "localhost"
+    SMTP_PORT: int = 1025
+    SMTP_USER: Optional[str] = ""
+    SMTP_PASSWORD: Optional[str] = ""
+    USE_SES: bool = False
+
+    # MFA Configuration (SEC-01, OI-26)
+    MFA_ISSUER_NAME: str = "CrossQuest (Crossworks)"
+
+    # CSRF Protection (SEC-28)
+    CSRF_HEADER_NAME: str = "X-CrossQuest-CSRF"
+    ALLOWED_ORIGINS: List[str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "https://crossquest.xworks.ph"
+    ]
 
     # Database: Use postgresql+psycopg2 for postgres, or sqlite for standalone development
     DATABASE_URL: str = "sqlite:///./crossquest_dev.db"
@@ -21,6 +50,7 @@ class Settings(BaseSettings):
     ANOMALY_FAILED_ATTEMPT_THRESHOLD: int = 5 # 5 failed logins (R2-a)
     ANOMALY_WINDOW_MINUTES: int = 15
     ANOMALY_VOLUME_BURST_THRESHOLD: int = 25 # records requested in window (R3-a AcctMgr/Trainer)
+
     # Environment & Context Signing (SEC-24, OI-14)
     ENVIRONMENT: str = "development"
     CONTEXT_SIGNING_SECRET: str = "crossquest_internal_context_signing_secret_key_change_in_prod"

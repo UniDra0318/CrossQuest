@@ -242,7 +242,11 @@ def test_tc_aut_05_refresh_token_rotation(client: TestClient, seed_test_data):
     assert login_resp.status_code == 200
     refresh_cookie = login_resp.cookies.get("crossquest_refresh_token")
 
-    refresh_resp = client.post("/api/v1/auth/refresh", cookies={"crossquest_refresh_token": refresh_cookie})
+    refresh_resp = client.post(
+        "/api/v1/auth/refresh",
+        cookies={"crossquest_refresh_token": refresh_cookie},
+        headers={"X-CrossQuest-CSRF": "1"}
+    )
     assert refresh_resp.status_code == 200
     assert "access_token" in refresh_resp.json()
 

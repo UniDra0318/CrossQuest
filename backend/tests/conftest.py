@@ -75,7 +75,13 @@ def setup_test_database():
             "ALTER TABLE training_record_versions ADD COLUMN payload_ciphertext TEXT",
             "ALTER TABLE training_record_versions ADD COLUMN policy_tokens VARCHAR(500)",
             "ALTER TABLE training_record_versions ADD COLUMN edited_by_user_id VARCHAR(36)",
-            "ALTER TABLE training_record_versions ADD COLUMN edited_at DATETIME"
+            "ALTER TABLE training_record_versions ADD COLUMN edited_at DATETIME",
+            "ALTER TABLE users ADD COLUMN mfa_enabled BOOLEAN DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN mfa_secret VARCHAR(64)",
+            "ALTER TABLE users ADD COLUMN mfa_recovery_codes JSON",
+            "ALTER TABLE user_sessions ADD COLUMN last_active_at DATETIME",
+            "ALTER TABLE user_sessions ADD COLUMN idle_timeout_sec INTEGER DEFAULT 900",
+            "ALTER TABLE user_sessions ADD COLUMN max_expires_at DATETIME"
         ]:
             try:
                 conn.execute(text(stmt))

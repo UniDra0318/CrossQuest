@@ -64,10 +64,10 @@ export default function Sidebar({ activeView, setActiveView }) {
 
       case 'trainee':
         return [
-          { id: 'trainee_quest', label: 'My quest', icon: Flame },
-          { id: 'trainee_quiz', label: 'Quizzes', icon: GraduationCap },
-          { id: 'trainee_badges', label: 'Badges', icon: Award },
-          { id: 'trainee_certs', label: 'Certifications', icon: BookOpen }
+          { id: 'trainee_quest', label: 'Quest & Progress', icon: Flame },
+          { id: 'trainee_quiz', label: 'Knowledge Quizzes', icon: GraduationCap },
+          { id: 'trainee_badges', label: 'Earned Badges', icon: Award },
+          { id: 'trainee_certs', label: 'My Certifications', icon: BookOpen }
         ];
 
       default:

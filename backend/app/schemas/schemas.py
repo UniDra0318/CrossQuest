@@ -5,15 +5,35 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 
 # Auth & Token
 class Token(BaseModel):
-    access_token: str
-    token_type: str
-    role: str
-    user_id: str
-    full_name: str
+    access_token: Optional[str] = None
+    token_type: Optional[str] = "bearer"
+    role: Optional[str] = None
+    user_id: Optional[str] = None
+    full_name: Optional[str] = None
     assigned_client_accounts: List[str] = []
+    mfa_required: bool = False
+    challenge_token: Optional[str] = None
 
 class TokenData(BaseModel):
     user_id: Optional[str] = None
+
+# MFA Schemas (SEC-01, OI-26)
+class MFASetupResponse(BaseModel):
+    secret: str
+    otpauth_uri: str
+    qr_code_data_uri: str
+
+class MFAEnableRequest(BaseModel):
+    secret: str
+    code: str
+
+class MFAEnableResponse(BaseModel):
+    message: str
+    recovery_codes: List[str]
+
+class MFAVerifyRequest(BaseModel):
+    challenge_token: str
+    code: str # 6-digit TOTP code or 8-character recovery code
 
 
 # User Schemas
@@ -50,6 +70,7 @@ class UserResponse(UserBase):
     id: str
     is_active: bool
     force_password_change: bool = False
+    mfa_enabled: bool = False
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

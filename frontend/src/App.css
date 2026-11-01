@@ -6913,10 +6913,8 @@
 }
 
 .sidebar-nav-btn {
-  border-radius: 10px !important;
-  color: #c9dbe7 !important;
-  padding: 12px !important;
-  font-family: 'Inter', sans-serif !important;
+  border-radius: 12px !important;
+  color: rgba(255, 255, 255, 0.78) !important;
 }
 
 .sidebar-nav-btn:hover {
@@ -6925,10 +6923,9 @@
 }
 
 .sidebar-nav-btn.active {
-  background: #07456b !important;
-  border-left: 3px solid #f0605d !important;
+  background: #f0605d !important;
   color: #ffffff !important;
-  box-shadow: none !important;
+  box-shadow: 0 4px 14px rgba(240, 96, 93, 0.38) !important;
   font-weight: 700;
 }
 

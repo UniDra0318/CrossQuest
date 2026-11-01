@@ -12,6 +12,7 @@ from app.schemas.schemas import (
 )
 from app.api.deps import get_current_user, get_current_admin_user
 from app.crypto.cpabe_engine import cpabe_engine
+from app.services.email_service import email_service
 
 router = APIRouter()
 
@@ -64,10 +65,10 @@ def create_user_by_admin(
     db.commit()
     db.refresh(user)
 
-    # Generate single-use activation token (15-minute expiry)
+    # Generate single-use activation token (24-hour expiry per Chapter III / Phase 1)
     raw_token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
-    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=15)
+    expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=24)
 
     reset_token = PasswordResetToken(
         user_id=user.id,
@@ -76,6 +77,9 @@ def create_user_by_admin(
         expires_at=expires_at
     )
     db.add(reset_token)
+
+    # Deliver setup invitation email from crossquest@xworks.ph (Phase 1)
+    email_service.send_account_setup_email(user.email, user.full_name, raw_token)
 
     # Log to audit log
     log = AccessLog(
@@ -86,7 +90,7 @@ def create_user_by_admin(
         resource_id=user.id,
         outcome="SUCCESS",
         source_ip=_get_client_ip(request),
-        details={"created_email": user.email, "role": user.role}
+        details={"created_email": user.email, "role": user.role, "invitation_sent": True}
     )
     db.add(log)
     db.commit()
@@ -218,6 +222,9 @@ def trigger_user_password_reset(
         expires_at=expires_at
     )
     db.add(reset_token)
+
+    # Deliver password reset email from crossquest@xworks.ph (Phase 1, 15-minute expiry)
+    email_service.send_password_reset_email(user.email, user.full_name, raw_token)
 
     # Invalidate active sessions and force password change
     user.force_password_change = True

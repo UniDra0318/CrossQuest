@@ -48,6 +48,12 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     force_password_change = Column(Boolean, default=False)
+    
+    # MFA for Admin & Finance (SEC-01, OI-26)
+    mfa_enabled = Column(Boolean, default=False)
+    mfa_secret = Column(String(64), nullable=True) # Base32 secret for pyotp
+    mfa_recovery_codes = Column(JSON, default=list) # List of SHA-256 hashed single-use recovery codes
+    
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -553,6 +559,12 @@ class UserSession(Base):
     refresh_token_hash = Column(String(64), index=True, nullable=False)
     is_revoked = Column(Boolean, default=False)
     expires_at = Column(DateTime, nullable=False)
+    
+    # Role-based idle timeout & 12-hour maximum lifetime (SEC-07, OI-17)
+    last_active_at = Column(DateTime, default=datetime.utcnow)
+    idle_timeout_sec = Column(Integer, default=900) # Default 15m (900s admin/fin, 1800s am/trn, 3600s trainee)
+    max_expires_at = Column(DateTime, nullable=True) # 12-hour absolute maximum session lifetime
+    
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="sessions")
