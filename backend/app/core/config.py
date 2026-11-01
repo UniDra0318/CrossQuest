@@ -44,12 +44,25 @@ class Settings(BaseSettings):
     CPABE_MASTER_PUBLIC_KEY_PATH: Optional[str] = "keys/mpk.key"
     CPABE_MASTER_SECRET_KEY_PATH: Optional[str] = "keys/msk.key"
 
-    # Anomaly Detection Thresholds (Chapter III Table 22, Section 3.7.3)
+    # Anomaly Detection Thresholds (Chapter III Table 22, Section 3.7.3 & Phase 4)
     ANOMALY_WORK_HOURS_START: int = 9   # 09:00 PHT
     ANOMALY_WORK_HOURS_END: int = 18    # 18:00 PHT
     ANOMALY_FAILED_ATTEMPT_THRESHOLD: int = 5 # 5 failed logins (R2-a)
+    ANOMALY_R2_B_IP_THRESHOLD: int = 10       # 10 failed logins for single IP (R2-b)
+    ANOMALY_R2_B_DISTINCT_USERS_THRESHOLD: int = 2 # at least 2 distinct targeted usernames (R2-b)
     ANOMALY_WINDOW_MINUTES: int = 15
     ANOMALY_VOLUME_BURST_THRESHOLD: int = 25 # records requested in window (R3-a AcctMgr/Trainer)
+
+    # Audit Retention & Compliance (OI-20)
+    AUDIT_RETENTION_DAYS: int = 365           # 12-month retention
+    AUDIT_WARNING_DAYS: int = 30              # Proactive warning window for open alerts
+
+    # pgAudit and Amazon RDS Logging (OI-20)
+    PGAUDIT_ENABLED: bool = True
+    RDS_LOGGING_ENABLED: bool = True
+    PGAUDIT_LOG_STATEMENTS: str = "read, write, ddl, role"
+    PGAUDIT_LOG_CATALOG: bool = False
+    PGAUDIT_LOG_RELATION: bool = True
 
     # Environment & Context Signing (SEC-24, OI-14)
     ENVIRONMENT: str = "development"

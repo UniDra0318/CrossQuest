@@ -235,9 +235,10 @@ class QuizSubmitRequest(BaseModel):
 
 # Anomalies & Audit (with full alert lifecycle)
 class AnomalyAlertReviewRequest(BaseModel):
-    status: str # UNDER_REVIEW or CLOSED
+    status: str # UNDER_REVIEW, AWAITING_UNINVOLVED_ADMIN, or CLOSED (OI-30)
     disposition: Optional[str] = None # CLOSED_EXPECTED_ACTIVITY or CLOSED_FOLLOW_UP_REQUIRED
     review_note: Optional[str] = None
+    involved_admin_ids: Optional[List[str]] = None
 
 class AnomalyAlertResponse(BaseModel):
     id: str
@@ -294,6 +295,33 @@ class AnomalyRuleUpdate(BaseModel):
     parameters: Optional[Dict[str, Any]] = None
     client_reviewed: Optional[bool] = None
     description: Optional[str] = None
+    reason: Optional[str] = None
+
+
+class RetentionJobRequest(BaseModel):
+    retention_days: Optional[int] = 365
+    warning_days: Optional[int] = 30
+
+
+class RetentionWarningItem(BaseModel):
+    alert_id: str
+    rule_code: str
+    severity: Optional[str] = "MEDIUM"
+    status: str
+    created_at: str
+    age_days: int
+    days_until_retention_limit: int
+    warning: str
+
+
+class RetentionJobResponse(BaseModel):
+    success: bool
+    purged_logs_count: int
+    purged_closed_alerts_count: int
+    open_alerts_warned_count: int
+    warnings: List[RetentionWarningItem] = []
+    purge_cutoff: str
+    warning_cutoff: str
 
 
 

@@ -60,6 +60,26 @@ def admin_user(db_session: Session) -> User:
     return admin
 
 
+@pytest.fixture
+def second_admin_user(db_session: Session) -> User:
+    """Creates a second administrator for peer review tests (OI-29, OI-30)."""
+    admin2 = db_session.query(User).filter_by(email="anomaly_admin2@test.ph").first()
+    if not admin2:
+        admin2 = User(
+            email="anomaly_admin2@test.ph",
+            username="anomaly_admin2",
+            full_name="Prof. Roel Traballo",
+            hashed_password=get_password_hash("AdminPass222!"),
+            role="admin",
+            is_superuser=True,
+            is_active=True
+        )
+        db_session.add(admin2)
+        db_session.commit()
+        db_session.refresh(admin2)
+    return admin2
+
+
 @pytest.fixture(autouse=True)
 def clean_anomaly_state(db_session: Session, test_user: User):
     """Isolate each test by clearing prior logs and alerts for test_user."""
@@ -532,3 +552,448 @@ def test_tc_ano_21_below_threshold_no_alert(db_session: Session, test_user: User
 
     alert_report = anomaly_detector.check_report_bursts(test_user, db_session)
     assert alert_report is None
+
+
+# =========================================================================
+# Phase 4: Peer Review, Dual Threshold R2-b, Retention Job, & Detection Measurement
+# =========================================================================
+
+def test_tc_ano_22_r2_b_dual_threshold_requires_distinct_targeted_users(db_session: Session):
+    """TC-ANO-22: R2-b requires >=10 failures AND >=2 distinct targeted usernames in 10 min."""
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    target_ip = "192.168.100.99"
+    # Clean previous logs for test isolation
+    db_session.query(AccessLog).filter(AccessLog.source_ip == target_ip).delete()
+    db_session.commit()
+
+    # Case 1: 10 failures from same IP for single username -> distinct users = 1 < 2 -> R2-b does not trigger
+    for i in range(10):
+        log = AccessLog(
+            event_type="AUTH_FAILURE",
+            resource_type="AUTH",
+            outcome="FAILED",
+            reason_code="INVALID_CREDENTIALS",
+            source_ip=target_ip,
+            details={"username": "single_target_user@test.ph"},
+            occurred_at=now - timedelta(minutes=1)
+        )
+        db_session.add(log)
+    db_session.commit()
+
+    # Evaluating for another user from this IP
+    alert_single = anomaly_detector.check_failed_logins("other_user@test.ph", target_ip, db_session)
+    assert alert_single is None  # R2-b not triggered because distinct targeted usernames == 1
+
+    # Case 2: Add failure for a 2nd distinct user -> distinct users == 2 -> R2-b triggers!
+    log_second = AccessLog(
+        event_type="AUTH_FAILURE",
+        resource_type="AUTH",
+        outcome="FAILED",
+        reason_code="INVALID_CREDENTIALS",
+        source_ip=target_ip,
+        details={"username": "second_target_user@test.ph"},
+        occurred_at=now - timedelta(minutes=1)
+    )
+    db_session.add(log_second)
+    db_session.commit()
+
+    alert_multi = anomaly_detector.check_failed_logins("second_target_user@test.ph", target_ip, db_session)
+    assert alert_multi is not None
+    assert alert_multi.rule_code == "R2_FAILED_LOGINS_IP"
+    assert alert_multi.severity_base == "MEDIUM"
+    assert alert_multi.metadata_info["distinct_targeted_usernames"] >= 2
+
+
+def test_tc_ano_23_peer_review_blocks_subject_administrator(
+    client: TestClient, admin_user: User, second_admin_user: User, db_session: Session
+):
+    """TC-ANO-23: Administrators are blocked from reviewing alerts where they are the subject (OI-30)."""
+    # Create alert where admin_user is the subject
+    alert = AnomalyAlert(
+        subject_user_id=admin_user.id,
+        rule_code="R4_RECORD_DELETION",
+        severity_base="HIGH",
+        severity_final="HIGH",
+        severity="HIGH",
+        description="Administrator soft-deleted a record",
+        status="NEW"
+    )
+    db_session.add(alert)
+    db_session.commit()
+    db_session.refresh(alert)
+
+    token_subject_admin = create_access_token(subject=admin_user.id)
+    token_peer_admin = create_access_token(subject=second_admin_user.id)
+
+    # 1. Subject Administrator attempts review -> 403 Forbidden
+    res_forbidden = client.put(
+        f"/api/v1/anomalies/alerts/{alert.id}/review",
+        json={"status": "UNDER_REVIEW", "review_note": "Self-reviewing my action"},
+        headers={"Authorization": f"Bearer {token_subject_admin}"}
+    )
+    assert res_forbidden.status_code == 403
+    assert "Conflict of interest" in res_forbidden.json()["detail"]
+
+    # 2. Peer Administrator reviews successfully -> 200 OK
+    res_peer_review = client.put(
+        f"/api/v1/anomalies/alerts/{alert.id}/review",
+        json={"status": "UNDER_REVIEW", "review_note": "Peer review initiated by Prof. Traballo"},
+        headers={"Authorization": f"Bearer {token_peer_admin}"}
+    )
+    assert res_peer_review.status_code == 200
+    assert res_peer_review.json()["status"] == "UNDER_REVIEW"
+    assert res_peer_review.json()["reviewed_by_user_id"] == second_admin_user.id
+
+    # 3. Peer Administrator closes alert with mandatory disposition
+    res_peer_close = client.put(
+        f"/api/v1/anomalies/alerts/{alert.id}/review",
+        json={
+            "status": "CLOSED",
+            "disposition": "CLOSED_EXPECTED_ACTIVITY",
+            "review_note": "Verified authorized maintenance deletion."
+        },
+        headers={"Authorization": f"Bearer {token_peer_admin}"}
+    )
+    assert res_peer_close.status_code == 200
+    assert res_peer_close.json()["status"] == "CLOSED"
+
+
+def test_tc_ano_24_peer_review_awaiting_uninvolved_admin_state(
+    client: TestClient, admin_user: User, second_admin_user: User, db_session: Session
+):
+    """TC-ANO-24: Awaiting uninvolved Administrator state for multi-admin implication (OI-30)."""
+    alert = AnomalyAlert(
+        subject_user_id=None,
+        rule_code="R1_REPEATED_OUT_OF_SCOPE",
+        description="Shared administrative console security incident",
+        status="NEW"
+    )
+    db_session.add(alert)
+    db_session.commit()
+    db_session.refresh(alert)
+
+    token_admin1 = create_access_token(subject=admin_user.id)
+    token_admin2 = create_access_token(subject=second_admin_user.id)
+
+    # 1. Admin 1 transitions alert to AWAITING_UNINVOLVED_ADMIN, recording both admins as involved
+    res_await = client.put(
+        f"/api/v1/anomalies/alerts/{alert.id}/review",
+        json={
+            "status": "AWAITING_UNINVOLVED_ADMIN",
+            "review_note": "Both internal administrators logged in during incident window; recusing to uninvolved compliance reviewer.",
+            "involved_admin_ids": [admin_user.id, second_admin_user.id]
+        },
+        headers={"Authorization": f"Bearer {token_admin1}"}
+    )
+    assert res_await.status_code == 200
+    assert res_await.json()["status"] == "AWAITING_UNINVOLVED_ADMIN"
+
+    # 2. Implicated Admin 2 attempts closing -> 403 Forbidden
+    res_implicated = client.put(
+        f"/api/v1/anomalies/alerts/{alert.id}/review",
+        json={
+            "status": "CLOSED",
+            "disposition": "CLOSED_EXPECTED_ACTIVITY",
+            "review_note": "Trying to close"
+        },
+        headers={"Authorization": f"Bearer {token_admin2}"}
+    )
+    assert res_implicated.status_code == 403
+    assert "implicated" in res_implicated.json()["detail"].lower()
+
+
+def test_tc_ano_25_retention_job_purges_12mo_data_and_warns_open_alerts(
+    client: TestClient, admin_user: User, db_session: Session
+):
+    """TC-ANO-25: 12-month data retention purges old logs & closed alerts, warns 30 days ahead for open alerts (OI-20)."""
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    admin_token = create_access_token(subject=admin_user.id)
+
+    # 1. Old log (400 days old) -> Should be purged
+    old_log = AccessLog(
+        actor_user_id=admin_user.id,
+        event_type="AUTH_SUCCESS",
+        resource_type="AUTH",
+        outcome="SUCCESS",
+        source_ip="127.0.0.1",
+        occurred_at=now - timedelta(days=400)
+    )
+    # 2. Recent log (30 days old) -> Should be preserved
+    recent_log = AccessLog(
+        actor_user_id=admin_user.id,
+        event_type="AUTH_SUCCESS",
+        resource_type="AUTH",
+        outcome="SUCCESS",
+        source_ip="127.0.0.1",
+        occurred_at=now - timedelta(days=30)
+    )
+    # 3. Old closed alert (400 days old, CLOSED) -> Should be purged
+    old_closed_alert = AnomalyAlert(
+        rule_code="R2_FAILED_LOGINS_IP",
+        status="CLOSED",
+        disposition="CLOSED_EXPECTED_ACTIVITY",
+        review_note="Old closed alert",
+        description="Historical closed alert older than 12 months",
+        created_at=now - timedelta(days=400)
+    )
+    # 4. Old OPEN alert (350 days old, NEW) -> Approaching 12 months (within 30-day window) -> MUST NOT BE PURGED, but WARNED
+    open_warning_alert = AnomalyAlert(
+        rule_code="R4_RECORD_DELETION",
+        status="NEW",
+        description="Unreviewed deletion alert approaching retention deadline",
+        created_at=now - timedelta(days=350)
+    )
+    db_session.add_all([old_log, recent_log, old_closed_alert, open_warning_alert])
+    db_session.commit()
+
+    old_log_id = old_log.id
+    recent_log_id = recent_log.id
+    old_closed_alert_id = old_closed_alert.id
+    open_warning_alert_id = open_warning_alert.id
+
+    # Run retention job via API endpoint
+    res_run = client.post(
+        "/api/v1/anomalies/retention/run",
+        json={"retention_days": 365, "warning_days": 30},
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_run.status_code == 200
+    data = res_run.json()
+    assert data["success"] is True
+    assert data["purged_logs_count"] >= 1
+    assert data["purged_closed_alerts_count"] >= 1
+    assert data["open_alerts_warned_count"] >= 1
+
+    # Verify preserved records
+    assert db_session.query(AccessLog).filter(AccessLog.id == recent_log_id).first() is not None
+    assert db_session.query(AccessLog).filter(AccessLog.id == old_log_id).first() is None
+    assert db_session.query(AnomalyAlert).filter(AnomalyAlert.id == old_closed_alert_id).first() is None
+    # Open alert is preserved!
+    assert db_session.query(AnomalyAlert).filter(AnomalyAlert.id == open_warning_alert_id).first() is not None
+
+    # Verify warnings endpoint
+    res_warn = client.get(
+        "/api/v1/anomalies/retention/warnings",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_warn.status_code == 200
+    warnings = res_warn.json()
+    warn_ids = [w["alert_id"] for w in warnings]
+    assert open_warning_alert.id in warn_ids
+
+
+def test_tc_ano_26_threshold_tuning_audited_with_old_and_new_parameters(
+    client: TestClient, admin_user: User, db_session: Session
+):
+    """TC-ANO-26: Threshold tuning edits in UI record old and new parameters in AccessLog (OI-08)."""
+    admin_token = create_access_token(subject=admin_user.id)
+
+    # Update R2-b parameters
+    res_tune = client.put(
+        "/api/v1/anomalies/rules/R2_FAILED_LOGINS_IP",
+        json={
+            "parameters": {"threshold": 12, "distinct_usernames_threshold": 3, "window_minutes": 10},
+            "client_reviewed": True,
+            "reason": "Fine-tuning threshold based on Crossworks monthly review (OI-08)"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_tune.status_code == 200
+
+    # Query audit log for RULE_MODIFIED
+    audit_entry = (
+        db_session.query(AccessLog)
+        .filter(AccessLog.event_type == "RULE_MODIFIED", AccessLog.resource_type == "ANOMALY_RULE")
+        .order_by(AccessLog.occurred_at.desc())
+        .first()
+    )
+    assert audit_entry is not None
+    details = audit_entry.details
+    assert details["rule_code"] == "R2_FAILED_LOGINS_IP"
+    assert "old_parameters" in details
+    assert details["new_parameters"]["threshold"] == 12
+    assert details["new_parameters"]["distinct_usernames_threshold"] == 3
+    assert "OI-08" in details["reason"]
+
+
+def test_tc_ano_27_detection_measurement_30_events_per_rule(
+    db_session: Session, test_user: User
+):
+    """TC-ANO-27: Measure detection latency (p95 <= 60s), 0 missed detections, 0 false alarms across 30 events per rule."""
+    import time
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    rules_to_test = [
+        "R1_OUT_OF_SCOPE",
+        "R1_REPEATED_OUT_OF_SCOPE",
+        "R2_FAILED_LOGINS_ACCOUNT",
+        "R2_FAILED_LOGINS_IP",
+        "R3_HIGH_RECORD_ACCESS",
+        "R3_REPORT_BURSTS",
+        "R4_RECORD_DELETION",
+        "R4_RECORD_EDIT",
+        "R4_BULK_EDIT"
+    ]
+
+    latencies = []
+    missed_detections = 0
+    false_alarms = 0
+
+    # 1. 30 Positive / Anomalous events per rule (testing 0 missed detections)
+    for rule in rules_to_test:
+        for trial in range(30):
+            t_start = time.perf_counter()
+            alert = None
+
+            if rule == "R1_OUT_OF_SCOPE":
+                alert = anomaly_detector.record_out_of_scope_attempt(
+                    test_user, f"/records/secret_{trial}", "CORP_BETA", db_session
+                )
+            elif rule == "R1_REPEATED_OUT_OF_SCOPE":
+                # Seed 3 denials
+                for d in range(3):
+                    db_session.add(AccessLog(
+                        actor_user_id=test_user.id,
+                        actor_role=test_user.role,
+                        event_type="ACCESS_DENIED",
+                        resource_type="RECORD",
+                        outcome="DENIED",
+                        reason_code="OUT_OF_SCOPE",
+                        occurred_at=now - timedelta(minutes=1)
+                    ))
+                db_session.commit()
+                alert = anomaly_detector.record_out_of_scope_attempt(
+                    test_user, f"/records/secret_rep_{trial}", "CORP_BETA", db_session
+                )
+            elif rule == "R2_FAILED_LOGINS_ACCOUNT":
+                # Seed 5 failed logins for this account
+                uname = f"brute_{trial}@test.ph"
+                for fl in range(5):
+                    db_session.add(AccessLog(
+                        event_type="AUTH_FAILURE",
+                        resource_type="AUTH",
+                        outcome="FAILED",
+                        reason_code="INVALID_CREDENTIALS",
+                        source_ip=f"10.0.{trial}.1",
+                        details={"username": uname},
+                        occurred_at=now - timedelta(minutes=1)
+                    ))
+                db_session.commit()
+                alert = anomaly_detector.check_failed_logins(uname, f"10.0.{trial}.1", db_session)
+            elif rule == "R2_FAILED_LOGINS_IP":
+                ip = f"198.51.100.{trial}"
+                for fl in range(10):
+                    db_session.add(AccessLog(
+                        event_type="AUTH_FAILURE",
+                        resource_type="AUTH",
+                        outcome="FAILED",
+                        reason_code="INVALID_CREDENTIALS",
+                        source_ip=ip,
+                        details={"username": f"user_{fl}_{trial}@test.ph"},
+                        occurred_at=now - timedelta(minutes=1)
+                    ))
+                db_session.commit()
+                alert = anomaly_detector.check_failed_logins(f"user_0_{trial}@test.ph", ip, db_session)
+            elif rule == "R3_HIGH_RECORD_ACCESS":
+                for v in range(25):
+                    db_session.add(AccessLog(
+                        actor_user_id=test_user.id,
+                        actor_role=test_user.role,
+                        event_type="ACCESS_ALLOWED",
+                        resource_type="RECORD",
+                        outcome="SUCCESS",
+                        resource_id=f"rec_burst_{trial}_{v}",
+                        occurred_at=now - timedelta(minutes=1)
+                    ))
+                db_session.commit()
+                alert = anomaly_detector.check_high_record_access(test_user, db_session)
+            elif rule == "R3_REPORT_BURSTS":
+                for r in range(5):
+                    db_session.add(AccessLog(
+                        actor_user_id=test_user.id,
+                        actor_role=test_user.role,
+                        event_type="REPORT_GENERATED",
+                        resource_type="REPORT",
+                        outcome="SUCCESS",
+                        occurred_at=now - timedelta(minutes=1)
+                    ))
+                db_session.commit()
+                alert = anomaly_detector.check_report_bursts(test_user, db_session)
+            elif rule == "R4_RECORD_DELETION":
+                alert = anomaly_detector.record_deletion_event(
+                    user=test_user,
+                    record_id=f"rec_del_{trial}",
+                    company_code="CORP_ALPHA",
+                    db=db_session
+                )
+            elif rule == "R4_RECORD_EDIT":
+                alert = anomaly_detector.record_edit_event(
+                    user=test_user,
+                    record_id=f"rec_edit_{trial}",
+                    fields_changed=["score"],
+                    db=db_session
+                )
+            elif rule == "R4_BULK_EDIT":
+                for be in range(10):
+                    db_session.add(AccessLog(
+                        actor_user_id=test_user.id,
+                        actor_role=test_user.role,
+                        event_type="RECORD_EDIT",
+                        resource_type="RECORD",
+                        outcome="SUCCESS",
+                        resource_id=f"rec_bulk_{trial}_{be}",
+                        occurred_at=now - timedelta(minutes=1)
+                    ))
+                db_session.commit()
+                alert = anomaly_detector.record_edit_event(
+                    user=test_user,
+                    record_id=f"rec_bulk_{trial}_final",
+                    fields_changed=["score"],
+                    db=db_session
+                )
+            t_elapsed = time.perf_counter() - t_start
+            latencies.append(t_elapsed)
+
+            if alert is None:
+                missed_detections += 1
+
+    # 2. 30 Negative / Normal baseline events (testing 0 false alarms)
+    clean_user = db_session.query(User).filter_by(email="normal_baseline@test.ph").first()
+    if not clean_user:
+        clean_user = User(
+            email="normal_baseline@test.ph",
+            username="normal_baseline",
+            full_name="Baseline User",
+            hashed_password=get_password_hash("Baseline123!"),
+            role="account_manager",
+            assigned_client_accounts=["CORP_ALPHA"],
+            is_active=True
+        )
+        db_session.add(clean_user)
+        db_session.commit()
+
+    for trial in range(30):
+        # 1 single failed login from distinct IP -> well below thresholds
+        alert_false = anomaly_detector.check_failed_logins(
+            f"normal_user_{trial}@test.ph", f"172.16.1.{trial}", db_session
+        )
+        if alert_false is not None:
+            false_alarms += 1
+
+    # Calculate statistics
+    latencies.sort()
+    n = len(latencies)
+    median_latency = latencies[n // 2]
+    p95_latency = latencies[int(n * 0.95)]
+    max_latency = latencies[-1]
+
+    # Chapter III Performance Requirement: p95 <= 60 seconds (in practice < 0.1s on local engine)
+    assert p95_latency <= 60.0, f"p95 latency {p95_latency}s exceeded 60s limit"
+    assert missed_detections == 0, f"Expected 0 missed detections, got {missed_detections}"
+    assert false_alarms == 0, f"Expected 0 false alarms, got {false_alarms}"
+
+    print(
+        f"\n[Phase 4 Anomaly Measurement M4] Total evaluations: {n} | "
+        f"Median: {median_latency*1000:.2f}ms | p95: {p95_latency*1000:.2f}ms | Max: {max_latency*1000:.2f}ms | "
+        f"Missed detections: {missed_detections} | False alarms: {false_alarms}"
+    )

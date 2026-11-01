@@ -448,7 +448,7 @@ class AnomalyAlert(Base):
     client_reviewed = Column(Boolean, default=False)
     
     # Alert lifecycle (Section 3.7.5)
-    status = Column(String(20), default="NEW") # NEW, UNDER_REVIEW, CLOSED
+    status = Column(String(32), default="NEW") # NEW, UNDER_REVIEW, AWAITING_UNINVOLVED_ADMIN, CLOSED
     disposition = Column(String(50), nullable=True) # CLOSED_EXPECTED_ACTIVITY, CLOSED_FOLLOW_UP_REQUIRED
     review_note = Column(Text, nullable=True) # Required when closing
     reviewed_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)

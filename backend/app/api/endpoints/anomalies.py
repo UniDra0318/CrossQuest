@@ -6,8 +6,10 @@ from sqlalchemy import desc
 from app.core.database import get_db
 from app.models.entities import AnomalyAlert, AccessLog, User
 from app.schemas.schemas import (
-    AnomalyAlertResponse, AnomalyAlertReviewRequest, AccessLogResponse
+    AnomalyAlertResponse, AnomalyAlertReviewRequest, AccessLogResponse,
+    RetentionJobRequest, RetentionJobResponse, RetentionWarningItem
 )
+from app.services.retention_service import run_retention_purge, get_retention_warnings
 from app.api.deps import get_current_admin_user
 
 router = APIRouter()
@@ -37,11 +39,12 @@ def review_anomaly_alert(
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_current_admin_user)
 ):
-    """Administrator review of an anomaly alert (Section 3.7.5).
+    """Administrator review of an anomaly alert with Peer Review enforcement (Section 3.7.5, OI-30).
     
     Transitions:
     - NEW -> UNDER_REVIEW
-    - UNDER_REVIEW / NEW -> CLOSED with required disposition & review note:
+    - NEW / UNDER_REVIEW -> AWAITING_UNINVOLVED_ADMIN (when an involved admin must recuse or both are flagged)
+    - UNDER_REVIEW / NEW / AWAITING_UNINVOLVED_ADMIN -> CLOSED with required disposition & review note:
         * CLOSED_EXPECTED_ACTIVITY
         * CLOSED_FOLLOW_UP_REQUIRED
     """
@@ -49,12 +52,44 @@ def review_anomaly_alert(
     if not alert:
         raise HTTPException(status_code=404, detail="Anomaly alert not found")
 
+    # 1. Peer Review check (OI-30):
+    # An Administrator cannot review or resolve an alert where they are the subject (subject_user_id != self)
+    if alert.subject_user_id and alert.subject_user_id == admin_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Conflict of interest: Administrators cannot review or close alerts where they are the subject (OI-30). A peer Administrator must review this alert."
+        )
+
+    # 2. Check if alert is awaiting uninvolved administrator
+    meta = alert.metadata_info or {}
+    involved_admins = meta.get("involved_admin_ids", [])
+    if alert.status == "AWAITING_UNINVOLVED_ADMIN":
+        if admin_user.id in involved_admins or alert.subject_user_id == admin_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Conflict of interest: Administrator is implicated in this alert. Only an uninvolved Administrator can review an alert in AWAITING_UNINVOLVED_ADMIN state (OI-30)."
+            )
+
     new_status = review_in.status.upper()
-    if new_status not in ("UNDER_REVIEW", "CLOSED"):
+    if new_status not in ("UNDER_REVIEW", "AWAITING_UNINVOLVED_ADMIN", "CLOSED"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Status must be either 'UNDER_REVIEW' or 'CLOSED'."
+            detail="Status must be 'UNDER_REVIEW', 'AWAITING_UNINVOLVED_ADMIN', or 'CLOSED'."
         )
+
+    if new_status == "AWAITING_UNINVOLVED_ADMIN":
+        if not review_in.review_note or not review_in.review_note.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A review note explaining why peer or uninvolved administrator review is required is mandatory."
+            )
+        # Store involved admin IDs if provided
+        inv = list(review_in.involved_admin_ids or [])
+        if alert.subject_user_id and alert.subject_user_id not in inv:
+            inv.append(alert.subject_user_id)
+        if admin_user.id not in inv:
+            inv.append(admin_user.id)
+        alert.metadata_info = {**meta, "involved_admin_ids": inv}
 
     if new_status == "CLOSED":
         if not review_in.disposition:
@@ -119,7 +154,7 @@ DEFAULT_RULES = [
     {"rule_code": "R1_OUT_OF_SCOPE", "parameters": {"threshold": 1, "window_minutes": 1440, "severity": "LOW"}, "description": "Single out-of-scope attempt aggregated daily"},
     {"rule_code": "R1_REPEATED_OUT_OF_SCOPE", "parameters": {"threshold": 3, "window_minutes": 15, "severity": "MEDIUM"}, "description": "Repeated out-of-scope attempts in 15 min"},
     {"rule_code": "R2_FAILED_LOGINS_ACCOUNT", "parameters": {"threshold": 5, "window_minutes": 10, "severity": "MEDIUM"}, "description": "Failed logins for single account"},
-    {"rule_code": "R2_FAILED_LOGINS_IP", "parameters": {"threshold": 10, "window_minutes": 10, "severity": "MEDIUM"}, "description": "Failed logins for single IP"},
+    {"rule_code": "R2_FAILED_LOGINS_IP", "parameters": {"threshold": 10, "distinct_usernames_threshold": 2, "window_minutes": 10, "severity": "MEDIUM"}, "description": "Failed logins for single IP (>=10 failures across >=2 distinct usernames in 10 min)"},
     {"rule_code": "R3_HIGH_RECORD_ACCESS", "parameters": {"thresholds": {"account_manager": 25, "trainer": 25, "finance": 50, "admin": 50, "trainee": 15}, "window_minutes": 15}, "description": "High distinct record access"},
     {"rule_code": "R3_REPORT_BURSTS", "parameters": {"threshold": 5, "window_minutes": 60, "severity": "MEDIUM"}, "description": "Report generation bursts"},
     {"rule_code": "R4_RECORD_DELETION", "parameters": {"threshold": 1, "severity": "HIGH"}, "description": "Soft deletion of client data"},
@@ -159,8 +194,10 @@ def update_anomaly_rule(
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_current_admin_user)
 ):
-    """Administrator updates rule thresholds/parameters and manages review approval (TC-ANO-20)."""
+    """Administrator updates rule thresholds/parameters and manages review approval (TC-ANO-20, OI-08)."""
     rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == rule_code).first()
+    old_params = {}
+    old_v = 0
     if not rule:
         # Create if not existing
         rule = AnomalyRule(
@@ -172,6 +209,8 @@ def update_anomaly_rule(
         )
         db.add(rule)
     else:
+        old_params = dict(rule.parameters or {})
+        old_v = rule.version_no
         if update_in.parameters is not None:
             rule.parameters = update_in.parameters
             rule.version_no += 1
@@ -180,7 +219,7 @@ def update_anomaly_rule(
         if update_in.description is not None:
             rule.description = update_in.description
 
-    # Audit log
+    # Audit log with comprehensive parameter delta for Crossworks review (OI-08)
     log = AccessLog(
         actor_user_id=admin_user.id,
         actor_role=admin_user.role,
@@ -188,9 +227,48 @@ def update_anomaly_rule(
         resource_type="ANOMALY_RULE",
         resource_id=rule.id,
         outcome="SUCCESS",
-        details={"rule_code": rule_code, "version": rule.version_no, "client_reviewed": rule.client_reviewed}
+        details={
+            "rule_code": rule_code,
+            "old_parameters": old_params,
+            "new_parameters": rule.parameters,
+            "old_version": old_v,
+            "new_version": rule.version_no,
+            "client_reviewed": rule.client_reviewed,
+            "reason": update_in.reason or update_in.description or "Threshold tuning updated by Administrator (OI-08)"
+        }
     )
     db.add(log)
     db.commit()
     db.refresh(rule)
     return rule
+
+
+# --- 12-Month Audit & Anomaly Retention Endpoints (OI-20) ---
+
+@router.post("/retention/run", response_model=RetentionJobResponse)
+def trigger_retention_job(
+    req: RetentionJobRequest = RetentionJobRequest(),
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Executes 12-month data retention job, purging old audit logs and closed alerts,
+    and generating proactive warnings for alerts approaching the 12-month limit (OI-20).
+    """
+    res = run_retention_purge(
+        db=db,
+        retention_days=req.retention_days,
+        warning_days=req.warning_days,
+        triggered_by_user_id=admin_user.id
+    )
+    return res
+
+
+@router.get("/retention/warnings", response_model=List[RetentionWarningItem])
+def list_retention_warnings(
+    retention_days: int = 365,
+    warning_days: int = 30,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Lists open anomaly alerts within 30 days of the 12-month retention disposal limit."""
+    return get_retention_warnings(db=db, retention_days=retention_days, warning_days=warning_days)

@@ -7,7 +7,7 @@ Rules:
 - R1-a: Out-of-scope attempt (1 event) -> Low alert, aggregated daily.
 - R1-b: Repeated out-of-scope attempts (3 events in 15 min) -> Medium alert.
 - R2-a: Failed logins, single account (5 in 10 min) -> Medium alert (no lock-out).
-- R2-b: Failed logins, single source IP (10 in 10 min) -> Medium alert (no lock-out).
+- R2-b: Failed logins, single source IP (>=10 failures AND >=2 distinct usernames in 10 min) -> Medium alert (no lock-out).
 - R3-a: High record access (distinct record-detail views in 15 min) -> Medium alert; High if >= 2x threshold.
         Thresholds by role: AcctMgr 25, Trainer 25, Finance 50, Admin 50, Trainee 15.
         (Note: list/search views are excluded from R3-a).
@@ -21,6 +21,8 @@ Rules:
 Alerts are recorded for Administrator review only (no automatic lock-out, immutable).
 """
 
+import hmac
+import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple, Dict, Any
 from sqlalchemy.orm import Session
@@ -203,20 +205,33 @@ class AccessAnomalyDetector:
         source_ip: str,
         db: Session
     ) -> Optional[AnomalyAlert]:
-        """Rule R2: 5 failures/account (R2-a) or 10 failures/IP (R2-b) in 10 minutes. No lock-out."""
+        """Rule R2: 5 failures/account (R2-a) or >=10 failures across >=2 distinct targeted usernames for IP (R2-b) in 10 minutes. No lock-out."""
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         window_10m = now - timedelta(minutes=10)
 
-        # R2-a: Failed logins for one username
-        account_failures = (
-            db.query(func.count(AccessLog.id))
+        # Compute keyed-HMAC username for privacy-preserving match
+        uname_normalized = username.lower().strip() if username else ""
+        username_hmac = hmac.new(settings.SECRET_KEY.encode(), uname_normalized.encode(), hashlib.sha256).hexdigest()
+
+        # Query recent AUTH_FAILURE logs within the 10-minute sliding window
+        recent_failures = (
+            db.query(AccessLog)
             .filter(
                 AccessLog.event_type == "AUTH_FAILURE",
-                AccessLog.details["username"].as_string() == username,
                 AccessLog.occurred_at >= window_10m
             )
-            .scalar() or 0
+            .all()
         )
+
+        # R2-a: Failed logins for targeted account (threshold = 5)
+        account_failures = 0
+        for log in recent_failures:
+            det = log.details or {}
+            log_uname = det.get("username")
+            log_hmac = det.get("username_hmac")
+            if (log_uname and log_uname.lower().strip() == uname_normalized) or (log_hmac and log_hmac == username_hmac):
+                account_failures += 1
+
         if account_failures >= 5:
             user = db.query(User).filter(or_(User.email == username, User.username == username)).first()
             return self._create_or_update_alert(
@@ -228,24 +243,36 @@ class AccessAnomalyDetector:
                 metadata_info={"username": username, "failures": account_failures, "window_minutes": 10}
             )
 
-        # R2-b: Failed logins from one source address
-        ip_failures = (
-            db.query(func.count(AccessLog.id))
-            .filter(
-                AccessLog.event_type == "AUTH_FAILURE",
-                AccessLog.source_ip == source_ip,
-                AccessLog.occurred_at >= window_10m
-            )
-            .scalar() or 0
-        )
-        if ip_failures >= 10:
+        # R2-b: Failed logins from single source IP (dual threshold: >=10 failures AND >=2 distinct targeted usernames)
+        ip_failures = 0
+        distinct_targeted_users = set()
+        for log in recent_failures:
+            if log.source_ip == source_ip:
+                ip_failures += 1
+                det = log.details or {}
+                identifier = det.get("username_hmac") or det.get("username")
+                if identifier:
+                    distinct_targeted_users.add(identifier)
+
+        threshold_ip = getattr(settings, "ANOMALY_R2_B_IP_THRESHOLD", 10)
+        threshold_distinct = getattr(settings, "ANOMALY_R2_B_DISTINCT_USERS_THRESHOLD", 2)
+
+        if ip_failures >= threshold_ip and len(distinct_targeted_users) >= threshold_distinct:
             return self._create_or_update_alert(
                 db=db,
                 rule_code="R2_FAILED_LOGINS_IP",
                 base_severity="MEDIUM",
-                description=f"Multiple failed logins from source IP {source_ip}: {ip_failures} failures in 10 minutes.",
+                description=(
+                    f"Multiple failed logins from source IP {source_ip}: "
+                    f"{ip_failures} failures across {len(distinct_targeted_users)} distinct targeted accounts in 10 minutes."
+                ),
                 subject_user_id=None,
-                metadata_info={"source_ip": source_ip, "failures": ip_failures, "window_minutes": 10}
+                metadata_info={
+                    "source_ip": source_ip,
+                    "failures": ip_failures,
+                    "distinct_targeted_usernames": len(distinct_targeted_users),
+                    "window_minutes": 10
+                }
             )
 
         return None
