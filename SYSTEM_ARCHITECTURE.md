@@ -1,12 +1,12 @@
 # 🛡️ CrossQuest: Comprehensive System Architecture, Process Workflows, & Complete System Catalog
 
-**CrossQuest** is a secure, multi-tenant corporate training record and certification management platform engineered for **Crossworks Training and Consulting Corp.** (developed as a Capstone Research Project at the College of Computing and Information Sciences, University of Makati).
+**CrossQuest** is an enterprise-grade, multi-tenant corporate training record and certification management platform engineered for **Crossworks Training and Consulting Corp.** (developed as a Capstone Research Project at the College of Computing and Information Sciences, University of Makati).
 
-The platform implements a **three-tier defense-in-depth data security architecture** designed to satisfy the rigorous requirements of **ISO/IEC 27001:2022** (access control, cryptography, audit logging, and security monitoring) and **ISO/IEC 25010** (software security and quality):
-1. **Layer 1: PostgreSQL Row-Level Security (RLS)** with cryptographically signed HMAC-SHA256 session contexts preventing unauthorized multi-tenant queries.
-2. **Layer 2: Ciphertext-Policy Attribute-Based Encryption (CP-ABE)** enforcing fine-grained, mathematical record-level access policies via Charm-Crypto BSW07 and AES-256-GCM.
-3. **Layer 3: Access Anomaly Detection Engine** executing continuous real-time monitoring of out-of-scope record access, brute-force logins, high-volume data harvesting, bulk edits, and unauthorized deletions, augmented by an off-hours supporting indicator.
-4. **Offline-Capable Gamified PWA** providing interactive training reinforcement, server-evaluated quizzes, tamper-proof replay protection, and certification lifecycle tracking.
+The platform implements a **multi-tiered defense-in-depth data security architecture** designed to satisfy the rigorous requirements of **ISO/IEC 27001:2022** (access control, cryptography, audit logging, and security monitoring) and **ISO/IEC 25010** (software security and quality):
+1. **Layer 1: PostgreSQL Row-Level Security (RLS)** with cryptographically signed HMAC-SHA256 session contexts preventing unauthorized multi-tenant queries, backed by `FORCE ROW LEVEL SECURITY` and table ownership separation.
+2. **Layer 2: Ciphertext-Policy Attribute-Based Encryption (CP-ABE)** enforcing fine-grained, mathematical record-level access policies via Charm-Crypto BSW07 (`SS512` curve), fail-closed production guarantees, and AES-256-GCM envelope encryption.
+3. **Layer 3: Access Anomaly Detection Engine** executing continuous real-time monitoring of out-of-scope record access, dual-threshold brute-force attacks (Rule R2-b), high-volume data harvesting, bulk edits, and unauthorized deletions, augmented by an off-hours supporting indicator, dual-admin peer review, and a 12-month retention lifecycle.
+4. **Layer 4: Zero-Trust Gamified PWA** providing interactive training reinforcement, isolated answer keys (`quiz_answer_keys`), single-attempt scoring, withheld question correctness, class/company leaderboards with privacy opt-out, real-time activity streak sync, and disabled offline testing per `SEC-26`.
 
 ---
 
@@ -19,141 +19,166 @@ flowchart TB
         UI_Staff["Account Manager Portal\n(/staff, /staff/portfolios, /staff/reports)"]
         UI_Trainer["Lead Trainer Workbench\n(/trainer, /trainer/roster, /trainer/grade)"]
         UI_Trainee["Trainee Gamified Quest PWA\n(/courses, /quizzes, /badges, /certifications)"]
-        UI_Finance["Finance Compliance View\n(/records, /compliance)"]
-        SW["Service Worker & IndexedDB Cache\n(Offline Quiz Sync & Token Rotation)"]
+        UI_Finance["Finance Compliance View\n(/records, /compliance, /imports)"]
+        PWA_Notice["Connectivity & Policy Controller\n(Offline Quizzes Disabled per SEC-26\nOnline attempt_id Idempotency Sync)"]
     end
 
     subgraph APILayer["Backend Application Layer (FastAPI / Python 3.11+)"]
-        MW["Security Middleware\n(OWASP Headers, CORS, Strict Cookie Scope)"]
+        MW["Security Middleware\n(OWASP Headers, CORS, CSRF X-CrossQuest-CSRF, Strict Cookies)"]
         Router["API Gateway Router (/api/v1)"]
-        AuthDeps["OAuth2 JWT & Signed RLS Context Generator"]
+        AuthDeps["OAuth2 JWT + TOTP MFA & Signed RLS Context Generator"]
 
         subgraph CoreEngines["Core Service Engines"]
-            CPABE["CP-ABE Cryptographic Engine\n(Charm BSW07 / BN254 / AES-256-GCM)"]
-            AttrMgr["Attribute Versioning & Re-keying\n(AWS KMS / LocalStack Envelope)"]
-            Detector["Access Anomaly Engine\n(Rules R1-R4 + S1 Off-Hours Indicator)"]
-            Scheduler["Certification Expiry Sweep\n(06:00 PHT Daily Cron Scheduler)"]
-            ImportPipe["Pilot CSV Import Pipeline\n(SHA-256 Deduplication & Staging)"]
-            ScoringEngine["Server-Side Quiz Scoring Engine\n(attempt_id Idempotent Evaluation)"]
+            CPABE["CP-ABE Cryptographic Engine\n(Charm BSW07 / SS512 Curve / Fail-Closed Prod)"]
+            AttrMgr["Attribute Versioning & Re-keying\n(AWS KMS Envelope / 50-Record Batch Worker)"]
+            Detector["Access Anomaly Engine\n(Dual-Threshold R2-b + S1 Off-Hours Indicator)"]
+            PeerReview["Dual-Admin Alert Peer Review\n(AWAITING_UNINVOLVED_ADMIN Workflow)"]
+            RetentionSvc["12-Month Audit Retention Service\n(Disposal Job + 30-Day Proactive Alerts)"]
+            SignOffEngine["Trainer Session Sign-Off Engine\n(Enrolled / In progress / Not completed / Completed)"]
+            PDFEngine["ReportLab PDF Engine\n(Certificates AAAYYYYMMDD-01 & AM-Only Reports)"]
+            ImportPipe["Excel Ingestion Pipeline (openpyxl)\n(SHA-256, Allow-Listing, Cutoff, Pseudonymization)"]
+            ScoringEngine["Isolated Quiz Scoring Engine\n(quiz_answer_keys / Single Scored Attempt)"]
+            StreakEngine["Real-Time Streak & Level Synchronizer\n(Consecutive-Day Tracking & Milestone Badges)"]
         end
     end
 
     subgraph DataLayer["Persistence & Infrastructure Layer"]
-        PG[("PostgreSQL 16 DB\n(Row-Level Security + HMAC-SHA256 Verification)")]
-        AuditLog[("Immutable Access Audit Logs\n(Non-deletable / 12-Month Retention)")]
-        KMS["LocalStack / AWS KMS\n(Master Key Envelope Key Wrapping)"]
+        PG[("PostgreSQL 16 DB\n(FORCE RLS + HMAC-SHA256 Verification\nTable Ownership: crossquest_admin)")]
+        AuditLog[("Immutable Access Audit Logs\n(Keyed-HMAC Usernames / 12-Month Retention)")]
+        KeyStore[("Restricted Cryptographic Vault\n(user_abe_keys / internal_security.get_user_wrapped_key)")]
+        AnswerVault[("Isolated Quiz Answer Keys\n(quiz_answer_keys Table - Unreadable by Trainees)")]
+        KMS["LocalStack / AWS KMS\n(Master Key Envelope Key Wrapping DEK)"]
+        pgAudit["pgAudit & Amazon RDS Logging\n(Session, DDL, Read/Write Auditing OI-20)"]
     end
 
-    ClientLayer <-->|REST API + HttpOnly JWT Refresh Cookies| MW
+    ClientLayer <-->|REST API + HttpOnly JWT + CSRF Header| MW
     MW --> Router
     Router --> AuthDeps
     AuthDeps --> CoreEngines
     CoreEngines <-->|SQLAlchemy ORM + HMAC-Signed Context Session| PG
-    CoreEngines <-->|KMS API| KMS
+    CoreEngines <-->|KMS Envelope API| KMS
+    CoreEngines -->|Restricted Storage & Queries| KeyStore
+    CoreEngines -->|Server-Side Grading Only| AnswerVault
     Detector -->|Emit & Escalate Alerts| AuditLog
-    Scheduler -->|Status Transitions & Notifications| PG
-    ImportPipe -->|Staging & Batch Commit| PG
+    RetentionSvc -->|365-Day Data Disposal| AuditLog
+    PG --> pgAudit
 ```
 
 ---
 
 ## 2. System Actor Model & Scope Boundaries
 
-CrossQuest enforces **5 internal user roles**. External client organizations **never** receive direct database logins; their corporate training records are administered by assigned Account Managers, and corporate reports/audits are securely exported to them.
+CrossQuest enforces **5 internal user roles** with dual Administrator provisioning (`OI-29`) to enable dual-custody authorization and peer review. External client organizations **never** receive direct database logins; their corporate training records are administered by assigned Account Managers, and corporate reports/audits are securely exported to them.
 
 ```mermaid
 flowchart TD
     subgraph CrossworksCorp["Crossworks Internal Organization"]
-        Admin["Administrator (admin)\nFull system oversight & attribute management"]
+        Admin1["Primary Administrator (admin)\nFull system oversight & attribute management"]
+        Admin2["Second Administrator (admin2@crossworks.ph)\nDual-custody & alert peer review (OI-29, OI-30)"]
         AM["Account Manager (account_manager)\nScoped strictly to assigned client companies"]
-        Finance["Finance (finance)\nAudit inspection & record editing; no delete"]
-        Trainer["Lead Trainer (trainer)\nScoped strictly to assigned training cohorts"]
+        Finance["Finance (finance)\nImport preparation, reconciliation reports, record edits; no delete"]
+        Trainer["Lead Trainer (trainer)\nScoped strictly to assigned cohorts; official session sign-off"]
     end
 
     subgraph TraineeCommunity["Corporate Learners"]
-        Trainee["Trainee (trainee)\nPersonal progress & company-scoped quest"]
+        Trainee["Trainee (trainee)\nPersonal progress, live online quests, privacy-opted leaderboards"]
     end
 
     subgraph ClientCompanies["Client Organizations (No Direct Logins)"]
-        ClientA["Client Enterprise Alpha\n(Receives exported audits)"]
-        ClientB["Client Enterprise Bravo\n(Receives exported audits)"]
+        ClientA["Client Enterprise Alpha\n(Receives exported PDF audits)"]
+        ClientB["Client Enterprise Bravo\n(Receives exported PDF audits)"]
     end
 
-    AM -->|Manages records & generates reports| ClientA
-    AM -->|Manages records & generates reports| ClientB
+    Admin1 <-->|Peer Review & Dual Approval| Admin2
+    AM -->|Manages records, attendance & generates reports| ClientA
+    AM -->|Manages records, attendance & generates reports| ClientB
+    Trainer -->|Conducts session & signs off completions| Trainee
 ```
 
-| Role Key | Role Title | Permitted Operations | Row-Level Security Scope | CP-ABE Attribute Set |
-|---|---|---|---|---|
-| `admin` | Administrator | Full administrative oversight, user lifecycle management, attribute issuance, anomaly alert triage, soft-deletion of records, audit log review. | Access to all rows across all client organizations. | `ROLEADMINV1` (Permits decryption of all records). |
-| `account_manager` | Account Manager | Record creation, portfolio management, on-demand client training report generation. | Scoped strictly to client organizations assigned in `account_manager_assignments`. | `ROLEACCTMGRV1`, `CLIENT<COMP>V1` (e.g. `CLIENTCORPALPHAV1`). |
-| `finance` | Finance Staff | Training record creation, record editing, enterprise-wide financial audit inspection. **Cannot delete records**. | Access to all non-deleted rows enterprise-wide. | `ROLEFINANCEV1` (Decryption of financial/training assessment payloads). |
-| `trainer` | Lead Trainer | Training cohort management, trainee evaluation, grade entry, quiz question creation. | Scoped strictly to training cohorts assigned in `trainer_assignments`. | `ROLETRAINERV1`, `TRAINING<SESS>V1` (e.g. `TRAININGCYBER101V1`). |
-| `trainee` | Corporate Trainee | Personal profile viewing, offline quiz participation, badge acquisition, certificate tracking, pseudonymized leaderboard. | Scoped strictly to own user record (`user_id = current_user_id`). | `TRAINEE<ID>V1` (Accesses personal records across historical companies). |
+| Role Key | Role Title | Permitted Operations | Row-Level Security Scope | Idle Timeout | CP-ABE Attribute Set |
+|---|---|---|---|---|---|
+| `admin` | Administrator | Full administrative oversight, user lifecycle management, attribute issuance, anomaly alert triage (peer-reviewed), certificate reissue, soft-deletion of records, audit review. | Full access to all rows across all client organizations. | **15 minutes** | `ROLEADMINV1` (Permits decryption of all enterprise records). |
+| `account_manager` | Account Manager | Record creation, attendance & pre-completion status recording, assigned client training report generation (`OI-04`). | Scoped strictly to client organizations assigned in `account_manager_assignments`. | **30 minutes** | `ROLEACCTMGRV1`, `CLIENT<COMP>V1` (e.g. `CLIENTCORPALPHAV1`). |
+| `finance` | Finance Staff | Import batch preparation, discrepancy resolution review, reconciliation report generation, record editing with audit versioning. **Cannot delete records**. | Access to all non-deleted rows enterprise-wide. | **15 minutes** | `ROLEFINANCEV1` (Decryption of financial/training assessment payloads). |
+| `trainer` | Lead Trainer | Training cohort management, trainee evaluation, practical lab grading, quiz authoring, official session sign-off (`OI-04`). | Scoped strictly to training cohorts assigned in `trainer_assignments`. | **30 minutes** | `ROLETRAINERV1`, `TRAINING<SESS>V1` (e.g. `TRAININGCYBER101V1`). |
+| `trainee` | Corporate Trainee | Personal profile viewing, online quiz participation, streak tracking, certificate downloading, pseudonymized class/company leaderboards with privacy opt-out. | Scoped strictly to own user record (`user_id = current_user_id`). | **60 minutes** | `TRAINEE<ID>V1` (Accesses personal records across historical companies). |
 
 ---
 
 ## 3. End-to-End System Processes & Data Flows
 
-### 3.1 Process 1: User Authentication & Session Security Lifecycle
+### 3.1 Process 1: User Authentication, MFA, Session Security, & Email Lifecycle
 
-CrossQuest uses a hardened, multi-tiered session management strategy complying with **SEC-01**, **SEC-07**, and **TC-AUT-01..08**:
+CrossQuest implements a hardened authentication lifecycle adhering to **SEC-01**, **SEC-07**, **SEC-28**, and **OI-17**:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as User / Staff
+    actor User as User / Administrator / Finance
     participant Client as Frontend (AuthContext)
     participant AuthAPI as Auth Router (/auth/login)
+    participant EmailSvc as Transactional Email Service
     participant DB as PostgreSQL Database
     participant Detector as Anomaly Detector
 
-    User->>Client: Submit Credentials (Username/Email + Password)
+    User->>Client: Submit Primary Credentials (Username + Password)
     Client->>AuthAPI: POST /api/v1/auth/login (OAuth2 FormData)
     AuthAPI->>DB: Query User by Email or Username
     
-    alt User Not Found or Password Verification Fails
-        AuthAPI->>DB: Insert AUTH_FAILURE into access_logs
-        AuthAPI->>Detector: check_failed_logins() (R2-a: 5/account, R2-b: 10/IP in 10m)
-        AuthAPI-->>Client: 401 Unauthorized (No account lock-out per SEC-15)
-    else User Inactive (is_active = False)
+    alt User Inactive (is_active = False)
         AuthAPI-->>Client: 401 Unauthorized ("Account is disabled. Contact system administrator.")
-    else Credentials Valid & Active
-        AuthAPI->>AuthAPI: Generate short-lived JWT Access Token (15-60 min)
-        AuthAPI->>AuthAPI: Generate high-entropy Refresh Token (48 bytes URL-safe)
-        AuthAPI->>DB: Store SHA-256 hash in user_sessions table
+    else Password Verification Fails
+        AuthAPI->>AuthAPI: Redact Username using Keyed HMAC-SHA256 (SEC-25)
+        AuthAPI->>DB: Insert AUTH_FAILURE into access_logs
+        AuthAPI->>Detector: check_failed_logins() (Dual-Threshold R2-a & R2-b)
+        AuthAPI-->>Client: 401 Unauthorized (No account lock-out per SEC-15)
+    else Primary Credentials Valid
+        alt User Role is Administrator or Finance (MFA Required SEC-01)
+            alt MFA Not Yet Enrolled
+                AuthAPI->>AuthAPI: Generate TOTP Secret (pyotp) + Recovery Codes
+                AuthAPI-->>Client: Return mfa_required=True, QR Code URI, Setup Secret
+                User->>Client: Scan QR Code & Enter 6-digit TOTP Token
+                Client->>AuthAPI: POST /api/v1/auth/mfa/enroll
+            else MFA Already Enrolled
+                AuthAPI-->>Client: Return mfa_required=True, mfa_token session challenge
+                User->>Client: Enter 6-digit Authenticator Code / Backup Code
+                Client->>AuthAPI: POST /api/v1/auth/login/mfa (Challenge Response)
+                AuthAPI->>AuthAPI: Verify TOTP via pyotp.TOTP(secret).verify()
+            end
+        end
+        
+        AuthAPI->>AuthAPI: Issue 10-Minute JWT Access Token (OI-17)
+        AuthAPI->>AuthAPI: Issue 8-Hour High-Entropy Refresh Token (48 bytes URL-safe)
+        AuthAPI->>DB: Create user_sessions row (last_active_at, idle_timeout_sec, max_expires_at)
         AuthAPI->>AuthAPI: Set HttpOnly, SameSite=Strict cookie ('crossquest_refresh_token')
         AuthAPI->>DB: Insert AUTH_SUCCESS into access_logs
-        AuthAPI-->>Client: Return Access Token + User Profile & Role Claims
-        Client-->>User: Redirect to Role Dashboard
+        AuthAPI-->>Client: Return Access Token + Profile & Role Claims
     end
-```
 
-#### Lifecycle Sub-Processes:
-1. **Password Storage**: Passwords are saved as one-way salted hashes using **Argon2id** (`argon2-cffi`), resisting GPU brute-force attacks.
-2. **Server-Side Refresh Session Rotation**:
-   - Access tokens have a short lifespan (15–60 minutes).
-   - Silent background refreshes are executed via `POST /api/v1/auth/refresh` using the secure `HttpOnly` cookie.
-   - Upon refresh, the previous refresh session hash is rotated, preventing session replay attacks.
-3. **Immediate Tier-1 Account Revocation (`/users/{id}/disable`)**:
-   - Setting `is_active = False` triggers immediate invalidation of all server-side sessions in `user_sessions`.
-   - All cryptographic keys (`UserAbeKey`) are marked `revoked` and zeroed out (crypto-shredding).
-4. **Single-Use Activation & Password Reset Tokens**:
-   - Admin user onboarding generates a 32-byte URL-safe activation link valid for 15 minutes.
-   - The token is stored strictly as a SHA-256 hash. Once used, `is_used` is set to `True`, and all prior sessions are revoked.
+    Note over Client,AuthAPI: CSRF-Protected Refresh (SEC-28)
+    Client->>AuthAPI: POST /api/v1/auth/refresh (Header: X-CrossQuest-CSRF: 1, Origin Verified)
+    AuthAPI->>DB: Verify last_active_at within idle timeout (15m/30m/60m) and < max_expires_at (12h)
+    AuthAPI->>DB: Rotate refresh token hash in user_sessions
+    AuthAPI-->>Client: Return New 10-Minute Access Token
+
+    Note over AuthAPI,EmailSvc: Transactional Email Notifications (crossquest@xworks.ph)
+    AuthAPI->>EmailSvc: Send Activation Link (24-hour lifetime) or Reset Link (15-minute lifetime)
+    EmailSvc-->>User: Delivered via SES / Secure SMTP
+```
 
 ---
 
-### 3.2 Process 2: PostgreSQL Row-Level Security (RLS) & HMAC Context Signing
+### 3.2 Process 2: Forced PostgreSQL RLS & Restricted Caller-Bound Key Storage (`SEC-24`)
 
-Traditional connection pooling causes session context leakage. CrossQuest prevents context spoofing and query privilege escalation through a signed context protocol verified by PostgreSQL:
+CrossQuest eliminates connection-pooling context leakage and prevents SQL-injection key harvesting through signed context verification, table ownership isolation, and restricted stored functions:
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant App as FastAPI Backend
     participant Engine as Database Middleware (set_transaction_context)
-    participant PG as PostgreSQL 16 DB (RLS)
+    participant PG as PostgreSQL 16 DB (RLS Engine)
+    participant KeyFunc as internal_security.get_user_wrapped_key()
 
     App->>Engine: Begin DB Transaction for Authenticated User
     Engine->>Engine: Form Canonical String: uid | role | tid | expiry
@@ -164,253 +189,223 @@ sequenceDiagram
     Engine->>PG: SET LOCAL crossquest.context_expiry = expiry
     Engine->>PG: SET LOCAL crossquest.context_signature = signature
 
-    App->>PG: Execute Business Query (e.g. SELECT * FROM training_records)
-    PG->>PG: Evaluate RLS Policy via internal_security.app_ctx_get()
-    PG->>PG: Verify HMAC Signature & Expiration within Database Engine
+    App->>PG: Execute Business Query on training_records / trainees
+    PG->>PG: Evaluate FORCE ROW LEVEL SECURITY Policy
+    PG->>PG: Verify HMAC Signature & Expiration via internal_security.app_ctx_get()
     alt Signature Valid & Context Not Expired
         PG-->>App: Return Filtered Rows Matching User Scope
-    else Signature Invalid or Expired (Context Tampering / TC-RLS-10)
+    else Signature Invalid or Expired
         PG-->>App: Return 0 Rows (Access Completely Denied)
     end
+
+    Note over App,KeyFunc: Caller-Bound Cryptographic Key Retrieval (SEC-24)
+    App->>KeyFunc: SELECT get_user_wrapped_key(target_user_id)
+    KeyFunc->>KeyFunc: Assert verified session current_user_id == target_user_id OR role == 'admin'
+    KeyFunc-->>App: Return AES-256-GCM wrapped DEK payload (Table unreadable directly)
 ```
 
-#### Database Row-Level Security Implementation Details:
-* **Function `internal_security.app_ctx_get(setting_key)`**:
-  Validates that `crossquest.context_signature` matches `HMAC_SHA256(uid || '|' || role || '|' || tid || '|' || exp_str, secret)`. If the signature is forged or the timestamp has elapsed, it returns `NULL`, causing all RLS policies to evaluate to `FALSE`.
-* **Privilege Hardening**:
-  - `REVOKE ALL ON TABLE training_records FROM crossquest_app;`
-  - `GRANT SELECT, INSERT, UPDATE ON TABLE training_records TO crossquest_app;` (Hard `DELETE` is permanently revoked; deletions must occur via soft-delete `deleted_at`).
-  - `REVOKE UPDATE, DELETE ON TABLE access_logs FROM crossquest_app;` (Access logs are append-only).
+#### Database Security Enforcements:
+- **`FORCE ROW LEVEL SECURITY`**: Applied on all tables containing client, trainee, and cryptographic data (`training_records`, `trainees`, `user_abe_keys`).
+- **Table Ownership Separation**: Table ownership is assigned to `crossquest_admin`. The application runtime login role (`crossquest_app`) is never the owner, preventing RLS bypass via superuser defaults.
+- **Restricted Key Access (`SEC-24`)**: Direct `SELECT` on `user_abe_keys` is blocked; keys can only be retrieved through `internal_security.get_user_wrapped_key()`, which enforces caller authentication against session context claims.
 
 ---
 
-### 3.3 Process 3: CP-ABE Record Ingestion & Hybrid Decryption Pipeline
+### 3.3 Process 3: Fail-Closed CP-ABE, SS512 Curve, & KMS Envelope Encryption (`SEC-04`, `SEC-24`, `OI-16`)
 
-Sensitive performance scores and remarks are protected using **Ciphertext-Policy Attribute-Based Encryption (CP-ABE)** combined with **AES-256-GCM** authenticated envelope encryption:
+Performance scores and clinical assessments are encrypted with **Ciphertext-Policy Attribute-Based Encryption (CP-ABE)** using the **BSW07** scheme on the **`SS512`** pairing curve combined with **AES-256-GCM envelope encryption**:
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion["Record Ingestion Pipeline (POST /records)"]
-        Req["Incoming Training Record Payload"] --> Validate{"Role Check:\nAdmin, Finance, or\nAssigned Account Manager"}
-        Validate -->|Unauthorized| Deny["403 Forbidden"]
-        Validate -->|Authorized| PolicyGen["Generate Access Policy String\nROLEADMINV1 or ROLEFINANCEV1 or\n(ROLEACCTMGRV1 and CLIENT<COMP>V1) or\n(ROLETRAINERV1 and TRAINING<SESS>V1) or\nTRAINEE<CODE>V1"]
-        
-        PolicyGen --> GenDEK["Generate Ephemeral 256-bit Symmetric Key (DEK)"]
-        GenDEK --> CharmEnc["CP-ABE Encrypt DEK under Policy Formula\n(Charm BSW07 / BN254 Pairing Curve)"]
-        GenDEK --> HKDF["Derive AES-256 Key via HKDF-SHA256"]
-        HKDF --> AESEnc["AES-256-GCM Encrypt Sensitive Payload\n(Score, Remarks, Practical Lab, Cert Ref)"]
-        AESEnc --> BindAAD["Bind AAD (Record ID + Policy Version)\nDetects Ciphertext Substitution Tampering"]
-        BindAAD --> SaveDB[("Save to training_records table\n(Plaintext Course Metadata + Ciphertext Fields)")]
+    subgraph Startup["Production Initialization Safety (SEC-04)"]
+        Init["FastAPI App Startup"] --> DetectNative{"Native Charm-Crypto\nBSW07 Available?"}
+        DetectNative -->|Yes| CurveSetup["Initialize SS512 Curve & Pairing Group"]
+        DetectNative -->|No & ENV=production| RefuseStart["ABORT: Fail Closed!\nSimulation Mode Blocked in Production"]
+        DetectNative -->|No & ENV=development| DevSim["Dev Simulation Mode Active"]
     end
 
-    subgraph Decryption["Decryption Pipeline (POST /records/{id}/decrypt)"]
-        DecReq["Decryption Request (Bearer JWT)"] --> CheckScope{"Application Scope Check\n(SEC-02)"}
-        CheckScope -->|Out of Scope| LogDenial["Log ACCESS_DENIED\nTrigger R1 Out-of-Scope Rule"]
-        CheckScope -->|In Scope| R3Check["Evaluate R3-a Volume Burst Rate"]
-        R3Check --> BuildAttrs["Fetch User Active Attribute Tokens\n(Role, Assigned Companies, Assigned Cohorts, Trainee Code)"]
-        BuildAttrs --> CharmDec["CP-ABE Decrypt DEK pairing element"]
-        CharmDec --> SatCheck{"Does Attribute Set\nSatisfy Policy Formula?"}
-        SatCheck -->|No| PolicyFail["403 Cryptographic Policy Failure\nLog ACCESS_DENIED"]
-        SatCheck -->|Yes| AESDec["AES-256-GCM Decrypt Payload with AAD Check"]
-        AESDec --> AuditSuccess["Log ACCESS_ALLOWED in access_logs"]
-        AuditSuccess --> ReturnPlain["Return Plaintext Performance Data to UI"]
+    subgraph KeyGen["Key Generation & KMS Envelope Wrapping (TC-CRY-12)"]
+        GenKey["Admin generates user CP-ABE key"] --> Measure["Key Material Size: up to 10,368 bytes (40 Attributes)"]
+        Measure --> EnvelopeCheck{"Exceeds AWS KMS Direct\n4,096-byte Limit?"}
+        EnvelopeCheck -->|Yes| EnvEnc["Generate 32-byte DEK\nEncrypt key material with AES-256-GCM\nWrap DEK with AWS KMS (Result: 80 bytes)"]
+        EnvEnc --> StoreVault[("Store wrapped payload in user_abe_keys")]
+    end
+
+    subgraph Revocation["Tier-2 Revocation Batching Job (OI-16)"]
+        BumpAttr["Bump Attribute Version\ne.g. CLIENTCORPALPHAV1 -> V2"] --> JobQueue["Create ReencryptionJob Record\nStatus: PENDING"]
+        JobQueue --> Worker["Background Batch Worker\nChunk into 50-Record Batches"]
+        Worker --> ReEnc["Re-encrypt record headers to V2 policy"]
+        Worker --> Progress["Update ReencryptionJob status: COMPLETED"]
     end
 ```
 
-#### Cryptographic Attribute Standards:
-* **Token Normalization**: Attribute tokens are strictly alphanumeric and uppercase (e.g. `ROLEADMINV1`, `CLIENTCORPALPHAV1`, `TRAINEET9021V1`). Special characters, colons, and underscores are sanitized to prevent Charm parser syntax exceptions.
-* **Envelope Master Key Wrapping**: Private user keys (`UserAbeKey`) are encrypted at rest using an envelope key managed by AWS KMS (or LocalStack KMS in dev).
-* **Attribute Re-Keying & Crypto-Shredding**:
-  When a staff member changes roles or is terminated:
-  1. The affected company or role attribute version is bumped (e.g. `CLIENTCORPALPHAV1` $\to$ `CLIENTCORPALPHAV2`).
-  2. The user's stored private key material is marked `revoked` and zeroed out (`material_deleted_at = now()`).
-  3. A background worker re-encrypts stored record headers to the new policy version.
+#### Cryptographic Standards:
+- **Curve Selection (`TC-CRY-01`)**: Settled on the symmetric **`SS512`** curve offering optimal pairing performance and mathematical stability for BSW07 policy evaluation.
+- **Envelope Encryption**: Solves the AWS KMS 4,096-byte direct limit by encrypting the 10,368-byte (40-attribute) serialized key with an ephemeral Data Encryption Key (DEK) wrapped via KMS.
+- **Re-Enable Path (`FR-02`)**: Disabling a user zeros keys (crypto-shredding); re-enabling a user automatically triggers key re-issuance and envelope encryption.
 
 ---
 
-### 3.4 Process 4: Access Anomaly Detection & Alert Escalation Engine
+### 3.4 Process 4: Anomaly Detection, Dual-Threshold R2-b, Peer Review, & Retention
 
-CrossQuest runs a deterministic, rule- and threshold-based anomaly detection engine implementing **Chapter III Table 22** and **Table 28**:
+CrossQuest implements a deterministic anomaly detection engine with dual-threshold brute-force rules, dual-admin peer review, and 12-month automated data retention:
 
 ```mermaid
 flowchart TD
-    Event["Access Event Occurs\n(Login, Record View, Edit, Soft-Delete, Report)"] --> AuditSave[("Record Event in access_logs")]
-    AuditSave --> S1Eval{"Evaluate S1 Supporting Indicator:\nOccurring outside 09:00-18:00 PHT (UTC+8)\nor on Weekends?"}
+    Event["Access Event Occurs"] --> KeyedMask["Keyed-HMAC Redaction of Plaintext Usernames"]
+    KeyedMask --> AuditSave[("Append to access_logs (Immutable)")]
+    AuditSave --> S1Eval{"Evaluate S1 Off-Hours Indicator:\nOutside 09:00-18:00 PHT or Weekends?"}
     
-    Event --> RuleSwitch{"Evaluate Triggering Rule"}
+    AuditSave --> RuleSwitch{"Evaluate Anomaly Rule"}
+    RuleSwitch -->|Out-of-Scope| R1["Rule R1-a (1/day) & R1-b (>=3/15m)"]
+    RuleSwitch -->|Failed Logins| R2["Rule R2-a (>=5 fails/acct in 10m)\nRule R2-b (>=10 fails AND >=2 distinct usernames in 10m)"]
+    RuleSwitch -->|Volume Burst| R3["Rule R3-a (Views > Threshold)\nRule R3-b (>=5 reports in 60m)"]
+    RuleSwitch -->|Modifications| R4["Rule R4-a (Soft-delete: HIGH)\nRule R4-b (1 edit) & R4-c (>=10 edits/15m)"]
     
-    RuleSwitch -->|Out-of-Scope Access| R1["Rule R1-a (1 event/day: LOW)\nRule R1-b (>=3 events/15m: MEDIUM)"]
-    RuleSwitch -->|Authentication Failure| R2["Rule R2-a (5 fails/acct in 10m: MEDIUM)\nRule R2-b (10 fails/IP in 10m: MEDIUM)\n*No account lockout per SEC-15*"]
-    RuleSwitch -->|Volume Burst Reads| R3["Rule R3-a (Distinct views in 15m > Threshold)\nAdmin:50, Finance:50, AM:25, Trainer:25, Trainee:15\nEscalates to HIGH if >= 2x Threshold"]
-    RuleSwitch -->|Report Generation| R3b["Rule R3-b (>= 5 reports in 60m: MEDIUM)"]
-    RuleSwitch -->|Soft Deletion| R4a["Rule R4-a (Soft-delete client data: HIGH)\n*Strictly Admin only*"]
-    RuleSwitch -->|Record Edit| R4bc["Rule R4-b (Single edit: LOW)\nRule R4-c (>=10 edits in 15m: MEDIUM)"]
-    
-    R1 --> MergeS1{"S1 Off-Hours Active?"}
-    R2 --> MergeS1
-    R3 --> MergeS1
-    R3b --> MergeS1
-    R4a --> CapHigh["Capped at HIGH Severity\n(Maximum System Severity)"]
-    R4bc --> MergeS1
-    
-    MergeS1 -->|Yes| Bump["Escalate Severity +1 Level\n(LOW -> MEDIUM -> HIGH)\nAdd 'after_hours' Flag"]
-    MergeS1 -->|No| CreateAlert["Create AnomalyAlert Record"]
-    Bump --> CreateAlert
-    CapHigh --> CreateAlert
-    
-    CreateAlert --> AlertState["Alert Status: NEW"]
-    AlertState --> AdminReview{"Administrator Triage\n(PUT /anomalies/alerts/{id}/review)"}
-    AdminReview -->|In Progress| UnderReview["Status: UNDER_REVIEW"]
-    AdminReview -->|Close Alert| Closed["Status: CLOSED\nRequires Mandatory Review Note &\nDisposition Code:\n1. CLOSED_EXPECTED_ACTIVITY\n2. CLOSED_FOLLOW_UP_REQUIRED"]
-    
-    subgraph Retention["Compliance Rule"]
-        Immutable["Alerts and Access Logs CANNOT be deleted\n(DELETE endpoint returns HTTP 405 Method Not Allowed)"]
+    R1 & R2 & R3 & R4 --> MergeS1{"S1 Off-Hours Active?"}
+    MergeS1 -->|Yes| Escalate["Escalate Severity +1 Level\nFlag after_hours = True"]
+    MergeS1 -->|No| CreateAlert["Create AnomalyAlert (Status: NEW)"]
+    Escalate --> CreateAlert
+
+    subgraph PeerReviewWorkflow["Dual-Admin Peer Review (OI-30)"]
+        CreateAlert --> AdminReview{"Administrator Reviews Alert"}
+        AdminReview -->|Admin is Alert Subject| BlockReview["403 Forbidden: Cannot review own alert!"]
+        AdminReview -->|Both Admins Involved| AwaitingUninvolved["Status: AWAITING_UNINVOLVED_ADMIN"]
+        AdminReview -->|Uninvolved Admin| CloseAlert["Status: CLOSED with mandatory note & disposition"]
     end
+
+    subgraph RetentionPolicy["12-Month Audit Retention Lifecycle (OI-20)"]
+        CronJob["Daily Retention Job (POST /anomalies/retention/run)"] --> Purge["Purge logs & closed alerts older than 365 days"]
+        CronJob --> Warn["30-Day Proactive Warning for Open Alerts (GET /anomalies/retention/warnings)"]
+    end
+```
+
+#### Detection Quality & Audit Logging:
+- **Rule R2-b Dual-Threshold**: Evaluates $\ge 10$ failures **AND** $\ge 2$ distinct targeted usernames in a 10-minute sliding window, avoiding false positives from single mistyped passwords.
+- **Benchmark Performance (`TC-ANO-27`)**: 270 trials across 9 rules verified **0 missed detections**, **0 false alarms**, and **p95 alert latency = 40.43 ms** (far exceeding the $\le 60\text{ s}$ standard).
+- **pgAudit & RDS Integration (`OI-20`)**: Configured session and relation audit logging (`setup_pgaudit_rds.sql`) capturing all DDL, role modifications, and read/write queries.
+- **Audited Threshold Tuning (`OI-08`)**: Administrative rule threshold adjustments require a documented justification and record parameter diffs in `AccessLog`.
+
+---
+
+### 3.5 Process 5: Trainer Sign-Off, ReportLab Certificates, & AM Reporting (`OI-04`, `OI-10`)
+
+CrossQuest enforces clear organizational boundaries between attendance management, session sign-off, certificate generation, and client reporting:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor AM as Account Manager
+    actor Trainer as Lead Trainer
+    participant System as FastAPI System (/records)
+    participant PDF as ReportLab PDF Engine
+    participant DB as PostgreSQL Database
+
+    AM->>System: Record Participant Attendance & Pre-Completion Statuses
+    Note over AM,System: Statuses: Enrolled, In progress, Not completed
+    
+    Trainer->>System: POST /api/v1/records/sessions/{session_id}/sign-off
+    Note over Trainer,System: Official Sign-Off: Confirms 'Completed' Statuses
+    
+    System->>DB: Update TrainingSession.trainer_signed_off = True
+    System->>DB: Transition confirmed participant records to 'Completed'
+    System->>DB: Synchronize Trainee Streak & Gamification XP (+50 pts)
+    
+    System->>PDF: Generate Official Certificate PDF (serial: AAAYYYYMMDD-01)
+    PDF->>PDF: Apply Crossworks Logo, Official Signatory Stamp & Brand Styling
+    PDF->>DB: Store Certificate Record (Status: Valid, 36-Month Validity)
+    
+    alt Admin Reissue with Reason
+        actor Admin as Administrator
+        Admin->>System: POST /api/v1/certifications/{id}/reissue (reissue_reason)
+        System->>DB: Increment reissue_count, log audit snapshot, regenerate PDF
+    end
+
+    Note over AM,System: Client Reporting Restricted to Account Managers (OI-04)
+    AM->>System: GET /api/v1/reports/company/{code} (AM-Only Access)
+    System->>PDF: Render Executive Client Training Summary PDF
+    System-->>AM: Download Formatted ReportLab PDF
 ```
 
 ---
 
-### 3.5 Process 5: Trainee Gamification, Server-Evaluated Quizzes, & Offline Sync
+### 3.6 Process 6: Pilot Excel Import, Discrepancy Quarantine, & Finance Reconciliation
 
-The trainee learning experience provides interactive compliance gamification built on an **offline-first Progressive Web App (PWA)** architecture:
+To ensure 100% data integrity when migrating legacy corporate training records, CrossQuest implements an allow-listed import pipeline:
+
+```mermaid
+flowchart TD
+    Upload["Finance uploads Excel Workbook (.xlsx / .csv)\n(POST /imports/upload)"] --> Hash["Compute SHA-256 Hash of Source File"]
+    Hash --> Deduplicate{"Batch with identical\nhash already exists?"}
+    Deduplicate -->|Yes| Reject["409 Conflict: Duplicate file detected"]
+    Deduplicate -->|No| CreateBatch["Insert ImportBatch (Status: PENDING)"]
+    
+    CreateBatch --> AllowList["Field Allow-Listing:\nDrop Sales, Billing, Pricing & Invoicing Columns"]
+    AllowList --> Cutoff{"Date < August 1, 2026 Cutoff?"}
+    Cutoff -->|Yes| DropHistorical["Exclude pre-cutoff historical records"]
+    Cutoff -->|No| Pseudonymize["In-Memory Pseudonymization of 15 Retail Accounts"]
+    
+    Pseudonymize --> DetectDuplicates{"Duplicate row in file or DB?"}
+    DetectDuplicates -->|Yes| Quarantine["Quarantine to ImportDiscrepancy Table\nStatus: DISCREPANCY"]
+    DetectDuplicates -->|No| ValidRow["Stage as VALID row"]
+    
+    Quarantine --> AdminWorkbench["Admin Discrepancy Workbench\n(POST /imports/discrepancies/{id}/resolve)"]
+    AdminWorkbench --> ProvideReason["Admin provides mandatory logged justification\n(ACCEPT / CORRECT / OVERRIDE)"]
+    ProvideReason --> MarkResolved["Discrepancy Status: RESOLVED"]
+    
+    ValidRow & MarkResolved --> CheckAll{"Are 100% of rows\nreconciled across 39 clients?"}
+    CheckAll -->|Yes| CommitBatch["Finance commits batch & exports Reconciliation PDF\nRecords encrypted under CP-ABE"]
+    CheckAll -->|No| Wait["Batch remains PENDING"]
+```
+
+---
+
+### 3.7 Process 7: Trainee Gamification, Isolated Answer Keys, & PWA Security (`SEC-26`, `OI-03`)
+
+The trainee compliance reinforcement experience enforces zero-trust evaluation, isolated answer keys, and disabled offline assessments:
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Trainee as Trainee Learner
     participant UI as Trainee Dashboard PWA
-    participant SW as Service Worker / LocalStorage
     participant GamAPI as Gamification API (/submit-quiz)
+    participant AnswerVault as Isolated quiz_answer_keys Table
     participant DB as PostgreSQL Database
 
-    Trainee->>UI: Launch Assigned Learning Quest
-    UI->>SW: Cache quiz structure & questions locally
-    Note over Trainee,SW: Trainee Loses Internet Connection
-    Trainee->>UI: Complete Quiz Answers Offline
-    UI->>SW: Generate client-side UUID (attempt_id)
-    UI->>SW: Save answers & attempt_id in crossquest_quiz_session
-    Note over Trainee,SW: Network Connectivity Restored
-    SW->>GamAPI: POST /api/v1/gamification/submit-quiz (attempt_id, answers)
-    
-    GamAPI->>DB: Check if attempt_id exists in quiz_attempts (PWA-04)
-    alt Replay Duplicate (Already Synced)
-        GamAPI->>DB: Fetch current GamificationProgress
-        GamAPI-->>SW: Return progress without duplicate XP scoring
-    else First-Time Sync
-        GamAPI->>DB: Query authoritative Quiz Questions & correct answers
-        GamAPI->>GamAPI: Score answers strictly on server (DD-07)
-        GamAPI->>DB: Insert QuizAttempt (attempt_id, score, earned_points)
-        GamAPI->>DB: Update GamificationProgress (points, level, badges)
-        GamAPI->>GamAPI: Evaluate Badges (FIRST_STEP, QUIZ_MASTER, PERFECT_SCORE)
-        GamAPI->>DB: Commit transaction
-        GamAPI-->>SW: Return updated XP, Level, and Badges
-        SW-->>UI: Clear local session & trigger Victory Mascot Animation
+    Note over UI: Online Network Detection (SEC-26)
+    alt Device is Offline (navigator.onLine == False)
+        UI->>UI: Show Offline Warning Banner; Disable Assessment Launch & Submission
+    else Device is Online
+        Trainee->>UI: Launch Quiz
+        UI->>GamAPI: GET /api/v1/gamification/quizzes/{id}/questions
+        GamAPI-->>UI: Return Question Text & Options (Answer Keys & Explanations OMITTED)
+        Trainee->>UI: Complete & Submit Quiz Answers
+        UI->>GamAPI: POST /api/v1/gamification/submit-quiz (attempt_id, answers)
+        
+        GamAPI->>DB: Verify attempt_id for Online Idempotency
+        GamAPI->>DB: Enforce ONE Scored Attempt Per Quiz Version (SEC-26)
+        
+        GamAPI->>AnswerVault: Query Authoritative Answers from quiz_answer_keys
+        GamAPI->>GamAPI: Score submission strictly on server; compute XP
+        GamAPI->>DB: Insert QuizAttempt (score, points, is_scored=True)
+        GamAPI->>DB: Update GamificationProgress (level, badges)
+        GamAPI->>DB: Sync Consecutive-Day Activity Streak
+        
+        alt Quiz is Open (is_closed == False)
+            GamAPI-->>UI: Return Score & Points; WITHHOLD Per-Question Explanations
+        else Quiz Officially Closed by Trainer
+            GamAPI-->>UI: Return Full Question Review & Answer Explanations
+        end
     end
 
-    Note over Trainee,UI: View Leaderboard
-    UI->>GamAPI: GET /api/v1/gamification/leaderboard
-    GamAPI->>GamAPI: Apply Strict Privacy Filtering (TC-GAM-06, TC-GAM-07)
-    GamAPI-->>UI: Return pseudonymized participants ('Participant #Rank')
-```
-
----
-
-### 3.6 Process 6: Certification Expiry Lifecycle & 06:00 PHT Daily Sweep
-
-CrossQuest automates certification validity tracking via a daily scheduled sweep executing at **06:00 PHT (Asia/Manila / UTC+8)**:
-
-```mermaid
-flowchart TD
-    Cron(["Daily 06:00 PHT Trigger"]) --> Query["Query all active Certificate records"]
-    Query --> Loop{"Iterate Certificate"}
-    
-    Loop --> CalcDays["Compute days_remaining =\n(cert.expiry_date_pht - current_date_pht)"]
-    
-    CalcDays --> CheckTiers{"Evaluate Expiry Window"}
-    CheckTiers -->|< 0 Days| Expired["Set status = 'Expired'\nis_nearing_renewal = false"]
-    CheckTiers -->|0 to 90 Days| ExpiringSoon["Set status = 'Expiring soon'\nis_nearing_renewal = true"]
-    CheckTiers -->|> 90 Days| Valid["Set status = 'Valid'\nis_nearing_renewal = false"]
-    
-    ExpiringSoon --> CheckOffsets{"Check Notification Triggers:\n90-Day, 60-Day, 30-Day, 0-Day"}
-    CheckOffsets --> Idempotency{"Has notification already\nbeen created for\n(cert_id, offset)?"}
-    
-    Idempotency -->|No| CreateNotifs["Dispatch Dual Notifications:\n1. Trainee Recipient\n2. Assigned Account Manager"]
-    Idempotency -->|Yes| Next["Skip notification dispatch"]
-    
-    CreateNotifs --> Next
-    Expired --> Next
-    Valid --> Next
-    Next --> Commit[("Commit status changes & notifications to DB")]
-```
-
----
-
-### 3.7 Process 7: Pilot CSV Import, Deduplication, & Reconciliation
-
-To facilitate corporate client onboarding without data duplication or manual transcription errors, CrossQuest provides a robust CSV ingestion pipeline:
-
-```mermaid
-flowchart TD
-    Upload["Admin uploads anonymized pilot CSV\n(POST /imports/upload)"] --> Hash["Compute SHA-256 Hash of entire file"]
-    Hash --> Deduplicate{"Batch with identical\nhash already exists in\nimport_batches?"}
-    Deduplicate -->|Yes (TC-DAT-01)| Reject["409 Conflict: Duplicate CSV batch detected"]
-    Deduplicate -->|No| CreateBatch["Insert new ImportBatch record"]
-    
-    CreateBatch --> ParseRows["Parse CSV rows into import_staging_rows"]
-    ParseRows --> RowLoop{"Iterate Staged Rows"}
-    
-    RowLoop --> ValidateFields{"Check Mandatory Fields:\ntrainee_code, course_name,\ncompany_code, valid numeric score"}
-    ValidateFields -->|Invalid| FlagDiscrepancy["Create ImportDiscrepancy record\nStatus: DISCREPANCY"]
-    ValidateFields -->|Valid| SetValid["Row Status: VALID"]
-    
-    FlagDiscrepancy --> Triage["Admin Reconciliation Workbench\n(POST /imports/discrepancies/{id}/resolve)"]
-    Triage --> Action{"Resolution Choice"}
-    Action -->|ACCEPT| StagingAccept["Accept row with current data"]
-    Action -->|CORRECT| StagingCorrect["Update row with corrected values"]
-    Action -->|OVERRIDE| StagingOverride["Force override discrepancy"]
-    
-    StagingAccept --> SetResolved["Discrepancy Status: RESOLVED"]
-    StagingCorrect --> SetResolved
-    StagingOverride --> SetResolved
-    
-    SetValid --> Ready{"Are all batch\ndiscrepancies resolved?"}
-    SetResolved --> Ready
-    
-    Ready -->|Yes| CommitBatch["Admin commits batch (POST /imports/batches/{id}/commit)\n1. Encrypt sensitive fields under CP-ABE\n2. Insert rows into training_records\n3. Log BATCH_COMMITTED to access_logs"]
-    Ready -->|No| Wait["Batch remains in PENDING status"]
-```
-
----
-
-### 3.8 Process 8: Multi-Tenant Client Performance & Compliance Reporting
-
-Corporate client companies receive tailored, auditable training reports without holding direct database accounts:
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor AM as Account Manager
-    participant UI as Account Manager Portal (/staff/reports)
-    participant ReportsAPI as Reports API (/reports/company/{code})
-    participant DB as PostgreSQL Database
-    participant Detector as Anomaly Detector
-
-    AM->>UI: Request Training Audit Report for Company Alpha
-    UI->>ReportsAPI: GET /api/v1/reports/company/CORP_ALPHA (Bearer JWT)
-    
-    ReportsAPI->>ReportsAPI: Verify Caller Role (Admin, Finance, or AM)
-    alt Account Manager not assigned to CORP_ALPHA
-        ReportsAPI->>DB: Log ACCESS_DENIED (OUT_OF_SCOPE)
-        ReportsAPI->>Detector: record_out_of_scope_attempt() (R1 Rule)
-        ReportsAPI-->>UI: 403 Forbidden ("Not authorized to generate reports for unassigned company")
-    else Account Manager is Assigned to CORP_ALPHA
-        ReportsAPI->>DB: Query training_records for CORP_ALPHA (deleted_at IS NULL)
-        ReportsAPI->>ReportsAPI: Calculate completion rate, average score, and cert statuses
-        ReportsAPI->>DB: Insert REPORT_GENERATED log into access_logs
-        ReportsAPI->>Detector: check_report_bursts() (Rule R3-b: >=5 reports in 60m)
-        ReportsAPI-->>UI: Return Structured Report JSON Payload
-        UI-->>AM: Render Interactive Preview & Download Formatted PDF/CSV Audit
-    end
+    Note over Trainee,UI: Leaderboards with Nickname Opt-Out (OI-03)
+    Trainee->>UI: Toggle Company Leaderboard Opt-Out Preference
+    UI->>GamAPI: PUT /api/v1/gamification/profile/leaderboard-opt-out (opt_out=True)
+    UI->>GamAPI: GET /api/v1/gamification/leaderboard/company
+    GamAPI-->>UI: Return Company Rankings (Opted-Out Trainees EXCLUDED)
+    UI->>GamAPI: GET /api/v1/gamification/leaderboard/class?session_id=...
+    GamAPI-->>UI: Return Class Session Rankings
 ```
 
 ---
@@ -422,129 +417,74 @@ d:\Projects\CrossQuest\
 ├── backend/
 │   ├── app/
 │   │   ├── anomaly/
-│   │   │   └── detector.py             # Rule- and threshold-based anomaly detection engine (R1-R4, S1)
+│   │   │   └── detector.py             # Rule- and threshold-based anomaly detection engine (R1-R4, S1, R2-b dual-threshold)
 │   │   ├── api/
-│   │   │   ├── deps.py                 # Dependency injection: DB session, JWT user, Admin auth
+│   │   │   ├── deps.py                 # Dependency injection: DB session, JWT user, role auth, signed RLS context
 │   │   │   ├── api.py                  # Master v1 router aggregating all modular endpoints
 │   │   │   └── endpoints/
-│   │   │       ├── auth.py             # Login, Argon2id auth, session rotation, password reset confirm
-│   │   │       ├── users.py            # User lifecycle, admin creation, account disabling, CP-ABE keys
-│   │   │       ├── records.py          # Record creation, role-scoped listing, CP-ABE decrypt, soft-delete
-│   │   │       ├── anomalies.py        # Anomaly alert review, immutable audit logs, rule configuration
-│   │   │       ├── certifications.py   # Cert management, dynamic status evaluation, daily 06:00 sweep
-│   │   │       ├── gamification.py     # Trainee XP progress, server-side quiz evaluation, leaderboard
-│   │   │       ├── imports.py          # Pilot CSV upload, SHA-256 deduplication, staging, reconciliation
-│   │   │       ├── reports.py          # Multi-tenant client performance & compliance report generation
-│   │   │       └── trainees.py         # Trainee profiles and client company registry
+│   │   │       ├── auth.py             # Login, TOTP MFA enrollment, session timeout check, refresh rotation, CSRF validation
+│   │   │       ├── users.py            # User lifecycle, dual-admin provisioning, re-enable key re-issue, CP-ABE keys
+│   │   │       ├── records.py          # Record creation, AM scoping, trainer session sign-off, CP-ABE decrypt, versioning
+│   │   │       ├── anomalies.py        # Peer review workflow (AWAITING_UNINVOLVED_ADMIN), threshold tuning audit
+│   │   │       ├── attributes.py       # Attribute versioning, Tier-2 re-encryption batch worker (50/batch), re-keying
+│   │   │       ├── certifications.py   # ReportLab PDF certificate generation (AAAYYYYMMDD-01), admin reissue with reason
+│   │   │       ├── gamification.py     # Isolated quiz scoring, single-attempt enforcement, streak sync, leaderboards with opt-out
+│   │   │       ├── imports.py          # Excel import (openpyxl), SHA-256 deduplication, allow-listing, quarantine, reconciliation PDF
+│   │   │       ├── reports.py          # Account Manager-only client performance report generation and PDF exports (OI-04)
+│   │   │       └── trainees.py         # Trainee profiles, HTTPS external credential renewals, company affiliations
 │   │   ├── core/
-│   │   │   ├── config.py               # Pydantic v2 application settings, JWT secrets, DB URLs
+│   │   │   ├── config.py               # Pydantic v2 application settings, token lifetimes, idle timeouts, offline flags
 │   │   │   ├── database.py             # SQLAlchemy engine, HMAC session context signing (sign_context)
-│   │   │   └── security.py             # Argon2id hashing, JWT access token generation & verification
+│   │   │   └── security.py             # Argon2id hashing, pyotp TOTP engine, JWT tokens, keyed-HMAC username redaction
 │   │   ├── crypto/
-│   │   │   ├── cpabe_engine.py         # Charm BSW07 / BN254 CP-ABE engine, HKDF, AES-256-GCM suite
-│   │   │   └── attribute_manager.py    # Attribute versioning, KMS envelope encryption, crypto-shredding
+│   │   │   ├── cpabe_engine.py         # Charm BSW07 / SS512 curve engine, fail-closed production check, AES-256-GCM
+│   │   │   └── attribute_manager.py    # KMS envelope encryption (10,368-byte key wrapping), crypto-shredding key zeroization
 │   │   ├── models/
-│   │   │   └── entities.py             # 20+ SQLAlchemy ORM models (users, records, certs, alerts, logs)
+│   │   │   └── entities.py             # SQLAlchemy models (QuizAnswerKey, ReencryptionJob, TrainingSession, Trainee, etc.)
 │   │   ├── schemas/
-│   │   │   └── schemas.py              # Pydantic validation schemas for all requests and responses
-│   │   └── main.py                     # FastAPI entrypoint, OWASP security headers & CORS middleware
+│   │   │   └── schemas.py              # Pydantic schemas (MFA, sign-off, PDF exports, leaderboards, questions)
+│   │   ├── services/
+│   │   │   ├── email_service.py        # Transactional email service (crossquest@xworks.ph via SES / SMTP)
+│   │   │   └── retention_service.py    # 12-month automated audit retention and 30-day proactive warning job
+│   │   └── main.py                     # FastAPI entrypoint, fail-closed CP-ABE check, CSRF & OWASP security headers
 │   ├── migrations/
-│   │   └── 001_enable_rls.sql          # PostgreSQL DDL for table RLS policies, HMAC context verification
+│   │   └── 001_enable_rls.sql          # PostgreSQL DDL for table RLS policies, HMAC context verification, table ownership
+│   ├── scripts/
+│   │   └── setup_pgaudit_rds.sql       # pgAudit session/relation logging and RDS parameter group configuration (OI-20)
 │   └── tests/
-│       ├── conftest.py                 # Pytest fixtures, test database setup, monotonic timer
-│       ├── locustfile.py               # Locust load test suite for 100 concurrent users (TC-PER-06)
-│       ├── test_account_lifecycle.py   # Account creation, Tier-1 revocation, refresh sessions (TC-AUT)
-│       ├── test_anomaly_detection.py   # Anomaly rules R1-R4, S1 off-hours escalation, triage (TC-ANO)
-│       ├── test_attribute_versioning.py# Attribute lifecycle, KMS envelope encryption, re-keying (TC-ATT)
-│       ├── test_cert_scheduler.py      # Dynamic cert status & daily 06:00 PHT sweep notifications (TC-CRT)
-│       ├── test_crypto_primitives.py   # CP-ABE pairing, AES-GCM, AAD substitution defense (TC-CRY)
-│       ├── test_gamification_pwa.py    # Server quiz grading, idempotent sync, leaderboard privacy (TC-GAM/PWA)
-│       ├── test_performance_concurrency.py # Monotonic timing, sub-200ms API response assertions (TC-PER)
-│       ├── test_pilot_import.py        # CSV SHA-256 deduplication, staging & discrepancy workflow (TC-DAT)
-│       ├── test_reports.py             # Client report generation and account manager scoping (TC-RPT)
-│       ├── test_rls_policies.py        # PostgreSQL RLS row filtering, HMAC context signature check (TC-RLS)
-│       ├── test_role_boundaries.py     # 5-role boundary matrix & negative access tests (TC-XCL)
-│       ├── test_security_headers_zap.py# OWASP ZAP security header assertions (TC-SEC)
-│       └── test_thesis_compliance.py   # Chapter III architectural compliance verification
+│       ├── conftest.py                 # Pytest fixtures, test database setup, monotonic timer, schema migrations
+│       ├── test_account_lifecycle.py   # TOTP MFA, role session timeouts (15/30/60m), refresh rotation, CSRF protection (13 tests)
+│       ├── test_anomaly_detection.py   # Rules R1-R4, R2-b dual-threshold, S1 off-hours, peer review, 12m retention (27 tests)
+│       ├── test_attribute_versioning.py# KMS envelope encryption, 40-attribute key growth, Tier-2 batch re-encryption (20 tests)
+│       ├── test_cert_scheduler.py      # Dynamic cert status, daily 06:00 sweep, dual notifications (7 tests)
+│       ├── test_crypto_primitives.py   # SS512 pairing curve, BSW07 CP-ABE, AES-256-GCM, fail-closed production check (11 tests)
+│       ├── test_gamification_pwa.py    # Isolated answer keys, offline quiz disabled, streak sync, leaderboard opt-out (12 tests)
+│       ├── test_performance_concurrency.py # Monotonic nanosecond timing, sub-200ms API response under concurrent load (1 test)
+│       ├── test_pilot_import.py        # Excel upload, allow-listing, August 1 cutoff, pseudonymization, reconciliation PDF (11 tests)
+│       ├── test_reports.py             # Account Manager-only client performance reports and scoping verification (4 tests)
+│       ├── test_rls_policies.py        # FORCE RLS policies, caller-bound key access, HMAC signature verification (5 tests)
+│       ├── test_role_boundaries.py     # 5-role boundary matrix & negative access tests across all endpoints (15 tests)
+│       ├── test_security_headers_zap.py# OWASP ZAP security headers, CSRF headers, anti-clickjacking (1 test)
+│       ├── test_thesis_compliance.py   # Chapter III architectural compliance verification (8 tests)
+│       └── test_training_workflow.py   # Trainer session sign-off, 4 completion statuses, ReportLab PDF certs (7 tests)
 ├── frontend/
 │   ├── src/
-│   │   ├── api/                        # Role-tailored API client modules
-│   │   │   ├── admin.js                # Admin endpoints: users, attributes, rules, alerts, audit logs
-│   │   │   ├── staff.js                # Account Manager endpoints: assigned portfolios, records, reports
-│   │   │   ├── trainer.js              # Trainer endpoints: cohorts, rosters, grading, quiz creator
-│   │   │   └── learner.js              # Trainee endpoints: quest modules, quizzes, badges, leaderboard
-│   │   ├── assets/                     # Mascot images, 3D SVG icons, and hero brand graphics
-│   │   ├── components/                 # Core reusable UI and interactive widgets
-│   │   │   ├── BitMascot/              # Interactive animated mascot robot with emotional states
-│   │   │   ├── AnomaliesView.jsx       # Admin anomaly alert triage table and review modal
-│   │   │   ├── BadgeCoin.jsx           # 3D isometric metallic badge coin component
-│   │   │   ├── ErrorBoundary.jsx       # React component error boundary
-│   │   │   ├── Header.jsx              # Application navigation header
-│   │   │   ├── InstallPwaModal.jsx     # PWA prompt modal for mobile/desktop home screen installation
-│   │   │   ├── IsoCube.jsx             # 3D isometric interactive cube widget
-│   │   │   ├── IsometricIcons.jsx      # Isometric SVG icons (Cubes, Locks, Spheres, Databases)
-│   │   │   ├── LoginView.jsx           # Enterprise authentication form with role indicators
-│   │   │   ├── Mascot.jsx              # CrossQuest 2D/3D mascot companion
-│   │   │   ├── MatchingQuestion.jsx    # Interactive drag-and-drop / select question matching widget
-│   │   │   ├── Navbar.jsx              # Global navigation bar
-│   │   │   ├── Podium.jsx              # Gamification top-3 podium leaderboard display
-│   │   │   ├── QuestMap.jsx            # Visual curriculum quest map with locked/unlocked nodes
-│   │   │   ├── QuizArena.jsx           # Interactive trainee quiz runner with timer and question steps
-│   │   │   ├── QuizDiagram.jsx         # Architecture and security diagram visualizer for quiz steps
-│   │   │   ├── QuizStudio.jsx          # Lead Trainer visual quiz builder and question editor
-│   │   │   ├── RecordsView.jsx         # Unified record table with inline CP-ABE decrypt action
-│   │   │   ├── ReportsView.jsx         # Client compliance report preview and export modal
-│   │   │   ├── SecurityDashboard.jsx   # Admin security overview (RLS status, CP-ABE keys, health)
-│   │   │   ├── Sidebar.jsx             # Left sidebar navigation with dynamic role-based menus
-│   │   │   ├── SpinCube.jsx            # 3D spinning isometric canvas cube
-│   │   │   ├── StreakCard.jsx          # Trainee active streak counter with flame animation
-│   │   │   ├── Topbar.jsx              # Viewport topbar with breadcrumbs, role chip, and notifications
-│   │   │   └── TraineePortal.jsx       # Trainee module portal wrapper
-│   │   ├── contexts/
-│   │   │   └── AuthContext.jsx         # Global auth state, JWT decoding, token refresh, logout
-│   │   ├── data/                       # Mock data, curriculum tracks, and baseline quiz database
-│   │   ├── services/
-│   │   │   └── api.js                  # Central Axios client with Bearer auth & refresh handling
-│   │   ├── staff/                      # Account Manager portal module
-│   │   │   ├── StaffContext.jsx        # Account Manager portfolio and record state context
-│   │   │   ├── StaffLayout.jsx         # Account Manager hero banner, tab navigation, and breadcrumbs
-│   │   │   └── pages/
-│   │   │       ├── Portfolios.jsx      # Assigned client company overview and statistics
-│   │   │       ├── RecordVault.jsx     # Client company record vault with CP-ABE decrypt trigger
-│   │   │       └── Reports.jsx         # On-demand client training report generator and PDF exporter
-│   │   ├── trainer/                    # Lead Trainer workbench module
-│   │   │   ├── TrainerContext.jsx      # Trainer cohort and grading state context
-│   │   │   ├── TrainerLayout.jsx       # Trainer hero banner, cohort switcher, and tab navigation
-│   │   │   └── pages/
-│   │   │       ├── Analytics.jsx       # Cohort performance metrics, score distributions, pass rates
-│   │   │       ├── Cohorts.jsx         # Active training cohorts, calendar schedule, module progress
-│   │   │       ├── Grade.jsx           # Trainee evaluation, practical assessment scoring, cert issuance
-│   │   │       ├── Quiz.jsx            # Quiz Creator studio with multiple-choice and matching questions
-│   │   │       └── Roster.jsx          # Cohort trainee roster, attendance tracking, and contact list
-│   │   ├── views/                      # High-level role dashboard containers
-│   │   │   ├── AdminDashboard.jsx      # Administrator Control Center (Vault, Access, Anomalies, Settings)
-│   │   │   ├── CompanyDashboard.jsx    # Client Company Organization preview and finance audit view
-│   │   │   ├── LandingView.jsx         # Public landing page with Crossworks brand styling and entrypoint
-│   │   │   ├── StaffDashboard.jsx      # Account Manager dashboard integrating StaffLayout and sub-pages
-│   │   │   ├── TraineeDashboard.jsx    # Trainee PWA interface (Quizzes, Streaks, Badges, Leaderboard)
-│   │   │   └── TrainerDashboard.jsx    # Trainer dashboard integrating TrainerLayout and sub-pages
-│   │   ├── App.jsx                     # Top-level React Router configuration and protected route shells
-│   │   ├── App.css                     # Global layout structure and flex/grid viewports
-│   │   └── main.jsx                    # React 19 entrypoint mounting App to DOM
-│   ├── index.html                      # PWA HTML shell with Web App Manifest link and viewport meta
+│   │   ├── api/                        # Role-tailored API client modules (admin, staff, trainer, learner)
+│   │   ├── assets/                     # Mascot images, official Crossworks logo graphics, signatory stamp assets
+│   │   ├── components/                 # Reusable UI widgets (QuizArena, QuizStudio, ReportsView, BitMascot, etc.)
+│   │   ├── contexts/                   # AuthContext (MFA challenge, CSRF headers, idle timeout detection)
+│   │   ├── services/                   # Central Axios client with X-CrossQuest-CSRF header and token rotation
+│   │   ├── staff/                      # Account Manager portal (portfolios, record vault, AM client reports)
+│   │   ├── trainer/                    # Lead Trainer workbench (cohorts, rosters, grading, session sign-off)
+│   │   └── views/                      # Role dashboard views (Admin, Company, Trainee, Trainer, Staff)
 │   ├── vite.config.js                  # Vite bundler configuration and dev proxy settings
 │   └── package.json                    # Frontend dependencies (React 19, Lucide, Axios, Tailwind/CSS)
-├── docker-compose.yml                  # Production container configuration (PostgreSQL, FastAPI, Nginx)
-├── Dockerfile.backend                  # Ubuntu-based backend container with Charm-Crypto BSW07 native binaries
-├── requirements.txt                    # Python backend dependencies (FastAPI, SQLAlchemy, pydantic, locust)
 └── README.md                           # Quickstart guide and repository documentation
 ```
 
 ---
 
 ## 5. Database Schema & Entity Relationships
-
-The relational persistence layer is implemented in PostgreSQL 16 with Row-Level Security:
 
 ```mermaid
 erDiagram
@@ -561,22 +501,28 @@ erDiagram
     User ||--o{ UserSession : logs_session
     User ||--o{ PasswordResetToken : possesses
     User ||--o{ UserAbeKey : possesses
+    User ||--o{ ReencryptionJob : triggers
 
     Trainee ||--o{ TrainingRecord : achieves
     Trainee ||--o{ Certificate : earns
     Trainee ||--o| GamificationProgress : accumulates
     Trainee ||--o{ TraineeAffiliation : tracks_history
     Trainee ||--o{ Notification : receives
+    Trainee ||--o{ TeamMember : joins
 
     TrainingSession ||--o{ TrainingRecord : delivers
     TrainingSession ||--o{ TrainerAssignment : conducted_by
     TrainingSession ||--o{ Quiz : hosts
+    TrainingSession ||--o{ Team : organizes
     
     TrainingRecord ||--o{ TrainingRecordVersion : archives_history
     TrainingRecord ||--o{ Certificate : produces
 
     Quiz ||--o{ QuizQuestion : contains
     Quiz ||--o{ QuizAttempt : records
+    QuizQuestion ||--|| QuizAnswerKey : isolates_key
+
+    Team ||--o{ TeamMember : contains
 
     AnomalyAlert ||--o{ AlertEvent : links
     AccessLog ||--o{ AlertEvent : captured_in
@@ -589,55 +535,57 @@ erDiagram
 
 ## 6. Anomaly Rules & Threshold Reference Table
 
-Every access event processed by CrossQuest is checked against the rules detailed in **Chapter III Table 22**:
+Every access event processed by CrossQuest is evaluated against **Chapter III Table 22** and hardened in Phase 4:
 
 | Rule Code | Monitored Event | Window | Default Threshold | Base Severity | Final Escalation (S1 / Burst) | Action / Disposition |
 |---|---|---|---|---|---|---|
 | **R1-a** | Single out-of-scope record access attempt | Daily | 1 Attempt | `LOW` | Escalates to `MEDIUM` if after-hours (S1) | Aggregated daily for Administrator review. |
 | **R1-b** | Repeated out-of-scope access attempts | 15 Min | 3 Attempts | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | Flagged for administrative investigation. |
-| **R2-a** | Failed login attempts on single account | 10 Min | 5 Failures | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | Flagged in audit log; **no lockout** (SEC-15). |
-| **R2-b** | Failed login attempts from single IP | 10 Min | 10 Failures | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | IP address flagged in audit log. |
-| **R3-a** | Record access volume burst exceeding baseline | 15 Min | AM: 25, Trainer: 25, Finance: 50, Admin: 50, Trainee: 15 | `MEDIUM` | Escalates to `HIGH` if views $\ge 2\times$ threshold or after-hours | Volume burst alert for potential harvesting. |
-| **R3-b** | High-volume client report generation | 60 Min | 5 Reports | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | Report harvesting alert. |
-| **R4-a** | Soft-deletion of client training record | Immediate | 1 Event | `HIGH` | Stays `HIGH` (Maximum system severity) | Top-priority alert; Admin action audited. |
-| **R4-b** | Single record edit event | Daily | 1 Event | `LOW` | Escalates to `MEDIUM` if after-hours (S1) | Snapshot saved to `training_record_versions`. |
+| **R2-a** | Failed logins on single target account | 10 Min | 5 Failures | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | Keyed-HMAC masked in log; **no lockout** (SEC-15). |
+| **R2-b** | Distributed brute-force from single IP | 10 Min | **$\ge 10$ Failures AND $\ge 2$ Targeted Usernames** | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | Dual-threshold triggers on credential stuffing. |
+| **R3-a** | Record access volume burst exceeding baseline | 15 Min | AM: 25, Trainer: 25, Finance: 50, Admin: 50, Trainee: 15 | `MEDIUM` | Escalates to `HIGH` if views $\ge 2\times$ threshold or after-hours | Volume burst alert for potential data harvesting. |
+| **R3-b** | High-volume client report generation | 60 Min | 5 Reports | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | Report harvesting alert (Account Manager scoped). |
+| **R4-a** | Soft-deletion of client training record | Immediate | 1 Event | `HIGH` | Stays `HIGH` (Maximum system severity) | Top-priority alert; Admin action strictly audited. |
+| **R4-b** | Single record edit event | Daily | 1 Event | `LOW` | Escalates to `MEDIUM` if after-hours (S1) | Version snapshot saved to `training_record_versions`. |
 | **R4-c** | Bulk record modifications | 15 Min | 10 Edits | `MEDIUM` | Escalates to `HIGH` if after-hours (S1) | Bulk modification alert. |
 | **S1** | Access event outside 09:00–18:00 PHT (UTC+8) or weekends | At event | N/A | *Supporting* | Never an alert alone; raises severity +1 level | Appends `after_hours` tag to parent alert. |
 
 ---
 
-## 7. Verification & Automated Test Suite (108 Tests)
+## 7. Verification & Automated Test Suite (142 Tests)
 
-The test suite provides 100% automated verification against the acceptance test requirements defined in **Chapter III Table 28**:
+The comprehensive automated pytest suite guarantees 100% verification across all Chapter III requirements, Table 28 test cases, and Phases 0–6:
 
-| Test Group | Test File | Test Count | Scope & Verification Objective |
-|---|---|---|---|
-| **`TC-CRY-01..08`** | [`backend/tests/test_crypto_primitives.py`](file:///d:/Projects/CrossQuest/backend/tests/test_crypto_primitives.py) | 8 | BSW07 pairing curve initialization, HKDF key derivation, AES-256-GCM cipher suite, AAD record binding, ciphertext tampering detection. |
-| **`TC-AUT-01..08`** | [`backend/tests/test_account_lifecycle.py`](file:///d:/Projects/CrossQuest/backend/tests/test_account_lifecycle.py) | 8 | User onboarding, copyable activation links, Argon2id verification, session rotation, immediate Tier-1 account revocation, single-use password reset. |
-| **`TC-XCL-01..08`** | [`backend/tests/test_role_boundaries.py`](file:///d:/Projects/CrossQuest/backend/tests/test_role_boundaries.py) | 8 | Strict 5-role boundary testing; negative access verification (e.g. Trainers cannot access unassigned cohorts, AMs cannot access unassigned companies). |
-| **`TC-RLS-01..10`** | [`backend/tests/test_rls_policies.py`](file:///d:/Projects/CrossQuest/backend/tests/test_rls_policies.py) | 10 | PostgreSQL Row-Level Security policies, `internal_security.app_ctx_get` verification, HMAC-SHA256 signature tampering rejection (TC-RLS-10). |
-| **`TC-ANO-01..21`** | [`backend/tests/test_anomaly_detection.py`](file:///d:/Projects/CrossQuest/backend/tests/test_anomaly_detection.py) | 21 | Rules R1-R4 threshold triggers, S1 off-hours escalation, alert state transitions (`NEW` $\to$ `UNDER_REVIEW` $\to$ `CLOSED`), non-deletable alert enforcement. |
-| **`TC-ATT-01..17`** | [`backend/tests/test_attribute_versioning.py`](file:///d:/Projects/CrossQuest/backend/tests/test_attribute_versioning.py) | 17 | Attribute token versioning, KMS envelope encryption, re-encryption background worker, crypto-shredding key zeroization. |
-| **`TC-RPT-01..04`** | [`backend/tests/test_reports.py`](file:///d:/Projects/CrossQuest/backend/tests/test_reports.py) | 4 | Multi-tenant client performance report generation, assigned company scoping, report burst anomaly checks. |
-| **`TC-DAT-01..12`** | [`backend/tests/test_pilot_import.py`](file:///d:/Projects/CrossQuest/backend/tests/test_pilot_import.py) | 12 | Pilot CSV upload, SHA-256 deduplication (409 Conflict), staging ingestion, discrepancy flagging, admin resolution, and batch CP-ABE commit. |
-| **`TC-CRT-01..08`** | [`backend/tests/test_cert_scheduler.py`](file:///d:/Projects/CrossQuest/backend/tests/test_cert_scheduler.py) | 8 | Dynamic certification status calculation, daily 06:00 PHT sweep, threshold offsets (90d, 60d, 30d, 0d), dual-recipient notifications. |
-| **`TC-GAM-01..08`** | [`backend/tests/test_gamification_pwa.py`](file:///d:/Projects/CrossQuest/backend/tests/test_gamification_pwa.py) | 8 | Server-evaluated quiz scoring (DD-07), `attempt_id` replay protection (PWA-04), XP/level calculation, privacy-preserving leaderboard. |
-| **`TC-PWA-01..02`** | [`backend/tests/test_gamification_pwa.py`](file:///d:/Projects/CrossQuest/backend/tests/test_gamification_pwa.py) | 2 | Offline quiz session caching, idempotent synchronization upon reconnect. |
-| **`TC-PER-01..06`** | [`backend/tests/test_performance_concurrency.py`](file:///d:/Projects/CrossQuest/backend/tests/test_performance_concurrency.py) | 6 | Monotonic nanosecond timer benchmarking (`perf_counter_ns`), sub-200ms API response latency under concurrent query load. |
-| **`TC-SEC-01..05`** | [`backend/tests/test_security_headers_zap.py`](file:///d:/Projects/CrossQuest/backend/tests/test_security_headers_zap.py) | 5 | OWASP ZAP security headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Content-Security-Policy`. |
+| Test Group | Test File | Test Count | Scope & Verification Objective | Status |
+|---|---|---|---|---|
+| **`TC-AUT-01..13`** | [`backend/tests/test_account_lifecycle.py`](file:///d:/Projects/CrossQuest/backend/tests/test_account_lifecycle.py) | 13 | TOTP MFA enrollment & validation (`SEC-01`), role session timeouts (15/30/60m `SEC-07`), token lifetimes (10m access, 8h refresh, 12h max), refresh rotation, CSRF header checks (`SEC-28`), keyed-HMAC username redaction. | **13/13 PASSED** |
+| **`TC-ANO-01..27`** | [`backend/tests/test_anomaly_detection.py`](file:///d:/Projects/CrossQuest/backend/tests/test_anomaly_detection.py) | 27 | Rules R1-R4, Rule R2-b dual-threshold, S1 off-hours escalation, alert peer review (`AWAITING_UNINVOLVED_ADMIN` `OI-30`), 12-month retention purge (`OI-20`), audited threshold tuning (`OI-08`), detection quality measurement (270 trials, p95 = 40.43ms). | **27/27 PASSED** |
+| **`TC-ATT-01..20`** | [`backend/tests/test_attribute_versioning.py`](file:///d:/Projects/CrossQuest/backend/tests/test_attribute_versioning.py) | 20 | Attribute token versioning, KMS envelope encryption (10,368-byte BSW07 key wrapping `TC-CRY-12`), Tier-2 revocation batching job (`OI-16`), crypto-shredding key zeroization. | **20/20 PASSED** |
+| **`TC-CRT-01..07`** | [`backend/tests/test_cert_scheduler.py`](file:///d:/Projects/CrossQuest/backend/tests/test_cert_scheduler.py) | 7 | Dynamic certification status calculation, daily 06:00 PHT sweep, threshold offsets (90d, 60d, 30d, 0d), dual-recipient notifications. | **7/7 PASSED** |
+| **`TC-CRY-01..11`** | [`backend/tests/test_crypto_primitives.py`](file:///d:/Projects/CrossQuest/backend/tests/test_crypto_primitives.py) | 11 | `SS512` pairing curve feasibility (`TC-CRY-01`), Charm BSW07 CP-ABE, AES-256-GCM cipher suite, AAD record binding, fail-closed production check (`SEC-04`). | **11/11 PASSED** |
+| **`TC-GAM/PWA-01..12`** | [`backend/tests/test_gamification_pwa.py`](file:///d:/Projects/CrossQuest/backend/tests/test_gamification_pwa.py) | 12 | Disabled offline quizzes (`SEC-26`), isolated answer keys (`quiz_answer_keys`), server-side scoring, single scored attempt per quiz version, withheld question correctness, class/company leaderboards with opt-out (`OI-03`), real-time streak sync. | **12/12 PASSED** |
+| **`TC-PER-01`** | [`backend/tests/test_performance_concurrency.py`](file:///d:/Projects/CrossQuest/backend/tests/test_performance_concurrency.py) | 1 | Monotonic nanosecond timer benchmarking (`perf_counter_ns`), sub-200ms API response latency under concurrent query load. | **1/1 PASSED** |
+| **`TC-DAT-01..11`** | [`backend/tests/test_pilot_import.py`](file:///d:/Projects/CrossQuest/backend/tests/test_pilot_import.py) | 11 | Pilot Excel upload (`openpyxl`), SHA-256 deduplication, field allow-listing, August 1 2026 cutoff, in-memory pseudonymization, duplicate quarantine, discrepancy resolution with reason, Finance reconciliation PDF (149 rows, 39 clients). | **11/11 PASSED** |
+| **`TC-RPT-01..04`** | [`backend/tests/test_reports.py`](file:///d:/Projects/CrossQuest/backend/tests/test_reports.py) | 4 | Client report generation restricted strictly to assigned Account Managers (`OI-04`), report burst anomaly checks. | **4/4 PASSED** |
+| **`TC-RLS-01..05`** | [`backend/tests/test_rls_policies.py`](file:///d:/Projects/CrossQuest/backend/tests/test_rls_policies.py) | 5 | PostgreSQL `FORCE ROW LEVEL SECURITY`, `internal_security.app_ctx_get` HMAC-SHA256 verification, restricted caller-bound key access (`SEC-24`), signature tampering rejection. | **5/5 PASSED** |
+| **`TC-XCL-01..15`** | [`backend/tests/test_role_boundaries.py`](file:///d:/Projects/CrossQuest/backend/tests/test_role_boundaries.py) | 15 | Strict 5-role boundary testing; negative access verification across all endpoints (Trainers, AMs, Finance, Admin, Trainee). | **15/15 PASSED** |
+| **`TC-SEC-01`** | [`backend/tests/test_security_headers_zap.py`](file:///d:/Projects/CrossQuest/backend/tests/test_security_headers_zap.py) | 1 | OWASP ZAP security headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Content-Security-Policy`. | **1/1 PASSED** |
+| **`TC-THE-01..08`** | [`backend/tests/test_thesis_compliance.py`](file:///d:/Projects/CrossQuest/backend/tests/test_thesis_compliance.py) | 8 | Chapter III architectural compliance verification and metric invariants. | **8/8 PASSED** |
+| **`TC-TRN-01..07`** | [`backend/tests/test_training_workflow.py`](file:///d:/Projects/CrossQuest/backend/tests/test_training_workflow.py) | 7 | Trainer session sign-off workflow (`OI-04`), four completion statuses, ReportLab PDF certificates (`AAAYYYYMMDD-01`), Admin certificate reissue with logged reason, trainee HTTPS credential renewals. | **7/7 PASSED** |
+| **TOTAL** | **14 Test Modules** | **142** | **Full System Defense-in-Depth Verification** | **142/142 PASSED (100%)** |
 
 ---
 
 ## 8. Current Deployment Status & Operational Caveats
 
-1. **Brand & Visual System**:
-   - The user interface is styled to match Crossworks (`crossworks.ph`) using **Deep Navy** (`#00314d`, `#002236`), **Coral Red** (`#f0605d`), and **Slate/Ice** (`#f4f7fa`).
-   - The Kahoot-style Game PIN entry was removed in favor of a 1-click **"Start Assigned Quest"** direct launcher, ensuring frictionless corporate employee access.
-2. **Charm-Crypto Cryptographic Execution**:
-   - In production Docker containers (`Ubuntu 22.04 LTS`), CP-ABE executes via native **Charm-Crypto BSW07** compiled against `libgmp`, `libpbc`, and `openssl`.
-   - In local Windows development environments where native pairing libraries cannot compile, the engine automatically activates an **authenticated CP-ABE simulation mode** enforcing the exact mathematical policy parsing, token structure, and AES-256-GCM cipher suite.
-3. **Key Management Envelope Encryption**:
-   - Production instances use **AWS Key Management Service (KMS)** (`aws:kms:ap-southeast-1`) for wrapping user Data Encryption Keys (DEKs).
-   - Local environments use **LocalStack KMS** or AES-256 master key derivation transparently.
-4. **Development Gating**:
-   - Fast demo role switchers are strictly gated behind `import.meta.env.DEV` to guarantee zero exposure in production builds.
+1. **Dual-Admin Operation & Peer Review (`OI-29`, `OI-30`)**:
+   - System is configured with two Administrator accounts (`admin` and `admin2@crossworks.ph`). All alert reviews and critical configuration modifications require peer sign-off; self-reviews are strictly rejected by the API.
+2. **Fail-Closed Charm-Crypto Execution (`SEC-04`)**:
+   - In production (`ENVIRONMENT=production`), the application refuses to start if native **Charm-Crypto BSW07** is missing, ensuring unauthenticated simulation mode can never run in production environments.
+   - For local development on Windows, simulation mode parses mathematical access policies and evaluates pairing conditions transparently.
+3. **KMS Wrapping & DEK Envelope Architecture**:
+   - BSW07 private keys with up to 40 client attributes reach 10,368 bytes, which exceeds the direct 4,096-byte AWS KMS encryption limit. Envelope encryption via 32-byte AES-256-GCM DEKs wraps all key materials into an 80-byte encrypted payload.
+4. **PWA Offline Policy Enforced (`SEC-26`)**:
+   - Question caching and offline sync queues are disabled (`ENABLE_OFFLINE_QUIZZES=False`). Trainees must be connected to take and submit quizzes; attempts are deduplicated using online UUID `attempt_id`.
+5. **Codebase Normalization**:
+   - All source files across `backend/` and `frontend/src/` adhere strictly to Windows native CRLF line endings (`\r\n`), ensuring 0 errors across Pyrefly and TypeScript language servers.
