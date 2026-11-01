@@ -53,9 +53,27 @@ const quizzes0 = () => [
     { id: 'a4', type: 'hotspot', prompt: 'Tap the layer that keeps tenant records cryptographically isolated.', answerLabel: 'CP-ABE Payload Encryption with Cryptographic Isolation' },
     { id: 'a5', type: 'kahoot', prompt: 'A staff member opens another client’s record. What anomaly is logged?', options: ['LATE_LOGIN', 'OUT_OF_SCOPE', 'BRUTE_FORCE', 'GEO_SHIFT'], answer: 1 },
   ] },
-  { id: 'q-acc', category: 'Access Control', title: 'Role-Based Access & Policy Verification', timePerQ: 45, pass: 80, questions: [] },
-  { id: 'q-prv', category: 'Privacy Management', title: 'PIA Simulation', timePerQ: 45, pass: 80, questions: [] },
-  { id: 'q-db', category: 'Database Security', title: 'Multi-Tenant Data Isolation & Security', timePerQ: 45, pass: 80, questions: [] },
+  { id: 'q-acc', category: 'Access Control', title: 'Role-Based Access & Policy Verification', timePerQ: 45, pass: 80, questions: [
+    { id: 'acc1', type: 'kahoot', prompt: 'Which cryptographic algorithm evaluates boolean attribute access policies against secret keys?', options: ['CP-ABE (Waters11 / BSW07)', 'Symmetric AES-256-CBC', 'RSA 2048 without attribute binding', 'SHA-256 Hashing'], answer: 0 },
+    { id: 'acc2', type: 'identification', prompt: 'What anomaly rule flags an access attempt when a staff member accesses a client company outside their assigned tenant clearance?', accepted: ['out_of_scope', 'out of scope', 'out-of-scope', 'rule 1', 'r1'] },
+    { id: 'acc3', type: 'sequence', prompt: 'Order the policy evaluation pipeline for cryptographic record decryption.', steps: ['Receive JWT bearer token and authenticate user role', 'Extract user CP-ABE attributes (role, tenant scope, clearance)', 'Evaluate boolean policy tree against attribute set in pairing group', 'Recover AES-256-GCM symmetric session key and decrypt confidential payload'] },
+    { id: 'acc4', type: 'hotspot', prompt: 'Tap the authority component responsible for issuing and versioning CP-ABE private keys.', answerLabel: 'Attribute Authority & Private Key Generator (PKG)' },
+    { id: 'acc5', type: 'kahoot', prompt: 'What is the security outcome if a staff member attempts to decrypt a record without holding the required company token?', options: ['Decryption fails mathematically in pairing evaluation (HTTP 403)', 'Server returns plain text with a warning', 'Database automatically grants temporary clearance', 'Password is reset automatically'], answer: 0 },
+  ] },
+  { id: 'q-prv', category: 'Privacy Management', title: 'PIA Simulation', timePerQ: 45, pass: 80, questions: [
+    { id: 'prv1', type: 'kahoot', prompt: 'Under Republic Act 10173 (Data Privacy Act of 2012), within how many hours must an organization notify the NPC upon confirmation of a major breach?', options: ['72 hours from reasonable knowledge', '24 hours', '7 calendar days', '30 business days'], answer: 0 },
+    { id: 'prv2', type: 'identification', prompt: 'Name the privacy-preserving technique that replaces individual retail customer identities with pseudonyms in volatile memory.', accepted: ['pseudonymization', 'pseudonym', 'in-memory pseudonymization', 'tokenization'] },
+    { id: 'prv3', type: 'sequence', prompt: 'Arrange the 4 core phases of a statutory Privacy Impact Assessment (PIA).', steps: ['Data Flow Mapping & Inventory Assessment', 'Privacy Risk Identification & Vulnerability Analysis', 'Control Evaluation against NPC Circular 16-03 Guidelines', 'Remediation Action Plan & Risk Sign-Off'] },
+    { id: 'prv4', type: 'hotspot', prompt: 'Tap the statutory privacy control that prevents public leaderboard disclosure of a trainee’s real personal identity.', answerLabel: 'Leaderboard Pseudonymous Display Name & Explicit Opt-Out Mechanism' },
+    { id: 'prv5', type: 'kahoot', prompt: 'Which columns are stripped in volatile memory during Excel workbook staging to comply with FR-22 and DAT-01?', options: ['Sales Invoice (SI #), PO #, and Tax Form 2307 billing columns', 'Trainee Full Name and Company Code', 'Training Score and Evaluation Remarks', 'Course Title and Delivery Method'], answer: 0 },
+  ] },
+  { id: 'q-db', category: 'Database Security', title: 'Multi-Tenant Data Isolation & Security', timePerQ: 45, pass: 80, questions: [
+    { id: 'db1', type: 'kahoot', prompt: 'Which PostgreSQL mechanism enforces that SQL queries are scoped strictly to the current tenant session, even with SQL injection attempts?', options: ['Row-Level Security (FORCE RLS)', 'Client-side array filtering', 'Shared unpartitioned views', 'File system permission flags'], answer: 0 },
+    { id: 'db2', type: 'identification', prompt: 'What PostgreSQL session variable is set per-request to enforce database-level tenant isolation?', accepted: ['app.current_company_code', 'current_company_code', 'rls tenant', 'company_code'] },
+    { id: 'db3', type: 'sequence', prompt: 'Order the multi-tier defense-in-depth layers protecting confidential training records.', steps: ['Transport Layer Security (TLS 1.3 / OWASP Headers)', 'Role-Based Authorization & Session JWT Verification', 'PostgreSQL Row-Level Security (RLS Tenant Scoping)', 'CP-ABE Cryptographic Envelope & AES-256-GCM Storage'] },
+    { id: 'db4', type: 'hotspot', prompt: 'Tap the verification engine that guarantees 100% row parity between physical training workbooks and staged database records.', answerLabel: 'Ordinal Physical-to-Database Reconciliation & Discrepancy Quarantine Desk' },
+    { id: 'db5', type: 'kahoot', prompt: 'How does CrossQuest handle records with completion dates prior to the August 1, 2026 baseline cutoff?', options: ['Quarantined as PRE_CUTOFF_DATE discrepancy with explanation required', 'Silently dropped without audit logs', 'Overwritten with current date', 'Stored in public leaderboard directly'], answer: 0 },
+  ] },
 ];
 
 const benchmarks = [
