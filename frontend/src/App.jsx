@@ -187,7 +187,7 @@ function MainAppShell({ activeSubPage }) {
 
       {/* Main Content Viewport */}
       <div className="enterprise-viewport">
-        <Topbar activeViewTitle={getViewTitle()} />
+        <Topbar activeViewTitle={getViewTitle()} streakDays={liveStreakDays} />
 
         <main className="enterprise-page-area">
           {currentUser?.role === 'admin' && (
