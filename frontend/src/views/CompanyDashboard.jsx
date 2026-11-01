@@ -9,8 +9,10 @@ import {
   Download,
   Calendar,
   Lock,
-  Award
+  Award,
+  AlertTriangle
 } from 'lucide-react';
+import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useAuth } from '../contexts/AuthContext';
 import { INITIAL_TRAINING_RECORDS } from '../data/mockData';
 import { fetchRecords } from '../services/api';
@@ -19,6 +21,8 @@ export default function CompanyDashboard({ activeSubView }) {
   const { currentUser, token } = useAuth();
   const companyCode = currentUser?.company_code || 'CORP_ALPHA';
   const [records, setRecords] = useState(INITIAL_TRAINING_RECORDS);
+  const [isLoading, setIsLoading] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
 
   useEffect(() => {
     async function loadCompanyData() {
@@ -55,6 +59,12 @@ export default function CompanyDashboard({ activeSubView }) {
 
   return (
     <div className="dashboard-content-layout">
+      {usingFallback && (
+        <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', color: '#92400e', padding: '10px 16px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AlertTriangle size={16} color="#d97706" />
+          <span>Notice: Showing cached baseline compliance data. Live synchronization in progress or server offline.</span>
+        </div>
+      )}
       {/* 1. COMPANY OVERVIEW */}
       {(activeSubView === 'company_overview' || !activeSubView || !['company_trainees', 'audit_certificate'].includes(activeSubView)) && (
         <>

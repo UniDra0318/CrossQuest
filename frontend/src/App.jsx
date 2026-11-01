@@ -11,6 +11,7 @@ import CompanyDashboard from './views/CompanyDashboard';
 import TraineeDashboard from './views/TraineeDashboard';
 import LandingView from './views/LandingView';
 import InstallPwaModal from './components/InstallPwaModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
 // Protected Route wrapper
@@ -154,6 +155,7 @@ function MainAppShell({ activeSubPage }) {
         <Topbar activeViewTitle={getViewTitle()} streakDays={liveStreakDays} />
 
         <main className="enterprise-page-area">
+          <ErrorBoundary>
           {currentUser?.role === 'admin' && (
             <AdminDashboard activeSubView={activeView} setActiveView={handleNavChange} />
           )}
@@ -173,6 +175,7 @@ function MainAppShell({ activeSubPage }) {
           {currentUser?.role === 'trainee' && (
             <TraineeDashboard activeSubView={activeView} setActiveView={handleNavChange} onStreakLoad={setLiveStreakDays} />
           )}
+          </ErrorBoundary>
         </main>
       </div>
 

@@ -38,7 +38,6 @@ import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateSt
 import SpinCube from '../components/SpinCube';
 import BitMascot from '../components/BitMascot/BitMascot';
 import '../styles/admin.css';
-
 export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token, currentUser } = useAuth();
   const [adminProfile] = useState(defaultAdmin);
@@ -48,14 +47,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [anomalies, setAnomalies] = useState(defaultAnomalies);
   const [records, setRecords] = useState(defaultRecords);
   const [settings] = useState(defaultSettings);
-
   const [editingStaffId, setEditingStaffId] = useState(null);
   const [editForm, setEditForm] = useState({ role: '', level: 1, clients: [] });
   const [anomalyFilter, setAnomalyFilter] = useState('ALL');
   const [staffSearch, setStaffSearch] = useState('');
   const [recordSearch, setRecordSearch] = useState('');
   const [copiedKey, setCopiedKey] = useState(false);
-
+  const [usingFallback, setUsingFallback] = useState(false);
   // Sync real data from database if available
   useEffect(() => {
     async function loadAdminData() {
@@ -67,7 +65,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           fetchCompanies(token),
           fetchStaffUsers(token)
         ]);
-
         if (dbStaff && dbStaff.length > 0) {
           setStaffList(dbStaff.map(u => ({
             id: u.id,
@@ -80,7 +77,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : 'orange'
           })));
         }
-
         if (dbRecords && dbRecords.length > 0) {
           setRecords(dbRecords.map((r, idx) => {
             const compCode = r.encryption_policy?.includes('FINTECH_BETA') 
@@ -89,7 +85,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 ? 'RETAIL_GAMMA' 
                 : 'CORP_ALPHA';
             const compObj = (dbCompanies || []).find(c => c.code === compCode);
-
             return {
               id: r.id || `rec-${100 + idx}`,
               trainee: r.trainee_name || `Learner ${idx + 1}`,
@@ -101,7 +96,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             };
           }));
         }
-
         if (dbAnomalies && dbAnomalies.length > 0) {
           setAnomalies(dbAnomalies.map(a => ({
             id: a.id,
@@ -115,16 +109,15 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         }
       } catch (err) {
         console.warn("Could not load backend admin data, using robust local state:", err);
+        setUsingFallback(true);
       }
     }
     loadAdminData();
   }, [token]);
-
   // Acknowledge / resolve anomaly
   const handleResolveAnomaly = (id) => {
     setAnomalies(prev => prev.map(a => a.id === id ? { ...a, status: 'RESOLVED' } : a));
   };
-
   // Start inline editing staff
   const startEditStaff = (user) => {
     setEditingStaffId(user.id);
@@ -134,7 +127,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       clients: [...(user.clients || [])]
     });
   };
-
   // Save staff attributes
   const handleSaveStaff = async (id) => {
     if (token) {
@@ -148,7 +140,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         console.warn("Error persisting staff update:", e);
       }
     }
-
     setStaffList(prev => prev.map(s => {
       if (s.id === id) {
         return {
@@ -162,7 +153,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     }));
     setEditingStaffId(null);
   };
-
   const toggleClientInEdit = (clientCode) => {
     setEditForm(prev => {
       const exists = prev.clients.includes(clientCode);
@@ -172,7 +162,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       };
     });
   };
-
   const handleCopyPublicKey = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(overview.architecture.publicKey);
@@ -180,29 +169,30 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       setTimeout(() => setCopiedKey(false), 2000);
     }
   };
-
   const unreviewedCount = anomalies.filter(a => a.status === 'UNREVIEWED').length;
-
   const filteredAnomalies = anomalies.filter(a => {
     if (anomalyFilter === 'UNREVIEWED') return a.status === 'UNREVIEWED';
     if (anomalyFilter === 'RESOLVED') return a.status === 'RESOLVED';
     return true;
   });
-
   const filteredStaff = staffList.filter(s => 
     s.name.toLowerCase().includes(staffSearch.toLowerCase()) || 
     s.email.toLowerCase().includes(staffSearch.toLowerCase())
   );
-
   const filteredRecords = records.filter(r => 
     r.trainee.toLowerCase().includes(recordSearch.toLowerCase()) || 
     r.course.toLowerCase().includes(recordSearch.toLowerCase()) ||
     r.org.toLowerCase().includes(recordSearch.toLowerCase()) ||
     r.id.toLowerCase().includes(recordSearch.toLowerCase())
   );
-
   return (
     <div className="adm-main">
+      {usingFallback && (
+        <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', color: '#92400e', padding: '10px 16px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AlertTriangle size={16} color="#d97706" />
+          <span>Notice: Displaying cached baseline data. Live telemetry synchronization in progress or server offline.</span>
+        </div>
+      )}
       {/* 1. TOP STATUS BAR */}
       <div className="adm-top">
         <div className="adm-crumbs">
@@ -218,7 +208,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           </div>
         </div>
       </div>
-
       {/* 2. 3D HERO BANNER WITH VIEW NAVIGATION TABS */}
       <div className="adm-hero">
         <div className="adm-hero__text">
@@ -229,7 +218,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           <p>
             Centralized monitoring for role-based access control, tenant isolation, and anomaly response across all enterprise cohorts.
           </p>
-
           <div className="adm-tabs">
             <button 
               type="button"
@@ -268,7 +256,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             </button>
           </div>
         </div>
-
         {/* Mascot Scene */}
         <div className="adm-hero__cube">
           <span className="adm-float adm-float--tl">AES-256 + RSA</span>
@@ -276,7 +263,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           <BitMascot size={210} />
         </div>
       </div>
-
       {/* =====================================================================
           VIEW 1: SECURITY OVERVIEW
           ===================================================================== */}
@@ -298,7 +284,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <CheckCircle2 size={13} /> {overview.postureNote}
               </div>
             </div>
-
             {/* Tile 2: Pending Anomaly Incidents */}
             <div 
               className="adm-kpi" 
@@ -322,7 +307,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 Rule- & threshold-based active flags (Click to view)
               </div>
             </div>
-
             {/* Tile 3: Managed Staff Profiles */}
             <div 
               className="adm-kpi"
@@ -350,7 +334,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 Managed cryptographic credentials (Click to edit)
               </div>
             </div>
-
             {/* Tile 4: Database Layer Guard */}
             <div className="adm-kpi">
               <div className="adm-kpi__top">
@@ -371,7 +354,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </div>
             </div>
           </div>
-
           {/* Dual Split: Recent Alerts & 3D Security Architecture */}
           <div className="adm-split">
             {/* Left: Recent Alerts */}
@@ -424,7 +406,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 </div>
               </div>
             </div>
-
             {/* Right: 3D Stacked Layers & Specs */}
             <div className="adm-split__side">
               <div className="adm-panel">
@@ -432,7 +413,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <h2>Security Architecture</h2>
                   <span className="adm-pill adm-pill--blue">CROSSWORKS CORE</span>
                 </div>
-
                 <div className="adm-pad">
                   {/* 3D Preserved-3D Isometric Layers */}
                   <div className="adm-stack3d">
@@ -468,7 +448,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     </ul>
                   </div>
                 </div>
-
                 {/* Definition List */}
                 <dl className="adm-dl">
                   <div>
@@ -509,7 +488,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           </div>
         </>
       )}
-
       {/* =====================================================================
           VIEW 2: ACCESS PERMISSIONS & STAFF ROLES
           ===================================================================== */}
@@ -530,7 +508,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               />
             </div>
           </div>
-
           <div className="adm-scroll">
             <div className="adm-table">
               {/* Table Header */}
@@ -541,11 +518,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <div>ASSIGNED CLIENT TENANTS</div>
                 <div style={{ textAlign: 'right' }}>ACTIONS</div>
               </div>
-
               {/* Table Rows */}
               {filteredStaff.map((user) => {
                 const isEditing = editingStaffId === user.id;
-
                 return (
                   <div key={user.id} className="adm-row">
                     <div className="adm-grid adm-grid--access">
@@ -564,13 +539,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                           <span className="adm-mono">{user.email}</span>
                         </div>
                       </div>
-
                       <div>
                         <span className={`adm-chip ${user.role.includes('ADMIN') ? 'adm-chip--violet' : user.role.includes('STAFF') ? 'adm-chip--orange' : user.role.includes('TRAINER') ? 'adm-chip--green' : 'adm-chip--blue'}`}>
                           {user.role}
                         </span>
                       </div>
-
                       <div>
                         <div className="adm-level">
                           <span>
@@ -581,7 +554,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                           <b>Level {user.level}</b>
                         </div>
                       </div>
-
                       <div>
                         <div className="adm-wrap">
                           {(user.clients || []).map((code) => (
@@ -589,7 +561,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                           ))}
                         </div>
                       </div>
-
                       <div style={{ textAlign: 'right' }}>
                         <button 
                           type="button" 
@@ -601,7 +572,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         </button>
                       </div>
                     </div>
-
                     {/* Inline Editor */}
                     {isEditing && (
                       <div className="adm-edit">
@@ -618,7 +588,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                             <option value="TRAINEE">TRAINEE</option>
                           </select>
                         </label>
-
                         <label>
                           <span className="adm-label">CLEARANCE LEVEL (1–3)</span>
                           <select 
@@ -630,7 +599,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                             <option value={3}>Level 3 (Executive Master)</option>
                           </select>
                         </label>
-
                         <fieldset>
                           <legend className="adm-label">ASSIGNED CLIENT ORGANIZATIONS</legend>
                           {clients.map((c) => (
@@ -644,7 +612,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                             </label>
                           ))}
                         </fieldset>
-
                         <div className="adm-edit__act">
                           <button 
                             type="button" 
@@ -670,7 +637,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           </div>
         </div>
       )}
-
       {/* =====================================================================
           VIEW 3: ANOMALY MONITOR & RADAR SCANNER
           ===================================================================== */}
@@ -705,7 +671,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </button>
             </div>
           </div>
-
           {/* Live Radar Scanner Banner */}
           <div className="adm-pad" style={{ background: '#170b2e', padding: '32px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
             <div className="adm-radar-wrap">
@@ -714,7 +679,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <i className="adm-radar__x" />
                 <i className="adm-radar__y" />
                 <i className="adm-radar__sweep" />
-
                 {/* Radar Blips */}
                 <span className="adm-blip" style={{ left: '42%', top: '35%' }} title="Out of Scope Attempt" />
                 <span className="adm-blip" style={{ left: '72%', top: '65%' }} title="Off Hours Decryption" />
@@ -727,7 +691,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </span>
             </div>
           </div>
-
           {/* Timeline Feed */}
           <div className="adm-timeline">
             {filteredAnomalies.map((item) => {
@@ -773,7 +736,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           </div>
         </div>
       )}
-
       {/* =====================================================================
           VIEW 4: MASTER RECORD VAULT & EXPORT AUDIT LOGS
           ===================================================================== */}
@@ -805,7 +767,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </button>
             </div>
           </div>
-
           <div className="adm-scroll">
             <div className="adm-table">
               <div className="adm-grid adm-grid--vault adm-th">
@@ -816,14 +777,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <div>ACCESS CONTROL POLICY</div>
                 <div style={{ textAlign: 'right' }}>STATUS</div>
               </div>
-
               {filteredRecords.map((r) => (
                 <div key={r.id} className="adm-row adm-grid adm-grid--vault">
                   <div className="adm-recid">
                     <FileText size={13} />
                     <span>{r.id}</span>
                   </div>
-
                   <div className="adm-person">
                     <div className="adm-av adm-av--sq" style={{ background: '#6a2bd9', color: '#fff' }}>
                       {(r.trainee || 'U').slice(0, 2).toUpperCase()}
@@ -833,19 +792,15 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                       <span className="adm-mono">{r.email}</span>
                     </div>
                   </div>
-
                   <div>
                     <span className="adm-org">{r.org}</span>
                   </div>
-
                   <div className="adm-course">
                     {r.course}
                   </div>
-
                   <div>
                     <code className="adm-policy">{r.policy}</code>
                   </div>
-
                   <div style={{ textAlign: 'right' }}>
                     <span className={`adm-chip ${r.status === 'COMPLETED' ? 'adm-chip--green' : 'adm-chip--amber'}`}>
                       {r.status}
@@ -857,7 +812,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           </div>
         </div>
       )}
-
       {/* =====================================================================
           VIEW 5: SECURITY ENGINE SETTINGS & CONFIGURATION
           ===================================================================== */}
@@ -875,7 +829,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <p>Cryptographic parameters & master authority specs</p>
                 </div>
               </div>
-
               <div className="adm-field" style={{ marginBottom: '16px' }}>
                 <div className="adm-field__icon">
                   <Shield size={20} />
@@ -885,7 +838,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <div className="adm-field__val">{settings.accessControl.cryptoScheme}</div>
                 </div>
               </div>
-
               <div className="adm-field" style={{ marginBottom: '16px' }}>
                 <div className="adm-field__icon">
                   <Server size={20} />
@@ -895,7 +847,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <div className="adm-field__val">{settings.accessControl.provider}</div>
                 </div>
               </div>
-
               <div className="adm-field">
                 <div className="adm-field__icon">
                   <Lock size={20} />
@@ -906,7 +857,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 </div>
               </div>
             </div>
-
             {/* Card 2: Anomaly Detection Thresholds */}
             <div className="adm-card">
               <div className="adm-ptitle">
@@ -918,7 +868,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <p>Rule- & threshold-based trigger levels</p>
                 </div>
               </div>
-
               {/* Operating Window */}
               <div className="adm-field adm-field--window" style={{ marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -927,7 +876,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     {settings.anomaly.window.start} – {settings.anomaly.window.end} {settings.anomaly.window.tz}
                   </strong>
                 </div>
-
                 <div className="adm-window">
                   <i style={{ left: '33.3%', width: '45.8%' }} />
                 </div>
@@ -938,7 +886,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <span>18:00</span>
                   <span>24:00</span>
                 </div>
-
                 <div className="adm-wrap" style={{ marginTop: '14px' }}>
                   {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((d) => (
                     <span 
@@ -950,7 +897,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   ))}
                 </div>
               </div>
-
               {/* Threshold 1: Failed Attempts */}
               <div className="adm-field adm-field--thr" style={{ marginBottom: '16px' }}>
                 <div className="adm-thr__icon" style={{ background: '#d12a43' }}>
@@ -964,7 +910,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   </div>
                 </div>
               </div>
-
               {/* Threshold 2: Burst Volume */}
               <div className="adm-field adm-field--thr">
                 <div className="adm-thr__icon" style={{ background: '#ff7a1a' }}>
