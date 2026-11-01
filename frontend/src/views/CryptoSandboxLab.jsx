@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
+  Copy,
+  Check,
   ShieldCheck, 
   Lock, 
   Unlock, 
@@ -161,6 +163,20 @@ export default function CryptoSandboxLab() {
   const [decryptionResult, setDecryptionResult] = useState(null);
   const [decryptError, setDecryptError] = useState(null);
   const [activeTamperMode, setActiveTamperMode] = useState("NONE");
+  const [copiedCipher, setCopiedCipher] = useState(false);
+  const [copiedPayload, setCopiedPayload] = useState(false);
+
+  const handleCopy = (text, type) => {
+    navigator.clipboard.writeText(text);
+    if (type === 'abe') {
+      setCopiedCipher(true);
+      setTimeout(() => setCopiedCipher(false), 2000);
+    } else {
+      setCopiedPayload(true);
+      setTimeout(() => setCopiedPayload(false), 2000);
+    }
+  };
+
 
   // Load Personas on Mount
   useEffect(() => {
@@ -451,12 +467,14 @@ export default function CryptoSandboxLab() {
             </div>
           </div>
 
-          {/* Encrypt Action Button */}
+          {/* Encrypt Action Button with guaranteed high-contrast visible text */}
           <button
             type="button"
             onClick={handleExecuteEncrypt}
             disabled={isEncrypting}
             style={{
+              width: '100%',
+              minHeight: '48px',
               padding: '12px 24px',
               borderRadius: '12px',
               background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
@@ -469,20 +487,20 @@ export default function CryptoSandboxLab() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              boxShadow: '0 4px 16px rgba(124, 58, 237, 0.3)',
+              boxShadow: '0 4px 16px rgba(124, 58, 237, 0.35)',
               transition: 'all 0.2s ease'
             }}
           >
             {isEncrypting ? (
-              <>
-                <RefreshCw size={16} className="spin-animation" />
-                <span>Generating Cryptographic Pairing & DEK...</span>
-              </>
+              <span style={{ color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13.5px' }}>
+                <RefreshCw size={16} className="spin-animation" style={{ color: '#ffffff' }} />
+                Generating Cryptographic Pairing & DEK...
+              </span>
             ) : (
-              <>
-                <Zap size={16} />
-                <span>Execute CP-ABE + AES-256-GCM Encryption</span>
-              </>
+              <span style={{ color: '#ffffff', display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '14px' }}>
+                <Zap size={16} style={{ color: '#ffffff' }} />
+                Execute CP-ABE + AES-256-GCM Encryption
+              </span>
             )}
           </button>
 
@@ -492,35 +510,114 @@ export default function CryptoSandboxLab() {
             </div>
           )}
 
-          {/* Ciphertext Output Inspection */}
+          {/* Ciphertext Output Inspection with Full Text-Wrap & Copy Actions */}
           {encryptedPackage && (
-            <div style={{ marginTop: '8px', padding: '16px', background: '#0f172a', borderRadius: '16px', color: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  CIPHERTEXT ENVELOPE GENERATED ({encryptedPackage.execution_time_ms} ms)
+            <div style={{ marginTop: '8px', padding: '18px 20px', background: '#0f172a', borderRadius: '18px', color: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '14px', border: '1px solid #1e293b' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1e293b', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ShieldCheck size={14} /> CIPHERTEXT ENVELOPE GENERATED ({encryptedPackage.execution_time_ms} ms)
                 </span>
-                <span style={{ background: '#1e293b', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', color: '#94a3b8' }}>
+                <span style={{ background: '#1e293b', padding: '3px 10px', borderRadius: '8px', fontSize: '11px', color: '#94a3b8', fontFamily: 'monospace' }}>
                   {encryptedPackage.engine}
                 </span>
               </div>
 
+              {/* ABE Ciphertext with Clean Text Wrap */}
               <div>
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>CP-ABE Group Element Ciphertext (abe_ciphertext):</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '11.5px', color: '#a78bfa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '11.5px', color: '#94a3b8', fontWeight: 700 }}>
+                    1. CP-ABE Group Element Ciphertext (abe_ciphertext):
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(encryptedPackage.abe_ciphertext, 'abe')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: copiedCipher ? '#4ade80' : '#38bdf8',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    {copiedCipher ? <Check size={12} /> : <Copy size={12} />}
+                    <span>{copiedCipher ? 'Copied!' : 'Copy Cipher'}</span>
+                  </button>
+                </div>
+                <div 
+                  style={{ 
+                    fontFamily: 'monospace', 
+                    fontSize: '11px', 
+                    color: '#c4b5fd', 
+                    background: '#1e293b',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #334155',
+                    wordBreak: 'break-all',
+                    overflowWrap: 'anywhere',
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: '120px',
+                    overflowY: 'auto',
+                    lineHeight: 1.5
+                  }}
+                >
                   {encryptedPackage.abe_ciphertext}
                 </div>
               </div>
 
+              {/* AES-GCM Ciphertext with Clean Text Wrap */}
               <div>
-                <div style={{ fontSize: '11px', color: '#94a3b8' }}>AES-256-GCM Encrypted Payload (payload_ciphertext):</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '11.5px', color: '#4ade80', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '11.5px', color: '#94a3b8', fontWeight: 700 }}>
+                    2. AES-256-GCM Encrypted Payload (payload_ciphertext):
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(encryptedPackage.payload_ciphertext, 'payload')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: copiedPayload ? '#4ade80' : '#38bdf8',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    {copiedPayload ? <Check size={12} /> : <Copy size={12} />}
+                    <span>{copiedPayload ? 'Copied!' : 'Copy Cipher'}</span>
+                  </button>
+                </div>
+                <div 
+                  style={{ 
+                    fontFamily: 'monospace', 
+                    fontSize: '11px', 
+                    color: '#86efac', 
+                    background: '#1e293b',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #334155',
+                    wordBreak: 'break-all',
+                    overflowWrap: 'anywhere',
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: '140px',
+                    overflowY: 'auto',
+                    lineHeight: 1.5
+                  }}
+                >
                   {encryptedPackage.payload_ciphertext}
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '11px', color: '#94a3b8', borderTop: '1px solid #1e293b', paddingTop: '8px' }}>
-                <div>Nonce (96-bit IV): <code style={{ color: '#f1f5f9' }}>{encryptedPackage.nonce.slice(0, 12)}...</code></div>
-                <div>AAD Binding: <code style={{ color: '#f1f5f9' }}>{encryptedPackage.aad.slice(0, 20)}...</code></div>
+              {/* Nonce and AAD Binding Footer */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '11.5px', color: '#94a3b8', borderTop: '1px solid #1e293b', paddingTop: '10px' }}>
+                <div>Nonce (96-bit IV): <code style={{ color: '#f1f5f9', wordBreak: 'break-all' }}>{encryptedPackage.nonce}</code></div>
+                <div>AAD Binding: <code style={{ color: '#f1f5f9', wordBreak: 'break-all' }}>{encryptedPackage.aad}</code></div>
               </div>
             </div>
           )}
