@@ -9,7 +9,8 @@ from app.api.endpoints import (
     anomalies,
     reports,
     imports,
-    attributes
+    attributes,
+    crypto_lab
 )
 
 api_router = APIRouter()
@@ -24,4 +25,4 @@ api_router.include_router(anomalies.router, prefix="/anomalies", tags=["Access A
 api_router.include_router(reports.router, prefix="/reports", tags=["Client Reports"])
 api_router.include_router(imports.router, prefix="/imports", tags=["Pilot CSV Import"])
 api_router.include_router(attributes.router, prefix="/attributes", tags=["CP-ABE Attributes & Tier-2 Revocation"])
-
+api_router.include_router(crypto_lab.router, prefix="/crypto-lab", tags=["CP-ABE Interactive Sandbox"])

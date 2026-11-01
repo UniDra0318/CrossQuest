@@ -518,3 +518,50 @@ export async function fetchRetentionWarnings(token) {
   }
   return null;
 }
+
+export async function fetchCryptoPersonas() {
+  try {
+    const res = await fetch(`${API_BASE}/crypto-lab/personas`);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for crypto personas:", err);
+  }
+  return null;
+}
+
+export async function runCryptoSandboxEncrypt({ payload, policy, recordId, version } = {}) {
+  const res = await fetch(`${API_BASE}/crypto-lab/encrypt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      payload: payload || {},
+      policy: policy || "ROLEADMIN",
+      record_id: recordId || "REC-DEMO-001",
+      version: version || 1
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Encryption failed (${res.status})`);
+  }
+  return data;
+}
+
+export async function runCryptoSandboxDecrypt({ encryptedRecord, userAttributes, recordId, version, simulateTamper } = {}) {
+  const res = await fetch(`${API_BASE}/crypto-lab/decrypt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      encrypted_record: encryptedRecord,
+      user_attributes: userAttributes || [],
+      record_id: recordId || "REC-DEMO-001",
+      version: version || 1,
+      simulate_tamper: simulateTamper || "NONE"
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Decryption failed (${res.status})`);
+  }
+  return data;
+}

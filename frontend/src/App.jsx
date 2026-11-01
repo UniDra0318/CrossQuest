@@ -9,6 +9,7 @@ import TrainerDashboard from './views/TrainerDashboard';
 import CompanyDashboard from './views/CompanyDashboard';
 import TraineeDashboard from './views/TraineeDashboard';
 import LandingView from './views/LandingView';
+import CryptoSandboxLab from './views/CryptoSandboxLab';
 import InstallPwaModal from './components/InstallPwaModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
@@ -63,6 +64,7 @@ export function resolveView(subPage, role) {
     case 'assigned_clients': return 'assigned_clients';
     case 'reconciliation':
     case 'finance_reconciliation': return 'finance_reconciliation';
+    case 'crypto_lab': return 'crypto_lab';
     default: return subPage;
   }
 }
@@ -93,6 +95,7 @@ export function getRouteForView(viewId, role) {
     case 'audit_certificate': return '/compliance';
     case 'finance_reconciliation': return '/finance/reconciliation';
     case 'company_overview': return '/dashboard';
+    case 'crypto_lab': return '/crypto-lab';
     default: return '/dashboard';
   }
 }
@@ -115,6 +118,7 @@ function MainAppShell({ activeSubPage }) {
   };
 
   const getViewTitle = () => {
+    if (activeView === 'crypto_lab') return 'CP-ABE & AES-256-GCM Verification Sandbox';
     switch (currentUser?.role) {
       case 'admin':
         if (activeView === 'attribute_authority') return 'Access Permissions Authority';
@@ -157,24 +161,30 @@ function MainAppShell({ activeSubPage }) {
 
         <main className="enterprise-page-area">
           <ErrorBoundary>
-          {currentUser?.role === 'admin' && (
-            <AdminDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-          )}
+          {activeView === 'crypto_lab' ? (
+            <CryptoSandboxLab />
+          ) : (
+            <>
+              {currentUser?.role === 'admin' && (
+                <AdminDashboard activeSubView={activeView} setActiveView={handleNavChange} />
+              )}
 
-          {(currentUser?.role === 'crossworks_staff' || currentUser?.role === 'account_manager') && (
-            <StaffDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-          )}
+              {(currentUser?.role === 'crossworks_staff' || currentUser?.role === 'account_manager') && (
+                <StaffDashboard activeSubView={activeView} setActiveView={handleNavChange} />
+              )}
 
-          {currentUser?.role === 'trainer' && (
-            <TrainerDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-          )}
+              {currentUser?.role === 'trainer' && (
+                <TrainerDashboard activeSubView={activeView} setActiveView={handleNavChange} />
+              )}
 
-          {(currentUser?.role === 'company_staff' || currentUser?.role === 'finance') && (
-            <CompanyDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-          )}
+              {(currentUser?.role === 'company_staff' || currentUser?.role === 'finance') && (
+                <CompanyDashboard activeSubView={activeView} setActiveView={handleNavChange} />
+              )}
 
-          {currentUser?.role === 'trainee' && (
-            <TraineeDashboard activeSubView={activeView} setActiveView={handleNavChange} onStreakLoad={setLiveStreakDays} />
+              {currentUser?.role === 'trainee' && (
+                <TraineeDashboard activeSubView={activeView} setActiveView={handleNavChange} onStreakLoad={setLiveStreakDays} />
+              )}
+            </>
           )}
           </ErrorBoundary>
         </main>
@@ -406,6 +416,16 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="trainer_analytics" />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* CP-ABE Cryptographic Sandbox Lab for Capstone Defense Panelists */}
+      <Route 
+        path="/crypto-lab" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="crypto_lab" />
           </ProtectedRoute>
         } 
       />

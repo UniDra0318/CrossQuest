@@ -111,6 +111,32 @@ export default function Topbar({ activeViewTitle, streakDays }) {
             </div>
           )}
 
+          {/* CP-ABE Live Sandbox for Capstone Defense Panelists */}
+          <button 
+            type="button"
+            onClick={() => navigate('/crypto-lab')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+              color: '#ffffff',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 800,
+              fontSize: '12px',
+              boxShadow: '0 2px 10px rgba(124, 58, 237, 0.25)',
+              transition: 'all 0.15s ease'
+            }}
+            title="Open Interactive CP-ABE Cryptographic Sandbox for Capstone Defense"
+          >
+            <Shield size={13} />
+            <span>CP-ABE Lab</span>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 6px #4ade80' }} />
+          </button>
+
           {/* Interactive Profile Menu Trigger */}
           <div className="role-dropdown-wrapper" style={{ position: 'relative' }}>
             <button 
