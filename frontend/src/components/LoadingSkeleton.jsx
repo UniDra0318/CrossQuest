@@ -66,3 +66,4 @@ export default function LoadingSkeleton({ rows = 3, type = 'rows', height }) {
     </div>
   );
 }
+

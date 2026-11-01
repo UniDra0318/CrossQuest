@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Award, 
   Flame, 
@@ -145,7 +145,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       progressSegments: [false, false, false, false],
       completed: quizScoreStatus['act-4']?.completed,
       score: quizScoreStatus['act-4']?.score,
-      accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned · Due in 3d'
+      accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned - Due in 3d'
     }
   ];
 
@@ -200,7 +200,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     setActiveQuiz(null);
   };
 
-  // Quiz exit handler (no session save — SEC-26)
+  // Quiz exit handler (no session save - SEC-26)
   const handleQuizExit = () => {
     setActiveQuiz(null);
   };
@@ -297,7 +297,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               </div>
               <h1 className="template-hero-title">Welcome back, {currentUser?.name}!</h1>
               <p className="template-hero-subtitle">
-                Complete today's interactive quest to extend your <strong>{streakDays !== null ? `${streakDays}-day` : '…'} streak</strong> and climb the corporate leaderboard.
+                Complete today's interactive quest to extend your <strong>{streakDays !== null ? `${streakDays}-day` : '...'} streak</strong> and climb the corporate leaderboard.
               </p>
 
               {/* Enterprise Learning Action Buttons */}
@@ -327,14 +327,14 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             <div className="template-hero-right">
               {/* Badges container on right */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                {/* Floating streak pill — live from backend */}
+                {/* Floating streak pill - live from backend */}
                 <div className="template-hero-streak-badge">
                   <div className="streak-flame-circle">
                     <Flame size={16} className="text-orange" fill="#ff6a00" />
                   </div>
                   <div className="streak-text-group">
                     <span className="streak-val">
-                      {gamLoading ? '…' : `${streakDays ?? 0} Days`}
+                      {gamLoading ? '...' : `${streakDays ?? 0} Days`}
                     </span>
                     <span className="streak-lbl">ACTIVE STREAK</span>
                   </div>
@@ -347,9 +347,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   </div>
                   <div className="streak-text-group">
                     <span className="streak-val">
-                      {gamLoading ? '…' : `Level ${level ?? 1}`}
+                      {gamLoading ? '...' : `Level ${level ?? 1}`}
                     </span>
-                    <span className="streak-lbl">{gamLoading ? '…' : `${(points ?? 0).toLocaleString()} XP`}</span>
+                    <span className="streak-lbl">{gamLoading ? '...' : `${(points ?? 0).toLocaleString()} XP`}</span>
                   </div>
                 </div>
               </div>
@@ -428,7 +428,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                         ) : (
                           <>
                             <span className="activity-pending-pill">
-                              <span>Assigned · Due in 3d</span>
+                              <span>Assigned - Due in 3d</span>
                             </span>
                             <button
                               className="activity-btn-play"
@@ -478,12 +478,12 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
             {/* Right: Streak This Week + Corporate Leaderboard */}
             <div className="template-right-widgets">
-              {/* This Week Streak Tracker — live from backend */}
+              {/* This Week Streak Tracker - live from backend */}
               <div className="template-this-week-card">
                 <div className="this-week-header flex-between">
                   <h4>This week</h4>
                   <span className="this-week-counter">
-                    {gamLoading ? '…' : `${Math.min(streakDays ?? 0, 7)} / 7 DAYS`}
+                    {gamLoading ? '...' : `${Math.min(streakDays ?? 0, 7)} / 7 DAYS`}
                   </span>
                 </div>
                 <div className="this-week-days-row">
@@ -531,7 +531,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                         {currentUser?.initials || 'JD'}
                       </div>
                       <span className="leaderboard-user-name">
-                        You · {currentUser?.name || 'Juan Dela Cruz'}
+                        You - {currentUser?.name || 'Juan Dela Cruz'}
                       </span>
                     </div>
                     <span className="leaderboard-rank-badge">RANK [#1]</span>
