@@ -165,15 +165,19 @@ export default function CryptoSandboxLab() {
   const [activeTamperMode, setActiveTamperMode] = useState("NONE");
   const [copiedCipher, setCopiedCipher] = useState(false);
   const [copiedPayload, setCopiedPayload] = useState(false);
+  const [copiedDecrypted, setCopiedDecrypted] = useState(false);
 
   const handleCopy = (text, type) => {
     navigator.clipboard.writeText(text);
     if (type === 'abe') {
       setCopiedCipher(true);
       setTimeout(() => setCopiedCipher(false), 2000);
-    } else {
+    } else if (type === 'payload') {
       setCopiedPayload(true);
       setTimeout(() => setCopiedPayload(false), 2000);
+    } else if (type === 'decrypted') {
+      setCopiedDecrypted(true);
+      setTimeout(() => setCopiedDecrypted(false), 2000);
     }
   };
 
@@ -326,8 +330,8 @@ export default function CryptoSandboxLab() {
         </div>
       </div>
 
-      {/* 2. TWO-COLUMN INTERACTIVE LAB WORKBENCH */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      {/* 2. TWO-COLUMN INTERACTIVE LAB WORKBENCH (LOCKED EQUAL WIDTHS & TOP-ALIGNED) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '24px', alignItems: 'start', width: '100%', boxSizing: 'border-box' }}>
         
         {/* COLUMN LEFT: STEP 1 - ENCRYPTION STATION */}
         <div 
@@ -339,7 +343,10 @@ export default function CryptoSandboxLab() {
             boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '18px'
+            gap: '18px',
+            minWidth: 0,
+            width: '100%',
+            boxSizing: 'border-box'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--cq-line)', paddingBottom: '16px' }}>
@@ -633,7 +640,10 @@ export default function CryptoSandboxLab() {
             boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '18px'
+            gap: '18px',
+            minWidth: 0,
+            width: '100%',
+            boxSizing: 'border-box'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--cq-line)', paddingBottom: '16px' }}>
@@ -656,7 +666,7 @@ export default function CryptoSandboxLab() {
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
               SELECT USER PERSONA TO TEST (ONE-CLICK EVALUATION):
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' }}>
               {personas.map((p) => {
                 const isSelected = selectedPersona?.id === p.id && !customAttributesInput.trim();
                 return (
@@ -674,17 +684,19 @@ export default function CryptoSandboxLab() {
                       background: isSelected ? '#f8fafc' : '#ffffff',
                       cursor: 'pointer',
                       transition: 'all 0.15s ease',
-                      boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.06)' : 'none'
+                      boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.06)' : 'none',
+                      minWidth: 0,
+                      boxSizing: 'border-box'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <strong style={{ fontSize: '13px', color: '#1e293b' }}>{p.name}</strong>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: p.badge_color }} />
+                      <strong style={{ fontSize: '13px', color: '#1e293b', wordBreak: 'break-word' }}>{p.name}</strong>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: p.badge_color, flexShrink: 0 }} />
                     </div>
-                    <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '6px' }}>{p.role}</div>
+                    <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '6px', wordBreak: 'break-word' }}>{p.role}</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                       {p.attributes.map(attr => (
-                        <span key={attr} style={{ background: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontFamily: 'monospace', fontWeight: 700 }}>
+                        <span key={attr} style={{ background: '#f1f5f9', color: '#334155', padding: '1px 6px', borderRadius: '4px', fontSize: '10px', fontFamily: 'monospace', fontWeight: 700, wordBreak: 'break-all' }}>
                           {attr}
                         </span>
                       ))}
@@ -779,8 +791,8 @@ export default function CryptoSandboxLab() {
             </button>
           </div>
 
-          {/* Decryption Verification Outcome */}
-          {decryptionResult && (
+          {/* Decryption Verification Outcome with Strict Text-Wrapping and Size Stability */}
+          {decryptionResult ? (
             <div 
               style={{ 
                 borderRadius: '18px', 
@@ -797,26 +809,32 @@ export default function CryptoSandboxLab() {
                     : '2px solid #f43f5e',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px'
+                gap: '12px',
+                width: '100%',
+                boxSizing: 'border-box',
+                minWidth: 0,
+                overflow: 'hidden'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
                   {decryptionResult.decryption_status === 'GRANTED' ? (
-                    <CheckCircle2 size={20} color="#047857" />
+                    <CheckCircle2 size={20} color="#047857" style={{ flexShrink: 0 }} />
                   ) : decryptionResult.decryption_status === 'REJECTED_TAMPER_DETECTED' ? (
-                    <AlertTriangle size={20} color="#b45309" />
+                    <AlertTriangle size={20} color="#b45309" style={{ flexShrink: 0 }} />
                   ) : (
-                    <ShieldAlert size={20} color="#be123c" />
+                    <ShieldAlert size={20} color="#be123c" style={{ flexShrink: 0 }} />
                   )}
                   <strong 
                     style={{ 
-                      fontSize: '15px', 
+                      fontSize: '14.5px', 
                       color: decryptionResult.decryption_status === 'GRANTED' 
                         ? '#065f46' 
                         : decryptionResult.decryption_status === 'REJECTED_TAMPER_DETECTED' 
                           ? '#92400e' 
-                          : '#9f1239' 
+                          : '#9f1239',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere'
                     }}
                   >
                     {decryptionResult.decryption_status === 'GRANTED' 
@@ -827,26 +845,115 @@ export default function CryptoSandboxLab() {
                   </strong>
                 </div>
 
-                <span style={{ fontSize: '11px', fontWeight: 800, padding: '2px 8px', borderRadius: '12px', background: '#ffffff', color: '#475569', border: '1px solid #cbd5e1' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, padding: '2px 8px', borderRadius: '12px', background: '#ffffff', color: '#475569', border: '1px solid #cbd5e1', flexShrink: 0 }}>
                   Latency: {decryptionResult.execution_time_ms} ms
                 </span>
               </div>
 
-              <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.5, color: '#334155' }}>
+              {/* Explanation with explicit break-word text-wrapping */}
+              <p 
+                style={{ 
+                  margin: 0, 
+                  fontSize: '13px', 
+                  lineHeight: 1.55, 
+                  color: '#334155', 
+                  wordBreak: 'break-word', 
+                  overflowWrap: 'anywhere',
+                  whiteSpace: 'pre-wrap' 
+                }}
+              >
                 {decryptionResult.explanation}
               </p>
 
-              {/* Decrypted Plaintext JSON Display */}
-              {decryptionResult.decrypted_content && (
-                <div style={{ marginTop: '4px' }}>
-                  <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#047857', marginBottom: '4px' }}>
-                    AUTHENTICATED RECOVERED PLAINTEXT:
+              {/* Attributes and Policy Tested Summary */}
+              {decryptionResult.user_attributes_tested && (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', flexWrap: 'wrap', fontSize: '11px', borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '8px' }}>
+                  <span style={{ color: '#64748b', fontWeight: 700 }}>Attributes Evaluated:</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {decryptionResult.user_attributes_tested.map(a => (
+                      <span key={a} style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#1e293b', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '10.5px', fontWeight: 700, wordBreak: 'break-all' }}>
+                        {a}
+                      </span>
+                    ))}
                   </div>
-                  <pre style={{ margin: 0, padding: '12px', background: '#ffffff', borderRadius: '10px', border: '1px solid #a7f3d0', fontSize: '12px', fontFamily: 'monospace', color: '#1e293b', maxHeight: '180px', overflowY: 'auto' }}>
+                </div>
+              )}
+
+              {/* Decrypted Plaintext JSON Display with Copy Action & Strict Break-All Wrap */}
+              {decryptionResult.decrypted_content && (
+                <div style={{ marginTop: '4px', width: '100%', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#047857' }}>
+                      AUTHENTICATED RECOVERED PLAINTEXT:
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(JSON.stringify(decryptionResult.decrypted_content, null, 2), 'decrypted')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: copiedDecrypted ? '#047857' : '#0284c7',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      {copiedDecrypted ? <Check size={12} /> : <Copy size={12} />}
+                      <span>{copiedDecrypted ? 'Copied!' : 'Copy Plaintext'}</span>
+                    </button>
+                  </div>
+                  <pre 
+                    style={{ 
+                      margin: 0, 
+                      padding: '12px 14px', 
+                      background: '#ffffff', 
+                      borderRadius: '10px', 
+                      border: '1px solid #a7f3d0', 
+                      fontSize: '12px', 
+                      fontFamily: 'monospace', 
+                      color: '#1e293b', 
+                      maxHeight: '180px', 
+                      overflowY: 'auto',
+                      overflowX: 'hidden',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                      overflowWrap: 'anywhere',
+                      lineHeight: 1.5,
+                      boxSizing: 'border-box',
+                      width: '100%'
+                    }}
+                  >
                     {JSON.stringify(decryptionResult.decrypted_content, null, 2)}
                   </pre>
                 </div>
               )}
+            </div>
+          ) : (
+            <div 
+              style={{ 
+                borderRadius: '16px', 
+                padding: '24px 20px', 
+                background: '#f8fafc', 
+                border: '1.5px dashed #cbd5e1', 
+                textAlign: 'center', 
+                color: '#64748b', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '8px',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}
+            >
+              <ShieldCheck size={28} color="#94a3b8" />
+              <strong style={{ fontSize: '13px', color: '#475569' }}>Awaiting Decryption Verification</strong>
+              <span style={{ fontSize: '11.5px', color: '#94a3b8', maxWidth: '340px' }}>
+                Select a test persona or custom attributes, then click "Verify Decryption" to evaluate the access policy tree.
+              </span>
             </div>
           )}
         </div>
