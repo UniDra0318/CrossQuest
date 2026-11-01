@@ -202,20 +202,20 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Scrollbar */
+/* Modern Minimalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-app);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #46146f;
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #631ecc;
+  background: #94a3b8;
 }
 
 /* Loading Shimmer Animation */

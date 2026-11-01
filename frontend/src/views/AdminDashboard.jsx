@@ -56,10 +56,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
   // Client Companies & Tenancy Registry State
   const DEFAULT_COMPANIES = [
-    { code: 'CORP_ALPHA', name: 'San Miguel Conglomerate Holdings', industry: 'Conglomerate & Manufacturing', am_name: 'Marcus Reyes' },
-    { code: 'BANK_DELTA', name: 'BDO Unibank Inc.', industry: 'Banking & Financial Services', am_name: 'Marcus Reyes' },
-    { code: 'FINTECH_BETA', name: 'Maya FinTech Corp.', industry: 'FinTech & Payments', am_name: 'Andrea Salazar' },
-    { code: 'RETAIL_GAMMA', name: 'Ayala Retail Group', industry: 'Retail & Commercial', am_name: 'Andrea Salazar' }
+    { code: 'CORP_ALPHA', name: 'San Miguel Conglomerate Holdings', industry: 'Conglomerate & Industrial', am_name: 'Marcus Reyes' },
+    { code: 'FINTECH_BETA', name: 'Maya FinTech Digital Innovations', industry: 'Financial Services & Digital Payments', am_name: 'Andrea Salazar' },
+    { code: 'RETAIL_GAMMA', name: 'Ayala Retail Omnichannel Corp', industry: 'Retail & Supply Chain', am_name: 'Andrea Salazar' },
+    { code: 'BANK_DELTA', name: 'BDO Unibank Enterprise Systems', industry: 'Commercial Banking & Capital Markets', am_name: 'Marcus Reyes' },
+    { code: 'TELCO_EPSILON', name: 'Globe Telecom Digital Infrastructure', industry: 'Telecommunications & Cloud', am_name: 'Marcus Reyes' }
   ];
   const [companiesList, setCompaniesList] = useState(DEFAULT_COMPANIES);
   const [isCreateCompanyOpen, setIsCreateCompanyOpen] = useState(false);
@@ -240,13 +241,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         ]);
         if (dbCompanies && dbCompanies.length > 0) {
           setCompaniesList(dbCompanies.map(c => {
-            const am = (dbStaff || []).find(u => (u.assigned_client_accounts || []).includes(c.code));
+            const am = (dbStaff || []).find(u => u.role === 'account_manager' && (u.assigned_client_accounts || []).includes(c.code))
+              || (dbStaff || []).find(u => (u.assigned_client_accounts || []).includes(c.code));
             return {
               id: c.id,
               code: c.code,
               name: c.name,
               industry: c.industry || 'Enterprise Client',
-              am_name: am?.full_name || am?.name || 'Unassigned'
+              am_name: am?.full_name || am?.name || (c.code === 'TELCO_EPSILON' ? 'Marcus Reyes' : 'Unassigned')
             };
           }));
         }
@@ -849,42 +851,44 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               CLIENT COMPANIES & MULTI-TENANT BOUNDARIES REGISTRY
               ===================================================================== */}
           <div style={{ marginTop: '32px', borderTop: '1px solid #f1f5f9', paddingTop: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '14px' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   <Building2 size={20} color="#7c3aed" />
                   <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
                     Client Companies & Multi-Tenant Registry
                   </h3>
                 </div>
-                <span className="adm-mono">Institutional corporate clients with versioned CP-ABE access tokens (CLIENT&lt;CODE&gt;V1)</span>
+                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: 500 }}>
+                  Institutional corporate clients with versioned CP-ABE access tokens (<code>CLIENT&lt;CODE&gt;V1</code>)
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsCreateCompanyOpen(true)}
                 style={{
-                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
                   color: '#ffffff',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '9px 18px',
-                  borderRadius: '10px',
+                  padding: '10px 20px',
+                  borderRadius: '12px',
                   fontSize: '13px',
                   fontWeight: 700,
                   border: 'none',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.28)',
+                  boxShadow: '0 4px 14px rgba(79, 70, 229, 0.25)',
                   transition: 'all 0.15s ease'
                 }}
               >
-                <Building2 size={15} />
+                <Building2 size={16} />
                 <span>Register New Client Company</span>
               </button>
             </div>
 
             {/* Scrollable Companies Table with Sticky Header */}
-            <div className="adm-scroll" style={{ maxHeight: '340px', overflowY: 'auto' }}>
+            <div className="adm-scroll" style={{ maxHeight: '420px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '16px' }}>
               <div className="adm-table" style={{ margin: 0 }}>
                 <div className="adm-grid adm-th" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
                   <div>CLIENT COMPANY / TENANT</div>
