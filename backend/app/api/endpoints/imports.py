@@ -358,6 +358,43 @@ async def upload_workbook_batch(
     }
 
 
+@router.get("/batches")
+def list_import_batches(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> List[Dict[str, Any]]:
+    """Lists all staged import batches with row counts, discrepancy counts, and reconciliation status."""
+    if current_user.role not in ("finance", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Finance and Administrator roles can view import batches."
+        )
+
+    batches = db.query(ImportBatch).order_by(ImportBatch.loaded_at.desc()).all()
+    result = []
+    for b in batches:
+        disc_count = db.query(ImportDiscrepancy).filter(ImportDiscrepancy.batch_id == b.id).count()
+        unresolved = db.query(ImportDiscrepancy).filter(
+            ImportDiscrepancy.batch_id == b.id,
+            ImportDiscrepancy.resolution == None
+        ).count()
+        result.append({
+            "id": b.id,
+            "source_file_name": b.source_file_name,
+            "file_hash": b.file_hash,
+            "record_count": b.record_count,
+            "in_scope_count": b.in_scope_count,
+            "pre_cutoff_count": b.pre_cutoff_count,
+            "quarantined_count": b.quarantined_count,
+            "distinct_customers_count": b.distinct_customers_count,
+            "reconciled": bool(b.reconciled),
+            "loaded_at": b.loaded_at.isoformat() if b.loaded_at else None,
+            "discrepancy_count": disc_count,
+            "unresolved_discrepancies": unresolved
+        })
+    return result
+
+
 @router.get("/batches/{batch_id}/discrepancies")
 def get_batch_discrepancies(
     batch_id: str,

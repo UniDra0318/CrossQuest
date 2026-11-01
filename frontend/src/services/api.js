@@ -228,3 +228,87 @@ export async function submitTrainerSignOff(sessionId, payload, token) {
   }
   return data;
 }
+
+export async function fetchImportBatches(token) {
+  try {
+    const res = await fetch(`${API_BASE}/imports/batches`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for import batches:", err);
+  }
+  return null;
+}
+
+export async function uploadImportFile(file, token) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+  const endpoint = isExcel ? `${API_BASE}/imports/upload-workbook` : `${API_BASE}/imports/upload`;
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    body: formData
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `File upload failed (${res.status})`);
+  }
+  return data;
+}
+
+export async function fetchBatchDiscrepancies(batchId, token) {
+  try {
+    const res = await fetch(`${API_BASE}/imports/batches/${batchId}/discrepancies`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for batch discrepancies:", err);
+  }
+  return null;
+}
+
+export async function resolveDiscrepancy(discrepancyId, payload, token) {
+  const res = await fetch(`${API_BASE}/imports/discrepancies/${discrepancyId}/resolve`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Resolution failed (${res.status})`);
+  }
+  return data;
+}
+
+export async function fetchReconciliationReport(batchId, token) {
+  try {
+    const res = await fetch(`${API_BASE}/imports/batches/${batchId}/reconciliation`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for reconciliation report:", err);
+  }
+  return null;
+}
+
+export async function commitImportBatch(batchId, token) {
+  const res = await fetch(`${API_BASE}/imports/batches/${batchId}/commit`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Commit batch failed (${res.status})`);
+  }
+  return data;
+}

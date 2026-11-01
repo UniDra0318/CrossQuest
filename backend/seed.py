@@ -25,7 +25,8 @@ from app.models.entities import (
     User, ClientCompany, Trainee, TraineeAffiliation, Course, TrainingSession,
     TrainerAssignment, AccountManagerAssignment, TrainingRecord, TrainingRecordVersion,
     CertificationType, Certificate, Notification, GamificationProgress,
-    AccessLog, AnomalyAlert, Quiz, QuizQuestion, QuizAnswerKey, QuizAttempt, Team, TeamMember
+    AccessLog, AnomalyAlert, Quiz, QuizQuestion, QuizAnswerKey, QuizAttempt, Team, TeamMember,
+    ImportBatch, ImportDiscrepancy, ImportStagingRow
 )
 from app.crypto.cpabe_engine import cpabe_engine
 
@@ -965,7 +966,136 @@ def seed_database():
         db.add_all(alerts)
         db.commit()
 
-        print("Seeding completed successfully with rich, fully populated multi-tenant dataset!")
+        # 15. Pilot Data Import & Reconciliation Batch (Chapter III, Figure 12, FR-22, DAT-01, DAT-03, DAT-08)
+        p_batch = ImportBatch(
+            id="batch-pilot-2026",
+            source_file_name="Crossworks_Training_Participants_Pilot_2026.xlsx",
+            file_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            record_count=150,
+            in_scope_count=149,
+            pre_cutoff_count=1,
+            quarantined_count=3,
+            distinct_customers_count=39,
+            reconciled=False,
+            loaded_at=datetime(2026, 8, 2, 14, 30),
+            loaded_by_user_id=u_fin1.id
+        )
+        db.add(p_batch)
+        db.commit()
+
+        # Pilot Discrepancies
+        discrepancies = [
+            ImportDiscrepancy(
+                batch_id=p_batch.id,
+                source_row_no=3,
+                issue_type="PRE_CUTOFF_DATE",
+                field_name="Training_Date",
+                resolution="EXCLUDE",
+                resolution_reason="Training date June 6, 2026 is prior to August 1, 2026 pilot cutoff baseline (FR-22).",
+                resolved_by_user_id=u_admin1.id,
+                resolved_at=datetime(2026, 8, 2, 15, 0)
+            ),
+            ImportDiscrepancy(
+                batch_id=p_batch.id,
+                source_row_no=42,
+                issue_type="DUPLICATE_PARTICIPANT",
+                field_name="Participant_Name",
+                resolution=None,
+                resolution_reason=None
+            ),
+            ImportDiscrepancy(
+                batch_id=p_batch.id,
+                source_row_no=88,
+                issue_type="COMPANY_NAME_VARIANT",
+                field_name="Customer_Name",
+                resolution=None,
+                resolution_reason=None
+            )
+        ]
+        db.add_all(discrepancies)
+        db.commit()
+
+        # Representative Pilot Staging Rows (150 total physical rows, 149 in-scope, 39 distinct customers)
+        # 24 Corporate Customers
+        corp_customers = [
+            "San Miguel Corporation", "Maya FinTech Philippines", "Ayala Corporation", "BDO Unibank Inc.",
+            "Globe Telecom", "JG Summit Holdings", "Aboitiz Equity Ventures", "Megaworld Corporation",
+            "PLDT Inc.", "Metropolitan Bank & Trust Co.", "Robinsons Retail Holdings", "Jollibee Foods Corp.",
+            "Monde Nissin Corporation", "Security Bank Corporation", "Puregold Price Club", "Universal Robina Corp.",
+            "Alliance Global Group", "DMCI Holdings", "GT Capital Holdings", "Filinvest Development Corp.",
+            "Nickel Asia Corporation", "Century Pacific Food", "Semirara Mining & Power", "Red Oak Properties, Inc."
+        ]
+        # 15 Pseudonymized Retail Individuals (INDIV-C026 to INDIV-C040)
+        indiv_customers = [f"INDIV-C{i:03d}" for i in range(26, 41)]
+
+        staging_rows = []
+        # Row 3: Pre-cutoff excluded
+        staging_rows.append(ImportStagingRow(
+            batch_id=p_batch.id,
+            source_row_no=3,
+            validation_status="PRE_CUTOFF_EXCLUDED",
+            raw_data={
+                "customer": "Retail Individual",
+                "standardized_customer": "Retail Individual",
+                "participant": "Ron Robert Despi",
+                "date": "2026-06-06",
+                "is_individual_retail": True
+            }
+        ))
+
+        # Row 42: Duplicate quarantined
+        staging_rows.append(ImportStagingRow(
+            batch_id=p_batch.id,
+            source_row_no=42,
+            validation_status="QUARANTINED",
+            raw_data={
+                "customer": "INDIV-C026",
+                "standardized_customer": "INDIV-C026",
+                "participant": "INDIV-C026",
+                "date": "2026-09-05",
+                "is_individual_retail": True
+            }
+        ))
+
+        # Row 88: Company name variant quarantined
+        staging_rows.append(ImportStagingRow(
+            batch_id=p_batch.id,
+            source_row_no=88,
+            validation_status="QUARANTINED",
+            raw_data={
+                "customer": "Red Oak Properties Inc.",
+                "standardized_customer": "Red Oak Properties, Inc.",
+                "participant": "Mark Anthony Solis",
+                "date": "2026-08-20",
+                "is_individual_retail": False
+            }
+        ))
+
+        # Populate remainder of rows across the 39 distinct customers
+        current_row = 1
+        for i in range(147):
+            while current_row in (3, 42, 88):
+                current_row += 1
+            cust = (corp_customers + indiv_customers)[i % len(corp_customers + indiv_customers)]
+            is_indiv = cust.startswith("INDIV-")
+            staging_rows.append(ImportStagingRow(
+                batch_id=p_batch.id,
+                source_row_no=current_row,
+                validation_status="VALID",
+                raw_data={
+                    "customer": cust,
+                    "standardized_customer": cust,
+                    "participant": f"{cust} Trainee {(i % 5) + 1}",
+                    "date": "2026-08-15",
+                    "is_individual_retail": is_indiv
+                }
+            ))
+            current_row += 1
+
+        db.add_all(staging_rows)
+        db.commit()
+
+        print("Seeding completed successfully with rich, fully populated multi-tenant dataset and pilot import batch!")
 
     except Exception as e:
         db.rollback()

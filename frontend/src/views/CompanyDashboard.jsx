@@ -10,8 +10,10 @@ import {
   Calendar, 
   Lock, 
   Award, 
-  AlertTriangle 
+  AlertTriangle, 
+  FileSpreadsheet 
 } from 'lucide-react';
+import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useAuth } from '../contexts/AuthContext';
 import { INITIAL_TRAINING_RECORDS } from '../data/mockData';
@@ -67,11 +69,15 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
     ? (companyRecords.reduce((acc, r) => acc + (r.score || 0), 0) / companyRecords.length).toFixed(1)
     : '0.0';
 
-  const currentTab = ['company_trainees', 'audit_certificate'].includes(activeSubView)
+  const isFinanceOrAdmin = currentUser?.role === 'finance' || currentUser?.role === 'admin';
+  const currentTab = ['company_trainees', 'audit_certificate', 'finance_reconciliation'].includes(activeSubView)
     ? activeSubView
-    : 'company_overview';
+    : (currentUser?.role === 'finance' && activeSubView === 'dashboard')
+      ? 'finance_reconciliation'
+      : 'company_overview';
 
   const companyTabs = [
+    ...(isFinanceOrAdmin ? [{ id: 'finance_reconciliation', label: 'Pilot Import & Reconciliation Desk', icon: FileSpreadsheet }] : []),
     { id: 'company_overview', label: 'Company Compliance', icon: Building2 },
     { id: 'company_trainees', label: 'Employee Records', icon: Users },
     { id: 'audit_certificate', label: 'Compliance & Audit Report', icon: ShieldCheck }
@@ -312,6 +318,11 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 4. FINANCE PILOT DATA IMPORT & RECONCILIATION DESK (FR-22, DAT-01, DAT-03, DAT-08) */}
+      {currentTab === 'finance_reconciliation' && (
+        <FinanceReconciliationDesk />
       )}
     </div>
   );

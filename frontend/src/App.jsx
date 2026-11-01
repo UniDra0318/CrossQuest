@@ -61,6 +61,8 @@ export function resolveView(subPage, role) {
     case 'analytics': return 'trainer_analytics';
     case 'settings': return 'system_settings';
     case 'assigned_clients': return 'assigned_clients';
+    case 'reconciliation':
+    case 'finance_reconciliation': return 'finance_reconciliation';
     default: return subPage;
   }
 }
@@ -89,6 +91,7 @@ export function getRouteForView(viewId, role) {
     case 'company_trainees': return '/trainees';
     case 'trainee_quest': return '/courses';
     case 'audit_certificate': return '/compliance';
+    case 'finance_reconciliation': return '/finance/reconciliation';
     case 'company_overview': return '/dashboard';
     default: return '/dashboard';
   }
@@ -132,6 +135,7 @@ function MainAppShell({ activeSubPage }) {
         return 'Lead Trainer Course Delivery';
       case 'finance':
       case 'company_staff':
+        if (activeView === 'finance_reconciliation') return 'Finance Pilot Data Import & Reconciliation Desk';
         if (activeView === 'company_trainees') return 'Employee Training Records';
         if (activeView === 'audit_certificate') return 'Compliance & Audit Report';
         return 'Client Organization Portal';
@@ -212,6 +216,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="quizzes" />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/finance/reconciliation" 
+        element={
+          <ProtectedRoute>
+            <MainAppShell activeSubPage="finance_reconciliation" />
           </ProtectedRoute>
         } 
       />
