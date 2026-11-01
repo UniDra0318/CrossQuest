@@ -21,7 +21,10 @@ import {
   Copy,
   Check,
   Eye,
-  CheckSquare
+  CheckSquare,
+  UserPlus,
+  X,
+  Mail
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -34,7 +37,7 @@ import {
   settings as defaultSettings 
 } from '../data/adminData';
 import { exportAuditLogs } from '../api/admin';
-import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes } from '../services/api';
+import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes, createUserApi } from '../services/api';
 import SpinCube from '../components/SpinCube';
 import BitMascot from '../components/BitMascot/BitMascot';
 import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk';
@@ -49,6 +52,90 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [records, setRecords] = useState(defaultRecords);
   const [settings] = useState(defaultSettings);
   const [editingStaffId, setEditingStaffId] = useState(null);
+
+  // Provision User Modal state (FR-02, SEC-01)
+  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({
+    full_name: '',
+    email: '',
+    role: 'account_manager',
+    assigned_client_accounts: ['CORP_ALPHA'],
+    temporary_password: ''
+  });
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [createUserError, setCreateUserError] = useState(null);
+  const [createdUserResult, setCreatedUserResult] = useState(null);
+  const [copiedActivationLink, setCopiedActivationLink] = useState(false);
+
+  const handleToggleNewUserClient = (code) => {
+    setNewUserForm(prev => {
+      const exists = prev.assigned_client_accounts.includes(code);
+      return {
+        ...prev,
+        assigned_client_accounts: exists
+          ? prev.assigned_client_accounts.filter(c => c !== code)
+          : [...prev.assigned_client_accounts, code]
+      };
+    });
+  };
+
+  const handleCreateUserSubmit = async (e) => {
+    e.preventDefault();
+    setIsCreatingUser(true);
+    setCreateUserError(null);
+
+    const payload = {
+      full_name: newUserForm.full_name.trim(),
+      email: newUserForm.email.trim().toLowerCase(),
+      role: newUserForm.role,
+      assigned_client_accounts: newUserForm.assigned_client_accounts,
+      temporary_password: newUserForm.temporary_password.trim() || undefined
+    };
+
+    const res = await createUserApi(payload, token);
+    setIsCreatingUser(false);
+
+    if (res.ok) {
+      setCreatedUserResult(res.data);
+      const u = res.data.user;
+      setStaffList(prev => [
+        {
+          id: u.id,
+          name: u.full_name,
+          initials: u.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+          email: u.email,
+          role: u.role.replace(/_/g, ' ').toUpperCase(),
+          level: 1,
+          clients: u.assigned_client_accounts || ['CORP_ALPHA'],
+          tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : u.role === 'finance' ? 'blue' : 'orange'
+        },
+        ...prev
+      ]);
+    } else {
+      setCreateUserError(res.error || 'Failed to provision user.');
+    }
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateUserOpen(false);
+    setCreatedUserResult(null);
+    setCreateUserError(null);
+    setNewUserForm({
+      full_name: '',
+      email: '',
+      role: 'account_manager',
+      assigned_client_accounts: ['CORP_ALPHA'],
+      temporary_password: ''
+    });
+  };
+
+  const handleCopyActivationLink = () => {
+    if (!createdUserResult?.activation_link) return;
+    const fullLink = `${window.location.origin}${createdUserResult.activation_link}`;
+    navigator.clipboard.writeText(fullLink);
+    setCopiedActivationLink(true);
+    setTimeout(() => setCopiedActivationLink(false), 2000);
+  };
   const [editForm, setEditForm] = useState({ role: '', level: 1, clients: [] });
   const [anomalyFilter, setAnomalyFilter] = useState('ALL');
   const [staffSearch, setStaffSearch] = useState('');
@@ -494,19 +581,43 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           ===================================================================== */}
       {activeSubView === 'attribute_authority' && (
         <div className="adm-panel" style={{ marginTop: '32px' }}>
-          <div className="adm-panel__head">
+          <div className="adm-panel__head" style={{ flexWrap: 'wrap', gap: '14px' }}>
             <div>
               <h2>Staff Access & Role Management</h2>
               <span className="adm-mono">Configure roles, clearance levels, and assigned tenant scope</span>
             </div>
-            <div className="adm-search">
-              <Search size={15} />
-              <input 
-                type="text" 
-                placeholder="Search staff members..." 
-                value={staffSearch}
-                onChange={(e) => setStaffSearch(e.target.value)}
-              />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setIsCreateUserOpen(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <UserPlus size={15} />
+                <span>Provision New Account</span>
+              </button>
+              <div className="adm-search">
+                <Search size={15} />
+                <input 
+                  type="text" 
+                  placeholder="Search staff members..." 
+                  value={staffSearch}
+                  onChange={(e) => setStaffSearch(e.target.value)}
+                />
+              </div>
             </div>
           </div>
           <div className="adm-scroll">
@@ -833,6 +944,373 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          PROVISION NEW USER MODAL (FR-02, SEC-01)
+          ===================================================================== */}
+      {isCreateUserOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isCreatingUser) handleCloseCreateModal();
+          }}
+        >
+          <div 
+            style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '560px',
+              width: '100%',
+              boxShadow: '0 20px 45px rgba(0,0,0,0.2)',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '90vh'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <UserPlus size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                    {createdUserResult ? 'Account Provisioned' : 'Provision Enterprise User'}
+                  </h3>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                    Institutional Account Setup & CP-ABE Key Issuance (FR-02)
+                  </span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={handleCloseCreateModal}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '24px 28px', overflowY: 'auto' }}>
+              {createdUserResult ? (
+                /* SUCCESS VIEW */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#ecfdf5', borderRadius: '16px', border: '1px solid #a7f3d0' }}>
+                    <CheckCircle2 size={24} color="#059669" style={{ flexShrink: 0 }} />
+                    <div style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.5 }}>
+                      <strong>User account successfully registered!</strong>
+                      <div>Initial CP-ABE cryptographic keys were generated and bound.</div>
+                    </div>
+                  </div>
+
+                  {/* Account Summary Card */}
+                  <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '16px', border: '1px solid #e2e8f0', fontSize: '12.5px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', marginBottom: '6px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Full Name:</span>
+                      <strong style={{ color: '#1e293b' }}>{createdUserResult.user.full_name}</strong>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', marginBottom: '6px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Email Address:</span>
+                      <code style={{ color: '#1e293b', fontFamily: 'monospace' }}>{createdUserResult.user.email}</code>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', marginBottom: '6px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Assigned Role:</span>
+                      <span style={{ fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase' }}>
+                        {createdUserResult.user.role.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Tenant Scope:</span>
+                      <span style={{ color: '#0284c7', fontWeight: 700 }}>
+                        {(createdUserResult.user.assigned_client_accounts || []).join(', ') || 'Enterprise Universal'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Copyable Activation Link */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      SINGLE-USE ACTIVATION LINK (VALID FOR 24 HOURS):
+                    </label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <input 
+                        type="text" 
+                        readOnly 
+                        value={`${window.location.origin}${createdUserResult.activation_link}`}
+                        style={{
+                          flex: 1,
+                          padding: '10px 12px',
+                          borderRadius: '10px',
+                          border: '1.5px solid #cbd5e1',
+                          background: '#f1f5f9',
+                          fontFamily: 'monospace',
+                          fontSize: '12px',
+                          color: '#334155'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCopyActivationLink}
+                        style={{
+                          padding: '10px 16px',
+                          borderRadius: '10px',
+                          background: copiedActivationLink ? '#059669' : '#0284c7',
+                          color: '#ffffff',
+                          border: 'none',
+                          fontWeight: 700,
+                          fontSize: '12.5px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {copiedActivationLink ? <Check size={14} /> : <Copy size={14} />}
+                        <span>{copiedActivationLink ? 'Copied!' : 'Copy Link'}</span>
+                      </button>
+                    </div>
+                    <p style={{ margin: '8px 0 0 0', fontSize: '11.5px', color: '#64748b', lineHeight: 1.4 }}>
+                      An automated setup invitation email was sent to <code>{createdUserResult.user.email}</code>. You may also provide this link directly to the employee.
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+                    <button
+                      type="button"
+                      onClick={handleCloseCreateModal}
+                      style={{
+                        padding: '10px 22px',
+                        borderRadius: '10px',
+                        background: '#1e293b',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* FORM VIEW */
+                <form onSubmit={handleCreateUserSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Full Name */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      FULL NAME:
+                    </label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. Andrea Salazar"
+                      value={newUserForm.full_name}
+                      onChange={(e) => setNewUserForm({ ...newUserForm, full_name: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '13.5px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  {/* Corporate Email */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      CORPORATE EMAIL ADDRESS:
+                    </label>
+                    <input 
+                      type="email" 
+                      required
+                      placeholder="e.g. andrea.am@crossworks.ph"
+                      value={newUserForm.email}
+                      onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '13.5px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  {/* System Role */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      ASSIGNED ROLE:
+                    </label>
+                    <select
+                      value={newUserForm.role}
+                      onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '13.5px',
+                        background: '#ffffff',
+                        fontWeight: 600,
+                        color: '#1e293b',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <option value="account_manager">Account Manager (Scoped to assigned enterprise tenants)</option>
+                      <option value="trainer">Lead Trainer (Course & practical evaluation sign-off)</option>
+                      <option value="finance">Finance Personnel (Reconciliation, audit review, no delete)</option>
+                      <option value="trainee">Trainee Learner (Portable learning quests & achievements)</option>
+                      <option value="admin">Administrator (Universal authority & peer-review)</option>
+                    </select>
+                  </div>
+
+                  {/* Assigned Client Tenants (relevant for AM, Trainer, Trainee) */}
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      <span>ASSIGNED CLIENT TENANTS:</span>
+                      <span style={{ color: '#64748b', fontSize: '11px' }}>Cryptographic scope boundary</span>
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      {['CORP_ALPHA', 'BANK_DELTA', 'FINTECH_BETA', 'RETAIL_GAMMA'].map((cCode) => {
+                        const checked = newUserForm.assigned_client_accounts.includes(cCode);
+                        return (
+                          <div 
+                            key={cCode}
+                            onClick={() => handleToggleNewUserClient(cCode)}
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: checked ? '1.5px solid #7c3aed' : '1px solid #e2e8f0',
+                              background: checked ? '#f5f3ff' : '#ffffff',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <input 
+                              type="checkbox" 
+                              checked={checked}
+                              onChange={() => {}}
+                              style={{ accentColor: '#7c3aed' }}
+                            />
+                            <span style={{ fontSize: '12px', fontWeight: 700, color: checked ? '#6d28d9' : '#475569', fontFamily: 'monospace' }}>
+                              {cCode}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Optional Initial Password */}
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      <span>TEMPORARY INITIAL PASSWORD (OPTIONAL):</span>
+                      <span style={{ color: '#94a3b8', fontSize: '11px' }}>Leave blank to auto-generate</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      placeholder="Leave blank for secure auto-generated temporary key"
+                      value={newUserForm.temporary_password}
+                      onChange={(e) => setNewUserForm({ ...newUserForm, temporary_password: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '10px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '12.5px',
+                        fontFamily: 'monospace',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  {/* Error Notification */}
+                  {createUserError && (
+                    <div style={{ padding: '10px 14px', background: '#fff1f2', borderRadius: '10px', border: '1px solid #fecdd3', color: '#be123c', fontSize: '12.5px' }}>
+                      {createUserError}
+                    </div>
+                  )}
+
+                  {/* Modal Footer Actions */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                    <button
+                      type="button"
+                      onClick={handleCloseCreateModal}
+                      disabled={isCreatingUser}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: '10px',
+                        background: '#f1f5f9',
+                        color: '#475569',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isCreatingUser || !newUserForm.full_name.trim() || !newUserForm.email.trim()}
+                      style={{
+                        padding: '10px 22px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: isCreatingUser ? 'not-allowed' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)'
+                      }}
+                    >
+                      {isCreatingUser ? (
+                        <>
+                          <RefreshCw size={14} className="spin-animation" />
+                          <span>Provisioning User...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus size={14} />
+                          <span>Provision & Generate Activation Link</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>

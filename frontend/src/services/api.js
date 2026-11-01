@@ -565,3 +565,40 @@ export async function runCryptoSandboxDecrypt({ encryptedRecord, userAttributes,
   }
   return data;
 }
+
+export async function createUserApi(userData, token) {
+  try {
+    const res = await fetch(`${API_BASE}/users/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(userData)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: data.detail || 'Failed to create user account' };
+    }
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+export async function confirmPasswordResetApi({ token, new_password }) {
+  try {
+    const res = await fetch(`${API_BASE}/auth/confirm-reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, new_password })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: data.detail || 'Failed to activate account' };
+    }
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}

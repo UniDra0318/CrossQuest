@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
-from app.models.entities import User, Trainee, AccessLog, UserSession, PasswordResetToken, UserAbeKey
+from app.models.entities import User, Trainee, AccessLog, UserSession, PasswordResetToken, UserAbeKey, GamificationProgress
 from app.schemas.schemas import (
     UserResponse, UserAttributeUpdate, UserCreateAdmin, UserActivationResponse, PasswordChangeRequest
 )
@@ -78,6 +78,38 @@ def create_user_by_admin(
         expires_at=expires_at
     )
     db.add(reset_token)
+
+    # If role is trainee, auto-link or create Trainee profile with Gamification
+    if user.role.lower() == "trainee":
+        t = db.query(Trainee).filter(Trainee.email == user.email).first()
+        if t:
+            t.user_id = user.id
+        else:
+            name_parts = user.full_name.split(" ", 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else "Trainee"
+            t = Trainee(
+                trainee_code=f"TRN-{secrets.randbelow(9000) + 1000}",
+                user_id=user.id,
+                first_name=first_name,
+                last_name=last_name,
+                email=user.email,
+                display_name=first_name
+            )
+            db.add(t)
+            db.flush()
+            gp = GamificationProgress(trainee_id=t.id)
+            db.add(gp)
+
+    # Issue initial CP-ABE key for user
+    try:
+        attribute_manager.issue_or_rekey_user(
+            db=db,
+            user=user,
+            admin_user_id=admin_user.id
+        )
+    except Exception:
+        pass
 
     # Deliver setup invitation email from crossquest@xworks.ph (Phase 1)
     email_service.send_account_setup_email(user.email, user.full_name, raw_token)

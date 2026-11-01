@@ -2,6 +2,7 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginView from './components/LoginView';
+import ActivateAccount from './views/ActivateAccount';
 import Topbar from './components/Topbar';
 import AdminDashboard from './views/AdminDashboard';
 import StaffDashboard from './views/StaffDashboard';
@@ -203,6 +204,7 @@ function AppRoutes() {
     <Routes>
       {/* Login Route */}
       <Route path="/login" element={<LoginView />} />
+      <Route path="/activate" element={<ActivateAccount />} />
 
       {/* Main Application Routes */}
       <Route 
