@@ -552,11 +552,26 @@ def seed_database():
                 trainee_id=t_juan.id,
                 cert_type_code="ISO_31000",
                 title="ISO 31000 Certified Risk Manager",
+                serial_number="SMC20260815-01",
                 issue_date=datetime(2026, 8, 15),
                 expiry_date=datetime(2029, 8, 15),
-                expiry_basis="Calculated: issue_date + 36 months",
+                expiry_basis="Calculated: issue_date + 36 months validity",
                 status="Valid",
+                is_self_reported=False,
                 is_nearing_renewal=False
+            ),
+            Certificate(
+                trainee_id=t_juan.id,
+                cert_type_code="PMP",
+                title="Project Management Professional (PMP)",
+                serial_number="SMC20231201-01",
+                issue_date=now_dt - timedelta(days=365*3 - 42),
+                expiry_date=now_dt + timedelta(days=42),
+                expiry_basis="Self-reported external credential URL (36 months validity)",
+                status="Expiring soon",
+                is_self_reported=True,
+                credential_url="https://www.credly.com/badges/juan-delacruz-pmp-2023",
+                is_nearing_renewal=True
             ),
             Certificate(
                 record_id="rec-102",
@@ -619,6 +634,13 @@ def seed_database():
 
         # 9. Seed Notifications
         notifs = [
+            Notification(
+                recipient_user_id=u_trn_juan.id,
+                certification_id=certs[1].id,
+                offset_days=60,
+                title="External Credential Renewal Alert (60 Days)",
+                message="Your Project Management Professional (PMP) credential expires in 42 days. Submit renewal badge URL to ensure compliance."
+            ),
             Notification(
                 recipient_user_id=u_trn_maria.id,
                 certification_id=certs[2].id,

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Award, 
   Flame, 
@@ -13,12 +13,27 @@ import {
   GraduationCap, 
   AlertTriangle,
   FileQuestion,
-  ChevronRight
+  ChevronRight,
+  ExternalLink,
+  Download,
+  RefreshCw,
+  PlusCircle,
+  FileCheck
 } from 'lucide-react';
 import { getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchTraineeGamification, submitQuizScore, toggleLeaderboardOptOut, fetchCompanyLeaderboard } from '../services/api';
+import { 
+  fetchTraineeGamification, 
+  submitQuizScore, 
+  toggleLeaderboardOptOut, 
+  fetchCompanyLeaderboard,
+  fetchCertificates,
+  fetchCertificationTypes,
+  submitExternalCredential,
+  fetchExpiryNotifications,
+  triggerExpirySweep
+} from '../services/api';
 import Mascot from '../components/Mascot';
 import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
@@ -33,6 +48,22 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   const [level, setLevel] = useState(null);
   const [streakDays, setStreakDays] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  // Live Certifications & Expiry Notifications State (FR-18, FR-19, DAT-05, U-15)
+  const [liveCerts, setLiveCerts] = useState([]);
+  const [certNotifications, setCertNotifications] = useState([]);
+  const [certTypes, setCertTypes] = useState([]);
+  const [showExternalModal, setShowExternalModal] = useState(false);
+  const [externalSubmitting, setExternalSubmitting] = useState(false);
+  const [externalForm, setExternalForm] = useState({
+    cert_type_code: 'PMP',
+    title: 'Project Management Professional (PMP)',
+    credential_url: '',
+    issue_date: '',
+    expiry_date: ''
+  });
+  const [certMsg, setCertMsg] = useState(null);
+  const [certError, setCertError] = useState(null);
   const [leaderboardOptOut, setLeaderboardOptOut] = useState(false);
   const [gamLoading, setGamLoading] = useState(true);
 
@@ -151,26 +182,47 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
   const earnedBadges = designBadges;
 
-  const certificates = [
+  const displayCertificates = (liveCerts && liveCerts.length > 0) ? liveCerts.map(c => ({
+    id: c.id,
+    title: c.title,
+    serialNumber: c.serial_number || 'CQ-2026-PENDING',
+    clientCompany: currentUser?.organization || 'San Miguel Conglomerate Holdings',
+    issuedOn: c.issue_date ? new Date(c.issue_date).toLocaleDateString() : '2026-08-15',
+    expiresOn: c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : '2029-08-15',
+    daysUntilExpiry: Math.max(0, Math.ceil(((new Date(c.expiry_date || Date.now())) - Date.now()) / (1000 * 60 * 60 * 24))),
+    isRenewalApproaching: c.is_nearing_renewal || c.status === 'Expiring soon',
+    status: c.status || 'Valid',
+    isSelfReported: Boolean(c.is_self_reported),
+    credentialUrl: c.credential_url,
+    hash: `SERIAL:${c.serial_number || c.id?.substring(0, 8)}`
+  })) : [
     {
       id: 'cert-01',
-      title: 'Enterprise Security Lead Implementer',
-      clientCompany: 'San Miguel Conglomerate Holdings',
-      issuedOn: '2025-11-10',
-      expiresOn: '2026-11-10',
-      daysUntilExpiry: 38,
-      isRenewalApproaching: true,
-      hash: 'SHA256:e3b0c442...852b855'
+      title: 'ISO 31000 Certified Risk Manager',
+      serialNumber: 'SMC20260815-01',
+      clientCompany: currentUser?.organization || 'San Miguel Conglomerate Holdings',
+      issuedOn: '2026-08-15',
+      expiresOn: '2029-08-15',
+      daysUntilExpiry: 1018,
+      isRenewalApproaching: false,
+      status: 'Valid',
+      isSelfReported: false,
+      credentialUrl: null,
+      hash: 'SERIAL:SMC20260815-01'
     },
     {
       id: 'cert-02',
-      title: 'DevSecOps & Supply Chain Defense',
-      clientCompany: 'San Miguel Conglomerate Holdings',
-      issuedOn: '2026-04-15',
-      expiresOn: '2027-04-15',
-      daysUntilExpiry: 194,
-      isRenewalApproaching: false,
-      hash: 'SHA256:d4735e3a...13ab35'
+      title: 'Project Management Professional (PMP)',
+      serialNumber: 'SMC20231201-01',
+      clientCompany: currentUser?.organization || 'San Miguel Conglomerate Holdings',
+      issuedOn: '2023-12-01',
+      expiresOn: '2026-12-12',
+      daysUntilExpiry: 42,
+      isRenewalApproaching: true,
+      status: 'Expiring soon',
+      isSelfReported: true,
+      credentialUrl: 'https://www.credly.com/badges/juan-delacruz-pmp-2023',
+      hash: 'SERIAL:SMC20231201-01'
     }
   ];
 
@@ -203,6 +255,69 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   // Quiz exit handler (no session save - SEC-26)
   const handleQuizExit = () => {
     setActiveQuiz(null);
+  };
+
+  // Certification Handlers (FR-18, FR-19, DAT-05, U-15)
+  const reloadCerts = async () => {
+    try {
+      const [cList, nList] = await Promise.all([
+        fetchCertificates(token),
+        fetchExpiryNotifications(token)
+      ]);
+      if (cList) setLiveCerts(cList);
+      if (nList) setCertNotifications(nList);
+    } catch (err) {
+      console.warn('Failed reloading certificates:', err);
+    }
+  };
+
+  const handleExternalSubmit = async (e) => {
+    e.preventDefault();
+    setCertError(null);
+    setCertMsg(null);
+
+    const url = externalForm.credential_url.trim();
+    if (!url.startsWith('https://')) {
+      setCertError('External credential badge URL must be a valid HTTPS link (e.g. https://www.credly.com/badges/...).');
+      return;
+    }
+
+    setExternalSubmitting(true);
+    try {
+      const payload = {
+        cert_type_code: externalForm.cert_type_code,
+        title: externalForm.title || 'External Credential',
+        credential_url: url,
+        issue_date: externalForm.issue_date ? new Date(externalForm.issue_date).toISOString() : new Date().toISOString(),
+        expiry_date: externalForm.expiry_date ? new Date(externalForm.expiry_date).toISOString() : null
+      };
+
+      const res = await submitExternalCredential(payload, token);
+      setCertMsg(`Successfully registered ${res.title}! Serial: ${res.serial_number}. Automated 36-month expiry tracking active.`);
+      setShowExternalModal(false);
+      setExternalForm({
+        cert_type_code: 'PMP',
+        title: 'Project Management Professional (PMP)',
+        credential_url: '',
+        issue_date: '',
+        expiry_date: ''
+      });
+      await reloadCerts();
+    } catch (err) {
+      setCertError(err.message || 'Failed to submit external credential.');
+    } finally {
+      setExternalSubmitting(false);
+    }
+  };
+
+  const handleRunSweep = async () => {
+    try {
+      const res = await triggerExpirySweep(token);
+      alert(`Automated Expiry Sweep Complete! Scanned ${res.total_certificates_scanned || 0} certificates. Issued ${res.notifications_issued || 0} expiry notification(s).`);
+      await reloadCerts();
+    } catch (err) {
+      alert(err.message || 'Failed to trigger expiry sweep.');
+    }
   };
 
   // Trainee in-page tab options
@@ -677,62 +792,343 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         </div>
       )}
 
-      {/* 4. CERTIFICATIONS SUB-VIEW */}
+      {/* 4. CERTIFICATIONS SUB-VIEW (FR-18, FR-19, DAT-05, U-15) */}
       {currentTab === 'trainee_certs' && (
-        <div className="card section-card">
-          <div className="card-header-bar">
-            <div>
-              <h3 className="card-title">My Verified Certifications</h3>
-              <p className="card-subtitle">
-                Official course completion certificates with cryptographic validation.
-              </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Active Renewal Notifications Alert Banner */}
+          {certNotifications.length > 0 && (
+            <div
+              style={{
+                background: '#fffbeb',
+                border: '1.5px solid #f59e0b',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                color: '#92400e',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <AlertTriangle size={24} color="#d97706" />
+                <div>
+                  <strong style={{ fontSize: '14px', color: '#78350f' }}>
+                    {certNotifications[0].title}
+                  </strong>
+                  <div style={{ fontSize: '13px', marginTop: '2px', color: '#92400e' }}>
+                    {certNotifications[0].message}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setExternalForm(prev => ({
+                    ...prev,
+                    cert_type_code: 'PMP',
+                    title: 'Project Management Professional (PMP)'
+                  }));
+                  setShowExternalModal(true);
+                }}
+                style={{
+                  background: '#d97706',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontWeight: 700,
+                  fontSize: '12.5px',
+                  cursor: 'pointer'
+                }}
+              >
+                Submit Renewal Badge URL
+              </button>
             </div>
+          )}
+
+          {/* Feedback messages */}
+          {certMsg && (
+            <div style={{ padding: '12px 16px', background: '#ecfdf5', border: '1px solid #10b981', borderRadius: '8px', color: '#065f46', fontSize: '13px' }}>
+              &#10004; {certMsg}
+            </div>
+          )}
+
+          <div className="card section-card">
+            <div className="card-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h3 className="card-title">My Verified Certifications & External Credentials</h3>
+                <p className="card-subtitle">
+                  Official course completion certificates and self-reported industry certifications (PMI / PECB) with automated 36-month validity tracking.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  className="btn btn-primary flex-align gap-8"
+                  onClick={() => setShowExternalModal(true)}
+                  style={{ background: '#6366f1', color: '#ffffff' }}
+                >
+                  <PlusCircle size={15} />
+                  <span>Self-Report External Credential</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary flex-align gap-8"
+                  onClick={handleRunSweep}
+                  style={{ fontSize: '12.5px' }}
+                >
+                  <RefreshCw size={14} />
+                  <span>Check Expiry Sweep</span>
+                </button>
+              </div>
+            </div>
+
+            {displayCertificates.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8' }}>
+                <Shield size={48} style={{ margin: '0 auto 16px', opacity: 0.4 }} />
+                <h4 style={{ fontWeight: '700', marginBottom: '8px', color: '#64748b' }}>No certifications yet</h4>
+                <p style={{ fontSize: '14px' }}>Complete a training program or self-report an external certification to begin!</p>
+              </div>
+            ) : (
+              <div className="p-24 certs-list-grid">
+                {displayCertificates.map((cert) => (
+                  <div key={cert.id} className="card-gamified certificate-card">
+                    <div className="cert-top-row flex-between">
+                      <div className="flex-align gap-8">
+                        <Shield size={22} className={cert.isSelfReported ? "text-cyan" : "text-gold"} />
+                        <div>
+                          <h4 style={{ fontSize: '14px', fontWeight: 800 }}>{cert.title}</h4>
+                          <div className="text-secondary text-xs">{cert.clientCompany}</div>
+                        </div>
+                      </div>
+                      <span className={`badge-gamified ${cert.status === 'Expiring soon' ? 'badge-amber' : cert.status === 'Expired' ? 'badge-red' : 'badge-green'}`}>
+                        {cert.status === 'Expiring soon' ? `Due in ${cert.daysUntilExpiry}d` : cert.status === 'Expired' ? 'Expired' : 'Active Credential'}
+                      </span>
+                    </div>
+
+                    <div className="cert-meta-body">
+                      <div className="cert-meta-item">
+                        <span className="meta-label">Serial Number:</span>
+                        <code style={{ fontSize: '11px', fontWeight: 800, color: '#4338ca' }}>{cert.serialNumber}</code>
+                      </div>
+                      <div className="cert-meta-item">
+                        <span className="meta-label">Issued On:</span>
+                        <span className="meta-val">{cert.issuedOn}</span>
+                      </div>
+                      <div className="cert-meta-item">
+                        <span className="meta-label">Valid Until (36m):</span>
+                        <span className="meta-val">{cert.expiresOn}</span>
+                      </div>
+
+                      {cert.isSelfReported && (
+                        <div style={{ marginTop: '8px', padding: '6px 10px', background: 'rgba(6, 182, 212, 0.08)', borderRadius: '6px', border: '1px solid rgba(6, 182, 212, 0.25)' }}>
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: '#0891b2', textTransform: 'uppercase' }}>
+                            &#128274; SELF-REPORTED EXTERNAL CREDENTIAL
+                          </div>
+                          {cert.credentialUrl && (
+                            <a
+                              href={cert.credentialUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', color: '#0284c7', fontWeight: 700, marginTop: '2px', textDecoration: 'none' }}
+                            >
+                              <span>View Verified Badge (Credly/Issuer)</span>
+                              <ExternalLink size={12} />
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {cert.isRenewalApproaching && (
+                      <div className="renewal-alert-strip" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div className="flex-align gap-8">
+                          <AlertCircle size={14} className="text-gold" />
+                          <span>Renewal due in <strong>{cert.daysUntilExpiry} days</strong> (36-month cycle)</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExternalForm(prev => ({
+                              ...prev,
+                              cert_type_code: cert.title.includes('PMP') ? 'PMP' : 'ISO_31000',
+                              title: cert.title
+                            }));
+                            setShowExternalModal(true);
+                          }}
+                          style={{
+                            background: '#ffbe0b',
+                            color: '#1e293b',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '4px 10px',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Renew Badge
+                        </button>
+                      </div>
+                    )}
+
+                    <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                      <a
+                        href={`http://localhost:8000/api/v1/certifications/${cert.id}/pdf`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-secondary flex-align gap-8"
+                        style={{ fontSize: '11.5px', padding: '6px 12px', textDecoration: 'none' }}
+                      >
+                        <Download size={13} />
+                        <span>Download PDF</span>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {certificates.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8' }}>
-              <Shield size={48} style={{ margin: '0 auto 16px', opacity: 0.4 }} />
-              <h4 style={{ fontWeight: '700', marginBottom: '8px', color: '#64748b' }}>No certifications yet</h4>
-              <p style={{ fontSize: '14px' }}>Complete a training program to earn your first certificate!</p>
-            </div>
-          ) : (
-            <div className="p-24 certs-list-grid">
-              {certificates.map((cert) => (
-                <div key={cert.id} className="card-gamified certificate-card">
-                  <div className="cert-top-row flex-between">
-                    <div className="flex-align gap-8">
-                      <Shield size={22} className="text-gold" />
-                      <div>
-                        <h4>{cert.title}</h4>
-                        <div className="text-secondary text-xs">{cert.clientCompany}</div>
-                      </div>
-                    </div>
-                    <span className="badge-gamified badge-green">Active Credential</span>
-                  </div>
-
-                  <div className="cert-meta-body">
-                    <div className="cert-meta-item">
-                      <span className="meta-label">Issued On:</span>
-                      <span className="meta-val">{cert.issuedOn}</span>
-                    </div>
-                    <div className="cert-meta-item">
-                      <span className="meta-label">Valid Until:</span>
-                      <span className="meta-val">{cert.expiresOn}</span>
-                    </div>
-                    <div className="cert-meta-item">
-                      <span className="meta-label">Digital Hash:</span>
-                      <code className="text-xs text-cyan">{cert.hash}</code>
-                    </div>
-                  </div>
-
-                  {cert.isRenewalApproaching && (
-                    <div className="renewal-alert-strip">
-                      <AlertCircle size={14} className="text-gold" />
-                      <span>Annual renewal recommended in <strong>{cert.daysUntilExpiry} days</strong></span>
-                    </div>
-                  )}
+          {/* Self-Report External Credential Modal (FR-18, FR-19, DAT-05, U-15) */}
+          {showExternalModal && (
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ background: '#ffffff', borderRadius: '14px', padding: '24px', width: '520px', maxWidth: '92%', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                    Self-Report External Credential (PMI / PECB)
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowExternalModal(false)}
+                    style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748b' }}
+                  >
+                    &times;
+                  </button>
                 </div>
-              ))}
+
+                <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: '#64748b', lineHeight: 1.4 }}>
+                  Self-report an active industry certification (e.g. PMI PMP, PECB ISO 31000). System activates automated 90, 60, 30, and 0-day renewal tracking with a standard 36-month validity cycle.
+                </p>
+
+                {certError && (
+                  <div style={{ marginBottom: '14px', padding: '10px 14px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12.5px' }}>
+                    &#9888; {certError}
+                  </div>
+                )}
+
+                <form onSubmit={handleExternalSubmit}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      CERTIFICATION TYPE:
+                    </label>
+                    <select
+                      value={externalForm.cert_type_code}
+                      onChange={(e) => {
+                        const code = e.target.value;
+                        let autoTitle = 'Project Management Professional (PMP)';
+                        if (code === 'CAPM') autoTitle = 'Certified Associate in Project Management (CAPM)';
+                        if (code === 'PMI-ACP') autoTitle = 'PMI Agile Certified Practitioner (PMI-ACP)';
+                        if (code === 'PMI-CPMAI') autoTitle = 'Cognitive Project Management in AI (PMI-CPMAI)';
+                        if (code === 'ISO_31000') autoTitle = 'ISO 31000 Certified Risk Manager';
+                        if (code === 'PECB-LRM') autoTitle = 'PECB ISO 31000 Lead Risk Manager';
+                        if (code === 'PECB-SLRM') autoTitle = 'PECB ISO 31000 Senior Lead Risk Manager';
+                        if (code === 'OTHER') autoTitle = 'Industry Certified Specialist';
+                        setExternalForm(prev => ({ ...prev, cert_type_code: code, title: autoTitle }));
+                      }}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    >
+                      <option value="PMP">PMP &mdash; Project Management Professional (PMI)</option>
+                      <option value="CAPM">CAPM &mdash; Certified Associate in Project Management (PMI)</option>
+                      <option value="PMI-ACP">PMI-ACP &mdash; PMI Agile Certified Practitioner (PMI)</option>
+                      <option value="PMI-CPMAI">PMI-CPMAI &mdash; Cognitive Project Management in AI (PMI)</option>
+                      <option value="ISO_31000">ISO 31000 &mdash; Certified Risk Manager (PECB)</option>
+                      <option value="PECB-LRM">PECB-LRM &mdash; ISO 31000 Lead Risk Manager (PECB)</option>
+                      <option value="PECB-SLRM">PECB-SLRM &mdash; ISO 31000 Senior Lead Risk Manager (PECB)</option>
+                      <option value="OTHER">OTHER &mdash; Custom Industry Credential</option>
+                    </select>
+                  </div>
+
+                  <div style={{ marginBottom: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      CERTIFICATION TITLE:
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={externalForm.title}
+                      onChange={(e) => setExternalForm(prev => ({ ...prev, title: e.target.value }))}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      VERIFIED CREDENTIAL BADGE URL (HTTPS ONLY):
+                    </label>
+                    <input
+                      type="url"
+                      required
+                      placeholder="https://www.credly.com/badges/your-credential-badge-id"
+                      value={externalForm.credential_url}
+                      onChange={(e) => setExternalForm(prev => ({ ...prev, credential_url: e.target.value }))}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
+                    />
+                    <div style={{ fontSize: '11px', color: '#0891b2', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>&#128274; SSRF-Protected: Per Chapter III SEC-28, link syntax is validated without inbound server scraping.</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        ISSUE DATE:
+                      </label>
+                      <input
+                        type="date"
+                        value={externalForm.issue_date}
+                        onChange={(e) => setExternalForm(prev => ({ ...prev, issue_date: e.target.value }))}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12.5px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        EXPIRY DATE (OPTIONAL):
+                      </label>
+                      <input
+                        type="date"
+                        value={externalForm.expiry_date}
+                        onChange={(e) => setExternalForm(prev => ({ ...prev, expiry_date: e.target.value }))}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12.5px', boxSizing: 'border-box' }}
+                      />
+                      <span style={{ fontSize: '10.5px', color: '#64748b' }}>Defaults to 36 months if blank</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowExternalModal(false)}
+                      disabled={externalSubmitting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      style={{ background: '#6366f1', color: '#ffffff' }}
+                      disabled={externalSubmitting}
+                    >
+                      {externalSubmitting ? 'Registering...' : 'Register Credential'}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
         </div>

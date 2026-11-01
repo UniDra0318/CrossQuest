@@ -312,3 +312,70 @@ export async function commitImportBatch(batchId, token) {
   }
   return data;
 }
+
+export async function fetchCertificationTypes(token) {
+  try {
+    const res = await fetch(`${API_BASE}/certifications/types`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for cert types:", err);
+  }
+  return null;
+}
+
+export async function fetchCertificates(token) {
+  try {
+    const res = await fetch(`${API_BASE}/certifications/`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for certificates:", err);
+  }
+  return null;
+}
+
+export async function submitExternalCredential(payload, token) {
+  const res = await fetch(`${API_BASE}/certifications/external-renewal`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `External credential submission failed (${res.status})`);
+  }
+  return data;
+}
+
+export async function fetchExpiryNotifications(token) {
+  try {
+    const res = await fetch(`${API_BASE}/certifications/notifications`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for notifications:", err);
+  }
+  return null;
+}
+
+export async function triggerExpirySweep(token) {
+  const res = await fetch(`${API_BASE}/certifications/trigger-sweep`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Sweep trigger failed (${res.status})`);
+  }
+  return data;
+}
