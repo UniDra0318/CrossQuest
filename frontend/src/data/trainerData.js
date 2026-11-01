@@ -128,7 +128,42 @@ export function createStore() {
       if (!quiz) throw Object.assign(new Error('Quiz not found.'), { status: 404 });
       const prompt = String(q.prompt ?? '').trim().slice(0, 300);
       if (!prompt) throw Object.assign(new Error('Question text is required.'), { status: 400 });
-      const question = { id: `n${Date.now()}`, type: 'identification', prompt, accepted: [String(q.answer ?? '').trim().toLowerCase()].filter(Boolean) };
+
+      const qType = q.type || 'identification';
+      let question;
+      if (qType === 'kahoot') {
+        question = {
+          id: `n${Date.now()}`,
+          type: 'kahoot',
+          prompt,
+          options: Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'],
+          answer: Number(q.answer) || 0
+        };
+      } else if (qType === 'sequence') {
+        question = {
+          id: `n${Date.now()}`,
+          type: 'sequence',
+          prompt,
+          steps: Array.isArray(q.steps) && q.steps.length > 0 ? q.steps : ['Step 1', 'Step 2', 'Step 3', 'Step 4']
+        };
+      } else if (qType === 'hotspot') {
+        question = {
+          id: `n${Date.now()}`,
+          type: 'hotspot',
+          prompt,
+          answerLabel: String(q.answerLabel || 'Target Security Component')
+        };
+      } else {
+        const accepted = Array.isArray(q.accepted) && q.accepted.length > 0
+          ? q.accepted
+          : String(q.answer ?? '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        question = {
+          id: `n${Date.now()}`,
+          type: 'identification',
+          prompt,
+          accepted: accepted.length > 0 ? accepted : ['answer']
+        };
+      }
       quiz.questions.push(question);
       return structuredClone(question);
     },

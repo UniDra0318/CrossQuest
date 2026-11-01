@@ -18,6 +18,13 @@ export default function Quiz() {
   const [newQuestionAnswer, setNewQuestionAnswer] = useState('');
   const [creatingQuiz, setCreatingQuiz] = useState(false);
 
+  // Multi-type question builder state
+  const [questionType, setQuestionType] = useState('kahoot'); // 'kahoot' | 'identification' | 'sequence' | 'hotspot'
+  const [kahootOptions, setKahootOptions] = useState(['', '', '', '']);
+  const [kahootCorrectIdx, setKahootCorrectIdx] = useState(0);
+  const [sequenceSteps, setSequenceSteps] = useState(['', '', '', '']);
+  const [hotspotTarget, setHotspotTarget] = useState('');
+
   const activeQuiz = quizzes.find((q) => q.id === activeQuizId) || quizzes[0];
 
   if (loading && (!quizzes || quizzes.length === 0)) {
@@ -39,13 +46,49 @@ export default function Quiz() {
 
   const onAddQuestion = async (e) => {
     e.preventDefault();
-    if (!newQuestionPrompt.trim() || !newQuestionAnswer.trim() || !activeQuiz) return;
-    await handleAddQuestion(activeQuiz.id, {
-      prompt: newQuestionPrompt.trim(),
-      answer: newQuestionAnswer.trim(),
-    });
+    if (!newQuestionPrompt.trim() || !activeQuiz) return;
+
+    let payload = {
+      type: questionType,
+      prompt: newQuestionPrompt.trim()
+    };
+
+    if (questionType === 'kahoot') {
+      const validOpts = kahootOptions.map(o => o.trim()).filter(Boolean);
+      if (validOpts.length < 2) {
+        alert('Please provide at least 2 options for multiple choice.');
+        return;
+      }
+      payload.options = kahootOptions.map((o, idx) => o.trim() || `Option ${String.fromCharCode(65 + idx)}`);
+      payload.answer = kahootCorrectIdx;
+    } else if (questionType === 'sequence') {
+      const validSteps = sequenceSteps.map(s => s.trim()).filter(Boolean);
+      if (validSteps.length < 2) {
+        alert('Please provide at least 2 ordered sequence steps.');
+        return;
+      }
+      payload.steps = validSteps;
+    } else if (questionType === 'hotspot') {
+      if (!hotspotTarget.trim()) {
+        alert('Please specify the target component label for the hotspot.');
+        return;
+      }
+      payload.answerLabel = hotspotTarget.trim();
+    } else {
+      if (!newQuestionAnswer.trim()) {
+        alert('Please provide accepted answer term(s).');
+        return;
+      }
+      payload.accepted = newQuestionAnswer.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+      payload.answer = newQuestionAnswer.trim();
+    }
+
+    await handleAddQuestion(activeQuiz.id, payload);
     setNewQuestionPrompt('');
     setNewQuestionAnswer('');
+    setKahootOptions(['', '', '', '']);
+    setSequenceSteps(['', '', '', '']);
+    setHotspotTarget('');
   };
 
   return (
@@ -162,36 +205,176 @@ export default function Quiz() {
               <span className="adm-label">QUESTION ROSTER</span>
             </div>
 
-            {/* Add question form */}
-            <form onSubmit={onAddQuestion} className="trn-draft">
-              <label>
+            {/* Add question form with Multi-Format Question Type Selector */}
+            <form onSubmit={onAddQuestion} className="trn-draft" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Select Question Format:
+                </span>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {[
+                    { id: 'kahoot', label: 'Kahoot 4-Tile', icon: '🎴' },
+                    { id: 'identification', label: 'Identification', icon: '✍️' },
+                    { id: 'sequence', label: 'Sequence Order', icon: '🔢' },
+                    { id: 'hotspot', label: 'Diagram Hotspot', icon: '🎯' }
+                  ].map(t => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setQuestionType(t.id)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '10px',
+                        border: questionType === t.id ? '2px solid #7c3aed' : '1px solid #cbd5e1',
+                        background: questionType === t.id ? '#f5f3ff' : '#ffffff',
+                        color: questionType === t.id ? '#6d28d9' : '#475569',
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span>{t.icon}</span>
+                      <span>{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Prompt Input */}
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#475569' }}>
                 QUESTION PROMPT
                 <input
                   type="text"
-                  placeholder="e.g. Which layer protects cross-tenant records?"
+                  placeholder="e.g. Which control enforces 'never trust, always verify' on every request?"
                   value={newQuestionPrompt}
                   onChange={(e) => setNewQuestionPrompt(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #cbd5e1', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                 />
               </label>
 
-              <label>
-                ACCEPTED ANSWER
-                <input
-                  type="text"
-                  placeholder="e.g. cp-abe or zero trust"
-                  value={newQuestionAnswer}
-                  onChange={(e) => setNewQuestionAnswer(e.target.value)}
-                />
-              </label>
+              {/* Dynamic Question Type Fields */}
+              {questionType === 'kahoot' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+                    4 MULTIPLE CHOICE OPTIONS (SELECT RADIO TO MARK CORRECT ANSWER):
+                  </span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                    {['A', 'B', 'C', 'D'].map((letter, idx) => (
+                      <div 
+                        key={letter} 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '8px', 
+                          padding: '8px 12px', 
+                          borderRadius: '10px', 
+                          border: kahootCorrectIdx === idx ? '2px solid #10b981' : '1px solid #cbd5e1',
+                          background: kahootCorrectIdx === idx ? '#ecfdf5' : '#ffffff'
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="kahootCorrect"
+                          checked={kahootCorrectIdx === idx}
+                          onChange={() => setKahootCorrectIdx(idx)}
+                          style={{ accentColor: '#10b981', cursor: 'pointer' }}
+                        />
+                        <strong style={{ fontSize: '12px', color: kahootCorrectIdx === idx ? '#059669' : '#64748b' }}>{letter}.</strong>
+                        <input
+                          type="text"
+                          placeholder={`Option ${letter}...`}
+                          value={kahootOptions[idx]}
+                          onChange={(e) => {
+                            const next = [...kahootOptions];
+                            next[idx] = e.target.value;
+                            setKahootOptions(next);
+                          }}
+                          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '12.5px' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              <button
-                type="submit"
-                disabled={!newQuestionPrompt.trim() || !newQuestionAnswer.trim()}
-                className="adm-btn adm-btn-solid cq-btn--purple"
-                style={{ fontSize: '12px', padding: '10px 16px' }}
-              >
-                + Add Question
-              </button>
+              {questionType === 'identification' && (
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+                  ACCEPTED ANSWER(S) (COMMA-SEPARATED FOR VARIANTS)
+                  <input
+                    type="text"
+                    placeholder="e.g. zero trust, zta, zero-trust architecture"
+                    value={newQuestionAnswer}
+                    onChange={(e) => setNewQuestionAnswer(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #cbd5e1', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </label>
+              )}
+
+              {questionType === 'sequence' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+                    ORDERED SEQUENCE STEPS (CHRONOLOGICAL 1 &rarr; 4):
+                  </span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                    {[1, 2, 3, 4].map((stepNum, idx) => (
+                      <div key={stepNum} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#ffffff' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#ede9fe', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>
+                          {stepNum}
+                        </span>
+                        <input
+                          type="text"
+                          placeholder={`Step ${stepNum}...`}
+                          value={sequenceSteps[idx]}
+                          onChange={(e) => {
+                            const next = [...sequenceSteps];
+                            next[idx] = e.target.value;
+                            setSequenceSteps(next);
+                          }}
+                          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '12.5px' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {questionType === 'hotspot' && (
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+                  TARGET SECURITY COMPONENT LABEL (HOTSPOT ANSWER)
+                  <input
+                    type="text"
+                    placeholder="e.g. CP-ABE Payload Encryption with Cryptographic Isolation"
+                    value={hotspotTarget}
+                    onChange={(e) => setHotspotTarget(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #cbd5e1', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </label>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
+                <button
+                  type="submit"
+                  disabled={!newQuestionPrompt.trim()}
+                  className="adm-btn adm-btn-solid cq-btn--purple"
+                  style={{
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '10px 20px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: !newQuestionPrompt.trim() ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 14px rgba(124, 58, 237, 0.25)'
+                  }}
+                >
+                  + Add {questionType === 'kahoot' ? 'Kahoot Question' : questionType === 'sequence' ? 'Sequence Question' : questionType === 'hotspot' ? 'Diagram Hotspot' : 'Identification Question'}
+                </button>
+              </div>
             </form>
 
             {/* Question cards */}
