@@ -679,7 +679,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           VIEW 2: ACCESS PERMISSIONS & STAFF ROLES
           ===================================================================== */}
       {activeSubView === 'attribute_authority' && (
-        <div className="adm-panel" style={{ marginTop: '32px' }}>
+        <>
+          <div className="adm-panel" style={{ marginTop: '32px' }}>
           <div className="adm-panel__head" style={{ flexWrap: 'wrap', gap: '14px' }}>
             <div>
               <h2>Staff Access & Role Management</h2>
@@ -846,102 +847,98 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               })}
             </div>
           </div>
+        </div>
 
-          {/* =====================================================================
-              CLIENT COMPANIES & MULTI-TENANT BOUNDARIES REGISTRY
-              ===================================================================== */}
-          <div style={{ marginTop: '32px', borderTop: '1px solid #f1f5f9', paddingTop: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '14px' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <Building2 size={20} color="#7c3aed" />
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
-                    Client Companies & Multi-Tenant Registry
-                  </h3>
-                </div>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: 500 }}>
-                  Institutional corporate clients with versioned CP-ABE access tokens (<code>CLIENT&lt;CODE&gt;V1</code>)
-                </p>
+        {/* =====================================================================
+            CLIENT COMPANIES & MULTI-TENANT BOUNDARIES REGISTRY (DEDICATED PANEL)
+            ===================================================================== */}
+        <div className="adm-panel" style={{ marginTop: '32px' }}>
+          <div className="adm-panel__head">
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                <Building2 size={20} color="#7c3aed" />
+                <h2 style={{ margin: 0 }}>Client Companies & Multi-Tenant Registry</h2>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsCreateCompanyOpen(true)}
-                style={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
-                  color: '#ffffff',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 20px',
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(79, 70, 229, 0.25)',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Building2 size={16} />
-                <span>Register New Client Company</span>
-              </button>
+              <span className="adm-mono">Institutional corporate clients with versioned CP-ABE access tokens (CLIENT&lt;CODE&gt;V1)</span>
             </div>
+            <button
+              type="button"
+              onClick={() => setIsCreateCompanyOpen(true)}
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                color: '#ffffff',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Building2 size={15} />
+              <span>Register New Client Company</span>
+            </button>
+          </div>
 
-            {/* Scrollable Companies Table with Sticky Header */}
-            <div className="adm-scroll" style={{ maxHeight: '420px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '16px' }}>
-              <div className="adm-table" style={{ margin: 0 }}>
-                <div className="adm-grid adm-th" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
-                  <div>CLIENT COMPANY / TENANT</div>
-                  <div>INDUSTRY SECTOR</div>
-                  <div>CP-ABE ATTRIBUTE TOKEN</div>
-                  <div>ASSIGNED ACCOUNT MANAGER</div>
-                  <div style={{ textAlign: 'right' }}>DATA ISOLATION</div>
-                </div>
+          <div className="adm-scroll" style={{ maxHeight: '440px', overflowY: 'auto' }}>
+            <div className="adm-table">
+              <div className="adm-grid adm-th" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
+                <div>CLIENT COMPANY / TENANT</div>
+                <div>INDUSTRY SECTOR</div>
+                <div>CP-ABE ATTRIBUTE TOKEN</div>
+                <div>ASSIGNED ACCOUNT MANAGER</div>
+                <div style={{ textAlign: 'right' }}>DATA ISOLATION</div>
+              </div>
 
-                {companiesList.map((c) => (
-                  <div key={c.code} className="adm-row" style={{ padding: '14px 28px' }}>
-                    <div className="adm-grid" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <Building2 size={16} />
-                        </div>
-                        <div>
-                          <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>{c.name}</strong>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                            <span className="adm-org" style={{ fontSize: '10px', padding: '2px 8px' }}>{c.code}</span>
-                          </div>
-                        </div>
+              {companiesList.map((c) => (
+                <div key={c.code} className="adm-row" style={{ padding: '16px 28px' }}>
+                  <div className="adm-grid" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #ede9fe' }}>
+                        <Building2 size={18} />
                       </div>
-
-                      <div style={{ fontSize: '12.5px', color: '#475569' }}>
-                        {c.industry}
-                      </div>
-
                       <div>
-                        <span className="adm-chip adm-chip--violet" style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 800 }}>
-                          CLIENT{c.code.replace(/[^A-Z0-9]/g, '')}V1
-                        </span>
-                      </div>
-
-                      <div>
-                        <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7' }} />
-                          {c.am_name || 'Marcus Reyes'}
-                        </span>
-                      </div>
-
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '10.5px', fontWeight: 800, padding: '3px 8px', borderRadius: '8px', background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>
-                          &#10004; FORCE RLS
-                        </span>
+                        <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>{c.name}</strong>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
+                          <span className="adm-org" style={{ fontSize: '10px', padding: '2px 8px' }}>{c.code}</span>
+                        </div>
                       </div>
                     </div>
+
+                    <div style={{ fontSize: '12.5px', color: '#475569' }}>
+                      {c.industry}
+                    </div>
+
+                    <div>
+                      <span className="adm-chip adm-chip--violet" style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '8px' }}>
+                        CLIENT{c.code.replace(/[^A-Z0-9]/g, '')}V1
+                      </span>
+                    </div>
+
+                    <div>
+                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7' }} />
+                        {c.am_name || 'Marcus Reyes'}
+                      </span>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '10.5px', fontWeight: 800, padding: '4px 10px', borderRadius: '8px', background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>
+                        &#10004; FORCE RLS
+                      </span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+        </>
       )}
       {/* =====================================================================
           VIEW 3: ANOMALY MONITOR & PEER-REVIEW RESOLUTION DESK (FR-21, OI-30)
