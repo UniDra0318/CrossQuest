@@ -18,7 +18,7 @@ import {
 import { getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchTraineeGamification, submitQuizScore, toggleLeaderboardOptOut } from '../services/api';
+import { fetchTraineeGamification, submitQuizScore, toggleLeaderboardOptOut, fetchCompanyLeaderboard } from '../services/api';
 import Mascot from '../components/Mascot';
 import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
@@ -27,8 +27,9 @@ import { TRACKS } from '../data/tracks';
 import { badges as designBadges, leaderboard as designLeaderboard } from '../data/mock';
 
 export default function TraineeDashboard({ activeSubView, setActiveView, onStreakLoad }) {
-  const { currentUser } = useAuth();
+  const { currentUser, token } = useAuth();
   const [points, setPoints] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [level, setLevel] = useState(null);
   const [streakDays, setStreakDays] = useState(null);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -74,6 +75,17 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     }
     loadGamification();
   }, [currentUser?.id, onStreakLoad]);
+
+  // Sync company leaderboard
+  useEffect(() => {
+    async function loadLeaderboard() {
+      const data = await fetchCompanyLeaderboard(token);
+      if (data && data.length > 0) {
+        setLeaderboard(data);
+      }
+    }
+    loadLeaderboard();
+  }, [token]);
 
   const handleToggleOptOut = async () => {
     const nextVal = !leaderboardOptOut;
