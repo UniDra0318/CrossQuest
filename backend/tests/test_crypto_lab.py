@@ -72,3 +72,4 @@ def test_crypto_lab_encrypt_and_decrypt_lifecycle(client: TestClient):
     assert tamper_data["decryption_status"] == "REJECTED_TAMPER_DETECTED"
     assert tamper_data["decrypted_content"] is None
     assert tamper_data["integrity_verified"] is False
+

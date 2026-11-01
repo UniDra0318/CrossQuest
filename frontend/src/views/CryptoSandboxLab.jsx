@@ -81,8 +81,65 @@ const PRESET_SCENARIOS = [
   }
 ];
 
+const FALLBACK_PERSONAS = [
+  {
+    id: "persona_admin",
+    name: "Dr. Sarah Jenkins",
+    role: "Administrator",
+    organization: "Crossworks Training & Consulting",
+    attributes: ["ROLEADMIN"],
+    description: "Master Authority: Can decrypt all records across all enterprise tenants via universal authority clause.",
+    badge_color: "#7c3aed"
+  },
+  {
+    id: "persona_am_alpha",
+    name: "Marcus Reyes",
+    role: "Account Manager",
+    organization: "Assigned: San Miguel & BDO Unibank",
+    attributes: ["ROLEACCTMGR", "CLIENTCORPALPHAV1", "CLIENTBANKDELTAV1"],
+    description: "Enterprise Scoped: Permitted for San Miguel (CORP_ALPHA) and BDO (BANK_DELTA) records only.",
+    badge_color: "#2563eb"
+  },
+  {
+    id: "persona_am_beta",
+    name: "Andrea Salazar",
+    role: "Account Manager",
+    organization: "Assigned: Maya FinTech & Ayala Retail",
+    attributes: ["ROLEACCTMGR", "CLIENTFINTECHBETAV1", "CLIENTRETAILGAMMAV1"],
+    description: "Competitor Tenant: Permitted for Maya FinTech and Ayala Retail. Out-of-scope for San Miguel.",
+    badge_color: "#0284c7"
+  },
+  {
+    id: "persona_trainee_juan",
+    name: "Juan Dela Cruz",
+    role: "Trainee Analyst",
+    organization: "San Miguel Conglomerate Holdings",
+    attributes: ["TRAINEE", "TRAINEETRN9021"],
+    description: "Personal Identity Portability (DD-01): Decrypts his own lifetime learning achievements across employers.",
+    badge_color: "#059669"
+  },
+  {
+    id: "persona_trainer_david",
+    name: "David Lim",
+    role: "Lead Security Trainer",
+    organization: "Crossworks Instructor Faculty",
+    attributes: ["ROLETRAINER", "TRAININGSEC2026V1"],
+    description: "Course Scoped: Authorized for Information Security cohort sessions.",
+    badge_color: "#d97706"
+  },
+  {
+    id: "persona_adversary",
+    name: "Unauthorized Intruder / Attacker",
+    role: "Untrusted External Entity",
+    organization: "External Internet / Rogue DBA",
+    attributes: ["ANONYMOUS_ACTOR", "UNAUTHORIZED_GUEST"],
+    description: "Adversary Simulation: Zero valid enterprise attributes. Mathematical decryption provably impossible.",
+    badge_color: "#e11d48"
+  }
+];
+
 export default function CryptoSandboxLab() {
-  const [personas, setPersonas] = useState([]);
+  const [personas, setPersonas] = useState(FALLBACK_PERSONAS);
   const [loadingPersonas, setLoadingPersonas] = useState(false);
 
   // Encryption Form State
@@ -98,7 +155,7 @@ export default function CryptoSandboxLab() {
   const [encryptError, setEncryptError] = useState(null);
 
   // Decryption Station State
-  const [selectedPersona, setSelectedPersona] = useState(null);
+  const [selectedPersona, setSelectedPersona] = useState(FALLBACK_PERSONAS[1]);
   const [customAttributesInput, setCustomAttributesInput] = useState("");
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptionResult, setDecryptionResult] = useState(null);
