@@ -1877,8 +1877,10 @@
   color: var(--cq-purple);
   transform: translateX(3px);
 }
-
-
+
+
+
+
 /* =========================================
    POLISHED BUTTON SYSTEM (.btn, .btn-primary, .btn-secondary, .btn-sm)
 ========================================= */
@@ -5247,10 +5249,20 @@
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  max-height: 440px;
+  overflow-y: auto;
   border: 1.5px solid #e2e8f0;
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+}
+
+.clean-table thead th,
+.clean-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8fafc;
 }
 
 .trainee-info-cell {

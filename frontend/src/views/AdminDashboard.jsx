@@ -23,6 +23,7 @@ import {
   Eye,
   CheckSquare,
   UserPlus,
+  Building2,
   X,
   Mail
 } from 'lucide-react';
@@ -37,7 +38,7 @@ import {
   settings as defaultSettings 
 } from '../data/adminData';
 import { exportAuditLogs } from '../api/admin';
-import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes, createUserApi } from '../services/api';
+import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes, createUserApi, createCompanyApi } from '../services/api';
 import SpinCube from '../components/SpinCube';
 import BitMascot from '../components/BitMascot/BitMascot';
 import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk';
@@ -52,6 +53,90 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [records, setRecords] = useState(defaultRecords);
   const [settings] = useState(defaultSettings);
   const [editingStaffId, setEditingStaffId] = useState(null);
+
+  // Client Companies & Tenancy Registry State
+  const DEFAULT_COMPANIES = [
+    { code: 'CORP_ALPHA', name: 'San Miguel Conglomerate Holdings', industry: 'Conglomerate & Manufacturing', am_name: 'Marcus Reyes' },
+    { code: 'BANK_DELTA', name: 'BDO Unibank Inc.', industry: 'Banking & Financial Services', am_name: 'Marcus Reyes' },
+    { code: 'FINTECH_BETA', name: 'Maya FinTech Corp.', industry: 'FinTech & Payments', am_name: 'Andrea Salazar' },
+    { code: 'RETAIL_GAMMA', name: 'Ayala Retail Group', industry: 'Retail & Commercial', am_name: 'Andrea Salazar' }
+  ];
+  const [companiesList, setCompaniesList] = useState(DEFAULT_COMPANIES);
+  const [isCreateCompanyOpen, setIsCreateCompanyOpen] = useState(false);
+  const [newCompanyForm, setNewCompanyForm] = useState({
+    code: '',
+    name: '',
+    industry: 'Enterprise & Financial Services',
+    assigned_am_id: ''
+  });
+  const [isCreatingCompany, setIsCreatingCompany] = useState(false);
+  const [createCompanyError, setCreateCompanyError] = useState(null);
+  const [createdCompanyResult, setCreatedCompanyResult] = useState(null);
+
+  const handleCreateCompanySubmit = async (e) => {
+    e.preventDefault();
+    setIsCreatingCompany(true);
+    setCreateCompanyError(null);
+
+    const cleanCode = newCompanyForm.code.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+    const cleanName = newCompanyForm.name.trim();
+
+    const res = await createCompanyApi({
+      code: cleanCode,
+      name: cleanName,
+      industry: newCompanyForm.industry.trim()
+    }, token);
+
+    setIsCreatingCompany(false);
+
+    if (res.ok) {
+      const selectedAm = staffList.find(s => s.id === newCompanyForm.assigned_am_id);
+      
+      // If AM was selected, update their assignments
+      if (selectedAm && token) {
+        try {
+          const currentClients = selectedAm.clients || [];
+          if (!currentClients.includes(cleanCode)) {
+            await updateStaffAttributes(selectedAm.id, {
+              role: selectedAm.role.toLowerCase().replace(/ /g, '_'),
+              clearance_level: selectedAm.level || 1,
+              assigned_client_accounts: [...currentClients, cleanCode]
+            }, token);
+          }
+        } catch (err) {
+          console.warn("Could not bind AM to company:", err);
+        }
+      }
+
+      const newCompObj = {
+        code: cleanCode,
+        name: cleanName,
+        industry: newCompanyForm.industry.trim(),
+        am_name: selectedAm?.name || 'Marcus Reyes'
+      };
+
+      setCompaniesList(prev => [newCompObj, ...prev]);
+      setCreatedCompanyResult({
+        ...res.data,
+        attribute_token: `CLIENT${cleanCode}V1`,
+        assigned_am: selectedAm?.name || 'Marcus Reyes'
+      });
+    } else {
+      setCreateCompanyError(res.error || 'Failed to create client company.');
+    }
+  };
+
+  const handleCloseCompanyModal = () => {
+    setIsCreateCompanyOpen(false);
+    setCreatedCompanyResult(null);
+    setCreateCompanyError(null);
+    setNewCompanyForm({
+      code: '',
+      name: '',
+      industry: 'Enterprise & Financial Services',
+      assigned_am_id: ''
+    });
+  };
 
   // Provision User Modal state (FR-02, SEC-01)
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
@@ -153,6 +238,18 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           fetchCompanies(token),
           fetchStaffUsers(token)
         ]);
+        if (dbCompanies && dbCompanies.length > 0) {
+          setCompaniesList(dbCompanies.map(c => {
+            const am = (dbStaff || []).find(u => (u.assigned_client_accounts || []).includes(c.code));
+            return {
+              id: c.id,
+              code: c.code,
+              name: c.name,
+              industry: c.industry || 'Enterprise Client',
+              am_name: am?.full_name || am?.name || 'Unassigned'
+            };
+          }));
+        }
         if (dbStaff && dbStaff.length > 0) {
           setStaffList(dbStaff.map(u => ({
             id: u.id,
@@ -747,6 +844,99 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               })}
             </div>
           </div>
+
+          {/* =====================================================================
+              CLIENT COMPANIES & MULTI-TENANT BOUNDARIES REGISTRY
+              ===================================================================== */}
+          <div style={{ marginTop: '32px', borderTop: '1px solid #f1f5f9', paddingTop: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                  <Building2 size={20} color="#7c3aed" />
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+                    Client Companies & Multi-Tenant Registry
+                  </h3>
+                </div>
+                <span className="adm-mono">Institutional corporate clients with versioned CP-ABE access tokens (CLIENT&lt;CODE&gt;V1)</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreateCompanyOpen(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(2, 132, 199, 0.28)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Building2 size={15} />
+                <span>Register New Client Company</span>
+              </button>
+            </div>
+
+            {/* Scrollable Companies Table with Sticky Header */}
+            <div className="adm-scroll" style={{ maxHeight: '340px', overflowY: 'auto' }}>
+              <div className="adm-table" style={{ margin: 0 }}>
+                <div className="adm-grid adm-th" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
+                  <div>CLIENT COMPANY / TENANT</div>
+                  <div>INDUSTRY SECTOR</div>
+                  <div>CP-ABE ATTRIBUTE TOKEN</div>
+                  <div>ASSIGNED ACCOUNT MANAGER</div>
+                  <div style={{ textAlign: 'right' }}>DATA ISOLATION</div>
+                </div>
+
+                {companiesList.map((c) => (
+                  <div key={c.code} className="adm-row" style={{ padding: '14px 28px' }}>
+                    <div className="adm-grid" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <Building2 size={16} />
+                        </div>
+                        <div>
+                          <strong style={{ fontSize: '13.5px', color: '#0f172a' }}>{c.name}</strong>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                            <span className="adm-org" style={{ fontSize: '10px', padding: '2px 8px' }}>{c.code}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: '12.5px', color: '#475569' }}>
+                        {c.industry}
+                      </div>
+
+                      <div>
+                        <span className="adm-chip adm-chip--violet" style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: 800 }}>
+                          CLIENT{c.code.replace(/[^A-Z0-9]/g, '')}V1
+                        </span>
+                      </div>
+
+                      <div>
+                        <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7' }} />
+                          {c.am_name || 'Marcus Reyes'}
+                        </span>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '10.5px', fontWeight: 800, padding: '3px 8px', borderRadius: '8px', background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>
+                          &#10004; FORCE RLS
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
       {/* =====================================================================
@@ -948,6 +1138,285 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           </div>
         </div>
       )}
+
+      {/* =====================================================================
+          REGISTER CLIENT COMPANY MODAL
+          ===================================================================== */}
+      {isCreateCompanyOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isCreatingCompany) handleCloseCompanyModal();
+          }}
+        >
+          <div 
+            style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '540px',
+              width: '100%',
+              boxShadow: '0 20px 45px rgba(0,0,0,0.2)',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Building2 size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                    {createdCompanyResult ? 'Company Registered' : 'Register New Client Company'}
+                  </h3>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                    Enterprise Multi-Tenant Onboarding & CP-ABE Token Activation
+                  </span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={handleCloseCompanyModal}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '24px 28px' }}>
+              {createdCompanyResult ? (
+                /* SUCCESS VIEW */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#ecfdf5', borderRadius: '16px', border: '1px solid #a7f3d0' }}>
+                    <CheckCircle2 size={24} color="#059669" style={{ flexShrink: 0 }} />
+                    <div style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.5 }}>
+                      <strong>Enterprise Client Company successfully registered!</strong>
+                      <div>The company code is active and Row-Level Security isolation is enforced.</div>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '16px', border: '1px solid #e2e8f0', fontSize: '12.5px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Company Name:</span>
+                      <strong style={{ color: '#1e293b' }}>{createdCompanyResult.name}</strong>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Tenant Code:</span>
+                      <code style={{ color: '#0284c7', fontFamily: 'monospace', fontWeight: 800 }}>{createdCompanyResult.code}</code>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px', marginBottom: '8px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>CP-ABE Token:</span>
+                      <span style={{ color: '#7c3aed', fontFamily: 'monospace', fontWeight: 800 }}>
+                        {createdCompanyResult.attribute_token}
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px' }}>
+                      <span style={{ color: '#64748b', fontWeight: 600 }}>Assigned AM:</span>
+                      <span style={{ color: '#1e293b', fontWeight: 700 }}>{createdCompanyResult.assigned_am}</span>
+                    </div>
+                  </div>
+
+                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: 1.5 }}>
+                    Training records for this tenant will now be encrypted with <code>{createdCompanyResult.attribute_token}</code>. The assigned Account Manager can immediately generate scoped compliance reports.
+                  </p>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={handleCloseCompanyModal}
+                      style={{
+                        padding: '10px 22px',
+                        borderRadius: '10px',
+                        background: '#1e293b',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* FORM VIEW */
+                <form onSubmit={handleCreateCompanySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      COMPANY FULL LEGAL NAME:
+                    </label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. Jollibee Foods Corporation"
+                      value={newCompanyForm.name}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        const autoCode = name.replace(/[^A-Za-z0-9]/g, '_').toUpperCase().slice(0, 16);
+                        setNewCompanyForm({ ...newCompanyForm, name, code: newCompanyForm.code || autoCode });
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '13.5px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      <span>COMPANY TENANT CODE:</span>
+                      <span style={{ color: '#0284c7', fontSize: '11px', fontFamily: 'monospace' }}>Bound to CP-ABE</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. JLL_BEE"
+                      value={newCompanyForm.code}
+                      onChange={(e) => setNewCompanyForm({ ...newCompanyForm, code: e.target.value.toUpperCase() })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '13.5px',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      INDUSTRY SECTOR:
+                    </label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="e.g. Food, Beverage & Hospitality"
+                      value={newCompanyForm.industry}
+                      onChange={(e) => setNewCompanyForm({ ...newCompanyForm, industry: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '13.5px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                      PRIMARY ASSIGNED ACCOUNT MANAGER:
+                    </label>
+                    <select
+                      value={newCompanyForm.assigned_am_id}
+                      onChange={(e) => setNewCompanyForm({ ...newCompanyForm, assigned_am_id: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        border: '1.5px solid #cbd5e1',
+                        fontSize: '13.5px',
+                        background: '#ffffff',
+                        fontWeight: 600,
+                        color: '#1e293b',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <option value="">Select Account Manager...</option>
+                      {staffList.filter(s => s.role.includes('STAFF') || s.role.includes('ACCOUNT')).map(am => (
+                        <option key={am.id} value={am.id}>{am.name} ({am.email})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {createCompanyError && (
+                    <div style={{ padding: '10px 14px', background: '#fff1f2', borderRadius: '10px', border: '1px solid #fecdd3', color: '#be123c', fontSize: '12.5px' }}>
+                      {createCompanyError}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                    <button
+                      type="button"
+                      onClick={handleCloseCompanyModal}
+                      disabled={isCreatingCompany}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: '10px',
+                        background: '#f1f5f9',
+                        color: '#475569',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isCreatingCompany || !newCompanyForm.code.trim() || !newCompanyForm.name.trim()}
+                      style={{
+                        padding: '10px 22px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        cursor: isCreatingCompany ? 'not-allowed' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)'
+                      }}
+                    >
+                      {isCreatingCompany ? (
+                        <>
+                          <RefreshCw size={14} className="spin-animation" />
+                          <span>Activating Tenant...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Building2 size={14} />
+                          <span>Register & Activate CP-ABE Tenant</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* =====================================================================
           PROVISION NEW USER MODAL (FR-02, SEC-01)

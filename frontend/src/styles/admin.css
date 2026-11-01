@@ -271,11 +271,11 @@ button:disabled { opacity: 0.6; cursor: progress; }
 
 /* tables (Access + Vault) */
 .adm-table { margin-top: 24px; }
-.adm-scroll { overflow-x: auto; }
+.adm-scroll { overflow-x: auto; max-height: 480px; overflow-y: auto; border: 1px solid var(--cq-line); border-radius: 16px; }
 .adm-grid { display: grid; gap: 16px; align-items: center; min-width: 980px; }
 .adm-grid--access { grid-template-columns: 1.5fr 1fr 1fr 1.6fr 140px; }
 .adm-grid--vault { grid-template-columns: 110px 1.2fr 1.3fr 1.3fr 1.6fr 130px; }
-.adm-th { padding: 12px 28px; background: var(--cq-lav-2); font: 700 10px var(--font-mono); letter-spacing: 0.12em; color: var(--cq-ink-soft); }
+.adm-th { position: sticky; top: 0; z-index: 2; padding: 12px 28px; background: var(--cq-lav-2); font: 700 10px var(--font-mono); letter-spacing: 0.12em; color: var(--cq-ink-soft); }
 .adm-row { padding: 18px 28px; border-top: 1px solid rgba(23, 16, 43, 0.08); min-width: 980px; }
 .adm-row.adm-grid { min-width: 980px; }
 .adm-person { display: flex; align-items: center; gap: 12px; min-width: 0; }

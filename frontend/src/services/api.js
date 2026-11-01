@@ -566,6 +566,26 @@ export async function runCryptoSandboxDecrypt({ encryptedRecord, userAttributes,
   return data;
 }
 
+export async function createCompanyApi(companyData, token) {
+  try {
+    const res = await fetch(`${API_BASE}/trainees/companies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(companyData)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: data.detail || 'Failed to create company' };
+    }
+    return { ok: true, data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
 export async function createUserApi(userData, token) {
   try {
     const res = await fetch(`${API_BASE}/users/`, {
