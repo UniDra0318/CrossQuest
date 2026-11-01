@@ -68,6 +68,9 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     CONTEXT_SIGNING_SECRET: str = "crossquest_internal_context_signing_secret_key_change_in_prod"
 
+    # Gamification & PWA Security (SEC-26, Phase 6)
+    ENABLE_OFFLINE_QUIZZES: bool = False
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 

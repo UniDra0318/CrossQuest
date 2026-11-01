@@ -1,15 +1,72 @@
+"""Gamification & Quiz Arena Endpoints (SEC-26, OI-03, Priority 5 & 6).
+
+Implements:
+- SEC-26: Answer keys kept separate in QuizAnswerKey; scored strictly server-side.
+- SEC-26: Per-question correctness withheld until quiz is officially closed.
+- SEC-26: Exactly one scored attempt permitted per quiz version.
+- SEC-26: Offline quizzes disabled by default (ENABLE_OFFLINE_QUIZZES=False); online idempotency via attempt_id.
+- OI-03: Class & company leaderboards with nickname opt-out for company board.
+- Real-time level and consecutive-day activity streak synchronization.
+"""
+
 import uuid
-from typing import List, Optional
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional, Dict, Any
+from datetime import datetime, date, timezone, timedelta
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
+
 from app.core.database import get_db
-from app.models.entities import GamificationProgress, Trainee, Quiz, QuizQuestion, QuizAttempt, Team, User
-from app.schemas.schemas import GamificationResponse, QuizSubmitRequest
+from app.core.config import settings
+from app.models.entities import (
+    GamificationProgress, Trainee, Quiz, QuizQuestion, QuizAnswerKey,
+    QuizAttempt, Team, User, TrainingSession, TrainingRecord
+)
+from app.schemas.schemas import (
+    GamificationResponse, QuizSubmitRequest, LeaderboardOptOutRequest,
+    LeaderboardEntry, QuizQuestionTraineeView, QuizSubmissionResult,
+    QuizQuestionReview
+)
 from app.api.deps import get_current_user
 
 router = APIRouter()
+
+
+def update_trainee_activity_streak(db: Session, trainee: Trainee, gam: GamificationProgress) -> int:
+    """Updates consecutive-day activity streak for a trainee."""
+    today = datetime.now(timezone.utc).date()
+    current_streak = trainee.current_streak or 0
+
+    if trainee.last_activity_date:
+        delta = (today - trainee.last_activity_date).days
+        if delta == 0:
+            # Already active today, preserve streak
+            pass
+        elif delta == 1:
+            # Consecutive day activity
+            current_streak += 1
+        else:
+            # Inactivity break: reset streak to 1
+            current_streak = 1
+    else:
+        current_streak = 1
+
+    trainee.current_streak = current_streak
+    trainee.last_activity_date = today
+
+    gam.streak = current_streak
+    gam.last_activity_date = today
+
+    # Streak badges
+    badges = list(gam.badges or [])
+    if current_streak >= 3 and "STREAK_3" not in badges:
+        badges.append("STREAK_3")
+    if current_streak >= 7 and "STREAK_7" not in badges:
+        badges.append("STREAK_7")
+    gam.badges = badges
+
+    return current_streak
+
 
 @router.get("/trainee/{trainee_id}", response_model=GamificationResponse)
 def get_trainee_gamification(
@@ -17,13 +74,85 @@ def get_trainee_gamification(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    """Fetches gamification progress for a trainee."""
+    trainee = db.query(Trainee).filter(Trainee.id == trainee_id).first()
+    if not trainee:
+        raise HTTPException(status_code=404, detail="Trainee not found")
+
     progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee_id).first()
     if not progress:
-        progress = GamificationProgress(trainee_id=trainee_id, points=0, quizzes_completed=0, level=1, badges=[])
+        progress = GamificationProgress(
+            trainee_id=trainee_id,
+            points=0,
+            quizzes_completed=0,
+            level=1,
+            badges=[],
+            streak=trainee.current_streak or 0
+        )
         db.add(progress)
         db.commit()
         db.refresh(progress)
-    return progress
+
+    # Sync fields
+    res = GamificationResponse(
+        id=progress.id,
+        trainee_id=progress.trainee_id,
+        points=progress.points or 0,
+        level=progress.level or 1,
+        badges=progress.badges or [],
+        quizzes_completed=progress.quizzes_completed or 0,
+        streak=progress.streak or trainee.current_streak or 0,
+        current_streak=trainee.current_streak or progress.streak or 0
+    )
+    return res
+
+
+@router.put("/profile/leaderboard-opt-out")
+def toggle_leaderboard_opt_out(
+    payload: LeaderboardOptOutRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Allows a trainee to opt out of the company/team leaderboard (OI-03)."""
+    if current_user.role != "trainee":
+        raise HTTPException(status_code=403, detail="Only trainees can modify leaderboard privacy preferences.")
+
+    trainee = db.query(Trainee).filter(Trainee.user_id == current_user.id).first()
+    if not trainee:
+        raise HTTPException(status_code=404, detail="Trainee profile not found.")
+
+    trainee.leaderboard_opt_out = payload.opt_out
+    db.commit()
+    return {
+        "status": "success",
+        "leaderboard_opt_out": trainee.leaderboard_opt_out,
+        "message": "Company leaderboard visibility updated."
+    }
+
+
+@router.get("/quizzes/{quiz_id}/questions", response_model=List[QuizQuestionTraineeView])
+def get_quiz_questions_for_trainee(
+    quiz_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Returns quiz questions WITHOUT answer keys or explanations (SEC-26)."""
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz_id).all()
+    # Strip correct answers and explanations
+    return [
+        QuizQuestionTraineeView(
+            id=q.id,
+            quiz_id=q.quiz_id,
+            question_text=q.question_text,
+            options=q.options or [],
+            points=q.points or 10
+        )
+        for q in questions
+    ]
 
 
 @router.post("/submit-quiz", response_model=GamificationResponse)
@@ -32,14 +161,23 @@ def submit_quiz_attempt(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Submits a quiz attempt (online or from offline queue).
+    """Submits a quiz attempt with strictly server-side scoring (SEC-26).
     
-    Adheres to:
-    - PWA-04, REL-03: Offline responses synced with client UUID attempt_id for exactly-once idempotency.
-    - DD-07: Scoring is strictly performed on the server. Client-provided score is ignored.
-    - TC-GAM-08: Non-trainees (Trainers/Account Managers/Finance) cannot submit quiz attempts.
+    Security Controls:
+    - Rejects offline submissions if ENABLE_OFFLINE_QUIZZES is False.
+    - Idempotent deduplication on attempt_id (PWA-04).
+    - Enforces exactly ONE scored attempt per quiz version (SEC-26).
+    - Scores against isolated QuizAnswerKey table.
+    - Real-time level and consecutive-day activity streak sync.
     """
-    # Role gating & identity verification
+    # 1. Check offline submission policy (SEC-26)
+    if quiz_data.submitted_offline and not getattr(settings, "ENABLE_OFFLINE_QUIZZES", False):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Offline quiz submissions are disabled per security policy SEC-26. Live online connection required."
+        )
+
+    # 2. Role gating & identity verification
     trainee = db.query(Trainee).filter(Trainee.id == quiz_data.trainee_id).first()
     if not trainee:
         raise HTTPException(status_code=404, detail="Trainee not found")
@@ -51,59 +189,94 @@ def submit_quiz_attempt(
                 detail="Trainees can only submit quiz attempts for their own account."
             )
     elif current_user.role == "admin":
-        pass  # Admin allowed for test/admin purposes
+        pass  # Admin allowed for testing/audit
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only trainees can submit quiz attempts."
         )
 
-    # Idempotency check: if attempt_id is provided, check if already processed (PWA-04)
-    if quiz_data.attempt_id:
-        existing_attempt = db.query(QuizAttempt).filter(QuizAttempt.id == quiz_data.attempt_id).first()
-        if existing_attempt:
-            # Already synced and processed; return existing progress without duplicate scoring
-            progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
-            return progress
+    # 3. Idempotency check on attempt_id
+    attempt_id = quiz_data.attempt_id or str(uuid.uuid4())
+    existing_attempt = db.query(QuizAttempt).filter(QuizAttempt.id == attempt_id).first()
+    if existing_attempt:
+        progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
+        return GamificationResponse(
+            id=progress.id,
+            trainee_id=progress.trainee_id,
+            points=progress.points or 0,
+            level=progress.level or 1,
+            badges=progress.badges or [],
+            quizzes_completed=progress.quizzes_completed or 0,
+            streak=progress.streak or trainee.current_streak or 0,
+            current_streak=trainee.current_streak or progress.streak or 0
+        )
 
     quiz = db.query(Quiz).filter(Quiz.id == quiz_data.quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
 
+    # 4. Enforce ONE scored attempt per quiz version (SEC-26)
+    quiz_ver = quiz.version_no or 1
+    prior_attempt = db.query(QuizAttempt).filter(
+        QuizAttempt.quiz_id == quiz.id,
+        QuizAttempt.trainee_id == trainee.id,
+        QuizAttempt.quiz_version == quiz_ver,
+        QuizAttempt.is_scored == True
+    ).first()
+
+    if prior_attempt:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Trainee has already submitted a scored attempt for quiz version {quiz_ver}. Only one scored attempt is permitted."
+        )
+
+    # 5. Server-side scoring against isolated QuizAnswerKey (SEC-26)
     earned_score = 0.0
     earned_points = 0
+    answers = quiz_data.answers or {}
 
-    # Strictly server-side scoring against stored questions (DD-07, TC-GAM-01, TC-GAM-02)
-    if quiz.questions:
+    questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz.id).all()
+    if questions:
         correct_count = 0
-        total_q = len(quiz.questions)
-        answers = quiz_data.answers or {}
-        for q in quiz.questions:
+        total_q = len(questions)
+        for q in questions:
+            # Query answer key table
+            ans_key = db.query(QuizAnswerKey).filter(QuizAnswerKey.question_id == q.id).first()
+            expected_correct = ans_key.correct_answer if ans_key else q.correct_answer
+
             user_choice = answers.get(str(q.id))
-            if user_choice is not None and user_choice == q.correct_answer:
+            if user_choice is not None and expected_correct is not None and user_choice == expected_correct:
                 correct_count += 1
                 earned_points += (q.points if q.points is not None else 10)
-        earned_score = (correct_count / max(1, total_q)) * 100.0
-    else:
-        earned_score = 0.0
-        earned_points = 0
 
-    # Record attempt with attempt_id for future idempotent replay
-    attempt_id = quiz_data.attempt_id or str(uuid.uuid4())
+        earned_score = (correct_count / max(1, total_q)) * 100.0
+
+    # 6. Record Quiz Attempt
     attempt = QuizAttempt(
         id=attempt_id,
         quiz_id=quiz.id,
         trainee_id=trainee.id,
+        quiz_version=quiz_ver,
         submitted_offline=quiz_data.submitted_offline,
         score=earned_score,
-        total_points=earned_points
+        total_points=earned_points,
+        is_scored=True,
+        submitted_at=datetime.utcnow()
     )
     db.add(attempt)
 
-    # Update Gamification Progress
+    # 7. Update Gamification Progress & Real-Time Streak Sync
     progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
     if not progress:
-        progress = GamificationProgress(trainee_id=trainee.id, points=0, quizzes_completed=0, level=1, badges=[])
+        progress = GamificationProgress(
+            trainee_id=trainee.id,
+            points=0,
+            quizzes_completed=0,
+            level=1,
+            badges=[],
+            streak=0
+        )
         db.add(progress)
 
     if progress.points is None:
@@ -117,7 +290,10 @@ def submit_quiz_attempt(
     progress.quizzes_completed += 1
     progress.level = max(1, 1 + (progress.points // 100))
 
-    # Badge rules (GAM-02, Section 3.8.6)
+    # Real-time streak sync
+    streak = update_trainee_activity_streak(db, trainee, progress)
+
+    # Badge unlocks
     current_badges = list(progress.badges or [])
     if progress.quizzes_completed >= 1 and "FIRST_STEP" not in current_badges:
         current_badges.append("FIRST_STEP")
@@ -129,7 +305,191 @@ def submit_quiz_attempt(
     progress.badges = current_badges
     db.commit()
     db.refresh(progress)
-    return progress
+
+    return GamificationResponse(
+        id=progress.id,
+        trainee_id=progress.trainee_id,
+        points=progress.points,
+        level=progress.level,
+        badges=progress.badges,
+        quizzes_completed=progress.quizzes_completed,
+        streak=streak,
+        current_streak=streak
+    )
+
+
+@router.post("/quizzes/{quiz_id}/close")
+def close_quiz_session(
+    quiz_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trainer or Admin closes a quiz session, enabling question reviews (SEC-26)."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers or administrators can close quizzes.")
+
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    quiz.is_closed = True
+    quiz.closed_at = datetime.utcnow()
+    db.commit()
+    return {"status": "success", "quiz_id": quiz.id, "is_closed": True, "closed_at": quiz.closed_at}
+
+
+@router.get("/quizzes/{quiz_id}/review/{attempt_id}", response_model=QuizSubmissionResult)
+def get_quiz_review(
+    quiz_id: str,
+    attempt_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Returns detailed question review for a closed quiz (SEC-26).
+    Withheld if quiz is still open.
+    """
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    attempt = db.query(QuizAttempt).filter(QuizAttempt.id == attempt_id, QuizAttempt.quiz_id == quiz_id).first()
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Quiz attempt not found")
+
+    trainee = db.query(Trainee).filter(Trainee.id == attempt.trainee_id).first()
+    if current_user.role == "trainee" and trainee.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Trainees can only review their own attempts.")
+
+    # SEC-26: Withhold per-question correctness until closed
+    if not quiz.is_closed:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Per-question correctness and explanations are withheld until the quiz session is officially closed."
+        )
+
+    questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz.id).all()
+    review_items = []
+    for q in questions:
+        ans_key = db.query(QuizAnswerKey).filter(QuizAnswerKey.question_id == q.id).first()
+        correct_idx = ans_key.correct_answer if ans_key else q.correct_answer
+        explanation = ans_key.explanation if ans_key else q.explanation
+
+        review_items.append(
+            QuizQuestionReview(
+                question_id=q.id,
+                question_text=q.question_text,
+                options=q.options or [],
+                selected_option=None,
+                correct_answer=correct_idx,
+                is_correct=False,
+                explanation=explanation,
+                points_earned=0
+            )
+        )
+
+    gam = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
+    gam_resp = GamificationResponse(
+        id=gam.id if gam else str(uuid.uuid4()),
+        trainee_id=trainee.id,
+        points=gam.points if gam else 0,
+        level=gam.level if gam else 1,
+        badges=gam.badges if gam else [],
+        quizzes_completed=gam.quizzes_completed if gam else 0,
+        streak=gam.streak if gam else 0,
+        current_streak=trainee.current_streak or 0
+    )
+
+    return QuizSubmissionResult(
+        attempt_id=attempt.id,
+        quiz_id=quiz.id,
+        trainee_id=trainee.id,
+        score=attempt.score or 0.0,
+        total_points=attempt.total_points or 0,
+        passed=(attempt.score or 0.0) >= 80.0,
+        is_closed=quiz.is_closed,
+        review_available=True,
+        questions_review=review_items,
+        gamification=gam_resp
+    )
+
+
+@router.get("/leaderboard/class", response_model=List[LeaderboardEntry])
+def get_class_leaderboard(
+    session_id: str = Query(..., description="Training session ID for the class"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Class/session leaderboard (OI-03).
+    Displays participants enrolled in the specific session.
+    """
+    records = db.query(TrainingRecord).filter(TrainingRecord.session_id == session_id).all()
+    trainee_ids = [r.trainee_id for r in records if r.trainee_id]
+    if not trainee_ids:
+        return []
+
+    trainees = db.query(Trainee).filter(Trainee.id.in_(trainee_ids)).all()
+    entries = []
+    for rank, trainee in enumerate(trainees, start=1):
+        gam = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
+        entries.append(
+            LeaderboardEntry(
+                rank=rank,
+                display_name=trainee.display_name or f"Trainee #{rank}",
+                points=gam.points if gam and gam.points else 0,
+                level=gam.level if gam and gam.level else 1,
+                streak=trainee.current_streak or (gam.streak if gam else 0) or 0,
+                badges_count=len(gam.badges or []) if gam else 0,
+                quizzes_completed=gam.quizzes_completed if gam and gam.quizzes_completed else 0
+            )
+        )
+    entries.sort(key=lambda x: x.points, reverse=True)
+    for idx, e in enumerate(entries, start=1):
+        e.rank = idx
+    return entries
+
+
+@router.get("/leaderboard/company", response_model=List[LeaderboardEntry])
+def get_company_leaderboard(
+    company_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Company/team leaderboard with nickname opt-out (OI-03).
+    Trainees with leaderboard_opt_out == True are excluded from company rankings.
+    """
+    target_company_id = company_id
+    if current_user.role == "trainee":
+        viewer_trainee = db.query(Trainee).filter(Trainee.user_id == current_user.id).first()
+        if viewer_trainee:
+            target_company_id = viewer_trainee.current_company_id
+
+    if not target_company_id:
+        return []
+
+    # Filter by company AND exclude opted-out trainees (OI-03)
+    trainees = db.query(Trainee).filter(
+        Trainee.current_company_id == target_company_id,
+        Trainee.leaderboard_opt_out == False
+    ).all()
+
+    entries = []
+    for rank, trainee in enumerate(trainees, start=1):
+        gam = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
+        entries.append(
+            LeaderboardEntry(
+                rank=rank,
+                display_name=trainee.display_name or f"Colleague #{rank}",
+                points=gam.points if gam and gam.points else 0,
+                level=gam.level if gam and gam.level else 1,
+                streak=trainee.current_streak or (gam.streak if gam else 0) or 0,
+                badges_count=len(gam.badges or []) if gam else 0,
+                quizzes_completed=gam.quizzes_completed if gam and gam.quizzes_completed else 0
+            )
+        )
+    entries.sort(key=lambda x: x.points, reverse=True)
+    for idx, e in enumerate(entries, start=1):
+        e.rank = idx
+    return entries
 
 
 @router.get("/leaderboard")
@@ -140,11 +500,11 @@ def get_leaderboard(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Fetches class or team leaderboard (GAM-04, Section 3.8.6).
+    """Fetches class or team leaderboard (GAM-04, Section 3.8.6, OI-03).
     
     STRICT PRIVACY ENFORCEMENT (TC-GAM-06, TC-GAM-07):
     - Real trainee names, emails, and trainee codes are NEVER returned.
-    - Trainee company scoping: if company_only is True, filters to fellow trainees of the same company.
+    - If company_only is True, filters to fellow trainees of the same company and respects opt-out.
     - Global cross-company view: participants outside the trainee's company are strictly pseudonymized.
     """
     query = (
@@ -156,7 +516,10 @@ def get_leaderboard(
     if current_user.role == "trainee":
         viewer_trainee = db.query(Trainee).filter(Trainee.user_id == current_user.id).first()
         if company_only and viewer_trainee and viewer_trainee.current_company_id:
-            query = query.filter(Trainee.current_company_id == viewer_trainee.current_company_id)
+            query = query.filter(
+                Trainee.current_company_id == viewer_trainee.current_company_id,
+                Trainee.leaderboard_opt_out == False
+            )
 
     top_entries = query.order_by(desc(GamificationProgress.points)).limit(10).all()
 
@@ -164,7 +527,6 @@ def get_leaderboard(
     for rank, (gam, trainee) in enumerate(top_entries, start=1):
         # Determine pseudonymization based on viewing role and company boundary
         if current_user.role == "trainee" and not company_only:
-            # Trainee looking at global cross-company leaderboard
             if viewer_trainee and trainee.current_company_id == viewer_trainee.current_company_id:
                 safe_nickname = trainee.display_name or f"Colleague #{rank}"
             else:
@@ -175,10 +537,10 @@ def get_leaderboard(
         leaderboard.append({
             "rank": rank,
             "display_name": safe_nickname,
-            "points": gam.points,
-            "level": gam.level,
+            "points": gam.points or 0,
+            "level": gam.level or 1,
+            "streak": trainee.current_streak or gam.streak or 0,
             "badges_count": len(gam.badges or []),
-            "quizzes_completed": gam.quizzes_completed
+            "quizzes_completed": gam.quizzes_completed or 0
         })
     return leaderboard
-

@@ -81,6 +81,19 @@ function prepareQuizQuestions(quiz, initialSession) {
 }
 
 export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Prepared questions with randomized question order & randomized choices
   const [questions, setQuestions] = useState(() => prepareQuizQuestions(quiz, initialSession));
 
@@ -114,26 +127,10 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const currentQ = questions[currentIndex] || questions[0];
   const totalQuestions = questions.length;
 
-  // Auto-save session progress to localStorage on any state change
+  // SEC-26: Offline caching of questions and sync queue disabled
   const saveProgress = (overrides = {}) => {
-    const session = {
-      quizId: quiz.id,
-      quizTitle: quiz.title,
-      stage,
-      currentIndex,
-      correctCount,
-      timeLeft,
-      pointsTotal,
-      answersHistory,
-      preparedQuestions: questions,
-      savedAt: Date.now(),
-      ...overrides
-    };
-    try {
-      localStorage.setItem('crossquest_quiz_session', JSON.stringify(session));
-    } catch (e) {
-      console.warn("Could not save quiz session to localStorage:", e);
-    }
+    // Offline caching of questions disabled per SEC-26 policy.
+    return;
   };
 
   // Setup sequence items when question changes
@@ -304,6 +301,10 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   };
 
   const handleFinishAndReturn = () => {
+    if (!isOnline) {
+      alert("Cannot submit assessment while offline. Quizzes require an active internet connection per security policy SEC-26.");
+      return;
+    }
     const finalAccuracy = Math.round((correctCount / totalQuestions) * 100);
     if (onFinish) {
       onFinish({
@@ -381,17 +382,28 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               </div>
             </div>
 
-            <div className="briefing-protection-alert">
-              <Sparkles size={18} className="text-emerald flex-shrink-0" />
-              <div>
-                <strong>Auto-Save Disruption Protection:</strong> If you experience a lost connection, power cut, or accidental browser closure, your answers and question progress are saved automatically so you can resume immediately without penalty.
+            {!isOnline ? (
+              <div style={{ background: '#451a03', border: '1px solid #f59e0b', color: '#fef3c7', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <AlertTriangle size={18} color="#f59e0b" className="flex-shrink-0" />
+                <div>
+                  <strong>Offline Mode Notice:</strong> Assessment is disabled while offline. Live scoring requires an active network connection per security policy SEC-26.
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="briefing-protection-alert">
+                <Shield size={18} className="text-emerald flex-shrink-0" />
+                <div>
+                  <strong>Zero-Trust Server-Side Validation:</strong> All answers are verified server-side against secure answer keys (SEC-26). Offline caching and tampering are strictly prevented.
+                </div>
+              </div>
+            )}
 
             <div className="briefing-actions">
               <button 
                 className="btn-tactile btn-tactile-purple btn-begin-quiz"
                 onClick={handleStartAssessment}
+                disabled={!isOnline}
+                style={{ opacity: !isOnline ? 0.5 : 1, cursor: !isOnline ? 'not-allowed' : 'pointer' }}
               >
                 <Play size={18} />
                 <span>Begin Assessment Now</span>

@@ -220,17 +220,62 @@ class GamificationResponse(BaseModel):
     level: int
     badges: List[str]
     quizzes_completed: int
+    streak: Optional[int] = 0
+    current_streak: Optional[int] = 0
 
     model_config = ConfigDict(from_attributes=True)
 
 class QuizSubmitRequest(BaseModel):
-    attempt_id: Optional[str] = None # Client-generated UUID for offline idempotency
+    attempt_id: Optional[str] = None # Client-generated UUID for idempotency
     trainee_id: str
     quiz_id: str
     answers: Optional[Dict[str, int]] = None
     score: Optional[float] = None
     total_questions: Optional[int] = None
     submitted_offline: bool = False
+
+class LeaderboardOptOutRequest(BaseModel):
+    opt_out: bool
+
+class LeaderboardEntry(BaseModel):
+    rank: int
+    display_name: str
+    points: int
+    level: int
+    streak: Optional[int] = 0
+    badges_count: int
+    quizzes_completed: int
+
+class QuizQuestionTraineeView(BaseModel):
+    id: str
+    quiz_id: str
+    question_text: str
+    options: List[str]
+    points: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+class QuizQuestionReview(BaseModel):
+    question_id: str
+    question_text: str
+    options: List[str]
+    selected_option: Optional[int] = None
+    correct_answer: Optional[int] = None
+    is_correct: bool
+    explanation: Optional[str] = None
+    points_earned: int
+
+class QuizSubmissionResult(BaseModel):
+    attempt_id: str
+    quiz_id: str
+    trainee_id: str
+    score: float
+    total_points: int
+    passed: bool
+    is_closed: bool
+    review_available: bool # True only if quiz is closed (SEC-26)
+    questions_review: Optional[List[QuizQuestionReview]] = None
+    gamification: GamificationResponse
 
 
 # Anomalies & Audit (with full alert lifecycle)

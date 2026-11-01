@@ -92,6 +92,46 @@ export async function fetchLeaderboard() {
   return null;
 }
 
+export async function fetchClassLeaderboard(sessionId, token) {
+  try {
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}/gamification/leaderboard/class?session_id=${encodeURIComponent(sessionId)}`, { headers });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for class leaderboard:", err);
+  }
+  return null;
+}
+
+export async function fetchCompanyLeaderboard(token) {
+  try {
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}/gamification/leaderboard/company`, { headers });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for company leaderboard:", err);
+  }
+  return null;
+}
+
+export async function toggleLeaderboardOptOut(optOut, token) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}/gamification/profile/leaderboard-opt-out`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ opt_out: optOut })
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error updating leaderboard opt-out:", err);
+  }
+  return null;
+}
+
 export async function fetchTraineeGamification(traineeId) {
   try {
     const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`);

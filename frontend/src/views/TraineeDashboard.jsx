@@ -26,7 +26,7 @@ import {
 import { QUIZ_DATABASE, getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore } from '../services/api';
+import { fetchLeaderboard, fetchTraineeGamification, submitQuizScore, toggleLeaderboardOptOut } from '../services/api';
 import mascotRobot from '../assets/mascot-robot.png';
 import Mascot from '../components/Mascot';
 import IsoCube from '../components/IsoCube';
@@ -46,8 +46,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
   const [points, setPoints] = useState(12877);
   const [level, setLevel] = useState(4);
   const [streakDays, setStreakDays] = useState(7);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [leaderboardOptOut, setLeaderboardOptOut] = useState(false);
 
-  // Active quiz & persistence session state
+  // Active quiz state
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [savedSession, setSavedSession] = useState(null);
   const [quizScoreStatus, setQuizScoreStatus] = useState({
@@ -57,22 +59,19 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
     'act-4': { completed: false, score: null }
   });
 
-  // Check for auto-saved quiz session on mount
+  // Track online status (SEC-26: Offline quizzes disabled)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('crossquest_quiz_session');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.quizId && parsed.stage !== 'completed') {
-          setSavedSession(parsed);
-        }
-      }
-    } catch (e) {
-      console.warn("Could not retrieve saved quiz session:", e);
-    }
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
-  // Sync with backend gamification data
+  // Sync with backend gamification data & real-time streak
   useEffect(() => {
     async function loadGamification() {
       if (currentUser?.id) {
@@ -80,11 +79,20 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
         if (gam) {
           setPoints(gam.points || 12877);
           setLevel(gam.level || 4);
+          if (gam.streak !== undefined || gam.current_streak !== undefined) {
+            setStreakDays(gam.streak || gam.current_streak || 1);
+          }
         }
       }
     }
     loadGamification();
   }, [currentUser?.id]);
+
+  const handleToggleOptOut = async () => {
+    const nextVal = !leaderboardOptOut;
+    setLeaderboardOptOut(nextVal);
+    await toggleLeaderboardOptOut(nextVal);
+  };
 
   // Quizzes list aligned with QUIZ_DATABASE and TRACKS
   const assignedActivities = [
@@ -240,6 +248,15 @@ export default function TraineeDashboard({ activeSubView, setActiveView }) {
 
   return (
     <div className="dashboard-content-layout">
+      {/* OFFLINE CONNECTIVITY NOTICE BANNER (SEC-26) */}
+      {!isOnline && (
+        <div style={{ background: '#451a03', border: '1px solid #f59e0b', color: '#fef3c7', padding: '14px 18px', borderRadius: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <AlertTriangle size={22} color="#f59e0b" className="flex-shrink-0" />
+          <div>
+            <strong>Offline Mode Notice:</strong> Live quizzes, assessments, and score synchronization require an active network connection per security policy (SEC-26). Offline caching and submissions are disabled.
+          </div>
+        </div>
+      )}
       {/* OUTAGE / DISRUPTION RECOVERY BANNER */}
       {savedSession && (
         <div className="quiz-recovery-banner">

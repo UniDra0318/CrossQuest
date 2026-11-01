@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.entities import (
     TrainingRecord, TrainingRecordVersion, Trainee, ClientCompany, User, AccessLog,
-    AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate
+    AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate, GamificationProgress
 )
 from app.schemas.schemas import (
     TrainingRecordCreate, TrainingRecordUpdate, TrainingRecordResponse, DecryptedRecordResponse,
@@ -556,6 +556,29 @@ def sign_off_training_session(
 
         if comp.status == "Completed":
             rec.completion_date = now_utc
+
+            # Sync Gamification & streak on attendance/completion (Phase 6)
+            if rec.trainee_id:
+                t_obj = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()
+                if t_obj:
+                    g_obj = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == t_obj.id).first()
+                    if not g_obj:
+                        g_obj = GamificationProgress(trainee_id=t_obj.id, points=0, quizzes_completed=0, level=1, badges=[])
+                        db.add(g_obj)
+                    g_obj.points = (g_obj.points or 0) + 50
+                    g_obj.level = max(1, 1 + (g_obj.points // 100))
+                    today = now_utc.date()
+                    if t_obj.last_activity_date:
+                        delta = (today - t_obj.last_activity_date).days
+                        if delta == 1:
+                            t_obj.current_streak = (t_obj.current_streak or 0) + 1
+                        elif delta > 1:
+                            t_obj.current_streak = 1
+                    else:
+                        t_obj.current_streak = 1
+                    t_obj.last_activity_date = today
+                    g_obj.streak = t_obj.current_streak
+                    g_obj.last_activity_date = today
 
             # Trigger Certificate Issuance for completed participant
             existing_cert = db.query(Certificate).filter(

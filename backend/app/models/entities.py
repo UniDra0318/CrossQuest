@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import (
-    Column, String, Integer, Boolean, DateTime, ForeignKey, Text, JSON, Float
+    Column, String, Integer, Boolean, DateTime, Date, ForeignKey, Text, JSON, Float
 )
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -80,6 +80,9 @@ class Trainee(Base):
     
     # Current active company affiliation
     current_company_id = Column(String(36), ForeignKey("client_companies.id"), nullable=True)
+    leaderboard_opt_out = Column(Boolean, default=False) # OI-03 opt-out from company leaderboard
+    current_streak = Column(Integer, default=0) # Activity streak in days
+    last_activity_date = Column(Date, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -310,6 +313,8 @@ class Quiz(Base):
     title = Column(String(200), nullable=False)
     version_no = Column(Integer, default=1)
     available_until = Column(DateTime, nullable=True)
+    is_closed = Column(Boolean, default=False) # SEC-26 hold back per-question correctness until closed
+    closed_at = Column(DateTime, nullable=True)
     created_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -319,18 +324,37 @@ class Quiz(Base):
 
 
 class QuizQuestion(Base):
-    """Quiz question entity. Note: correct answer is kept strictly server-side (DD-07)."""
+    """Quiz question entity (SEC-26).
+    Correct answers and explanations are stored separately in QuizAnswerKey.
+    """
     __tablename__ = "quiz_questions"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     quiz_id = Column(String(36), ForeignKey("quizzes.id"), nullable=False)
     question_text = Column(Text, nullable=False)
     options = Column(JSON, nullable=False) # List of option strings
-    correct_answer = Column(Integer, nullable=False) # Index (0-based) - strictly server-side
+    correct_answer = Column(Integer, nullable=True) # Kept for fallback/compat, answer_key is authoritative
     explanation = Column(Text, nullable=True)
     points = Column(Integer, default=10)
 
     quiz = relationship("Quiz", back_populates="questions")
+    answer_key = relationship("QuizAnswerKey", uselist=False, back_populates="question", cascade="all, delete-orphan")
+
+
+class QuizAnswerKey(Base):
+    """Separate quiz answer keys table (SEC-26).
+    Kept separate from quiz questions so application queries and student endpoints
+    cannot read answer keys directly. Scored via server-side function only.
+    """
+    __tablename__ = "quiz_answer_keys"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    question_id = Column(String(36), ForeignKey("quiz_questions.id", ondelete="CASCADE"), unique=True, nullable=False)
+    correct_answer = Column(Integer, nullable=False) # Index (0-based)
+    explanation = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    question = relationship("QuizQuestion", back_populates="answer_key")
 
 
 class QuizAttempt(Base):
@@ -344,6 +368,7 @@ class QuizAttempt(Base):
     submitted_offline = Column(Boolean, default=False)
     score = Column(Float, default=0.0)
     total_points = Column(Integer, default=0)
+    is_scored = Column(Boolean, default=True) # SEC-26 one scored attempt per quiz version
     submitted_at = Column(DateTime, default=datetime.utcnow)
 
     quiz = relationship("Quiz", back_populates="attempts")
@@ -383,6 +408,8 @@ class GamificationProgress(Base):
     level = Column(Integer, default=1)
     badges = Column(JSON, default=list) # List of earned badge strings
     quizzes_completed = Column(Integer, default=0)
+    streak = Column(Integer, default=0)
+    last_activity_date = Column(Date, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     trainee = relationship("Trainee", back_populates="gamification")

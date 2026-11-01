@@ -102,7 +102,15 @@ def setup_test_database():
             "ALTER TABLE import_batches ADD COLUMN reconciled BOOLEAN DEFAULT 0",
             "ALTER TABLE import_discrepancies ADD COLUMN resolution_reason TEXT",
             "ALTER TABLE import_discrepancies ADD COLUMN resolved_by_user_id VARCHAR(36)",
-            "ALTER TABLE import_discrepancies ADD COLUMN resolved_at DATETIME"
+            "ALTER TABLE import_discrepancies ADD COLUMN resolved_at DATETIME",
+            "ALTER TABLE trainees ADD COLUMN leaderboard_opt_out BOOLEAN DEFAULT 0",
+            "ALTER TABLE trainees ADD COLUMN current_streak INTEGER DEFAULT 0",
+            "ALTER TABLE trainees ADD COLUMN last_activity_date DATE",
+            "ALTER TABLE quizzes ADD COLUMN is_closed BOOLEAN DEFAULT 0",
+            "ALTER TABLE quizzes ADD COLUMN closed_at DATETIME",
+            "ALTER TABLE quiz_attempts ADD COLUMN is_scored BOOLEAN DEFAULT 1",
+            "ALTER TABLE gamification_progress ADD COLUMN streak INTEGER DEFAULT 0",
+            "ALTER TABLE gamification_progress ADD COLUMN last_activity_date DATE"
         ]:
             try:
                 conn.execute(text(stmt))
