@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Users, 
@@ -6,18 +6,18 @@ import {
   TrendingUp, 
   ShieldCheck, 
   FileCheck, 
-  Download,
-  Calendar,
-  Lock,
-  Award,
-  AlertTriangle
+  Download, 
+  Calendar, 
+  Lock, 
+  Award, 
+  AlertTriangle 
 } from 'lucide-react';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useAuth } from '../contexts/AuthContext';
 import { INITIAL_TRAINING_RECORDS } from '../data/mockData';
 import { fetchRecords } from '../services/api';
 
-export default function CompanyDashboard({ activeSubView }) {
+export default function CompanyDashboard({ activeSubView, setActiveView }) {
   const { currentUser, token } = useAuth();
   const companyCode = currentUser?.company_code || 'CORP_ALPHA';
   const [records, setRecords] = useState(INITIAL_TRAINING_RECORDS);
@@ -26,26 +26,36 @@ export default function CompanyDashboard({ activeSubView }) {
 
   useEffect(() => {
     async function loadCompanyData() {
-      const dbRecords = await fetchRecords(token);
-      if (dbRecords && dbRecords.length > 0) {
-        const mapped = dbRecords.map((r, idx) => {
-          const code = r.encryption_policy?.includes('FINTECH_BETA') 
-            ? 'FINTECH_BETA' 
-            : r.encryption_policy?.includes('RETAIL_GAMMA') 
-              ? 'RETAIL_GAMMA' 
-              : 'CORP_ALPHA';
-          return {
-            id: r.id,
-            traineeName: r.trainee_name || `Employee ${idx + 1}`,
-            traineeEmail: `employee${idx + 1}@${code.toLowerCase()}.ph`,
-            companyCode: code,
-            courseName: r.course_name,
-            status: r.status || 'completed',
-            score: r.score || 92.0,
-            completionDate: r.created_at ? new Date(r.created_at).toLocaleDateString() : '2026-09-20'
-          };
-        });
-        setRecords(mapped);
+      setIsLoading(true);
+      try {
+        const dbRecords = await fetchRecords(token);
+        if (dbRecords && dbRecords.length > 0) {
+          const mapped = dbRecords.map((r, idx) => {
+            const code = r.encryption_policy?.includes('FINTECH_BETA') 
+              ? 'FINTECH_BETA' 
+              : r.encryption_policy?.includes('RETAIL_GAMMA') 
+                ? 'RETAIL_GAMMA' 
+                : 'CORP_ALPHA';
+            return {
+              id: r.id,
+              traineeName: r.trainee_name || `Employee ${idx + 1}`,
+              traineeEmail: `employee${idx + 1}@${code.toLowerCase()}.ph`,
+              companyCode: code,
+              courseName: r.course_name,
+              status: r.status || 'completed',
+              score: r.score || 92.0,
+              completionDate: r.created_at ? new Date(r.created_at).toLocaleDateString() : '2026-09-20'
+            };
+          });
+          setRecords(mapped);
+          setUsingFallback(false);
+        } else {
+          setUsingFallback(true);
+        }
+      } catch (err) {
+        setUsingFallback(true);
+      } finally {
+        setIsLoading(false);
       }
     }
     loadCompanyData();
@@ -57,6 +67,16 @@ export default function CompanyDashboard({ activeSubView }) {
     ? (companyRecords.reduce((acc, r) => acc + (r.score || 0), 0) / companyRecords.length).toFixed(1)
     : '0.0';
 
+  const currentTab = ['company_trainees', 'audit_certificate'].includes(activeSubView)
+    ? activeSubView
+    : 'company_overview';
+
+  const companyTabs = [
+    { id: 'company_overview', label: 'Company Compliance', icon: Building2 },
+    { id: 'company_trainees', label: 'Employee Records', icon: Users },
+    { id: 'audit_certificate', label: 'Compliance & Audit Report', icon: ShieldCheck }
+  ];
+
   return (
     <div className="dashboard-content-layout">
       {usingFallback && (
@@ -65,12 +85,54 @@ export default function CompanyDashboard({ activeSubView }) {
           <span>Notice: Showing cached baseline compliance data. Live synchronization in progress or server offline.</span>
         </div>
       )}
+
+      {/* IN-PAGE COMPANY WORKSPACE TAB STRIP */}
+      <nav className="company-nav-tabs" aria-label="Company Sections" style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '8px',
+        marginBottom: '20px',
+        borderBottom: '1px solid #e2e8f0',
+        paddingBottom: '10px'
+      }}>
+        {companyTabs.map(tab => {
+          const Icon = tab.icon;
+          const isActive = currentTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveView && setActiveView(tab.id)}
+              className={`trainee-tab-pill ${isActive ? 'active' : ''}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 16px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: isActive ? '700' : '600',
+                color: isActive ? '#4338ca' : '#64748b',
+                background: isActive ? '#eef2ff' : '#ffffff',
+                border: isActive ? '1px solid #c7d2fe' : '1px solid #e2e8f0',
+                cursor: 'pointer',
+                boxShadow: isActive ? '0 1px 3px rgba(67, 56, 202, 0.1)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Icon size={15} color={isActive ? '#4f46e5' : '#94a3b8'} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
       {/* 1. COMPANY OVERVIEW */}
-      {(activeSubView === 'company_overview' || !activeSubView || !['company_trainees', 'audit_certificate'].includes(activeSubView)) && (
+      {currentTab === 'company_overview' && (
         <>
           <div className="view-title-header">
             <div>
-              <h2>{currentUser?.organization} — Compliance Portal</h2>
+              <h2>{currentUser?.organization} - Compliance Portal</h2>
               <p className="text-secondary text-sm">
                 Corporate training progress, audit verification, and data isolation oversight.
               </p>
@@ -156,7 +218,7 @@ export default function CompanyDashboard({ activeSubView }) {
       )}
 
       {/* 2. COMPANY TRAINEES */}
-      {activeSubView === 'company_trainees' && (
+      {currentTab === 'company_trainees' && (
         <div className="card section-card">
           <div className="card-header-bar">
             <div>
@@ -209,7 +271,7 @@ export default function CompanyDashboard({ activeSubView }) {
       )}
 
       {/* 3. AUDIT CERTIFICATE */}
-      {activeSubView === 'audit_certificate' && (
+      {currentTab === 'audit_certificate' && (
         <div className="card section-card">
           <div className="card-header-bar">
             <div>

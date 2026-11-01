@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, 
@@ -7,19 +7,20 @@ import {
   Check, 
   LogOut, 
   User, 
-  GraduationCap,
-  Building2,
-  Key,
-  Award
+  GraduationCap, 
+  Building2, 
+  Key, 
+  Award 
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 /**
- * Topbar — global header bar rendered by MainAppShell for all authenticated roles.
+ * Topbar - global header bar rendered by MainAppShell for all authenticated roles.
  * Props:
- *   activeViewTitle {string} — human-readable name of the current view (set by App.jsx)
- *   streakDays      {number|null} — live streak count passed from TraineeDashboard via
- *                                   MainAppShell; null while loading (shows "…").
+ *   activeViewTitle {string} - human-readable name of the current view (set by App.jsx)
+ *   streakDays      {number|null} - live streak count passed from TraineeDashboard via
+ *                                   MainAppShell; null while loading.
  *                                   Only rendered for the trainee role.
  */
 export default function Topbar({ activeViewTitle, streakDays }) {
@@ -50,29 +51,50 @@ export default function Topbar({ activeViewTitle, streakDays }) {
 
   return (
     <header className="gamified-topbar">
-      {/* Left: Breadcrumbs & Page Title */}
-      <div className="topbar-left">
-        <div className="gamified-breadcrumb">
-          <span className="crumb-brand">CrossQuest</span>
-          <span className="crumb-divider">/</span>
-          <span className="crumb-active">{activeViewTitle}</span>
+      {/* Left: Brand Logo & View Breadcrumb */}
+      <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div 
+          className="topbar-brand-link" 
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}
+          onClick={() => navigate('/dashboard')}
+          title="CrossQuest Dashboard"
+        >
+          <img 
+            src={logoStacked} 
+            alt="CrossQuest" 
+            style={{ height: '36px', width: 'auto', display: 'block' }} 
+          />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontWeight: '900', fontSize: '17px', letterSpacing: '-0.02em', color: '#1e1b4b', lineHeight: 1.1 }}>
+              CrossQuest
+            </span>
+            <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.12em', color: '#6366f1', textTransform: 'uppercase' }}>
+              Enterprise Learning
+            </span>
+          </div>
         </div>
+
+        <span style={{ color: '#cbd5e1', fontSize: '18px', fontWeight: '300' }}>/</span>
+
+        <span className="crumb-active" style={{ fontSize: '13.5px', fontWeight: '700', color: '#475569' }}>
+          {activeViewTitle}
+        </span>
       </div>
 
       {/* Right: Streak (Trainees only) and User Dropdown */}
       <div className="topbar-right">
-        {/* Streak Pill - Trainees only — live value from backend */}
+        {/* Streak Pill - Trainees only - live value from backend */}
         {currentUser?.role === 'trainee' && (
           <div className="gamified-stat-pill streak-pill">
             <Flame size={16} className="stat-flame-icon" />
             <span className="stat-num">
-              {streakDays !== null && streakDays !== undefined ? streakDays : '…'}
+              {streakDays !== null && streakDays !== undefined ? streakDays : '...'}
             </span>
             <span className="stat-label">DAY STREAK</span>
           </div>
         )}
 
-        {/* Role Switcher Menu — DEV ONLY (hidden in production build) */}
+        {/* Role Switcher Menu - DEV ONLY (hidden in production build) */}
         {import.meta.env.DEV && (
           <div className="role-dropdown-wrapper">
             <button 
@@ -124,7 +146,7 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                             <div className="role-option-name">{u.name}</div>
                             <div className="role-option-meta">
                               <span className="role-tag">{u.role.replace(/_/g, ' ').toUpperCase()}</span>
-                              <span className="role-org">• {u.organization}</span>
+                              <span className="role-org">- {u.organization}</span>
                             </div>
                           </div>
                           {isSelected && (
