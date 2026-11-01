@@ -22,6 +22,7 @@ from typing import Dict, Any, List, Optional, Set
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +62,14 @@ def sanitize_token(token: str) -> str:
 class CPABEEngine:
     """Hybrid CP-ABE Cryptographic Engine with AES-256-GCM and HKDF key derivation."""
 
-    def __init__(self, group_name: str = "BN254"):
-        # BN254 proposed for production/pilot security level (VR-26, Section 3.6.4)
+    def __init__(self, group_name: str = "SS512"):
+        # SS512 is the Type 1 symmetric pairing curve settled in TC-CRY-01 feasibility test for BSW07
+        # Fail-closed enforcement: production MUST refuse to run in simulation mode (SEC-04, VR-24)
+        if getattr(settings, "ENVIRONMENT", "development") == "production" and not CHARM_AVAILABLE:
+            raise RuntimeError(
+                "FAIL-CLOSED SECURITY ENFORCEMENT: Charm-Crypto native pairing library is not available. "
+                "Production environment refuses to start CP-ABE engine in simulation mode (SEC-04, VR-24)."
+            )
         self.charm_available = CHARM_AVAILABLE
         self.group_name = group_name
         self.group = None

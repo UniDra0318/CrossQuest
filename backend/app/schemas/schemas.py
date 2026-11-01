@@ -387,3 +387,41 @@ class ReconciliationReportResponse(BaseModel):
     reconciled: bool
     customer_breakdown: List[Dict[str, Any]]
     discrepancies: List[Dict[str, Any]]
+
+
+class ReencryptionTriggerRequest(BaseModel):
+    company_code: str
+    old_version: int
+    new_version: int
+    batch_size: Optional[int] = 50
+
+
+class ReencryptionJobResponse(BaseModel):
+    id: str
+    company_code: str
+    old_version: int
+    new_version: int
+    batch_size: int
+    total_records: int
+    processed_records: int
+    progress_percent: float
+    status: str
+    error_message: Optional[str] = None
+    created_at: datetime
+    completed_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AttributeBumpRequest(BaseModel):
+    attribute_type: str
+    ref_code: str
+
+
+class AttributeBumpResponse(BaseModel):
+    attribute_type: str
+    ref_code: str
+    old_token: str
+    new_token: str
+    old_version: int
+    new_version: int

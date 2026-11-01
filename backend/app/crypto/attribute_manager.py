@@ -22,7 +22,7 @@ from cryptography.hazmat.primitives import hashes
 from app.core.config import settings
 from app.models.entities import (
     AbeAttribute, UserAbeKey, UserKeyAttribute, User, TrainingRecord,
-    TrainingRecordVersion, AccessLog, ClientCompany, Trainee
+    TrainingRecordVersion, AccessLog, ClientCompany, Trainee, ReencryptionJob
 )
 from app.crypto.cpabe_engine import cpabe_engine, sanitize_token
 
@@ -270,7 +270,7 @@ class AttributeManager:
         return key_record
 
     # -------------------------------------------------------------------------
-    # 4. Background Re-Encryption Worker (DD-05, TC-ATT-08..09, TC-ATT-15)
+    # 4. Background Re-Encryption Worker & Batching Policy (DD-05, OI-16, TC-ATT-08..09, TC-ATT-15)
     # -------------------------------------------------------------------------
     def reencrypt_records_job(
         self,
@@ -278,15 +278,18 @@ class AttributeManager:
         company_code: str,
         old_version: int,
         new_version: int,
-        admin_user_id: Optional[str] = None
+        admin_user_id: Optional[str] = None,
+        batch_size: int = 50
     ) -> Dict[str, Any]:
-        """Background worker that re-encrypts historical records to new policy version.
+        """Background worker that re-encrypts historical records to new policy version in defined batches (OI-16).
         
         1. Queries records matching company and old_version.
-        2. Decrypts record using system authority / admin key.
-        3. Snapshots current state into TrainingRecordVersion.
-        4. Re-encrypts under updated policy (with CLIENT<comp>V<new_version>).
-        5. Updates TrainingRecord and logs progress.
+        2. Creates a ReencryptionJob tracking entity.
+        3. Processes records in batches of batch_size (default 50 records per chunk).
+        4. Decrypts record using system authority / admin key.
+        5. Snapshots current state into TrainingRecordVersion.
+        6. Re-encrypts under updated policy (with CLIENT<comp>V<new_version>).
+        7. Updates TrainingRecord and logs progress.
         """
         clean_code = sanitize_token(company_code)
         comp = db.query(ClientCompany).filter(ClientCompany.code == company_code).first()
@@ -303,68 +306,95 @@ class AttributeManager:
             .all()
         )
 
+        total_count = len(records)
+        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        job = ReencryptionJob(
+            company_code=company_code,
+            old_version=old_version,
+            new_version=new_version,
+            batch_size=batch_size,
+            total_records=total_count,
+            processed_records=0,
+            status="IN_PROGRESS",
+            initiated_by_user_id=admin_user_id,
+            created_at=now_utc
+        )
+        db.add(job)
+        db.commit()
+        db.refresh(job)
+
         admin_key = cpabe_engine.generate_user_private_key(["ROLEADMIN", "ROLEADMINV1"])
         processed_count = 0
 
-        for rec in records:
-            # Reconstruct cipher package
-            cipher_pkg = {
-                "policy": rec.encryption_policy,
-                "policy_version": rec.policy_version,
-                "abe_ciphertext": rec.abe_ciphertext,
-                "payload_ciphertext": rec.payload_ciphertext,
-                "nonce": rec.nonce,
-                "engine": "charm-bsw07" if cpabe_engine.charm_available else "simulation"
-            }
+        # Process records in chunks of batch_size (defined batching policy per OI-16)
+        if records:
+            for i in range(0, total_count, batch_size):
+                chunk = records[i:i + batch_size]
+                for rec in chunk:
+                    # Reconstruct cipher package
+                    cipher_pkg = {
+                        "policy": rec.encryption_policy,
+                        "policy_version": rec.policy_version,
+                        "abe_ciphertext": rec.abe_ciphertext,
+                        "payload_ciphertext": rec.payload_ciphertext,
+                        "nonce": rec.nonce,
+                        "engine": "charm-bsw07" if cpabe_engine.charm_available else "simulation"
+                    }
 
-            # Decrypt existing payload
-            trainee = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()
-            trainee_code = trainee.trainee_code if trainee else "default"
-            decrypted = cpabe_engine.decrypt_record(
-                cipher_pkg,
-                admin_key,
-                record_id=f"rec-{trainee_code}",
-                version=rec.policy_version
-            )
+                    # Decrypt existing payload
+                    trainee = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()
+                    trainee_code = trainee.trainee_code if trainee else "default"
+                    decrypted = cpabe_engine.decrypt_record(
+                        cipher_pkg,
+                        admin_key,
+                        record_id=f"rec-{trainee_code}",
+                        version=rec.policy_version
+                    )
 
-            if decrypted is None:
-                # Fallback payload from score
-                decrypted = {"score": rec.score, "reencrypted": True}
+                    if decrypted is None:
+                        decrypted = {"score": rec.score, "reencrypted": True}
 
-            # 1. Snapshot previous version into TrainingRecordVersion (DD-06)
-            snapshot = TrainingRecordVersion(
-                record_id=rec.id,
-                version_no=rec.policy_version,
-                abe_ciphertext=rec.abe_ciphertext,
-                payload_ciphertext=rec.payload_ciphertext,
-                policy_tokens=rec.encryption_policy,
-                edited_by_user_id=admin_user_id,
-                edited_at=datetime.now(timezone.utc).replace(tzinfo=None)
-            )
-            db.add(snapshot)
+                    # 1. Snapshot previous version into TrainingRecordVersion (DD-06)
+                    snapshot = TrainingRecordVersion(
+                        record_id=rec.id,
+                        version_no=rec.policy_version,
+                        abe_ciphertext=rec.abe_ciphertext,
+                        payload_ciphertext=rec.payload_ciphertext,
+                        policy_tokens=rec.encryption_policy,
+                        edited_by_user_id=admin_user_id,
+                        edited_at=datetime.now(timezone.utc).replace(tzinfo=None)
+                    )
+                    db.add(snapshot)
 
-            # 2. Re-encrypt with new client version token
-            new_policy = cpabe_engine.build_record_policy(
-                company_code=company_code,
-                session_code=rec.session.session_code if rec.session else None,
-                trainee_code=trainee_code,
-                client_version=new_version
-            )
+                    # 2. Re-encrypt with new client version token
+                    new_policy = cpabe_engine.build_record_policy(
+                        company_code=company_code,
+                        session_code=rec.session.session_code if rec.session else None,
+                        trainee_code=trainee_code,
+                        client_version=new_version
+                    )
 
-            re_encrypted = cpabe_engine.encrypt_record(
-                plaintext_data=decrypted,
-                policy_str=new_policy,
-                record_id=f"rec-{trainee_code}",
-                version=new_version
-            )
+                    re_encrypted = cpabe_engine.encrypt_record(
+                        plaintext_data=decrypted,
+                        policy_str=new_policy,
+                        record_id=f"rec-{trainee_code}",
+                        version=new_version
+                    )
 
-            rec.encryption_policy = new_policy
-            rec.policy_version = new_version
-            rec.abe_ciphertext = re_encrypted.get("abe_ciphertext")
-            rec.payload_ciphertext = re_encrypted.get("payload_ciphertext")
-            rec.nonce = re_encrypted.get("nonce")
-            processed_count += 1
+                    rec.encryption_policy = new_policy
+                    rec.policy_version = new_version
+                    rec.abe_ciphertext = re_encrypted.get("abe_ciphertext")
+                    rec.payload_ciphertext = re_encrypted.get("payload_ciphertext")
+                    rec.nonce = re_encrypted.get("nonce")
+                    processed_count += 1
 
+                # Update job progress after chunk
+                job.processed_records = processed_count
+                db.commit()
+
+        job.status = "COMPLETED"
+        job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
         db.commit()
 
         # Audit log
@@ -373,23 +403,30 @@ class AttributeManager:
             actor_role="admin" if admin_user_id else "system",
             event_type="RE_ENCRYPT_JOB",
             resource_type="RECORD_BATCH",
+            resource_id=job.id,
             outcome="SUCCESS",
             details={
+                "job_id": job.id,
                 "company_code": company_code,
                 "old_version": old_version,
                 "new_version": new_version,
-                "records_processed": processed_count
+                "batch_size": batch_size,
+                "records_processed": processed_count,
+                "total_records": total_count
             }
         )
         db.add(log)
         db.commit()
 
         return {
+            "job_id": job.id,
             "status": "COMPLETED",
             "company_code": company_code,
             "old_version": old_version,
             "new_version": new_version,
-            "records_processed": processed_count
+            "batch_size": batch_size,
+            "records_processed": processed_count,
+            "total_records": total_count
         }
 
 

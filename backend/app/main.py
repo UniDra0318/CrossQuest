@@ -40,6 +40,16 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return response
 
+@app.on_event("startup")
+def verify_fail_closed_crypto_environment():
+    """Fail-closed verification: production environment must refuse to start without native Charm-Crypto (SEC-04)."""
+    from app.crypto.cpabe_engine import CHARM_AVAILABLE
+    if getattr(settings, "ENVIRONMENT", "development") == "production" and not CHARM_AVAILABLE:
+        raise RuntimeError(
+            "FAIL-CLOSED SECURITY ENFORCEMENT: Server refusing to start in production without native Charm-Crypto library. "
+            "CP-ABE simulation mode is disallowed in production (SEC-04, VR-24)."
+        )
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")

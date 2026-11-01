@@ -611,3 +611,23 @@ class PasswordResetToken(Base):
     user = relationship("User", back_populates="reset_tokens")
 
 
+
+
+class ReencryptionJob(Base):
+    """Background Re-encryption Job tracking entity for Tier-2 Revocation (DD-05, OI-16, Section 3.6.7)."""
+    __tablename__ = "reencryption_jobs"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    company_code = Column(String(50), nullable=False)
+    old_version = Column(Integer, nullable=False)
+    new_version = Column(Integer, nullable=False)
+    batch_size = Column(Integer, default=50) # Defined batching policy (OI-16)
+    total_records = Column(Integer, default=0)
+    processed_records = Column(Integer, default=0)
+    status = Column(String(20), default="IN_PROGRESS") # IN_PROGRESS, COMPLETED, FAILED
+    error_message = Column(Text, nullable=True)
+    initiated_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+
+    initiated_by = relationship("User", foreign_keys=[initiated_by_user_id])

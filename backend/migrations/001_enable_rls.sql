@@ -267,3 +267,75 @@ REVOKE UPDATE, DELETE ON access_logs FROM crossquest_app;
 
 -- Block application role from reading internal cryptographic signing secret directly
 REVOKE ALL ON SCHEMA internal_security FROM crossquest_app;
+
+
+-- 11. Row-Level Security for User CP-ABE Private Keys (SEC-24, Phase 5)
+ALTER TABLE user_abe_keys ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_abe_keys FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS uak_select ON user_abe_keys;
+CREATE POLICY uak_select ON user_abe_keys FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') = 'ADMIN'
+    OR user_id = app_ctx_get('current_user_id')
+);
+
+-- Disallow runtime modification or deletion of key material through direct SQL
+DROP POLICY IF EXISTS uak_update ON user_abe_keys;
+CREATE POLICY uak_update ON user_abe_keys FOR UPDATE TO PUBLIC
+USING (app_ctx_get('current_role') = 'ADMIN')
+WITH CHECK (app_ctx_get('current_role') = 'ADMIN');
+
+-- 12. Restricted Key Access Function (SEC-24)
+-- Wrapped private keys are accessible strictly via cryptographically-verified caller context
+CREATE OR REPLACE FUNCTION internal_security.get_user_wrapped_key(target_user_id TEXT)
+RETURNS TABLE (
+    key_id TEXT,
+    user_id TEXT,
+    wrapped_dek TEXT,
+    nonce TEXT,
+    key_ciphertext TEXT,
+    kms_key_arn TEXT,
+    status TEXT
+) AS $$
+DECLARE
+    caller_id TEXT;
+    caller_role TEXT;
+BEGIN
+    caller_id := app_ctx_get('current_user_id');
+    caller_role := app_ctx_get('current_role');
+
+    -- Fail-closed if context is unauthenticated or expired
+    IF caller_id IS NULL OR caller_role IS NULL THEN
+        RETURN;
+    END IF;
+
+    -- Only Administrator or the verified user himself can read the wrapped key
+    IF caller_role != 'ADMIN' AND caller_id != target_user_id THEN
+        RETURN;
+    END IF;
+
+    RETURN QUERY
+    SELECT uak.id::TEXT, uak.user_id::TEXT, uak.wrapped_dek::TEXT, uak.nonce::TEXT, uak.key_ciphertext::TEXT, uak.kms_key_arn::TEXT, uak.status::TEXT
+    FROM user_abe_keys uak
+    WHERE uak.user_id = target_user_id
+      AND uak.status = 'active';
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, internal_security, pg_temp;
+
+-- 13. Table Ownership & Privileges Separation (Phase 5)
+-- Dedicated table owner role ensures runtime app role cannot bypass RLS
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'crossquest_admin') THEN
+        CREATE ROLE crossquest_admin WITH LOGIN PASSWORD 'admin_secure_password';
+    END IF;
+END $$;
+
+ALTER TABLE training_records OWNER TO crossquest_admin;
+ALTER TABLE certificates OWNER TO crossquest_admin;
+ALTER TABLE trainees OWNER TO crossquest_admin;
+ALTER TABLE user_abe_keys OWNER TO crossquest_admin;
+ALTER TABLE quizzes OWNER TO crossquest_admin;
+ALTER TABLE quiz_attempts OWNER TO crossquest_admin;
+ALTER TABLE access_logs OWNER TO crossquest_admin;

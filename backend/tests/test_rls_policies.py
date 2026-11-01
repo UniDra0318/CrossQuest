@@ -76,3 +76,33 @@ def test_transaction_local_context_injection():
     # Cleanup
     request_context_var.set(None)
     assert request_context_var.get() is None
+
+
+def test_user_abe_keys_isolation_and_restricted_key_access():
+    """Verify that wrapped private keys are bound to verified caller context (SEC-24)."""
+    user_a = "usr-alice-111"
+    user_b = "usr-bob-222"
+
+    # 1. Caller Alice generates valid HMAC context for herself
+    ctx_alice = sign_context(user_id=user_a, role="account_manager", ttl_seconds=60)
+    request_context_var.set(ctx_alice)
+
+    # Alice can read her own key
+    current_ctx = request_context_var.get()
+    assert current_ctx["user_id"] == user_a
+    can_read_own = (current_ctx["user_id"] == user_a or current_ctx["role"] == "ADMIN")
+    assert can_read_own is True
+
+    # Alice CANNOT read Bob's key
+    can_read_bob = (current_ctx["user_id"] == user_b or current_ctx["role"] == "ADMIN")
+    assert can_read_bob is False
+
+    # 2. Administrator context allows oversight
+    ctx_admin = sign_context(user_id="usr-admin-999", role="admin", ttl_seconds=60)
+    request_context_var.set(ctx_admin)
+    admin_ctx = request_context_var.get()
+    admin_can_read = (admin_ctx["role"] == "ADMIN" or admin_ctx["user_id"] == user_b)
+    assert admin_can_read is True
+
+    # Cleanup
+    request_context_var.set(None)

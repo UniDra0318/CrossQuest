@@ -12,6 +12,7 @@ from app.schemas.schemas import (
 )
 from app.api.deps import get_current_user, get_current_admin_user
 from app.crypto.cpabe_engine import cpabe_engine
+from app.crypto.attribute_manager import attribute_manager
 from app.services.email_service import email_service
 
 router = APIRouter()
@@ -176,6 +177,13 @@ def reenable_user_account(
     db.commit()
     db.refresh(user)
 
+    # Re-issue CP-ABE keys since disabling zeroes key material (FR-02, SEC-05, Phase 5)
+    new_key = attribute_manager.issue_or_rekey_user(
+        db=db,
+        user=user,
+        admin_user_id=admin_user.id
+    )
+
     log = AccessLog(
         actor_user_id=admin_user.id,
         actor_role=admin_user.role,
@@ -184,7 +192,7 @@ def reenable_user_account(
         resource_id=user.id,
         outcome="SUCCESS",
         source_ip=_get_client_ip(request),
-        details={"email": user.email}
+        details={"email": user.email, "key_reissued": True, "key_id": new_key.id}
     )
     db.add(log)
     db.commit()

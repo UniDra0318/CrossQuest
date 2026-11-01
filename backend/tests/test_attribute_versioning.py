@@ -13,7 +13,9 @@ import uuid
 import json
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, create_access_token
+from fastapi.testclient import TestClient
+from app.models.entities import ReencryptionJob
 from app.models.entities import (
     User, ClientCompany, Trainee, TrainingSession, TrainingRecord,
     TrainingRecordVersion, AbeAttribute, UserAbeKey, UserKeyAttribute, AccessLog
@@ -428,3 +430,154 @@ def test_tc_att_17_performance_measure_timing(monotonic_timer, db_session: Sessi
 
     assert bump_ns > 0
     print(f"\n[Measure Timing] Attribute Version Bump: {bump_ms:.3f}ms ({bump_ns}ns)")
+
+
+def test_tc_att_18_tier2_batching_policy_chunking(db_session: Session, version_test_data):
+    """TC-ATT-18: Batching policy enforces chunks of 50 records and creates tracking entity (OI-16)."""
+    comp = version_test_data["comp"]
+    trainee = version_test_data["trainee"]
+
+    # Seed 12 training records for this company under version 1
+    for i in range(12):
+        rec = TrainingRecord(
+            trainee_id=trainee.id,
+            company_at_completion_id=comp.id,
+            course_name=f"Secure Architecture Module {i}",
+            policy_version=1,
+            encryption_policy=f"CLIENT{comp.code}V1",
+            payload_ciphertext="dummy_payload",
+            score=88.0 + i
+        )
+        db_session.add(rec)
+    db_session.commit()
+
+    # Execute re-encryption job with chunk size of 5
+    result = attribute_manager.reencrypt_records_job(
+        db=db_session,
+        company_code=comp.code,
+        old_version=1,
+        new_version=2,
+        batch_size=5
+    )
+
+    assert result["status"] == "COMPLETED"
+    assert result["batch_size"] == 5
+    assert result["records_processed"] >= 12
+    assert "job_id" in result
+
+    # Verify ReencryptionJob record persisted with correct counts
+    job = db_session.query(ReencryptionJob).filter(ReencryptionJob.id == result["job_id"]).first()
+    assert job is not None
+    assert job.status == "COMPLETED"
+    assert job.batch_size == 5
+    assert job.processed_records >= 12
+
+
+def test_tc_att_19_reencryption_status_api_endpoints(
+    client: TestClient, db_session: Session, version_test_data
+):
+    """TC-ATT-19: REST endpoints for triggering and polling batch re-encryption jobs (OI-16)."""
+    comp = version_test_data["comp"]
+
+    # Admin user
+    admin = db_session.query(User).filter_by(role="admin").first()
+    if not admin:
+        admin = User(
+            email="reenc_admin@test.ph",
+            username="reenc_admin",
+            full_name="Reencryption Admin",
+            hashed_password=get_password_hash("AdminPass123!"),
+            role="admin",
+            is_active=True
+        )
+        db_session.add(admin)
+        db_session.commit()
+
+    admin_token = create_access_token(subject=admin.id)
+
+    # 1. Trigger re-encryption
+    res_post = client.post(
+        "/api/v1/attributes/reencrypt",
+        json={
+            "company_code": comp.code,
+            "old_version": 2,
+            "new_version": 3,
+            "batch_size": 50
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_post.status_code == 200
+    job_data = res_post.json()
+    assert job_data["company_code"] == comp.code
+    assert job_data["status"] == "COMPLETED"
+    assert job_data["batch_size"] == 50
+    assert "id" in job_data
+
+    # 2. Query specific job status
+    job_id = job_data["id"]
+    res_get_job = client.get(
+        f"/api/v1/attributes/reencryption-jobs/{job_id}",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_get_job.status_code == 200
+    assert res_get_job.json()["id"] == job_id
+    assert res_get_job.json()["progress_percent"] == 100.0
+
+    # 3. List all jobs
+    res_list = client.get(
+        "/api/v1/attributes/reencryption-jobs",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_list.status_code == 200
+    assert len(res_list.json()) >= 1
+
+
+def test_tc_att_20_reenable_user_account_reissues_cpabe_key(
+    client: TestClient, db_session: Session, version_test_data
+):
+    """TC-ATT-20: Re-enabling a disabled user automatically re-issues CP-ABE key material (FR-02, SEC-05)."""
+    user = version_test_data["u_revoked"]
+    admin = db_session.query(User).filter_by(role="admin").first()
+    admin_token = create_access_token(subject=admin.id)
+
+    # 1. First issue key for user
+    key_v1 = attribute_manager.issue_or_rekey_user(db_session, user)
+    assert key_v1.status == "active"
+    assert key_v1.key_ciphertext is not None
+
+    # 2. Disable user -> zeroes keys (crypto-shredding)
+    res_disable = client.put(
+        f"/api/v1/users/{user.id}/disable",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_disable.status_code == 200
+    db_session.refresh(key_v1)
+    assert key_v1.status == "revoked"
+    assert not key_v1.key_ciphertext
+    assert key_v1.wrapped_dek is None
+
+    # 3. Re-enable user -> triggers key re-issuance step (FR-02)
+    res_reenable = client.put(
+        f"/api/v1/users/{user.id}/re-enable",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert res_reenable.status_code == 200
+    assert res_reenable.json()["is_active"] is True
+
+    # 4. Verify new active key exists with valid envelope encryption
+    active_key = db_session.query(UserAbeKey).filter(
+        UserAbeKey.user_id == user.id,
+        UserAbeKey.status == "active"
+    ).first()
+    assert active_key is not None
+    assert active_key.id != key_v1.id
+    assert active_key.key_ciphertext is not None
+    assert active_key.wrapped_dek is not None
+
+    # 5. Verify unwrap succeeds for re-enabled user
+    decrypted_key = attribute_manager.envelope_decrypt_key(
+        wrapped_dek_b64=active_key.wrapped_dek,
+        nonce_b64=active_key.nonce,
+        key_ciphertext_b64=active_key.key_ciphertext
+    )
+    assert decrypted_key is not None
