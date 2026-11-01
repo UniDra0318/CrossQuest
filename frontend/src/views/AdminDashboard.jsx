@@ -81,7 +81,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     const cleanCode = newCompanyForm.code.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
     const cleanName = newCompanyForm.name.trim();
 
-    const res = await createCompanyApi({
+    const companyRes = await createCompanyApi({
       code: cleanCode,
       name: cleanName,
       industry: newCompanyForm.industry.trim()
@@ -89,7 +89,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
     setIsCreatingCompany(false);
 
-    if (res.ok) {
+    if (companyRes.ok) {
       const selectedAm = staffList.find(s => s.id === newCompanyForm.assigned_am_id);
       
       // If AM was selected, update their assignments
@@ -117,12 +117,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
       setCompaniesList(prev => [newCompObj, ...prev]);
       setCreatedCompanyResult({
-        ...res.data,
+        ...companyRes.data,
         attribute_token: `CLIENT${cleanCode}V1`,
         assigned_am: selectedAm?.name || 'Marcus Reyes'
       });
     } else {
-      setCreateCompanyError(res.error || 'Failed to create client company.');
+      setCreateCompanyError(companyRes.error || 'Failed to create client company.');
     }
   };
 
@@ -177,12 +177,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       temporary_password: newUserForm.temporary_password.trim() || undefined
     };
 
-    const res = await createUserApi(payload, token);
+    const userRes = await createUserApi(payload, token);
     setIsCreatingUser(false);
 
-    if (res.ok) {
-      setCreatedUserResult(res.data);
-      const u = res.data.user;
+    if (userRes.ok) {
+      setCreatedUserResult(userRes.data);
+      const u = userRes.data.user;
       setStaffList(prev => [
         {
           id: u.id,
@@ -197,7 +197,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         ...prev
       ]);
     } else {
-      setCreateUserError(res.error || 'Failed to provision user.');
+      setCreateUserError(userRes.error || 'Failed to provision user.');
     }
   };
 
