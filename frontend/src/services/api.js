@@ -201,3 +201,30 @@ export async function updateStaffAttributes(userId, attrs, token) {
   return null;
 }
 
+export async function fetchTrainerSessions(token) {
+  try {
+    const res = await fetch(`${API_BASE}/records/sessions/assigned`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for trainer sessions:", err);
+  }
+  return null;
+}
+
+export async function submitTrainerSignOff(sessionId, payload, token) {
+  const res = await fetch(`${API_BASE}/records/sessions/${sessionId}/sign-off`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Sign-off failed (${res.status})`);
+  }
+  return data;
+}

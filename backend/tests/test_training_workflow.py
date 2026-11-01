@@ -414,3 +414,85 @@ def test_trainee_external_credential_renewal_ssrf_safe(client: TestClient, db_se
     assert data["is_self_reported"] is True
     assert data["credential_url"] == "https://www.credly.com/badges/sample-pmp-credential-id"
     assert data["serial_number"] is not None
+
+
+def test_tc_dat_17_future_date_sign_off_rejected(client: TestClient, db_session: Session, workflow_fixture):
+    """TC-DAT-17 & TC-CRT-11: Future-dated training sessions cannot be signed off before scheduled date."""
+    trainer = workflow_fixture["trainer"]
+    session = workflow_fixture["session"]
+    company = workflow_fixture["company"]
+    trainee = workflow_fixture["trainee"]
+    trainer_headers = _get_headers(trainer, db_session)
+
+    # Create a future-dated session (14 days ahead in Asia/Manila timezone)
+    future_start = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=14)
+    future_end = future_start + timedelta(days=3)
+    future_session = TrainingSession(
+        session_code=f"SESS-FUTURE-{uuid.uuid4().hex[:6]}",
+        course_name="Future-Dated Advanced Cryptography Lab",
+        start_date=future_start,
+        end_date=future_end,
+        delivery_type="Dedicated"
+    )
+    db_session.add(future_session)
+    db_session.commit()
+
+    # Assign trainer
+    assignment = TrainerAssignment(
+        user_id=trainer.id,
+        session_id=future_session.id
+    )
+    db_session.add(assignment)
+
+    # Enrolled record
+    rec = TrainingRecord(
+        trainee_id=trainee.id,
+        session_id=future_session.id,
+        company_at_completion_id=company.id,
+        course_name="Future-Dated Advanced Cryptography Lab",
+        status="In progress",
+        attendance_status="Present",
+        encryption_policy=f"(ROLE:TRAINEE AND DEPT:COMPLIANCE) OR (ROLE:STAFF AND TENANT:{company.code})",
+        payload_ciphertext="dummy_future_payload"
+    )
+    db_session.add(rec)
+    db_session.commit()
+
+    # Trainer attempts sign-off on future session -> 400 Bad Request
+    signoff_payload = {
+        "notes": "Attempting sign-off ahead of training schedule",
+        "completions": [
+            {"record_id": rec.id, "status": "Completed", "score": 95.0}
+        ]
+    }
+    res = client.post(
+        f"/api/v1/records/sessions/{future_session.id}/sign-off",
+        json=signoff_payload,
+        headers=trainer_headers
+    )
+    assert res.status_code == 400
+    assert "future-dated" in res.json()["detail"].lower()
+
+
+def test_trainer_assigned_sessions_endpoint(client: TestClient, db_session: Session, workflow_fixture):
+    """Trainer can query GET /api/v1/records/sessions/assigned to retrieve assigned rosters."""
+    trainer = workflow_fixture["trainer"]
+    am = workflow_fixture["am"]
+    trainer_headers = _get_headers(trainer, db_session)
+    am_headers = _get_headers(am, db_session)
+
+    # Account Manager forbidden -> 403
+    res_am = client.get("/api/v1/records/sessions/assigned", headers=am_headers)
+    assert res_am.status_code == 403
+
+    # Trainer allowed -> 200 with session list
+    res = client.get("/api/v1/records/sessions/assigned", headers=trainer_headers)
+    assert res.status_code == 200
+    sessions = res.json()
+    assert isinstance(sessions, list)
+    assert len(sessions) >= 1
+    for s in sessions:
+        assert "session_code" in s
+        assert "records" in s
+        assert "is_future_dated" in s
+        assert "trainer_signed_off" in s

@@ -529,6 +529,15 @@ def sign_off_training_session(
             detail="Only the assigned Trainer or an Administrator can sign off a training session."
         )
 
+    # TC-DAT-17 & TC-CRT-11: Future-Date & Timezone Protection (Asia/Manila UTC+8)
+    manila_tz = timezone(timedelta(hours=8))
+    now_manila_naive = datetime.now(timezone.utc).astimezone(manila_tz).replace(tzinfo=None)
+    if session.start_date and session.start_date > now_manila_naive:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot sign off on a future-dated training session before its scheduled date."
+        )
+
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
     session.trainer_signed_off = True
     session.trainer_sign_off_at = now_utc
@@ -633,3 +642,86 @@ def sign_off_training_session(
         "certificates_issued": certs_issued,
         "participants_updated": records_updated
     }
+
+
+@router.get("/sessions/assigned")
+def list_assigned_training_sessions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieve training sessions assigned to the current Trainer (or all sessions if Admin).
+    Returns session metadata, roster attendees, completion status, and Manila future-date flag.
+    """
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Trainers and Administrators can view session roster assignments."
+        )
+
+    manila_tz = timezone(timedelta(hours=8))
+    now_manila_naive = datetime.now(timezone.utc).astimezone(manila_tz).replace(tzinfo=None)
+
+    query = db.query(TrainingSession)
+    if current_user.role == "trainer":
+        query = query.join(TrainerAssignment, TrainerAssignment.session_id == TrainingSession.id)\
+                     .filter(TrainerAssignment.user_id == current_user.id)
+
+    sessions = query.order_by(TrainingSession.start_date.desc()).all()
+
+    result = []
+    for s in sessions:
+        is_future = bool(s.start_date and s.start_date > now_manila_naive)
+
+        records = db.query(TrainingRecord).filter(
+            TrainingRecord.session_id == s.id,
+            TrainingRecord.deleted_at == None
+        ).all()
+
+        roster_items = []
+        for r in records:
+            cert = db.query(Certificate).filter(Certificate.record_id == r.id).first()
+            trainee_name = "Unknown Trainee"
+            trainee_email = ""
+            trainee_code = ""
+            if r.trainee:
+                trainee_name = f"{r.trainee.first_name} {r.trainee.last_name}".strip()
+                trainee_email = r.trainee.email
+                trainee_code = r.trainee.trainee_code
+
+            company_name = r.company_at_completion.name if r.company_at_completion else "Unknown"
+            company_code = r.company_at_completion.code if r.company_at_completion else "CRO"
+
+            roster_items.append({
+                "record_id": r.id,
+                "trainee_id": r.trainee_id,
+                "trainee_code": trainee_code,
+                "trainee_name": trainee_name,
+                "trainee_email": trainee_email,
+                "company_name": company_name,
+                "company_code": company_code,
+                "status": r.status,
+                "attendance_status": r.attendance_status,
+                "score": r.score,
+                "completion_date": r.completion_date.isoformat() if r.completion_date else None,
+                "certificate_serial": cert.serial_number if cert else None
+            })
+
+        result.append({
+            "id": s.id,
+            "session_code": s.session_code,
+            "course_id": s.course_id,
+            "course_name": s.course_name,
+            "start_date": s.start_date.isoformat() if s.start_date else None,
+            "end_date": s.end_date.isoformat() if s.end_date else None,
+            "delivery_type": s.delivery_type,
+            "trainer_signed_off": bool(s.trainer_signed_off),
+            "trainer_sign_off_at": s.trainer_sign_off_at.isoformat() if s.trainer_sign_off_at else None,
+            "trainer_sign_off_user_id": s.trainer_sign_off_user_id,
+            "trainer_sign_off_notes": s.trainer_sign_off_notes,
+            "is_future_dated": is_future,
+            "attendees_count": len(roster_items),
+            "completed_count": sum(1 for item in roster_items if item["status"] == "Completed"),
+            "records": roster_items
+        })
+
+    return result
