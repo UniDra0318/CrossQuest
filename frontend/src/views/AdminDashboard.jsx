@@ -37,6 +37,7 @@ import { exportAuditLogs } from '../api/admin';
 import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes } from '../services/api';
 import SpinCube from '../components/SpinCube';
 import BitMascot from '../components/BitMascot/BitMascot';
+import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk';
 import '../styles/admin.css';
 export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token, currentUser } = useAuth();
@@ -638,102 +639,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         </div>
       )}
       {/* =====================================================================
-          VIEW 3: ANOMALY MONITOR & RADAR SCANNER
+          VIEW 3: ANOMALY MONITOR & PEER-REVIEW RESOLUTION DESK (FR-21, OI-30)
           ===================================================================== */}
       {activeSubView === 'anomalies' && (
-        <div className="adm-panel" style={{ marginTop: '32px' }}>
-          <div className="adm-panel__head">
-            <div>
-              <h2>Access Anomaly & Threat Detection Monitor</h2>
-              <span className="adm-mono">Real-time threat monitoring and cryptographic boundary enforcement</span>
-            </div>
-            <div className="adm-tabs">
-              <button 
-                type="button"
-                className={anomalyFilter === 'ALL' ? 'on' : ''} 
-                onClick={() => setAnomalyFilter('ALL')}
-              >
-                All Events ({anomalies.length})
-              </button>
-              <button 
-                type="button"
-                className={anomalyFilter === 'UNREVIEWED' ? 'on' : ''} 
-                onClick={() => setAnomalyFilter('UNREVIEWED')}
-              >
-                Unreviewed ({unreviewedCount})
-              </button>
-              <button 
-                type="button"
-                className={anomalyFilter === 'RESOLVED' ? 'on' : ''} 
-                onClick={() => setAnomalyFilter('RESOLVED')}
-              >
-                Resolved ({anomalies.length - unreviewedCount})
-              </button>
-            </div>
-          </div>
-          {/* Live Radar Scanner Banner */}
-          <div className="adm-pad" style={{ background: '#170b2e', padding: '32px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-            <div className="adm-radar-wrap">
-              <div className="adm-radar">
-                <i className="adm-radar__rings" />
-                <i className="adm-radar__x" />
-                <i className="adm-radar__y" />
-                <i className="adm-radar__sweep" />
-                {/* Radar Blips */}
-                <span className="adm-blip" style={{ left: '42%', top: '35%' }} title="Out of Scope Attempt" />
-                <span className="adm-blip" style={{ left: '72%', top: '65%' }} title="Off Hours Decryption" />
-                <span className="adm-blip adm-blip--ok" style={{ left: '25%', top: '78%' }} title="Resolved" />
-              </div>
-            </div>
-            <div style={{ textAlign: 'center', marginTop: '14px' }}>
-              <span className="adm-pill adm-pill--green">
-                <span className="adm-live" /> REAL-TIME RADAR TELEMETRY ACTIVE
-              </span>
-            </div>
-          </div>
-          {/* Timeline Feed */}
-          <div className="adm-timeline">
-            {filteredAnomalies.map((item) => {
-              const isResolved = item.status === 'RESOLVED';
-              return (
-                <div key={item.id} className="adm-timeline__item">
-                  <span className={`adm-timeline__dot ${isResolved ? 'adm-timeline__dot--ok' : item.type === 'OUT_OF_SCOPE' ? '' : 'adm-timeline__dot--amber'}`} />
-                  <div className={`adm-alert ${isResolved ? 'adm-alert--done' : item.type === 'OUT_OF_SCOPE' ? 'adm-alert--red' : 'adm-alert--amber'}`}>
-                    <div className="adm-alert__icon">
-                      <AlertTriangle size={20} />
-                    </div>
-                    <div className="adm-alert__body">
-                      <div className="adm-alert__head">
-                        <strong>{item.name}</strong>
-                        <span className="adm-mono">({item.email})</span>
-                        <span className={`adm-chip ${isResolved ? 'adm-chip--green' : item.type === 'OUT_OF_SCOPE' ? 'adm-chip--red' : 'adm-chip--amber'}`}>
-                          {item.type.replace(/_/g, ' ')}
-                        </span>
-                      </div>
-                      <p>{item.message}</p>
-                      <div className="adm-alert__meta">
-                        <span className="adm-mono"><Clock size={12} /> {item.at}</span>
-                        {isResolved && (
-                          <span className="adm-ack">
-                            <CheckCircle2 size={13} /> Resolved & Acknowledged
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {!isResolved && (
-                      <button 
-                        type="button" 
-                        className="adm-btn adm-btn-solid adm-chip--solid"
-                        onClick={() => handleResolveAnomaly(item.id)}
-                      >
-                        <CheckCircle2 size={13} /> Resolve & Acknowledge
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <div style={{ marginTop: '24px' }}>
+          <AdminPeerReviewAnomalyDesk />
         </div>
       )}
       {/* =====================================================================

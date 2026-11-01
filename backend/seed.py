@@ -983,6 +983,30 @@ def seed_database():
                 event_count=32,
                 tags=["BULK_DOWNLOAD"],
                 metadata_info={"window_minutes": 3, "records_fetched": 32}
+            ),
+            AnomalyAlert(
+                subject_user_id=u_admin1.id,
+                rule_code="R3_REPORT_BURSTS",
+                severity_base="MEDIUM",
+                severity_final="MEDIUM",
+                status="NEW",
+                description="Administrator Dr. Sarah Jenkins initiated 6 consecutive client report requests within 45 minutes (threshold: 5).",
+                event_count=6,
+                tags=["BURST_REQUEST", "PEER_REVIEW_REQUIRED"],
+                metadata_info={"window_minutes": 45, "report_burst_count": 6}
+            ),
+            AnomalyAlert(
+                subject_user_id=u_trainer2.id,
+                rule_code="R4_RECORD_EDIT",
+                severity_base="LOW",
+                severity_final="MEDIUM",
+                after_hours_tag=True,
+                status="AWAITING_UNINVOLVED_ADMIN",
+                description="Trainer David Lim modified score attributes after hours. Initial review recused due to trainer affiliation.",
+                event_count=1,
+                tags=["after_hours", "RECUSAL_FILED"],
+                metadata_info={"involved_admin_ids": [u_admin1.id]},
+                review_note="Recused due to co-instructorship with subject trainer. Requires independent peer administrator sign-off."
             )
         ]
         db.add_all(alerts)

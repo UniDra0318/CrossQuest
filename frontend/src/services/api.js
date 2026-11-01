@@ -434,3 +434,87 @@ export async function downloadClientReportPdf(companyCode, { startDate, endDate,
   window.URL.revokeObjectURL(blobUrl);
   return true;
 }
+
+export async function reviewAnomalyAlert(alertId, reviewData, token) {
+  const res = await fetch(`${API_BASE}/anomalies/alerts/${alertId}/review`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(reviewData)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Review failed (${res.status})`);
+  }
+  return data;
+}
+
+export async function fetchAccessLogs(limit = 100, token) {
+  try {
+    const res = await fetch(`${API_BASE}/anomalies/logs?limit=${limit}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for access logs:", err);
+  }
+  return null;
+}
+
+export async function fetchAnomalyRules(token) {
+  try {
+    const res = await fetch(`${API_BASE}/anomalies/rules`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for anomaly rules:", err);
+  }
+  return null;
+}
+
+export async function updateAnomalyRule(ruleCode, ruleData, token) {
+  const res = await fetch(`${API_BASE}/anomalies/rules/${encodeURIComponent(ruleCode)}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(ruleData)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Failed to update rule (${res.status})`);
+  }
+  return data;
+}
+
+export async function runRetentionJob(token) {
+  const res = await fetch(`${API_BASE}/anomalies/retention/run`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify({ retention_days: 365, warning_days: 30 })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Retention job failed (${res.status})`);
+  }
+  return data;
+}
+
+export async function fetchRetentionWarnings(token) {
+  try {
+    const res = await fetch(`${API_BASE}/anomalies/retention/warnings`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for retention warnings:", err);
+  }
+  return null;
+}
