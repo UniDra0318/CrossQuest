@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy import func
@@ -7,11 +7,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.entities import (
     TrainingRecord, TrainingRecordVersion, Trainee, ClientCompany, User, AccessLog,
-    AccountManagerAssignment, TrainerAssignment, TrainingSession
+    AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate
 )
 from app.schemas.schemas import (
-    TrainingRecordCreate, TrainingRecordUpdate, TrainingRecordResponse, DecryptedRecordResponse
+    TrainingRecordCreate, TrainingRecordUpdate, TrainingRecordResponse, DecryptedRecordResponse,
+    TrainerSignOffRequest, TrainerSignOffResponse
 )
+from app.api.endpoints.certifications import generate_cert_serial
 from app.api.deps import get_current_user
 from app.crypto.cpabe_engine import cpabe_engine
 from app.anomaly.detector import anomaly_detector
@@ -322,19 +324,49 @@ def edit_training_record(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Edits a training record.
-    
-    Permissions (Table 17, FR-07):
-    - Admin: allowed.
-    - Finance: allowed.
-    - Account Manager, Trainer, Trainee: DENIED.
+    """Edits a training record with strict role boundaries (Phase 2, Section 3.5.3, Table 16/17):
+    - Account Manager: records attendance and pre-completion statuses (Enrolled, In progress, Not completed) for assigned clients.
+      Cannot mark as Completed without Trainer sign-off.
+    - Admin & Finance: may edit records but MANDATES an explanation reason and generates a version history row.
+    - Trainer & Trainee: DENIED.
     """
-    if current_user.role not in ("admin", "finance"):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only Administrators and Finance personnel may edit training records")
+    if current_user.role not in ("admin", "finance", "account_manager"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Administrators, Finance, and assigned Account Managers may modify training records."
+        )
 
     record = db.query(TrainingRecord).filter(TrainingRecord.id == record_id).first()
     if not record or record.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Training record not found")
+
+    company = db.query(ClientCompany).filter(ClientCompany.id == record.company_at_completion_id).first()
+    company_code = company.code if company else ""
+
+    # Account Manager Scoping and Restrictions
+    if current_user.role == "account_manager":
+        assigned_codes = current_user.assigned_client_accounts or []
+        if company_code not in assigned_codes:
+            anomaly_detector.record_out_of_scope_attempt(current_user, f"EDIT_RECORD:{record_id}", company_code, db)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot modify training records for unassigned client companies."
+            )
+        
+        # A record cannot become Completed without Trainer sign-off!
+        if update_in.status == "Completed":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A training record cannot become Completed without official Trainer session sign-off."
+            )
+
+    # Admin & Finance Mandatory Reason Check
+    if current_user.role in ("admin", "finance"):
+        if not update_in.reason or not update_in.reason.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A mandatory explanation reason must be provided for Admin or Finance record modifications."
+            )
 
     # Save previous version to version history before modifying (DD-06, Section 3.5.2, p. 33)
     version_count = db.query(func.count(TrainingRecordVersion.id)).filter(TrainingRecordVersion.record_id == record.id).scalar() or 0
@@ -344,17 +376,37 @@ def edit_training_record(
         abe_ciphertext=record.abe_ciphertext,
         payload_ciphertext=record.payload_ciphertext,
         policy_tokens=record.encryption_policy,
-        edited_by_user_id=current_user.id
+        edited_by_user_id=current_user.id,
+        reason=update_in.reason.strip() if update_in.reason else None
     )
     db.add(prev_version)
 
     changed_fields = []
     if update_in.status is not None:
+        # Validate status in the 4 allowed statuses
+        if update_in.status not in ("Enrolled", "In progress", "Not completed", "Completed"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid completion status. Must be Enrolled, In progress, Not completed, or Completed."
+            )
+        if update_in.status == "Completed" and record.session_id:
+            session = db.query(TrainingSession).filter(TrainingSession.id == record.session_id).first()
+            if session and not session.trainer_signed_off and current_user.role != "admin":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Training record cannot be marked Completed because the training session has not been signed off by the Trainer."
+                )
         record.status = update_in.status
         changed_fields.append("status")
+
+    if update_in.attendance_status is not None:
+        record.attendance_status = update_in.attendance_status
+        changed_fields.append("attendance_status")
+
     if update_in.score is not None:
         record.score = update_in.score
         changed_fields.append("score")
+
     if update_in.completion_date is not None:
         record.completion_date = update_in.completion_date
         changed_fields.append("completion_date")
@@ -372,7 +424,10 @@ def edit_training_record(
         company_id=record.company_at_completion_id,
         outcome="SUCCESS",
         source_ip=_get_client_ip(request),
-        details={"fields_changed": changed_fields}
+        details={
+            "fields_changed": changed_fields,
+            "reason": update_in.reason if update_in.reason else "Account Manager attendance / status update"
+        }
     )
     db.add(log)
     db.commit()
@@ -430,3 +485,128 @@ def delete_training_record(
     anomaly_detector.record_deletion_event(current_user, record.id, company_code, db)
 
     return {"message": f"Record {record_id} successfully deleted (soft-delete).", "status": "DELETED"}
+
+
+
+@router.post("/sessions/{session_id}/sign-off", response_model=TrainerSignOffResponse)
+def sign_off_training_session(
+    session_id: str,
+    signoff_in: TrainerSignOffRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trainer signs off once per session and confirms each participant's completion (Phase 2, Section 3.5.3).
+    
+    Permissions:
+    - Assigned Trainer for the session.
+    - Administrator.
+    - All other roles: DENIED.
+    
+    Upon sign-off:
+    - Session is marked signed off.
+    - Confirmed participants are marked 'Completed' and official Certificates are issued.
+    - Non-passing participants are marked 'Not completed'.
+    """
+    session = db.query(TrainingSession).filter(TrainingSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Training session not found")
+
+    # Verify trainer assignment
+    if current_user.role == "trainer":
+        assignment = db.query(TrainerAssignment).filter(
+            TrainerAssignment.session_id == session.id,
+            TrainerAssignment.user_id == current_user.id
+        ).first()
+        if not assignment:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not the designated Trainer for this training session."
+            )
+    elif current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the assigned Trainer or an Administrator can sign off a training session."
+        )
+
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+    session.trainer_signed_off = True
+    session.trainer_sign_off_at = now_utc
+    session.trainer_sign_off_user_id = current_user.id
+    session.trainer_sign_off_notes = signoff_in.notes
+
+    certs_issued = 0
+    records_updated = 0
+
+    for comp in signoff_in.completions:
+        rec = db.query(TrainingRecord).filter(
+            TrainingRecord.id == comp.record_id,
+            TrainingRecord.session_id == session.id
+        ).first()
+        if not rec:
+            continue
+
+        if comp.status not in ("Completed", "Not completed"):
+            continue
+
+        rec.status = comp.status
+        if comp.score is not None:
+            rec.score = comp.score
+        records_updated += 1
+
+        if comp.status == "Completed":
+            rec.completion_date = now_utc
+
+            # Trigger Certificate Issuance for completed participant
+            existing_cert = db.query(Certificate).filter(
+                Certificate.record_id == rec.id
+            ).first()
+            if not existing_cert:
+                company = db.query(ClientCompany).filter(ClientCompany.id == rec.company_at_completion_id).first()
+                company_code = company.code if company else "CRO"
+                serial = generate_cert_serial(db, company_code, now_utc)
+
+                cert = Certificate(
+                    record_id=rec.id,
+                    trainee_id=rec.trainee_id,
+                    title=f"Certificate of Completion - {session.course_name}",
+                    serial_number=serial,
+                    issue_date=now_utc,
+                    expiry_date=now_utc + timedelta(days=36 * 30),
+                    expiry_basis="Calculated: issue_date + 36 months validity",
+                    status="Valid"
+                )
+                db.add(cert)
+                certs_issued += 1
+
+    db.commit()
+    db.refresh(session)
+
+    # Audit log
+    log = AccessLog(
+        actor_user_id=current_user.id,
+        actor_role=current_user.role,
+        event_type="TRAINER_SIGN_OFF",
+        resource_type="SESSION",
+        resource_id=session.id,
+        outcome="SUCCESS",
+        source_ip=_get_client_ip(request),
+        details={
+            "session_code": session.session_code,
+            "course_name": session.course_name,
+            "participants_updated": records_updated,
+            "certificates_issued": certs_issued,
+            "notes": signoff_in.notes
+        }
+    )
+    db.add(log)
+    db.commit()
+
+    return {
+        "session_id": session.id,
+        "session_code": session.session_code,
+        "trainer_signed_off": session.trainer_signed_off,
+        "trainer_sign_off_at": session.trainer_sign_off_at,
+        "certificates_issued": certs_issued,
+        "participants_updated": records_updated
+    }

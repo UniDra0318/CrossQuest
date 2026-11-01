@@ -81,7 +81,19 @@ def setup_test_database():
             "ALTER TABLE users ADD COLUMN mfa_recovery_codes JSON",
             "ALTER TABLE user_sessions ADD COLUMN last_active_at DATETIME",
             "ALTER TABLE user_sessions ADD COLUMN idle_timeout_sec INTEGER DEFAULT 900",
-            "ALTER TABLE user_sessions ADD COLUMN max_expires_at DATETIME"
+            "ALTER TABLE user_sessions ADD COLUMN max_expires_at DATETIME",
+            "ALTER TABLE training_sessions ADD COLUMN trainer_signed_off BOOLEAN DEFAULT 0",
+            "ALTER TABLE training_sessions ADD COLUMN trainer_sign_off_at DATETIME",
+            "ALTER TABLE training_sessions ADD COLUMN trainer_sign_off_user_id VARCHAR(36)",
+            "ALTER TABLE training_sessions ADD COLUMN trainer_sign_off_notes TEXT",
+            "ALTER TABLE training_records ADD COLUMN attendance_status VARCHAR(50) DEFAULT 'Present'",
+            "ALTER TABLE training_record_versions ADD COLUMN reason TEXT",
+            "ALTER TABLE certificates ADD COLUMN serial_number VARCHAR(50)",
+            "ALTER TABLE certificates ADD COLUMN reissue_count INTEGER DEFAULT 0",
+            "ALTER TABLE certificates ADD COLUMN reissue_reason TEXT",
+            "ALTER TABLE certificates ADD COLUMN reissued_by_user_id VARCHAR(36)",
+            "ALTER TABLE certificates ADD COLUMN is_self_reported BOOLEAN DEFAULT 0",
+            "ALTER TABLE certificates ADD COLUMN credential_url VARCHAR(500)"
         ]:
             try:
                 conn.execute(text(stmt))

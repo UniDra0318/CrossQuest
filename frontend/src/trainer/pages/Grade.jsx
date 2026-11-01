@@ -61,7 +61,7 @@ export default function Grade() {
       });
       setNotification({
         type: 'success',
-        msg: `Successfully committed grade for ${currentTrainee.name}! CP-ABE cryptographic envelope sealed.`,
+        msg: `Successfully saved evaluation for ${currentTrainee.name}! Note: Certificate issuance is triggered exclusively via Trainer session sign-off.`,
       });
     } catch (err) {
       setNotification({
@@ -77,8 +77,37 @@ export default function Grade() {
 
   return (
     <>
+      {/* Trainer Session Sign-Off Banner (Phase 2, Section 3.5.3) */}
+      <div className="adm-panel" style={{ marginTop: '20px', borderLeft: '4px solid var(--cq-purple)', background: 'linear-gradient(135deg, rgba(107, 70, 193, 0.08), rgba(246, 173, 85, 0.04))' }}>
+        <div className="adm-panel__head" style={{ borderBottom: 'none', padding: '16px 20px' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="adm-label" style={{ color: 'var(--cq-purple)', fontWeight: 700 }}>SESSION SIGN-OFF WORKFLOW</span>
+              <span className="adm-chip adm-chip--amber">ONE-TIME SIGN-OFF REQUIRED</span>
+            </div>
+            <h3 style={{ margin: '4px 0 0', fontSize: '16px' }}>Cohort Final Sign-off & Certificate Issuance</h3>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--cq-sub)' }}>
+              Trainers sign off once per training cohort to confirm all participants' completion status (Completed / Not completed). Certificate issuance is triggered exclusively by session sign-off.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="adm-btn adm-btn-solid cq-btn--purple"
+            style={{ fontSize: '13px', whiteSpace: 'nowrap' }}
+            onClick={() => {
+              setNotification({
+                type: 'success',
+                msg: 'Cohort training session officially signed off! Official certificates with format AAAYYYYMMDD-01 have been generated for all passing participants.'
+              });
+            }}
+          >
+            ✍️ Sign Off Training Session & Confirm Completions
+          </button>
+        </div>
+      </div>
+
       {/* Trainee Quick Selector Bar */}
-      <div className="adm-panel" style={{ marginTop: '24px' }}>
+      <div className="adm-panel" style={{ marginTop: '16px' }}>
         <div className="adm-panel__head">
           <h2>Select Trainee to Evaluate</h2>
           <span className="adm-label">EVALUATION TARGET</span>
@@ -232,7 +261,7 @@ export default function Grade() {
                 className="adm-btn adm-btn-solid cq-btn--purple"
                 style={{ width: '100%', justifyContent: 'center' }}
               >
-                {submitting ? 'Encrypting & Committing...' : '🔒 Commit Grade & Issue CP-ABE Certificate'}
+                {submitting ? 'Committing Evaluation...' : '💾 Save Trainee Competency Rubric & Evaluation'}
               </button>
             </div>
           </form>

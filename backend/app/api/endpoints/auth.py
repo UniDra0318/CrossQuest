@@ -212,10 +212,11 @@ def setup_mfa(
     )
     qr.add_data(otpauth_uri)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    from qrcode.image.pil import PilImage
+    img = qr.make_image(image_factory=PilImage, fill_color="black", back_color="white")
 
     buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
+    img.save(buffer, "PNG")
     qr_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     qr_data_uri = f"data:image/png;base64,{qr_base64}"
 

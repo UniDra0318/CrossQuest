@@ -132,6 +132,12 @@ class TrainingSession(Base):
     delivery_type = Column(String(50), default="Public") # Public, Dedicated
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    # Trainer Sign-off Workflow (Phase 2, Section 3.5.3)
+    trainer_signed_off = Column(Boolean, default=False)
+    trainer_sign_off_at = Column(DateTime, nullable=True)
+    trainer_sign_off_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    trainer_sign_off_notes = Column(Text, nullable=True)
+
     course = relationship("Course", back_populates="sessions")
     training_records = relationship("TrainingRecord", back_populates="session")
     trainer_assignments = relationship("TrainerAssignment", back_populates="session")
@@ -187,6 +193,7 @@ class TrainingRecord(Base):
     
     # Completion statuses: Enrolled, In progress, Completed, Not completed (Section 3.5.3)
     status = Column(String(50), default="In progress")
+    attendance_status = Column(String(50), default="Present") # Present, Absent, Excused
     completion_date = Column(DateTime, nullable=True)
     score = Column(Float, nullable=True) # Kept in plaintext for progress count; official sensitive details encrypted
 
@@ -225,6 +232,7 @@ class TrainingRecordVersion(Base):
     policy_tokens = Column(String(500), nullable=True)
     edited_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     edited_at = Column(DateTime, default=datetime.utcnow)
+    reason = Column(Text, nullable=True) # Mandatory reason logged for Admin and Finance edits
 
     record = relationship("TrainingRecord", back_populates="versions")
     edited_by_user = relationship("User", foreign_keys=[edited_by_user_id])
@@ -252,6 +260,7 @@ class Certificate(Base):
     trainee_id = Column(String(36), ForeignKey("trainees.id"), nullable=False)
     cert_type_code = Column(String(50), ForeignKey("certification_types.code"), nullable=True)
     title = Column(String(200), nullable=False)
+    serial_number = Column(String(50), unique=True, index=True, nullable=True) # AAAYYYYMMDD-01 format
     issue_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     expiry_date = Column(DateTime, nullable=False)
     expiry_basis = Column(String(255), default="Calculated: issue_date + 36 months")
@@ -259,6 +268,15 @@ class Certificate(Base):
     # Status is dynamically calculated on read: Valid, Expiring soon (<=90 days), Expired
     status = Column(String(50), default="Valid") 
     is_nearing_renewal = Column(Boolean, default=False) # <=90 days
+
+    # Reissue Tracking (Admin reissue with mandatory logged reason)
+    reissue_count = Column(Integer, default=0)
+    reissue_reason = Column(Text, nullable=True)
+    reissued_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+
+    # Trainee External Credential Renewal (Self-reported, HTTPS-only, zero server-side fetch)
+    is_self_reported = Column(Boolean, default=False)
+    credential_url = Column(String(500), nullable=True)
 
     trainee = relationship("Trainee", back_populates="certificates")
     record = relationship("TrainingRecord", back_populates="certificates")

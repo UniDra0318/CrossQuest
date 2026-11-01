@@ -137,10 +137,12 @@ class TrainingRecordCreate(BaseModel):
     extension_fields: Optional[Dict[str, Any]] = None
 
 class TrainingRecordUpdate(BaseModel):
-    status: Optional[str] = None
+    status: Optional[str] = None # Enrolled, In progress, Completed, Not completed
+    attendance_status: Optional[str] = None # Present, Absent, Excused
     score: Optional[float] = None
     completion_date: Optional[datetime] = None
     assessment_notes: Optional[str] = None
+    reason: Optional[str] = None # Required for Admin and Finance edits
 
 class TrainingRecordResponse(BaseModel):
     id: str
@@ -185,11 +187,15 @@ class CertificateResponse(BaseModel):
     record_id: Optional[str] = None
     cert_type_code: Optional[str] = None
     title: str
+    serial_number: Optional[str] = None
     issue_date: datetime
     expiry_date: datetime
     expiry_basis: str
     status: str # Valid, Expiring soon, Expired
     is_nearing_renewal: bool
+    reissue_count: int = 0
+    is_self_reported: bool = False
+    credential_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -289,3 +295,36 @@ class AnomalyRuleUpdate(BaseModel):
     client_reviewed: Optional[bool] = None
     description: Optional[str] = None
 
+
+
+class CertificateReissueRequest(BaseModel):
+    reason: str
+
+
+class ExternalRenewalRequest(BaseModel):
+    cert_type_code: str
+    title: str
+    credential_url: str
+    issue_date: Optional[datetime] = None
+    expiry_date: Optional[datetime] = None
+
+
+class ParticipantCompletionItem(BaseModel):
+    record_id: str
+    status: str # 'Completed' or 'Not completed'
+    score: Optional[float] = None
+    remarks: Optional[str] = None
+
+
+class TrainerSignOffRequest(BaseModel):
+    notes: Optional[str] = None
+    completions: List[ParticipantCompletionItem] = []
+
+
+class TrainerSignOffResponse(BaseModel):
+    session_id: str
+    session_code: str
+    trainer_signed_off: bool
+    trainer_sign_off_at: datetime
+    certificates_issued: int
+    participants_updated: int
