@@ -9,7 +9,8 @@ import {
   AlertCircle, 
   Shield, 
   Play, 
-  Clock,
+  Clock, 
+  GraduationCap, 
   AlertTriangle,
   FileQuestion,
   ChevronRight
@@ -72,7 +73,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       setGamLoading(false);
     }
     loadGamification();
-  }, [currentUser?.id]);
+  }, [currentUser?.id, onStreakLoad]);
 
   const handleToggleOptOut = async () => {
     const nextVal = !leaderboardOptOut;
@@ -192,18 +193,17 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     setActiveQuiz(null);
   };
 
-  // Gamification shimmer placeholder
-  const GamStat = ({ value, label, icon: Icon }) => (
-    gamLoading ? (
-      <div className="gam-stat-shimmer" aria-busy="true" />
-    ) : (
-      <div className="gam-stat-item">
-        {Icon && <Icon size={14} />}
-        <span className="gam-stat-val">{value ?? '–'}</span>
-        <span className="gam-stat-lbl">{label}</span>
-      </div>
-    )
-  );
+  // Trainee in-page tab options
+  const currentTab = ['trainee_quiz', 'trainee_badges', 'trainee_certs'].includes(activeSubView) 
+    ? activeSubView 
+    : 'trainee_quest';
+
+  const traineeTabs = [
+    { id: 'trainee_quest', label: 'Quest & Progress', icon: Flame },
+    { id: 'trainee_quiz', label: 'Knowledge Quizzes', icon: GraduationCap },
+    { id: 'trainee_badges', label: 'Earned Badges', icon: Award },
+    { id: 'trainee_certs', label: 'My Certifications', icon: BookOpen }
+  ];
 
   // =========================================================================
   // FULLSCREEN DISTRACTION-FREE QUIZ ARENA TAKEOVER
@@ -232,8 +232,49 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         </div>
       )}
 
+      {/* IN-PAGE TRAINEE WORKSPACE TAB STRIP */}
+      <nav className="trainee-nav-tabs" aria-label="Trainee Sections" style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '8px',
+        marginBottom: '20px',
+        borderBottom: '1px solid #e2e8f0',
+        paddingBottom: '10px'
+      }}>
+        {traineeTabs.map(tab => {
+          const Icon = tab.icon;
+          const isActive = currentTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveView && setActiveView(tab.id)}
+              className={`trainee-tab-pill ${isActive ? 'active' : ''}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 16px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: isActive ? '700' : '600',
+                color: isActive ? '#4338ca' : '#64748b',
+                background: isActive ? '#eef2ff' : '#ffffff',
+                border: isActive ? '1px solid #c7d2fe' : '1px solid #e2e8f0',
+                cursor: 'pointer',
+                boxShadow: isActive ? '0 1px 3px rgba(67, 56, 202, 0.1)' : 'none',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Icon size={15} color={isActive ? '#4f46e5' : '#94a3b8'} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
       {/* 1. MAIN TRAINEE QUEST VIEW */}
-      {(activeSubView === 'trainee_quest' || !activeSubView || !['trainee_quiz', 'trainee_badges', 'trainee_certs'].includes(activeSubView)) && (
+      {(currentTab === 'trainee_quest') && (
         <>
           {/* 1. HERO BANNER WITH 3D MASCOT */}
           <div className="template-hero-banner">
@@ -272,16 +313,32 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             </div>
 
             <div className="template-hero-right">
-              {/* Floating streak pill — live from backend */}
-              <div className="template-hero-streak-badge">
-                <div className="streak-flame-circle">
-                  <Flame size={16} className="text-orange" fill="#ff6a00" />
+              {/* Badges container on right */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                {/* Floating streak pill — live from backend */}
+                <div className="template-hero-streak-badge">
+                  <div className="streak-flame-circle">
+                    <Flame size={16} className="text-orange" fill="#ff6a00" />
+                  </div>
+                  <div className="streak-text-group">
+                    <span className="streak-val">
+                      {gamLoading ? '…' : `${streakDays ?? 0} Days`}
+                    </span>
+                    <span className="streak-lbl">ACTIVE STREAK</span>
+                  </div>
                 </div>
-                <div className="streak-text-group">
-                  <span className="streak-val">
-                    {gamLoading ? '…' : `${streakDays ?? 0} Days`}
-                  </span>
-                  <span className="streak-lbl">ACTIVE STREAK</span>
+
+                {/* Level & Points Pill */}
+                <div className="template-hero-streak-badge">
+                  <div className="streak-flame-circle" style={{ background: '#ecfdf5' }}>
+                    <Award size={16} color="#059669" />
+                  </div>
+                  <div className="streak-text-group">
+                    <span className="streak-val">
+                      {gamLoading ? '…' : `Level ${level ?? 1}`}
+                    </span>
+                    <span className="streak-lbl">{gamLoading ? '…' : `${(points ?? 0).toLocaleString()} XP`}</span>
+                  </div>
                 </div>
               </div>
 
@@ -480,7 +537,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       )}
 
       {/* 2. DEDICATED KNOWLEDGE QUIZZES CATALOG VIEW (When clicking Quizzes tab) */}
-      {activeSubView === 'trainee_quiz' && (
+      {currentTab === 'trainee_quiz' && (
         <div className="quizzes-catalog-view">
           <div className="catalog-header-banner">
             <div>
@@ -561,7 +618,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       )}
 
       {/* 3. EARNED BADGES SUB-VIEW */}
-      {activeSubView === 'trainee_badges' && (
+      {currentTab === 'trainee_badges' && (
         <div className="card section-card p-24" style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
           <div className="card-header-bar mb-16" style={{ padding: '0 0 16px', borderBottom: '1px solid #f1f5f9' }}>
             <div>
@@ -609,7 +666,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       )}
 
       {/* 4. CERTIFICATIONS SUB-VIEW */}
-      {activeSubView === 'trainee_certs' && (
+      {currentTab === 'trainee_certs' && (
         <div className="card section-card">
           <div className="card-header-bar">
             <div>
