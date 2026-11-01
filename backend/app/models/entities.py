@@ -541,6 +541,12 @@ class ImportBatch(Base):
     file_hash = Column(String(64), nullable=False)
     source_file_name = Column(String(255), nullable=False)
     record_count = Column(Integer, default=0)
+    storage_path = Column(String(500), nullable=True) # Restricted storage location
+    in_scope_count = Column(Integer, default=0) # >= August 1, 2026 cutoff
+    pre_cutoff_count = Column(Integer, default=0) # < August 1, 2026 excluded
+    quarantined_count = Column(Integer, default=0) # Duplicate rows quarantined
+    distinct_customers_count = Column(Integer, default=0) # Distinct client organizations
+    reconciled = Column(Boolean, default=False)
     loaded_at = Column(DateTime, default=datetime.utcnow)
     loaded_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
 
@@ -553,7 +559,7 @@ class ImportStagingRow(Base):
     batch_id = Column(String(36), ForeignKey("import_batches.id"), nullable=False)
     source_row_no = Column(Integer, nullable=False)
     raw_data = Column(JSON, default=dict)
-    validation_status = Column(String(50), default="PENDING")
+    validation_status = Column(String(50), default="PENDING") # VALID, PRE_CUTOFF_EXCLUDED, QUARANTINED, RESOLVED, COMMITTED
 
 
 class ImportDiscrepancy(Base):
@@ -565,7 +571,10 @@ class ImportDiscrepancy(Base):
     source_row_no = Column(Integer, nullable=False)
     issue_type = Column(String(100), nullable=False)
     field_name = Column(String(100), nullable=True)
-    resolution = Column(String(255), nullable=True)
+    resolution = Column(String(255), nullable=True) # ACCEPT, CORRECT, OVERRIDE_FLAG, MERGE_DUPLICATE
+    resolution_reason = Column(Text, nullable=True) # Mandatory reason on Admin resolution
+    resolved_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    resolved_at = Column(DateTime, nullable=True)
 
 
 class UserSession(Base):

@@ -328,3 +328,34 @@ class TrainerSignOffResponse(BaseModel):
     trainer_sign_off_at: datetime
     certificates_issued: int
     participants_updated: int
+
+
+class DiscrepancyResolveRequest(BaseModel):
+    resolution: str # ACCEPT, CORRECT, OVERRIDE_FLAG, MERGE_DUPLICATE
+    reason: str # Mandatory explanation reason logged for Admin resolution
+    corrected_data: Optional[Dict[str, Any]] = None
+
+
+class CustomerBreakdownItem(BaseModel):
+    customer_name: str
+    row_count: int
+    is_pseudonymized_individual: bool
+
+
+class ReconciliationReportResponse(BaseModel):
+    batch_id: str
+    file_hash: str
+    source_file_name: str
+    loaded_at: datetime
+    loaded_by_user_id: Optional[str] = None
+    total_rows: int
+    pre_cutoff_rows: int
+    in_scope_rows: int
+    distinct_customers: int
+    individual_customers_pseudonymized: int
+    quarantined_rows: int
+    resolved_rows: int
+    reconciliation_rate: str
+    reconciled: bool
+    customer_breakdown: List[Dict[str, Any]]
+    discrepancies: List[Dict[str, Any]]

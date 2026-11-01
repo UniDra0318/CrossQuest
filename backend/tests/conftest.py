@@ -93,7 +93,16 @@ def setup_test_database():
             "ALTER TABLE certificates ADD COLUMN reissue_reason TEXT",
             "ALTER TABLE certificates ADD COLUMN reissued_by_user_id VARCHAR(36)",
             "ALTER TABLE certificates ADD COLUMN is_self_reported BOOLEAN DEFAULT 0",
-            "ALTER TABLE certificates ADD COLUMN credential_url VARCHAR(500)"
+            "ALTER TABLE certificates ADD COLUMN credential_url VARCHAR(500)",
+            "ALTER TABLE import_batches ADD COLUMN storage_path VARCHAR(500)",
+            "ALTER TABLE import_batches ADD COLUMN in_scope_count INTEGER DEFAULT 0",
+            "ALTER TABLE import_batches ADD COLUMN pre_cutoff_count INTEGER DEFAULT 0",
+            "ALTER TABLE import_batches ADD COLUMN quarantined_count INTEGER DEFAULT 0",
+            "ALTER TABLE import_batches ADD COLUMN distinct_customers_count INTEGER DEFAULT 0",
+            "ALTER TABLE import_batches ADD COLUMN reconciled BOOLEAN DEFAULT 0",
+            "ALTER TABLE import_discrepancies ADD COLUMN resolution_reason TEXT",
+            "ALTER TABLE import_discrepancies ADD COLUMN resolved_by_user_id VARCHAR(36)",
+            "ALTER TABLE import_discrepancies ADD COLUMN resolved_at DATETIME"
         ]:
             try:
                 conn.execute(text(stmt))

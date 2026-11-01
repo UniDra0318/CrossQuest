@@ -144,6 +144,7 @@ def test_tc_dat_05_discrepancy_resolution(client: TestClient, import_admin_and_s
         f"/api/v1/imports/discrepancies/{disc.id}/resolve",
         json={
             "resolution": "CORRECT",
+            "reason": "Administrative data correction on pilot record.",
             "corrected_data": {"trainee_code": "TRN_RESOLVED_01", "score": "91.0"}
         },
         headers={"Authorization": f"Bearer {token}"}
@@ -241,3 +242,108 @@ def test_tc_dat_12_pilot_synthetic_dataset_integrity(db_session: Session):
     for t in trainees:
         assert t.trainee_code.startswith("TRN_PILOT_")
         assert t.current_company_id is not None
+
+
+def test_phase3_excel_workbook_pilot_ingestion_and_100_percent_reconciliation(client: TestClient, import_admin_and_staff, db_session: Session):
+    """Phase 3 Target: 100% reconciliation of 149 in-scope rows across 39 customers (Figure 12, Chapter III)."""
+    import os
+    admin = import_admin_and_staff["admin"]
+    token = create_access_token(subject=admin.id)
+
+    excel_path = r"d:\Downloads\Training_Participants_dda05079-5c52-4e44-909e-a5adbf4567e0.xlsx"
+    if not os.path.exists(excel_path):
+        pytest.skip(f"Pilot Excel file not found at {excel_path}")
+
+    with open(excel_path, "rb") as f:
+        file_bytes = f.read()
+
+    files = {"file": ("Training_Participants.xlsx", io.BytesIO(file_bytes), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+    resp = client.post("/api/v1/imports/upload-workbook", files=files, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    data = resp.json()
+
+    batch_id = data["batch_id"]
+    assert data["total_rows"] == 150
+    assert data["pre_cutoff_rows"] == 1 # June 6, 2026 Ron Robert Despi
+    assert data["in_scope_rows"] == 149 # Strict August 1, 2026 cutoff
+    assert data["distinct_customers"] == 39 # Red Oak consolidated
+    assert data["quarantined_rows"] == 2 # Angelito & Jocelyn duplicates
+
+    # 1. Fetch reconciliation report before quarantine resolution
+    rec_resp = client.get(f"/api/v1/imports/batches/{batch_id}/reconciliation", headers={"Authorization": f"Bearer {token}"})
+    assert rec_resp.status_code == 200
+    rec_data = rec_resp.json()
+    assert rec_data["in_scope_rows"] == 149
+    assert rec_data["distinct_customers"] == 39
+    assert rec_data["quarantined_rows"] == 2
+    assert rec_data["reconciled"] is False
+
+    # 2. Admin resolves quarantined discrepancies with mandatory logged reason
+    disc_resp = client.get(f"/api/v1/imports/batches/{batch_id}/discrepancies", headers={"Authorization": f"Bearer {token}"})
+    assert disc_resp.status_code == 200
+    discrepancies = disc_resp.json()
+    assert len(discrepancies) == 2
+
+    # Attempt resolution without reason -> 400 Bad Request
+    fail_res = client.put(
+        f"/api/v1/imports/discrepancies/{discrepancies[0]['id']}/resolve",
+        json={"resolution": "ACCEPT", "reason": ""},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert fail_res.status_code == 400
+
+    # Resolve both with logged reason
+    for d in discrepancies:
+        ok_res = client.put(
+            f"/api/v1/imports/discrepancies/{d['id']}/resolve",
+            json={
+                "resolution": "MERGE_DUPLICATE",
+                "reason": "Verified duplicate cohort registration with HR sponsor; merged into single participant profile."
+            },
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert ok_res.status_code == 200
+
+    # 3. Fetch reconciliation report after resolution -> 100% RECONCILIATION ACHIEVED!
+    rec_resp2 = client.get(f"/api/v1/imports/batches/{batch_id}/reconciliation", headers={"Authorization": f"Bearer {token}"})
+    assert rec_resp2.status_code == 200
+    rec_data2 = rec_resp2.json()
+    assert rec_data2["reconciliation_rate"] == "100.0%"
+    assert rec_data2["reconciled"] is True
+    assert rec_data2["resolved_rows"] == 2
+
+    # 4. Download Finance Reconciliation Report PDF (ReportLab, OI-10)
+    pdf_resp = client.get(f"/api/v1/imports/batches/{batch_id}/reconciliation/pdf", headers={"Authorization": f"Bearer {token}"})
+    assert pdf_resp.status_code == 200
+    assert pdf_resp.headers["content-type"] == "application/pdf"
+    assert pdf_resp.content.startswith(b"%PDF")
+
+
+def test_phase3_sample_data_drops_sales_and_billing_fields(client: TestClient, import_admin_and_staff, db_session: Session):
+    """Phase 3: Verify billing and sales columns are strictly dropped from Sample-Data workbooks."""
+    import os
+    admin = import_admin_and_staff["admin"]
+    token = create_access_token(subject=admin.id)
+
+    excel_path = r"d:\Downloads\Sample-Data_84bce693-2ae3-4172-a698-6b791b0977c0.xlsx"
+    if not os.path.exists(excel_path):
+        pytest.skip(f"Sample-Data Excel file not found at {excel_path}")
+
+    with open(excel_path, "rb") as f:
+        file_bytes = f.read()
+
+    files = {"file": ("Sample-Data.xlsx", io.BytesIO(file_bytes), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+    resp = client.post("/api/v1/imports/upload-workbook", files=files, headers={"Authorization": f"Bearer {token}"})
+    assert resp.status_code == 200
+    batch_id = resp.json()["batch_id"]
+
+    # Verify staging rows do NOT contain sales/billing columns
+    staging_rows = db_session.query(ImportStagingRow).filter(ImportStagingRow.batch_id == batch_id).limit(10).all()
+    assert len(staging_rows) > 0
+    for r in staging_rows:
+        raw = r.raw_data or {}
+        assert "sales" not in raw
+        assert "sales_by" not in raw
+        assert "payment_status" not in raw
+        assert "payment_method" not in raw
+        assert "2307" not in raw
