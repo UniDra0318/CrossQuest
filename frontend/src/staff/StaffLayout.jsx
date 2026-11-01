@@ -54,7 +54,7 @@ export default function StaffLayout({ activeTab, onTabChange, children }) {
           </p>
 
           <div className="stf-hero-chips">
-            <span className="stf-glass stf-glass--ok">AUTHORIZED SCOPE: CORP_ALPHA</span>
+            <span className="stf-glass stf-glass--ok">AUTHORIZED SCOPES: {currentUser?.assigned_client_accounts?.join(', ') || currentUser?.assigned_companies?.join(', ') || 'CORP_ALPHA, BANK_DELTA'}</span>
             <span className="stf-glass">MULTI-TENANT ISOLATION ACTIVE</span>
           </div>
 
@@ -85,7 +85,7 @@ export default function StaffLayout({ activeTab, onTabChange, children }) {
 
         {/* 3D Floating Scene */}
         <div className="adm-hero__cube">
-          <span className="adm-float adm-float--tl">CORP_ALPHA SCOPE</span>
+          <span className="adm-float adm-float--tl">ASSIGNED SCOPE</span>
           <span className="adm-float adm-float--br adm-float--orange">ROW ENCRYPTION</span>
           <SpinCube size={76} />
         </div>

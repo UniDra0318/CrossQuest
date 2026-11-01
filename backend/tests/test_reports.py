@@ -159,3 +159,55 @@ def test_tc_rpt_04_trainer_and_trainee_forbidden(client: TestClient, report_test
 
     assert client.get("/api/v1/reports/company/CORP_RPT_ALPHA", headers={"Authorization": f"Bearer {trainer_token}"}).status_code == 403
     assert client.get("/api/v1/reports/company/CORP_RPT_ALPHA", headers={"Authorization": f"Bearer {trainee_token}"}).status_code == 403
+
+
+def test_tc_rpt_05_assigned_companies_list(client: TestClient, report_test_data):
+    """TC-RPT-05: Account Manager retrieves assigned companies list with scoping metadata."""
+    am = report_test_data["am_alpha"]
+    token = create_access_token(subject=am.id)
+
+    resp = client.get(
+        "/api/v1/reports/assigned-companies",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    alpha = next((c for c in data if c["code"] == "CORP_RPT_ALPHA"), None)
+    assert alpha is not None
+    assert alpha["is_assigned"] is True
+    assert alpha["total_records"] >= 1
+
+    beta = next((c for c in data if c["code"] == "CORP_RPT_BETA"), None)
+    if beta:
+        assert beta["is_assigned"] is False
+
+
+def test_tc_rpt_06_pdf_download_official(client: TestClient, report_test_data):
+    """TC-RPT-06: Account Manager downloads signed ReportLab client report PDF."""
+    am = report_test_data["am_alpha"]
+    token = create_access_token(subject=am.id)
+
+    resp = client.get(
+        "/api/v1/reports/company/CORP_RPT_ALPHA/pdf",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "application/pdf"
+    assert 'Training_Report_CORP_RPT_ALPHA.pdf' in resp.headers['content-disposition']
+    assert resp.content.startswith(b"%PDF")
+
+
+def test_tc_rpt_07_status_and_date_filtering(client: TestClient, report_test_data):
+    """TC-RPT-07: Account Manager filters report by status and verifies record scoping."""
+    am = report_test_data["am_alpha"]
+    token = create_access_token(subject=am.id)
+
+    # Filter by completed
+    resp = client.get(
+        "/api/v1/reports/company/CORP_RPT_ALPHA?status_filter=Completed",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert all(t["status"] == "Completed" for t in data["trainees"])

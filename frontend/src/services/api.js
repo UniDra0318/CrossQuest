@@ -379,3 +379,58 @@ export async function triggerExpirySweep(token) {
   }
   return data;
 }
+
+export async function fetchAssignedClientCompanies(token) {
+  try {
+    const res = await fetch(`${API_BASE}/reports/assigned-companies`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for assigned companies:", err);
+  }
+  return null;
+}
+
+export async function fetchClientReport(companyCode, { startDate, endDate, statusFilter } = {}, token) {
+  const query = new URLSearchParams();
+  if (startDate) query.append('start_date', startDate);
+  if (endDate) query.append('end_date', endDate);
+  if (statusFilter && statusFilter !== 'ALL') query.append('status_filter', statusFilter);
+  const qStr = query.toString() ? `?${query.toString()}` : '';
+
+  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}${qStr}`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Failed to fetch client report (${res.status})`);
+  }
+  return data;
+}
+
+export async function downloadClientReportPdf(companyCode, { startDate, endDate, statusFilter } = {}, token) {
+  const query = new URLSearchParams();
+  if (startDate) query.append('start_date', startDate);
+  if (endDate) query.append('end_date', endDate);
+  if (statusFilter && statusFilter !== 'ALL') query.append('status_filter', statusFilter);
+  const qStr = query.toString() ? `?${query.toString()}` : '';
+
+  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/pdf${qStr}`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || `Failed to download report PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = `Training_Report_${companyCode.toUpperCase()}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(blobUrl);
+  return true;
+}

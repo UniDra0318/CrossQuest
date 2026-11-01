@@ -14,10 +14,49 @@ def _get_client_ip(request: Request) -> str:
     return request.client.host if request.client else "127.0.0.1"
 
 
+@router.get("/assigned-companies")
+def get_assigned_companies(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> List[Dict[str, Any]]:
+    """Returns list of client companies with their assigned status for the current Account Manager (OI-04, SEC-10)."""
+    if current_user.role != "account_manager":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Client reports can only be accessed by Account Managers (OI-04)."
+        )
+    assigned_codes = current_user.assigned_client_accounts or []
+    companies = db.query(ClientCompany).order_by(ClientCompany.name.asc()).all()
+    result = []
+    for comp in companies:
+        record_count = db.query(TrainingRecord).filter(
+            TrainingRecord.company_at_completion_id == comp.id,
+            TrainingRecord.deleted_at == None
+        ).count()
+        completed_count = db.query(TrainingRecord).filter(
+            TrainingRecord.company_at_completion_id == comp.id,
+            TrainingRecord.deleted_at == None,
+            TrainingRecord.status == "Completed"
+        ).count()
+        result.append({
+            "id": comp.id,
+            "code": comp.code,
+            "name": comp.name,
+            "industry": comp.industry,
+            "is_assigned": comp.code in assigned_codes,
+            "total_records": record_count,
+            "completed_records": completed_count
+        })
+    return result
+
+
 @router.get("/company/{company_code}")
 def generate_client_report(
     company_code: str,
     request: Request,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    status_filter: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
@@ -63,16 +102,33 @@ def generate_client_report(
         )
 
     # Query training records for this client company under RLS / scoping logic
-    records = (
+    query = (
         db.query(TrainingRecord, Trainee)
         .join(Trainee, TrainingRecord.trainee_id == Trainee.id)
         .filter(
             TrainingRecord.company_at_completion_id == company.id,
             TrainingRecord.deleted_at == None
         )
-        .order_by(TrainingRecord.completion_date.desc().nullslast())
-        .all()
     )
+
+    if status_filter and status_filter.upper() != "ALL":
+        query = query.filter(TrainingRecord.status.ilike(status_filter))
+
+    if start_date:
+        try:
+            sd = datetime.fromisoformat(start_date)
+            query = query.filter(TrainingRecord.completion_date >= sd)
+        except Exception:
+            pass
+
+    if end_date:
+        try:
+            ed = datetime.fromisoformat(end_date)
+            query = query.filter(TrainingRecord.completion_date <= ed)
+        except Exception:
+            pass
+
+    records = query.order_by(TrainingRecord.completion_date.desc().nullslast()).all()
 
     total_records = len(records)
     completed_count = sum(1 for r, _ in records if r.status == "Completed")
@@ -127,11 +183,13 @@ def generate_client_report(
     }
 
 
-
 @router.get("/company/{company_code}/pdf")
 def download_client_report_pdf(
     company_code: str,
     request: Request,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    status_filter: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -142,6 +200,9 @@ def download_client_report_pdf(
     report_data = generate_client_report(
         company_code=company_code,
         request=request,
+        start_date=start_date,
+        end_date=end_date,
+        status_filter=status_filter,
         db=db,
         current_user=current_user
     )

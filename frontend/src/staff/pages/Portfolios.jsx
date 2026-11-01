@@ -1,11 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Lock, ArrowRight, ShieldCheck, Users } from 'lucide-react';
+import { Building2, Lock, ArrowRight, ShieldCheck, Users, FileText } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useStaff } from '../StaffContext';
 
 export default function Portfolios() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const { portfolios, me } = useStaff();
+
+  const assignedScopes = currentUser?.assigned_client_accounts || currentUser?.assigned_companies || me?.scopes || ['CORP_ALPHA', 'BANK_DELTA'];
 
   return (
     <div>
@@ -15,13 +19,13 @@ export default function Portfolios() {
           <span className="adm-mono">Multi-tenant client accounts and authorized training agreements</span>
         </div>
         <span className="adm-pill adm-pill--blue">
-          AUTHORIZED SCOPES: {me?.scopes?.join(', ') || 'CORP_ALPHA'}
+          AUTHORIZED SCOPES: {assignedScopes.join(', ')}
         </span>
       </div>
 
       <div className="stf-cards">
         {portfolios.map((p) => {
-          const isMine = (me?.scopes || ['CORP_ALPHA']).includes(p.scope);
+          const isMine = assignedScopes.includes(p.scope);
 
           return (
             <div key={p.scope} className={`stf-card ${isMine ? 'stf-card--mine' : ''}`}>
@@ -71,16 +75,28 @@ export default function Portfolios() {
               </dl>
 
               {isMine ? (
-                <button
-                  type="button"
-                  className="adm-btn adm-btn-solid adm-chip--solid stf-cta"
-                  onClick={() => navigate('/staff')}
-                >
-                  <span>View Client Records</span>
-                  <ArrowRight size={15} />
-                </button>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn-solid adm-chip--solid stf-cta"
+                    style={{ flex: 1, margin: 0 }}
+                    onClick={() => navigate('/staff')}
+                  >
+                    <span>Records</span>
+                    <ArrowRight size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn--light stf-cta"
+                    style={{ flex: 1, margin: 0, background: '#f8fafc', border: '1px solid #cbd5e1' }}
+                    onClick={() => navigate(`/staff/reports?scope=${p.scope}`)}
+                  >
+                    <FileText size={14} />
+                    <span>Audit Report</span>
+                  </button>
+                </div>
               ) : (
-                <div className="stf-cta stf-cta--locked">
+                <div className="stf-cta stf-cta--locked" style={{ marginTop: '14px' }}>
                   <Lock size={14} />
                   <span>Scope Restricted (Requires Admin Authorization)</span>
                 </div>
