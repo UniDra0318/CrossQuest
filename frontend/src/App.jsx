@@ -146,8 +146,6 @@ function MainAppShell({ activeSubPage }) {
 
   return (
     <div className="enterprise-layout">
-      {/* Dynamic Role Sidebar */}
-      <Sidebar activeView={activeView} setActiveView={handleNavChange} />
 
       {/* Main Content Viewport */}
       <div className="enterprise-viewport">
