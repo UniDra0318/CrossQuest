@@ -9,11 +9,11 @@ export const QUIZ_THEMES = [
     bgStyle: {
       backgroundColor: '#0b092b',
       backgroundImage: `
-        linear-gradient(rgba(6, 182, 212, 0.14) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(6, 182, 212, 0.14) 1px, transparent 1px),
-        linear-gradient(135deg, #0b092b 0%, #170d38 50%, #0c1529 100%)
+        linear-gradient(rgba(6, 182, 212, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.16) 1px, transparent 1px),
+        linear-gradient(135deg, #0b092b 0%, #1e114a 25%, #0d1e3d 50%, #150933 75%, #081124 100%)
       `,
-      backgroundSize: '32px 32px, 32px 32px, 100% 100%'
+      backgroundSize: '32px 32px, 32px 32px, 250% 250%'
     },
     previewStyle: {
       background: 'linear-gradient(135deg, #090d24 0%, #170f3c 100%)',
@@ -41,10 +41,11 @@ export const QUIZ_THEMES = [
     bgStyle: {
       backgroundColor: '#09090b',
       backgroundImage: `
-        radial-gradient(circle at 20% 75%, rgba(217, 70, 239, 0.28) 0%, transparent 45%),
-        radial-gradient(circle at 80% 25%, rgba(99, 102, 241, 0.32) 0%, transparent 45%),
-        radial-gradient(ellipse at 50% 15%, #3b0764 0%, #09090b 70%)
-      `
+        radial-gradient(circle at 20% 75%, rgba(217, 70, 239, 0.36) 0%, transparent 45%),
+        radial-gradient(circle at 80% 25%, rgba(99, 102, 241, 0.38) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 15%, #4a044e 0%, #1e1b4b 45%, #09090b 100%)
+      `,
+      backgroundSize: '140% 140%, 140% 140%, 200% 200%'
     },
     previewStyle: {
       background: 'linear-gradient(135deg, #1b0a2e 0%, #2e0854 100%)',
@@ -72,10 +73,10 @@ export const QUIZ_THEMES = [
     bgStyle: {
       backgroundColor: '#18032e',
       backgroundImage: `
-        linear-gradient(0deg, rgba(249, 115, 22, 0.14) 1px, transparent 1px),
-        linear-gradient(180deg, #18032e 0%, #3b0764 40%, #831843 75%, #0f021f 100%)
+        linear-gradient(0deg, rgba(249, 115, 22, 0.16) 1px, transparent 1px),
+        linear-gradient(180deg, #18032e 0%, #4c0519 25%, #831843 50%, #ea580c 75%, #0f021f 100%)
       `,
-      backgroundSize: '100% 26px, 100% 100%'
+      backgroundSize: '100% 26px, 100% 220%'
     },
     previewStyle: {
       background: 'linear-gradient(135deg, #240a2e 0%, #4a0d3b 100%)',
@@ -103,11 +104,11 @@ export const QUIZ_THEMES = [
     bgStyle: {
       backgroundColor: '#022c22',
       backgroundImage: `
-        linear-gradient(rgba(16, 185, 129, 0.14) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(16, 185, 129, 0.14) 1px, transparent 1px),
-        linear-gradient(135deg, #022c22 0%, #064e3b 50%, #021a14 100%)
+        linear-gradient(rgba(16, 185, 129, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.16) 1px, transparent 1px),
+        linear-gradient(135deg, #022c22 0%, #064e3b 30%, #047857 65%, #011c15 100%)
       `,
-      backgroundSize: '28px 28px, 28px 28px, 100% 100%'
+      backgroundSize: '28px 28px, 28px 28px, 220% 220%'
     },
     previewStyle: {
       background: 'linear-gradient(135deg, #022019 0%, #064032 100%)',
@@ -135,9 +136,10 @@ export const QUIZ_THEMES = [
     bgStyle: {
       backgroundColor: '#082f49',
       backgroundImage: `
-        radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.22) 0%, transparent 60%),
-        linear-gradient(135deg, #082f49 0%, #0c4a6e 50%, #020617 100%)
-      `
+        radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.3) 0%, transparent 60%),
+        linear-gradient(135deg, #082f49 0%, #0284c7 35%, #0369a1 70%, #020617 100%)
+      `,
+      backgroundSize: '150% 150%, 220% 220%'
     },
     previewStyle: {
       background: 'linear-gradient(135deg, #062035 0%, #0a3d5c 100%)',
@@ -164,7 +166,11 @@ export const QUIZ_THEMES = [
     accent: '#94a3b8',
     bgStyle: {
       backgroundColor: '#0b0f19',
-      backgroundImage: 'linear-gradient(135deg, #0b0f19 0%, #111827 100%)'
+      backgroundImage: `
+        radial-gradient(circle at 50% 30%, rgba(148, 163, 184, 0.16) 0%, transparent 65%),
+        linear-gradient(135deg, #0b0f19 0%, #1e293b 40%, #111827 75%, #030712 100%)
+      `,
+      backgroundSize: '160% 160%, 220% 220%'
     },
     previewStyle: {
       background: 'linear-gradient(135deg, #0b0f19 0%, #1a2234 100%)',

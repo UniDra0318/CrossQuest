@@ -1061,7 +1061,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               <div className="p-24 certs-list-grid">
                 {displayCertificates.map((cert) => (
                   <div key={cert.id} className="card-gamified certificate-card">
-                    <div className="cert-top-row flex-between">
+                    <div className="cert-top-row flex-between" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px' }}>
                       <div className="flex-align gap-8">
                         <Shield size={22} className={cert.isSelfReported ? "text-cyan" : "text-gold"} />
                         <div>
@@ -1069,8 +1069,20 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                           <div className="text-secondary text-xs">{cert.clientCompany}</div>
                         </div>
                       </div>
-                      <span className={`badge-gamified ${cert.status === 'Expiring soon' ? 'badge-amber' : cert.status === 'Expired' ? 'badge-red' : 'badge-green'}`}>
-                        {cert.status === 'Expiring soon' ? `Due in ${cert.daysUntilExpiry}d` : cert.status === 'Expired' ? 'Expired' : 'Active Credential'}
+                      <span className={`cert-status-pill ${cert.status === 'Expiring soon' ? 'pill-amber' : cert.status === 'Expired' ? 'pill-red' : 'pill-green'}`}>
+                        {cert.status === 'Expiring soon' ? (
+                          <>
+                            <span style={{ fontSize: '9.5px', opacity: 0.9 }}>DUE IN</span>
+                            <strong style={{ fontSize: '11.5px', fontWeight: 900 }}>{cert.daysUntilExpiry}D</strong>
+                          </>
+                        ) : cert.status === 'Expired' ? (
+                          <span style={{ fontWeight: 800, fontSize: '11px' }}>EXPIRED</span>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: '9.5px', opacity: 0.9 }}>ACTIVE</span>
+                            <span style={{ fontSize: '10.5px', fontWeight: 800 }}>CREDENTIAL</span>
+                          </>
+                        )}
                       </span>
                     </div>
 

@@ -2540,91 +2540,112 @@
    ========================================================================== */
 
 /* ==========================================================================
-   DYNAMIC QUIZ ARENA ATMOSPHERES & LIVE EFFECTS
+   DYNAMIC QUIZ ARENA ATMOSPHERES & LIVE GRADIENTS
    ========================================================================== */
 
+/* 1. Cyber Grid: matrix lines drift + dynamic flowing neon gradient */
 @keyframes cyberGridDrift {
   0% {
-    background-position: 0 0, 0 0, 0 0;
+    background-position: 0 0, 0 0, 0% 50%;
+  }
+  50% {
+    background-position: 16px 16px, 16px 16px, 100% 50%;
   }
   100% {
-    background-position: 32px 32px, 32px 32px, 0 0;
+    background-position: 32px 32px, 32px 32px, 0% 50%;
   }
 }
 .theme-anim-cyber-grid {
-  animation: cyberGridDrift 20s linear infinite !important;
+  animation: cyberGridDrift 16s ease-in-out infinite !important;
 }
 
-@keyframes cosmicNebulaPulse {
+/* 2. Cosmic Nebula: drifting stellar dust clouds + dynamic breathing */
+@keyframes cosmicNebulaDynamic {
   0% {
-    filter: brightness(0.98) saturate(1);
+    background-position: 0% 0%, 100% 100%, 0% 50%;
+    filter: brightness(0.98) saturate(1.05);
   }
   50% {
-    filter: brightness(1.15) saturate(1.22);
+    background-position: 60% 40%, 40% 60%, 100% 50%;
+    filter: brightness(1.18) saturate(1.3);
   }
   100% {
-    filter: brightness(0.98) saturate(1);
+    background-position: 0% 0%, 100% 100%, 0% 50%;
+    filter: brightness(0.98) saturate(1.05);
   }
 }
 .theme-anim-cosmic-nebula {
-  animation: cosmicNebulaPulse 10s ease-in-out infinite alternate !important;
+  animation: cosmicNebulaDynamic 14s ease-in-out infinite !important;
 }
 
+/* 3. Retro Synthwave: scanlines drift + undulating sunset horizon */
 @keyframes synthwaveScan {
   0% {
-    background-position: 0 0, 0 0;
+    background-position: 0 0, 50% 0%;
+  }
+  50% {
+    background-position: 0 26px, 50% 100%;
   }
   100% {
-    background-position: 0 52px, 0 0;
+    background-position: 0 52px, 50% 0%;
   }
 }
 .theme-anim-retro-synthwave {
-  animation: synthwaveScan 8s linear infinite !important;
+  animation: synthwaveScan 10s linear infinite !important;
 }
 
-@keyframes emeraldMatrixFlow {
+/* 4. Emerald Matrix: digital grid streaming + bio-luminescent flow */
+@keyframes emeraldMatrixDynamic {
   0% {
-    background-position: 0 0, 0 0, 0 0;
+    background-position: 0 0, 0 0, 0% 50%;
+  }
+  50% {
+    background-position: 0 28px, 0 28px, 100% 50%;
   }
   100% {
-    background-position: 0 56px, 0 0, 0 0;
+    background-position: 0 56px, 0 56px, 0% 50%;
   }
 }
 .theme-anim-emerald-matrix {
-  animation: emeraldMatrixFlow 12s linear infinite !important;
+  animation: emeraldMatrixDynamic 12s ease-in-out infinite !important;
 }
 
-@keyframes oceanCausticDrift {
+/* 5. Ocean Abyssal: bioluminescent caustics + deep sea current flow */
+@keyframes oceanAbyssDynamic {
   0% {
-    filter: brightness(0.95) contrast(1);
-    background-position: 50% 50%, 0 0;
+    background-position: 30% 40%, 0% 50%;
+    filter: brightness(0.96) contrast(1);
   }
   50% {
-    filter: brightness(1.15) contrast(1.08);
-    background-position: 52% 48%, 0 0;
+    background-position: 70% 60%, 100% 50%;
+    filter: brightness(1.2) contrast(1.1);
   }
   100% {
-    filter: brightness(0.95) contrast(1);
-    background-position: 50% 50%, 0 0;
+    background-position: 30% 40%, 0% 50%;
+    filter: brightness(0.96) contrast(1);
   }
 }
 .theme-anim-ocean-abyss {
-  animation: oceanCausticDrift 9s ease-in-out infinite alternate !important;
+  animation: oceanAbyssDynamic 11s ease-in-out infinite alternate !important;
 }
 
-@keyframes obsidianZenBreathing {
+/* 6. Obsidian Zen: hypnotic ambient lighting drift + focus breathing */
+@keyframes obsidianZenDynamic {
   0% {
+    background-position: 40% 30%, 0% 50%;
     filter: brightness(0.96);
   }
   50% {
-    filter: brightness(1.06);
+    background-position: 60% 70%, 100% 50%;
+    filter: brightness(1.08);
   }
   100% {
+    background-position: 40% 30%, 0% 50%;
     filter: brightness(0.96);
   }
 }
 .theme-anim-obsidian-zen {
-  animation: obsidianZenBreathing 12s ease-in-out infinite alternate !important;
+  animation: obsidianZenDynamic 14s ease-in-out infinite alternate !important;
 }
 
 @keyframes pingPulse {
@@ -8839,4 +8860,42 @@
 
 .footer-link:hover {
   color: #6320ee;
+}
+
+/* ==========================================================================
+   PERFECTLY CENTERED CERTIFICATION STATUS PILLS (FR-18, FR-19)
+   ========================================================================== */
+
+.cert-status-pill {
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-family: var(--font-fun);
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  box-sizing: border-box;
+  min-width: 82px;
+}
+
+.pill-green {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.pill-amber {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.pill-red {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }

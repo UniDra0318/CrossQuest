@@ -659,3 +659,25 @@ html.compact-density .adm-card,
 html.compact-density .tr-session-card {
   padding: 12px 14px !important;
 }
+
+/* Centered Certification Status Pills in Dark Mode */
+html.dark .pill-green,
+[data-theme="dark"] .pill-green {
+  background-color: #064e3b !important;
+  color: #6ee7b7 !important;
+  border-color: #059669 !important;
+}
+
+html.dark .pill-amber,
+[data-theme="dark"] .pill-amber {
+  background-color: #78350f !important;
+  color: #fde68a !important;
+  border-color: #d97706 !important;
+}
+
+html.dark .pill-red,
+[data-theme="dark"] .pill-red {
+  background-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+  border-color: #dc2626 !important;
+}
