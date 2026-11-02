@@ -172,14 +172,50 @@ export default function Topbar({ activeViewTitle, streakDays }) {
 
           {/* Streak Pill - Trainees only */}
           {currentUser?.role === 'trainee' && (
-            <div className="gamified-stat-pill streak-pill">
-              <Flame size={16} className="stat-flame-icon" />
-              <span className="stat-num">
+            <div 
+              className="gamified-stat-pill streak-pill"
+              style={{
+                background: isDark ? 'rgba(234, 88, 12, 0.16)' : '#fff7ed',
+                border: isDark ? '1.5px solid rgba(249, 115, 22, 0.35)' : '1.5px solid #fed7aa',
+                boxShadow: isDark ? '0 2px 10px rgba(0, 0, 0, 0.3)' : '0 2px 4px rgba(234, 88, 12, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Flame 
+                size={16} 
+                className="stat-flame-icon" 
+                style={{ 
+                  color: isDark ? '#fb923c' : '#ea580c',
+                  filter: isDark ? 'drop-shadow(0 0 6px rgba(249, 115, 22, 0.6))' : 'drop-shadow(0 0 4px rgba(234, 88, 12, 0.4))'
+                }} 
+              />
+              <span 
+                className="stat-num streak-num" 
+                style={{ 
+                  color: isDark ? '#fb923c' : '#ea580c',
+                  fontWeight: 800,
+                  fontSize: '14px',
+                  lineHeight: 1
+                }}
+              >
                 {Number.isFinite(Number(streakDays))
                   ? Number(streakDays)
                   : (Number.isFinite(Number(currentUser?.streak)) ? Number(currentUser.streak) : 7)}
               </span>
-              <span className="stat-label">DAY STREAK</span>
+              <span 
+                className="stat-label streak-label" 
+                style={{ 
+                  color: isDark ? '#fdba74' : '#9a3412',
+                  fontWeight: 700,
+                  fontSize: '11px',
+                  letterSpacing: '0.04em',
+                  lineHeight: 1
+                }}
+              >
+                DAY STREAK
+              </span>
             </div>
           )}
 

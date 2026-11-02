@@ -7133,10 +7133,33 @@
   padding: 6px 14px !important;
   color: #c2410c !important;
   font-weight: 700;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
 }
 
+.streak-pill .stat-num,
+.streak-pill .streak-num {
+  font-family: var(--font-fun) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #ea580c !important;
+  line-height: 1 !important;
+}
+
+.streak-pill .stat-label,
+.streak-pill .streak-label {
+  font-size: 11px !important;
+  color: #9a3412 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1 !important;
+}
+
+.streak-pill .stat-flame-icon,
 .stat-flame-icon {
   color: #ea580c !important;
+  filter: drop-shadow(0 0 4px rgba(234, 88, 12, 0.4)) !important;
 }
 
 .role-selector-trigger {

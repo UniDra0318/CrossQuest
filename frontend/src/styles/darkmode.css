@@ -681,3 +681,35 @@ html.dark .pill-red,
   color: #fca5a5 !important;
   border-color: #dc2626 !important;
 }
+
+/* ==========================================================================
+   TOPBAR STREAK PILL (DARK MODE CONTRAST)
+   ========================================================================== */
+html.dark .streak-pill,
+[data-theme="dark"] .streak-pill {
+  background: rgba(234, 88, 12, 0.16) !important;
+  border: 1.5px solid rgba(249, 115, 22, 0.35) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .streak-pill .stat-num,
+html.dark .streak-pill .streak-num,
+[data-theme="dark"] .streak-pill .stat-num,
+[data-theme="dark"] .streak-pill .streak-num {
+  color: #fb923c !important;
+  font-weight: 800 !important;
+}
+
+html.dark .streak-pill .stat-label,
+html.dark .streak-pill .streak-label,
+[data-theme="dark"] .streak-pill .stat-label,
+[data-theme="dark"] .streak-pill .streak-label {
+  color: #fdba74 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .streak-pill .stat-flame-icon,
+[data-theme="dark"] .streak-pill .stat-flame-icon {
+  color: #f97316 !important;
+  filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.6)) !important;
+}
