@@ -111,31 +111,6 @@ export default function Topbar({ activeViewTitle, streakDays }) {
             </div>
           )}
 
-          {/* CP-ABE Live Sandbox for Capstone Defense Panelists */}
-          <button 
-            type="button"
-            onClick={() => navigate('/crypto-lab')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-              color: '#ffffff',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 800,
-              fontSize: '12px',
-              boxShadow: '0 2px 10px rgba(124, 58, 237, 0.25)',
-              transition: 'all 0.15s ease'
-            }}
-            title="Open Interactive CP-ABE Cryptographic Sandbox for Capstone Defense"
-          >
-            <Shield size={13} />
-            <span>CP-ABE Lab</span>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 6px #4ade80' }} />
-          </button>
 
           {/* Interactive Profile Menu Trigger */}
           <div className="role-dropdown-wrapper" style={{ position: 'relative' }}>
@@ -322,6 +297,34 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Lock size={13} color="#6366f1" />
                       <span>Security & Clearance Details</span>
+                    </span>
+                    <ExternalLink size={12} color="#94a3b8" />
+                  </button>
+
+                  {/* Action: CP-ABE Cryptographic Sandbox */}
+                  <button
+                    type="button"
+                    onClick={() => { navigate('/crypto-lab'); setProfileOpen(false); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      background: 'transparent',
+                      border: '1px solid #e2e8f0',
+                      color: '#334155',
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      marginTop: '6px'
+                    }}
+                    title="Interactive CP-ABE Cryptographic Sandbox"
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Shield size={13} color="#7c3aed" />
+                      <span>CP-ABE Cryptographic Lab</span>
                     </span>
                     <ExternalLink size={12} color="#94a3b8" />
                   </button>
