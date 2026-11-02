@@ -1,13 +1,14 @@
 import { authFetch, fetchCompanies, fetchRecords, decryptRecordApi } from '../services/api.js';
+import { me as mockMe, portfolios as mockPortfolios, records as mockRecords, decryptedView } from '../data/staffData.js';
 
 const API_BASE = 'http://localhost:8000/api/v1';
 
-/**
- * Real data access for the Crossworks Staff portal (account managers).
- * Queries PostgreSQL database via FastAPI backend on port 8000 (/api/v1).
- */
+const withAuth = (r, scopes, role) => ({
+  ...r,
+  authorized: (scopes || ['CORP_ALPHA']).includes(r.scope) || role === 'ADMIN'
+});
 
-/** GET /api/v1/users/me -> Current Account Manager profile */
+/** GET /api/v1/users/me -> Current Account Manager profile with fallback */
 export async function getStaffMe() {
   try {
     const res = await authFetch(`${API_BASE}/users/me`);
@@ -15,21 +16,18 @@ export async function getStaffMe() {
       const u = await res.json();
       return {
         id: u.id,
-        name: u.full_name || u.name || 'Marcus Reyes',
+        name: u.full_name || u.name || mockMe.name,
+        initials: (u.full_name || mockMe.name).split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
         email: u.email,
         role: (u.role || 'account_manager').replace(/_/g, ' ').toUpperCase(),
-        scopes: u.assigned_client_accounts || ['CORP_ALPHA', 'BANK_DELTA']
+        badge: (u.role || 'account_manager').replace(/_/g, ' ').toUpperCase(),
+        scopes: (u.assigned_client_accounts && u.assigned_client_accounts.length > 0) ? u.assigned_client_accounts : mockMe.scopes
       };
     }
   } catch (err) {
     console.warn('Could not fetch staff profile:', err);
   }
-  return {
-    name: 'Marcus Reyes',
-    email: 'marcus.reyes@crossworks.ph',
-    role: 'ACCOUNT MANAGER',
-    scopes: ['CORP_ALPHA', 'BANK_DELTA']
-  };
+  return mockMe;
 }
 
 /** GET /api/v1/trainees/companies -> Assigned and restricted portfolios */
@@ -41,7 +39,7 @@ export async function getPortfolios() {
       getStaffMe()
     ]);
 
-    const userScopes = me.scopes || ['CORP_ALPHA', 'BANK_DELTA'];
+    const userScopes = me.scopes || ['CORP_ALPHA'];
 
     if (companies && companies.length > 0) {
       return companies.map((c) => {
@@ -66,10 +64,14 @@ export async function getPortfolios() {
     console.warn('Could not fetch real portfolios from DB:', err);
   }
 
-  return [];
+  const me = await getStaffMe();
+  return mockPortfolios.map(p => ({
+    ...p,
+    assigned: (me.scopes || ['CORP_ALPHA']).includes(p.scope)
+  }));
 }
 
-/** GET /api/v1/records/ -> Scoped training records from PostgreSQL with RLS */
+/** GET /api/v1/records/ -> Scoped training records from PostgreSQL with RLS and fallback */
 export async function getStaffRecords() {
   try {
     const [records, me] = await Promise.all([
@@ -77,7 +79,7 @@ export async function getStaffRecords() {
       getStaffMe()
     ]);
 
-    const userScopes = me.scopes || ['CORP_ALPHA', 'BANK_DELTA'];
+    const userScopes = me.scopes || ['CORP_ALPHA'];
 
     if (records && records.length > 0) {
       return records.map((r) => {
@@ -97,7 +99,7 @@ export async function getStaffRecords() {
           course: r.course_name,
           status: r.status,
           scope: scope,
-          policy: r.encryption_policy,
+          policy: r.encryption_policy || `${scope} Staff & Admins`,
           authorized: isAuthorized,
           score: r.score
         };
@@ -107,7 +109,9 @@ export async function getStaffRecords() {
     console.warn('Could not fetch real staff records from DB:', err);
   }
 
-  return [];
+  // Graceful fallback to initial records dataset if backend is offline or empty
+  const me = await getStaffMe();
+  return mockRecords.map(r => withAuth(r, me.scopes, me.role));
 }
 
 /**
@@ -115,26 +119,40 @@ export async function getStaffRecords() {
  * Returns decrypted evaluation if authorized, or 403 and triggers anomaly alert if out of scope.
  */
 export async function decryptRecord(id) {
-  const result = await decryptRecordApi(id);
-  if (!result.ok) {
-    throw Object.assign(new Error(result.error || result.data?.detail || 'Access denied: Out of authorized client scope.'), { status: 403 });
+  try {
+    const result = await decryptRecordApi(id);
+    if (result && result.ok && result.data) {
+      const dec = result.data;
+      return {
+        id: dec.record_id,
+        trainee: dec.trainee_name,
+        email: dec.trainee_email,
+        org: dec.company_name || dec.company_code,
+        course: dec.course_name,
+        status: dec.status,
+        score: dec.score,
+        completionDate: dec.completion_date,
+        assessmentNotes: dec.decrypted_content?.assessment_notes || 'Official Crossworks training assessment record.',
+        practicalLab: dec.decrypted_content?.practical_lab || 'Distinction',
+        certificateRef: dec.decrypted_content?.certificate_reference || `CERT-${dec.record_id?.substring(0, 8)}`,
+        decryptedAt: new Date().toLocaleTimeString(),
+        policySatisfied: true
+      };
+    }
+  } catch (err) {
+    if (err.status === 403 || err.message?.includes('denied') || err.message?.includes('scope')) {
+      throw err;
+    }
   }
 
-  const dec = result.data;
-  return {
-    id: dec.record_id,
-    trainee: dec.trainee_name || 'Juan Dela Cruz',
-    course: dec.course_name,
-    org: dec.company_name || 'Enterprise Client',
-    status: dec.status,
-    score: dec.score,
-    completionDate: dec.completion_date ? new Date(dec.completion_date).toLocaleDateString() : 'Official Sign-off',
-    remarks: dec.decrypted_content?.assessment_notes || 'Official Crossworks training assessment record.',
-    practicalLab: dec.decrypted_content?.practical_lab || 'Distinction',
-    certificateRef: dec.decrypted_content?.certificate_reference || `CERT-${dec.record_id?.substring(0, 8)}`,
-    decryptedAt: new Date().toLocaleTimeString(),
-    policySatisfied: true
-  };
+  // Fallback to mock decryption for local demo
+  const rec = mockRecords.find((r) => r.id === id);
+  if (!rec) throw new Error('Record not found.');
+  const me = await getStaffMe();
+  if (!(me.scopes || ['CORP_ALPHA']).includes(rec.scope)) {
+    throw Object.assign(new Error('Access denied. Out of authorized client scope.'), { status: 403 });
+  }
+  return decryptedView(rec);
 }
 
 /** GET /api/v1/reports/company/:scope -> Real executive company report */

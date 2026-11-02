@@ -14,7 +14,7 @@ import {
 import { useStaff } from '../StaffContext';
 
 export default function RecordVault() {
-  const { records, decryptedRecords, deniedAttempts, decryptingId, handleDecrypt, loading } = useStaff();
+  const { me, records, decryptedRecords, deniedAttempts, decryptingId, handleDecrypt, loading } = useStaff();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterScope, setFilterScope] = useState('ALL'); // 'ALL' | 'MINE' | 'OTHER'
 
@@ -59,7 +59,7 @@ export default function RecordVault() {
             className={filterScope === 'MINE' ? 'on' : ''}
             onClick={() => setFilterScope('MINE')}
           >
-            Assigned Scope: CORP_ALPHA ({records.filter(r => r.authorized).length})
+            Assigned Scope: {me?.scopes?.join(', ') || 'CORP_ALPHA'} ({records.filter(r => r.authorized).length})
           </button>
           <button
             type="button"

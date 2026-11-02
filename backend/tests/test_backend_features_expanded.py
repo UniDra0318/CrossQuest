@@ -454,3 +454,4 @@ def test_database_tls_enforced_check():
     assert "dialect" in status
     assert "tls_enforced" in status
     assert "status" in status
+

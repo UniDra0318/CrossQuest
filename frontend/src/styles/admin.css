@@ -71,6 +71,7 @@
   margin-top: 16px; max-width: 620px;
   font: 800 clamp(24px, 2.7vw, 36px) / 1.12 var(--font-display);
   letter-spacing: -0.02em;
+  color: #ffffff !important;
 }
 .adm-hero p { margin: 12px 0 24px; max-width: 520px; font-size: 15px; line-height: 1.55; color: #e4dcfa; }
 .adm-hero__cube {
