@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { getStaffMe, getPortfolios, getStaffRecords, decryptRecord } from '../api/staff';
 
 const StaffContext = createContext(null);
 
 export function StaffProvider({ children }) {
+  const { currentUser } = useAuth();
   const [me, setMe] = useState(null);
   const [portfolios, setPortfolios] = useState([]);
   const [records, setRecords] = useState([]);
@@ -32,7 +34,7 @@ export function StaffProvider({ children }) {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentUser]);
 
   const handleDecrypt = async (record) => {
     setDecryptingId(record.id);

@@ -39,10 +39,15 @@ export default function LoginView() {
 
   const roleList = [
     { key: 'admin', title: 'Administrator', name: 'Dr. Sarah Jenkins', org: 'Crossworks Admin', icon: Shield, badgeClass: 'admin' },
-    { key: 'account_manager', title: 'Account Manager', name: 'Marcus Reyes', org: 'Crossworks Staff', icon: Key, badgeClass: 'staff' },
+    { key: 'admin_roel', title: 'Co-Administrator', name: 'Prof. Roel Traballo', org: 'Crossworks Admin', icon: Shield, badgeClass: 'admin' },
+    { key: 'account_manager', title: 'Account Manager (San Miguel & BDO)', name: 'Marcus Reyes', org: 'CORP_ALPHA • BANK_DELTA', icon: Key, badgeClass: 'staff' },
+    { key: 'am_andrea', title: 'Account Manager (Maya & Ayala)', name: 'Andrea Salazar', org: 'FINTECH_BETA • RETAIL_GAMMA', icon: Key, badgeClass: 'staff' },
     { key: 'finance', title: 'Finance & Operations', name: 'Elena Santos', org: 'Crossworks Finance', icon: Building2, badgeClass: 'company' },
-    { key: 'trainer', title: 'Lead Trainer', name: 'David Lim', org: 'Course Instructor', icon: GraduationCap, badgeClass: 'trainer' },
-    { key: 'trainee', title: 'Trainee Learner', name: 'Juan Dela Cruz', org: 'San Miguel Corp', icon: Award, badgeClass: 'trainee' }
+    { key: 'trainer', title: 'Lead Trainer (San Miguel & Maya)', name: 'David Lim', org: 'Course Instructor', icon: GraduationCap, badgeClass: 'trainer' },
+    { key: 'trainer_maria', title: 'Lead Trainer (Ayala & BDO)', name: 'Maria Hernandez', org: 'Course Instructor', icon: GraduationCap, badgeClass: 'trainer' },
+    { key: 'trainee', title: 'Trainee (San Miguel)', name: 'Juan Dela Cruz', org: 'CORP_ALPHA • San Miguel', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_maria', title: 'Trainee (Maya FinTech)', name: 'Maria Clara', org: 'FINTECH_BETA • Maya FinTech', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_gabriel', title: 'Trainee (Ayala Retail)', name: 'Gabriel Ramos', org: 'RETAIL_GAMMA • Ayala Retail', icon: Award, badgeClass: 'trainee' }
   ];
 
   return (

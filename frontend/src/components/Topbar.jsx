@@ -358,12 +358,20 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                       </button>
 
                       {showRoleSwitcher && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px' }}>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                          marginTop: '6px',
+                          maxHeight: '320px',
+                          overflowY: 'auto',
+                          paddingRight: '4px'
+                        }}>
                           {Object.entries(DEMO_USERS)
                             .filter(([key]) => key !== 'crossworks_staff' && key !== 'company_staff')
                             .map(([key, u]) => {
                               const RoleIcon = getRoleIcon(u.role);
-                              const isSelected = u.role === currentUser?.role;
+                              const isSelected = u.email === currentUser?.email;
                               return (
                                 <button
                                   key={key}
@@ -380,16 +388,24 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                                     borderRadius: '6px',
                                     border: 'none',
                                     background: isSelected ? '#eef2ff' : 'transparent',
-                                    color: isSelected ? '#4338ca' : '#475569',
+                                    color: isSelected ? '#4338ca' : '#334155',
                                     fontSize: '12px',
-                                    fontWeight: isSelected ? '700' : '600',
+                                    fontWeight: isSelected ? '700' : '500',
                                     cursor: 'pointer',
-                                    textAlign: 'left'
+                                    textAlign: 'left',
+                                    transition: 'background 0.15s ease'
                                   }}
                                 >
-                                  <RoleIcon size={13} color={isSelected ? '#4f46e5' : '#94a3b8'} />
-                                  <span style={{ flex: 1 }}>{u.name}</span>
-                                  {isSelected && <Check size={13} color="#4f46e5" />}
+                                  <RoleIcon size={14} color={isSelected ? '#4f46e5' : '#94a3b8'} style={{ flexShrink: 0 }} />
+                                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontWeight: isSelected ? '700' : '600', fontSize: '12px', color: isSelected ? '#4338ca' : '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {u.name}
+                                    </span>
+                                    <span style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {u.title || u.role}
+                                    </span>
+                                  </div>
+                                  {isSelected && <Check size={14} color="#4f46e5" style={{ flexShrink: 0 }} />}
                                 </button>
                               );
                             })}

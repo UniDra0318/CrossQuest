@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export const DEMO_USERS = {
+  // --- ADMINISTRATORS ---
   admin: {
     id: "usr-admin-01",
     email: "admin@crossworks.ph",
@@ -8,44 +9,111 @@ export const DEMO_USERS = {
     title: "System Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
+    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
     initials: "SJ"
   },
+  admin_roel: {
+    id: "usr-admin-02",
+    email: "admin2@crossworks.ph",
+    name: "Prof. Roel Traballo",
+    title: "Co-Administrator",
+    role: "admin",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+    initials: "RT"
+  },
+
+  // --- ACCOUNT MANAGERS (SCOPED MULTI-TENANT CLIENTS) ---
   account_manager: {
     id: "usr-am-02",
     email: "marcus.reyes@crossworks.ph",
     name: "Marcus Reyes",
-    title: "Account Manager (Assigned: San Miguel)",
+    title: "AM: San Miguel & BDO (CORP_ALPHA, BANK_DELTA)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA"],
+    assigned_companies: ["CORP_ALPHA", "BANK_DELTA"],
+    assigned_client_accounts: ["CORP_ALPHA", "BANK_DELTA"],
     initials: "MR"
   },
+  am_andrea: {
+    id: "usr-am-03",
+    email: "andrea.salazar@crossworks.ph",
+    name: "Andrea Salazar",
+    title: "AM: Maya & Ayala (FINTECH_BETA, RETAIL_GAMMA)",
+    role: "account_manager",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["FINTECH_BETA", "RETAIL_GAMMA"],
+    assigned_client_accounts: ["FINTECH_BETA", "RETAIL_GAMMA"],
+    initials: "AS"
+  },
+
+  // --- FINANCE & OPERATIONS (ENTERPRISE VIEW) ---
   finance: {
     id: "usr-fin-03",
     email: "elena.santos@crossworks.ph",
     name: "Elena Santos",
-    title: "Finance & Operations Specialist",
+    title: "Finance & Operations Lead",
+    role: "finance",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+    initials: "ES"
+  },
+  finance_victor: {
+    id: "usr-fin-04",
+    email: "victor.cruz@crossworks.ph",
+    name: "Victor Cruz",
+    title: "Financial Auditor",
     role: "finance",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
-    initials: "ES"
+    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
+    initials: "VC"
   },
+
+  // --- TRAINERS ---
   trainer: {
     id: "usr-trainer-04",
     email: "david.lim@crossworks.ph",
     name: "David Lim",
-    title: "Lead Training Instructor",
+    title: "Lead Trainer (San Miguel & Maya)",
     role: "trainer",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["CORP_ALPHA", "FINTECH_BETA"],
+    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA"],
     initials: "DL"
   },
+  trainer_maria: {
+    id: "usr-trainer-05",
+    email: "maria.hernandez@crossworks.ph",
+    name: "Maria Hernandez",
+    title: "Lead Trainer (Ayala & BDO)",
+    role: "trainer",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["RETAIL_GAMMA", "BANK_DELTA"],
+    assigned_client_accounts: ["RETAIL_GAMMA", "BANK_DELTA"],
+    initials: "MH"
+  },
+  trainer_alex: {
+    id: "usr-trainer-06",
+    email: "alex.santos@crossworks.ph",
+    name: "Engr. Alex Santos",
+    title: "Lead Trainer (Globe Telecom)",
+    role: "trainer",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["TELCO_EPSILON"],
+    assigned_client_accounts: ["TELCO_EPSILON"],
+    initials: "AS"
+  },
+
+  // --- TRAINEES ACROSS DIFFERENT CLIENT COMPANIES ---
   trainee: {
-    id: "usr-trainee-05",
+    id: "4bf4b74e-d001-4ab5-8ccf-325565adf3b1",
     email: "juan.delacruz@alpha-corp.ph",
     name: "Juan Dela Cruz",
-    title: "Trainee Analyst",
+    title: "San Miguel Corp (CORP_ALPHA)",
     role: "trainee",
     organization: "San Miguel Conglomerate Holdings",
     trainee_code: "TRN-9021",
@@ -54,10 +122,79 @@ export const DEMO_USERS = {
     assigned_companies: ["CORP_ALPHA"],
     streak: 7,
     initials: "JD"
+  },
+  trainee_beatrice: {
+    id: "ebda330c-24f7-4625-b713-acafbc0d4f00",
+    email: "beatrice.tan@alpha-corp.ph",
+    name: "Beatrice Tan",
+    title: "San Miguel Corp (CORP_ALPHA)",
+    role: "trainee",
+    organization: "San Miguel Conglomerate Holdings",
+    trainee_code: "TRN-9045",
+    display_name: "BeaSecOps",
+    company_code: "CORP_ALPHA",
+    assigned_companies: ["CORP_ALPHA"],
+    streak: 12,
+    initials: "BT"
+  },
+  trainee_maria: {
+    id: "b45c7419-02c7-4aa6-bc17-04f9568c213b",
+    email: "maria.clara@maya-fintech.ph",
+    name: "Maria Clara",
+    title: "Maya FinTech (FINTECH_BETA)",
+    role: "trainee",
+    organization: "Maya FinTech Digital Innovations",
+    trainee_code: "TRN-9088",
+    display_name: "MayaFinPro",
+    company_code: "FINTECH_BETA",
+    assigned_companies: ["FINTECH_BETA"],
+    streak: 5,
+    initials: "MC"
+  },
+  trainee_liam: {
+    id: "403cd7cd-a014-42e0-8165-f16e8ed85371",
+    email: "liam.chen@maya-fintech.ph",
+    name: "Liam Chen",
+    title: "Maya FinTech (FINTECH_BETA)",
+    role: "trainee",
+    organization: "Maya FinTech Digital Innovations",
+    trainee_code: "TRN-9092",
+    display_name: "LiamDevSec",
+    company_code: "FINTECH_BETA",
+    assigned_companies: ["FINTECH_BETA"],
+    streak: 3,
+    initials: "LC"
+  },
+  trainee_gabriel: {
+    id: "ddcb84b6-48aa-4bdb-a73f-19919d6730fa",
+    email: "g.ramos@ayala-retail.ph",
+    name: "Gabriel Ramos",
+    title: "Ayala Retail (RETAIL_GAMMA)",
+    role: "trainee",
+    organization: "Ayala Retail Omnichannel Corp",
+    trainee_code: "TRN-9114",
+    display_name: "RetailOpsRamos",
+    company_code: "RETAIL_GAMMA",
+    assigned_companies: ["RETAIL_GAMMA"],
+    streak: 9,
+    initials: "GR"
+  },
+  trainee_chloe: {
+    id: "bd398658-8eff-4215-975a-baf703936d7f",
+    email: "chloe.garcia@ayala-retail.ph",
+    name: "Chloe Garcia",
+    title: "Ayala Retail (RETAIL_GAMMA)",
+    role: "trainee",
+    organization: "Ayala Retail Omnichannel Corp",
+    trainee_code: "TRN-9125",
+    display_name: "ChloeCloud",
+    company_code: "RETAIL_GAMMA",
+    assigned_companies: ["RETAIL_GAMMA"],
+    streak: 4,
+    initials: "CG"
   }
 };
 
-// Aliases for backward compatibility with early prototype keys
 DEMO_USERS.crossworks_staff = DEMO_USERS.account_manager;
 DEMO_USERS.company_staff = DEMO_USERS.finance;
 
