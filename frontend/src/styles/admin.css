@@ -91,13 +91,13 @@
 .adm-float {
   position: absolute; display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 12px; border-radius: 999px;
-  background: #fff; color: var(--cq-ink); box-shadow: 0 4px 0 #b9b2d6;
+  background: #fff; color: #0f172a; box-shadow: 0 4px 0 #b9b2d6;
   font: 700 10px var(--font-mono); letter-spacing: 0.08em; white-space: nowrap;
   animation: cq-float 5s ease-in-out infinite;
 }
 .adm-float--tl { left: 0; top: 6px; }
 .adm-float--br { right: 0; bottom: 6px; animation-duration: 7s; }
-.adm-float--orange { background: var(--cq-orange); box-shadow: 0 4px 0 var(--cq-orange-dk); }
+.adm-float--orange { background: var(--cq-orange); color: #fff; box-shadow: 0 4px 0 var(--cq-orange-dk); }
 
 .adm-search {
   display: flex; align-items: center; gap: 10px; max-width: 460px;
