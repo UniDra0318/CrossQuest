@@ -1,0 +1,202 @@
+/* ==========================================================================
+   CrossQuest Enterprise Dark Mode Theme Engine
+   Applied when html.dark or [data-theme="dark"] is active
+   ========================================================================== */
+
+html.dark,
+[data-theme="dark"] {
+  --cq-ink: #f8fafc;
+  --cq-ink-soft: #cbd5e1;
+  --cq-body: #e2e8f0;
+  
+  --cq-purple: #0f172a;
+  --cq-purple-dk: #020617;
+  --cq-purple-deep: #090d16;
+  --cq-purple-night: #030712;
+  --cq-lilac: #38bdf8;
+  
+  --cq-lav: #0f172a;
+  --cq-lav-2: #090d16;
+  --cq-line: rgba(255, 255, 255, 0.12);
+  
+  color-scheme: dark;
+}
+
+/* Base Body & Layout in Dark Mode */
+html.dark body,
+[data-theme="dark"] body {
+  background-color: #090d16 !important;
+  color: #f1f5f9 !important;
+}
+
+/* App Main Containers */
+html.dark .app-main,
+html.dark .trainee-dashboard,
+html.dark .admin-dashboard,
+html.dark .trainer-dashboard,
+html.dark .staff-portal,
+html.dark .crypto-sandbox-container,
+[data-theme="dark"] .app-main,
+[data-theme="dark"] .trainee-dashboard,
+[data-theme="dark"] .admin-dashboard,
+[data-theme="dark"] .trainer-dashboard,
+[data-theme="dark"] .staff-portal,
+[data-theme="dark"] .crypto-sandbox-container {
+  background-color: #090d16 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Topbar in Dark Mode */
+html.dark .gamified-topbar,
+[data-theme="dark"] .gamified-topbar {
+  background-color: #0f172a !important;
+  border-bottom: 1px solid #1e293b !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .topbar-brand-link span:first-of-type,
+[data-theme="dark"] .topbar-brand-link span:first-of-type {
+  color: #ffffff !important;
+}
+
+html.dark .crumb-active,
+[data-theme="dark"] .crumb-active {
+  color: #cbd5e1 !important;
+}
+
+html.dark .role-selector-trigger,
+[data-theme="dark"] .role-selector-trigger {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .role-trigger-name,
+[data-theme="dark"] .role-trigger-name {
+  color: #f8fafc !important;
+}
+
+/* Cards & Panels in Dark Mode */
+html.dark .template-hero-card,
+html.dark .template-this-week-card,
+html.dark .template-activity-card,
+html.dark .adm-card,
+html.dark .tr-session-card,
+html.dark .role-popover-card,
+html.dark .leaderboard-card,
+html.dark .modal-content,
+[data-theme="dark"] .template-hero-card,
+[data-theme="dark"] .template-this-week-card,
+[data-theme="dark"] .template-activity-card,
+[data-theme="dark"] .adm-card,
+[data-theme="dark"] .tr-session-card,
+[data-theme="dark"] .role-popover-card,
+[data-theme="dark"] .leaderboard-card,
+[data-theme="dark"] .modal-content {
+  background-color: #131b2e !important;
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .template-activity-card .activity-content,
+[data-theme="dark"] .template-activity-card .activity-content {
+  background-color: #131b2e !important;
+}
+
+html.dark .activity-content h3,
+[data-theme="dark"] .activity-content h3 {
+  color: #f8fafc !important;
+}
+
+html.dark .activity-meta,
+[data-theme="dark"] .activity-meta {
+  color: #94a3b8 !important;
+}
+
+/* Dashboard Nav Tabs */
+html.dark .template-nav-tabs,
+[data-theme="dark"] .template-nav-tabs {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+html.dark .template-tab-btn,
+[data-theme="dark"] .template-tab-btn {
+  color: #94a3b8 !important;
+}
+
+html.dark .template-tab-btn.active,
+[data-theme="dark"] .template-tab-btn.active {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Streak and Stat Pills */
+html.dark .gamified-stat-pill,
+[data-theme="dark"] .gamified-stat-pill {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Inputs, Selects & Tables */
+html.dark input,
+html.dark select,
+html.dark textarea,
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark input::placeholder,
+[data-theme="dark"] input::placeholder {
+  color: #64748b !important;
+}
+
+html.dark table,
+[data-theme="dark"] table {
+  color: #f1f5f9 !important;
+}
+
+html.dark th,
+[data-theme="dark"] th {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+  border-color: #334155 !important;
+}
+
+html.dark td,
+[data-theme="dark"] td {
+  border-color: #1e293b !important;
+}
+
+html.dark tr:hover td,
+[data-theme="dark"] tr:hover td {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* High-Contrast Mode */
+html.high-contrast,
+[data-contrast="high"] {
+  --cq-ink: #ffffff !important;
+  --cq-line: #ffffff !important;
+}
+
+html.high-contrast * {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Compact Density Mode */
+html.compact-density body {
+  font-size: 13px !important;
+}
+
+html.compact-density .template-activity-card,
+html.compact-density .adm-card,
+html.compact-density .tr-session-card {
+  padding: 12px 14px !important;
+}

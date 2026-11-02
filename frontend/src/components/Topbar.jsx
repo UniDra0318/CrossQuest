@@ -15,8 +15,16 @@ import {
   Eye,
   EyeOff,
   X,
-  ExternalLink
+  ExternalLink,
+  Zap,
+  Settings,
+  Sun,
+  Moon,
+  Palette
 } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import ProfileSettingsModal from './ProfileSettingsModal';
+import DevRoleSwitcherModal from './DevRoleSwitcherModal';
 import { useAuth } from '../contexts/AuthContext';
 import { toggleLeaderboardOptOut } from '../services/api';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
@@ -32,8 +40,11 @@ export default function Topbar({ activeViewTitle, streakDays }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
   const [optOut, setOptOut] = useState(false);
   const [optOutLoading, setOptOutLoading] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   const getRoleIcon = (role) => {
     switch(role) {
@@ -99,7 +110,66 @@ export default function Topbar({ activeViewTitle, streakDays }) {
         </div>
 
         {/* Right: Streak (Trainees only) and Functional Profile Menu */}
-        <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Prominent High-Visibility Dev Role Switcher Pill */}
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              className="dev-switcher-topbar-pill"
+              onClick={() => setShowRoleModal(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 14px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
+                color: '#ffffff',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 3px 10px rgba(245, 158, 11, 0.35)',
+                fontWeight: '800',
+                fontSize: '12px',
+                transition: 'transform 0.15s ease'
+              }}
+              title="Open Developer Role Switcher Sandbox (14 personas across 5 companies)"
+            >
+              <Zap size={14} />
+              <span>DEV ROLE SWITCHER</span>
+              <span style={{
+                padding: '2px 7px',
+                borderRadius: '999px',
+                background: 'rgba(255, 255, 255, 0.28)',
+                fontSize: '11px',
+                fontWeight: '800'
+              }}>
+                {currentUser?.name?.split(' ')[0] || 'User'}
+              </span>
+            </button>
+          )}
+
+          {/* Quick Dark Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: isDark ? '#1e293b' : '#f8fafc',
+              border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+              color: isDark ? '#38bdf8' : '#f59e0b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {isDark ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
+
           {/* Streak Pill - Trainees only */}
           {currentUser?.role === 'trainee' && (
             <div className="gamified-stat-pill streak-pill">
@@ -277,6 +347,35 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                     </div>
                   )}
 
+                  {/* Action: Profile & System Settings (Dark Mode, Preferences) */}
+                  <button
+                    type="button"
+                    onClick={() => { setShowSettingsModal(true); setProfileOpen(false); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '10px',
+                      background: isDark ? '#1e293b' : '#f8fafc',
+                      border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                      color: isDark ? '#f8fafc' : '#1e293b',
+                      fontSize: '12.5px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'background 0.15s ease'
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Settings size={15} color="#4f46e5" />
+                      <span>Profile & System Settings</span>
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#6366f1', fontWeight: '800' }}>
+                      {isDark ? '🌙 Dark' : '☀️ Light'}
+                    </span>
+                  </button>
+
                   {/* Action: View Cryptographic Details Modal */}
                   <button
                     type="button"
@@ -289,8 +388,8 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                       padding: '8px 12px',
                       borderRadius: '8px',
                       background: 'transparent',
-                      border: '1px solid #e2e8f0',
-                      color: '#334155',
+                      border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                      color: isDark ? '#cbd5e1' : '#334155',
                       fontSize: '12px',
                       fontWeight: '700',
                       cursor: 'pointer'
@@ -333,9 +432,50 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                     </button>
                   )}
 
-                  {/* Dev Role Switcher Section */}
+                  {/* Dev Role Switcher Section - Prominent & Highlighted */}
                   {import.meta.env.DEV && (
-                    <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '8px' }}>
+                    <div style={{
+                      borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9',
+                      paddingTop: '10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={() => { setShowRoleModal(true); setProfileOpen(false); }}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '10px 14px',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+                          border: '1.5px solid #fcd34d',
+                          color: '#92400e',
+                          fontSize: '12.5px',
+                          fontWeight: '800',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)'
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Zap size={16} color="#ea580c" />
+                          <span>⚡ DEV ROLE SWITCHER</span>
+                        </span>
+                        <span style={{
+                          padding: '2px 8px',
+                          borderRadius: '999px',
+                          background: '#f59e0b',
+                          color: '#ffffff',
+                          fontSize: '10.5px',
+                          fontWeight: '800'
+                        }}>
+                          14 PERSONAS
+                        </span>
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => setShowRoleSwitcher(!showRoleSwitcher)}
@@ -344,16 +484,16 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '6px 8px',
+                          padding: '4px 6px',
                           background: 'none',
                           border: 'none',
-                          color: '#64748b',
+                          color: isDark ? '#94a3b8' : '#64748b',
                           fontSize: '11px',
                           fontWeight: '700',
                           cursor: 'pointer'
                         }}
                       >
-                        <span>DEV ROLE SWITCHER</span>
+                        <span>Quick Inline Persona List</span>
                         <ChevronDown size={12} className={`role-chevron ${showRoleSwitcher ? 'open' : ''}`} />
                       </button>
 
@@ -362,8 +502,7 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '4px',
-                          marginTop: '6px',
-                          maxHeight: '320px',
+                          maxHeight: '260px',
                           overflowY: 'auto',
                           paddingRight: '4px'
                         }}>
@@ -387,8 +526,8 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                                     padding: '6px 10px',
                                     borderRadius: '6px',
                                     border: 'none',
-                                    background: isSelected ? '#eef2ff' : 'transparent',
-                                    color: isSelected ? '#4338ca' : '#334155',
+                                    background: isSelected ? (isDark ? '#1e293b' : '#eef2ff') : 'transparent',
+                                    color: isSelected ? '#4f46e5' : (isDark ? '#cbd5e1' : '#334155'),
                                     fontSize: '12px',
                                     fontWeight: isSelected ? '700' : '500',
                                     cursor: 'pointer',
@@ -398,7 +537,7 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                                 >
                                   <RoleIcon size={14} color={isSelected ? '#4f46e5' : '#94a3b8'} style={{ flexShrink: 0 }} />
                                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontWeight: isSelected ? '700' : '600', fontSize: '12px', color: isSelected ? '#4338ca' : '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    <span style={{ fontWeight: isSelected ? '700' : '600', fontSize: '12px', color: isSelected ? '#4338ca' : (isDark ? '#f8fafc' : '#1e293b'), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                       {u.name}
                                     </span>
                                     <span style={{ fontSize: '10px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -444,6 +583,18 @@ export default function Topbar({ activeViewTitle, streakDays }) {
           </div>
         </div>
       </header>
+
+      {/* Profile & System Settings Modal (Dark Mode, Preferences) */}
+      <ProfileSettingsModal 
+        isOpen={showSettingsModal} 
+        onClose={() => setShowSettingsModal(false)} 
+      />
+
+      {/* Developer Role Switcher Modal (Multi-Tenant Sandbox) */}
+      <DevRoleSwitcherModal 
+        isOpen={showRoleModal} 
+        onClose={() => setShowRoleModal(false)} 
+      />
 
       {/* Security & Cryptographic Clearance Modal */}
       {showDetailsModal && (
