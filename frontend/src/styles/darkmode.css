@@ -71,6 +71,15 @@ html.dark .crypto-sandbox-container,
   color: #f1f5f9 !important;
 }
 
+html.dark .enterprise-page-area:has(.quiz-active-fullscreen-root),
+[data-theme="dark"] .enterprise-page-area:has(.quiz-active-fullscreen-root) {
+  padding: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  background: transparent !important;
+}
+
 /* ==========================================================================
    2. TOPBAR & NAVIGATION HEADER
    ========================================================================== */

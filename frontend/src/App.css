@@ -548,6 +548,24 @@
   background-color: #ffffff;
 }
 
+.enterprise-page-area:has(.quiz-active-fullscreen-root),
+.enterprise-page-area:has(.quiz-fullscreen-wrapper) {
+  padding: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  overflow-x: hidden;
+}
+
+.quiz-active-fullscreen-root {
+  width: 100%;
+  min-height: calc(100vh - 65px);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .enterprise-page-area {
   flex: 1;
   padding: 28px;
@@ -2523,11 +2541,11 @@
 
 .briefing-card {
   width: 100%;
-  max-width: 820px;
+  max-width: 1060px;
   margin: 0 auto;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -2536,106 +2554,106 @@
 
 .briefing-header-bar {
   width: 100%;
-  padding: 12px 20px;
+  padding: 18px 28px;
   color: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   box-sizing: border-box;
 }
 
 .briefing-category-tag {
   display: inline-block;
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 9999px;
   margin-bottom: 2px;
 }
 
 .briefing-title {
   font-family: var(--font-fun);
-  font-size: 19px;
+  font-size: 22px;
   font-weight: 800;
   color: #ffffff;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .briefing-instructor {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
 .briefing-body {
-  padding: 12px 18px;
+  padding: 18px 28px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   background: transparent;
   box-sizing: border-box;
 }
 
 .briefing-section h3 {
   font-family: var(--font-fun);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   color: #f8fafc;
-  margin: 0 0 4px 0;
+  margin: 0 0 6px 0;
 }
 
 .briefing-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: #e2e8f0;
-  line-height: 1.45;
+  line-height: 1.5;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-left: 4px solid #a855f7;
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 10px;
+  padding: 10px 16px;
   margin: 0;
 }
 
 .briefing-metrics-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  gap: 10px;
 }
 
 .briefing-stat-tile {
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  padding: 6px 4px;
+  border-radius: 10px;
+  padding: 10px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 2px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  gap: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
 .briefing-stat-tile:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.25);
 }
 
 .stat-num {
   font-family: var(--font-fun);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   color: #ffffff;
 }
 
 .stat-label {
-  font-size: 9.5px;
+  font-size: 10px;
   color: #94a3b8;
   font-weight: 600;
 }
@@ -2643,21 +2661,21 @@
 .briefing-protection-alert {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.32);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 11px;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 11.5px;
   color: #6ee7b7;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .briefing-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-top: 6px;
+  gap: 12px;
+  padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 

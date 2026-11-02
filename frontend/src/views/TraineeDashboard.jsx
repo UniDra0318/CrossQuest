@@ -504,26 +504,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   // =========================================================================
   if (activeQuiz) {
     return (
-      <div className="dashboard-content-layout" style={{ maxWidth: '920px', margin: '0 auto', width: '100%', padding: '6px 12px 14px' }}>
-        <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-          <button 
-            type="button"
-            className="btn btn-secondary btn-sm flex-align gap-6"
-            onClick={handleQuizExit}
-            style={{ fontWeight: '700', borderRadius: '8px', padding: '5px 12px', fontSize: '11.5px' }}
-          >
-            <ArrowRight size={14} style={{ transform: 'rotate(180deg)' }} />
-            <span>Back to Quizzes Catalog</span>
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700', color: '#94a3b8' }}>
-            <span style={{ padding: '3px 8px', background: 'rgba(99, 102, 241, 0.2)', color: '#a5b4fc', border: '1px solid rgba(99, 102, 241, 0.35)', borderRadius: '999px', fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Interactive Assessment
-            </span>
-            <span>&bull;</span>
-            <span style={{ color: '#f8fafc', fontWeight: 800 }}>{activeQuiz.title}</span>
-          </div>
-        </div>
-
+      <div className="quiz-active-fullscreen-root" style={{ width: '100%', minHeight: 'calc(100vh - 65px)', margin: 0, padding: 0 }}>
         <QuizArena 
           quiz={activeQuiz}
           initialSession={null}
