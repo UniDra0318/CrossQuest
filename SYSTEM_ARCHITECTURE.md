@@ -6,7 +6,7 @@ The platform implements a **multi-tiered defense-in-depth data security architec
 1. **Layer 1: PostgreSQL Row-Level Security (RLS)** with cryptographically signed HMAC-SHA256 session contexts preventing unauthorized multi-tenant queries, backed by `FORCE ROW LEVEL SECURITY` and table ownership separation.
 2. **Layer 2: Ciphertext-Policy Attribute-Based Encryption (CP-ABE)** enforcing fine-grained, mathematical record-level access policies via Charm-Crypto BSW07 (`SS512` curve), fail-closed production guarantees, and AES-256-GCM envelope encryption.
 3. **Layer 3: Access Anomaly Detection Engine** executing continuous real-time monitoring of out-of-scope record access, dual-threshold brute-force attacks (Rule R2-b), high-volume data harvesting, bulk edits, and unauthorized deletions, augmented by an off-hours supporting indicator, dual-admin peer review, and a 12-month retention lifecycle.
-4. **Layer 4: Zero-Trust Gamified PWA** providing interactive training reinforcement, isolated answer keys (`quiz_answer_keys`), single-attempt scoring, withheld question correctness, class/company leaderboards with privacy opt-out, real-time activity streak sync, and disabled offline testing per `SEC-26`.
+4. **Layer 4: Zero-Trust Gamified PWA** providing interactive training reinforcement, isolated answer keys (`quiz_answer_keys`), single-attempt scoring, withheld question correctness, class/company leaderboards with privacy opt-out, resilient real-time streak synchronization, and disabled offline testing per `SEC-26`.
 
 ---
 
@@ -15,12 +15,23 @@ The platform implements a **multi-tiered defense-in-depth data security architec
 ```mermaid
 flowchart TB
     subgraph ClientLayer["Frontend Client Layer (React 19 + Vite PWA)"]
-        UI_Admin["Admin Security Console\n(/admin, /admin/access, /admin/vault)"]
-        UI_Staff["Account Manager Portal\n(/staff, /staff/portfolios, /staff/reports)"]
-        UI_Trainer["Lead Trainer Workbench\n(/trainer, /trainer/roster, /trainer/grade)"]
-        UI_Trainee["Trainee Gamified Quest PWA\n(/courses, /quizzes, /badges, /certifications)"]
-        UI_Finance["Finance Compliance View\n(/records, /compliance, /imports)"]
+        direction TB
+        subgraph Shell["Unified Shell Layout"]
+            Sidebar["Persistent Navigation Sidebar\n(Role-Specific Modules, Badges, Collapse)"]
+            Topbar["Sticky Topbar\n(Breadcrumbs, Trainee Streak Pill, Role Switcher,\nUser Profile Card Popover)"]
+        end
+
+        subgraph RoleViews["Role Dashboard Views & Workbenches"]
+            UI_Admin["Admin Security Console\n(/admin, /admin/access, /admin/vault,\nDiscreet CP-ABE Sandbox Entry)"]
+            UI_Staff["Account Manager Portal\n(/staff, /staff/portfolios, /staff/reports)"]
+            UI_Trainer["Lead Trainer Workbench\n(/trainer, /trainer/roster, /trainer/grade,\nMulti-Format Question Studio /quizzes)"]
+            UI_Trainee["Trainee Gamified Quest PWA\n(/courses, /quizzes, /badges, /certifications)"]
+            UI_Finance["Finance Compliance & Reconciliation Desk\n(/finance/reconciliation, /records, /compliance)"]
+            UI_CryptoLab["Interactive CP-ABE Cryptographic Sandbox\n(/crypto-lab - Admin Only Popover Access)"]
+        end
+
         PWA_Notice["Connectivity & Policy Controller\n(Offline Quizzes Disabled per SEC-26\nOnline attempt_id Idempotency Sync)"]
+        Shell --> RoleViews
     end
 
     subgraph APILayer["Backend Application Layer (FastAPI / Python 3.11+)"]
@@ -30,6 +41,7 @@ flowchart TB
 
         subgraph CoreEngines["Core Service Engines"]
             CPABE["CP-ABE Cryptographic Engine\n(Charm BSW07 / SS512 Curve / Fail-Closed Prod)"]
+            CryptoLabEngine["CP-ABE Sandbox & Tamper Evaluation Engine\n(Policy Parsing / Bit-Flip & AAD Alter Rejection)"]
             AttrMgr["Attribute Versioning & Re-keying\n(AWS KMS Envelope / 50-Record Batch Worker)"]
             Detector["Access Anomaly Engine\n(Dual-Threshold R2-b + S1 Off-Hours Indicator)"]
             PeerReview["Dual-Admin Alert Peer Review\n(AWAITING_UNINVOLVED_ADMIN Workflow)"]
@@ -38,7 +50,7 @@ flowchart TB
             PDFEngine["ReportLab PDF Engine\n(Certificates AAAYYYYMMDD-01 & AM-Only Reports)"]
             ImportPipe["Excel Ingestion Pipeline (openpyxl)\n(SHA-256, Allow-Listing, Cutoff, Pseudonymization)"]
             ScoringEngine["Isolated Quiz Scoring Engine\n(quiz_answer_keys / Single Scored Attempt)"]
-            StreakEngine["Real-Time Streak & Level Synchronizer\n(Consecutive-Day Tracking & Milestone Badges)"]
+            StreakEngine["Real-Time Streak & Level Synchronizer\n(Polymorphic Trainee Lookup & Token Auth)"]
         end
     end
 
@@ -73,15 +85,15 @@ CrossQuest enforces **5 internal user roles** with dual Administrator provisioni
 ```mermaid
 flowchart TD
     subgraph CrossworksCorp["Crossworks Internal Organization"]
-        Admin1["Primary Administrator (admin)\nFull system oversight & attribute management"]
+        Admin1["Primary Administrator (admin)\nFull oversight, attribute authority, discreet CP-ABE lab"]
         Admin2["Second Administrator (admin2@crossworks.ph)\nDual-custody & alert peer review (OI-29, OI-30)"]
         AM["Account Manager (account_manager)\nScoped strictly to assigned client companies"]
         Finance["Finance (finance)\nImport preparation, reconciliation reports, record edits; no delete"]
-        Trainer["Lead Trainer (trainer)\nScoped strictly to assigned cohorts; official session sign-off"]
+        Trainer["Lead Trainer (trainer)\nScoped to assigned cohorts; multi-format quiz studio & sign-off"]
     end
 
     subgraph TraineeCommunity["Corporate Learners"]
-        Trainee["Trainee (trainee)\nPersonal progress, live online quests, privacy-opted leaderboards"]
+        Trainee["Trainee (trainee)\nPersonal progress, live online quests, streak, privacy opt-out"]
     end
 
     subgraph ClientCompanies["Client Organizations (No Direct Logins)"]
@@ -97,10 +109,10 @@ flowchart TD
 
 | Role Key | Role Title | Permitted Operations | Row-Level Security Scope | Idle Timeout | CP-ABE Attribute Set |
 |---|---|---|---|---|---|
-| `admin` | Administrator | Full administrative oversight, user lifecycle management, attribute issuance, anomaly alert triage (peer-reviewed), certificate reissue, soft-deletion of records, audit review. | Full access to all rows across all client organizations. | **15 minutes** | `ROLEADMINV1` (Permits decryption of all enterprise records). |
+| `admin` | Administrator | Full administrative oversight, user lifecycle management, attribute issuance, anomaly alert triage (peer-reviewed), certificate reissue, soft-deletion of records, audit review, **CP-ABE Cryptographic Sandbox access (`/crypto-lab`)**. | Full access to all rows across all client organizations. | **15 minutes** | `ROLEADMINV1` (Permits decryption of all enterprise records). |
 | `account_manager` | Account Manager | Record creation, attendance & pre-completion status recording, assigned client training report generation (`OI-04`). | Scoped strictly to client organizations assigned in `account_manager_assignments`. | **30 minutes** | `ROLEACCTMGRV1`, `CLIENT<COMP>V1` (e.g. `CLIENTCORPALPHAV1`). |
 | `finance` | Finance Staff | Import batch preparation, discrepancy resolution review, reconciliation report generation, record editing with audit versioning. **Cannot delete records**. | Access to all non-deleted rows enterprise-wide. | **15 minutes** | `ROLEFINANCEV1` (Decryption of financial/training assessment payloads). |
-| `trainer` | Lead Trainer | Training cohort management, trainee evaluation, practical lab grading, quiz authoring, official session sign-off (`OI-04`). | Scoped strictly to training cohorts assigned in `trainer_assignments`. | **30 minutes** | `ROLETRAINERV1`, `TRAINING<SESS>V1` (e.g. `TRAININGCYBER101V1`). |
+| `trainer` | Lead Trainer | Training cohort management, trainee evaluation, multi-format quiz authoring (Kahoot 4-tile, text identification, sequence ordering, diagram hotspot), official session sign-off (`OI-04`). | Scoped strictly to training cohorts assigned in `trainer_assignments`. | **30 minutes** | `ROLETRAINERV1`, `TRAINING<SESS>V1` (e.g. `TRAININGCYBER101V1`). |
 | `trainee` | Corporate Trainee | Personal profile viewing, online quiz participation, streak tracking, certificate downloading, pseudonymized class/company leaderboards with privacy opt-out. | Scoped strictly to own user record (`user_id = current_user_id`). | **60 minutes** | `TRAINEE<ID>V1` (Accesses personal records across historical companies). |
 
 ---
@@ -288,7 +300,7 @@ flowchart TD
 
 ---
 
-### 3.5 Process 5: Trainer Sign-Off, ReportLab Certificates, & AM Reporting (`OI-04`, `OI-10`)
+### 3.5 Process 5: Multi-Format Question Studio, Trainer Sign-Off, ReportLab Certificates, & AM Reporting (`OI-04`, `OI-10`)
 
 CrossQuest enforces clear organizational boundaries between attendance management, session sign-off, certificate generation, and client reporting:
 
@@ -301,11 +313,15 @@ sequenceDiagram
     participant PDF as ReportLab PDF Engine
     participant DB as PostgreSQL Database
 
+    Note over Trainer,System: Multi-Format Question Creation Studio (/trainer/pages/Quiz.jsx)
+    Trainer->>System: POST /api/v1/gamification/quizzes/{id}/questions
+    Note over Trainer,System: Supported Formats: Kahoot 4-Tile, Text Identification, Sequence Ordering, Diagram Hotspot
+
     AM->>System: Record Participant Attendance & Pre-Completion Statuses
     Note over AM,System: Statuses: Enrolled, In progress, Not completed
     
     Trainer->>System: POST /api/v1/records/sessions/{session_id}/sign-off
-    Note over Trainer,System: Official Sign-Off: Confirms 'Completed' Statuses
+    Note over Trainer,System: Official Sign-Off: Confirms 'Completed' Statuses (Future dates rejected)
     
     System->>DB: Update TrainingSession.trainer_signed_off = True
     System->>DB: Transition confirmed participant records to 'Completed'
@@ -360,18 +376,28 @@ flowchart TD
 
 ---
 
-### 3.7 Process 7: Trainee Gamification, Isolated Answer Keys, & PWA Security (`SEC-26`, `OI-03`)
+### 3.7 Process 7: Trainee Gamification, Polymorphic Streak Sync, & PWA Security (`SEC-26`, `OI-03`)
 
-The trainee compliance reinforcement experience enforces zero-trust evaluation, isolated answer keys, and disabled offline assessments:
+The trainee compliance reinforcement experience enforces zero-trust evaluation, isolated answer keys, resilient streak retrieval, and disabled offline assessments:
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Trainee as Trainee Learner
-    participant UI as Trainee Dashboard PWA
-    participant GamAPI as Gamification API (/submit-quiz)
+    participant UI as Trainee Dashboard PWA (Topbar / Dashboard)
+    participant GamAPI as Gamification API (/gamification)
     participant AnswerVault as Isolated quiz_answer_keys Table
     participant DB as PostgreSQL Database
+
+    Note over UI,GamAPI: Streak & XP Retrieval via Bearer Token
+    UI->>GamAPI: GET /api/v1/gamification/trainee/{id_or_user_or_email} (Authorization: Bearer <token>)
+    GamAPI->>DB: Polymorphic Lookup: Trainee.id == id OR user_id == id OR email == id OR trainee_code == id
+    alt Record Found
+        GamAPI-->>UI: Return GamificationProgress (streak_days, total_points, level)
+    else Fallback Default
+        GamAPI-->>UI: Return Resilient Fallback (streak_days=1, total_points=0)
+    end
+    UI->>UI: Render Live Streak Pill in Topbar (e.g. 7 DAY STREAK)
 
     Note over UI: Online Network Detection (SEC-26)
     alt Device is Offline (navigator.onLine == False)
@@ -390,7 +416,7 @@ sequenceDiagram
         GamAPI->>GamAPI: Score submission strictly on server; compute XP
         GamAPI->>DB: Insert QuizAttempt (score, points, is_scored=True)
         GamAPI->>DB: Update GamificationProgress (level, badges)
-        GamAPI->>DB: Sync Consecutive-Day Activity Streak
+        GamAPI->>DB: Increment Consecutive-Day Activity Streak
         
         alt Quiz is Open (is_closed == False)
             GamAPI-->>UI: Return Score & Points; WITHHOLD Per-Question Explanations
@@ -406,6 +432,58 @@ sequenceDiagram
     GamAPI-->>UI: Return Company Rankings (Opted-Out Trainees EXCLUDED)
     UI->>GamAPI: GET /api/v1/gamification/leaderboard/class?session_id=...
     GamAPI-->>UI: Return Class Session Rankings
+```
+
+---
+
+### 3.8 Process 8: Interactive CP-ABE Cryptographic Sandbox & Tamper Evaluation (`/crypto-lab`)
+
+For research defense demonstration and cryptographic validation, an interactive sandbox is provisioned for system administrators:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as System Administrator
+    participant Topbar as Topbar Profile Menu
+    participant LabView as CryptoSandboxLab (/crypto-lab)
+    participant LabAPI as Crypto Lab API (/api/v1/crypto-lab)
+    participant Engine as CP-ABE BSW07 Engine
+
+    Admin->>Topbar: Open User Profile Popover (topbar-user-avatar)
+    Note over Topbar: Access Check: userRole === 'admin'
+    Topbar->>Admin: Reveal Discreet "CP-ABE Cryptographic Lab" Action
+    Admin->>LabView: Navigate to /crypto-lab
+    
+    LabView->>LabAPI: GET /api/v1/crypto-lab/personas
+    LabAPI-->>LabView: Return 6 Capstone Personas (Admin, AM Alpha, AM Beta, Trainee, Trainer, Adversary)
+    
+    Admin->>LabView: Define Record Payload & CP-ABE Access Policy
+    Note over LabView: Example: ROLEADMIN or (ROLEACCTMGR and CLIENTCORPALPHAV1) or TRAINEETRN9021
+    Admin->>LabView: Click "Encrypt Payload"
+    LabView->>LabAPI: POST /api/v1/crypto-lab/encrypt
+    LabAPI->>Engine: Generate AES-256-GCM DEK, Encrypt Payload, Encrypt DEK under Policy
+    Engine-->>LabAPI: Return abe_ciphertext, payload_ciphertext, nonce, AAD
+    LabAPI-->>LabView: Display Formatted Ciphertext & Mathematical Pairing Node Tree
+    
+    alt Authorized Persona Evaluation (e.g. AM Marcus Reyes)
+        Admin->>LabView: Select Persona & Click "Attempt Decryption"
+        LabView->>LabAPI: POST /api/v1/crypto-lab/decrypt (simulate_tamper="NONE")
+        LabAPI->>Engine: Evaluate Attribute Overlap with Policy Tree
+        Engine-->>LabAPI: Decryption Status: GRANTED (Policy Satisfied)
+        LabAPI-->>LabView: Render Decrypted Training Assessment & Benchmark Timing
+    else Unauthorized Persona Evaluation (e.g. Competitor AM Andrea Salazar / Adversary)
+        Admin->>LabView: Select Competitor Persona & Attempt Decryption
+        LabView->>LabAPI: POST /api/v1/crypto-lab/decrypt
+        LabAPI->>Engine: Evaluate Attribute Overlap
+        Engine-->>LabAPI: Decryption Status: DENIED_POLICY_UNSATISFIED
+        LabAPI-->>LabView: Display Policy Denial & Zero Plaintext Leakage
+    else Active Tampering Attack Simulation (Bit-Flip or AAD Alteration)
+        Admin->>LabView: Select "Simulate Ciphertext Bit-Flip Attack" & Submit
+        LabView->>LabAPI: POST /api/v1/crypto-lab/decrypt (simulate_tamper="CIPHERTEXT_BIT_FLIP")
+        LabAPI->>Engine: Tamper Ciphertext Byte prior to GCM Verification
+        Engine-->>LabAPI: Decryption Status: REJECTED_TAMPER_DETECTED (Integrity Verification Failed)
+        LabAPI-->>LabView: Display Cryptographic Integrity Alert & Rejection
+    end
 ```
 
 ---
@@ -428,6 +506,7 @@ d:\Projects\CrossQuest\
 │   │   │       ├── anomalies.py        # Peer review workflow (AWAITING_UNINVOLVED_ADMIN), threshold tuning audit
 │   │   │       ├── attributes.py       # Attribute versioning, Tier-2 re-encryption batch worker (50/batch), re-keying
 │   │   │       ├── certifications.py   # ReportLab PDF certificate generation (AAAYYYYMMDD-01), admin reissue with reason
+│   │   │       ├── crypto_lab.py       # CP-ABE interactive sandbox, defense personas, policy evaluation & tamper injection
 │   │   │       ├── gamification.py     # Isolated quiz scoring, single-attempt enforcement, streak sync, leaderboards with opt-out
 │   │   │       ├── imports.py          # Excel import (openpyxl), SHA-256 deduplication, allow-listing, quarantine, reconciliation PDF
 │   │   │       ├── reports.py          # Account Manager-only client performance report generation and PDF exports (OI-04)
@@ -457,27 +536,68 @@ d:\Projects\CrossQuest\
 │       ├── test_anomaly_detection.py   # Rules R1-R4, R2-b dual-threshold, S1 off-hours, peer review, 12m retention (27 tests)
 │       ├── test_attribute_versioning.py# KMS envelope encryption, 40-attribute key growth, Tier-2 batch re-encryption (20 tests)
 │       ├── test_cert_scheduler.py      # Dynamic cert status, daily 06:00 sweep, dual notifications (7 tests)
+│       ├── test_crypto_lab.py          # CP-ABE cryptographic sandbox, personas, policy verification, tamper rejection (2 tests)
 │       ├── test_crypto_primitives.py   # SS512 pairing curve, BSW07 CP-ABE, AES-256-GCM, fail-closed production check (11 tests)
 │       ├── test_gamification_pwa.py    # Isolated answer keys, offline quiz disabled, streak sync, leaderboard opt-out (12 tests)
 │       ├── test_performance_concurrency.py # Monotonic nanosecond timing, sub-200ms API response under concurrent load (1 test)
 │       ├── test_pilot_import.py        # Excel upload, allow-listing, August 1 cutoff, pseudonymization, reconciliation PDF (11 tests)
-│       ├── test_reports.py             # Account Manager-only client performance reports and scoping verification (4 tests)
+│       ├── test_reports.py             # Account Manager-only client performance reports and scoping verification (7 tests)
 │       ├── test_rls_policies.py        # FORCE RLS policies, caller-bound key access, HMAC signature verification (5 tests)
 │       ├── test_role_boundaries.py     # 5-role boundary matrix & negative access tests across all endpoints (15 tests)
 │       ├── test_security_headers_zap.py# OWASP ZAP security headers, CSRF headers, anti-clickjacking (1 test)
 │       ├── test_thesis_compliance.py   # Chapter III architectural compliance verification (8 tests)
-│       └── test_training_workflow.py   # Trainer session sign-off, 4 completion statuses, ReportLab PDF certs (7 tests)
+│       └── test_training_workflow.py   # Trainer session sign-off, 4 completion statuses, ReportLab PDF certs (9 tests)
 ├── frontend/
 │   ├── src/
-│   │   ├── api/                        # Role-tailored API client modules (admin, staff, trainer, learner)
-│   │   ├── assets/                     # Mascot images, official Crossworks logo graphics, signatory stamp assets
-│   │   ├── components/                 # Reusable UI widgets (QuizArena, QuizStudio, ReportsView, BitMascot, etc.)
-│   │   ├── contexts/                   # AuthContext (MFA challenge, CSRF headers, idle timeout detection)
-│   │   ├── services/                   # Central Axios client with X-CrossQuest-CSRF header and token rotation
-│   │   ├── staff/                      # Account Manager portal (portfolios, record vault, AM client reports)
-│   │   ├── trainer/                    # Lead Trainer workbench (cohorts, rosters, grading, session sign-off)
-│   │   └── views/                      # Role dashboard views (Admin, Company, Trainee, Trainer, Staff)
-│   ├── vite.config.js                  # Vite bundler configuration and dev proxy settings
+│   │   ├── api/                        # Role-tailored API client modules (admin.js, staff.js, trainer.js, learner.js)
+│   │   ├── assets/                     # Official brand assets (crossquest-logo-stacked.svg, robot mascot, hero)
+│   │   ├── components/                 # Core reusable UI widgets & layout elements
+│   │   │   ├── AdminPeerReviewAnomalyDesk.jsx # Dual-admin alert peer review & justification desk
+│   │   │   ├── AnomaliesView.jsx       # Real-time anomaly incident log & severity escalation feed
+│   │   │   ├── BadgeCoin.jsx           # Gamified achievement badge 3D rendering component
+│   │   │   ├── ErrorBoundary.jsx       # React application error boundary & graceful crash recovery
+│   │   │   ├── FinanceReconciliationDesk.jsx # Pilot Excel staging, quarantine resolution & PDF export
+│   │   │   ├── InstallPwaModal.jsx     # Zero-trust PWA installation modal & offline status banner
+│   │   │   ├── IsoCube.jsx             # Isometric geometric UI graphics component
+│   │   │   ├── IsometricIcons.jsx      # Specialized SVG isometric icon system
+│   │   │   ├── LoadingSkeleton.jsx     # Shimmer skeleton loader for low-latency perceived performance
+│   │   │   ├── LoginView.jsx           # Dual-stage login view (Argon2id + TOTP MFA enrollment & challenge)
+│   │   │   ├── Mascot.jsx              # Mascot animation and dialog container
+│   │   │   ├── MatchingQuestion.jsx    # Interactive question type for sequence & association matching
+│   │   │   ├── Podium.jsx              # Leaderboard top-3 winner podium widget
+│   │   │   ├── QuestMap.jsx            # Interactive gamified learning path and stop node map
+│   │   │   ├── QuizArena.jsx           # Live online quiz assessment interface (withheld answers until close)
+│   │   │   ├── QuizDiagram.jsx         # Diagram hotspot question viewer and response selector
+│   │   │   ├── QuizStudio.jsx          # Embedded question authoring workbench component
+│   │   │   ├── RecordsView.jsx         # CP-ABE encrypted training record table & live decryption trigger
+│   │   │   ├── ReportsView.jsx         # Executive training analytics and ReportLab PDF download workbench
+│   │   │   ├── SecurityDashboard.jsx   # Top-level security monitoring overview and metrics summary
+│   │   │   ├── Sidebar.jsx             # Persistent collapsible left navigation sidebar with role-filtered routes
+│   │   │   ├── SpinCube.jsx            # 3D animated cube loader widget
+│   │   │   ├── StreakCard.jsx          # Trainee streak summary & milestone progress widget
+│   │   │   ├── Topbar.jsx              # Sticky topbar: view breadcrumbs, streak pill, role switcher, profile popover
+│   │   │   ├── TraineePortal.jsx       # Trainee dashboard wrapper and course navigation controller
+│   │   │   └── BitMascot/              # Dedicated Bit mascot sprite styling and animation components
+│   │   ├── contexts/                   # AuthContext (JWT, TOTP MFA challenge, CSRF headers, idle timeouts)
+│   │   ├── services/                   # Central Axios client (X-CrossQuest-CSRF, automatic refresh token rotation)
+│   │   ├── staff/                      # Account Manager workbench & client company management
+│   │   │   ├── StaffContext.jsx        # Account Manager client selection & scoping context
+│   │   │   ├── StaffLayout.jsx         # Scoped AM shell layout wrapper
+│   │   │   └── pages/                  # AM view pages (Portfolios.jsx, RecordVault.jsx, Reports.jsx)
+│   │   ├── trainer/                    # Lead Trainer workbench & evaluation studio
+│   │   │   ├── TrainerContext.jsx      # Trainer cohort & active session context
+│   │   │   ├── TrainerLayout.jsx       # Lead Trainer shell layout wrapper
+│   │   │   └── pages/                  # Trainer pages (Analytics.jsx, Cohorts.jsx, Grade.jsx, Quiz.jsx, Roster.jsx)
+│   │   └── views/                      # Canonical top-level view routing components
+│   │       ├── ActivateAccount.jsx     # First-time user onboarding & initial credential activation
+│   │       ├── AdminDashboard.jsx      # Master administrator overview & security metrics
+│   │       ├── CompanyDashboard.jsx    # Corporate tenant view & Finance reconciliation portal
+│   │       ├── CryptoSandboxLab.jsx    # Interactive CP-ABE cryptographic lab & tamper evaluation sandbox
+│   │       ├── LandingView.jsx         # Public landing page with system capabilities and login trigger
+│   │       ├── StaffDashboard.jsx      # Account Manager client dashboard
+│   │       ├── TraineeDashboard.jsx    # Trainee quest portal, course modules, streak pill & badges
+│   │       └── TrainerDashboard.jsx    # Lead Trainer cohort administration & sign-off workbench
+│   ├── vite.config.js                  # Vite bundler configuration, PWA manifest, and dev proxy settings
 │   └── package.json                    # Frontend dependencies (React 19, Lucide, Axios, Tailwind/CSS)
 └── README.md                           # Quickstart guide and repository documentation
 ```
@@ -552,7 +672,7 @@ Every access event processed by CrossQuest is evaluated against **Chapter III Ta
 
 ---
 
-## 7. Verification & Automated Test Suite (142 Tests)
+## 7. Verification & Automated Test Suite (149 Tests across 15 Modules)
 
 The comprehensive automated pytest suite guarantees 100% verification across all Chapter III requirements, Table 28 test cases, and Phases 0–6:
 
@@ -562,17 +682,18 @@ The comprehensive automated pytest suite guarantees 100% verification across all
 | **`TC-ANO-01..27`** | [`backend/tests/test_anomaly_detection.py`](file:///d:/Projects/CrossQuest/backend/tests/test_anomaly_detection.py) | 27 | Rules R1-R4, Rule R2-b dual-threshold, S1 off-hours escalation, alert peer review (`AWAITING_UNINVOLVED_ADMIN` `OI-30`), 12-month retention purge (`OI-20`), audited threshold tuning (`OI-08`), detection quality measurement (270 trials, p95 = 40.43ms). | **27/27 PASSED** |
 | **`TC-ATT-01..20`** | [`backend/tests/test_attribute_versioning.py`](file:///d:/Projects/CrossQuest/backend/tests/test_attribute_versioning.py) | 20 | Attribute token versioning, KMS envelope encryption (10,368-byte BSW07 key wrapping `TC-CRY-12`), Tier-2 revocation batching job (`OI-16`), crypto-shredding key zeroization. | **20/20 PASSED** |
 | **`TC-CRT-01..07`** | [`backend/tests/test_cert_scheduler.py`](file:///d:/Projects/CrossQuest/backend/tests/test_cert_scheduler.py) | 7 | Dynamic certification status calculation, daily 06:00 PHT sweep, threshold offsets (90d, 60d, 30d, 0d), dual-recipient notifications. | **7/7 PASSED** |
+| **`TC-LAB-01..02`** | [`backend/tests/test_crypto_lab.py`](file:///d:/Projects/CrossQuest/backend/tests/test_crypto_lab.py) | 2 | Capstone defense persona retrieval, multi-tenant policy encryption/decryption, unauthorized isolation, and ciphertext bit-flip tamper rejection. | **2/2 PASSED** |
 | **`TC-CRY-01..11`** | [`backend/tests/test_crypto_primitives.py`](file:///d:/Projects/CrossQuest/backend/tests/test_crypto_primitives.py) | 11 | `SS512` pairing curve feasibility (`TC-CRY-01`), Charm BSW07 CP-ABE, AES-256-GCM cipher suite, AAD record binding, fail-closed production check (`SEC-04`). | **11/11 PASSED** |
-| **`TC-GAM/PWA-01..12`** | [`backend/tests/test_gamification_pwa.py`](file:///d:/Projects/CrossQuest/backend/tests/test_gamification_pwa.py) | 12 | Disabled offline quizzes (`SEC-26`), isolated answer keys (`quiz_answer_keys`), server-side scoring, single scored attempt per quiz version, withheld question correctness, class/company leaderboards with opt-out (`OI-03`), real-time streak sync. | **12/12 PASSED** |
+| **`TC-GAM/PWA-01..12`** | [`backend/tests/test_gamification_pwa.py`](file:///d:/Projects/CrossQuest/backend/tests/test_gamification_pwa.py) | 12 | Disabled offline quizzes (`SEC-26`), isolated answer keys (`quiz_answer_keys`), server-side scoring, single scored attempt per quiz version, withheld question correctness, class/company leaderboards with opt-out (`OI-03`), resilient real-time streak sync. | **12/12 PASSED** |
 | **`TC-PER-01`** | [`backend/tests/test_performance_concurrency.py`](file:///d:/Projects/CrossQuest/backend/tests/test_performance_concurrency.py) | 1 | Monotonic nanosecond timer benchmarking (`perf_counter_ns`), sub-200ms API response latency under concurrent query load. | **1/1 PASSED** |
 | **`TC-DAT-01..11`** | [`backend/tests/test_pilot_import.py`](file:///d:/Projects/CrossQuest/backend/tests/test_pilot_import.py) | 11 | Pilot Excel upload (`openpyxl`), SHA-256 deduplication, field allow-listing, August 1 2026 cutoff, in-memory pseudonymization, duplicate quarantine, discrepancy resolution with reason, Finance reconciliation PDF (149 rows, 39 clients). | **11/11 PASSED** |
-| **`TC-RPT-01..04`** | [`backend/tests/test_reports.py`](file:///d:/Projects/CrossQuest/backend/tests/test_reports.py) | 4 | Client report generation restricted strictly to assigned Account Managers (`OI-04`), report burst anomaly checks. | **4/4 PASSED** |
+| **`TC-RPT-01..07`** | [`backend/tests/test_reports.py`](file:///d:/Projects/CrossQuest/backend/tests/test_reports.py) | 7 | Client report generation restricted strictly to assigned Account Managers (`OI-04`), cross-client authorization boundaries, report burst anomaly checks, status/date filtering, ReportLab PDF download. | **7/7 PASSED** |
 | **`TC-RLS-01..05`** | [`backend/tests/test_rls_policies.py`](file:///d:/Projects/CrossQuest/backend/tests/test_rls_policies.py) | 5 | PostgreSQL `FORCE ROW LEVEL SECURITY`, `internal_security.app_ctx_get` HMAC-SHA256 verification, restricted caller-bound key access (`SEC-24`), signature tampering rejection. | **5/5 PASSED** |
 | **`TC-XCL-01..15`** | [`backend/tests/test_role_boundaries.py`](file:///d:/Projects/CrossQuest/backend/tests/test_role_boundaries.py) | 15 | Strict 5-role boundary testing; negative access verification across all endpoints (Trainers, AMs, Finance, Admin, Trainee). | **15/15 PASSED** |
 | **`TC-SEC-01`** | [`backend/tests/test_security_headers_zap.py`](file:///d:/Projects/CrossQuest/backend/tests/test_security_headers_zap.py) | 1 | OWASP ZAP security headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Content-Security-Policy`. | **1/1 PASSED** |
 | **`TC-THE-01..08`** | [`backend/tests/test_thesis_compliance.py`](file:///d:/Projects/CrossQuest/backend/tests/test_thesis_compliance.py) | 8 | Chapter III architectural compliance verification and metric invariants. | **8/8 PASSED** |
-| **`TC-TRN-01..07`** | [`backend/tests/test_training_workflow.py`](file:///d:/Projects/CrossQuest/backend/tests/test_training_workflow.py) | 7 | Trainer session sign-off workflow (`OI-04`), four completion statuses, ReportLab PDF certificates (`AAAYYYYMMDD-01`), Admin certificate reissue with logged reason, trainee HTTPS credential renewals. | **7/7 PASSED** |
-| **TOTAL** | **14 Test Modules** | **142** | **Full System Defense-in-Depth Verification** | **142/142 PASSED (100%)** |
+| **`TC-TRN-01..09`** | [`backend/tests/test_training_workflow.py`](file:///d:/Projects/CrossQuest/backend/tests/test_training_workflow.py) | 9 | Trainer session sign-off workflow (`OI-04`), four completion statuses, ReportLab PDF certificates (`AAAYYYYMMDD-01`), Admin certificate reissue with logged reason, trainee HTTPS credential renewals, future date rejection, assigned session queries. | **9/9 PASSED** |
+| **TOTAL** | **15 Test Modules** | **149** | **Full System Defense-in-Depth Verification** | **149/149 PASSED (100%)** |
 
 ---
 
@@ -587,5 +708,7 @@ The comprehensive automated pytest suite guarantees 100% verification across all
    - BSW07 private keys with up to 40 client attributes reach 10,368 bytes, which exceeds the direct 4,096-byte AWS KMS encryption limit. Envelope encryption via 32-byte AES-256-GCM DEKs wraps all key materials into an 80-byte encrypted payload.
 4. **PWA Offline Policy Enforced (`SEC-26`)**:
    - Question caching and offline sync queues are disabled (`ENABLE_OFFLINE_QUIZZES=False`). Trainees must be connected to take and submit quizzes; attempts are deduplicated using online UUID `attempt_id`.
-5. **Codebase Normalization**:
-   - All source files across `backend/` and `frontend/src/` adhere strictly to Windows native CRLF line endings (`\r\n`), ensuring 0 errors across Pyrefly and TypeScript language servers.
+5. **Discreet CP-ABE Sandbox Entry (`/crypto-lab`)**:
+   - Accessible only to the `admin` role via an action inside the interactive User Profile popover card in the top navigation bar, preventing UI clutter while preserving full capstone defense capabilities.
+6. **Codebase Normalization & Line Endings**:
+   - All source files across `backend/` and `frontend/src/` adhere strictly to Windows native CRLF line endings (`\r\n`), ensuring 0 errors across Pyrefly, TypeScript, and Vite toolchains.
