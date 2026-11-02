@@ -1,6 +1,7 @@
 export const QUIZ_THEMES = [
   {
     id: 'cyber_grid',
+    animClass: 'theme-anim-cyber-grid',
     name: 'Cyber Grid',
     tagline: 'Neon isometric matrix grid',
     icon: '⚡',
@@ -32,6 +33,7 @@ export const QUIZ_THEMES = [
   },
   {
     id: 'cosmic_nebula',
+    animClass: 'theme-anim-cosmic-nebula',
     name: 'Cosmic Nebula',
     tagline: 'Deep space stellar galaxy',
     icon: '🌌',
@@ -62,6 +64,7 @@ export const QUIZ_THEMES = [
   },
   {
     id: 'retro_synthwave',
+    animClass: 'theme-anim-retro-synthwave',
     name: 'Retro Synthwave',
     tagline: '80s arcade neon sunset',
     icon: '🌇',
@@ -92,6 +95,7 @@ export const QUIZ_THEMES = [
   },
   {
     id: 'emerald_matrix',
+    animClass: 'theme-anim-emerald-matrix',
     name: 'Emerald Matrix',
     tagline: 'Bio-tech digital flow',
     icon: '🌿',
@@ -123,6 +127,7 @@ export const QUIZ_THEMES = [
   },
   {
     id: 'ocean_abyss',
+    animClass: 'theme-anim-ocean-abyss',
     name: 'Ocean Abyssal',
     tagline: 'Bioluminescent deep sea trench',
     icon: '🌊',
@@ -152,6 +157,7 @@ export const QUIZ_THEMES = [
   },
   {
     id: 'obsidian_zen',
+    animClass: 'theme-anim-obsidian-zen',
     name: 'Obsidian Zen',
     tagline: 'Minimalist focus mode',
     icon: '🖤',
