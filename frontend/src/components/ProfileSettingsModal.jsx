@@ -729,3 +729,4 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
     </div>
   );
 }
+

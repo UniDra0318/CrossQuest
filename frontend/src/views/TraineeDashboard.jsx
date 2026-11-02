@@ -572,11 +572,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: isActive ? '700' : '600',
-                color: isActive ? '#4338ca' : '#64748b',
-                background: isActive ? '#eef2ff' : '#ffffff',
-                border: isActive ? '1px solid #c7d2fe' : '1px solid #e2e8f0',
                 cursor: 'pointer',
-                boxShadow: isActive ? '0 1px 3px rgba(67, 56, 202, 0.1)' : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
@@ -933,7 +929,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
       {/* 3. EARNED BADGES SUB-VIEW */}
       {currentTab === 'trainee_badges' && (
-        <div className="card section-card p-24" style={{ background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+        <div className="card section-card p-24" style={{ borderRadius: '16px', border: '1px solid #e2e8f0' }}>
           <div className="card-header-bar mb-16" style={{ padding: '0 0 16px', borderBottom: '1px solid #f1f5f9' }}>
             <div>
               <h3 className="card-title" style={{ fontSize: '20px', fontWeight: '800', color: '#1e1b4b', marginBottom: '4px' }}>

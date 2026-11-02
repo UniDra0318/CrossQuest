@@ -21,10 +21,13 @@ import {
   CheckCircle,
   FileText,
   Shuffle,
-  LogOut
+  LogOut,
+  Palette,
+  ChevronDown
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
 import MatchingQuestion from './MatchingQuestion';
+import { QUIZ_THEMES, getQuizTheme, DEFAULT_QUIZ_THEME_ID } from '../data/quizThemes';
 
 const KAHOOT_TILES = [
   { key: 0, symbol: '▲', colorClass: 'tile-red', bg: '#e21b3c', shadow: '#a1122a' },
@@ -97,6 +100,27 @@ function prepareQuizQuestions(quiz, initialSession) {
 
 export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  // Background Theme State
+  const [quizThemeId, setQuizThemeId] = useState(() => {
+    try {
+      return localStorage.getItem('crossquest_quiz_bg_theme') || DEFAULT_QUIZ_THEME_ID;
+    } catch {
+      return DEFAULT_QUIZ_THEME_ID;
+    }
+  });
+  const [showThemePicker, setShowThemePicker] = useState(false);
+
+  const activeTheme = getQuizTheme(quizThemeId);
+
+  const handleSelectTheme = (themeId) => {
+    setQuizThemeId(themeId);
+    try {
+      localStorage.setItem('crossquest_quiz_bg_theme', themeId);
+    } catch (e) {
+      console.warn('Failed to save quiz theme preference:', e);
+    }
+  };
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -367,8 +391,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // ==========================================
   if (stage === 'briefing') {
     return (
-      <div className="quiz-fullscreen-wrapper">
-        <div className="briefing-card">
+      <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, minHeight: '100vh', width: '100%', borderRadius: '24px', padding: '24px', transition: 'all 0.3s ease' }}>
+        <div className="briefing-card" style={{ ...activeTheme.cardStyle }}>
           <div className="briefing-header-bar" style={{ backgroundColor: quiz.headerColor }}>
             <span className="briefing-category-tag">{quiz.category}</span>
             <h1 className="briefing-title">{quiz.title}</h1>
@@ -379,6 +403,75 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             <div className="briefing-section">
               <h3>Scenario & Assessment Background</h3>
               <p className="briefing-desc">{quiz.description}</p>
+            </div>
+
+            {/* Interactive Background Theme Selector */}
+            <div className="briefing-theme-picker-section" style={{
+              margin: '18px 0 24px',
+              padding: '16px 18px',
+              borderRadius: '16px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.12)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <span style={{ fontSize: '13px', fontWeight: '800', color: activeTheme.accent, display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <Palette size={16} />
+                  <span>Choose Arena Atmosphere & Theme ({QUIZ_THEMES.length} Themes)</span>
+                </span>
+                <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                  Active: <strong>{activeTheme.name}</strong>
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                {QUIZ_THEMES.map(th => {
+                  const isSel = th.id === quizThemeId;
+                  return (
+                    <div
+                      key={th.id}
+                      onClick={() => handleSelectTheme(th.id)}
+                      style={{
+                        ...th.bgStyle,
+                        padding: '12px 14px',
+                        borderRadius: '14px',
+                        border: isSel ? `2px solid ${th.accent}` : '1.5px solid rgba(255,255,255,0.15)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        boxShadow: isSel ? `0 0 16px ${th.accent}66` : 'none',
+                        transition: 'all 0.2s ease',
+                        position: 'relative'
+                      }}
+                    >
+                      <span style={{ fontSize: '20px' }}>{th.icon}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: '800', fontSize: '12px', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {th.name}
+                        </div>
+                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {th.tagline}
+                        </div>
+                      </div>
+                      {isSel && (
+                        <div style={{
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          background: th.accent,
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                          fontWeight: '800'
+                        }}>
+                          ✓
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="briefing-metrics-grid">
@@ -460,8 +553,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const historyList = Object.values(answersHistory);
 
     return (
-      <div className="quiz-fullscreen-wrapper">
-        <div className="results-card">
+      <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, minHeight: '100vh', width: '100%', borderRadius: '24px', padding: '24px', transition: 'all 0.3s ease' }}>
+        <div className="results-card" style={{ ...activeTheme.cardStyle }}>
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
             {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
@@ -588,8 +681,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className="quiz-fullscreen-wrapper">
-      <div className="quiz-arena-card">
+    <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, minHeight: '100vh', width: '100%', borderRadius: '24px', padding: '24px', transition: 'all 0.3s ease' }}>
+      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
@@ -612,10 +705,85 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </div>
           </div>
 
-          <div className="arena-right-actions">
+          <div className="arena-right-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {floatingPoint && (
               <div className="floating-points-pill">{floatingPoint}</div>
             )}
+
+            {/* Quick Background Theme Switcher Dropdown */}
+            <div style={{ position: 'relative' }}>
+              <button
+                type="button"
+                onClick={() => setShowThemePicker(!showThemePicker)}
+                className="btn-tactile btn-tactile-ghost btn-sm"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  color: activeTheme.accent,
+                  border: `1px solid ${activeTheme.accent}55`,
+                  cursor: 'pointer'
+                }}
+                title="Change Quiz Background Theme"
+              >
+                <span>{activeTheme.icon}</span>
+                <span>{activeTheme.name}</span>
+                <ChevronDown size={12} />
+              </button>
+
+              {showThemePicker && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 6px)',
+                  right: 0,
+                  zIndex: 100,
+                  width: '220px',
+                  borderRadius: '16px',
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  padding: '8px',
+                  boxShadow: '0 16px 36px rgba(0,0,0,0.6)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }}>
+                  {QUIZ_THEMES.map(th => (
+                    <button
+                      key={th.id}
+                      type="button"
+                      onClick={() => {
+                        handleSelectTheme(th.id);
+                        setShowThemePicker(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '8px 12px',
+                        borderRadius: '10px',
+                        border: 'none',
+                        background: th.id === quizThemeId ? '#1e293b' : 'transparent',
+                        color: th.id === quizThemeId ? th.accent : '#f1f5f9',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '12px',
+                        fontWeight: '700'
+                      }}
+                    >
+                      <span>{th.icon}</span>
+                      <span>{th.name}</span>
+                      {th.id === quizThemeId && <Check size={14} style={{ marginLeft: 'auto' }} />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button 
               className="btn-tactile btn-tactile-ghost btn-sm"
               onClick={handleAbandon}

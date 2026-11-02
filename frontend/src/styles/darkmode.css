@@ -1,6 +1,6 @@
 /* ==========================================================================
    CrossQuest Enterprise Dark Mode Theme Engine
-   Applied when html.dark or [data-theme="dark"] is active
+   Comprehensive deep obsidian styling across all views, portals & cards
    ========================================================================== */
 
 html.dark,
@@ -22,31 +22,45 @@ html.dark,
   color-scheme: dark;
 }
 
-/* Base Body & Layout in Dark Mode */
-html.dark body,
-[data-theme="dark"] body {
-  background-color: #090d16 !important;
-  color: #f1f5f9 !important;
-}
+/* ==========================================================================
+   1. GLOBAL CANVAS & LAYOUT CONTAINERS
+   ========================================================================== */
 
-/* App Main Containers */
+html.dark body,
+html.dark #root,
+html.dark .enterprise-layout,
+html.dark .enterprise-viewport,
+html.dark .enterprise-page-area,
+html.dark .dashboard-content-layout,
 html.dark .app-main,
 html.dark .trainee-dashboard,
 html.dark .admin-dashboard,
 html.dark .trainer-dashboard,
 html.dark .staff-portal,
+html.dark .company-dashboard,
 html.dark .crypto-sandbox-container,
+[data-theme="dark"] body,
+[data-theme="dark"] #root,
+[data-theme="dark"] .enterprise-layout,
+[data-theme="dark"] .enterprise-viewport,
+[data-theme="dark"] .enterprise-page-area,
+[data-theme="dark"] .dashboard-content-layout,
 [data-theme="dark"] .app-main,
 [data-theme="dark"] .trainee-dashboard,
 [data-theme="dark"] .admin-dashboard,
 [data-theme="dark"] .trainer-dashboard,
 [data-theme="dark"] .staff-portal,
+[data-theme="dark"] .company-dashboard,
 [data-theme="dark"] .crypto-sandbox-container {
   background-color: #090d16 !important;
+  background: #090d16 !important;
   color: #f1f5f9 !important;
 }
 
-/* Topbar in Dark Mode */
+/* ==========================================================================
+   2. TOPBAR & NAVIGATION HEADER
+   ========================================================================== */
+
 html.dark .gamified-topbar,
 [data-theme="dark"] .gamified-topbar {
   background-color: #0f172a !important;
@@ -75,72 +89,206 @@ html.dark .role-trigger-name,
   color: #f8fafc !important;
 }
 
-/* Cards & Panels in Dark Mode */
-html.dark .template-hero-card,
-html.dark .template-this-week-card,
-html.dark .template-activity-card,
-html.dark .adm-card,
-html.dark .tr-session-card,
 html.dark .role-popover-card,
-html.dark .leaderboard-card,
-html.dark .modal-content,
-[data-theme="dark"] .template-hero-card,
-[data-theme="dark"] .template-this-week-card,
-[data-theme="dark"] .template-activity-card,
-[data-theme="dark"] .adm-card,
-[data-theme="dark"] .tr-session-card,
-[data-theme="dark"] .role-popover-card,
-[data-theme="dark"] .leaderboard-card,
-[data-theme="dark"] .modal-content {
-  background-color: #131b2e !important;
-  border-color: #1e293b !important;
+[data-theme="dark"] .role-popover-card {
+  background-color: #111827 !important;
+  border-color: #1f2937 !important;
   color: #f1f5f9 !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
-html.dark .template-activity-card .activity-content,
-[data-theme="dark"] .template-activity-card .activity-content {
-  background-color: #131b2e !important;
+/* ==========================================================================
+   3. TRAINEE IN-PAGE TAB STRIP
+   ========================================================================== */
+
+html.dark .trainee-nav-tabs,
+[data-theme="dark"] .trainee-nav-tabs {
+  border-bottom: 1px solid #1f2937 !important;
 }
 
-html.dark .activity-content h3,
-[data-theme="dark"] .activity-content h3 {
+html.dark .trainee-tab-pill,
+[data-theme="dark"] .trainee-tab-pill {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .trainee-tab-pill:hover,
+[data-theme="dark"] .trainee-tab-pill:hover {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .trainee-tab-pill.active,
+[data-theme="dark"] .trainee-tab-pill.active {
+  background-color: #1e1b4b !important;
+  background: #1e1b4b !important;
+  border: 1px solid #4f46e5 !important;
+  color: #a5b4fc !important;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.35) !important;
+}
+
+/* ==========================================================================
+   4. ACTIVITY CARDS & COURSE GRIDS
+   ========================================================================== */
+
+html.dark .template-activity-card,
+[data-theme="dark"] .template-activity-card,
+html.dark .activity-card-body,
+[data-theme="dark"] .activity-card-body {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .activity-title,
+[data-theme="dark"] .activity-title {
   color: #f8fafc !important;
 }
 
-html.dark .activity-meta,
-[data-theme="dark"] .activity-meta {
+html.dark .activity-instructor,
+[data-theme="dark"] .activity-instructor {
   color: #94a3b8 !important;
 }
 
-/* Dashboard Nav Tabs */
-html.dark .template-nav-tabs,
-[data-theme="dark"] .template-nav-tabs {
-  background-color: #0f172a !important;
-  border-color: #1e293b !important;
+html.dark .template-activity-card:hover,
+[data-theme="dark"] .template-activity-card:hover {
+  border-color: #374151 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
 }
 
-html.dark .template-tab-btn,
-[data-theme="dark"] .template-tab-btn {
-  color: #94a3b8 !important;
-}
-
-html.dark .template-tab-btn.active,
-[data-theme="dark"] .template-tab-btn.active {
+html.dark .template-activity-card .accuracy-pill,
+[data-theme="dark"] .template-activity-card .accuracy-pill {
   background-color: #1e293b !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
-}
-
-/* Streak and Stat Pills */
-html.dark .gamified-stat-pill,
-[data-theme="dark"] .gamified-stat-pill {
-  background-color: #1e293b !important;
+  color: #38bdf8 !important;
   border-color: #334155 !important;
+}
+
+/* ==========================================================================
+   5. HERO & SECTION HEADINGS
+   ========================================================================== */
+
+html.dark .template-section-header h2,
+html.dark .template-section-header h3,
+html.dark .template-section-title,
+[data-theme="dark"] .template-section-header h2,
+[data-theme="dark"] .template-section-header h3,
+[data-theme="dark"] .template-section-title {
   color: #f8fafc !important;
 }
 
-/* Inputs, Selects & Tables */
+html.dark .template-section-subtitle,
+[data-theme="dark"] .template-section-subtitle {
+  color: #94a3b8 !important;
+}
+
+html.dark .template-section-header span,
+[data-theme="dark"] .template-section-header span {
+  color: #94a3b8 !important;
+}
+
+/* ==========================================================================
+   6. WEEKLY TRACKER & STAT CARDS
+   ========================================================================== */
+
+html.dark .template-this-week-card,
+[data-theme="dark"] .template-this-week-card {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .this-week-header h4,
+[data-theme="dark"] .this-week-header h4 {
+  color: #f8fafc !important;
+}
+
+html.dark .this-week-counter,
+[data-theme="dark"] .this-week-counter {
+  color: #fb923c !important;
+}
+
+html.dark .day-flame-circle,
+[data-theme="dark"] .day-flame-circle {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+
+html.dark .day-flame-circle.active,
+[data-theme="dark"] .day-flame-circle.active {
+  background-color: #431407 !important;
+  border-color: #f97316 !important;
+}
+
+/* ==========================================================================
+   7. BADGES & ACHIEVEMENTS SHOWCASE
+   ========================================================================== */
+
+html.dark .badge-showcase-card,
+html.dark .badge-item-card,
+[data-theme="dark"] .badge-showcase-card,
+[data-theme="dark"] .badge-item-card {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .badge-title,
+[data-theme="dark"] .badge-title {
+  color: #f8fafc !important;
+}
+
+html.dark .badge-desc,
+[data-theme="dark"] .badge-desc {
+  color: #94a3b8 !important;
+}
+
+/* ==========================================================================
+   8. CERTIFICATES & RECORD VAULTS
+   ========================================================================== */
+
+html.dark .cert-vault-card,
+html.dark .section-card,
+html.dark .card,
+[data-theme="dark"] .cert-vault-card,
+[data-theme="dark"] .section-card,
+[data-theme="dark"] .card {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #f8fafc !important;
+}
+
+html.dark table,
+[data-theme="dark"] table {
+  color: #f1f5f9 !important;
+}
+
+html.dark th,
+[data-theme="dark"] th {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+html.dark td,
+[data-theme="dark"] td {
+  border-color: #1f2937 !important;
+}
+
+html.dark tr:hover td,
+[data-theme="dark"] tr:hover td {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ==========================================================================
+   9. FORMS, INPUTS & CONTROLS
+   ========================================================================== */
+
 html.dark input,
 html.dark select,
 html.dark textarea,
@@ -157,29 +305,34 @@ html.dark input::placeholder,
   color: #64748b !important;
 }
 
-html.dark table,
-[data-theme="dark"] table {
+html.dark .btn-secondary,
+[data-theme="dark"] .btn-secondary {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .btn-secondary:hover,
+[data-theme="dark"] .btn-secondary:hover {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   10. MODALS & POPUPS
+   ========================================================================== */
+
+html.dark .modal-content,
+[data-theme="dark"] .modal-content {
+  background-color: #111827 !important;
+  border-color: #1f2937 !important;
   color: #f1f5f9 !important;
 }
 
-html.dark th,
-[data-theme="dark"] th {
-  background-color: #1e293b !important;
-  color: #94a3b8 !important;
-  border-color: #334155 !important;
-}
+/* ==========================================================================
+   11. HIGH-CONTRAST & COMPACT ACCESSIBILITY MODES
+   ========================================================================== */
 
-html.dark td,
-[data-theme="dark"] td {
-  border-color: #1e293b !important;
-}
-
-html.dark tr:hover td,
-[data-theme="dark"] tr:hover td {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-}
-
-/* High-Contrast Mode */
 html.high-contrast,
 [data-contrast="high"] {
   --cq-ink: #ffffff !important;
@@ -190,7 +343,6 @@ html.high-contrast * {
   border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-/* Compact Density Mode */
 html.compact-density body {
   font-size: 13px !important;
 }
@@ -199,4 +351,91 @@ html.compact-density .template-activity-card,
 html.compact-density .adm-card,
 html.compact-density .tr-session-card {
   padding: 12px 14px !important;
+}
+
+/* ==========================================================================
+   12. QUIZ ARENA, BRIEFING, QUESTIONS & INTERACTIVE TILES
+   ========================================================================== */
+
+html.dark .briefing-card,
+html.dark .quiz-arena-card,
+html.dark .results-card,
+[data-theme="dark"] .briefing-card,
+[data-theme="dark"] .quiz-arena-card,
+[data-theme="dark"] .results-card {
+  background-color: #12102e !important;
+  border-color: #2e285a !important;
+  color: #f8fafc !important;
+}
+
+html.dark .briefing-stat-tile,
+[data-theme="dark"] .briefing-stat-tile {
+  background-color: #1e1b4b !important;
+  background: #1e1b4b !important;
+  border-color: #3730a3 !important;
+}
+
+html.dark .briefing-stat-tile .stat-num,
+[data-theme="dark"] .briefing-stat-tile .stat-num {
+  color: #f8fafc !important;
+}
+
+html.dark .briefing-stat-tile .stat-label,
+[data-theme="dark"] .briefing-stat-tile .stat-label {
+  color: #94a3b8 !important;
+}
+
+html.dark .briefing-body h3,
+html.dark .briefing-desc,
+html.dark .arena-question-heading h2,
+[data-theme="dark"] .briefing-body h3,
+[data-theme="dark"] .briefing-desc,
+[data-theme="dark"] .arena-question-heading h2 {
+  color: #f8fafc !important;
+}
+
+html.dark .arena-top-control-bar,
+[data-theme="dark"] .arena-top-control-bar {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .countdown-timer-chip,
+[data-theme="dark"] .countdown-timer-chip {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .sequence-item-row,
+[data-theme="dark"] .sequence-item-row {
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .sequence-item-text,
+[data-theme="dark"] .sequence-item-text {
+  color: #f8fafc !important;
+}
+
+html.dark .sequence-instructions,
+[data-theme="dark"] .sequence-instructions {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .identification-input,
+[data-theme="dark"] .identification-input {
+  background-color: #0f172a !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .matching-card,
+[data-theme="dark"] .matching-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
