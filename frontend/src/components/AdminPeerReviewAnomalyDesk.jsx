@@ -24,6 +24,7 @@ import {
   Archive
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { 
   fetchAnomalies, 
   reviewAnomalyAlert, 
@@ -36,6 +37,28 @@ import {
 
 export default function AdminPeerReviewAnomalyDesk() {
   const { token, currentUser } = useAuth();
+  const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
+  const isDark = effectiveTheme === 'dark';
+
+  const themeStyles = {
+    cardBg: isDark ? '#111827' : '#ffffff',
+    panelBg: isDark ? '#111827' : '#ffffff',
+    panelBorder: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+    borderSubtle: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9',
+    inputBg: isDark ? '#1e293b' : '#f8fafc',
+    inputBorder: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+    inputText: isDark ? '#f8fafc' : '#1e293b',
+    textMain: isDark ? '#f8fafc' : '#1e293b',
+    textMuted: isDark ? '#94a3b8' : '#64748b',
+    textSub: isDark ? '#cbd5e1' : '#475569',
+    tableThBg: isDark ? '#0f172a' : '#f8fafc',
+    tableThColor: isDark ? '#94a3b8' : '#475569',
+    tableBorder: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0',
+    chipBg: isDark ? '#1e293b' : '#f1f5f9',
+    chipText: isDark ? '#cbd5e1' : '#475569',
+    subtleBox: isDark ? '#0f172a' : '#f8fafc',
+    subtleBoxBorder: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
+  };
 
   // Navigation sub-tabs
   const [activeTab, setActiveTab] = useState('queue'); // 'queue' | 'audit_trail' | 'rules' | 'retention'
@@ -317,8 +340,9 @@ export default function AdminPeerReviewAnomalyDesk() {
               gap: '8px',
               border: 'none',
               cursor: 'pointer',
-              background: activeTab === 'queue' ? 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)' : '#f1f5f9',
-              color: activeTab === 'queue' ? '#ffffff' : '#475569',
+              background: activeTab === 'queue' ? 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
+              color: activeTab === 'queue' ? '#ffffff' : (isDark ? '#94a3b8' : '#475569'),
+              border: activeTab === 'queue' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               boxShadow: activeTab === 'queue' ? '0 4px 12px rgba(225, 29, 72, 0.25)' : 'none',
               transition: 'all 0.15s ease'
             }}
@@ -343,10 +367,10 @@ export default function AdminPeerReviewAnomalyDesk() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              border: 'none',
+              border: activeTab === 'audit_trail' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               cursor: 'pointer',
-              background: activeTab === 'audit_trail' ? 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)' : '#f1f5f9',
-              color: activeTab === 'audit_trail' ? '#ffffff' : '#475569',
+              background: activeTab === 'audit_trail' ? 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
+              color: activeTab === 'audit_trail' ? '#ffffff' : (isDark ? '#94a3b8' : '#475569'),
               boxShadow: activeTab === 'audit_trail' ? '0 4px 12px rgba(79, 70, 229, 0.25)' : 'none',
               transition: 'all 0.15s ease'
             }}
@@ -366,10 +390,10 @@ export default function AdminPeerReviewAnomalyDesk() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              border: 'none',
+              border: activeTab === 'rules' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               cursor: 'pointer',
-              background: activeTab === 'rules' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : '#f1f5f9',
-              color: activeTab === 'rules' ? '#ffffff' : '#475569',
+              background: activeTab === 'rules' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
+              color: activeTab === 'rules' ? '#ffffff' : (isDark ? '#94a3b8' : '#475569'),
               boxShadow: activeTab === 'rules' ? '0 4px 12px rgba(2, 132, 199, 0.25)' : 'none',
               transition: 'all 0.15s ease'
             }}
@@ -389,10 +413,10 @@ export default function AdminPeerReviewAnomalyDesk() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              border: 'none',
+              border: activeTab === 'retention' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               cursor: 'pointer',
-              background: activeTab === 'retention' ? 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)' : '#f1f5f9',
-              color: activeTab === 'retention' ? '#ffffff' : '#475569',
+              background: activeTab === 'retention' ? 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
+              color: activeTab === 'retention' ? '#ffffff' : (isDark ? '#94a3b8' : '#475569'),
               boxShadow: activeTab === 'retention' ? '0 4px 12px rgba(124, 58, 237, 0.25)' : 'none',
               transition: 'all 0.15s ease'
             }}
@@ -411,9 +435,9 @@ export default function AdminPeerReviewAnomalyDesk() {
             gap: '6px',
             padding: '8px 14px',
             borderRadius: '10px',
-            background: '#f8fafc',
-            border: '1px solid #cbd5e1',
-            color: '#475569',
+            background: isDark ? '#1e293b' : '#f8fafc',
+            border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+            color: isDark ? '#cbd5e1' : '#475569',
             fontSize: '12.5px',
             fontWeight: 600,
             cursor: 'pointer'
@@ -474,10 +498,10 @@ export default function AdminPeerReviewAnomalyDesk() {
           {/* Controls & Filter Bar */}
           <div 
             style={{ 
-              background: '#ffffff', 
+              background: themeStyles.cardBg, 
               borderRadius: '16px', 
               padding: '14px 20px', 
-              border: '1px solid var(--cq-line)', 
+              border: themeStyles.panelBorder, 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'space-between', 
@@ -486,12 +510,12 @@ export default function AdminPeerReviewAnomalyDesk() {
               position: 'sticky',
               top: '10px',
               zIndex: 10,
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
+              boxShadow: isDark ? '0 6px 20px rgba(0, 0, 0, 0.4)' : '0 4px 16px rgba(0, 0, 0, 0.04)'
             }}
           >
             {/* Left: Filter Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>STATUS:</span>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: themeStyles.textMuted }}>STATUS:</span>
               {['ALL', 'NEW', 'UNDER_REVIEW', 'AWAITING_UNINVOLVED_ADMIN', 'CLOSED'].map((st) => (
                 <button
                   key={st}
@@ -504,9 +528,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                     fontWeight: 600,
                     cursor: 'pointer',
                     border: '1px solid',
-                    background: statusFilter === st ? '#1e293b' : '#f8fafc',
-                    color: statusFilter === st ? '#ffffff' : '#475569',
-                    borderColor: statusFilter === st ? '#1e293b' : '#cbd5e1'
+                    background: statusFilter === st ? (isDark ? '#6366f1' : '#1e293b') : themeStyles.inputBg,
+                    color: statusFilter === st ? '#ffffff' : themeStyles.textSub,
+                    borderColor: statusFilter === st ? (isDark ? '#818cf8' : '#1e293b') : themeStyles.inputBorder
                   }}
                 >
                   {st.replace(/_/g, ' ')}
@@ -518,9 +542,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                   fontWeight: 800, 
                   padding: '3px 10px', 
                   borderRadius: '20px', 
-                  background: '#f1f5f9', 
-                  color: '#475569', 
-                  border: '1px solid #e2e8f0',
+                  background: themeStyles.chipBg, 
+                  color: themeStyles.chipText, 
+                  border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
                   marginLeft: '4px' 
                 }}
               >
@@ -530,7 +554,7 @@ export default function AdminPeerReviewAnomalyDesk() {
 
             {/* Right: Search */}
             <div style={{ position: 'relative', minWidth: '240px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: themeStyles.textMuted }} />
               <input
                 type="text"
                 placeholder="Search rule, subject, tags..."
@@ -540,9 +564,10 @@ export default function AdminPeerReviewAnomalyDesk() {
                   width: '100%',
                   padding: '7px 12px 7px 32px',
                   borderRadius: '10px',
-                  border: '1px solid #cbd5e1',
+                  border: themeStyles.inputBorder,
                   fontSize: '12.5px',
-                  background: '#f8fafc',
+                  color: themeStyles.inputText,
+                  background: themeStyles.inputBg,
                   outline: 'none'
                 }}
               />
@@ -1048,11 +1073,11 @@ export default function AdminPeerReviewAnomalyDesk() {
           </div>
 
           {/* Retention Warnings Card */}
-          <div className="adm-panel" style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid var(--cq-line)', overflow: 'hidden' }}>
-            <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: '1px solid var(--cq-line)' }}>
+          <div className="adm-panel" style={{ background: themeStyles.cardBg, borderRadius: '24px', border: themeStyles.panelBorder, overflow: 'hidden' }}>
+            <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: themeStyles.panelBorder }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>Alerts Approaching 12-Month Disposal Limit (Within 30 Days)</h3>
-                <span className="adm-mono" style={{ fontSize: '12px', color: '#64748b' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: themeStyles.textMain }}>Alerts Approaching 12-Month Disposal Limit (Within 30 Days)</h3>
+                <span className="adm-mono" style={{ fontSize: '12px', color: themeStyles.textMuted }}>
                   Proactive warnings for open incidents requiring expedited review prior to automated purge
                 </span>
               </div>
@@ -1062,15 +1087,15 @@ export default function AdminPeerReviewAnomalyDesk() {
               {retentionWarnings.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '420px', overflowY: 'auto', paddingRight: '4px' }}>
                   {retentionWarnings.map((w, idx) => (
-                    <div key={idx} style={{ padding: '12px 16px', borderRadius: '12px', background: '#fffbeb', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div key={idx} style={{ padding: '12px 16px', borderRadius: '12px', background: isDark ? 'rgba(245, 158, 11, 0.12)' : '#fffbeb', border: isDark ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <AlertTriangle size={18} color="#d97706" />
                         <div>
-                          <strong style={{ color: '#92400e' }}>{w.rule_code}</strong> (ID: {w.alert_id})
-                          <div style={{ fontSize: '12px', color: '#b45309' }}>Age: {w.age_days} days • Created on {new Date(w.created_at).toLocaleDateString()}</div>
+                          <strong style={{ color: isDark ? '#fcd34d' : '#92400e' }}>{w.rule_code}</strong> <span style={{ color: themeStyles.textMuted }}>(ID: {w.alert_id})</span>
+                          <div style={{ fontSize: '12px', color: isDark ? '#fbbf24' : '#b45309' }}>Age: {w.age_days} days • Created on {new Date(w.created_at).toLocaleDateString()}</div>
                         </div>
                       </div>
-                      <span style={{ background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 800 }}>
+                      <span style={{ background: isDark ? 'rgba(245, 158, 11, 0.25)' : '#fef3c7', color: isDark ? '#fde68a' : '#b45309', padding: '4px 10px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 800 }}>
                         {w.days_until_disposal} DAYS UNTIL PURGE
                       </span>
                     </div>
@@ -1109,11 +1134,12 @@ export default function AdminPeerReviewAnomalyDesk() {
         >
           <div 
             style={{ 
-              background: '#ffffff', 
+              background: isDark ? '#0f172a' : '#ffffff', 
               borderRadius: '24px', 
               width: '100%', 
               maxWidth: '580px', 
-              boxShadow: '0 24px 60px rgba(0,0,0,0.25)', 
+              boxShadow: '0 24px 60px rgba(0,0,0,0.45)', 
+              border: isDark ? '1px solid #1e293b' : 'none',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column'
@@ -1141,18 +1167,18 @@ export default function AdminPeerReviewAnomalyDesk() {
             {/* Modal Body */}
             <form onSubmit={handleSubmitReview} style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
               {/* Alert Snippet */}
-              <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '12px 16px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+              <div style={{ background: themeStyles.subtleBox, borderRadius: '12px', padding: '12px 16px', border: themeStyles.subtleBoxBorder }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: themeStyles.textMuted }}>
                   {selectedAlertForReview.rule_code} • {selectedAlertForReview.severity_final || selectedAlertForReview.severity_base} SEVERITY
                 </div>
-                <div style={{ fontSize: '13.5px', color: '#1e293b', marginTop: '4px', lineHeight: 1.4 }}>
+                <div style={{ fontSize: '13.5px', color: themeStyles.textMain, marginTop: '4px', lineHeight: 1.4 }}>
                   {selectedAlertForReview.description}
                 </div>
               </div>
 
               {/* Status Selection */}
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textSub, marginBottom: '8px' }}>
                   TARGET WORKFLOW STATUS:
                 </label>
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -1167,9 +1193,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                       fontWeight: 700,
                       cursor: 'pointer',
                       border: '1.5px solid',
-                      background: reviewStatus === 'UNDER_REVIEW' ? '#eff6ff' : '#ffffff',
-                      color: reviewStatus === 'UNDER_REVIEW' ? '#1d4ed8' : '#64748b',
-                      borderColor: reviewStatus === 'UNDER_REVIEW' ? '#3b82f6' : '#cbd5e1'
+                      background: reviewStatus === 'UNDER_REVIEW' ? (isDark ? 'rgba(59, 130, 246, 0.25)' : '#eff6ff') : (isDark ? '#1e293b' : '#ffffff'),
+                      color: reviewStatus === 'UNDER_REVIEW' ? (isDark ? '#93c5fd' : '#1d4ed8') : themeStyles.textMuted,
+                      borderColor: reviewStatus === 'UNDER_REVIEW' ? '#3b82f6' : (isDark ? '#334155' : '#cbd5e1')
                     }}
                   >
                     Under Review
@@ -1186,9 +1212,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                       fontWeight: 700,
                       cursor: 'pointer',
                       border: '1.5px solid',
-                      background: reviewStatus === 'AWAITING_UNINVOLVED_ADMIN' ? '#faf5ff' : '#ffffff',
-                      color: reviewStatus === 'AWAITING_UNINVOLVED_ADMIN' ? '#7e22ce' : '#64748b',
-                      borderColor: reviewStatus === 'AWAITING_UNINVOLVED_ADMIN' ? '#a855f7' : '#cbd5e1'
+                      background: reviewStatus === 'AWAITING_UNINVOLVED_ADMIN' ? (isDark ? 'rgba(168, 85, 247, 0.25)' : '#faf5ff') : (isDark ? '#1e293b' : '#ffffff'),
+                      color: reviewStatus === 'AWAITING_UNINVOLVED_ADMIN' ? (isDark ? '#d8b4fe' : '#7e22ce') : themeStyles.textMuted,
+                      borderColor: reviewStatus === 'AWAITING_UNINVOLVED_ADMIN' ? '#a855f7' : (isDark ? '#334155' : '#cbd5e1')
                     }}
                   >
                     Recuse & Escalate
@@ -1205,9 +1231,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                       fontWeight: 700,
                       cursor: 'pointer',
                       border: '1.5px solid',
-                      background: reviewStatus === 'CLOSED' ? '#ecfdf5' : '#ffffff',
-                      color: reviewStatus === 'CLOSED' ? '#047857' : '#64748b',
-                      borderColor: reviewStatus === 'CLOSED' ? '#10b981' : '#cbd5e1'
+                      background: reviewStatus === 'CLOSED' ? (isDark ? 'rgba(16, 185, 129, 0.25)' : '#ecfdf5') : (isDark ? '#1e293b' : '#ffffff'),
+                      color: reviewStatus === 'CLOSED' ? (isDark ? '#6ee7b7' : '#047857') : themeStyles.textMuted,
+                      borderColor: reviewStatus === 'CLOSED' ? '#10b981' : (isDark ? '#334155' : '#cbd5e1')
                     }}
                   >
                     Close & Resolve
@@ -1218,7 +1244,7 @@ export default function AdminPeerReviewAnomalyDesk() {
               {/* Disposition (Mandatory if CLOSED) */}
               {reviewStatus === 'CLOSED' && (
                 <div>
-                  <label htmlFor="review-disposition" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                  <label htmlFor="review-disposition" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textSub, marginBottom: '6px' }}>
                     FORMAL DISPOSITION (OI-30):
                   </label>
                   <select
@@ -1229,11 +1255,11 @@ export default function AdminPeerReviewAnomalyDesk() {
                       width: '100%',
                       padding: '9px 12px',
                       borderRadius: '10px',
-                      border: '1.5px solid #cbd5e1',
+                      border: themeStyles.inputBorder,
                       fontSize: '13px',
                       fontWeight: 600,
-                      color: '#1e293b',
-                      background: '#f8fafc',
+                      color: themeStyles.inputText,
+                      background: themeStyles.inputBg,
                       outline: 'none'
                     }}
                   >
@@ -1249,7 +1275,7 @@ export default function AdminPeerReviewAnomalyDesk() {
 
               {/* Mandatory Review Note */}
               <div>
-                <label htmlFor="review-note" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                <label htmlFor="review-note" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textSub, marginBottom: '6px' }}>
                   REVIEW SIGN-OFF NOTE (STRICTLY REQUIRED):
                 </label>
                 <textarea
@@ -1262,9 +1288,10 @@ export default function AdminPeerReviewAnomalyDesk() {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: '1.5px solid #cbd5e1',
+                    border: themeStyles.inputBorder,
                     fontSize: '13px',
-                    background: '#f8fafc',
+                    color: themeStyles.inputText,
+                    background: themeStyles.inputBg,
                     outline: 'none',
                     resize: 'vertical'
                   }}
@@ -1287,9 +1314,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                   style={{
                     padding: '9px 18px',
                     borderRadius: '10px',
-                    background: '#f1f5f9',
-                    color: '#475569',
-                    border: 'none',
+                    background: isDark ? '#1e293b' : '#f1f5f9',
+                    color: isDark ? '#cbd5e1' : '#475569',
+                    border: isDark ? '1px solid #334155' : 'none',
                     fontWeight: 700,
                     fontSize: '13px',
                     cursor: 'pointer'
@@ -1342,11 +1369,12 @@ export default function AdminPeerReviewAnomalyDesk() {
         >
           <div 
             style={{ 
-              background: '#ffffff', 
+              background: isDark ? '#0f172a' : '#ffffff', 
               borderRadius: '24px', 
               width: '100%', 
               maxWidth: '540px', 
-              boxShadow: '0 24px 60px rgba(0,0,0,0.25)', 
+              boxShadow: '0 24px 60px rgba(0,0,0,0.45)', 
+              border: isDark ? '1px solid #1e293b' : 'none',
               overflow: 'hidden' 
             }}
           >
@@ -1370,7 +1398,7 @@ export default function AdminPeerReviewAnomalyDesk() {
 
             <form onSubmit={handleSaveRule} style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textSub, marginBottom: '6px' }}>
                   PARAMETERS (JSON FORMAT):
                 </label>
                 <textarea
@@ -1381,17 +1409,18 @@ export default function AdminPeerReviewAnomalyDesk() {
                     width: '100%',
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: '1.5px solid #cbd5e1',
+                    border: themeStyles.inputBorder,
                     fontFamily: 'monospace',
                     fontSize: '12.5px',
-                    background: '#f8fafc',
+                    color: themeStyles.inputText,
+                    background: themeStyles.inputBg,
                     outline: 'none'
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textSub, marginBottom: '6px' }}>
                   CHANGE JUSTIFICATION (AUDIT TRAIL LOG):
                 </label>
                 <input
@@ -1402,9 +1431,10 @@ export default function AdminPeerReviewAnomalyDesk() {
                     width: '100%',
                     padding: '8px 12px',
                     borderRadius: '8px',
-                    border: '1.5px solid #cbd5e1',
+                    border: themeStyles.inputBorder,
                     fontSize: '12.5px',
-                    background: '#f8fafc',
+                    color: themeStyles.inputText,
+                    background: themeStyles.inputBg,
                     outline: 'none'
                   }}
                 />
