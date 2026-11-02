@@ -14,6 +14,7 @@ import CryptoSandboxLab from './views/CryptoSandboxLab';
 import InstallPwaModal from './components/InstallPwaModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
+import './styles/darkmode.css';
 
 // Protected Route wrapper
 function ProtectedRoute({ children }) {

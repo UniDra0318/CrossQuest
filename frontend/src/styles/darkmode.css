@@ -1,6 +1,6 @@
 /* ==========================================================================
    CrossQuest Enterprise Dark Mode Theme Engine
-   Comprehensive deep obsidian styling across all views, portals & cards
+   Comprehensive deep obsidian styling across all views, portals, tabs & cards
    ========================================================================== */
 
 html.dark,
@@ -8,17 +8,31 @@ html.dark,
   --cq-ink: #f8fafc;
   --cq-ink-soft: #cbd5e1;
   --cq-body: #e2e8f0;
-
+  
   --cq-purple: #0f172a;
   --cq-purple-dk: #020617;
   --cq-purple-deep: #090d16;
   --cq-purple-night: #030712;
   --cq-lilac: #38bdf8;
-
+  
   --cq-lav: #0f172a;
   --cq-lav-2: #090d16;
   --cq-line: rgba(255, 255, 255, 0.12);
 
+  /* index.css variables in dark mode */
+  --bg-app: #090d16;
+  --bg-sidebar: #0f172a;
+  --bg-header: #0f172a;
+  --bg-card: #111827;
+  --bg-card-subtle: #161f33;
+  --bg-card-hover: #1e293b;
+  --bg-input: #0f172a;
+  --border-subtle: #1f2937;
+  --border-bold: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-dim: #94a3b8;
+  
   color-scheme: dark;
 }
 
@@ -130,7 +144,7 @@ html.dark .trainee-tab-pill.active,
 }
 
 /* ==========================================================================
-   4. ACTIVITY CARDS & COURSE GRIDS
+   4. TAB 1: MAIN DASHBOARD & ACTIVITY CARDS
    ========================================================================== */
 
 html.dark .template-activity-card,
@@ -166,10 +180,6 @@ html.dark .template-activity-card .accuracy-pill,
   border-color: #334155 !important;
 }
 
-/* ==========================================================================
-   5. HERO & SECTION HEADINGS
-   ========================================================================== */
-
 html.dark .template-section-header h2,
 html.dark .template-section-header h3,
 html.dark .template-section-title,
@@ -188,44 +198,6 @@ html.dark .template-section-header span,
 [data-theme="dark"] .template-section-header span {
   color: #94a3b8 !important;
 }
-
-/* ==========================================================================
-   6. WEEKLY TRACKER & STAT CARDS
-   ========================================================================== */
-
-html.dark .template-this-week-card,
-[data-theme="dark"] .template-this-week-card {
-  background-color: #111827 !important;
-  background: #111827 !important;
-  border-color: #1f2937 !important;
-  color: #f8fafc !important;
-}
-
-html.dark .this-week-header h4,
-[data-theme="dark"] .this-week-header h4 {
-  color: #f8fafc !important;
-}
-
-html.dark .this-week-counter,
-[data-theme="dark"] .this-week-counter {
-  color: #fb923c !important;
-}
-
-html.dark .day-flame-circle,
-[data-theme="dark"] .day-flame-circle {
-  background-color: #1e293b !important;
-  border: 1px solid #334155 !important;
-}
-
-html.dark .day-flame-circle.active,
-[data-theme="dark"] .day-flame-circle.active {
-  background-color: #431407 !important;
-  border-color: #f97316 !important;
-}
-
-/* ==========================================================================
-   7. BADGES & ACHIEVEMENTS SHOWCASE
-   ========================================================================== */
 
 /* Main Dashboard "Your Earned Badges" Container */
 html.dark .template-badges-container,
@@ -273,143 +245,198 @@ html.dark .template-badge-desc,
   color: #94a3b8 !important;
 }
 
-/* Full Badges Showcase Sub-View */
-html.dark .badge-showcase-card,
-html.dark .badge-item-card,
-html.dark .badge-detail-card,
-[data-theme="dark"] .badge-showcase-card,
-[data-theme="dark"] .badge-item-card,
-[data-theme="dark"] .badge-detail-card {
-  background-color: #1a2236 !important;
-  background: #1a2236 !important;
-  border: 1px solid #2d3748 !important;
-  color: #f8fafc !important;
-}
-
-html.dark .badge-detail-card h4,
-html.dark .card-title,
-[data-theme="dark"] .badge-detail-card h4,
-[data-theme="dark"] .card-title {
-  color: #f8fafc !important;
-}
-
-html.dark .badge-title,
-[data-theme="dark"] .badge-title {
-  color: #f8fafc !important;
-}
-
-html.dark .badge-desc,
-[data-theme="dark"] .badge-desc {
-  color: #94a3b8 !important;
-}
-
-/* ==========================================================================
-   8. CERTIFICATES & RECORD VAULTS
-   ========================================================================== */
-
-html.dark .cert-vault-card,
-html.dark .section-card,
-html.dark .card,
-[data-theme="dark"] .cert-vault-card,
-[data-theme="dark"] .section-card,
-[data-theme="dark"] .card {
+/* Right Widgets: This Week & Corporate Leaderboard */
+html.dark .template-this-week-card,
+[data-theme="dark"] .template-this-week-card {
   background-color: #111827 !important;
   background: #111827 !important;
   border-color: #1f2937 !important;
   color: #f8fafc !important;
 }
 
-html.dark table,
-[data-theme="dark"] table {
-  color: #f1f5f9 !important;
+html.dark .this-week-header h4,
+[data-theme="dark"] .this-week-header h4 {
+  color: #f8fafc !important;
 }
 
-html.dark th,
-[data-theme="dark"] th {
+html.dark .this-week-counter,
+[data-theme="dark"] .this-week-counter {
+  color: #fb923c !important;
+}
+
+html.dark .day-flame-circle,
+[data-theme="dark"] .day-flame-circle {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+
+html.dark .day-flame-circle.active,
+[data-theme="dark"] .day-flame-circle.active {
+  background-color: #431407 !important;
+  border-color: #f97316 !important;
+}
+
+/* ==========================================================================
+   5. TAB 2: KNOWLEDGE QUIZZES CATALOG VIEW (Image 1)
+   ========================================================================== */
+
+html.dark .catalog-header-banner,
+html.dark .quiz-catalog-card,
+[data-theme="dark"] .catalog-header-banner,
+[data-theme="dark"] .quiz-catalog-card {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .catalog-header-banner h2,
+html.dark .catalog-card-title,
+[data-theme="dark"] .catalog-header-banner h2,
+[data-theme="dark"] .catalog-card-title {
+  color: #f8fafc !important;
+}
+
+html.dark .catalog-subtitle,
+html.dark .catalog-instructor-tag,
+html.dark .catalog-quiz-desc,
+html.dark .catalog-time-tag,
+[data-theme="dark"] .catalog-subtitle,
+[data-theme="dark"] .catalog-instructor-tag,
+[data-theme="dark"] .catalog-quiz-desc,
+[data-theme="dark"] .catalog-time-tag {
+  color: #94a3b8 !important;
+}
+
+html.dark .catalog-card-top,
+[data-theme="dark"] .catalog-card-top {
+  border-bottom: 1px solid #1f2937 !important;
+}
+
+html.dark .catalog-card-body,
+[data-theme="dark"] .catalog-card-body {
+  background-color: #111827 !important;
+  background: #111827 !important;
+}
+
+html.dark .qtype-badge,
+[data-theme="dark"] .qtype-badge {
   background-color: #1e293b !important;
   color: #cbd5e1 !important;
-  border-color: #334155 !important;
+  border: 1px solid #334155 !important;
 }
 
-html.dark td,
-[data-theme="dark"] td {
-  border-color: #1f2937 !important;
-}
-
-html.dark tr:hover td,
-[data-theme="dark"] tr:hover td {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-}
-
-/* ==========================================================================
-   9. FORMS, INPUTS & CONTROLS
-   ========================================================================== */
-
-html.dark input,
-html.dark select,
-html.dark textarea,
-[data-theme="dark"] input,
-[data-theme="dark"] select,
-[data-theme="dark"] textarea {
+html.dark .catalog-meta-row,
+[data-theme="dark"] .catalog-meta-row {
   background-color: #0f172a !important;
-  border-color: #334155 !important;
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+}
+
+html.dark .catalog-meta-item .meta-k,
+[data-theme="dark"] .catalog-meta-item .meta-k {
+  color: #94a3b8 !important;
+}
+
+html.dark .catalog-meta-item .meta-v,
+[data-theme="dark"] .catalog-meta-item .meta-v {
   color: #f8fafc !important;
-}
-
-html.dark input::placeholder,
-[data-theme="dark"] input::placeholder {
-  color: #64748b !important;
-}
-
-html.dark .btn-secondary,
-[data-theme="dark"] .btn-secondary {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
-  color: #f8fafc !important;
-}
-
-html.dark .btn-secondary:hover,
-[data-theme="dark"] .btn-secondary:hover {
-  background-color: #334155 !important;
-  color: #ffffff !important;
 }
 
 /* ==========================================================================
-   10. MODALS & POPUPS
+   6. TAB 3: BADGE SHOWCASE & ACHIEVEMENTS SUB-VIEW (Image 2)
    ========================================================================== */
 
-html.dark .modal-content,
-[data-theme="dark"] .modal-content {
+html.dark .section-card,
+html.dark .card-header-bar,
+[data-theme="dark"] .section-card,
+[data-theme="dark"] .card-header-bar {
   background-color: #111827 !important;
+  background: #111827 !important;
   border-color: #1f2937 !important;
-  color: #f1f5f9 !important;
+}
+
+html.dark .card-title,
+html.dark .card-header-bar h3,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .card-header-bar h3 {
+  color: #f8fafc !important;
+}
+
+html.dark .card-subtitle,
+html.dark .card-header-bar p,
+[data-theme="dark"] .card-subtitle,
+[data-theme="dark"] .card-header-bar p {
+  color: #94a3b8 !important;
+}
+
+html.dark .badge-detail-card,
+[data-theme="dark"] .badge-detail-card {
+  background-color: #1a2236 !important;
+  background: #1a2236 !important;
+  border: 1px solid #2d3748 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+  color: #f8fafc !important;
+}
+
+html.dark .badge-detail-card h4,
+[data-theme="dark"] .badge-detail-card h4 {
+  color: #f8fafc !important;
+}
+
+html.dark .badge-footer,
+[data-theme="dark"] .badge-footer {
+  border-top-color: #2d3748 !important;
 }
 
 /* ==========================================================================
-   11. HIGH-CONTRAST & COMPACT ACCESSIBILITY MODES
+   7. TAB 4: VERIFIED CERTIFICATIONS & CREDENTIALS (Image 3)
    ========================================================================== */
 
-html.high-contrast,
-[data-contrast="high"] {
-  --cq-ink: #ffffff !important;
-  --cq-line: #ffffff !important;
+html.dark .certificate-card,
+[data-theme="dark"] .certificate-card {
+  background-color: #131b2e !important;
+  background: #131b2e !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
-html.high-contrast * {
-  border-color: rgba(255, 255, 255, 0.4) !important;
+html.dark .cert-top-row h4,
+[data-theme="dark"] .cert-top-row h4 {
+  color: #f8fafc !important;
 }
 
-html.compact-density body {
-  font-size: 13px !important;
+html.dark .cert-meta-body,
+[data-theme="dark"] .cert-meta-body {
+  background-color: #0f172a !important;
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
 }
 
-html.compact-density .template-activity-card,
-html.compact-density .adm-card,
-html.compact-density .tr-session-card {
-  padding: 12px 14px !important;
+html.dark .cert-meta-item .meta-label,
+[data-theme="dark"] .cert-meta-item .meta-label {
+  color: #94a3b8 !important;
 }
+
+html.dark .cert-meta-item .meta-val,
+[data-theme="dark"] .cert-meta-item .meta-val {
+  color: #f8fafc !important;
+}
+
+html.dark .cert-meta-item code,
+[data-theme="dark"] .cert-meta-item code {
+  color: #818cf8 !important;
+}
+
+html.dark .renewal-alert-strip,
+[data-theme="dark"] .renewal-alert-strip {
+  background-color: #2d1f05 !important;
+  border-color: #b45309 !important;
+  color: #fef3c7 !important;
+}
+
 /* ==========================================================================
-   12. QUIZ ARENA, BRIEFING, QUESTIONS & INTERACTIVE TILES
+   8. QUIZ ARENA, BRIEFING & RESULTS
    ========================================================================== */
 
 html.dark .briefing-card,
@@ -493,4 +520,103 @@ html.dark .matching-card,
   background-color: #1e293b !important;
   border-color: #334155 !important;
   color: #f8fafc !important;
+}
+
+/* ==========================================================================
+   9. FORMS, INPUTS, TABLES & MODALS
+   ========================================================================== */
+
+html.dark input,
+html.dark select,
+html.dark textarea,
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark input::placeholder,
+[data-theme="dark"] input::placeholder {
+  color: #64748b !important;
+}
+
+html.dark table,
+[data-theme="dark"] table {
+  color: #f1f5f9 !important;
+}
+
+html.dark th,
+[data-theme="dark"] th {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+html.dark td,
+[data-theme="dark"] td {
+  border-color: #1f2937 !important;
+}
+
+html.dark tr:hover td,
+[data-theme="dark"] tr:hover td {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+html.dark .btn-secondary,
+[data-theme="dark"] .btn-secondary {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .btn-secondary:hover,
+[data-theme="dark"] .btn-secondary:hover {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+html.dark .cq-modal-container,
+[data-theme="dark"] .cq-modal-container {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .cq-modal-label,
+[data-theme="dark"] .cq-modal-label {
+  color: #cbd5e1 !important;
+}
+
+html.dark .modal-content,
+[data-theme="dark"] .modal-content {
+  background-color: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ==========================================================================
+   10. HIGH-CONTRAST & COMPACT ACCESSIBILITY MODES
+   ========================================================================== */
+
+html.high-contrast,
+[data-contrast="high"] {
+  --cq-ink: #ffffff !important;
+  --cq-line: #ffffff !important;
+}
+
+html.high-contrast * {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+html.compact-density body {
+  font-size: 13px !important;
+}
+
+html.compact-density .template-activity-card,
+html.compact-density .adm-card,
+html.compact-density .tr-session-card {
+  padding: 12px 14px !important;
 }

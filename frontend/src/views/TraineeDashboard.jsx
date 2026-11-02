@@ -929,13 +929,13 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
       {/* 3. EARNED BADGES SUB-VIEW */}
       {currentTab === 'trainee_badges' && (
-        <div className="card section-card p-24" style={{ borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-          <div className="card-header-bar mb-16" style={{ padding: '0 0 16px', borderBottom: '1px solid #f1f5f9' }}>
+        <div className="card section-card p-24" style={{ borderRadius: '16px' }}>
+          <div className="card-header-bar mb-16" style={{ padding: '0 0 16px' }}>
             <div>
               <h3 className="card-title" style={{ fontSize: '20px', fontWeight: '800', marginBottom: '4px' }}>
                 Badge Showcase &amp; Achievements
               </h3>
-              <p className="text-muted text-xs" style={{ color: '#64748b' }}>
+              <p className="card-subtitle text-xs">
                 Unlock shiny 3D collectible badges by proving your knowledge across security frameworks and policy access controls.
               </p>
             </div>
@@ -959,7 +959,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                     </div>
                     <h4 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '6px' }}>{badge.title || badge.name}</h4>
                     <p className="badge-desc" style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', flex: 1, lineHeight: '1.4' }}>{badge.description || badge.desc}</p>
-                    <div className="badge-footer flex-between" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+                    <div className="badge-footer flex-between" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px' }}>
                       <span className={`tier-chip tier-${tierClass}`} style={{ fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '999px', background: tierClass === 'legendary' ? '#fef3c7' : tierClass === 'master' ? '#dbeafe' : '#e0e7ff', color: tierClass === 'legendary' ? '#b45309' : tierClass === 'master' ? '#1d4ed8' : '#4338ca' }}>
                         {tierName.toUpperCase()}
                       </span>
@@ -1180,9 +1180,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           {/* Self-Report External Credential Modal (FR-18, FR-19, DAT-05, U-15) */}
           {showExternalModal && (
             <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ background: '#ffffff', borderRadius: '14px', padding: '24px', width: '520px', maxWidth: '92%', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}>
+              <div className="cq-modal-container card section-card" style={{ borderRadius: '14px', padding: '24px', width: '520px', maxWidth: '92%', boxShadow: '0 20px 40px rgba(0,0,0,0.45)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                  <h3 className="card-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>
                     Self-Report External Credential (PMI / PECB)
                   </h3>
                   <button
@@ -1194,7 +1194,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   </button>
                 </div>
 
-                <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: '#64748b', lineHeight: 1.4 }}>
+                <p className="card-subtitle" style={{ margin: '0 0 16px', fontSize: '12.5px', lineHeight: 1.4 }}>
                   Self-report an active industry certification (e.g. PMI PMP, PECB ISO 31000). System activates automated 90, 60, 30, and 0-day renewal tracking with a standard 36-month validity cycle.
                 </p>
 
@@ -1206,7 +1206,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
                 <form onSubmit={handleExternalSubmit}>
                   <div style={{ marginBottom: '12px' }}>
-                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                    <label className="cq-modal-label" style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '4px' }}>
                       CERTIFICATION TYPE:
                     </label>
                     <select
@@ -1237,7 +1237,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   </div>
 
                   <div style={{ marginBottom: '12px' }}>
-                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                    <label className="cq-modal-label" style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '4px' }}>
                       CERTIFICATION TITLE:
                     </label>
                     <input
@@ -1250,7 +1250,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   </div>
 
                   <div style={{ marginBottom: '14px' }}>
-                    <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                    <label className="cq-modal-label" style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '4px' }}>
                       VERIFIED CREDENTIAL BADGE URL (HTTPS ONLY):
                     </label>
                     <input
@@ -1268,7 +1268,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      <label className="cq-modal-label" style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '4px' }}>
                         ISSUE DATE:
                       </label>
                       <input
@@ -1279,7 +1279,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      <label className="cq-modal-label" style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '4px' }}>
                         EXPIRY DATE (OPTIONAL):
                       </label>
                       <input
