@@ -108,18 +108,128 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           if (onStreakLoad) onStreakLoad(streak);
 
           if (Array.isArray(gam.badges) && gam.badges.length > 0) {
-            const KNOWN_MAP = {
-              SEC_ROOKIE: { id: 'sec-rookie', title: 'Zero-Trust Initiate', description: 'Enrolled in corporate zero-trust compliance curriculum', tier: 'Adept' },
-              STREAK_7D: { id: 'seven-day-streak', title: '7-Day Streak Keeper', description: 'Maintained 7 consecutive active study days', tier: 'Legendary' },
-              QUIZ_MASTER: { id: 'security-champion', title: 'Cipher Master', description: 'Scored 90%+ on CP-ABE Policy Verification', tier: 'Master' },
-              SPEED_DEMON: { id: 'speed-demon', title: 'Rapid Responder', description: 'Completed timed security assessment under 60s', tier: 'Adept' },
-              FIRST_STEP: { id: 'first-step', title: 'First Quest Completed', description: 'Completed your first verified compliance assessment', tier: 'Adept' }
+            const BADGE_DEFINITIONS = {
+              FIRST_STEP: {
+                id: 'first-step',
+                title: 'First Quest Completed',
+                description: 'Completed your first verified compliance assessment',
+                tier: 'Adept',
+                icon: 'star',
+                hi: '#ffe08a',
+                lo: '#ffc53d',
+                rim: '#d99a00',
+                fg: '#17102b'
+              },
+              SEVEN_DAY_STREAK: {
+                id: 'seven-day-streak',
+                title: '7-Day Streak Keeper',
+                description: 'Maintained 7 consecutive active study days',
+                tier: 'Legendary',
+                icon: 'flame',
+                hi: '#ffb57a',
+                lo: '#ff7a1a',
+                rim: '#b84f00',
+                fg: '#17102b'
+              },
+              STREAK_7D: {
+                id: 'seven-day-streak',
+                title: '7-Day Streak Keeper',
+                description: 'Maintained 7 consecutive active study days',
+                tier: 'Legendary',
+                icon: 'flame',
+                hi: '#ffb57a',
+                lo: '#ff7a1a',
+                rim: '#b84f00',
+                fg: '#17102b'
+              },
+              SECURITY_CHAMPION: {
+                id: 'security-champion',
+                title: 'Security Champion',
+                description: 'Aced Security & Compliance Assessment with high score',
+                tier: 'Master',
+                icon: 'shield',
+                hi: '#6fa8ff',
+                lo: '#1d6fe0',
+                rim: '#124a9e',
+                fg: '#ffffff'
+              },
+              QUIZ_MASTER: {
+                id: 'security-champion',
+                title: 'Cipher Master',
+                description: 'Scored 90%+ on CP-ABE Policy Verification',
+                tier: 'Master',
+                icon: 'shield',
+                hi: '#6fa8ff',
+                lo: '#1d6fe0',
+                rim: '#124a9e',
+                fg: '#ffffff'
+              },
+              RISK_GUARDIAN: {
+                id: 'risk-guardian',
+                title: 'Risk Guardian',
+                description: 'Successfully identified and mitigated simulated data leakage risks',
+                tier: 'Master',
+                icon: 'award',
+                hi: '#a7f3d0',
+                lo: '#059669',
+                rim: '#065f46',
+                fg: '#ffffff'
+              },
+              AUDIT_MASTER: {
+                id: 'audit-master',
+                title: 'Audit Master',
+                description: 'Passed all tenant row-level compliance and privacy checks',
+                tier: 'Legendary',
+                icon: 'crown',
+                hi: '#fde68a',
+                lo: '#d97706',
+                rim: '#92400e',
+                fg: '#17102b'
+              },
+              SPEED_DEMON: {
+                id: 'speed-demon',
+                title: 'Rapid Responder',
+                description: 'Completed timed security assessment under 60 seconds',
+                tier: 'Adept',
+                icon: 'zap',
+                hi: '#a97cf5',
+                lo: '#6a2bd9',
+                rim: '#3b1590',
+                fg: '#ffffff'
+              },
+              SEC_ROOKIE: {
+                id: 'sec-rookie',
+                title: 'Zero-Trust Initiate',
+                description: 'Enrolled in corporate zero-trust compliance curriculum',
+                tier: 'Adept',
+                icon: 'star',
+                hi: '#e0e7ff',
+                lo: '#6366f1',
+                rim: '#4338ca',
+                fg: '#ffffff'
+              },
+              PERFECT_SCORE: {
+                id: 'perfect-score',
+                title: 'Flawless Decryption',
+                description: 'Achieved 100% precision on cryptographic verification test',
+                tier: 'Legendary',
+                icon: 'crown',
+                hi: '#fef08a',
+                lo: '#eab308',
+                rim: '#a16207',
+                fg: '#17102b'
+              }
             };
-            setEarnedBadges(gam.badges.map(b => KNOWN_MAP[b] || {
+            setEarnedBadges(gam.badges.map(b => BADGE_DEFINITIONS[b] || {
               id: b.toLowerCase().replace(/_/g, '-'),
-              title: b.replace(/_/g, ' '),
-              description: 'Corporate certification achievement unlocked',
-              tier: 'Adept'
+              title: b.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+              description: 'Verified corporate compliance achievement unlocked',
+              tier: b.includes('STREAK') || b.includes('MASTER') ? 'Legendary' : b.includes('CHAMPION') || b.includes('GUARDIAN') ? 'Master' : 'Adept',
+              icon: b.includes('STREAK') ? 'flame' : b.includes('SECURITY') || b.includes('GUARDIAN') ? 'shield' : b.includes('SPEED') ? 'zap' : 'star',
+              hi: b.includes('STREAK') ? '#ffb57a' : b.includes('SECURITY') ? '#6fa8ff' : '#a97cf5',
+              lo: b.includes('STREAK') ? '#ff7a1a' : b.includes('SECURITY') ? '#1d6fe0' : '#6a2bd9',
+              rim: b.includes('STREAK') ? '#b84f00' : b.includes('SECURITY') ? '#124a9e' : '#3b1590',
+              fg: b.includes('STREAK') ? '#17102b' : '#ffffff'
             }));
           }
         } else {
