@@ -42,6 +42,16 @@ function shuffleArray(array) {
   return arr;
 }
 
+// Helper to extract sequence items from all possible field names
+function extractSequenceItems(q) {
+  if (!q) return [];
+  if (Array.isArray(q.initialOrder) && q.initialOrder.length > 0) return [...q.initialOrder];
+  if (Array.isArray(q.correctOrder) && q.correctOrder.length > 0) return [...q.correctOrder];
+  if (Array.isArray(q.options) && q.options.length > 0) return [...q.options];
+  if (Array.isArray(q.steps) && q.steps.length > 0) return [...q.steps];
+  return [];
+}
+
 // Generate randomized question sequence and randomized item choices
 function prepareQuizQuestions(quiz, initialSession) {
   // If active session was restored from localStorage, retain its exact prepared questions array
@@ -66,7 +76,11 @@ function prepareQuizQuestions(quiz, initialSession) {
     }
     // Sequence order: dynamically scramble initialOrder ensuring it doesn't match solved state
     else if (cloned.type === 'sequence_order') {
-      if (Array.isArray(cloned.correctOrder)) {
+      const items = extractSequenceItems(cloned);
+      if (items.length > 0) {
+        if (!Array.isArray(cloned.correctOrder) || cloned.correctOrder.length === 0) {
+          cloned.correctOrder = [...items];
+        }
         let scrambled = shuffleArray(cloned.correctOrder);
         let tries = 0;
         while (tries < 5 && scrambled.every((item, idx) => item === cloned.correctOrder[idx])) {
@@ -112,7 +126,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // Interactive sequence ordering state & swap animation tracking
   const [sequenceItems, setSequenceItems] = useState(() => {
     const q = questions[currentIndex] || questions[0];
-    return q && q.type === 'sequence_order' ? [...(q.initialOrder || q.correctOrder)] : [];
+    return q && q.type === 'sequence_order' ? extractSequenceItems(q) : [];
   });
   const [swappedIdx, setSwappedIdx] = useState(null);
 
@@ -136,13 +150,13 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // Setup sequence items when question changes
   useEffect(() => {
     if (currentQ && currentQ.type === 'sequence_order') {
-      setSequenceItems([...(currentQ.initialOrder || currentQ.correctOrder)]);
+      setSequenceItems(extractSequenceItems(currentQ));
     }
     setIdentificationInput('');
     setSelectedOption(null);
     setAnsweredState(null);
     setTimeLeft(quiz.timePerQuestion || 45);
-  }, [currentIndex]);
+  }, [currentIndex, currentQ]);
 
   // Countdown Timer
   useEffect(() => {
@@ -175,6 +189,9 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     setQuestions(freshlyPrepared);
     setStage('active');
     setCurrentIndex(0);
+    if (freshlyPrepared[0] && freshlyPrepared[0].type === 'sequence_order') {
+      setSequenceItems(extractSequenceItems(freshlyPrepared[0]));
+    }
     setCorrectCount(0);
     setPointsTotal(0);
     setAnswersHistory({});
@@ -211,10 +228,11 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
   const moveSequenceItem = (index, direction) => {
     if (answeredState !== null) return;
+    const currentList = sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ);
     const targetIdx = direction === 'up' ? index - 1 : index + 1;
-    if (targetIdx < 0 || targetIdx >= sequenceItems.length) return;
+    if (targetIdx < 0 || targetIdx >= currentList.length) return;
 
-    const updated = [...sequenceItems];
+    const updated = [...currentList];
     const temp = updated[index];
     updated[index] = updated[targetIdx];
     updated[targetIdx] = temp;
@@ -227,8 +245,12 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
   const handleSequenceVerify = () => {
     if (answeredState !== null) return;
-    const isCorrect = JSON.stringify(sequenceItems) === JSON.stringify(currentQ.correctOrder);
-    const userAns = sequenceItems.map((s, i) => `${i + 1}. ${s}`).join(' ➔ ');
+    const currentList = sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ);
+    const correctSeq = (Array.isArray(currentQ.correctOrder) && currentQ.correctOrder.length > 0)
+      ? currentQ.correctOrder
+      : (Array.isArray(currentQ.options) ? currentQ.options : currentList);
+    const isCorrect = JSON.stringify(currentList) === JSON.stringify(correctSeq);
+    const userAns = currentList.map((s, i) => `${i + 1}. ${s}`).join(' ➔ ');
     evaluateAnswer(isCorrect, userAns);
   };
 
@@ -714,7 +736,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 Use the <strong>Up (▲)</strong> and <strong>Down (▼)</strong> arrow buttons to reorder the items into the correct chronological or architectural sequence:
               </div>
               <div className="sequence-items-list">
-                {sequenceItems.map((itemText, idx) => (
+                {(sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ)).map((itemText, idx, arr) => (
                   <div 
                     key={idx} 
                     className={`sequence-item-row ${swappedIdx === idx ? 'seq-item-swapped' : ''}`}
@@ -735,7 +757,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                         <button 
                           type="button"
                           className="seq-arrow-btn"
-                          disabled={idx === sequenceItems.length - 1}
+                          disabled={idx === arr.length - 1}
                           onClick={() => moveSequenceItem(idx, 'down')}
                           title="Move step down"
                         >

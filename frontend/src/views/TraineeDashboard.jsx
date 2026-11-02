@@ -478,12 +478,33 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   // =========================================================================
   if (activeQuiz) {
     return (
-      <QuizArena 
-        quiz={activeQuiz}
-        initialSession={null}
-        onFinish={handleQuizFinish}
-        onExit={handleQuizExit}
-      />
+      <div className="dashboard-content-layout" style={{ maxWidth: '1080px', margin: '0 auto', width: '100%', padding: '16px 20px 48px' }}>
+        <div style={{ marginBottom: '18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <button 
+            type="button"
+            className="btn btn-secondary btn-sm flex-align gap-6"
+            onClick={handleQuizExit}
+            style={{ fontWeight: '700', borderRadius: '10px' }}
+          >
+            <ArrowRight size={16} style={{ transform: 'rotate(180deg)' }} />
+            <span>Back to Quizzes Catalog</span>
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: '700', color: '#64748b' }}>
+            <span style={{ padding: '4px 10px', background: '#e0e7ff', color: '#4338ca', borderRadius: '999px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Interactive Assessment
+            </span>
+            <span>&bull;</span>
+            <span style={{ color: '#0f172a' }}>{activeQuiz.title}</span>
+          </div>
+        </div>
+
+        <QuizArena 
+          quiz={activeQuiz}
+          initialSession={null}
+          onFinish={handleQuizFinish}
+          onExit={handleQuizExit}
+        />
+      </div>
     );
   }
 
