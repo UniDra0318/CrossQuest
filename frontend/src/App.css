@@ -8899,3 +8899,139 @@
   color: #b91c1c;
   border: 1px solid #fecaca;
 }
+
+/* ==========================================================================
+   STANDARD QUIZ THEME & DYNAMIC ATMOSPHERE OVERRIDES
+   ========================================================================== */
+.quiz-fullscreen-wrapper.theme-standard-light {
+  background-color: #f1f5f9 !important;
+  background-image: none !important;
+  color: #0f172a !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-card,
+.quiz-fullscreen-wrapper.theme-standard-light .quiz-arena-card,
+.quiz-fullscreen-wrapper.theme-standard-light .results-card {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08) !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-section h3,
+.quiz-fullscreen-wrapper.theme-standard-light .arena-question-heading h2,
+.quiz-fullscreen-wrapper.theme-standard-light .results-heading,
+.quiz-fullscreen-wrapper.theme-standard-light .summary-title-group h3 {
+  color: #0f172a !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .results-subtext {
+  color: #475569 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-desc {
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-left: 4px solid #7c3aed !important;
+  color: #334155 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-stat-tile {
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-stat-tile .stat-num {
+  color: #0f172a !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-stat-tile .stat-label {
+  color: #64748b !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-theme-picker-section {
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-protection-alert {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #065f46 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .arena-top-control-bar {
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-light .briefing-actions {
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark {
+  background-color: #090d16 !important;
+  background-image: none !important;
+  color: #f8fafc !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .briefing-card,
+.quiz-fullscreen-wrapper.theme-standard-dark .quiz-arena-card,
+.quiz-fullscreen-wrapper.theme-standard-dark .results-card {
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5) !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .briefing-section h3,
+.quiz-fullscreen-wrapper.theme-standard-dark .arena-question-heading h2,
+.quiz-fullscreen-wrapper.theme-standard-dark .results-heading,
+.quiz-fullscreen-wrapper.theme-standard-dark .summary-title-group h3 {
+  color: #f8fafc !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .results-subtext {
+  color: #94a3b8 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .briefing-desc {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-left: 4px solid #a855f7 !important;
+  color: #e2e8f0 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .briefing-stat-tile {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .briefing-stat-tile .stat-num {
+  color: #ffffff !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .briefing-stat-tile .stat-label {
+  color: #94a3b8 !important;
+}
+
+.quiz-fullscreen-wrapper.theme-standard-dark .briefing-theme-picker-section {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Ensure all custom dark atmospheres have crisp white text */
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .arena-question-heading h2,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .briefing-section h3,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .results-heading,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .summary-title-group h3 {
+  color: #f8fafc !important;
+}
+
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .results-subtext {
+  color: #cbd5e1 !important;
+}
+
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .briefing-stat-tile .stat-num {
+  color: #ffffff !important;
+}

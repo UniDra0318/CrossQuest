@@ -27,7 +27,8 @@ import {
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
 import MatchingQuestion from './MatchingQuestion';
-import { QUIZ_THEMES, getQuizTheme, DEFAULT_QUIZ_THEME_ID } from '../data/quizThemes';
+import { QUIZ_THEMES, getQuizTheme, DEFAULT_QUIZ_THEME_ID, STANDARD_THEME_ID } from '../data/quizThemes';
+import { useTheme } from '../contexts/ThemeContext';
 
 const KAHOOT_TILES = [
   { key: 0, symbol: '▲', colorClass: 'tile-red', bg: '#e21b3c', shadow: '#a1122a' },
@@ -101,6 +102,8 @@ function prepareQuizQuestions(quiz, initialSession) {
 export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
+  const { theme, effectiveTheme } = useTheme();
+
   // Background Theme State
   const [quizThemeId, setQuizThemeId] = useState(() => {
     try {
@@ -111,16 +114,24 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   });
   const [showThemePicker, setShowThemePicker] = useState(false);
 
-  const activeTheme = getQuizTheme(quizThemeId);
+  const activeTheme = getQuizTheme(quizThemeId, effectiveTheme);
 
   const handleSelectTheme = (themeId) => {
     setQuizThemeId(themeId);
     try {
       localStorage.setItem('crossquest_quiz_bg_theme', themeId);
+      if (themeId !== STANDARD_THEME_ID) {
+        localStorage.setItem('crossquest_last_custom_theme', themeId);
+      }
     } catch (e) {
       console.warn('Failed to save quiz theme preference:', e);
     }
   };
+
+  const isLightModeStandard = activeTheme.isStandard && effectiveTheme === 'light';
+  const wrapperThemeClass = activeTheme.isStandard 
+    ? (effectiveTheme === 'dark' ? 'theme-standard-dark' : 'theme-standard-light')
+    : (activeTheme.animClass || '');
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -392,7 +403,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   if (stage === 'briefing') {
     return (
       <div 
-        className={`quiz-fullscreen-wrapper ${activeTheme.animClass || ''}`}
+        className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`}
         style={{ 
           ...activeTheme.bgStyle, 
           width: '100%', 
@@ -413,17 +424,41 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             type="button"
             className="btn-tactile btn-tactile-ghost"
             onClick={onExit}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 18px', borderRadius: '12px', fontSize: '13px', fontWeight: '700', background: 'rgba(0, 0, 0, 0.5)', color: '#f8fafc', border: '1px solid rgba(255, 255, 255, 0.2)', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all 0.2s ease' }}
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              padding: '8px 18px', 
+              borderRadius: '12px', 
+              fontSize: '13px', 
+              fontWeight: '700', 
+              background: isLightModeStandard ? '#ffffff' : 'rgba(0, 0, 0, 0.5)', 
+              color: isLightModeStandard ? '#0f172a' : '#f8fafc', 
+              border: isLightModeStandard ? '1px solid #cbd5e1' : '1px solid rgba(255, 255, 255, 0.2)', 
+              cursor: 'pointer', 
+              backdropFilter: 'blur(10px)', 
+              transition: 'all 0.2s ease',
+              boxShadow: isLightModeStandard ? '0 2px 6px rgba(0,0,0,0.06)' : 'none'
+            }}
           >
             <ArrowRight size={15} style={{ transform: 'rotate(180deg)' }} />
             <span>Back to Quizzes Catalog</span>
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: '700', color: '#cbd5e1' }}>
-            <span style={{ padding: '4px 12px', background: 'rgba(255, 255, 255, 0.16)', color: '#ffffff', borderRadius: '999px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', backdropFilter: 'blur(8px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: '700', color: isLightModeStandard ? '#475569' : '#cbd5e1' }}>
+            <span style={{ 
+              padding: '4px 12px', 
+              background: isLightModeStandard ? '#e2e8f0' : 'rgba(255, 255, 255, 0.16)', 
+              color: isLightModeStandard ? '#334155' : '#ffffff', 
+              borderRadius: '999px', 
+              fontSize: '11px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.06em', 
+              backdropFilter: 'blur(8px)' 
+            }}>
               Interactive Assessment
             </span>
             <span>&bull;</span>
-            <span style={{ color: '#ffffff', fontWeight: 800, fontSize: '14px' }}>{quiz.title}</span>
+            <span style={{ color: isLightModeStandard ? '#0f172a' : '#ffffff', fontWeight: 800, fontSize: '14px' }}>{quiz.title}</span>
           </div>
         </div>
 
@@ -443,72 +478,206 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             {/* Interactive Background Theme Selector */}
             <div className="briefing-theme-picker-section" style={{
               margin: '0',
-              padding: '12px 18px',
+              padding: '14px 18px',
               borderRadius: '16px',
-              background: 'rgba(0, 0, 0, 0.32)',
-              border: '1px solid rgba(255, 255, 255, 0.12)'
+              background: isLightModeStandard ? '#f8fafc' : 'rgba(0, 0, 0, 0.32)',
+              border: isLightModeStandard ? '1.5px solid #e2e8f0' : '1px solid rgba(255, 255, 255, 0.12)'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                 <span style={{ fontSize: '12.5px', fontWeight: '800', color: activeTheme.accent, display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   <Palette size={16} />
-                  <span>Choose Arena Atmosphere &amp; Theme ({QUIZ_THEMES.length} Themes)</span>
+                  <span>Arena Theme &amp; Atmosphere</span>
                 </span>
-                <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>
-                  Active Atmosphere: <strong style={{ color: '#ffffff' }}>{activeTheme.name}</strong>
+                <span style={{ fontSize: '11.5px', color: isLightModeStandard ? '#64748b' : '#94a3b8' }}>
+                  Active Mode: <strong style={{ color: isLightModeStandard ? '#0f172a' : '#ffffff' }}>{activeTheme.name}</strong>
                 </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                {QUIZ_THEMES.map(th => {
-                  const isSel = th.id === quizThemeId;
-                  const buttonBg = th.previewStyle || th.bgStyle;
-                  return (
-                    <div
-                      key={th.id}
-                      onClick={() => handleSelectTheme(th.id)}
-                      style={{
-                        ...buttonBg,
-                        backgroundColor: buttonBg.backgroundColor || '#0f172a',
-                        padding: '10px 14px',
-                        borderRadius: '12px',
-                        border: isSel ? `2px solid ${th.accent}` : '1px solid rgba(255,255,255,0.15)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        boxShadow: isSel ? `0 0 16px ${th.accent}77, 0 4px 12px rgba(0,0,0,0.4)` : 'none',
-                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                        position: 'relative'
-                      }}
-                    >
-                      <span style={{ fontSize: '20px', lineHeight: 1 }}>{th.icon}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: '800', fontSize: '12px', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {th.name}
-                        </div>
-                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {th.tagline}
-                        </div>
+
+              {/* Segmented Mode Selector: Standard Mode vs Custom Atmospheres */}
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                marginBottom: '12px',
+                padding: '4px',
+                borderRadius: '12px',
+                background: isLightModeStandard ? '#e2e8f0' : 'rgba(0, 0, 0, 0.4)',
+                border: isLightModeStandard ? '1px solid #cbd5e1' : '1px solid rgba(255, 255, 255, 0.1)'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => handleSelectTheme(STANDARD_THEME_ID)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: activeTheme.isStandard 
+                      ? (effectiveTheme === 'light' ? '#ffffff' : '#6366f1') 
+                      : 'transparent',
+                    color: activeTheme.isStandard 
+                      ? (effectiveTheme === 'light' ? '#4f46e5' : '#ffffff') 
+                      : (isLightModeStandard ? '#64748b' : '#94a3b8'),
+                    fontWeight: activeTheme.isStandard ? '800' : '600',
+                    fontSize: '12.5px',
+                    cursor: 'pointer',
+                    boxShadow: activeTheme.isStandard ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>⚙️ Standard App Theme</span>
+                  <span style={{ fontSize: '11px', opacity: 0.85 }}>({theme === 'system' ? `System: ${effectiveTheme}` : theme})</span>
+                  {activeTheme.isStandard && <Check size={14} />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (activeTheme.isStandard) {
+                      const lastCustom = localStorage.getItem('crossquest_last_custom_theme') || 'cyber_grid';
+                      handleSelectTheme(lastCustom);
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: !activeTheme.isStandard 
+                      ? '#6366f1' 
+                      : 'transparent',
+                    color: !activeTheme.isStandard 
+                      ? '#ffffff' 
+                      : (isLightModeStandard ? '#64748b' : '#94a3b8'),
+                    fontWeight: !activeTheme.isStandard ? '800' : '600',
+                    fontSize: '12.5px',
+                    cursor: 'pointer',
+                    boxShadow: !activeTheme.isStandard ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>✨ Custom Atmospheres ({QUIZ_THEMES.length} Themes)</span>
+                  {!activeTheme.isStandard && <Check size={14} />}
+                </button>
+              </div>
+
+              {/* Standard Mode Summary Banner if Standard is chosen */}
+              {activeTheme.isStandard ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 18px',
+                  borderRadius: '12px',
+                  background: effectiveTheme === 'light' ? '#ffffff' : '#1e293b',
+                  border: effectiveTheme === 'light' ? '1.5px solid #e2e8f0' : '1px solid #334155',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '10px',
+                      background: effectiveTheme === 'light' ? '#e0e7ff' : '#312e81',
+                      color: effectiveTheme === 'light' ? '#4338ca' : '#c7d2fe',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '20px'
+                    }}>
+                      ⚙️
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '800', color: effectiveTheme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                        Standard Application Mode Active
                       </div>
-                      {isSel && (
-                        <div style={{
-                          width: '16px',
-                          height: '16px',
-                          borderRadius: '50%',
-                          background: th.accent,
-                          color: '#ffffff',
+                      <div style={{ fontSize: '11.5px', color: effectiveTheme === 'light' ? '#64748b' : '#94a3b8' }}>
+                        Using your global profile setting: <strong style={{ color: effectiveTheme === 'light' ? '#334155' : '#e2e8f0' }}>{theme === 'system' ? `System Preference (${effectiveTheme.toUpperCase()})` : `${theme.toUpperCase()} MODE`}</strong>. Distraction-free clean layout.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const lastCustom = localStorage.getItem('crossquest_last_custom_theme') || 'cyber_grid';
+                      handleSelectTheme(lastCustom);
+                    }}
+                    className="btn-tactile btn-tactile-ghost btn-sm"
+                    style={{
+                      fontSize: '11.5px',
+                      padding: '6px 14px',
+                      background: effectiveTheme === 'light' ? '#f1f5f9' : 'rgba(255,255,255,0.08)',
+                      color: effectiveTheme === 'light' ? '#4338ca' : '#a5b4fc',
+                      border: effectiveTheme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '8px'
+                    }}
+                  >
+                    Switch to Gaming Atmosphere →
+                  </button>
+                </div>
+              ) : (
+                /* Grid of 6 Custom Themes */
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  {QUIZ_THEMES.map(th => {
+                    const isSel = th.id === quizThemeId;
+                    const buttonBg = th.previewStyle || th.bgStyle;
+                    return (
+                      <div
+                        key={th.id}
+                        onClick={() => handleSelectTheme(th.id)}
+                        style={{
+                          ...buttonBg,
+                          backgroundColor: buttonBg.backgroundColor || '#0f172a',
+                          padding: '10px 14px',
+                          borderRadius: '12px',
+                          border: isSel ? `2px solid ${th.accent}` : '1px solid rgba(255,255,255,0.15)',
+                          cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '10px',
-                          fontWeight: '800'
-                        }}>
-                          ✓
+                          gap: '12px',
+                          boxShadow: isSel ? `0 0 16px ${th.accent}77, 0 4px 12px rgba(0,0,0,0.4)` : 'none',
+                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                          position: 'relative'
+                        }}
+                      >
+                        <span style={{ fontSize: '20px', lineHeight: 1 }}>{th.icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: '800', fontSize: '12px', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {th.name}
+                          </div>
+                          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {th.tagline}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                        {isSel && (
+                          <div style={{
+                            width: '16px',
+                            height: '16px',
+                            borderRadius: '50%',
+                            background: th.accent,
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '10px',
+                            fontWeight: '800'
+                          }}>
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="briefing-metrics-grid">
@@ -594,7 +763,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const historyList = Object.values(answersHistory);
 
     return (
-      <div className={`quiz-fullscreen-wrapper ${activeTheme.animClass || ''}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: 'calc(100vh - 65px)', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
+      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: 'calc(100vh - 65px)', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
         <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '1240px', width: '100%' }}>
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
@@ -722,7 +891,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className={`quiz-fullscreen-wrapper ${activeTheme.animClass || ''}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: 'calc(100vh - 65px)', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
+    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: 'calc(100vh - 65px)', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
       <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1240px', width: '100%' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
@@ -765,9 +934,9 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                   borderRadius: '10px',
                   fontSize: '12px',
                   fontWeight: '700',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  color: activeTheme.accent,
-                  border: `1px solid ${activeTheme.accent}55`,
+                  background: isLightModeStandard ? '#f1f5f9' : 'rgba(255, 255, 255, 0.08)',
+                  color: isLightModeStandard ? '#4f46e5' : activeTheme.accent,
+                  border: isLightModeStandard ? '1px solid #cbd5e1' : `1px solid ${activeTheme.accent}55`,
                   cursor: 'pointer'
                 }}
                 title="Change Quiz Background Theme"
@@ -783,44 +952,91 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                   top: 'calc(100% + 6px)',
                   right: 0,
                   zIndex: 100,
-                  width: '220px',
+                  width: '240px',
                   borderRadius: '16px',
-                  background: '#0f172a',
-                  border: '1px solid #334155',
+                  background: isLightModeStandard ? '#ffffff' : '#0f172a',
+                  border: isLightModeStandard ? '1px solid #cbd5e1' : '1px solid #334155',
                   padding: '8px',
-                  boxShadow: '0 16px 36px rgba(0,0,0,0.6)',
+                  boxShadow: '0 16px 36px rgba(0,0,0,0.3)',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '4px'
                 }}>
-                  {QUIZ_THEMES.map(th => (
-                    <button
-                      key={th.id}
-                      type="button"
-                      onClick={() => {
-                        handleSelectTheme(th.id);
-                        setShowThemePicker(false);
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        padding: '8px 12px',
-                        borderRadius: '10px',
-                        border: 'none',
-                        background: th.id === quizThemeId ? '#1e293b' : 'transparent',
-                        color: th.id === quizThemeId ? th.accent : '#f1f5f9',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        fontSize: '12px',
-                        fontWeight: '700'
-                      }}
-                    >
-                      <span>{th.icon}</span>
-                      <span>{th.name}</span>
-                      {th.id === quizThemeId && <Check size={14} style={{ marginLeft: 'auto' }} />}
-                    </button>
-                  ))}
+                  <div style={{ fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', color: '#94a3b8', padding: '4px 8px', letterSpacing: '0.05em' }}>
+                    Theme Mode
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleSelectTheme(STANDARD_THEME_ID);
+                      setShowThemePicker(false);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: activeTheme.isStandard 
+                        ? (effectiveTheme === 'dark' ? '#1e293b' : '#e0e7ff') 
+                        : 'transparent',
+                      color: activeTheme.isStandard 
+                        ? (effectiveTheme === 'dark' ? '#818cf8' : '#4338ca') 
+                        : (isLightModeStandard ? '#0f172a' : '#f1f5f9'),
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontSize: '12px',
+                      fontWeight: '700'
+                    }}
+                  >
+                    <span>⚙️</span>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span>Standard App Theme</span>
+                      <span style={{ fontSize: '10px', opacity: 0.75 }}>
+                        {theme === 'system' ? `System (${effectiveTheme})` : `${theme} mode`}
+                      </span>
+                    </div>
+                    {activeTheme.isStandard && <Check size={14} style={{ marginLeft: 'auto' }} />}
+                  </button>
+
+                  <div style={{ height: '1px', background: isLightModeStandard ? '#e2e8f0' : 'rgba(255,255,255,0.1)', margin: '4px 0' }} />
+                  <div style={{ fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', color: '#94a3b8', padding: '4px 8px', letterSpacing: '0.05em' }}>
+                    Custom Atmospheres ({QUIZ_THEMES.length})
+                  </div>
+
+                  {QUIZ_THEMES.map(th => {
+                    const isSel = th.id === quizThemeId;
+                    return (
+                      <button
+                        key={th.id}
+                        type="button"
+                        onClick={() => {
+                          handleSelectTheme(th.id);
+                          setShowThemePicker(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '8px 12px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: isSel ? (effectiveTheme === 'dark' || !activeTheme.isStandard ? '#1e293b' : '#e0e7ff') : 'transparent',
+                          color: isSel ? th.accent : (isLightModeStandard ? '#0f172a' : '#f1f5f9'),
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          fontSize: '12px',
+                          fontWeight: '700'
+                        }}
+                      >
+                        <span>{th.icon}</span>
+                        <span>{th.name}</span>
+                        {isSel && <Check size={14} style={{ marginLeft: 'auto' }} />}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

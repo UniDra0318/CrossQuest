@@ -22,7 +22,7 @@ export const QUIZ_THEMES = [
     cardStyle: {
       background: '#120f30',
       border: '1.5px solid rgba(6, 182, 212, 0.35)',
-      boxShadow: '0 16px 40px rgba(6, 182, 212, 0.18)',
+      boxShadow: '0 20px 50px rgba(6, 182, 212, 0.2)',
       color: '#f8fafc'
     },
     timerStyle: {
@@ -54,7 +54,7 @@ export const QUIZ_THEMES = [
     cardStyle: {
       background: '#170b28',
       border: '1.5px solid rgba(217, 70, 239, 0.35)',
-      boxShadow: '0 16px 40px rgba(217, 70, 239, 0.18)',
+      boxShadow: '0 20px 50px rgba(217, 70, 239, 0.2)',
       color: '#f8fafc'
     },
     timerStyle: {
@@ -85,7 +85,7 @@ export const QUIZ_THEMES = [
     cardStyle: {
       background: '#230b34',
       border: '1.5px solid rgba(249, 115, 22, 0.4)',
-      boxShadow: '0 16px 40px rgba(249, 115, 22, 0.2)',
+      boxShadow: '0 20px 50px rgba(249, 115, 22, 0.22)',
       color: '#f8fafc'
     },
     timerStyle: {
@@ -117,7 +117,7 @@ export const QUIZ_THEMES = [
     cardStyle: {
       background: '#063327',
       border: '1.5px solid rgba(16, 185, 129, 0.35)',
-      boxShadow: '0 16px 40px rgba(16, 185, 129, 0.18)',
+      boxShadow: '0 20px 50px rgba(16, 185, 129, 0.2)',
       color: '#f8fafc'
     },
     timerStyle: {
@@ -148,7 +148,7 @@ export const QUIZ_THEMES = [
     cardStyle: {
       background: '#09253d',
       border: '1.5px solid rgba(56, 189, 248, 0.35)',
-      boxShadow: '0 16px 40px rgba(56, 189, 248, 0.18)',
+      boxShadow: '0 20px 50px rgba(56, 189, 248, 0.2)',
       color: '#f8fafc'
     },
     timerStyle: {
@@ -179,7 +179,7 @@ export const QUIZ_THEMES = [
     cardStyle: {
       background: '#131b2e',
       border: '1.5px solid #1f2937',
-      boxShadow: '0 16px 40px rgba(0, 0, 0, 0.55)',
+      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
       color: '#f8fafc'
     },
     timerStyle: {
@@ -190,8 +190,43 @@ export const QUIZ_THEMES = [
   }
 ];
 
-export const DEFAULT_QUIZ_THEME_ID = 'cyber_grid';
+export const STANDARD_THEME_ID = 'standard';
+export const DEFAULT_QUIZ_THEME_ID = 'standard';
 
-export function getQuizTheme(themeId) {
+export function getQuizTheme(themeId, effectiveAppTheme = 'dark') {
+  if (themeId === 'standard' || themeId === 'none' || themeId === 'off' || !themeId) {
+    const isDark = effectiveAppTheme === 'dark';
+    return {
+      id: 'standard',
+      name: `Standard (${isDark ? 'Dark Mode' : 'Light Mode'})`,
+      tagline: isDark ? 'Clean obsidian system styling' : 'Crisp clean light system styling',
+      icon: '⚙️',
+      accent: '#6366f1',
+      isStandard: true,
+      animClass: '',
+      previewStyle: {
+        background: isDark 
+          ? 'linear-gradient(135deg, #111827 0%, #1e293b 100%)' 
+          : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        backgroundColor: isDark ? '#111827' : '#f8fafc'
+      },
+      bgStyle: {
+        backgroundColor: isDark ? '#090d16' : '#f8fafc',
+        backgroundImage: 'none'
+      },
+      cardStyle: {
+        background: isDark ? '#111827' : '#ffffff',
+        border: isDark ? '1px solid #1f2937' : '1.5px solid #e2e8f0',
+        boxShadow: isDark ? '0 24px 60px rgba(0, 0, 0, 0.5)' : '0 20px 48px rgba(15, 23, 42, 0.08)',
+        color: isDark ? '#f8fafc' : '#0f172a'
+      },
+      timerStyle: {
+        background: isDark ? '#1e293b' : '#f1f5f9',
+        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+        color: isDark ? '#f8fafc' : '#0f172a'
+      }
+    };
+  }
+
   return QUIZ_THEMES.find(t => t.id === themeId) || QUIZ_THEMES[0];
 }
