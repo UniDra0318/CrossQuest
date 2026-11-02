@@ -258,7 +258,26 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('crossquest_auth_user');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Find matching persona in DEMO_USERS to upgrade any stale cached object
+        const matchingDemo = Object.values(DEMO_USERS).find(
+          u => u.id === parsed.id || u.email === parsed.email
+        );
+        if (matchingDemo) {
+          const upgraded = { ...matchingDemo, ...parsed };
+          // Ensure streak, points, level, and quiz_progress from DEMO_USERS if missing or stale
+          if (upgraded.points === undefined || upgraded.quiz_progress === undefined) {
+            upgraded.streak = matchingDemo.streak;
+            upgraded.points = matchingDemo.points;
+            upgraded.level = matchingDemo.level;
+            upgraded.quiz_progress = matchingDemo.quiz_progress;
+          }
+          return upgraded;
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }

@@ -11,7 +11,14 @@ export async function authFetch(url, options = {}, token) {
     headers['Authorization'] = `Bearer ${activeToken}`;
   }
 
-  let res = await fetch(url, { ...options, headers });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  let res;
+  try {
+    res = await fetch(url, { ...options, headers, signal: options.signal || controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (res.status === 401) {
     try {
@@ -175,7 +182,13 @@ export async function fetchTraineeGamification(traineeId, token) {
     const headers = {};
     const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('crossquest_auth_token') : null);
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-    const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`, { headers });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`, { 
+      headers, 
+      signal: controller.signal 
+    });
+    clearTimeout(timeoutId);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for trainee gamification:", err);

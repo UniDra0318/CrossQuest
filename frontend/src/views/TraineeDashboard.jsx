@@ -44,10 +44,10 @@ import { badges as designBadges, leaderboard as designLeaderboard } from '../dat
 
 export default function TraineeDashboard({ activeSubView, setActiveView, onStreakLoad }) {
   const { currentUser, token } = useAuth();
-  const [points, setPoints] = useState(null);
+  const [points, setPoints] = useState(() => currentUser?.points ?? 12877);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [level, setLevel] = useState(null);
-  const [streakDays, setStreakDays] = useState(null);
+  const [level, setLevel] = useState(() => currentUser?.level ?? 4);
+  const [streakDays, setStreakDays] = useState(() => currentUser?.streak ?? 7);
   const [earnedBadges, setEarnedBadges] = useState(designBadges);
   const [realQuizzes, setRealQuizzes] = useState([]);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -68,15 +68,15 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   const [certMsg, setCertMsg] = useState(null);
   const [certError, setCertError] = useState(null);
   const [leaderboardOptOut, setLeaderboardOptOut] = useState(false);
-  const [gamLoading, setGamLoading] = useState(true);
+  const [gamLoading, setGamLoading] = useState(false);
 
   // Active quiz state
   const [activeQuiz, setActiveQuiz] = useState(null);
-  const [quizScoreStatus, setQuizScoreStatus] = useState({
-    'act-1': { completed: false, score: null },
-    'act-2': { completed: false, score: null },
-    'act-3': { completed: false, score: null },
-    'act-4': { completed: false, score: null }
+  const [quizScoreStatus, setQuizScoreStatus] = useState(() => currentUser?.quiz_progress || {
+    'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
+    'act-2': { completed: true, score: 95, segments: [true, true, true, true] },
+    'act-3': { completed: true, score: 90, segments: [true, true, true, false] },
+    'act-4': { completed: false, score: null, segments: [false, false, false, false] }
   });
 
   // Track online status (SEC-26: Offline quizzes disabled)
@@ -91,21 +91,32 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     };
   }, []);
 
+  // Immediately synchronize trainee persona when role switcher or account changes
+  useEffect(() => {
+    if (currentUser) {
+      const curStreak = currentUser.streak ?? 1;
+      const curPoints = currentUser.points ?? 500;
+      const curLevel = currentUser.level ?? 1;
+      setStreakDays(curStreak);
+      setPoints(curPoints);
+      setLevel(curLevel);
+      if (onStreakLoad) onStreakLoad(curStreak);
+
+      const defaultProg = {
+        'act-1': { completed: false, score: null, segments: [false, false, false, false] },
+        'act-2': { completed: false, score: null, segments: [false, false, false, false] },
+        'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+        'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+      };
+      setQuizScoreStatus(currentUser.quiz_progress || defaultProg);
+    }
+  }, [currentUser]);
+
   // Sync with backend gamification data & real-time streak
   useEffect(() => {
     async function loadGamification() {
-      setGamLoading(true);
-      if (currentUser?.id) {
-        // Sync individual trainee quiz progress status
-        const defaultProg = {
-          'act-1': { completed: false, score: null, segments: [false, false, false, false] },
-          'act-2': { completed: false, score: null, segments: [false, false, false, false] },
-          'act-3': { completed: false, score: null, segments: [false, false, false, false] },
-          'act-4': { completed: false, score: null, segments: [false, false, false, false] }
-        };
-        const traineeProg = currentUser?.quiz_progress || defaultProg;
-        setQuizScoreStatus(traineeProg);
-
+      if (!currentUser?.id) return;
+      try {
         const [gam, dbQuizzes] = await Promise.all([
           fetchTraineeGamification(currentUser.id, token),
           fetchQuizzes(token)
@@ -253,11 +264,14 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         if (dbQuizzes && dbQuizzes.length > 0) {
           setRealQuizzes(dbQuizzes);
         }
+      } catch (err) {
+        console.warn("API gamification load warning:", err);
+      } finally {
+        setGamLoading(false);
       }
-      setGamLoading(false);
     }
     loadGamification();
-  }, [currentUser?.id, token, onStreakLoad]);
+  }, [currentUser?.id, token]);
 
   // Sync company leaderboard
   useEffect(() => {
@@ -622,7 +636,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   </div>
                   <div className="streak-text-group">
                     <span className="streak-val">
-                      {`${streakDays ?? 7} Days`}
+                      {`${streakDays ?? currentUser?.streak ?? 1} Days`}
                     </span>
                     <span className="streak-lbl">ACTIVE STREAK</span>
                   </div>
@@ -771,12 +785,12 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 <div className="this-week-header flex-between">
                   <h4>This week</h4>
                   <span className="this-week-counter">
-                    {`${Math.min(streakDays ?? 7, 7)} / 7 DAYS`}
+                    {`${Math.min(streakDays ?? currentUser?.streak ?? 1, 7)} / 7 DAYS`}
                   </span>
                 </div>
                 <div className="this-week-days-row">
                   {['M','T','W','T','F','S','S'].map((day, idx) => {
-                    const activeCount = Math.min(streakDays ?? 7, 7);
+                    const activeCount = Math.min(streakDays ?? currentUser?.streak ?? 1, 7);
                     const isActive = idx < activeCount;
                     return (
                       <div key={idx} className="this-week-day-item">
