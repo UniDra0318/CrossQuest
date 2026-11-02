@@ -339,3 +339,135 @@ ALTER TABLE user_abe_keys OWNER TO crossquest_admin;
 ALTER TABLE quizzes OWNER TO crossquest_admin;
 ALTER TABLE quiz_attempts OWNER TO crossquest_admin;
 ALTER TABLE access_logs OWNER TO crossquest_admin;
+
+
+-- 14. Comprehensive RLS for All Client & Trainee Data Tables (Phase 5, SEC-08, Table 19)
+
+-- 14.1 Client Companies
+ALTER TABLE client_companies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE client_companies FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS comp_select ON client_companies;
+CREATE POLICY comp_select ON client_companies FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND app_has_company(id))
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND EXISTS (
+        SELECT 1 FROM trainees t
+        WHERE t.current_company_id = client_companies.id
+          AND t.user_id = app_ctx_get('current_user_id')
+    ))
+    OR (app_ctx_get('current_role') = 'TRAINER')
+);
+
+DROP POLICY IF EXISTS comp_admin_modify ON client_companies;
+CREATE POLICY comp_admin_modify ON client_companies FOR ALL TO PUBLIC
+USING (app_ctx_get('current_role') = 'ADMIN')
+WITH CHECK (app_ctx_get('current_role') = 'ADMIN');
+
+-- 14.2 Trainee Affiliations
+ALTER TABLE trainee_affiliations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trainee_affiliations FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS aff_select ON trainee_affiliations;
+CREATE POLICY aff_select ON trainee_affiliations FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
+    OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND app_has_company(company_id))
+);
+
+DROP POLICY IF EXISTS aff_modify ON trainee_affiliations;
+CREATE POLICY aff_modify ON trainee_affiliations FOR ALL TO PUBLIC
+USING (app_ctx_get('current_role') IN ('ADMIN', 'FINANCE', 'ACCOUNT_MANAGER'))
+WITH CHECK (app_ctx_get('current_role') IN ('ADMIN', 'FINANCE', 'ACCOUNT_MANAGER'));
+
+-- 14.3 Account Manager Assignments
+ALTER TABLE account_manager_assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE account_manager_assignments FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS ama_select ON account_manager_assignments;
+CREATE POLICY ama_select ON account_manager_assignments FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    OR user_id = app_ctx_get('current_user_id')
+);
+
+DROP POLICY IF EXISTS ama_admin_modify ON account_manager_assignments;
+CREATE POLICY ama_admin_modify ON account_manager_assignments FOR ALL TO PUBLIC
+USING (app_ctx_get('current_role') = 'ADMIN')
+WITH CHECK (app_ctx_get('current_role') = 'ADMIN');
+
+-- 14.4 Trainer Assignments
+ALTER TABLE trainer_assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trainer_assignments FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS tra_select ON trainer_assignments;
+CREATE POLICY tra_select ON trainer_assignments FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    OR user_id = app_ctx_get('current_user_id')
+);
+
+DROP POLICY IF EXISTS tra_admin_modify ON trainer_assignments;
+CREATE POLICY tra_admin_modify ON trainer_assignments FOR ALL TO PUBLIC
+USING (app_ctx_get('current_role') = 'ADMIN')
+WITH CHECK (app_ctx_get('current_role') = 'ADMIN');
+
+-- 14.5 Gamified Teams and Team Members
+ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE teams FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS team_select ON teams;
+CREATE POLICY team_select ON teams FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    OR (app_ctx_get('current_role') = 'TRAINER' AND app_has_session(session_id))
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND EXISTS (
+        SELECT 1 FROM training_records tr
+        WHERE tr.session_id = teams.session_id
+          AND tr.trainee_id = app_ctx_get('current_trainee_id')
+    ))
+);
+
+ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE team_members FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS tm_select ON team_members;
+CREATE POLICY tm_select ON team_members FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
+    OR (app_ctx_get('current_role') = 'TRAINER' AND EXISTS (
+        SELECT 1 FROM teams tm
+        WHERE tm.id = team_members.team_id
+          AND app_has_session(tm.session_id)
+    ))
+);
+
+-- 14.6 Gamification Progress
+ALTER TABLE gamification_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE gamification_progress FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS gam_select ON gamification_progress;
+CREATE POLICY gam_select ON gamification_progress FOR SELECT TO PUBLIC
+USING (
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
+    OR (app_ctx_get('current_role') = 'TRAINER')
+    OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND EXISTS (
+        SELECT 1 FROM trainees tr
+        WHERE tr.id = gamification_progress.trainee_id
+          AND tr.current_company_id IS NOT NULL
+          AND app_has_company(tr.current_company_id)
+    ))
+);
+
+-- Assign crossquest_admin ownership across all extended tables
+ALTER TABLE client_companies OWNER TO crossquest_admin;
+ALTER TABLE trainee_affiliations OWNER TO crossquest_admin;
+ALTER TABLE account_manager_assignments OWNER TO crossquest_admin;
+ALTER TABLE trainer_assignments OWNER TO crossquest_admin;
+ALTER TABLE teams OWNER TO crossquest_admin;
+ALTER TABLE team_members OWNER TO crossquest_admin;
+ALTER TABLE gamification_progress OWNER TO crossquest_admin;

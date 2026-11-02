@@ -110,7 +110,13 @@ def setup_test_database():
             "ALTER TABLE quizzes ADD COLUMN closed_at DATETIME",
             "ALTER TABLE quiz_attempts ADD COLUMN is_scored BOOLEAN DEFAULT 1",
             "ALTER TABLE gamification_progress ADD COLUMN streak INTEGER DEFAULT 0",
-            "ALTER TABLE gamification_progress ADD COLUMN last_activity_date DATE"
+            "ALTER TABLE gamification_progress ADD COLUMN last_activity_date DATE",
+            "ALTER TABLE client_companies ADD COLUMN client_type VARCHAR(20) DEFAULT 'COMPANY'",
+            "ALTER TABLE training_sessions ADD COLUMN venue VARCHAR(200)",
+            "ALTER TABLE training_sessions ADD COLUMN delivery_mode VARCHAR(50) DEFAULT 'F2F'",
+            "ALTER TABLE quizzes ADD COLUMN is_approved BOOLEAN DEFAULT 0",
+            "ALTER TABLE quizzes ADD COLUMN approved_by_user_id VARCHAR(36)",
+            "ALTER TABLE quizzes ADD COLUMN approved_at DATETIME"
         ]:
             try:
                 conn.execute(text(stmt))

@@ -71,6 +71,18 @@ class Settings(BaseSettings):
     # Gamification & PWA Security (SEC-26, Phase 6)
     ENABLE_OFFLINE_QUIZZES: bool = False
 
+    # AWS KMS Configuration (DD-09, SEC-06)
+    AWS_REGION: str = "ap-southeast-1"
+    AWS_KMS_KEY_ID: Optional[str] = None
+    AWS_KMS_KEY_ARN: Optional[str] = None
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+
+    # Database TLS Configuration (SEC-18)
+    DB_SSL_MODE: str = "require" # disable, allow, prefer, require, verify-ca, verify-full
+    DB_SSL_CERT_PATH: Optional[str] = None
+
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 

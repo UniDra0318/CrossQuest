@@ -12,6 +12,7 @@ class ClientCompany(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     code = Column(String(50), unique=True, index=True, nullable=False) # e.g. 'CORP_ALPHA'
     name = Column(String(200), nullable=False)
+    client_type = Column(String(20), default="COMPANY", nullable=False) # "COMPANY" or "INDIVIDUAL" (FR-05)
     industry = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -133,6 +134,8 @@ class TrainingSession(Base):
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
     delivery_type = Column(String(50), default="Public") # Public, Dedicated
+    delivery_mode = Column(String(50), default="F2F") # F2F, Online, Hybrid
+    venue = Column(String(200), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Trainer Sign-off Workflow (Phase 2, Section 3.5.3)
@@ -315,6 +318,9 @@ class Quiz(Base):
     available_until = Column(DateTime, nullable=True)
     is_closed = Column(Boolean, default=False) # SEC-26 hold back per-question correctness until closed
     closed_at = Column(DateTime, nullable=True)
+    is_approved = Column(Boolean, default=False)
+    approved_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    approved_at = Column(DateTime, nullable=True)
     created_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

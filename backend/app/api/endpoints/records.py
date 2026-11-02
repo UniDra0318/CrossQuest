@@ -11,7 +11,8 @@ from app.models.entities import (
 )
 from app.schemas.schemas import (
     TrainingRecordCreate, TrainingRecordUpdate, TrainingRecordResponse, DecryptedRecordResponse,
-    TrainerSignOffRequest, TrainerSignOffResponse
+    TrainerSignOffRequest, TrainerSignOffResponse, TrainingSessionCreate, TrainingSessionResponse,
+    TrainerAssignmentCreate, TrainerAssignmentResponse
 )
 from app.api.endpoints.certifications import generate_cert_serial
 from app.api.deps import get_current_user
@@ -762,5 +763,288 @@ def list_assigned_training_sessions(
             "completed_count": sum(1 for item in roster_items if item["status"] == "Completed"),
             "records": roster_items
         })
+
+    return result
+
+
+# -----------------------------------------------------------------------------
+# Training Session Management & Venue Support (Administrator & Account Manager)
+# -----------------------------------------------------------------------------
+@router.post("/sessions", response_model=TrainingSessionResponse)
+def create_training_session(
+    session_in: TrainingSessionCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Creates a new training session with venue and delivery mode.
+    Permitted for Administrator and Account Manager roles.
+    Enforces venue requirements for Online vs Face-to-Face delivery.
+    """
+    if current_user.role not in ("admin", "account_manager"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Administrators and Account Managers can create training sessions."
+        )
+
+    # Check for duplicate session code
+    existing = db.query(TrainingSession).filter(
+        TrainingSession.session_code == session_in.session_code.strip()
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Training session with this code already exists.")
+
+    venue = (session_in.venue or "").strip()
+    delivery_mode = (session_in.delivery_mode or "F2F").strip()
+
+    if delivery_mode.lower() == "online":
+        if not venue:
+            venue = "Online (Virtual Meeting)"
+    elif delivery_mode.lower() == "f2f":
+        if not venue:
+            raise HTTPException(
+                status_code=400,
+                detail="Physical venue is required for Face-to-Face (F2F) training sessions."
+            )
+
+    new_session = TrainingSession(
+        session_code=session_in.session_code.strip(),
+        course_id=session_in.course_id,
+        course_name=session_in.course_name.strip(),
+        start_date=session_in.start_date,
+        end_date=session_in.end_date,
+        delivery_type=session_in.delivery_type,
+        delivery_mode=delivery_mode,
+        venue=venue
+    )
+    db.add(new_session)
+    db.commit()
+    db.refresh(new_session)
+
+    # Audit log
+    log = AccessLog(
+        actor_user_id=current_user.id,
+        actor_role=current_user.role,
+        event_type="SESSION_CREATED",
+        resource_type="SESSION",
+        resource_id=new_session.id,
+        outcome="SUCCESS",
+        source_ip=_get_client_ip(request),
+        details={
+            "session_code": new_session.session_code,
+            "course_name": new_session.course_name,
+            "venue": new_session.venue,
+            "delivery_mode": new_session.delivery_mode
+        }
+    )
+    db.add(log)
+    db.commit()
+
+    return new_session
+
+
+@router.get("/sessions", response_model=List[TrainingSessionResponse])
+def list_training_sessions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Lists all training sessions with venue, delivery mode, and assigned trainers."""
+    sessions = db.query(TrainingSession).order_by(TrainingSession.start_date.desc()).all()
+    result = []
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    for s in sessions:
+        trainers_list = []
+        for ta in s.trainer_assignments:
+            is_active = (ta.valid_to is None or ta.valid_to > now_utc)
+            trainers_list.append({
+                "assignment_id": ta.id,
+                "user_id": ta.user_id,
+                "trainer_name": ta.user.full_name if ta.user else "Unknown Trainer",
+                "trainer_email": ta.user.email if ta.user else "",
+                "valid_from": ta.valid_from.isoformat() if ta.valid_from else None,
+                "valid_to": ta.valid_to.isoformat() if ta.valid_to else None,
+                "is_active": is_active
+            })
+
+        result.append(TrainingSessionResponse(
+            id=s.id,
+            session_code=s.session_code,
+            course_id=s.course_id,
+            course_name=s.course_name,
+            start_date=s.start_date,
+            end_date=s.end_date,
+            delivery_type=s.delivery_type or "Public",
+            delivery_mode=s.delivery_mode or "F2F",
+            venue=s.venue,
+            trainer_signed_off=bool(s.trainer_signed_off),
+            trainer_sign_off_at=s.trainer_sign_off_at,
+            created_at=s.created_at,
+            assigned_trainers=trainers_list
+        ))
+
+    return result
+
+
+# -----------------------------------------------------------------------------
+# Trainer Assignments Management (FR-04)
+# -----------------------------------------------------------------------------
+@router.post("/sessions/{session_id}/trainers", response_model=TrainerAssignmentResponse)
+def assign_trainer_to_session(
+    session_id: str,
+    assignment_in: TrainerAssignmentCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Assigns a Trainer to a training session (FR-04). Administrator only."""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Administrators can assign trainers to sessions (FR-04)."
+        )
+
+    session = db.query(TrainingSession).filter(TrainingSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Training session not found.")
+
+    trainer_user = db.query(User).filter(User.id == assignment_in.user_id).first()
+    if not trainer_user:
+        raise HTTPException(status_code=404, detail="Trainer user not found.")
+    if trainer_user.role != "trainer":
+        raise HTTPException(status_code=400, detail="Target user does not have the trainer role.")
+
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # Check for active existing assignment
+    active_assignment = db.query(TrainerAssignment).filter(
+        TrainerAssignment.session_id == session_id,
+        TrainerAssignment.user_id == assignment_in.user_id,
+        (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > now_utc)
+    ).first()
+    if active_assignment:
+        raise HTTPException(status_code=400, detail="Trainer is already actively assigned to this session.")
+
+    new_assignment = TrainerAssignment(
+        session_id=session_id,
+        user_id=assignment_in.user_id,
+        valid_from=now_utc,
+        valid_to=None
+    )
+    db.add(new_assignment)
+    db.commit()
+    db.refresh(new_assignment)
+
+    # Log TRAINER_ASSIGNED
+    log = AccessLog(
+        actor_user_id=current_user.id,
+        actor_role=current_user.role,
+        event_type="TRAINER_ASSIGNED",
+        resource_type="SESSION",
+        resource_id=session_id,
+        outcome="SUCCESS",
+        source_ip=_get_client_ip(request),
+        details={
+            "session_code": session.session_code,
+            "trainer_user_id": trainer_user.id,
+            "trainer_email": trainer_user.email
+        }
+    )
+    db.add(log)
+    db.commit()
+
+    return TrainerAssignmentResponse(
+        id=new_assignment.id,
+        user_id=new_assignment.user_id,
+        session_id=new_assignment.session_id,
+        trainer_name=trainer_user.full_name,
+        trainer_email=trainer_user.email,
+        valid_from=new_assignment.valid_from,
+        valid_to=new_assignment.valid_to,
+        is_active=True
+    )
+
+
+@router.delete("/sessions/{session_id}/trainers/{user_id}")
+@router.put("/sessions/{session_id}/trainers/{user_id}/end")
+def end_trainer_assignment(
+    session_id: str,
+    user_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Ends an active Trainer assignment to a training session (FR-04). Administrator only."""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Administrators can end trainer assignments (FR-04)."
+        )
+
+    session = db.query(TrainingSession).filter(TrainingSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Training session not found.")
+
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+    assignment = db.query(TrainerAssignment).filter(
+        TrainerAssignment.session_id == session_id,
+        TrainerAssignment.user_id == user_id,
+        (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > now_utc)
+    ).first()
+
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Active trainer assignment not found for this session.")
+
+    assignment.valid_to = now_utc
+    db.commit()
+
+    # Log TRAINER_ASSIGNMENT_ENDED
+    log = AccessLog(
+        actor_user_id=current_user.id,
+        actor_role=current_user.role,
+        event_type="TRAINER_ASSIGNMENT_ENDED",
+        resource_type="SESSION",
+        resource_id=session_id,
+        outcome="SUCCESS",
+        source_ip=_get_client_ip(request),
+        details={
+            "session_code": session.session_code,
+            "trainer_user_id": user_id,
+            "ended_at": now_utc.isoformat()
+        }
+    )
+    db.add(log)
+    db.commit()
+
+    return {"message": "Trainer assignment ended successfully.", "ended_at": now_utc.isoformat()}
+
+
+@router.get("/sessions/{session_id}/trainers", response_model=List[TrainerAssignmentResponse])
+def list_session_trainers(
+    session_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Lists all trainers assigned to a training session (past and active)."""
+    session = db.query(TrainingSession).filter(TrainingSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Training session not found.")
+
+    assignments = db.query(TrainerAssignment).filter(TrainerAssignment.session_id == session_id).all()
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    result = []
+    for ta in assignments:
+        is_active = bool(ta.valid_to is None or ta.valid_to > now_utc)
+        result.append(TrainerAssignmentResponse(
+            id=ta.id,
+            user_id=ta.user_id,
+            session_id=ta.session_id,
+            trainer_name=ta.user.full_name if ta.user else "Unknown Trainer",
+            trainer_email=ta.user.email if ta.user else "",
+            valid_from=ta.valid_from,
+            valid_to=ta.valid_to,
+            is_active=is_active
+        ))
 
     return result

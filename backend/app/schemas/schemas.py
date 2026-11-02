@@ -86,6 +86,7 @@ class UserAttributeUpdate(BaseModel):
 class ClientCompanyBase(BaseModel):
     code: str
     name: str
+    client_type: str = "COMPANY" # COMPANY or INDIVIDUAL (FR-05)
     industry: Optional[str] = None
 
 class ClientCompanyCreate(ClientCompanyBase):
@@ -200,6 +201,8 @@ class QuizListItem(BaseModel):
     course_name: Optional[str] = None
     version_no: int
     is_closed: bool
+    is_approved: Optional[bool] = False
+    approved_at: Optional[datetime] = None
     questions_count: int
     completed: Optional[bool] = False
     score: Optional[float] = None
@@ -517,3 +520,95 @@ class AttributeBumpResponse(BaseModel):
     new_token: str
     old_version: int
     new_version: int
+
+
+# Training Session Management (FR-04, FR-05)
+class TrainingSessionCreate(BaseModel):
+    session_code: str
+    course_id: Optional[str] = None
+    course_name: str
+    start_date: datetime
+    end_date: datetime
+    delivery_type: str = "Public" # Public, Dedicated
+    delivery_mode: str = "F2F" # F2F, Online, Hybrid
+    venue: Optional[str] = None
+
+class TrainingSessionResponse(BaseModel):
+    id: str
+    session_code: str
+    course_id: Optional[str] = None
+    course_name: str
+    start_date: datetime
+    end_date: datetime
+    delivery_type: str
+    delivery_mode: str = "F2F"
+    venue: Optional[str] = None
+    trainer_signed_off: bool = False
+    trainer_sign_off_at: Optional[datetime] = None
+    created_at: datetime
+    assigned_trainers: Optional[List[Dict[str, Any]]] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+class TrainerAssignmentCreate(BaseModel):
+    user_id: str
+
+class TrainerAssignmentResponse(BaseModel):
+    id: str
+    user_id: str
+    session_id: str
+    trainer_name: Optional[str] = None
+    trainer_email: Optional[str] = None
+    valid_from: datetime
+    valid_to: Optional[datetime] = None
+    is_active: bool = True
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Trainee Company Affiliation (FR-15)
+class TraineeCompanyChangeRequest(BaseModel):
+    new_company_id: str
+    effective_date: Optional[datetime] = None
+    reason: Optional[str] = None
+
+class TraineeAffiliationResponse(BaseModel):
+    id: str
+    trainee_id: str
+    company_id: str
+    company_name: Optional[str] = None
+    company_code: Optional[str] = None
+    valid_from: datetime
+    valid_to: Optional[datetime] = None
+    is_current: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+# Gamification Teams (GAM-03)
+class TeamCreate(BaseModel):
+    team_name: str
+
+class TeamMemberAdd(BaseModel):
+    trainee_id: str
+
+class TeamMemberResponse(BaseModel):
+    id: str
+    team_id: str
+    trainee_id: str
+    trainee_name: Optional[str] = None
+    trainee_code: Optional[str] = None
+    display_name: Optional[str] = None
+    points: int = 0
+
+    model_config = ConfigDict(from_attributes=True)
+
+class TeamResponse(BaseModel):
+    id: str
+    session_id: str
+    team_name: str
+    created_by_user_id: str
+    created_at: datetime
+    members_count: int = 0
+    total_points: int = 0
+    members: List[TeamMemberResponse] = []
+
+    model_config = ConfigDict(from_attributes=True)

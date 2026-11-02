@@ -39,6 +39,14 @@ db_url = settings.DATABASE_URL
 if db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
+# Enforce TLS for PostgreSQL database connections (SEC-18, Chapter III Section 3.7.2)
+if "postgresql" in db_url:
+    if "sslmode" not in db_url and "sslmode" not in connect_args:
+        connect_args["sslmode"] = settings.DB_SSL_MODE
+    if settings.DB_SSL_CERT_PATH and "sslrootcert" not in connect_args:
+        connect_args["sslrootcert"] = settings.DB_SSL_CERT_PATH
+
+
 engine = create_engine(
     db_url,
     connect_args=connect_args,
@@ -101,3 +109,25 @@ def get_db():
         db.close()
 
 
+
+def verify_database_tls_enforced(target_engine) -> Dict[str, Any]:
+    """Verifies connection TLS status and sslmode for compliance auditing (SEC-18)."""
+    dialect = target_engine.dialect.name
+    if dialect != "postgresql":
+        return {
+            "dialect": dialect,
+            "tls_enforced": False,
+            "ssl_mode": "n/a (sqlite_dev)",
+            "status": "DEVELOPMENT_SQLITE_NO_TLS"
+        }
+    
+    with target_engine.connect() as conn:
+        result = conn.execute(text("SHOW ssl;")).fetchone()
+        ssl_status = result[0] if result else "unknown"
+        return {
+            "dialect": "postgresql",
+            "tls_enforced": ssl_status.lower() in ("on", "true", "yes"),
+            "ssl_mode": settings.DB_SSL_MODE,
+            "ssl_status": ssl_status,
+            "status": "COMPLIANT_TLS_ENFORCED" if ssl_status.lower() in ("on", "true", "yes") else "TLS_NOT_ACTIVE"
+        }

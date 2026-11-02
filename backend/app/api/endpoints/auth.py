@@ -18,11 +18,13 @@ from app.core.security import (
 )
 from app.models.entities import User, AccessLog, UserSession, PasswordResetToken
 from app.schemas.schemas import (
-    Token, UserCreate, UserResponse, PasswordResetConfirm,
+    Token, UserCreate, UserResponse, PasswordResetConfirm, PasswordResetRequest,
     MFASetupResponse, MFAEnableRequest, MFAEnableResponse, MFAVerifyRequest
 )
 from app.api.deps import get_current_user
 from app.anomaly.detector import anomaly_detector
+from app.services.email_service import email_service
+from sqlalchemy import func
 
 router = APIRouter()
 
@@ -467,6 +469,71 @@ def logout_user(
 
     response.delete_cookie(key="crossquest_refresh_token")
     return {"message": "Successfully logged out. Refresh session revoked."}
+
+
+
+@router.post("/request-password-reset")
+def request_password_reset(
+    body: PasswordResetRequest,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Public self-service password reset request (FR-26, SEC-01).
+    Enforces anti-enumeration: returns identical message whether user exists or not.
+    Generates a single-use token valid for 15 minutes and dispatches it via email.
+    """
+    client_ip = _get_client_ip(request)
+    email_clean = body.email.strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == email_clean).first()
+
+    if user and user.is_active:
+        # Invalidate previous unused reset tokens for this user
+        db.query(PasswordResetToken).filter(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.is_used == False
+        ).update({"is_used": True})
+
+        raw_token = secrets.token_urlsafe(32)
+        token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+        expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=15)
+
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            token_hash=token_hash,
+            is_used=False,
+            expires_at=expires_at
+        )
+        db.add(reset_token)
+
+        user_hmac = hmac_username(user.email)
+        log = AccessLog(
+            actor_user_id=user.id,
+            actor_role=user.role,
+            event_type="PW_RESET_REQUESTED",
+            resource_type="AUTH",
+            outcome="SUCCESS",
+            source_ip=client_ip,
+            details={"email_hmac": user_hmac}
+        )
+        db.add(log)
+        db.commit()
+
+        email_service.send_password_reset_email(user.email, user.full_name, raw_token)
+    else:
+        anon_hmac = hmac_username(email_clean)
+        log = AccessLog(
+            actor_user_id=None,
+            actor_role="anonymous",
+            event_type="PW_RESET_REQUESTED",
+            resource_type="AUTH",
+            outcome="FAILURE",
+            source_ip=client_ip,
+            details={"email_hmac": anon_hmac, "reason": "not_found_or_inactive"}
+        )
+        db.add(log)
+        db.commit()
+
+    return {"message": "If an active account is registered with this email, a password reset link has been dispatched."}
 
 
 @router.post("/confirm-reset-password")

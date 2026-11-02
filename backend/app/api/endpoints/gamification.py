@@ -20,12 +20,14 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.entities import (
     GamificationProgress, Trainee, Quiz, QuizQuestion, QuizAnswerKey,
-    QuizAttempt, Team, User, TrainingSession, TrainingRecord
+    QuizAttempt, Team, TeamMember, User, TrainingSession, TrainingRecord,
+    TrainerAssignment, AccessLog
 )
 from app.schemas.schemas import (
     GamificationResponse, QuizSubmitRequest, LeaderboardOptOutRequest,
     LeaderboardEntry, QuizQuestionTraineeView, QuizSubmissionResult,
-    QuizQuestionReview, QuizListItem, QuizCreate, QuizQuestionCreate
+    QuizQuestionReview, QuizListItem, QuizCreate, QuizQuestionCreate,
+    TeamCreate, TeamResponse, TeamMemberAdd, TeamMemberResponse
 )
 from app.api.deps import get_current_user
 
@@ -725,3 +727,237 @@ def get_leaderboard(
             "quizzes_completed": gam.quizzes_completed or 0
         })
     return leaderboard
+
+
+# -----------------------------------------------------------------------------
+# Quiz Approval Workflow (GAM-01, SEC-26)
+# -----------------------------------------------------------------------------
+@router.post("/quizzes/{quiz_id}/approve")
+def approve_quiz(
+    quiz_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Assigned Trainer or Administrator approves a quiz for student deployment (GAM-01, SEC-26)."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only assigned Trainers and Administrators can approve quizzes."
+        )
+
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found.")
+
+    if current_user.role == "trainer" and quiz.session_id:
+        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+        assigned = db.query(TrainerAssignment).filter(
+            TrainerAssignment.session_id == quiz.session_id,
+            TrainerAssignment.user_id == current_user.id,
+            (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > now_utc)
+        ).first()
+        if not assigned and quiz.created_by_user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Trainer can only approve quizzes for assigned training sessions."
+            )
+
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+    quiz.is_approved = True
+    quiz.approved_by_user_id = current_user.id
+    quiz.approved_at = now_utc
+    db.commit()
+
+    return {
+        "status": "success",
+        "quiz_id": quiz.id,
+        "is_approved": True,
+        "approved_by_user_id": current_user.id,
+        "approved_at": now_utc.isoformat()
+    }
+
+
+# -----------------------------------------------------------------------------
+# Gamified Teams Management (GAM-03)
+# -----------------------------------------------------------------------------
+@router.post("/sessions/{session_id}/teams", response_model=TeamResponse)
+def create_session_team(
+    session_id: str,
+    payload: TeamCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Creates a team for gamified group scoring within a session (GAM-03).
+    Permitted for assigned Trainers and Administrators.
+    """
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Trainers and Administrators can create teams."
+        )
+
+    session = db.query(TrainingSession).filter(TrainingSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Training session not found.")
+
+    if current_user.role == "trainer":
+        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+        assigned = db.query(TrainerAssignment).filter(
+            TrainerAssignment.session_id == session_id,
+            TrainerAssignment.user_id == current_user.id,
+            (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > now_utc)
+        ).first()
+        if not assigned:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Trainer is not assigned to this training session."
+            )
+
+    team = Team(
+        session_id=session_id,
+        team_name=payload.team_name.strip(),
+        created_by_user_id=current_user.id
+    )
+    db.add(team)
+    db.commit()
+    db.refresh(team)
+
+    return TeamResponse(
+        id=team.id,
+        session_id=team.session_id,
+        team_name=team.team_name,
+        created_by_user_id=team.created_by_user_id,
+        created_at=team.created_at,
+        members_count=0,
+        total_points=0,
+        members=[]
+    )
+
+
+@router.get("/sessions/{session_id}/teams", response_model=List[TeamResponse])
+def list_session_teams(
+    session_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Lists all teams for a training session with members and aggregate scores (GAM-03)."""
+    teams = db.query(Team).filter(Team.session_id == session_id).all()
+    results = []
+
+    for t in teams:
+        members_list = []
+        team_points = 0
+        for m in t.members:
+            trainee = m.trainee
+            points = 0
+            display = ""
+            name = ""
+            code = ""
+            if trainee:
+                gam = trainee.gamification
+                points = gam.points if gam else 0
+                team_points += points
+                display = trainee.display_name or f"{trainee.first_name} {trainee.last_name}"
+                name = f"{trainee.first_name} {trainee.last_name}"
+                code = trainee.trainee_code
+
+            members_list.append(TeamMemberResponse(
+                id=m.id,
+                team_id=m.team_id,
+                trainee_id=m.trainee_id,
+                trainee_name=name,
+                trainee_code=code,
+                display_name=display,
+                points=points
+            ))
+
+        results.append(TeamResponse(
+            id=t.id,
+            session_id=t.session_id,
+            team_name=t.team_name,
+            created_by_user_id=t.created_by_user_id,
+            created_at=t.created_at,
+            members_count=len(members_list),
+            total_points=team_points,
+            members=members_list
+        ))
+
+    return results
+
+
+@router.post("/teams/{team_id}/members", response_model=TeamMemberResponse)
+def add_team_member(
+    team_id: str,
+    payload: TeamMemberAdd,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Adds a trainee to a gamified team (GAM-03). Permitted for Trainers and Admins."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Trainers and Administrators can add team members."
+        )
+
+    team = db.query(Team).filter(Team.id == team_id).first()
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found.")
+
+    trainee = db.query(Trainee).filter(Trainee.id == payload.trainee_id).first()
+    if not trainee:
+        raise HTTPException(status_code=404, detail="Trainee not found.")
+
+    # Check duplicate
+    existing = db.query(TeamMember).filter(
+        TeamMember.team_id == team_id,
+        TeamMember.trainee_id == payload.trainee_id
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Trainee is already a member of this team.")
+
+    new_member = TeamMember(
+        team_id=team_id,
+        trainee_id=payload.trainee_id
+    )
+    db.add(new_member)
+    db.commit()
+    db.refresh(new_member)
+
+    gam = trainee.gamification
+    points = gam.points if gam else 0
+
+    return TeamMemberResponse(
+        id=new_member.id,
+        team_id=new_member.team_id,
+        trainee_id=new_member.trainee_id,
+        trainee_name=f"{trainee.first_name} {trainee.last_name}",
+        trainee_code=trainee.trainee_code,
+        display_name=trainee.display_name or f"{trainee.first_name} {trainee.last_name}",
+        points=points
+    )
+
+
+@router.delete("/teams/{team_id}/members/{trainee_id}")
+def remove_team_member(
+    team_id: str,
+    trainee_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Removes a trainee from a gamified team (GAM-03)."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Trainers and Administrators can remove team members."
+        )
+
+    member = db.query(TeamMember).filter(
+        TeamMember.team_id == team_id,
+        TeamMember.trainee_id == trainee_id
+    ).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Team member not found.")
+
+    db.delete(member)
+    db.commit()
+    return {"status": "success", "message": "Trainee removed from team."}

@@ -133,11 +133,28 @@ class AttributeManager:
     # 2. KMS Envelope Encryption for Private Keys (DD-09, SEC-06)
     # -------------------------------------------------------------------------
     @staticmethod
+    def _get_kms_client():
+        """Initializes boto3 AWS KMS client if configured, otherwise returns None."""
+        try:
+            import boto3
+            from botocore.config import Config
+            boto_config = Config(connect_timeout=3, read_timeout=3, retries={'max_attempts': 2})
+            kwargs = {"region_name": getattr(settings, "AWS_REGION", "ap-southeast-1"), "config": boto_config}
+            if getattr(settings, "AWS_ACCESS_KEY_ID", None) and getattr(settings, "AWS_SECRET_ACCESS_KEY", None):
+                kwargs["aws_access_key_id"] = settings.AWS_ACCESS_KEY_ID
+                kwargs["aws_secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
+            return boto3.client("kms", **kwargs)
+        except Exception as e:
+            logger.debug(f"[AWS KMS] Client initialization skipped or unavailable: {e}")
+            return None
+
+    @staticmethod
     def envelope_encrypt_key(serialized_key: str, kms_key_arn: Optional[str] = None) -> Dict[str, str]:
-        """Encrypts serialized CP-ABE user key using AES-256-GCM envelope encryption.
+        """Encrypts serialized CP-ABE user key using AES-256-GCM envelope encryption (SEC-06, DD-09).
         
         A random 256-bit Data Encryption Key (DEK) is generated.
-        DEK is wrapped with KMS (or HKDF root key in local development).
+        DEK is wrapped with real AWS KMS when configured; falls back gracefully to
+        local HKDF AES-256-GCM KEK in development or offline environments.
         """
         raw_key_bytes = serialized_key.encode("utf-8")
         dek = os.urandom(32) # 256-bit DEK
@@ -147,39 +164,28 @@ class AttributeManager:
         aesgcm = AESGCM(dek)
         key_ciphertext = aesgcm.encrypt(nonce, raw_key_bytes, b"crossquest-cpabe-dek-aad")
 
-        # Wrap DEK (using KMS derivation in dev/pilot)
-        hkdf = HKDF(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=b"kms-envelope-salt",
-            info=b"crossquest-kms-wrapping-key"
-        )
-        master_kek = hkdf.derive(settings.SECRET_KEY.encode("utf-8"))
-        kek_nonce = os.urandom(12)
-        kek_cipher = AESGCM(master_kek)
-        wrapped_dek_bytes = kek_cipher.encrypt(kek_nonce, dek, b"dek-envelope")
+        target_arn = kms_key_arn or getattr(settings, "AWS_KMS_KEY_ARN", None) or getattr(settings, "AWS_KMS_KEY_ID", None)
+        wrapped_payload = None
+        final_arn = target_arn or "arn:aws:kms:ap-southeast-1:local:crossquest-master-key"
 
-        # Combine kek_nonce + wrapped_dek_bytes for storage
-        wrapped_payload = kek_nonce + wrapped_dek_bytes
+        # Attempt real AWS KMS wrapping if target ARN is a live AWS KMS ARN
+        if target_arn and ":local:" not in target_arn:
+            kms = AttributeManager._get_kms_client()
+            if kms:
+                try:
+                    resp = kms.encrypt(
+                        KeyId=target_arn,
+                        Plaintext=dek,
+                        EncryptionContext={"Service": "CrossQuest", "Type": "CP-ABE-DEK"}
+                    )
+                    # Prefix with magic tag b"AWSKMS:" to indicate real AWS KMS wrapped blob
+                    wrapped_payload = b"AWSKMS:" + resp["CiphertextBlob"]
+                    logger.info(f"[AWS KMS] DEK successfully envelope-wrapped under AWS KMS key: {target_arn}")
+                except Exception as e:
+                    logger.warning(f"[AWS KMS] Call failed ({e}); falling back to local AES-256-GCM envelope KEK.")
 
-        return {
-            "wrapped_dek": base64.b64encode(wrapped_payload).decode("utf-8"),
-            "nonce": base64.b64encode(nonce).decode("utf-8"),
-            "key_ciphertext": base64.b64encode(key_ciphertext).decode("utf-8"),
-            "kms_key_arn": kms_key_arn or "arn:aws:kms:ap-southeast-1:local:crossquest-master-key"
-        }
-
-    @staticmethod
-    def envelope_decrypt_key(wrapped_dek_b64: str, nonce_b64: str, key_ciphertext_b64: str) -> Optional[str]:
-        """Unwraps DEK and decrypts the CP-ABE private key."""
-        try:
-            wrapped_payload = base64.b64decode(wrapped_dek_b64)
-            kek_nonce = wrapped_payload[:12]
-            wrapped_dek_bytes = wrapped_payload[12:]
-            nonce = base64.b64decode(nonce_b64)
-            key_ciphertext = base64.b64decode(key_ciphertext_b64)
-
-            # Unwrap DEK
+        # Fallback to local HKDF AES-256-GCM KEK
+        if wrapped_payload is None:
             hkdf = HKDF(
                 algorithm=hashes.SHA256(),
                 length=32,
@@ -187,10 +193,58 @@ class AttributeManager:
                 info=b"crossquest-kms-wrapping-key"
             )
             master_kek = hkdf.derive(settings.SECRET_KEY.encode("utf-8"))
+            kek_nonce = os.urandom(12)
             kek_cipher = AESGCM(master_kek)
-            dek = kek_cipher.decrypt(kek_nonce, wrapped_dek_bytes, b"dek-envelope")
+            wrapped_dek_bytes = kek_cipher.encrypt(kek_nonce, dek, b"dek-envelope")
+            wrapped_payload = b"LOCAL:" + kek_nonce + wrapped_dek_bytes
 
-            # Decrypt key payload
+        return {
+            "wrapped_dek": base64.b64encode(wrapped_payload).decode("utf-8"),
+            "nonce": base64.b64encode(nonce).decode("utf-8"),
+            "key_ciphertext": base64.b64encode(key_ciphertext).decode("utf-8"),
+            "kms_key_arn": final_arn
+        }
+
+    @staticmethod
+    def envelope_decrypt_key(wrapped_dek_b64: str, nonce_b64: str, key_ciphertext_b64: str, kms_key_arn: Optional[str] = None) -> Optional[str]:
+        """Unwraps DEK using AWS KMS or local KEK fallback and decrypts CP-ABE key (SEC-06)."""
+        try:
+            wrapped_payload = base64.b64decode(wrapped_dek_b64)
+            nonce = base64.b64decode(nonce_b64)
+            key_ciphertext = base64.b64decode(key_ciphertext_b64)
+            dek = None
+
+            # Check if wrapped via real AWS KMS
+            if wrapped_payload.startswith(b"AWSKMS:"):
+                kms_ciphertext = wrapped_payload[7:]
+                kms = AttributeManager._get_kms_client()
+                if kms:
+                    try:
+                        resp = kms.decrypt(
+                            CiphertextBlob=kms_ciphertext,
+                            EncryptionContext={"Service": "CrossQuest", "Type": "CP-ABE-DEK"}
+                        )
+                        dek = resp["Plaintext"]
+                    except Exception as e:
+                        logger.warning(f"[AWS KMS] KMS unwrap failed: {e}")
+
+            # Local KEK unwrapping
+            if dek is None:
+                raw_local = wrapped_payload[6:] if wrapped_payload.startswith(b"LOCAL:") else wrapped_payload
+                kek_nonce = raw_local[:12]
+                wrapped_dek_bytes = raw_local[12:]
+
+                hkdf = HKDF(
+                    algorithm=hashes.SHA256(),
+                    length=32,
+                    salt=b"kms-envelope-salt",
+                    info=b"crossquest-kms-wrapping-key"
+                )
+                master_kek = hkdf.derive(settings.SECRET_KEY.encode("utf-8"))
+                kek_cipher = AESGCM(master_kek)
+                dek = kek_cipher.decrypt(kek_nonce, wrapped_dek_bytes, b"dek-envelope")
+
+            # Decrypt CP-ABE key payload
             aesgcm = AESGCM(dek)
             decrypted_key_bytes = aesgcm.decrypt(nonce, key_ciphertext, b"crossquest-cpabe-dek-aad")
             return decrypted_key_bytes.decode("utf-8")
