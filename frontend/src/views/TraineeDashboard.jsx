@@ -48,6 +48,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   const [leaderboard, setLeaderboard] = useState([]);
   const [level, setLevel] = useState(null);
   const [streakDays, setStreakDays] = useState(null);
+  const [earnedBadges, setEarnedBadges] = useState(designBadges);
+  const [realQuizzes, setRealQuizzes] = useState([]);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   // Live Certifications & Expiry Notifications State (FR-18, FR-19, DAT-05, U-15)
