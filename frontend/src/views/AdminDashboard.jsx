@@ -28,6 +28,7 @@ import {
   Mail
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { 
   admin as defaultAdmin, 
   overview as defaultOverview, 
@@ -54,6 +55,7 @@ import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk
 import '../styles/admin.css';
 export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token, currentUser } = useAuth();
+  const { isDark } = useTheme();
   const [adminProfile] = useState(defaultAdmin);
   const [overview, setOverview] = useState(defaultOverview);
   const [clients] = useState(defaultClients);
@@ -920,18 +922,32 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <div key={c.code} className="adm-row" style={{ padding: '16px 28px' }}>
                   <div className="adm-grid" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #ede9fe' }}>
+                      <div 
+                        className="adm-comp-icon" 
+                        style={{ 
+                          width: '38px', 
+                          height: '38px', 
+                          borderRadius: '12px', 
+                          background: isDark ? '#1e1b4b' : '#f5f3ff', 
+                          color: isDark ? '#c4b5fd' : '#7c3aed', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          flexShrink: 0, 
+                          border: isDark ? '1px solid #312e81' : '1px solid #ede9fe' 
+                        }}
+                      >
                         <Building2 size={18} />
                       </div>
                       <div>
-                        <strong style={{ fontSize: '13.5px', color: '#0f172a', display: 'block' }}>{c.name}</strong>
+                        <strong className="client-comp-name" style={{ fontSize: '13.5px', color: isDark ? '#f8fafc' : '#0f172a', display: 'block' }}>{c.name}</strong>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
                           <span className="adm-org" style={{ fontSize: '10px', padding: '2px 8px' }}>{c.code}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '12.5px', color: '#475569' }}>
+                    <div className="client-comp-sector" style={{ fontSize: '12.5px', color: isDark ? '#cbd5e1' : '#475569' }}>
                       {c.industry}
                     </div>
 
@@ -942,14 +958,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     </div>
 
                     <div>
-                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7' }} />
+                      <span className="client-comp-manager" style={{ fontSize: '12.5px', fontWeight: 700, color: isDark ? '#f8fafc' : '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8' }} />
                         {c.am_name || 'Marcus Reyes'}
                       </span>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '10.5px', fontWeight: 800, padding: '4px 10px', borderRadius: '8px', background: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0' }}>
+                      <span style={{ fontSize: '10.5px', fontWeight: 800, padding: '4px 10px', borderRadius: '8px', background: isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5', color: isDark ? '#6ee7b7' : '#059669', border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid #a7f3d0' }}>
                         &#10004; FORCE RLS
                       </span>
                     </div>

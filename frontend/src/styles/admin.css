@@ -341,3 +341,24 @@ button:disabled { opacity: 0.6; cursor: progress; }
 @media (prefers-reduced-motion: reduce) {
   .adm *, .adm *::before, .adm *::after { animation: none !important; }
 }
+
+.client-comp-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  display: block;
+  color: var(--cq-ink, #0f172a);
+}
+
+.client-comp-sector {
+  font-size: 12.5px;
+  color: var(--cq-ink-soft, #475569);
+}
+
+.client-comp-manager {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--cq-ink, #1e293b);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

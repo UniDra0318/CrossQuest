@@ -1033,3 +1033,117 @@ html.dark .adm-ticks span,
 [data-theme="dark"] .adm-ticks span {
   color: #94a3b8 !important;
 }
+
+/* ==========================================================================
+   12. ADMIN ATTRIBUTE AUTHORITY & MULTI-TENANT REGISTRY CONTRAST ENHANCEMENTS
+   ========================================================================== */
+html.dark .adm-th,
+[data-theme="dark"] .adm-th {
+  background-color: #0b1120 !important;
+  color: #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .adm-mono,
+html.dark .adm-crumbs,
+html.dark .adm-crumbs strong,
+[data-theme="dark"] .adm-mono,
+[data-theme="dark"] .adm-crumbs,
+[data-theme="dark"] .adm-crumbs strong {
+  color: #cbd5e1 !important;
+}
+
+html.dark .adm-person .adm-mono,
+[data-theme="dark"] .adm-person .adm-mono {
+  color: #94a3b8 !important;
+}
+
+/* Tenant Tags (CORP_ALPHA, FINTECH_BETA, etc.) */
+html.dark .adm-org,
+[data-theme="dark"] .adm-org {
+  background: rgba(124, 58, 237, 0.25) !important;
+  color: #ddd6fe !important;
+  border: 1px solid rgba(139, 92, 246, 0.45) !important;
+}
+
+/* Chips in Dark Mode */
+html.dark .adm-chip,
+[data-theme="dark"] .adm-chip {
+  background: rgba(124, 58, 237, 0.25) !important;
+  color: #ddd6fe !important;
+  border: 1px solid rgba(139, 92, 246, 0.45) !important;
+}
+
+html.dark .adm-chip--violet,
+[data-theme="dark"] .adm-chip--violet {
+  background: rgba(124, 58, 237, 0.25) !important;
+  color: #ddd6fe !important;
+  border: 1px solid rgba(139, 92, 246, 0.45) !important;
+}
+
+html.dark .adm-chip--blue,
+[data-theme="dark"] .adm-chip--blue {
+  background: rgba(14, 165, 233, 0.22) !important;
+  color: #bae6fd !important;
+  border: 1px solid rgba(14, 165, 233, 0.45) !important;
+}
+
+html.dark .adm-chip--orange,
+[data-theme="dark"] .adm-chip--orange {
+  background: rgba(249, 115, 22, 0.22) !important;
+  color: #fed7aa !important;
+  border: 1px solid rgba(249, 115, 22, 0.45) !important;
+}
+
+html.dark .adm-chip--green,
+[data-theme="dark"] .adm-chip--green {
+  background: rgba(16, 185, 129, 0.22) !important;
+  color: #a7f3d0 !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+}
+
+html.dark .adm-chip--amber,
+[data-theme="dark"] .adm-chip--amber {
+  background: rgba(245, 158, 11, 0.22) !important;
+  color: #fef08a !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+}
+
+html.dark .adm-chip--red,
+[data-theme="dark"] .adm-chip--red {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #fecaca !important;
+  border: 1px solid rgba(239, 68, 68, 0.45) !important;
+}
+
+/* Edit Roles button in rows */
+html.dark .adm-row .adm-btn--light,
+[data-theme="dark"] .adm-row .adm-btn--light {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+html.dark .adm-row .adm-btn--light:hover,
+[data-theme="dark"] .adm-row .adm-btn--light:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+  border-color: #4f46e5 !important;
+}
+
+/* Clearance Level bars & text */
+html.dark .adm-level b,
+[data-theme="dark"] .adm-level b {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-level i,
+[data-theme="dark"] .adm-level i {
+  background: #334155 !important;
+}
+
+html.dark .adm-level i.on,
+[data-theme="dark"] .adm-level i.on {
+  background: linear-gradient(180deg, #a78bfa, #7c3aed) !important;
+}
