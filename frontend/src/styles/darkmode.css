@@ -8,17 +8,17 @@ html.dark,
   --cq-ink: #f8fafc;
   --cq-ink-soft: #cbd5e1;
   --cq-body: #e2e8f0;
-  
+
   --cq-purple: #0f172a;
   --cq-purple-dk: #020617;
   --cq-purple-deep: #090d16;
   --cq-purple-night: #030712;
   --cq-lilac: #38bdf8;
-  
+
   --cq-lav: #0f172a;
   --cq-lav-2: #090d16;
   --cq-line: rgba(255, 255, 255, 0.12);
-  
+
   color-scheme: dark;
 }
 
@@ -227,13 +227,69 @@ html.dark .day-flame-circle.active,
    7. BADGES & ACHIEVEMENTS SHOWCASE
    ========================================================================== */
 
-html.dark .badge-showcase-card,
-html.dark .badge-item-card,
-[data-theme="dark"] .badge-showcase-card,
-[data-theme="dark"] .badge-item-card {
+/* Main Dashboard "Your Earned Badges" Container */
+html.dark .template-badges-container,
+[data-theme="dark"] .template-badges-container {
   background-color: #111827 !important;
   background: #111827 !important;
-  border-color: #1f2937 !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .template-badges-container h3,
+html.dark .template-section-title-wrap h3,
+[data-theme="dark"] .template-badges-container h3,
+[data-theme="dark"] .template-section-title-wrap h3 {
+  color: #f8fafc !important;
+}
+
+html.dark .template-view-all-link,
+[data-theme="dark"] .template-view-all-link {
+  color: #818cf8 !important;
+}
+
+html.dark .template-badge-card,
+[data-theme="dark"] .template-badge-card {
+  background-color: #1a2236 !important;
+  background: #1a2236 !important;
+  border: 1px solid #2d3748 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .template-badge-card:hover,
+[data-theme="dark"] .template-badge-card:hover {
+  background-color: #1e293b !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25) !important;
+}
+
+html.dark .template-badge-name,
+[data-theme="dark"] .template-badge-name {
+  color: #f8fafc !important;
+}
+
+html.dark .template-badge-desc,
+[data-theme="dark"] .template-badge-desc {
+  color: #94a3b8 !important;
+}
+
+/* Full Badges Showcase Sub-View */
+html.dark .badge-showcase-card,
+html.dark .badge-item-card,
+html.dark .badge-detail-card,
+[data-theme="dark"] .badge-showcase-card,
+[data-theme="dark"] .badge-item-card,
+[data-theme="dark"] .badge-detail-card {
+  background-color: #1a2236 !important;
+  background: #1a2236 !important;
+  border: 1px solid #2d3748 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .badge-detail-card h4,
+html.dark .card-title,
+[data-theme="dark"] .badge-detail-card h4,
+[data-theme="dark"] .card-title {
   color: #f8fafc !important;
 }
 
@@ -352,7 +408,6 @@ html.compact-density .adm-card,
 html.compact-density .tr-session-card {
   padding: 12px 14px !important;
 }
-
 /* ==========================================================================
    12. QUIZ ARENA, BRIEFING, QUESTIONS & INTERACTIVE TILES
    ========================================================================== */

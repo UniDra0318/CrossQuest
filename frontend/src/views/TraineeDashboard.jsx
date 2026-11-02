@@ -932,7 +932,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         <div className="card section-card p-24" style={{ borderRadius: '16px', border: '1px solid #e2e8f0' }}>
           <div className="card-header-bar mb-16" style={{ padding: '0 0 16px', borderBottom: '1px solid #f1f5f9' }}>
             <div>
-              <h3 className="card-title" style={{ fontSize: '20px', fontWeight: '800', color: '#1e1b4b', marginBottom: '4px' }}>
+              <h3 className="card-title" style={{ fontSize: '20px', fontWeight: '800', marginBottom: '4px' }}>
                 Badge Showcase &amp; Achievements
               </h3>
               <p className="text-muted text-xs" style={{ color: '#64748b' }}>
@@ -953,11 +953,11 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 const tierName = badge.tier || (badge.id === 'seven-day-streak' ? 'Legendary' : badge.id === 'security-champion' ? 'Master' : 'Adept');
                 const tierClass = tierName.toLowerCase();
                 return (
-                  <div key={badge.id} className="badge-detail-card card-gamified" style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                  <div key={badge.id} className="badge-detail-card card-gamified" style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
                     <div style={{ marginBottom: '16px', transform: 'scale(1.1)' }}>
                       <BadgeCoin badge={badge} />
                     </div>
-                    <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>{badge.title || badge.name}</h4>
+                    <h4 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '6px' }}>{badge.title || badge.name}</h4>
                     <p className="badge-desc" style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', flex: 1, lineHeight: '1.4' }}>{badge.description || badge.desc}</p>
                     <div className="badge-footer flex-between" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
                       <span className={`tier-chip tier-${tierClass}`} style={{ fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '999px', background: tierClass === 'legendary' ? '#fef3c7' : tierClass === 'master' ? '#dbeafe' : '#e0e7ff', color: tierClass === 'legendary' ? '#b45309' : tierClass === 'master' ? '#1d4ed8' : '#4338ca' }}>

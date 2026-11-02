@@ -153,3 +153,4 @@ export const DEFAULT_QUIZ_THEME_ID = 'cyber_grid';
 export function getQuizTheme(themeId) {
   return QUIZ_THEMES.find(t => t.id === themeId) || QUIZ_THEMES[0];
 }
+
