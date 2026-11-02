@@ -25,7 +25,7 @@ export const DEMO_USERS = {
     initials: "RT"
   },
 
-  // --- ACCOUNT MANAGERS (SCOPED MULTI-TENANT CLIENTS) ---
+  // --- ACCOUNT MANAGERS ---
   account_manager: {
     id: "usr-am-02",
     email: "marcus.reyes@crossworks.ph",
@@ -49,7 +49,7 @@ export const DEMO_USERS = {
     initials: "AS"
   },
 
-  // --- FINANCE & OPERATIONS (ENTERPRISE VIEW) ---
+  // --- FINANCE & OPERATIONS ---
   finance: {
     id: "usr-fin-03",
     email: "elena.santos@crossworks.ph",
@@ -108,7 +108,7 @@ export const DEMO_USERS = {
     initials: "AS"
   },
 
-  // --- TRAINEES ACROSS DIFFERENT CLIENT COMPANIES ---
+  // --- TRAINEES WITH UNIQUE STREAKS, POINTS & QUIZ PROGRESS ---
   trainee: {
     id: "4bf4b74e-d001-4ab5-8ccf-325565adf3b1",
     email: "juan.delacruz@alpha-corp.ph",
@@ -121,6 +121,15 @@ export const DEMO_USERS = {
     company_code: "CORP_ALPHA",
     assigned_companies: ["CORP_ALPHA"],
     streak: 7,
+    points: 12877,
+    level: 4,
+    quizzes_completed: 3,
+    quiz_progress: {
+      'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 90, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
     initials: "JD"
   },
   trainee_beatrice: {
@@ -134,7 +143,16 @@ export const DEMO_USERS = {
     display_name: "BeaSecOps",
     company_code: "CORP_ALPHA",
     assigned_companies: ["CORP_ALPHA"],
-    streak: 12,
+    streak: 5,
+    points: 9450,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 75, segments: [true, true, true, false] },
+      'act-2': { completed: true, score: 80, segments: [true, true, true, false] },
+      'act-3': { completed: false, score: null, segments: [true, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
     initials: "BT"
   },
   trainee_maria: {
@@ -148,7 +166,16 @@ export const DEMO_USERS = {
     display_name: "MayaFinPro",
     company_code: "FINTECH_BETA",
     assigned_companies: ["FINTECH_BETA"],
-    streak: 5,
+    streak: 12,
+    points: 15200,
+    level: 5,
+    quizzes_completed: 4,
+    quiz_progress: {
+      'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-4': { completed: true, score: 90, segments: [true, true, true, true] }
+    },
     initials: "MC"
   },
   trainee_liam: {
@@ -162,7 +189,16 @@ export const DEMO_USERS = {
     display_name: "LiamDevSec",
     company_code: "FINTECH_BETA",
     assigned_companies: ["FINTECH_BETA"],
-    streak: 3,
+    streak: 4,
+    points: 7800,
+    level: 2,
+    quizzes_completed: 1,
+    quiz_progress: {
+      'act-1': { completed: true, score: 80, segments: [true, true, false, false] },
+      'act-2': { completed: false, score: null, segments: [true, false, false, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
     initials: "LC"
   },
   trainee_gabriel: {
@@ -176,7 +212,16 @@ export const DEMO_USERS = {
     display_name: "RetailOpsRamos",
     company_code: "RETAIL_GAMMA",
     assigned_companies: ["RETAIL_GAMMA"],
-    streak: 9,
+    streak: 4,
+    points: 11300,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-2': { completed: true, score: 90, segments: [true, true, true, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
     initials: "GR"
   },
   trainee_chloe: {
@@ -190,7 +235,16 @@ export const DEMO_USERS = {
     display_name: "ChloeCloud",
     company_code: "RETAIL_GAMMA",
     assigned_companies: ["RETAIL_GAMMA"],
-    streak: 4,
+    streak: 9,
+    points: 14600,
+    level: 4,
+    quizzes_completed: 3,
+    quiz_progress: {
+      'act-1': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 92, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 88, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
     initials: "CG"
   }
 };

@@ -108,6 +108,13 @@ function MainAppShell({ activeSubPage }) {
   const [liveStreakDays, setLiveStreakDays] = useState(() => currentUser?.role === 'trainee' ? (currentUser?.streak ?? 7) : 7);
   const [activeView, setActiveView] = useState(() => resolveView(activeSubPage, currentUser?.role));
 
+  // Instantly synchronize topbar streak when dev role switcher changes active persona
+  useEffect(() => {
+    if (currentUser?.role === 'trainee') {
+      setLiveStreakDays(currentUser?.streak ?? 1);
+    }
+  }, [currentUser]);
+
   // Keep activeView synchronized with current route prop
   useEffect(() => {
     setActiveView(resolveView(activeSubPage, currentUser?.role));

@@ -96,14 +96,24 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     async function loadGamification() {
       setGamLoading(true);
       if (currentUser?.id) {
+        // Sync individual trainee quiz progress status
+        const defaultProg = {
+          'act-1': { completed: false, score: null, segments: [false, false, false, false] },
+          'act-2': { completed: false, score: null, segments: [false, false, false, false] },
+          'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+          'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+        };
+        const traineeProg = currentUser?.quiz_progress || defaultProg;
+        setQuizScoreStatus(traineeProg);
+
         const [gam, dbQuizzes] = await Promise.all([
           fetchTraineeGamification(currentUser.id, token),
           fetchQuizzes(token)
         ]);
         if (gam) {
-          setPoints(gam.points ?? 0);
-          setLevel(gam.level ?? 1);
-          const streak = gam.streak ?? gam.current_streak ?? 7;
+          setPoints(gam.points ?? currentUser?.points ?? 0);
+          setLevel(gam.level ?? currentUser?.level ?? 1);
+          const streak = gam.streak ?? gam.current_streak ?? currentUser?.streak ?? 1;
           setStreakDays(streak);
           if (onStreakLoad) onStreakLoad(streak);
 
@@ -233,8 +243,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             }));
           }
         } else {
-          const fallbackStreak = currentUser?.streak ?? 7;
+          const fallbackStreak = currentUser?.streak ?? 1;
           setStreakDays(fallbackStreak);
+          setPoints(currentUser?.points ?? 500);
+          setLevel(currentUser?.level ?? 1);
           if (onStreakLoad) onStreakLoad(fallbackStreak);
         }
 
@@ -264,7 +276,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     await toggleLeaderboardOptOut(nextVal);
   };
 
-  // Quizzes list aligned with QUIZ_DATABASE and TRACKS
+  // Quizzes list aligned with dynamic per-trainee progress status
   const assignedActivities = [
     {
       id: 'act-1',
@@ -274,7 +286,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       headerColor: TRACKS.infosec.color,
       category: TRACKS.infosec.name,
       track: TRACKS.infosec,
-      progressSegments: [true, true, true, false],
+      progressSegments: quizScoreStatus['act-1']?.segments || (quizScoreStatus['act-1']?.completed ? [true, true, true, true] : [false, false, false, false]),
       completed: quizScoreStatus['act-1']?.completed,
       score: quizScoreStatus['act-1']?.score,
       accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned'
@@ -287,7 +299,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       headerColor: TRACKS.access.color,
       category: TRACKS.access.name,
       track: TRACKS.access,
-      progressSegments: [true, true, true, true],
+      progressSegments: quizScoreStatus['act-2']?.segments || (quizScoreStatus['act-2']?.completed ? [true, true, true, true] : [false, false, false, false]),
       completed: quizScoreStatus['act-2']?.completed,
       score: quizScoreStatus['act-2']?.score,
       accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned'
@@ -300,7 +312,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       headerColor: TRACKS.privacy.color,
       category: TRACKS.privacy.name,
       track: TRACKS.privacy,
-      progressSegments: [true, true, true, false],
+      progressSegments: quizScoreStatus['act-3']?.segments || (quizScoreStatus['act-3']?.completed ? [true, true, true, true] : [false, false, false, false]),
       completed: quizScoreStatus['act-3']?.completed,
       score: quizScoreStatus['act-3']?.score,
       accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned'
@@ -313,7 +325,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       headerColor: TRACKS.database.color,
       category: TRACKS.database.name,
       track: TRACKS.database,
-      progressSegments: [false, false, false, false],
+      progressSegments: quizScoreStatus['act-4']?.segments || (quizScoreStatus['act-4']?.completed ? [true, true, true, true] : [false, false, false, false]),
       completed: quizScoreStatus['act-4']?.completed,
       score: quizScoreStatus['act-4']?.score,
       accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned - Due in 3d'
