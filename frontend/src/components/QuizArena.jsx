@@ -20,7 +20,8 @@ import {
   Trophy,
   CheckCircle,
   FileText,
-  Shuffle
+  Shuffle,
+  LogOut
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
 import MatchingQuestion from './MatchingQuestion';
@@ -129,6 +130,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     return q && q.type === 'sequence_order' ? extractSequenceItems(q) : [];
   });
   const [swappedIdx, setSwappedIdx] = useState(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   // Detailed answers history for post-quiz summary
   const [answersHistory, setAnswersHistory] = useState(() => initialSession?.answersHistory || {});
@@ -344,10 +346,17 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   };
 
   const handleAbandon = () => {
-    if (window.confirm("Do you want to pause and exit? Your progress is saved so you can resume right where you left off.")) {
-      saveProgress();
-      if (onExit) onExit();
-    }
+    setShowExitConfirm(true);
+  };
+
+  const confirmExit = () => {
+    setShowExitConfirm(false);
+    saveProgress();
+    if (onExit) onExit();
+  };
+
+  const cancelExit = () => {
+    setShowExitConfirm(false);
   };
 
   const accuracyPct = Math.round((correctCount / Math.max(1, currentIndex + (answeredState ? 1 : 0))) * 100);
@@ -819,6 +828,91 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           )}
         </div>
       </div>
+
+      {/* Modern In-App Pause & Exit Modal (Replaces browser window.confirm dialog) */}
+      {showExitConfirm && (
+        <div 
+          className="modal-backdrop-gamified"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999999,
+            padding: '20px'
+          }}
+          onClick={cancelExit}
+        >
+          <div 
+            className="card-gamified"
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              padding: '32px 28px',
+              maxWidth: '440px',
+              width: '100%',
+              boxShadow: '0 24px 60px rgba(15, 23, 42, 0.22)',
+              border: '1.5px solid #e2e8f0',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div 
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: '#fef3c7',
+                color: '#d97706',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 8px 16px rgba(217, 119, 6, 0.15)'
+              }}
+            >
+              <LogOut size={26} />
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '19px', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>
+                Pause & Exit Assessment?
+              </h3>
+              <p style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.5', margin: 0 }}>
+                Your current score and answered questions are preserved so you can resume the quest whenever you're ready.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '8px' }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '700' }}
+                onClick={cancelExit}
+              >
+                Resume Quest
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '700', background: '#ef4444', color: '#fff', border: 'none' }}
+                onClick={confirmExit}
+              >
+                Confirm & Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
