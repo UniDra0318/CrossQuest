@@ -929,6 +929,12 @@ html.dark .adm-btn--light,
 html.dark .adm-scroll,
 [data-theme="dark"] .adm-scroll {
   border-color: #1f2937 !important;
+  scrollbar-color: #475569 transparent !important;
+}
+
+html.dark .adm-scroll::-webkit-scrollbar-thumb,
+[data-theme="dark"] .adm-scroll::-webkit-scrollbar-thumb {
+  background: #475569 !important;
 }
 
 html.dark .adm-th,

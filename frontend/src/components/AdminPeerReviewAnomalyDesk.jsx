@@ -482,7 +482,11 @@ export default function AdminPeerReviewAnomalyDesk() {
               alignItems: 'center', 
               justifyContent: 'space-between', 
               flexWrap: 'wrap', 
-              gap: '14px' 
+              gap: '14px',
+              position: 'sticky',
+              top: '10px',
+              zIndex: 10,
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
             }}
           >
             {/* Left: Filter Buttons */}
@@ -508,6 +512,20 @@ export default function AdminPeerReviewAnomalyDesk() {
                   {st.replace(/_/g, ' ')}
                 </button>
               ))}
+              <span 
+                style={{ 
+                  fontSize: '11px', 
+                  fontWeight: 800, 
+                  padding: '3px 10px', 
+                  borderRadius: '20px', 
+                  background: '#f1f5f9', 
+                  color: '#475569', 
+                  border: '1px solid #e2e8f0',
+                  marginLeft: '4px' 
+                }}
+              >
+                {filteredAlerts.length} {filteredAlerts.length === 1 ? 'INCIDENT' : 'INCIDENTS'}
+              </span>
             </div>
 
             {/* Right: Search */}
@@ -531,8 +549,22 @@ export default function AdminPeerReviewAnomalyDesk() {
             </div>
           </div>
 
-          {/* Alerts Feed */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Alerts Feed (Contained & Scrollable) */}
+          <div 
+            className="adm-scroll"
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '14px',
+              maxHeight: 'clamp(480px, calc(100vh - 360px), 720px)',
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              padding: '6px 10px 16px 4px',
+              border: 'none',
+              borderRadius: '16px',
+              scrollbarWidth: 'thin'
+            }}
+          >
             {filteredAlerts.length > 0 ? (
               filteredAlerts.map((alert) => {
                 const isClosed = alert.status === 'CLOSED';
@@ -733,6 +765,11 @@ export default function AdminPeerReviewAnomalyDesk() {
                 <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '13.5px' }}>
                   All access requests are currently within normal policy thresholds.
                 </p>
+              </div>
+            )}
+            {filteredAlerts.length > 3 && (
+              <div style={{ textAlign: 'center', padding: '12px 0 6px 0', color: '#94a3b8', fontSize: '12px' }}>
+                End of {filteredAlerts.length} incident records &bull; Real-time audit telemetry active
               </div>
             )}
           </div>
@@ -1023,7 +1060,7 @@ export default function AdminPeerReviewAnomalyDesk() {
 
             <div style={{ padding: '20px 24px' }}>
               {retentionWarnings.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '420px', overflowY: 'auto', paddingRight: '4px' }}>
                   {retentionWarnings.map((w, idx) => (
                     <div key={idx} style={{ padding: '12px 16px', borderRadius: '12px', background: '#fffbeb', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
