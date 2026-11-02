@@ -314,11 +314,11 @@ export default function AdminPeerReviewAnomalyDesk() {
       <div 
         className="adm-panel" 
         style={{ 
-          background: '#ffffff', 
+          background: themeStyles.panelBg, 
           borderRadius: '20px', 
           padding: '12px 20px', 
-          border: '1px solid var(--cq-line)',
-          boxShadow: '0 4px 18px rgba(0,0,0,0.03)',
+          border: themeStyles.panelBorder,
+          boxShadow: isDark ? '0 4px 18px rgba(0,0,0,0.3)' : '0 4px 18px rgba(0,0,0,0.03)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -600,17 +600,23 @@ export default function AdminPeerReviewAnomalyDesk() {
 
                 const severity = alert.severity_final || alert.severity_base || 'LOW';
                 const sevColor = severity === 'HIGH' ? '#e11d48' : severity === 'MEDIUM' ? '#d97706' : '#0284c7';
-                const sevBg = severity === 'HIGH' ? '#ffe4e6' : severity === 'MEDIUM' ? '#fef3c7' : '#e0f2fe';
+                const sevBg = severity === 'HIGH' 
+                  ? (isDark ? 'rgba(225, 29, 72, 0.2)' : '#ffe4e6') 
+                  : severity === 'MEDIUM' 
+                  ? (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fef3c7') 
+                  : (isDark ? 'rgba(2, 132, 199, 0.2)' : '#e0f2fe');
 
                 return (
                   <div
                     key={alert.id}
                     style={{
-                      background: '#ffffff',
+                      background: themeStyles.cardBg,
                       borderRadius: '20px',
                       padding: '22px 26px',
-                      border: isClosed ? '1px solid #e2e8f0' : `1.5px solid ${sevColor}`,
-                      boxShadow: isClosed ? 'none' : '0 6px 20px rgba(0,0,0,0.04)',
+                      border: isClosed 
+                        ? themeStyles.panelBorder 
+                        : `1.5px solid ${sevColor}`,
+                      boxShadow: isClosed ? 'none' : (isDark ? '0 6px 20px rgba(0,0,0,0.35)' : '0 6px 20px rgba(0,0,0,0.04)'),
                       display: 'flex',
                       flexDirection: 'column',
                       gap: '14px',
@@ -628,19 +634,28 @@ export default function AdminPeerReviewAnomalyDesk() {
                             borderRadius: '12px', 
                             fontSize: '11.5px', 
                             fontWeight: 800,
-                            letterSpacing: '0.04em'
+                            letterSpacing: '0.04em',
+                            border: isDark ? `1px solid ${sevColor}` : 'none'
                           }}
                         >
                           {severity} SEVERITY
                         </span>
-                        <strong style={{ fontSize: '15px', color: '#1e293b' }}>
+                        <strong style={{ fontSize: '15px', color: themeStyles.textMain }}>
                           {alert.rule_code}
                         </strong>
-                        <span style={{ fontSize: '12px', color: '#64748b', fontFamily: 'monospace' }}>
+                        <span style={{ fontSize: '12px', color: themeStyles.textMuted, fontFamily: 'monospace' }}>
                           ALERT-ID: {alert.id.slice(0, 12)}...
                         </span>
                         {alert.after_hours_tag && (
-                          <span style={{ background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 700 }}>
+                          <span style={{ 
+                            background: isDark ? 'rgba(245, 158, 11, 0.2)' : '#fef3c7', 
+                            color: isDark ? '#fbbf24' : '#b45309', 
+                            border: isDark ? '1px solid rgba(245, 158, 11, 0.35)' : 'none',
+                            padding: '3px 8px', 
+                            borderRadius: '8px', 
+                            fontSize: '11px', 
+                            fontWeight: 700 
+                          }}>
                             🌙 AFTER HOURS
                           </span>
                         )}
@@ -650,8 +665,29 @@ export default function AdminPeerReviewAnomalyDesk() {
                       <div>
                         <span 
                           style={{ 
-                            background: isClosed ? '#ecfdf5' : alert.status === 'UNDER_REVIEW' ? '#eff6ff' : alert.status === 'AWAITING_UNINVOLVED_ADMIN' ? '#faf5ff' : '#fff1f2',
-                            color: isClosed ? '#047857' : alert.status === 'UNDER_REVIEW' ? '#1d4ed8' : alert.status === 'AWAITING_UNINVOLVED_ADMIN' ? '#6b21a8' : '#be123c',
+                            background: isClosed 
+                              ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') 
+                              : alert.status === 'UNDER_REVIEW' 
+                              ? (isDark ? 'rgba(59, 130, 246, 0.2)' : '#eff6ff') 
+                              : alert.status === 'AWAITING_UNINVOLVED_ADMIN' 
+                              ? (isDark ? 'rgba(168, 85, 247, 0.2)' : '#faf5ff') 
+                              : (isDark ? 'rgba(225, 29, 72, 0.2)' : '#fff1f2'),
+                            color: isClosed 
+                              ? (isDark ? '#34d399' : '#047857') 
+                              : alert.status === 'UNDER_REVIEW' 
+                              ? (isDark ? '#93c5fd' : '#1d4ed8') 
+                              : alert.status === 'AWAITING_UNINVOLVED_ADMIN' 
+                              ? (isDark ? '#d8b4fe' : '#6b21a8') 
+                              : (isDark ? '#fda4af' : '#be123c'),
+                            border: isDark 
+                              ? (isClosed 
+                                  ? '1px solid rgba(5, 150, 105, 0.35)' 
+                                  : alert.status === 'UNDER_REVIEW' 
+                                  ? '1px solid rgba(59, 130, 246, 0.35)' 
+                                  : alert.status === 'AWAITING_UNINVOLVED_ADMIN' 
+                                  ? '1px solid rgba(168, 85, 247, 0.35)' 
+                                  : '1px solid rgba(225, 29, 72, 0.35)') 
+                              : 'none',
                             padding: '4px 12px',
                             borderRadius: '20px',
                             fontSize: '12px',
@@ -668,25 +704,33 @@ export default function AdminPeerReviewAnomalyDesk() {
                     </div>
 
                     {/* Alert Description */}
-                    <p style={{ margin: 0, fontSize: '14px', color: '#334155', lineHeight: 1.5 }}>
+                    <p style={{ margin: 0, fontSize: '14px', color: themeStyles.textSub, lineHeight: 1.5 }}>
                       {alert.description}
                     </p>
 
                     {/* Metadata Badges & Tags */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>
-                        Subject User ID: <code style={{ color: '#1e293b', fontWeight: 600 }}>{alert.subject_user_id || 'SYSTEM'}</code>
+                      <span style={{ fontSize: '12px', color: themeStyles.textMuted }}>
+                        Subject User ID: <code style={{ color: isDark ? '#38bdf8' : '#1e293b', fontWeight: 600 }}>{alert.subject_user_id || 'SYSTEM'}</code>
                       </span>
-                      <span style={{ fontSize: '12px', color: '#cbd5e1' }}>•</span>
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>
-                        Event Count: <strong>{alert.event_count || 1}</strong>
+                      <span style={{ fontSize: '12px', color: themeStyles.textMuted }}>•</span>
+                      <span style={{ fontSize: '12px', color: themeStyles.textMuted }}>
+                        Event Count: <strong style={{ color: themeStyles.textMain }}>{alert.event_count || 1}</strong>
                       </span>
-                      <span style={{ fontSize: '12px', color: '#cbd5e1' }}>•</span>
-                      <span style={{ fontSize: '12px', color: '#64748b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '12px', color: themeStyles.textMuted }}>•</span>
+                      <span style={{ fontSize: '12px', color: themeStyles.textMuted, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <Clock size={12} /> {alert.created_at ? new Date(alert.created_at).toLocaleString() : 'Recent'}
                       </span>
                       {(alert.tags || []).map(tag => (
-                        <span key={tag} style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>
+                        <span key={tag} style={{ 
+                          background: themeStyles.chipBg, 
+                          color: themeStyles.chipText, 
+                          border: isDark ? '1px solid #334155' : 'none',
+                          padding: '2px 8px', 
+                          borderRadius: '6px', 
+                          fontSize: '11px', 
+                          fontWeight: 600 
+                        }}>
                           #{tag}
                         </span>
                       ))}
@@ -694,40 +738,40 @@ export default function AdminPeerReviewAnomalyDesk() {
 
                     {/* Reviewer Note Box if Already Reviewed */}
                     {(alert.review_note || alert.disposition) && (
-                      <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '12px 16px', border: '1px solid #e2e8f0', fontSize: '12.5px' }}>
+                      <div style={{ background: themeStyles.subtleBox, borderRadius: '12px', padding: '12px 16px', border: themeStyles.subtleBoxBorder, fontSize: '12.5px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                           {alert.disposition && (
-                            <strong style={{ color: alert.disposition === 'CLOSED_EXPECTED_ACTIVITY' ? '#047857' : '#b91c1c' }}>
+                            <strong style={{ color: alert.disposition === 'CLOSED_EXPECTED_ACTIVITY' ? (isDark ? '#34d399' : '#047857') : (isDark ? '#f87171' : '#b91c1c') }}>
                               Disposition: {alert.disposition}
                             </strong>
                           )}
                           {alert.reviewed_at && (
-                            <span style={{ color: '#94a3b8' }}>
+                            <span style={{ color: themeStyles.textMuted }}>
                               • Reviewed on {new Date(alert.reviewed_at).toLocaleDateString()}
                             </span>
                           )}
                         </div>
-                        <p style={{ margin: 0, color: '#475569', fontStyle: 'italic' }}>
+                        <p style={{ margin: 0, color: themeStyles.textSub, fontStyle: 'italic' }}>
                           "{alert.review_note}"
                         </p>
                       </div>
                     )}
 
                     {/* Peer Review Security Gate & Action Button */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', paddingTop: '6px', borderTop: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', paddingTop: '6px', borderTop: themeStyles.borderSubtle }}>
                       {/* Conflict-of-Interest Warning for Subject Admin */}
                       {isSubject ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#be123c', fontSize: '12.5px', fontWeight: 700 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isDark ? '#fb7185' : '#be123c', fontSize: '12.5px', fontWeight: 700 }}>
                           <Lock size={15} />
                           <span>⚠️ CONFLICT OF INTEREST (OI-30): You are the subject of this alert. Peer Administrator review required.</span>
                         </div>
                       ) : isRecused ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#7e22ce', fontSize: '12.5px', fontWeight: 700 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isDark ? '#c084fc' : '#7e22ce', fontSize: '12.5px', fontWeight: 700 }}>
                           <Lock size={15} />
                           <span>⚠️ RECUSAL ACTIVE: You are marked as an involved administrator. Uninvolved peer must sign off.</span>
                         </div>
                       ) : (
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>
+                        <div style={{ fontSize: '12px', color: themeStyles.textMuted }}>
                           {isClosed ? 'Resolved and archived with cryptographic audit log.' : 'Requires formal Peer Administrator evaluation & sign-off.'}
                         </div>
                       )}
@@ -741,9 +785,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                             style={{
                               padding: '8px 16px',
                               borderRadius: '10px',
-                              background: '#f1f5f9',
-                              color: '#94a3b8',
-                              border: '1px solid #e2e8f0',
+                              background: themeStyles.chipBg,
+                              color: themeStyles.textMuted,
+                              border: themeStyles.subtleBoxBorder,
                               fontSize: '12.5px',
                               fontWeight: 700,
                               cursor: 'not-allowed',
@@ -762,9 +806,11 @@ export default function AdminPeerReviewAnomalyDesk() {
                             style={{
                               padding: '8px 18px',
                               borderRadius: '10px',
-                              background: isClosed ? '#f8fafc' : 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                              color: isClosed ? '#334155' : '#ffffff',
-                              border: isClosed ? '1px solid #cbd5e1' : 'none',
+                              background: isClosed 
+                                ? (isDark ? '#1e293b' : '#f8fafc') 
+                                : 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                              color: isClosed ? themeStyles.textMain : '#ffffff',
+                              border: isClosed ? themeStyles.inputBorder : (isDark ? '1px solid #334155' : 'none'),
                               fontSize: '13px',
                               fontWeight: 700,
                               cursor: 'pointer',
@@ -784,10 +830,10 @@ export default function AdminPeerReviewAnomalyDesk() {
                 );
               })
             ) : (
-              <div style={{ background: '#ffffff', borderRadius: '20px', padding: '40px', textAlign: 'center', border: '1px solid var(--cq-line)' }}>
+              <div style={{ background: themeStyles.cardBg, borderRadius: '20px', padding: '40px', textAlign: 'center', border: themeStyles.panelBorder }}>
                 <CheckCircle2 size={36} color="#10b981" style={{ margin: '0 auto 12px auto' }} />
-                <h3 style={{ margin: 0, color: '#1e293b' }}>No Anomaly Alerts Pending</h3>
-                <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '13.5px' }}>
+                <h3 style={{ margin: 0, color: themeStyles.textMain }}>No Anomaly Alerts Pending</h3>
+                <p style={{ margin: '6px 0 0 0', color: themeStyles.textMuted, fontSize: '13.5px' }}>
                   All access requests are currently within normal policy thresholds.
                 </p>
               </div>
@@ -805,11 +851,11 @@ export default function AdminPeerReviewAnomalyDesk() {
           TAB 2: MASTER SECURITY AUDIT TRAIL (access_logs)
           ======================================================================= */}
       {activeTab === 'audit_trail' && (
-        <div className="adm-panel" style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid var(--cq-line)', overflow: 'hidden' }}>
-          <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: '1px solid var(--cq-line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+        <div className="adm-panel" style={{ background: themeStyles.panelBg, borderRadius: '24px', border: themeStyles.panelBorder, overflow: 'hidden' }}>
+          <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: themeStyles.panelBorder, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>Append-Only Security Audit Trail (SEC-12, SEC-13)</h3>
-              <span className="adm-mono" style={{ fontSize: '12px', color: '#64748b' }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: themeStyles.textMain }}>Append-Only Security Audit Trail (SEC-12, SEC-13)</h3>
+              <span className="adm-mono" style={{ fontSize: '12px', color: themeStyles.textMuted }}>
                 Immutable ledger of all decryption, report generation, and administrative actions
               </span>
             </div>
@@ -818,7 +864,7 @@ export default function AdminPeerReviewAnomalyDesk() {
               <select
                 value={logFilter}
                 onChange={(e) => setLogFilter(e.target.value)}
-                style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12.5px', background: '#f8fafc', outline: 'none' }}
+                style={{ padding: '6px 12px', borderRadius: '8px', border: themeStyles.inputBorder, fontSize: '12.5px', background: themeStyles.inputBg, color: themeStyles.inputText, outline: 'none' }}
               >
                 <option value="ALL">All Event Types</option>
                 <option value="REPORT_GENERATED">REPORT_GENERATED</option>
@@ -833,7 +879,7 @@ export default function AdminPeerReviewAnomalyDesk() {
                 placeholder="Search audit logs..."
                 value={logSearch}
                 onChange={(e) => setLogSearch(e.target.value)}
-                style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12.5px', background: '#f8fafc', outline: 'none' }}
+                style={{ padding: '6px 12px', borderRadius: '8px', border: themeStyles.inputBorder, fontSize: '12.5px', background: themeStyles.inputBg, color: themeStyles.inputText, outline: 'none' }}
               />
             </div>
           </div>
@@ -841,7 +887,7 @@ export default function AdminPeerReviewAnomalyDesk() {
           <div className="adm-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '11.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <tr style={{ background: themeStyles.tableThBg, borderBottom: themeStyles.tableBorder, color: themeStyles.tableThColor, fontSize: '11.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   <th style={{ padding: '12px 20px' }}>Timestamp (UTC+8)</th>
                   <th style={{ padding: '12px 16px' }}>Actor & Role</th>
                   <th style={{ padding: '12px 16px' }}>Event Type</th>
@@ -856,21 +902,29 @@ export default function AdminPeerReviewAnomalyDesk() {
                   filteredLogs.map((log) => {
                     const isSuccess = log.outcome === 'SUCCESS';
                     return (
-                      <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '12px 20px', fontFamily: 'monospace', color: '#64748b' }}>
+                      <tr key={log.id} style={{ borderBottom: themeStyles.borderSubtle }}>
+                        <td style={{ padding: '12px 20px', fontFamily: 'monospace', color: themeStyles.textMuted }}>
                           {log.occurred_at ? new Date(log.occurred_at).toLocaleString() : 'N/A'}
                         </td>
                         <td style={{ padding: '12px 16px' }}>
-                          <span style={{ fontWeight: 600, color: '#1e293b' }}>{log.actor_role}</span>
-                          <div style={{ fontSize: '11px', color: '#94a3b8', fontFamily: 'monospace' }}>
+                          <span style={{ fontWeight: 600, color: themeStyles.textMain }}>{log.actor_role}</span>
+                          <div style={{ fontSize: '11px', color: themeStyles.textMuted, fontFamily: 'monospace' }}>
                             {log.actor_user_id ? log.actor_user_id.slice(0, 8) : 'N/A'}
                           </div>
                         </td>
-                        <td style={{ padding: '12px 16px', fontWeight: 700, color: '#334155' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: 700, color: themeStyles.textMain }}>
                           {log.event_type}
                         </td>
                         <td style={{ padding: '12px 16px' }}>
-                          <span style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '11.5px', fontFamily: 'monospace' }}>
+                          <span style={{ 
+                            background: themeStyles.subtleBox, 
+                            color: isDark ? '#a5b4fc' : '#334155', 
+                            border: themeStyles.subtleBoxBorder, 
+                            padding: '3px 8px', 
+                            borderRadius: '6px', 
+                            fontSize: '11.5px', 
+                            fontFamily: 'monospace' 
+                          }}>
                             {log.resource_type || 'N/A'}:{log.resource_id ? log.resource_id.slice(0, 6) : ''}
                           </span>
                         </td>
@@ -881,17 +935,24 @@ export default function AdminPeerReviewAnomalyDesk() {
                               borderRadius: '12px', 
                               fontSize: '11px', 
                               fontWeight: 800,
-                              background: isSuccess ? '#ecfdf5' : '#fff1f2',
-                              color: isSuccess ? '#047857' : '#be123c'
+                              background: isSuccess 
+                                ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') 
+                                : (isDark ? 'rgba(225, 29, 72, 0.2)' : '#fff1f2'),
+                              color: isSuccess 
+                                ? (isDark ? '#34d399' : '#047857') 
+                                : (isDark ? '#fb7185' : '#be123c'),
+                              border: isDark 
+                                ? (isSuccess ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid rgba(225, 29, 72, 0.35)') 
+                                : 'none'
                             }}
                           >
                             {log.outcome}
                           </span>
                         </td>
-                        <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#64748b' }}>
+                        <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: themeStyles.textMuted }}>
                           {log.source_ip || '127.0.0.1'}
                         </td>
-                        <td style={{ padding: '12px 20px', fontSize: '12px', color: '#475569', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td style={{ padding: '12px 20px', fontSize: '12px', color: themeStyles.textSub, maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {log.reason_code ? `[${log.reason_code}] ` : ''}
                           {JSON.stringify(log.details || {})}
                         </td>
@@ -916,11 +977,11 @@ export default function AdminPeerReviewAnomalyDesk() {
           TAB 3: ANOMALY RULES & THRESHOLD MANAGEMENT (FIGURE 10, TABLE 22)
           ======================================================================= */}
       {activeTab === 'rules' && (
-        <div className="adm-panel" style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid var(--cq-line)', overflow: 'hidden' }}>
-          <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: '1px solid var(--cq-line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+        <div className="adm-panel" style={{ background: themeStyles.panelBg, borderRadius: '24px', border: themeStyles.panelBorder, overflow: 'hidden' }}>
+          <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: themeStyles.panelBorder, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>Rule-Based Detection Parameters & Client Review (OI-08)</h3>
-              <span className="adm-mono" style={{ fontSize: '12px', color: '#64748b' }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: themeStyles.textMain }}>Rule-Based Detection Parameters & Client Review (OI-08)</h3>
+              <span className="adm-mono" style={{ fontSize: '12px', color: themeStyles.textMuted }}>
                 Threshold configuration for access frequency, failed authentications, burst decryptions, and after-hours activities
               </span>
             </div>
@@ -932,7 +993,7 @@ export default function AdminPeerReviewAnomalyDesk() {
           <div className="adm-scroll">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '11.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <tr style={{ background: themeStyles.tableThBg, borderBottom: themeStyles.tableBorder, color: themeStyles.tableThColor, fontSize: '11.5px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   <th style={{ padding: '12px 20px' }}>Rule Code</th>
                   <th style={{ padding: '12px 16px' }}>Rule Description</th>
                   <th style={{ padding: '12px 16px' }}>Threshold Parameters</th>
@@ -944,19 +1005,30 @@ export default function AdminPeerReviewAnomalyDesk() {
               <tbody>
                 {rules && rules.length > 0 ? (
                   rules.map((rule) => (
-                  <tr key={rule.rule_code} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '14px 20px', fontWeight: 800, color: '#1e293b' }}>
+                  <tr key={rule.rule_code} style={{ borderBottom: themeStyles.borderSubtle }}>
+                    <td style={{ padding: '14px 20px', fontWeight: 800, color: themeStyles.textMain }}>
                       {rule.rule_code}
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#475569' }}>
+                    <td style={{ padding: '14px 16px', color: themeStyles.textSub }}>
                       {rule.description}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
-                      <pre style={{ margin: 0, fontSize: '11.5px', background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px', fontFamily: 'monospace', maxWidth: '280px', overflow: 'hidden' }}>
+                      <pre style={{ 
+                        margin: 0, 
+                        fontSize: '11.5px', 
+                        background: themeStyles.subtleBox, 
+                        color: isDark ? '#a5b4fc' : '#1e293b', 
+                        border: themeStyles.subtleBoxBorder, 
+                        padding: '6px 10px', 
+                        borderRadius: '6px', 
+                        fontFamily: 'monospace', 
+                        maxWidth: '280px', 
+                        overflow: 'hidden' 
+                      }}>
                         {JSON.stringify(rule.parameters || {}, null, 1)}
                       </pre>
                     </td>
-                    <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontWeight: 700 }}>
+                    <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontWeight: 700, color: themeStyles.textMain }}>
                       v{rule.version_no}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
@@ -966,8 +1038,15 @@ export default function AdminPeerReviewAnomalyDesk() {
                           borderRadius: '12px', 
                           fontSize: '11px', 
                           fontWeight: 700,
-                          background: rule.client_reviewed ? '#ecfdf5' : '#fef3c7',
-                          color: rule.client_reviewed ? '#047857' : '#b45309'
+                          background: rule.client_reviewed 
+                            ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') 
+                            : (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fef3c7'),
+                          color: rule.client_reviewed 
+                            ? (isDark ? '#34d399' : '#047857') 
+                            : (isDark ? '#fbbf24' : '#b45309'),
+                          border: isDark 
+                            ? (rule.client_reviewed ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid rgba(217, 119, 6, 0.35)') 
+                            : 'none'
                         }}
                       >
                         {rule.client_reviewed ? 'Approved ✓' : 'Pending Review'}
@@ -980,9 +1059,9 @@ export default function AdminPeerReviewAnomalyDesk() {
                         style={{
                           padding: '6px 14px',
                           borderRadius: '8px',
-                          background: '#f8fafc',
-                          border: '1px solid #cbd5e1',
-                          color: '#334155',
+                          background: themeStyles.inputBg,
+                          border: themeStyles.inputBorder,
+                          color: themeStyles.textMain,
                           fontSize: '12px',
                           fontWeight: 700,
                           cursor: 'pointer'
@@ -1014,11 +1093,11 @@ export default function AdminPeerReviewAnomalyDesk() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div 
             style={{ 
-              background: '#ffffff', 
+              background: themeStyles.cardBg, 
               borderRadius: '24px', 
               padding: '24px 28px', 
-              border: '1px solid var(--cq-line)',
-              boxShadow: '0 4px 18px rgba(0,0,0,0.03)'
+              border: themeStyles.panelBorder,
+              boxShadow: isDark ? '0 4px 18px rgba(0,0,0,0.3)' : '0 4px 18px rgba(0,0,0,0.03)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
@@ -1026,10 +1105,10 @@ export default function AdminPeerReviewAnomalyDesk() {
                 <span className="adm-pill adm-pill--purple" style={{ marginBottom: '8px' }}>
                   STATUTORY COMPLIANCE: SECTION 3.7.5 & OI-20
                 </span>
-                <h2 style={{ margin: '6px 0', fontSize: '20px', fontWeight: 800 }}>
+                <h2 style={{ margin: '6px 0', fontSize: '20px', fontWeight: 800, color: themeStyles.textMain }}>
                   12-Month Audit Log & Closed Alert Retention Policy
                 </h2>
-                <p style={{ margin: 0, color: '#64748b', fontSize: '13.5px', maxWidth: '680px', lineHeight: 1.5 }}>
+                <p style={{ margin: 0, color: themeStyles.textSub, fontSize: '13.5px', maxWidth: '680px', lineHeight: 1.5 }}>
                   Philippine Data Privacy Act (DPA 2012) and enterprise client agreements mandate disposal of audit logs and closed incident records older than 365 days. Alerts approaching 12 months enter a 30-day proactive warning cycle.
                 </p>
               </div>
@@ -1447,7 +1526,7 @@ export default function AdminPeerReviewAnomalyDesk() {
                   checked={ruleClientReviewed}
                   onChange={(e) => setRuleClientReviewed(e.target.checked)}
                 />
-                <label htmlFor="client-reviewed-chk" style={{ fontSize: '13px', color: '#334155', fontWeight: 600 }}>
+                <label htmlFor="client-reviewed-chk" style={{ fontSize: '13px', color: themeStyles.textMain, fontWeight: 600 }}>
                   Mark as Client Approved / Reviewed (OI-08)
                 </label>
               </div>
@@ -1456,7 +1535,7 @@ export default function AdminPeerReviewAnomalyDesk() {
                 <button
                   type="button"
                   onClick={() => setEditingRule(null)}
-                  style={{ padding: '8px 16px', borderRadius: '8px', background: '#f1f5f9', color: '#475569', border: 'none', fontWeight: 700, fontSize: '12.5px', cursor: 'pointer' }}
+                  style={{ padding: '8px 16px', borderRadius: '8px', background: themeStyles.inputBg, color: themeStyles.textMuted, border: themeStyles.inputBorder, fontWeight: 700, fontSize: '12.5px', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
