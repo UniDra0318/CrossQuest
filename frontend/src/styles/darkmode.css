@@ -445,9 +445,39 @@ html.dark .results-card,
 [data-theme="dark"] .briefing-card,
 [data-theme="dark"] .quiz-arena-card,
 [data-theme="dark"] .results-card {
-  background-color: #12102e !important;
-  border-color: #2e285a !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
   color: #f8fafc !important;
+}
+
+html.dark .briefing-body,
+[data-theme="dark"] .briefing-body {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.dark .briefing-desc,
+[data-theme="dark"] .briefing-desc {
+  background: rgba(0, 0, 0, 0.32) !important;
+  background-color: rgba(0, 0, 0, 0.32) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-left: 4px solid #a855f7 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .briefing-stat-tile,
+[data-theme="dark"] .briefing-stat-tile {
+  background: rgba(0, 0, 0, 0.28) !important;
+  background-color: rgba(0, 0, 0, 0.28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+html.dark .briefing-protection-alert,
+[data-theme="dark"] .briefing-protection-alert {
+  background: rgba(16, 185, 129, 0.12) !important;
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.32) !important;
+  color: #6ee7b7 !important;
 }
 
 html.dark .briefing-stat-tile,

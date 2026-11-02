@@ -391,7 +391,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // ==========================================
   if (stage === 'briefing') {
     return (
-      <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, minHeight: '100vh', width: '100%', borderRadius: '24px', padding: '24px', transition: 'all 0.3s ease' }}>
+      <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, width: '100%', borderRadius: '18px', padding: '14px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
         <div className="briefing-card" style={{ ...activeTheme.cardStyle }}>
           <div className="briefing-header-bar" style={{ backgroundColor: quiz.headerColor }}>
             <span className="briefing-category-tag">{quiz.category}</span>
@@ -401,68 +401,70 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
           <div className="briefing-body">
             <div className="briefing-section">
-              <h3>Scenario & Assessment Background</h3>
+              <h3>Scenario &amp; Assessment Background</h3>
               <p className="briefing-desc">{quiz.description}</p>
             </div>
 
             {/* Interactive Background Theme Selector */}
             <div className="briefing-theme-picker-section" style={{
-              margin: '18px 0 24px',
-              padding: '16px 18px',
-              borderRadius: '16px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.12)'
+              margin: '0',
+              padding: '8px 12px',
+              borderRadius: '12px',
+              background: 'rgba(0, 0, 0, 0.28)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <span style={{ fontSize: '13px', fontWeight: '800', color: activeTheme.accent, display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  <Palette size={16} />
-                  <span>Choose Arena Atmosphere & Theme ({QUIZ_THEMES.length} Themes)</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: activeTheme.accent, display: 'flex', alignItems: 'center', gap: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <Palette size={14} />
+                  <span>Choose Arena Atmosphere &amp; Theme ({QUIZ_THEMES.length} Themes)</span>
                 </span>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  Active: <strong>{activeTheme.name}</strong>
+                <span style={{ fontSize: '10px', color: '#94a3b8' }}>
+                  Active: <strong style={{ color: '#ffffff' }}>{activeTheme.name}</strong>
                 </span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
                 {QUIZ_THEMES.map(th => {
                   const isSel = th.id === quizThemeId;
+                  const buttonBg = th.previewStyle || th.bgStyle;
                   return (
                     <div
                       key={th.id}
                       onClick={() => handleSelectTheme(th.id)}
                       style={{
-                        ...th.bgStyle,
-                        padding: '12px 14px',
-                        borderRadius: '14px',
-                        border: isSel ? `2px solid ${th.accent}` : '1.5px solid rgba(255,255,255,0.15)',
+                        ...buttonBg,
+                        backgroundColor: buttonBg.backgroundColor || '#0f172a',
+                        padding: '6px 10px',
+                        borderRadius: '10px',
+                        border: isSel ? `2px solid ${th.accent}` : '1px solid rgba(255,255,255,0.15)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '10px',
-                        boxShadow: isSel ? `0 0 16px ${th.accent}66` : 'none',
-                        transition: 'all 0.2s ease',
+                        gap: '8px',
+                        boxShadow: isSel ? `0 0 12px ${th.accent}66` : 'none',
+                        transition: 'all 0.15s ease',
                         position: 'relative'
                       }}
                     >
-                      <span style={{ fontSize: '20px' }}>{th.icon}</span>
+                      <span style={{ fontSize: '16px', lineHeight: 1 }}>{th.icon}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: '800', fontSize: '12px', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontWeight: '800', fontSize: '11px', color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {th.name}
                         </div>
-                        <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {th.tagline}
                         </div>
                       </div>
                       {isSel && (
                         <div style={{
-                          width: '16px',
-                          height: '16px',
+                          width: '14px',
+                          height: '14px',
                           borderRadius: '50%',
                           background: th.accent,
                           color: '#ffffff',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '10px',
+                          fontSize: '9px',
                           fontWeight: '800'
                         }}>
                           ✓
@@ -476,48 +478,48 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
             <div className="briefing-metrics-grid">
               <div className="briefing-stat-tile">
-                <Target size={22} className="text-purple" />
+                <Target size={16} className="text-purple" />
                 <div className="stat-num">{totalQuestions} Questions</div>
                 <div className="stat-label">Assessment Items</div>
               </div>
 
               <div className="briefing-stat-tile">
-                <Shuffle size={22} className="text-cyan" />
+                <Shuffle size={16} className="text-cyan" />
                 <div className="stat-num">Randomized</div>
-                <div className="stat-label">Questions & Choices</div>
+                <div className="stat-label">Questions &amp; Choices</div>
               </div>
 
               <div className="briefing-stat-tile">
-                <Clock size={22} className="text-purple" />
+                <Clock size={16} className="text-purple" />
                 <div className="stat-num">{quiz.timePerQuestion}s / Item</div>
                 <div className="stat-label">Countdown Timer</div>
               </div>
 
               <div className="briefing-stat-tile">
-                <Award size={22} className="text-gold" />
+                <Award size={16} className="text-gold" />
                 <div className="stat-num">{quiz.passingScore}% Needed</div>
                 <div className="stat-label">Passing Standard</div>
               </div>
 
               <div className="briefing-stat-tile">
-                <Shield size={22} className="text-green" />
+                <Shield size={16} className="text-green" />
                 <div className="stat-num">Zero-Trust</div>
                 <div className="stat-label">Security Focus</div>
               </div>
             </div>
 
             {!isOnline ? (
-              <div style={{ background: '#451a03', border: '1px solid #f59e0b', color: '#fef3c7', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <AlertTriangle size={18} color="#f59e0b" className="flex-shrink-0" />
+              <div style={{ background: '#451a03', border: '1px solid #f59e0b', color: '#fef3c7', padding: '6px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+                <AlertTriangle size={15} color="#f59e0b" className="flex-shrink-0" />
                 <div>
-                  <strong>Offline Mode Notice:</strong> Assessment is disabled while offline. Live scoring requires an active network connection per security policy SEC-26.
+                  <strong>Offline Mode Notice:</strong> Assessment is disabled while offline per SEC-26.
                 </div>
               </div>
             ) : (
               <div className="briefing-protection-alert">
-                <Shield size={18} className="text-emerald flex-shrink-0" />
+                <Shield size={15} className="text-emerald flex-shrink-0" />
                 <div>
-                  <strong>Zero-Trust Server-Side Validation:</strong> All answers are verified server-side against secure answer keys (SEC-26). Offline caching and tampering are strictly prevented.
+                  <strong>Zero-Trust Server-Side Validation:</strong> All answers are verified server-side against secure answer keys (SEC-26).
                 </div>
               </div>
             )}
@@ -529,14 +531,15 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 disabled={!isOnline}
                 style={{ opacity: !isOnline ? 0.5 : 1, cursor: !isOnline ? 'not-allowed' : 'pointer' }}
               >
-                <Play size={18} />
+                <Play size={15} />
                 <span>Begin Assessment Now</span>
               </button>
               <button 
                 className="btn-tactile btn-tactile-ghost"
                 onClick={onExit}
+                style={{ padding: '8px 16px', fontSize: '12px' }}
               >
-                Cancel & Return
+                Cancel &amp; Return
               </button>
             </div>
           </div>
@@ -553,7 +556,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const historyList = Object.values(answersHistory);
 
     return (
-      <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, minHeight: '100vh', width: '100%', borderRadius: '24px', padding: '24px', transition: 'all 0.3s ease' }}>
+      <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, width: '100%', borderRadius: '18px', padding: '14px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
         <div className="results-card" style={{ ...activeTheme.cardStyle }}>
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
@@ -681,7 +684,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, minHeight: '100vh', width: '100%', borderRadius: '24px', padding: '24px', transition: 'all 0.3s ease' }}>
+    <div className="quiz-fullscreen-wrapper" style={{ ...activeTheme.bgStyle, width: '100%', borderRadius: '18px', padding: '14px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
       <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
