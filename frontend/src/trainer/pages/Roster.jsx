@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Users } from 'lucide-react';
+import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { useTrainer } from '../TrainerContext';
 
 export default function Roster({ onNavigateTab }) {
@@ -93,7 +95,11 @@ export default function Roster({ onNavigateTab }) {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="adm-state">No trainees match the current filters.</div>
+            <TableEmptyBlock
+              icon={Users}
+              title="No Trainees Match Current Filters"
+              subtitle="Adjust your search query, cohort, or certification state to view participants."
+            />
           ) : (
             filtered.map((t) => (
               <div key={t.id} className="adm-row adm-grid trn-rgrid">

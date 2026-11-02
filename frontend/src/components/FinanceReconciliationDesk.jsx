@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TableEmptyRow } from './TableEmptyState';
 import {
   FileSpreadsheet,
   UploadCloud,
@@ -758,11 +759,12 @@ export default function FinanceReconciliationDesk() {
                   </tr>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>
-                    &#10004; Zero discrepancies quarantined for this batch. All rows conform to schema.
-                  </td>
-                </tr>
+                <TableEmptyRow
+                  colSpan={6}
+                  icon={CheckCircle2}
+                  title="Zero Discrepancies Quarantined"
+                  subtitle="All ingested training records conform strictly to schema baselines and validation criteria."
+                />
               )}
             </tbody>
           </table>
@@ -927,11 +929,12 @@ export default function FinanceReconciliationDesk() {
                   </tr>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="4" style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>
-                    No matching customers found.
-                  </td>
-                </tr>
+                <TableEmptyRow
+                  colSpan={4}
+                  icon={Building2}
+                  title="No Matching Client Accounts"
+                  subtitle="No customer entities match the active classification filter or search query."
+                />
               )}
             </tbody>
           </table>

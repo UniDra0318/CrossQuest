@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { TableEmptyBlock } from '../components/TableEmptyState';
 import { 
   admin as defaultAdmin, 
   overview as defaultOverview, 
@@ -754,7 +755,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <div style={{ textAlign: 'right' }}>ACTIONS</div>
               </div>
               {/* Table Rows */}
-              {filteredStaff.map((user) => {
+              {filteredStaff && filteredStaff.length > 0 ? (
+                filteredStaff.map((user) => {
                 const isEditing = editingStaffId === user.id;
                 return (
                   <div key={user.id} className="adm-row">
@@ -867,7 +869,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     )}
                   </div>
                 );
-              })}
+              })
+              ) : (
+                <TableEmptyBlock
+                  icon={Users}
+                  title="No Staff Accounts Located"
+                  subtitle="No team members match the current search query or clearance criteria."
+                />
+              )}
             </div>
           </div>
         </div>
@@ -918,7 +927,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <div style={{ textAlign: 'right' }}>DATA ISOLATION</div>
               </div>
 
-              {companiesList.map((c) => (
+              {companiesList && companiesList.length > 0 ? (
+                companiesList.map((c) => (
                 <div key={c.code} className="adm-row" style={{ padding: '16px 28px' }}>
                   <div className="adm-grid" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -971,7 +981,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     </div>
                   </div>
                 </div>
-              ))}
+              ))
+              ) : (
+                <TableEmptyBlock
+                  icon={Building2}
+                  title="No Client Companies Registered"
+                  subtitle="Register your first multi-tenant client company to establish cryptographic isolation."
+                />
+              )}
             </div>
           </div>
         </div>
@@ -1026,7 +1043,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <div>ACCESS CONTROL POLICY</div>
                 <div style={{ textAlign: 'right' }}>STATUS</div>
               </div>
-              {filteredRecords.map((r) => (
+              {filteredRecords && filteredRecords.length > 0 ? (
+                filteredRecords.map((r) => (
                 <div key={r.id} className="adm-row adm-grid adm-grid--vault">
                   <div className="adm-recid">
                     <FileText size={13} />
@@ -1056,7 +1074,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     </span>
                   </div>
                 </div>
-              ))}
+              ))
+              ) : (
+                <TableEmptyBlock
+                  icon={FileText}
+                  title="No Master Training Records Found"
+                  subtitle="No records match your current filter, company selection, or search query."
+                />
+              )}
             </div>
           </div>
         </div>

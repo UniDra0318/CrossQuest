@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { TableEmptyRow } from '../../components/TableEmptyState';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Download, 
@@ -601,11 +602,12 @@ export default function Reports() {
                       );
                     })
                   ) : (
-                    <tr>
-                      <td colSpan={5} style={{ padding: '36px', textAlign: 'center', color: '#94a3b8' }}>
-                        No participant training records found matching the current filter.
-                      </td>
-                    </tr>
+                    <TableEmptyRow
+                      colSpan={5}
+                      icon={Users}
+                      title="No Trainee Records Found"
+                      subtitle="No participant training records match the current filter criteria."
+                    />
                   )}
                 </tbody>
               </table>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TableEmptyRow } from './TableEmptyState';
 import { 
   Building2, 
   FileText, 
@@ -113,7 +114,8 @@ export default function ReportsView({ clientCompanies, records, currentStaff }) 
               </tr>
             </thead>
             <tbody>
-              {companyRecords.map((r) => (
+              {companyRecords && companyRecords.length > 0 ? (
+                companyRecords.map((r) => (
                 <tr key={r.id}>
                   <td>
                     <div className="trainee-info-cell">
@@ -134,7 +136,15 @@ export default function ReportsView({ clientCompanies, records, currentStaff }) 
                     <span className="badge badge-gray">Policy Locked</span>
                   </td>
                 </tr>
-              ))}
+              ))
+              ) : (
+                <TableEmptyRow
+                  colSpan={5}
+                  icon={FileText}
+                  title="No Training History Records"
+                  subtitle="No participant records found for the selected company and reporting window."
+                />
+              )}
             </tbody>
           </table>
         </div>

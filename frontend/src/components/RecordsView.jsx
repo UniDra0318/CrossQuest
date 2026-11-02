@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TableEmptyRow } from './TableEmptyState';
 import { 
   Search, 
   Lock, 
@@ -133,7 +134,8 @@ export default function RecordsView({
               </tr>
             </thead>
             <tbody>
-              {filteredRecords.map((r) => {
+              {filteredRecords && filteredRecords.length > 0 ? (
+                filteredRecords.map((r) => {
                 const canAccess = isAuthorized(r);
                 return (
                   <tr key={r.id}>
@@ -172,7 +174,15 @@ export default function RecordsView({
                     </td>
                   </tr>
                 );
-              })}
+              })
+              ) : (
+                <TableEmptyRow
+                  colSpan={5}
+                  icon={FileText}
+                  title="No Training Records Located"
+                  subtitle="No records match your selected organization scope or attribute clearances."
+                />
+              )}
             </tbody>
           </table>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TableEmptyRow } from '../components/TableEmptyState';
 import { 
   Building2, 
   Users, 
@@ -267,7 +268,8 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {displayedRecords.map((r) => (
+                  {displayedRecords && displayedRecords.length > 0 ? (
+                    displayedRecords.map((r) => (
                     <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0f172a' }}>{r.traineeName}</td>
                       {isFinance && (
@@ -285,7 +287,15 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                         </span>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                  ) : (
+                    <TableEmptyRow
+                      colSpan={isFinance ? 5 : 4}
+                      icon={FileText}
+                      title="No Attestation Records Available"
+                      subtitle="No training records have been submitted or synchronized for this tenant yet."
+                    />
+                  )}
                 </tbody>
               </table>
             </div>
@@ -352,7 +362,8 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecords.map((r) => (
+                {filteredRecords && filteredRecords.length > 0 ? (
+                  filteredRecords.map((r) => (
                   <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -378,7 +389,15 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                       </span>
                     </td>
                   </tr>
-                ))}
+                ))
+                ) : (
+                  <TableEmptyRow
+                    colSpan={isFinance ? 6 : 5}
+                    icon={Users}
+                    title="No Trainees Found in Roster"
+                    subtitle="No cohort participants match the active status filter or search parameters."
+                  />
+                )}
               </tbody>
             </table>
           </div>

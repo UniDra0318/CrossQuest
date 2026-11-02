@@ -650,7 +650,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             </div>
 
             <div className="template-activities-grid">
-              {assignedActivities.map((act) => {
+              {assignedActivities && assignedActivities.length > 0 ? (
+                assignedActivities.map((act) => {
                 return (
                   <div key={act.id} className="template-activity-card">
                     {/* Top Colored Banner with 3D Graphic */}
@@ -724,7 +725,14 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                     </div>
                   </div>
                 );
-              })}
+              })
+              ) : (
+                <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8', gridColumn: '1 / -1' }}>
+                  <BookOpen size={48} style={{ margin: '0 auto 16px', opacity: 0.4 }} />
+                  <h4 style={{ fontWeight: '700', marginBottom: '8px', color: '#64748b' }}>No course activities assigned yet</h4>
+                  <p style={{ fontSize: '14px' }}>You are all caught up! New instructor module assignments will appear here.</p>
+                </div>
+              )}
             </div>
           </div>
 

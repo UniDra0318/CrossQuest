@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { 
   Search, 
   Lock, 
@@ -85,7 +86,8 @@ export default function RecordVault() {
             </div>
 
             {/* Table Rows */}
-            {filtered.map((r) => {
+            {filtered && filtered.length > 0 ? (
+              filtered.map((r) => {
               const isDecrypted = Boolean(decryptedRecords[r.id]);
               const decData = decryptedRecords[r.id];
               const isDenied = Boolean(deniedAttempts[r.id]);
@@ -201,7 +203,14 @@ export default function RecordVault() {
                   )}
                 </div>
               );
-            })}
+            })
+            ) : (
+              <TableEmptyBlock
+                icon={FileText}
+                title="No Accessible Records Located"
+                subtitle="No records match your active search query or assigned tenant clearance scope."
+              />
+            )}
           </div>
         </div>
 

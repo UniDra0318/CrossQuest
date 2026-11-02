@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TableEmptyRow } from './TableEmptyState';
 import { 
   Key, 
   Lock, 
@@ -209,7 +210,8 @@ export default function SecurityDashboard({
                 </tr>
               </thead>
               <tbody>
-                {filteredRecords.map((record) => {
+                {filteredRecords && filteredRecords.length > 0 ? (
+                  filteredRecords.map((record) => {
                   const authorized = canStaffDecrypt(record);
                   return (
                     <tr key={record.id} className="record-row">
@@ -244,7 +246,15 @@ export default function SecurityDashboard({
                       </td>
                     </tr>
                   );
-                })}
+                })
+                ) : (
+                  <TableEmptyRow
+                    colSpan={5}
+                    icon={Lock}
+                    title="No Cryptographic Records Found"
+                    subtitle="No attestation records currently match your search criteria or tenant scope."
+                  />
+                )}
               </tbody>
             </table>
           </div>

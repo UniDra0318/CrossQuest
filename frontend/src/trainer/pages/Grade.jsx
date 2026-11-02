@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TableEmptyRow } from '../../components/TableEmptyState';
 import { useTrainer } from '../TrainerContext';
 
 export default function Grade() {
@@ -471,11 +472,12 @@ export default function Grade() {
                     );
                   })
                 ) : (
-                  <tr>
-                    <td colSpan="6" style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
-                      No trainee records enrolled for this session.
-                    </td>
-                  </tr>
+                  <TableEmptyRow
+                    colSpan={6}
+                    icon={Users}
+                    title="No Trainees Enrolled"
+                    subtitle="No participant records are enrolled for this training session."
+                  />
                 )}
               </tbody>
             </table>

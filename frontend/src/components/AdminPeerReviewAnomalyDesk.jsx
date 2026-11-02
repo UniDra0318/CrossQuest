@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { TableEmptyRow } from './TableEmptyState';
 import { 
   ShieldAlert, 
   AlertTriangle, 
@@ -836,11 +837,12 @@ export default function AdminPeerReviewAnomalyDesk() {
                     );
                   })
                 ) : (
-                  <tr>
-                    <td colSpan={7} style={{ padding: '36px', textAlign: 'center', color: '#94a3b8' }}>
-                      No audit log records found.
-                    </td>
-                  </tr>
+                  <TableEmptyRow
+                    colSpan={7}
+                    icon={History}
+                    title="No Security Audit Trail Records"
+                    subtitle="No cryptographic events match the selected event type filter or search parameters."
+                  />
                 )}
               </tbody>
             </table>
@@ -878,7 +880,8 @@ export default function AdminPeerReviewAnomalyDesk() {
                 </tr>
               </thead>
               <tbody>
-                {rules.map((rule) => (
+                {rules && rules.length > 0 ? (
+                  rules.map((rule) => (
                   <tr key={rule.rule_code} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '14px 20px', fontWeight: 800, color: '#1e293b' }}>
                       {rule.rule_code}
@@ -927,7 +930,15 @@ export default function AdminPeerReviewAnomalyDesk() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                ))
+                ) : (
+                  <TableEmptyRow
+                    colSpan={6}
+                    icon={Sliders}
+                    title="No Detection Parameter Rules Configured"
+                    subtitle="Default baseline thresholds are currently being applied. No custom client-reviewed rules active."
+                  />
+                )}
               </tbody>
             </table>
           </div>
