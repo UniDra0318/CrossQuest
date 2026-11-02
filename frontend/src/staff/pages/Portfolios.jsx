@@ -3,20 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, Lock, ArrowRight, ShieldCheck, Users, FileText } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStaff } from '../StaffContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function Portfolios() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { portfolios, me } = useStaff();
+  const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
+  const isDark = effectiveTheme === 'dark';
 
   const assignedScopes = currentUser?.assigned_client_accounts || currentUser?.assigned_companies || me?.scopes || ['CORP_ALPHA', 'BANK_DELTA'];
 
   return (
     <div>
-      <div className="adm-panel__head" style={{ background: '#fff', borderRadius: '24px', padding: '24px 28px', border: '1px solid var(--cq-line)' }}>
+      <div 
+        className="adm-panel__head" 
+        style={{ 
+          background: isDark ? '#111827' : '#fff', 
+          borderRadius: '24px', 
+          padding: '24px 28px', 
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+          boxShadow: isDark ? '0 4px 18px rgba(0,0,0,0.3)' : '0 4px 18px rgba(0,0,0,0.03)'
+        }}
+      >
         <div>
-          <h2>Assigned Enterprise Portfolios</h2>
-          <span className="adm-mono">Multi-tenant client accounts and authorized training agreements</span>
+          <h2 style={{ color: isDark ? '#f8fafc' : '#0f172a' }}>Assigned Enterprise Portfolios</h2>
+          <span className="adm-mono" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Multi-tenant client accounts and authorized training agreements</span>
         </div>
         <span className="adm-pill adm-pill--blue">
           AUTHORIZED SCOPES: {assignedScopes.join(', ')}
@@ -88,7 +100,13 @@ export default function Portfolios() {
                   <button
                     type="button"
                     className="adm-btn adm-btn--light stf-cta"
-                    style={{ flex: 1, margin: 0, background: '#f8fafc', border: '1px solid #cbd5e1' }}
+                    style={{ 
+                      flex: 1, 
+                      margin: 0, 
+                      background: isDark ? '#1e293b' : '#f8fafc', 
+                      border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                      color: isDark ? '#f8fafc' : '#334155'
+                    }}
                     onClick={() => navigate(`/staff/reports?scope=${p.scope}`)}
                   >
                     <FileText size={14} />

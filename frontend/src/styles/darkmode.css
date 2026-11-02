@@ -1168,3 +1168,159 @@ html.dark .adm-level i.on,
 [data-theme="dark"] .adm-level i.on {
   background: linear-gradient(180deg, #a78bfa, #7c3aed) !important;
 }
+
+/* ==========================================================================
+   Crossworks Staff Portal Dark Mode (.stf-*)
+   ========================================================================== */
+
+/* Search & Filter Bar (Record Vault & Portfolios) */
+html.dark .stf-bar,
+[data-theme="dark"] .stf-bar {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .stf-search,
+[data-theme="dark"] .stf-search {
+  background: #0f172a !important;
+  border-color: #1f2937 !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .stf-search input,
+[data-theme="dark"] .stf-search input {
+  color: #f8fafc !important;
+}
+
+html.dark .stf-pills button,
+[data-theme="dark"] .stf-pills button {
+  background: #1e293b !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #334155 !important;
+}
+
+html.dark .stf-pills button.on,
+[data-theme="dark"] .stf-pills button.on {
+  background: #6a2bd9 !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+  box-shadow: 0 3px 0 #4c1d95 !important;
+}
+
+/* Portfolio Cards */
+html.dark .stf-card,
+[data-theme="dark"] .stf-card {
+  background: #111827 !important;
+  border: 1px dashed #374151 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .stf-card--mine,
+[data-theme="dark"] .stf-card--mine {
+  background: #131b2e !important;
+  border: 2px solid #7c3aed !important;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .stf-card h2,
+[data-theme="dark"] .stf-card h2 {
+  color: #f8fafc !important;
+}
+
+html.dark .stf-stats > div,
+[data-theme="dark"] .stf-stats > div {
+  border-bottom-color: #1f2937 !important;
+}
+
+html.dark .stf-stats dt,
+[data-theme="dark"] .stf-stats dt {
+  color: #94a3b8 !important;
+}
+
+html.dark .stf-stats dd,
+[data-theme="dark"] .stf-stats dd {
+  color: #f8fafc !important;
+}
+
+html.dark .stf-mono,
+[data-theme="dark"] .stf-mono {
+  color: #c4b5fd !important;
+}
+
+html.dark .stf-cta--locked,
+[data-theme="dark"] .stf-cta--locked {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-color: #374151 !important;
+  color: #94a3b8 !important;
+}
+
+/* Staff Reports KPI Tiles */
+html.dark .stf-stat,
+[data-theme="dark"] .stf-stat {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .stf-stat__num,
+[data-theme="dark"] .stf-stat__num {
+  color: #f8fafc !important;
+}
+
+html.dark .stf-stat p,
+[data-theme="dark"] .stf-stat p {
+  color: #94a3b8 !important;
+}
+
+html.dark .stf-select,
+[data-theme="dark"] .stf-select {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 0 #0f172a !important;
+}
+
+html.dark .stf-select select,
+[data-theme="dark"] .stf-select select {
+  color: #f8fafc !important;
+}
+
+/* Vault Row Locked & States */
+html.dark .stf-locked,
+[data-theme="dark"] .stf-locked {
+  background: repeating-linear-gradient(135deg, #111827, #111827 12px, #0f172a 12px, #0f172a 24px) !important;
+}
+
+html.dark .stf-attempt,
+[data-theme="dark"] .stf-attempt {
+  background: #1e131d !important;
+  border-color: #e11d48 !important;
+  color: #fda4af !important;
+}
+
+html.dark .stf-attempt:hover,
+[data-theme="dark"] .stf-attempt:hover {
+  background: #2e1220 !important;
+}
+
+html.dark .stf-result--ok,
+[data-theme="dark"] .stf-result--ok {
+  background: rgba(6, 78, 59, 0.25) !important;
+  border-color: #059669 !important;
+  color: #6ee7b7 !important;
+}
+
+html.dark .stf-result--bad,
+[data-theme="dark"] .stf-result--bad {
+  background: rgba(159, 18, 57, 0.25) !important;
+  border-color: #e11d48 !important;
+  color: #fda4af !important;
+}
+
+html.dark .stf-note,
+[data-theme="dark"] .stf-note {
+  background: #1a150b !important;
+  border-top-color: #78350f !important;
+  color: #fde68a !important;
+}

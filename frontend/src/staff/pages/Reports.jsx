@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStaff } from '../StaffContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { 
   fetchAssignedClientCompanies, 
   fetchClientReport, 
@@ -187,6 +188,9 @@ export default function Reports() {
   }, [report, searchTerm]);
 
   // Determine if currently selected company is assigned
+  const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
+  const isDark = effectiveTheme === 'dark';
+
   const currentCompanyMeta = companiesList.find(c => c.code === selectedScope);
   const isAssigned = currentCompanyMeta ? currentCompanyMeta.is_assigned : selectedScope === 'CORP_ALPHA' || selectedScope === 'BANK_DELTA';
 
@@ -196,11 +200,11 @@ export default function Reports() {
       <div 
         className="adm-panel" 
         style={{ 
-          background: '#ffffff', 
+          background: isDark ? '#111827' : '#ffffff', 
           borderRadius: '20px', 
           padding: '18px 24px', 
-          border: '1px solid var(--cq-line)',
-          boxShadow: '0 4px 18px rgba(0,0,0,0.03)'
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+          boxShadow: isDark ? '0 4px 18px rgba(0,0,0,0.3)' : '0 4px 18px rgba(0,0,0,0.03)'
         }}
       >
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
@@ -208,7 +212,7 @@ export default function Reports() {
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Building2 size={16} color="var(--cq-brand-primary)" />
-              <label htmlFor="scope-select" style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', letterSpacing: '0.04em' }}>
+              <label htmlFor="scope-select" style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b', letterSpacing: '0.04em' }}>
                 CLIENT PORTFOLIO:
               </label>
               <select
@@ -218,11 +222,11 @@ export default function Reports() {
                 style={{
                   padding: '8px 14px',
                   borderRadius: '10px',
-                  border: '1.5px solid #cbd5e1',
-                  background: '#f8fafc',
+                  border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                  background: isDark ? '#1e293b' : '#f8fafc',
                   fontWeight: 600,
                   fontSize: '13.5px',
-                  color: '#1e293b',
+                  color: isDark ? '#f8fafc' : '#1e293b',
                   cursor: 'pointer',
                   outline: 'none'
                 }}
@@ -246,7 +250,7 @@ export default function Reports() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label htmlFor="status-filter" style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+              <label htmlFor="status-filter" style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>
                 STATUS:
               </label>
               <select
@@ -256,11 +260,11 @@ export default function Reports() {
                 style={{
                   padding: '8px 12px',
                   borderRadius: '10px',
-                  border: '1.5px solid #cbd5e1',
-                  background: '#f8fafc',
+                  border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                  background: isDark ? '#1e293b' : '#f8fafc',
                   fontWeight: 600,
                   fontSize: '13px',
-                  color: '#334155',
+                  color: isDark ? '#f8fafc' : '#334155',
                   cursor: 'pointer',
                   outline: 'none'
                 }}
@@ -282,9 +286,9 @@ export default function Reports() {
                 gap: '6px',
                 padding: '8px 12px',
                 borderRadius: '10px',
-                background: '#f1f5f9',
-                border: '1px solid #e2e8f0',
-                color: '#475569',
+                background: isDark ? '#1e293b' : '#f1f5f9',
+                border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                color: isDark ? '#cbd5e1' : '#475569',
                 fontSize: '13px',
                 fontWeight: 600,
                 cursor: 'pointer'
@@ -423,7 +427,7 @@ export default function Reports() {
             {/* Tile 1: Total Learners */}
             <div className="stf-stat">
               <span className="adm-label">TOTAL ENROLLED LEARNERS</span>
-              <div className="stf-stat__num">{report.summary?.total_records ?? 0}</div>
+              <div className="stf-stat__num" style={{ color: isDark ? '#f8fafc' : '#0f172a' }}>{report.summary?.total_records ?? 0}</div>
               <div className="adm-avatars">
                 <span style={{ background: '#ff7a1a' }} />
                 <span style={{ background: '#6a2bd9' }} />
@@ -435,7 +439,7 @@ export default function Reports() {
             {/* Tile 2: Program Completion Rate */}
             <div className="stf-stat">
               <span className="adm-label">PROGRAM COMPLETION RATE</span>
-              <div className="stf-stat__num" style={{ color: '#08613f' }}>
+              <div className="stf-stat__num" style={{ color: isDark ? '#34d399' : '#08613f' }}>
                 {report.summary?.compliance_rate || `${Math.round(((report.summary?.completed_trainings || 0) / Math.max(1, report.summary?.total_records || 1)) * 100)}%`}
               </div>
               <div className="adm-progress adm-progress--green">
@@ -451,7 +455,7 @@ export default function Reports() {
             {/* Tile 3: Average Cohort Evaluation Score */}
             <div className="stf-stat">
               <span className="adm-label">AVERAGE COHORT EVALUATION</span>
-              <div className="stf-stat__num" style={{ color: '#4b1ca3' }}>
+              <div className="stf-stat__num" style={{ color: isDark ? '#c084fc' : '#4b1ca3' }}>
                 {report.summary?.average_score != null ? `${report.summary.average_score}%` : 'N/A'}
               </div>
               <div className="adm-progress adm-progress--purple">
@@ -462,11 +466,11 @@ export default function Reports() {
           </div>
 
           {/* 5. VERIFIED PARTICIPANT BREAKDOWN TABLE */}
-          <div className="adm-panel" style={{ background: '#ffffff', borderRadius: '24px', border: '1px solid var(--cq-line)', overflow: 'hidden' }}>
-            <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: '1px solid var(--cq-line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+          <div className="adm-panel" style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '24px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', overflow: 'hidden' }}>
+            <div className="adm-panel__head" style={{ padding: '20px 24px', borderBottom: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>Verified Trainee Completion Breakdown</h3>
-                <span className="adm-mono" style={{ fontSize: '12px', color: '#64748b' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>Verified Trainee Completion Breakdown</h3>
+                <span className="adm-mono" style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
                   Audited roster for {report.header?.client_name} ({report.header?.client_code})
                 </span>
               </div>
@@ -474,7 +478,7 @@ export default function Reports() {
               {/* Table search filter */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ position: 'relative', minWidth: '240px' }}>
-                  <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: isDark ? '#94a3b8' : '#64748b' }} />
                   <input
                     type="text"
                     placeholder="Search participant or module..."
@@ -484,10 +488,11 @@ export default function Reports() {
                       width: '100%',
                       padding: '7px 12px 7px 32px',
                       borderRadius: '10px',
-                      border: '1px solid #cbd5e1',
+                      border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
                       fontSize: '12.5px',
                       outline: 'none',
-                      background: '#f8fafc'
+                      background: isDark ? '#1e293b' : '#f8fafc',
+                      color: isDark ? '#f8fafc' : '#0f172a'
                     }}
                   />
                 </div>
@@ -500,7 +505,7 @@ export default function Reports() {
             <div className="adm-scroll">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13.5px' }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <tr style={{ background: isDark ? '#0f172a' : '#f8fafc', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', color: isDark ? '#94a3b8' : '#475569', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     <th style={{ padding: '14px 24px' }}>Trainee Participant</th>
                     <th style={{ padding: '14px 20px' }}>Course Program</th>
                     <th style={{ padding: '14px 20px' }}>Completion Status</th>
@@ -516,9 +521,11 @@ export default function Reports() {
                         <tr 
                           key={t.record_id || idx}
                           style={{ 
-                            borderBottom: '1px solid #f1f5f9',
+                            borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9',
                             transition: 'background 0.15s ease',
-                            background: idx % 2 === 0 ? '#ffffff' : '#fafafa'
+                            background: isDark 
+                              ? (idx % 2 === 0 ? '#111827' : '#141d30') 
+                              : (idx % 2 === 0 ? '#ffffff' : '#fafafa')
                           }}
                         >
                           {/* Participant */}
@@ -529,7 +536,7 @@ export default function Reports() {
                                   width: '36px', 
                                   height: '36px', 
                                   borderRadius: '50%', 
-                                  background: isCompleted ? 'linear-gradient(135deg, #ff7a1a 0%, #e05e00 100%)' : '#94a3b8',
+                                  background: isCompleted ? 'linear-gradient(135deg, #ff7a1a 0%, #e05e00 100%)' : (isDark ? '#334155' : '#94a3b8'),
                                   color: '#ffffff',
                                   display: 'flex',
                                   alignItems: 'center',
@@ -541,8 +548,8 @@ export default function Reports() {
                                 {t.trainee_name ? t.trainee_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'TR'}
                               </div>
                               <div>
-                                <div style={{ fontWeight: 700, color: '#1e293b' }}>{t.trainee_name}</div>
-                                <div style={{ fontSize: '11.5px', color: '#64748b', fontFamily: 'monospace' }}>
+                                <div style={{ fontWeight: 700, color: isDark ? '#f8fafc' : '#1e293b' }}>{t.trainee_name}</div>
+                                <div style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b', fontFamily: 'monospace' }}>
                                   ID: {t.trainee_code || t.record_id}
                                 </div>
                               </div>
@@ -550,7 +557,7 @@ export default function Reports() {
                           </td>
 
                           {/* Course Program */}
-                          <td style={{ padding: '14px 20px', fontWeight: 600, color: '#334155' }}>
+                          <td style={{ padding: '14px 20px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#334155' }}>
                             {t.course_name}
                           </td>
 
@@ -565,9 +572,15 @@ export default function Reports() {
                                 borderRadius: '20px',
                                 fontSize: '11.5px',
                                 fontWeight: 700,
-                                background: isCompleted ? '#ecfdf5' : '#fffbeb',
-                                color: isCompleted ? '#047857' : '#b45309',
-                                border: `1px solid ${isCompleted ? '#a7f3d0' : '#fde68a'}`
+                                background: isCompleted 
+                                  ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') 
+                                  : (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb'),
+                                color: isCompleted 
+                                  ? (isDark ? '#34d399' : '#047857') 
+                                  : (isDark ? '#fbbf24' : '#b45309'),
+                                border: isDark 
+                                  ? (isCompleted ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid rgba(217, 119, 6, 0.35)') 
+                                  : `1px solid ${isCompleted ? '#a7f3d0' : '#fde68a'}`
                               }}
                             >
                               {isCompleted ? <CheckCircle2 size={12} /> : <Clock size={12} />}
@@ -578,7 +591,7 @@ export default function Reports() {
                           {/* Accuracy Score */}
                           <td style={{ padding: '14px 20px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <div style={{ width: '80px', height: '6px', borderRadius: '4px', background: '#e2e8f0', overflow: 'hidden' }}>
+                              <div style={{ width: '80px', height: '6px', borderRadius: '4px', background: isDark ? '#1e293b' : '#e2e8f0', overflow: 'hidden' }}>
                                 <div 
                                   style={{ 
                                     height: '100%', 
@@ -588,14 +601,14 @@ export default function Reports() {
                                   }} 
                                 />
                               </div>
-                              <span style={{ fontWeight: 700, fontSize: '13px', color: '#1e293b' }}>
+                              <span style={{ fontWeight: 700, fontSize: '13px', color: isDark ? '#f8fafc' : '#1e293b' }}>
                                 {t.score != null ? `${t.score}%` : 'N/A'}
                               </span>
                             </div>
                           </td>
 
                           {/* Date */}
-                          <td style={{ padding: '14px 24px', textAlign: 'right', fontSize: '12.5px', color: '#64748b', fontFamily: 'monospace' }}>
+                          <td style={{ padding: '14px 24px', textAlign: 'right', fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', fontFamily: 'monospace' }}>
                             {t.training_date}
                           </td>
                         </tr>
@@ -614,7 +627,7 @@ export default function Reports() {
             </div>
 
             {/* Panel Footer */}
-            <div style={{ padding: '14px 24px', background: '#f8fafc', borderTop: '1px solid var(--cq-line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: '#64748b' }}>
+            <div style={{ padding: '14px 24px', background: isDark ? '#0f172a' : '#f8fafc', borderTop: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
               <span>Official Account Manager Report (FR-20, DAT-06, OI-04)</span>
               <span>ReportLab High-Fidelity PDF Engine Active</span>
             </div>
