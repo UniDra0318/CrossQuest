@@ -409,15 +409,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         <div className="adm-crumbs">
           CROSSQUEST ENTERPRISE / <strong>ADMIN SECURITY CONSOLE</strong>
         </div>
-        <div className="adm-chip-user">
-          <div className="adm-chip-user__av">
-            {adminProfile.initials || 'SJ'}
-          </div>
-          <div>
-            <strong>{currentUser?.name || adminProfile.name}</strong>
-            <small>{adminProfile.role}</small>
-          </div>
-        </div>
       </div>
       {/* 2. 3D HERO BANNER WITH VIEW NAVIGATION TABS */}
       <div className="adm-hero">
