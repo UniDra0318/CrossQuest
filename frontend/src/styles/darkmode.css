@@ -713,3 +713,323 @@ html.dark .streak-pill .stat-flame-icon,
   color: #f97316 !important;
   filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.6)) !important;
 }
+
+/* ==========================================================================
+   11. ADMIN SECURITY CONSOLE & EXECUTIVE DASHBOARD (DARK MODE)
+   ========================================================================== */
+html.dark .adm,
+html.dark .adm-main,
+[data-theme="dark"] .adm,
+[data-theme="dark"] .adm-main {
+  background-color: #090d16 !important;
+  color: #f8fafc !important;
+}
+
+/* KPI Tiles & Stat Cards */
+html.dark .adm-tile,
+html.dark .adm-kpi,
+[data-theme="dark"] .adm-tile,
+[data-theme="dark"] .adm-kpi {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .adm-tile:hover,
+html.dark .adm-kpi:hover,
+[data-theme="dark"] .adm-tile:hover,
+[data-theme="dark"] .adm-kpi:hover {
+  border-color: #374151 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .adm-kpi__num,
+html.dark .adm-tile__num,
+[data-theme="dark"] .adm-kpi__num,
+[data-theme="dark"] .adm-tile__num {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-kpi__note,
+html.dark .adm-label,
+html.dark .adm-crumbs,
+[data-theme="dark"] .adm-kpi__note,
+[data-theme="dark"] .adm-label,
+[data-theme="dark"] .adm-crumbs {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-crumbs strong,
+[data-theme="dark"] .adm-crumbs strong {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-progress,
+[data-theme="dark"] .adm-progress {
+  background-color: #1e293b !important;
+}
+
+/* Panels & Split Sections */
+html.dark .adm-panel,
+[data-theme="dark"] .adm-panel {
+  background-color: #111827 !important;
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .adm-panel__head,
+[data-theme="dark"] .adm-panel__head {
+  border-bottom: 1px solid #1f2937 !important;
+}
+
+html.dark .adm-panel__head h2,
+[data-theme="dark"] .adm-panel__head h2 {
+  color: #f8fafc !important;
+}
+
+/* Anomaly Alert Cards */
+html.dark .adm-alert,
+[data-theme="dark"] .adm-alert {
+  background: #161f33 !important;
+  border-color: #1f2937 !important;
+}
+
+html.dark .adm-alert--red,
+[data-theme="dark"] .adm-alert--red {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  border-left-color: #ef4444 !important;
+}
+
+html.dark .adm-alert--amber,
+[data-theme="dark"] .adm-alert--amber {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  border-left-color: #f59e0b !important;
+}
+
+html.dark .adm-alert--purple,
+[data-theme="dark"] .adm-alert--purple {
+  background: rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  border-left-color: #8b5cf6 !important;
+}
+
+html.dark .adm-alert--done,
+[data-theme="dark"] .adm-alert--done {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  border-left-color: #64748b !important;
+}
+
+html.dark .adm-alert__head strong,
+[data-theme="dark"] .adm-alert__head strong {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-alert p,
+[data-theme="dark"] .adm-alert p {
+  color: #cbd5e1 !important;
+}
+
+html.dark .adm-alert__meta .adm-mono,
+html.dark .adm-mono,
+[data-theme="dark"] .adm-alert__meta .adm-mono,
+[data-theme="dark"] .adm-mono {
+  color: #94a3b8 !important;
+}
+
+/* 3D Security Architecture & Spec DL */
+html.dark .adm-stack3d,
+[data-theme="dark"] .adm-stack3d {
+  background: #0f172a !important;
+  border: 1px solid #1f2937 !important;
+}
+
+html.dark .adm-legend strong,
+[data-theme="dark"] .adm-legend strong {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-legend span span,
+html.dark .adm-legend li > span,
+[data-theme="dark"] .adm-legend span span,
+[data-theme="dark"] .adm-legend li > span {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-dl > div,
+[data-theme="dark"] .adm-dl > div {
+  border-bottom: 1px solid #1f2937 !important;
+}
+
+html.dark .adm-dl dt,
+[data-theme="dark"] .adm-dl dt {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-dl dd,
+[data-theme="dark"] .adm-dl dd {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-key code,
+[data-theme="dark"] .adm-key code {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .adm-iconbtn,
+[data-theme="dark"] .adm-iconbtn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Top user chip & Search inputs */
+html.dark .adm-chip-user,
+[data-theme="dark"] .adm-chip-user {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+html.dark .adm-chip-user strong,
+[data-theme="dark"] .adm-chip-user strong {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-chip-user small,
+[data-theme="dark"] .adm-chip-user small {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-search,
+[data-theme="dark"] .adm-search {
+  background: #111827 !important;
+  border: 1px solid #1f2937 !important;
+}
+
+html.dark .adm-search input,
+[data-theme="dark"] .adm-search input {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-btn--light,
+[data-theme="dark"] .adm-btn--light {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 3px 0 #0f172a !important;
+}
+
+/* Data Tables (Staff & Records Vault) */
+html.dark .adm-scroll,
+[data-theme="dark"] .adm-scroll {
+  border-color: #1f2937 !important;
+}
+
+html.dark .adm-th,
+[data-theme="dark"] .adm-th {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-row,
+[data-theme="dark"] .adm-row {
+  border-top-color: #1f2937 !important;
+  background: transparent !important;
+}
+
+html.dark .adm-person strong,
+[data-theme="dark"] .adm-person strong {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-person .adm-mono,
+[data-theme="dark"] .adm-person .adm-mono {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-course,
+[data-theme="dark"] .adm-course {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-policy,
+[data-theme="dark"] .adm-policy {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #93c5fd !important;
+}
+
+html.dark .adm-edit,
+[data-theme="dark"] .adm-edit {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .adm-edit select,
+[data-theme="dark"] .adm-edit select {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .adm-timeline::before,
+[data-theme="dark"] .adm-timeline::before {
+  background: #1f2937 !important;
+}
+
+/* System Settings Tab */
+html.dark .adm-card,
+[data-theme="dark"] .adm-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .adm-ptitle h2,
+[data-theme="dark"] .adm-ptitle h2 {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-ptitle p,
+[data-theme="dark"] .adm-ptitle p {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-field,
+[data-theme="dark"] .adm-field {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .adm-field__val,
+[data-theme="dark"] .adm-field__val {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-thr__val b,
+[data-theme="dark"] .adm-thr__val b {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-thr__val span,
+[data-theme="dark"] .adm-thr__val span {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-window,
+[data-theme="dark"] .adm-window {
+  background: #334155 !important;
+}
+
+html.dark .adm-ticks span,
+[data-theme="dark"] .adm-ticks span {
+  color: #94a3b8 !important;
+}

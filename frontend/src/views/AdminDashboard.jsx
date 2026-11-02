@@ -394,7 +394,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     r.id.toLowerCase().includes(recordSearch.toLowerCase())
   );
   return (
-    <div className="adm-main">
+    <div className="adm-main admin-dashboard">
       {usingFallback && (
         <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', color: '#92400e', padding: '10px 16px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <AlertTriangle size={16} color="#d97706" />
