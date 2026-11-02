@@ -672,19 +672,19 @@ Every access event processed by CrossQuest is evaluated against **Chapter III Ta
 
 ---
 
-## 7. Verification & Automated Test Suite (149 Tests across 15 Modules)
+## 7. Verification & Automated Test Suite (151 Tests across 15 Modules)
 
 The comprehensive automated pytest suite guarantees 100% verification across all Chapter III requirements, Table 28 test cases, and Phases 0–6:
 
 | Test Group | Test File | Test Count | Scope & Verification Objective | Status |
 |---|---|---|---|---|
-| **`TC-AUT-01..13`** | [`backend/tests/test_account_lifecycle.py`](file:///d:/Projects/CrossQuest/backend/tests/test_account_lifecycle.py) | 13 | TOTP MFA enrollment & validation (`SEC-01`), role session timeouts (15/30/60m `SEC-07`), token lifetimes (10m access, 8h refresh, 12h max), refresh rotation, CSRF header checks (`SEC-28`), keyed-HMAC username redaction. | **13/13 PASSED** |
+| **`TC-AUT-01..14`** | [`backend/tests/test_account_lifecycle.py`](file:///d:/Projects/CrossQuest/backend/tests/test_account_lifecycle.py) | 14 | TOTP MFA enrollment & validation (`SEC-01`), role session timeouts (15/30/60m `SEC-07`), token lifetimes (10m access, 8h refresh, 12h max), refresh rotation, CSRF header checks (`SEC-28`), keyed-HMAC username redaction, real-time database system overview metrics. | **14/14 PASSED** |
 | **`TC-ANO-01..27`** | [`backend/tests/test_anomaly_detection.py`](file:///d:/Projects/CrossQuest/backend/tests/test_anomaly_detection.py) | 27 | Rules R1-R4, Rule R2-b dual-threshold, S1 off-hours escalation, alert peer review (`AWAITING_UNINVOLVED_ADMIN` `OI-30`), 12-month retention purge (`OI-20`), audited threshold tuning (`OI-08`), detection quality measurement (270 trials, p95 = 40.43ms). | **27/27 PASSED** |
 | **`TC-ATT-01..20`** | [`backend/tests/test_attribute_versioning.py`](file:///d:/Projects/CrossQuest/backend/tests/test_attribute_versioning.py) | 20 | Attribute token versioning, KMS envelope encryption (10,368-byte BSW07 key wrapping `TC-CRY-12`), Tier-2 revocation batching job (`OI-16`), crypto-shredding key zeroization. | **20/20 PASSED** |
 | **`TC-CRT-01..07`** | [`backend/tests/test_cert_scheduler.py`](file:///d:/Projects/CrossQuest/backend/tests/test_cert_scheduler.py) | 7 | Dynamic certification status calculation, daily 06:00 PHT sweep, threshold offsets (90d, 60d, 30d, 0d), dual-recipient notifications. | **7/7 PASSED** |
 | **`TC-LAB-01..02`** | [`backend/tests/test_crypto_lab.py`](file:///d:/Projects/CrossQuest/backend/tests/test_crypto_lab.py) | 2 | Capstone defense persona retrieval, multi-tenant policy encryption/decryption, unauthorized isolation, and ciphertext bit-flip tamper rejection. | **2/2 PASSED** |
 | **`TC-CRY-01..11`** | [`backend/tests/test_crypto_primitives.py`](file:///d:/Projects/CrossQuest/backend/tests/test_crypto_primitives.py) | 11 | `SS512` pairing curve feasibility (`TC-CRY-01`), Charm BSW07 CP-ABE, AES-256-GCM cipher suite, AAD record binding, fail-closed production check (`SEC-04`). | **11/11 PASSED** |
-| **`TC-GAM/PWA-01..12`** | [`backend/tests/test_gamification_pwa.py`](file:///d:/Projects/CrossQuest/backend/tests/test_gamification_pwa.py) | 12 | Disabled offline quizzes (`SEC-26`), isolated answer keys (`quiz_answer_keys`), server-side scoring, single scored attempt per quiz version, withheld question correctness, class/company leaderboards with opt-out (`OI-03`), resilient real-time streak sync. | **12/12 PASSED** |
+| **`TC-GAM/PWA-01..13`** | [`backend/tests/test_gamification_pwa.py`](file:///d:/Projects/CrossQuest/backend/tests/test_gamification_pwa.py) | 13 | Disabled offline quizzes (`SEC-26`), isolated answer keys (`quiz_answer_keys`), server-side scoring, single scored attempt per quiz version, withheld question correctness, class/company leaderboards with opt-out (`OI-03`), resilient real-time streak sync, database quiz catalog and authoring CRUD. | **13/13 PASSED** |
 | **`TC-PER-01`** | [`backend/tests/test_performance_concurrency.py`](file:///d:/Projects/CrossQuest/backend/tests/test_performance_concurrency.py) | 1 | Monotonic nanosecond timer benchmarking (`perf_counter_ns`), sub-200ms API response latency under concurrent query load. | **1/1 PASSED** |
 | **`TC-DAT-01..11`** | [`backend/tests/test_pilot_import.py`](file:///d:/Projects/CrossQuest/backend/tests/test_pilot_import.py) | 11 | Pilot Excel upload (`openpyxl`), SHA-256 deduplication, field allow-listing, August 1 2026 cutoff, in-memory pseudonymization, duplicate quarantine, discrepancy resolution with reason, Finance reconciliation PDF (149 rows, 39 clients). | **11/11 PASSED** |
 | **`TC-RPT-01..07`** | [`backend/tests/test_reports.py`](file:///d:/Projects/CrossQuest/backend/tests/test_reports.py) | 7 | Client report generation restricted strictly to assigned Account Managers (`OI-04`), cross-client authorization boundaries, report burst anomaly checks, status/date filtering, ReportLab PDF download. | **7/7 PASSED** |
@@ -693,7 +693,7 @@ The comprehensive automated pytest suite guarantees 100% verification across all
 | **`TC-SEC-01`** | [`backend/tests/test_security_headers_zap.py`](file:///d:/Projects/CrossQuest/backend/tests/test_security_headers_zap.py) | 1 | OWASP ZAP security headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Content-Security-Policy`. | **1/1 PASSED** |
 | **`TC-THE-01..08`** | [`backend/tests/test_thesis_compliance.py`](file:///d:/Projects/CrossQuest/backend/tests/test_thesis_compliance.py) | 8 | Chapter III architectural compliance verification and metric invariants. | **8/8 PASSED** |
 | **`TC-TRN-01..09`** | [`backend/tests/test_training_workflow.py`](file:///d:/Projects/CrossQuest/backend/tests/test_training_workflow.py) | 9 | Trainer session sign-off workflow (`OI-04`), four completion statuses, ReportLab PDF certificates (`AAAYYYYMMDD-01`), Admin certificate reissue with logged reason, trainee HTTPS credential renewals, future date rejection, assigned session queries. | **9/9 PASSED** |
-| **TOTAL** | **15 Test Modules** | **149** | **Full System Defense-in-Depth Verification** | **149/149 PASSED (100%)** |
+| **TOTAL** | **15 Test Modules** | **151** | **Full System Defense-in-Depth Verification** | **151/151 PASSED (100%)** |
 
 ---
 

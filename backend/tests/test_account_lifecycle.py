@@ -577,3 +577,25 @@ def test_email_delivery_lifecycle_setup_24h_and_reset_15m(setup_test_users):
     assert reset_email["from"] == "crossquest@xworks.ph"
     assert "15 minutes" in reset_email["html"]
 
+
+
+def test_system_overview_metrics(setup_test_users):
+    """Verifies real-time calculation of database security metrics for Admin console."""
+    from app.core.security import create_access_token
+    admin = setup_test_users["admin"]
+    admin_token = create_access_token(subject=admin.id)
+
+    resp = client.get(
+        "/api/v1/users/overview",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "users_total" in data
+    assert data["users_total"] >= 1
+    assert "clients_total" in data
+    assert "records_total" in data
+    assert "anomalies_24h" in data
+    assert data["system_status"] in ("NOMINAL", "ATTENTION")
+    assert "role_distribution" in data
+    assert data["role_distribution"].get("admin", 0) >= 1

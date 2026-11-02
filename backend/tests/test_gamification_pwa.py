@@ -609,3 +609,48 @@ def test_tc_oi_03_class_and_company_leaderboards_with_opt_out(client: TestClient
     assert resp_class2.status_code == 200
     class_names2 = [e["display_name"] for e in resp_class2.json()]
     assert trainee1.display_name in class_names2
+
+
+def test_tc_gam_13_quiz_catalog_and_authoring(client: TestClient, gamification_fixture):
+    """Verifies real database quiz catalog retrieval and Trainer/Admin question authoring."""
+    trainer = gamification_fixture["trainer"]
+    user1 = gamification_fixture["user1"]
+
+    trainer_token = create_access_token(subject=trainer.id)
+    trainee_token = create_access_token(subject=user1.id)
+
+    # 1. Trainer creates new quiz in DB
+    create_resp = client.post(
+        "/api/v1/gamification/quizzes",
+        json={"title": "Cloud Threat Modeling Challenge"},
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    assert create_resp.status_code == 200
+    quiz_data = create_resp.json()
+    quiz_id = quiz_data["id"]
+    assert quiz_data["title"] == "Cloud Threat Modeling Challenge"
+
+    # 2. Trainer adds question with isolated answer key
+    q_resp = client.post(
+        f"/api/v1/gamification/quizzes/{quiz_id}/questions",
+        json={
+            "question_text": "What is the primary objective of STRIDE threat modeling?",
+            "options": ["Identify security threats", "Compile source code", "Deploy containers", "Format database"],
+            "correct_option": 0,
+            "points": 15,
+            "explanation": "STRIDE categorizes system threats into Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, and Elevation of privilege."
+        },
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    assert q_resp.status_code == 200
+    q_data = q_resp.json()
+    assert q_data["question_text"].startswith("What is the primary")
+
+    # 3. Trainee lists quizzes from real DB
+    list_resp = client.get(
+        "/api/v1/gamification/quizzes",
+        headers={"Authorization": f"Bearer {trainee_token}"}
+    )
+    assert list_resp.status_code == 200
+    quizzes = list_resp.json()
+    assert any(q["id"] == quiz_id for q in quizzes)

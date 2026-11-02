@@ -161,7 +161,38 @@ def list_training_records(
     if trainee_id:
         query = query.filter(TrainingRecord.trainee_id == trainee_id)
 
-    return query.all()
+    records = query.all()
+    results = []
+    for r in records:
+        t_name = f"{r.trainee.first_name} {r.trainee.last_name}".strip() if r.trainee else "Unknown Trainee"
+        t_email = r.trainee.email if r.trainee else ""
+        t_code = r.trainee.trainee_code if r.trainee else ""
+        c_name = r.company_at_completion.name if r.company_at_completion else "Unknown Organization"
+        c_code = r.company_at_completion.code if r.company_at_completion else "CRO"
+
+        item = TrainingRecordResponse(
+            id=r.id,
+            trainee_id=r.trainee_id,
+            trainee_name=t_name,
+            trainee_email=t_email,
+            trainee_code=t_code,
+            company_name=c_name,
+            company_code=c_code,
+            session_id=r.session_id,
+            company_at_completion_id=r.company_at_completion_id,
+            course_name=r.course_name,
+            status=r.status,
+            score=r.score,
+            completion_date=r.completion_date,
+            encryption_policy=r.encryption_policy,
+            policy_version=r.policy_version,
+            is_encrypted=r.is_encrypted,
+            deleted_at=r.deleted_at,
+            deleted_by=r.deleted_by,
+            created_at=r.created_at
+        )
+        results.append(item)
+    return results
 
 
 @router.post("/{record_id}/decrypt", response_model=DecryptedRecordResponse)
@@ -305,10 +336,18 @@ def decrypt_training_record(
     db.add(log)
     db.commit()
 
+    t_name = f"{record.trainee.first_name} {record.trainee.last_name}".strip() if record.trainee else "Unknown Trainee"
+    t_email = record.trainee.email if record.trainee else ""
+    c_name = company.name if company else "Unknown Organization"
+
     return {
         "record_id": record.id,
         "course_name": record.course_name,
         "status": record.status,
+        "trainee_name": t_name,
+        "trainee_email": t_email,
+        "company_name": c_name,
+        "company_code": company_code,
         "score": record.score,
         "completion_date": record.completion_date,
         "decrypted_content": decrypted_content,

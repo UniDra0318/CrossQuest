@@ -25,7 +25,7 @@ from app.models.entities import (
 from app.schemas.schemas import (
     GamificationResponse, QuizSubmitRequest, LeaderboardOptOutRequest,
     LeaderboardEntry, QuizQuestionTraineeView, QuizSubmissionResult,
-    QuizQuestionReview
+    QuizQuestionReview, QuizListItem, QuizCreate, QuizQuestionCreate
 )
 from app.api.deps import get_current_user
 
@@ -140,6 +140,175 @@ def toggle_leaderboard_opt_out(
         "leaderboard_opt_out": trainee.leaderboard_opt_out,
         "message": "Company leaderboard visibility updated."
     }
+
+
+@router.get("/quizzes", response_model=List[QuizListItem])
+def list_quizzes(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Returns all quizzes from the database with question counts and completion status."""
+    quizzes = db.query(Quiz).order_by(Quiz.created_at.desc()).all()
+
+    trainee = None
+    if current_user.role == "trainee":
+        trainee = db.query(Trainee).filter(
+            (Trainee.user_id == current_user.id) | (Trainee.email == current_user.email)
+        ).first()
+
+    results = []
+    for q in quizzes:
+        q_count = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == q.id).count()
+        completed = False
+        score = None
+        if trainee:
+            att = db.query(QuizAttempt).filter(
+                QuizAttempt.quiz_id == q.id,
+                QuizAttempt.trainee_id == trainee.id,
+                QuizAttempt.is_scored == True
+            ).first()
+            if att:
+                completed = True
+                score = att.score
+
+        course_name = None
+        if q.session:
+            course_name = getattr(q.session, 'course_name', None)
+
+        results.append(QuizListItem(
+            id=q.id,
+            title=q.title,
+            session_id=q.session_id,
+            course_name=course_name,
+            version_no=q.version_no,
+            is_closed=q.is_closed,
+            questions_count=q_count,
+            completed=completed,
+            score=score,
+            created_at=q.created_at or datetime.now(timezone.utc)
+        ))
+    return results
+
+
+@router.post("/quizzes", response_model=QuizListItem)
+def create_quiz(
+    payload: QuizCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trainers and Admins create a new quiz in the database."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers and administrators can create quizzes.")
+
+    quiz = Quiz(
+        title=payload.title,
+        session_id=payload.session_id,
+        created_by_user_id=current_user.id,
+        version_no=1,
+        is_closed=False
+    )
+    db.add(quiz)
+    db.commit()
+    db.refresh(quiz)
+
+    return QuizListItem(
+        id=quiz.id,
+        title=quiz.title,
+        session_id=quiz.session_id,
+        course_name=None,
+        version_no=quiz.version_no,
+        is_closed=quiz.is_closed,
+        questions_count=0,
+        completed=False,
+        score=None,
+        created_at=quiz.created_at or datetime.now(timezone.utc)
+    )
+
+
+@router.post("/quizzes/{quiz_id}/questions", response_model=QuizQuestionTraineeView)
+def add_quiz_question(
+    quiz_id: str,
+    payload: QuizQuestionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trainers and Admins add a question to a quiz, storing answer keys in isolated QuizAnswerKey (SEC-26)."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers and administrators can add questions.")
+
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    question = QuizQuestion(
+        quiz_id=quiz.id,
+        question_text=payload.question_text,
+        options=payload.options,
+        correct_answer=payload.correct_option,
+        explanation=payload.explanation,
+        points=payload.points
+    )
+    db.add(question)
+    db.flush()
+
+    answer_key = QuizAnswerKey(
+        question_id=question.id,
+        correct_answer=payload.correct_option,
+        explanation=payload.explanation
+    )
+    db.add(answer_key)
+    db.commit()
+    db.refresh(question)
+
+    return QuizQuestionTraineeView(
+        id=question.id,
+        quiz_id=question.quiz_id,
+        question_text=question.question_text,
+        options=question.options or [],
+        points=question.points or 10
+    )
+
+
+@router.delete("/quizzes/{quiz_id}/questions/{question_id}")
+def delete_quiz_question(
+    quiz_id: str,
+    question_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Deletes a question and its isolated answer key."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers and administrators can delete questions.")
+
+    question = db.query(QuizQuestion).filter(
+        QuizQuestion.id == question_id,
+        QuizQuestion.quiz_id == quiz_id
+    ).first()
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+
+    db.delete(question)
+    db.commit()
+    return {"status": "success", "message": "Question deleted."}
+
+
+@router.delete("/quizzes/{quiz_id}")
+def delete_quiz(
+    quiz_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Deletes a quiz and all associated questions."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers and administrators can delete quizzes.")
+
+    quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+
+    db.delete(quiz)
+    db.commit()
+    return {"status": "success", "message": "Quiz deleted."}
 
 
 @router.get("/quizzes/{quiz_id}/questions", response_model=List[QuizQuestionTraineeView])

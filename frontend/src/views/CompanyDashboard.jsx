@@ -17,15 +17,14 @@ import {
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useAuth } from '../contexts/AuthContext';
-import { INITIAL_TRAINING_RECORDS } from '../data/mockData';
 import { fetchRecords } from '../services/api';
 
 export default function CompanyDashboard({ activeSubView, setActiveView }) {
   const { currentUser, token } = useAuth();
   const isFinance = currentUser?.role === 'finance';
   const companyCode = currentUser?.company_code || 'CORP_ALPHA';
-  const [records, setRecords] = useState(INITIAL_TRAINING_RECORDS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [records, setRecords] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
   const [recordSearch, setRecordSearch] = useState('');
 
@@ -36,30 +35,32 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
         const dbRecords = await fetchRecords(token);
         if (dbRecords && dbRecords.length > 0) {
           const mapped = dbRecords.map((r, idx) => {
-            const code = r.encryption_policy?.includes('FINTECH_BETA') 
-              ? 'FINTECH_BETA' 
-              : r.encryption_policy?.includes('RETAIL_GAMMA') 
-                ? 'RETAIL_GAMMA' 
-                : r.encryption_policy?.includes('BANK_DELTA')
-                  ? 'BANK_DELTA'
-                  : 'CORP_ALPHA';
+            const code = r.company_code || (
+              r.encryption_policy?.includes('FINTECH_BETA') ? 'FINTECH_BETA' :
+              r.encryption_policy?.includes('RETAIL_GAMMA') ? 'RETAIL_GAMMA' :
+              r.encryption_policy?.includes('BANK_DELTA') ? 'BANK_DELTA' :
+              r.encryption_policy?.includes('TELCO_EPSILON') ? 'TELCO_EPSILON' : 'CORP_ALPHA'
+            );
             return {
               id: r.id,
-              traineeName: r.trainee_name || `Employee ${idx + 1}`,
-              traineeEmail: `employee${idx + 1}@${code.toLowerCase()}.ph`,
+              traineeName: r.trainee_name || `Learner ${idx + 1}`,
+              traineeEmail: r.trainee_email || `employee${idx + 1}@${code.toLowerCase()}.ph`,
               companyCode: code,
+              companyName: r.company_name || code,
               courseName: r.course_name,
               status: r.status || 'completed',
-              score: r.score || 92.0,
-              completionDate: r.created_at ? new Date(r.created_at).toLocaleDateString() : '2026-09-20'
+              score: r.score != null ? r.score : 90.0,
+              completionDate: r.completion_date ? new Date(r.completion_date).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : '2026-09-20')
             };
           });
           setRecords(mapped);
           setUsingFallback(false);
         } else {
-          setUsingFallback(true);
+          setRecords([]);
+          setUsingFallback(false);
         }
       } catch (err) {
+        console.warn("Could not load company records:", err);
         setUsingFallback(true);
       } finally {
         setIsLoading(false);

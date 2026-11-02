@@ -38,7 +38,16 @@ import {
   settings as defaultSettings 
 } from '../data/adminData';
 import { exportAuditLogs } from '../api/admin';
-import { fetchRecords, fetchAnomalies, fetchCompanies, fetchStaffUsers, updateStaffAttributes, createUserApi, createCompanyApi } from '../services/api';
+import { 
+  fetchRecords, 
+  fetchAnomalies, 
+  fetchCompanies, 
+  fetchStaffUsers, 
+  fetchSystemOverview,
+  updateStaffAttributes, 
+  createUserApi, 
+  createCompanyApi 
+} from '../services/api';
 import SpinCube from '../components/SpinCube';
 import BitMascot from '../components/BitMascot/BitMascot';
 import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk';
@@ -46,7 +55,7 @@ import '../styles/admin.css';
 export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token, currentUser } = useAuth();
   const [adminProfile] = useState(defaultAdmin);
-  const [overview] = useState(defaultOverview);
+  const [overview, setOverview] = useState(defaultOverview);
   const [clients] = useState(defaultClients);
   const [staffList, setStaffList] = useState(defaultStaff);
   const [anomalies, setAnomalies] = useState(defaultAnomalies);
@@ -233,12 +242,24 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     async function loadAdminData() {
       if (!token) return;
       try {
-        const [dbRecords, dbAnomalies, dbCompanies, dbStaff] = await Promise.all([
+        const [dbRecords, dbAnomalies, dbCompanies, dbStaff, dbOverview] = await Promise.all([
           fetchRecords(token),
           fetchAnomalies(token),
           fetchCompanies(token),
-          fetchStaffUsers(token)
+          fetchStaffUsers(token),
+          fetchSystemOverview(token)
         ]);
+        if (dbOverview) {
+          setOverview(prev => ({
+            ...prev,
+            usersTotal: dbOverview.users_total,
+            usersActiveNow: dbOverview.users_active_now,
+            clientsTotal: dbOverview.clients_total,
+            policiesEnforced: dbOverview.policies_enforced,
+            anomalies24h: dbOverview.anomalies_24h,
+            systemStatus: dbOverview.system_status
+          }));
+        }
         if (dbCompanies && dbCompanies.length > 0) {
           setCompaniesList(dbCompanies.map(c => {
             const am = (dbStaff || []).find(u => u.role === 'account_manager' && (u.assigned_client_accounts || []).includes(c.code))
@@ -266,17 +287,17 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         }
         if (dbRecords && dbRecords.length > 0) {
           setRecords(dbRecords.map((r, idx) => {
-            const compCode = r.encryption_policy?.includes('FINTECH_BETA') 
-              ? 'FINTECH_BETA' 
-              : r.encryption_policy?.includes('RETAIL_GAMMA') 
-                ? 'RETAIL_GAMMA' 
-                : 'CORP_ALPHA';
-            const compObj = (dbCompanies || []).find(c => c.code === compCode);
+            const compCode = r.company_code || (
+              r.encryption_policy?.includes('FINTECH_BETA') ? 'FINTECH_BETA' :
+              r.encryption_policy?.includes('RETAIL_GAMMA') ? 'RETAIL_GAMMA' :
+              r.encryption_policy?.includes('BANK_DELTA') ? 'BANK_DELTA' :
+              r.encryption_policy?.includes('TELCO_EPSILON') ? 'TELCO_EPSILON' : 'CORP_ALPHA'
+            );
             return {
               id: r.id || `rec-${100 + idx}`,
               trainee: r.trainee_name || `Learner ${idx + 1}`,
-              email: `learner${idx + 1}@${compCode.toLowerCase().replace(/_/g, '-')}.ph`,
-              org: compObj?.name || (compCode === 'CORP_ALPHA' ? 'SAN MIGUEL CONGLOMERATE HOLDINGS' : compCode),
+              email: r.trainee_email || `learner${idx + 1}@${compCode.toLowerCase().replace(/_/g, '-')}.ph`,
+              org: r.company_name || (compCode === 'CORP_ALPHA' ? 'San Miguel Conglomerate Holdings' : compCode),
               course: r.course_name || 'Enterprise Security Training',
               policy: r.encryption_policy || `(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:${compCode})`,
               status: (r.status || 'COMPLETED').toUpperCase()

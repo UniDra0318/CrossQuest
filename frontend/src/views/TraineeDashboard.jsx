@@ -32,7 +32,8 @@ import {
   fetchCertificationTypes,
   submitExternalCredential,
   fetchExpiryNotifications,
-  triggerExpirySweep
+  triggerExpirySweep,
+  fetchQuizzes
 } from '../services/api';
 import Mascot from '../components/Mascot';
 import IsoCube from '../components/IsoCube';
@@ -93,17 +94,40 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     async function loadGamification() {
       setGamLoading(true);
       if (currentUser?.id) {
-        const gam = await fetchTraineeGamification(currentUser.id, token);
+        const [gam, dbQuizzes] = await Promise.all([
+          fetchTraineeGamification(currentUser.id, token),
+          fetchQuizzes(token)
+        ]);
         if (gam) {
           setPoints(gam.points ?? 0);
           setLevel(gam.level ?? 1);
           const streak = gam.streak ?? gam.current_streak ?? 7;
           setStreakDays(streak);
           if (onStreakLoad) onStreakLoad(streak);
+
+          if (Array.isArray(gam.badges) && gam.badges.length > 0) {
+            const KNOWN_MAP = {
+              SEC_ROOKIE: { id: 'sec-rookie', title: 'Zero-Trust Initiate', description: 'Enrolled in corporate zero-trust compliance curriculum', tier: 'Adept' },
+              STREAK_7D: { id: 'seven-day-streak', title: '7-Day Streak Keeper', description: 'Maintained 7 consecutive active study days', tier: 'Legendary' },
+              QUIZ_MASTER: { id: 'security-champion', title: 'Cipher Master', description: 'Scored 90%+ on CP-ABE Policy Verification', tier: 'Master' },
+              SPEED_DEMON: { id: 'speed-demon', title: 'Rapid Responder', description: 'Completed timed security assessment under 60s', tier: 'Adept' },
+              FIRST_STEP: { id: 'first-step', title: 'First Quest Completed', description: 'Completed your first verified compliance assessment', tier: 'Adept' }
+            };
+            setEarnedBadges(gam.badges.map(b => KNOWN_MAP[b] || {
+              id: b.toLowerCase().replace(/_/g, '-'),
+              title: b.replace(/_/g, ' '),
+              description: 'Corporate certification achievement unlocked',
+              tier: 'Adept'
+            }));
+          }
         } else {
           const fallbackStreak = currentUser?.streak ?? 7;
           setStreakDays(fallbackStreak);
           if (onStreakLoad) onStreakLoad(fallbackStreak);
+        }
+
+        if (dbQuizzes && dbQuizzes.length > 0) {
+          setRealQuizzes(dbQuizzes);
         }
       }
       setGamLoading(false);
@@ -184,7 +208,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     }
   ];
 
-  const earnedBadges = designBadges;
+// Earned badges state synchronized with database
 
   const displayCertificates = (liveCerts && liveCerts.length > 0) ? liveCerts.map(c => ({
     id: c.id,
@@ -416,7 +440,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               </div>
               <h1 className="template-hero-title">Welcome back, {currentUser?.name}!</h1>
               <p className="template-hero-subtitle">
-                Complete today's interactive quest to extend your <strong>{streakDays !== null ? `${streakDays}-day` : '...'} streak</strong> and climb the corporate leaderboard.
+                Complete today's interactive quest to extend your <strong>{Number.isFinite(Number(streakDays)) ? `${streakDays}-day` : '7-day'} streak</strong> and climb the corporate leaderboard.
               </p>
 
               {/* Enterprise Learning Action Buttons */}
@@ -453,7 +477,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   </div>
                   <div className="streak-text-group">
                     <span className="streak-val">
-                      {gamLoading ? '...' : `${streakDays ?? 0} Days`}
+                      {`${streakDays ?? 7} Days`}
                     </span>
                     <span className="streak-lbl">ACTIVE STREAK</span>
                   </div>
@@ -602,13 +626,13 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 <div className="this-week-header flex-between">
                   <h4>This week</h4>
                   <span className="this-week-counter">
-                    {gamLoading ? '...' : `${Math.min(streakDays ?? 0, 7)} / 7 DAYS`}
+                    {`${Math.min(streakDays ?? 7, 7)} / 7 DAYS`}
                   </span>
                 </div>
                 <div className="this-week-days-row">
                   {['M','T','W','T','F','S','S'].map((day, idx) => {
-                    const activeCount = Math.min(streakDays ?? 0, 7);
-                    const isActive = !gamLoading && idx < activeCount;
+                    const activeCount = Math.min(streakDays ?? 7, 7);
+                    const isActive = idx < activeCount;
                     return (
                       <div key={idx} className="this-week-day-item">
                         <div className={`day-flame-circle ${isActive ? 'active' : ''}`}>

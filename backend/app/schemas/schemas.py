@@ -72,6 +72,7 @@ class UserResponse(UserBase):
     force_password_change: bool = False
     mfa_enabled: bool = False
     created_at: datetime
+    streak: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -93,6 +94,7 @@ class ClientCompanyCreate(ClientCompanyBase):
 class ClientCompanyResponse(ClientCompanyBase):
     id: str
     created_at: datetime
+    streak: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -147,6 +149,11 @@ class TrainingRecordUpdate(BaseModel):
 class TrainingRecordResponse(BaseModel):
     id: str
     trainee_id: str
+    trainee_name: Optional[str] = None
+    trainee_email: Optional[str] = None
+    trainee_code: Optional[str] = None
+    company_name: Optional[str] = None
+    company_code: Optional[str] = None
     session_id: Optional[str] = None
     company_at_completion_id: str
     course_name: str
@@ -159,6 +166,7 @@ class TrainingRecordResponse(BaseModel):
     deleted_at: Optional[datetime] = None
     deleted_by: Optional[str] = None
     created_at: datetime
+    streak: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -166,10 +174,47 @@ class DecryptedRecordResponse(BaseModel):
     record_id: str
     course_name: str
     status: str
+    trainee_name: Optional[str] = None
+    trainee_email: Optional[str] = None
+    company_name: Optional[str] = None
+    company_code: Optional[str] = None
     score: Optional[float] = None
     completion_date: Optional[datetime] = None
     decrypted_content: Dict[str, Any]
     decryption_status: str
+
+class SystemOverviewResponse(BaseModel):
+    users_total: int
+    users_active_now: int
+    clients_total: int
+    records_total: int
+    anomalies_24h: int
+    policies_enforced: int
+    system_status: str
+    role_distribution: Dict[str, int]
+
+class QuizListItem(BaseModel):
+    id: str
+    title: str
+    session_id: Optional[str] = None
+    course_name: Optional[str] = None
+    version_no: int
+    is_closed: bool
+    questions_count: int
+    completed: Optional[bool] = False
+    score: Optional[float] = None
+    created_at: datetime
+
+class QuizCreate(BaseModel):
+    title: str
+    session_id: Optional[str] = None
+
+class QuizQuestionCreate(BaseModel):
+    question_text: str
+    options: List[str]
+    correct_option: int = 0
+    points: int = 10
+    explanation: Optional[str] = None
 
 
 # Certification
@@ -208,6 +253,7 @@ class NotificationResponse(BaseModel):
     message: str
     is_read: bool
     created_at: datetime
+    streak: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -305,6 +351,7 @@ class AnomalyAlertResponse(BaseModel):
     description: str
     metadata_info: Dict[str, Any]
     created_at: datetime
+    streak: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 

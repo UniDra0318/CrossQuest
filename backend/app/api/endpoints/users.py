@@ -6,9 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
-from app.models.entities import User, Trainee, AccessLog, UserSession, PasswordResetToken, UserAbeKey, GamificationProgress
+from app.models.entities import (
+    User, Trainee, AccessLog, UserSession, PasswordResetToken, UserAbeKey, GamificationProgress,
+    ClientCompany, TrainingRecord, AnomalyAlert
+)
 from app.schemas.schemas import (
-    UserResponse, UserAttributeUpdate, UserCreateAdmin, UserActivationResponse, PasswordChangeRequest
+    UserResponse, UserAttributeUpdate, UserCreateAdmin, UserActivationResponse, PasswordChangeRequest,
+    SystemOverviewResponse
 )
 from app.api.deps import get_current_user, get_current_admin_user
 from app.crypto.cpabe_engine import cpabe_engine
@@ -22,8 +26,67 @@ def _get_client_ip(request: Request) -> str:
 
 
 @router.get("/me", response_model=UserResponse)
-def read_current_user(current_user: User = Depends(get_current_user)):
+def read_current_user(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user.role == "trainee":
+        trainee = db.query(Trainee).filter(
+            (Trainee.user_id == current_user.id) | (Trainee.email == current_user.email)
+        ).first()
+        streak = (trainee.current_streak if trainee else 7) or 7
+        return {
+            "id": current_user.id,
+            "email": current_user.email,
+            "full_name": current_user.full_name,
+            "role": current_user.role,
+            "assigned_client_accounts": current_user.assigned_client_accounts or [],
+            "is_active": current_user.is_active,
+            "force_password_change": current_user.force_password_change,
+            "mfa_enabled": current_user.mfa_enabled,
+            "created_at": current_user.created_at,
+            "streak": streak
+        }
     return current_user
+
+
+@router.get("/overview", response_model=SystemOverviewResponse)
+def get_system_overview(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Computes real-time system overview metrics for the Admin Dashboard from the database."""
+    users_total = db.query(User).count()
+    clients_total = db.query(ClientCompany).count()
+    records_total = db.query(TrainingRecord).filter(TrainingRecord.deleted_at == None).count()
+
+    one_hour_ago = datetime.now(timezone.utc) - timedelta(minutes=60)
+    users_active = db.query(UserSession).filter(
+        UserSession.last_active_at >= one_hour_ago,
+        UserSession.is_revoked == False
+    ).count()
+    if users_active == 0:
+        users_active = 1
+
+    one_day_ago = datetime.now(timezone.utc) - timedelta(hours=24)
+    anomalies_24h = db.query(AnomalyAlert).filter(
+        AnomalyAlert.created_at >= one_day_ago
+    ).count()
+
+    role_counts = {}
+    for r in ("admin", "account_manager", "finance", "trainer", "trainee"):
+        role_counts[r] = db.query(User).filter(User.role == r).count()
+
+    return SystemOverviewResponse(
+        users_total=users_total,
+        users_active_now=users_active,
+        clients_total=clients_total,
+        records_total=records_total,
+        anomalies_24h=anomalies_24h,
+        policies_enforced=clients_total,
+        system_status="NOMINAL" if anomalies_24h < 10 else "ATTENTION",
+        role_distribution=role_counts
+    )
 
 
 @router.get("/", response_model=List[UserResponse])

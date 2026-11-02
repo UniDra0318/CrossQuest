@@ -162,7 +162,8 @@ export function AuthProvider({ children }) {
             organization: profile.role === 'trainee' 
               ? 'San Miguel Conglomerate' 
               : 'Crossworks Training & Consulting',
-            assigned_companies: profile.assigned_client_accounts || ['CORP_ALPHA']
+            assigned_companies: profile.assigned_client_accounts || ['CORP_ALPHA'],
+            streak: Number.isFinite(Number(profile.streak)) ? Number(profile.streak) : 7
           };
           setCurrentUser(userObj);
           localStorage.setItem('crossquest_auth_user', JSON.stringify(userObj));

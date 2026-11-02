@@ -655,3 +655,107 @@ export async function confirmPasswordResetApi({ token, new_password }) {
     return { ok: false, error: err.message };
   }
 }
+
+export async function fetchSystemOverview(token) {
+  try {
+    const res = await authFetch(`${API_BASE}/users/overview`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for system overview:", err);
+  }
+  return null;
+}
+
+export async function fetchQuizzes(token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for quizzes:", err);
+  }
+  return [];
+}
+
+export async function createQuizApi(payload, token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error creating quiz:", err);
+  }
+  return null;
+}
+
+export async function addQuizQuestionApi(quizId, payload, token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error adding quiz question:", err);
+  }
+  return null;
+}
+
+export async function deleteQuizQuestionApi(quizId, questionId, token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions/${questionId}`, {
+      method: 'DELETE'
+    }, token);
+    return res.ok;
+  } catch (err) {
+    console.warn("API error deleting quiz question:", err);
+    return false;
+  }
+}
+
+export async function deleteQuizApi(quizId, token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}`, {
+      method: 'DELETE'
+    }, token);
+    return res.ok;
+  } catch (err) {
+    console.warn("API error deleting quiz:", err);
+    return false;
+  }
+}
+
+export async function exportAuditLogsCsv(token) {
+  try {
+    const res = await authFetch(`${API_BASE}/anomalies/logs?limit=500`, {}, token);
+    if (!res.ok) throw new Error("Failed to load audit logs");
+    const logs = await res.json();
+
+    const esc = (v) => `"${String(v ?? '').replaceAll('"', '""')}"`;
+    const head = ['log_id', 'occurred_at', 'actor_role', 'event_type', 'resource_type', 'resource_id', 'outcome', 'reason_code', 'source_ip'];
+    const rows = (logs || []).map((l) => [
+      l.id,
+      l.occurred_at,
+      l.actor_role,
+      l.event_type,
+      l.resource_type,
+      l.resource_id,
+      l.outcome,
+      l.reason_code,
+      l.source_ip
+    ]);
+    const text = [head, ...rows].map((r) => r.map(esc).join(',')).join('\n');
+
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
+    const a = Object.assign(document.createElement('a'), { href: url, download: `master-audit-logs-${Date.now()}.csv` });
+    a.click();
+    URL.revokeObjectURL(url);
+    return true;
+  } catch (err) {
+    console.warn("Failed to export audit logs CSV:", err);
+    return false;
+  }
+}
