@@ -77,12 +77,24 @@ def get_trainee_gamification(
     """Fetches gamification progress for a trainee."""
     trainee = db.query(Trainee).filter(Trainee.id == trainee_id).first()
     if not trainee:
+        # Check by user_id, email, or trainee_code
+        trainee = db.query(Trainee).filter(
+            (Trainee.user_id == trainee_id) |
+            (Trainee.email == trainee_id) |
+            (Trainee.trainee_code == trainee_id)
+        ).first()
+    if not trainee and (trainee_id in ("me", "self", "current") or current_user.role == "trainee"):
+        trainee = db.query(Trainee).filter(
+            (Trainee.user_id == current_user.id) |
+            (Trainee.email == current_user.email)
+        ).first()
+    if not trainee:
         raise HTTPException(status_code=404, detail="Trainee not found")
 
-    progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee_id).first()
+    progress = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
     if not progress:
         progress = GamificationProgress(
-            trainee_id=trainee_id,
+            trainee_id=trainee.id,
             points=0,
             quizzes_completed=0,
             level=1,

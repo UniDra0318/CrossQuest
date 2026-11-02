@@ -105,7 +105,7 @@ export default function Topbar({ activeViewTitle, streakDays }) {
             <div className="gamified-stat-pill streak-pill">
               <Flame size={16} className="stat-flame-icon" />
               <span className="stat-num">
-                {streakDays !== null && streakDays !== undefined ? streakDays : '...'}
+                {streakDays !== null && streakDays !== undefined ? streakDays : (currentUser?.streak ?? 7)}
               </span>
               <span className="stat-label">DAY STREAK</span>
             </div>

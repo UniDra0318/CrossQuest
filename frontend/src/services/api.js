@@ -170,9 +170,12 @@ export async function toggleLeaderboardOptOut(optOut, token) {
   return null;
 }
 
-export async function fetchTraineeGamification(traineeId) {
+export async function fetchTraineeGamification(traineeId, token) {
   try {
-    const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`);
+    const headers = {};
+    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('crossquest_auth_token') : null);
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`, { headers });
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for trainee gamification:", err);

@@ -52,6 +52,7 @@ export const DEMO_USERS = {
     display_name: "CyberKnight9021",
     company_code: "CORP_ALPHA",
     assigned_companies: ["CORP_ALPHA"],
+    streak: 7,
     initials: "JD"
   }
 };

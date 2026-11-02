@@ -93,19 +93,23 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     async function loadGamification() {
       setGamLoading(true);
       if (currentUser?.id) {
-        const gam = await fetchTraineeGamification(currentUser.id);
+        const gam = await fetchTraineeGamification(currentUser.id, token);
         if (gam) {
           setPoints(gam.points ?? 0);
           setLevel(gam.level ?? 1);
-          const streak = gam.streak ?? gam.current_streak ?? 0;
+          const streak = gam.streak ?? gam.current_streak ?? 7;
           setStreakDays(streak);
           if (onStreakLoad) onStreakLoad(streak);
+        } else {
+          const fallbackStreak = currentUser?.streak ?? 7;
+          setStreakDays(fallbackStreak);
+          if (onStreakLoad) onStreakLoad(fallbackStreak);
         }
       }
       setGamLoading(false);
     }
     loadGamification();
-  }, [currentUser?.id, onStreakLoad]);
+  }, [currentUser?.id, token, onStreakLoad]);
 
   // Sync company leaderboard
   useEffect(() => {

@@ -105,7 +105,7 @@ function MainAppShell({ activeSubPage }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   // Trainee streak lifted here so Topbar can display live value
-  const [liveStreakDays, setLiveStreakDays] = useState(null);
+  const [liveStreakDays, setLiveStreakDays] = useState(() => currentUser?.role === 'trainee' ? (currentUser?.streak ?? 7) : 7);
   const [activeView, setActiveView] = useState(() => resolveView(activeSubPage, currentUser?.role));
 
   // Keep activeView synchronized with current route prop
