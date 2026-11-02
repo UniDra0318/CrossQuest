@@ -301,33 +301,35 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                     <ExternalLink size={12} color="#94a3b8" />
                   </button>
 
-                  {/* Action: CP-ABE Cryptographic Sandbox */}
-                  <button
-                    type="button"
-                    onClick={() => { navigate('/crypto-lab'); setProfileOpen(false); }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      background: 'transparent',
-                      border: '1px solid #e2e8f0',
-                      color: '#334155',
-                      fontSize: '12px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      marginTop: '6px'
-                    }}
-                    title="Interactive CP-ABE Cryptographic Sandbox"
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Shield size={13} color="#7c3aed" />
-                      <span>CP-ABE Cryptographic Lab</span>
-                    </span>
-                    <ExternalLink size={12} color="#94a3b8" />
-                  </button>
+                  {/* Action: CP-ABE Cryptographic Sandbox (Admin Only) */}
+                  {userRole === 'admin' && (
+                    <button
+                      type="button"
+                      onClick={() => { navigate('/crypto-lab'); setProfileOpen(false); }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        background: 'transparent',
+                        border: '1px solid #e2e8f0',
+                        color: '#334155',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        marginTop: '6px'
+                      }}
+                      title="Interactive CP-ABE Cryptographic Sandbox"
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Shield size={13} color="#7c3aed" />
+                        <span>CP-ABE Cryptographic Lab</span>
+                      </span>
+                      <ExternalLink size={12} color="#94a3b8" />
+                    </button>
+                  )}
 
                   {/* Dev Role Switcher Section */}
                   {import.meta.env.DEV && (
