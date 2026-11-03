@@ -22,7 +22,8 @@ import {
   fetchBatchDiscrepancies,
   resolveDiscrepancy,
   fetchReconciliationReport,
-  commitImportBatch
+  commitImportBatch,
+  downloadBatchReconciliationPdf
 } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -363,10 +364,18 @@ export default function FinanceReconciliationDesk() {
   };
 
   // 6. Download PDF
-  const handleDownloadPdf = () => {
-    if (!selectedBatchId) return;
-    const url = `http://localhost:8000/api/v1/imports/batches/${selectedBatchId}/reconciliation/pdf`;
-    window.open(url, '_blank');
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const handleDownloadPdf = async () => {
+    if (!selectedBatchId || downloadingPdf) return;
+    setDownloadingPdf(true);
+    try {
+      await downloadBatchReconciliationPdf(selectedBatchId, token);
+    } catch (err) {
+      console.warn("Could not download reconciliation PDF via API, attempting direct fallback:", err);
+      window.open(`http://localhost:8000/api/v1/imports/batches/${selectedBatchId}/reconciliation/pdf`, '_blank');
+    } finally {
+      setDownloadingPdf(false);
+    }
   };
 
   const selectedBatch = batches.find(b => b.id === selectedBatchId) || batches[0] || FALLBACK_BATCHES[0];

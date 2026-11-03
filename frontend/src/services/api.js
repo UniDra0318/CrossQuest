@@ -426,6 +426,44 @@ export async function triggerExpirySweep(token) {
   return data;
 }
 
+export async function downloadCertificatePdf(certificateId, token) {
+  const res = await fetch(`${API_BASE}/certifications/${encodeURIComponent(certificateId)}/pdf`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || `Failed to download certificate PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = `Certificate_${certificateId}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(blobUrl);
+}
+
+export async function downloadBatchReconciliationPdf(batchId, token) {
+  const res = await fetch(`${API_BASE}/imports/batches/${encodeURIComponent(batchId)}/reconciliation/pdf`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || `Failed to download reconciliation PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = `Finance_Reconciliation_Batch_${batchId.slice(0, 8)}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(blobUrl);
+}
+
 export async function fetchAssignedClientCompanies(token) {
   try {
     const res = await fetch(`${API_BASE}/reports/assigned-companies`, {

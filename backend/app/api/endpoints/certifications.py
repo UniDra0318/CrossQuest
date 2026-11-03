@@ -250,6 +250,7 @@ def list_user_expiry_notifications(
 
 
 @router.post("/run-expiry-check")
+@router.post("/trigger-sweep")
 def trigger_expiry_sweep(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)

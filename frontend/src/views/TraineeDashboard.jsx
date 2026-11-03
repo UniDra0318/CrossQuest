@@ -33,7 +33,8 @@ import {
   submitExternalCredential,
   fetchExpiryNotifications,
   triggerExpirySweep,
-  fetchQuizzes
+  fetchQuizzes,
+  downloadCertificatePdf
 } from '../services/api';
 import BitMascot from '../components/BitMascot/BitMascot';
 import '../styles/admin.css';
@@ -1135,16 +1136,21 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                     )}
 
                     <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                      <a
-                        href={`http://localhost:8000/api/v1/certifications/${cert.id}/pdf`}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await downloadCertificatePdf(cert.id, token);
+                          } catch (err) {
+                            alert(err.message || 'Failed to download certificate PDF.');
+                          }
+                        }}
                         className="btn btn-secondary flex-align gap-8"
-                        style={{ fontSize: '11.5px', padding: '6px 12px', textDecoration: 'none' }}
+                        style={{ fontSize: '11.5px', padding: '6px 12px', textDecoration: 'none', cursor: 'pointer' }}
                       >
                         <Download size={13} />
                         <span>Download PDF</span>
-                      </a>
+                      </button>
                     </div>
                   </div>
                 ))}
