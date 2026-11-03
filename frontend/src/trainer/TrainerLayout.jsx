@@ -1,7 +1,5 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useTrainer } from './TrainerContext';
 import BitMascot from '../components/BitMascot/BitMascot';
 import '../styles/admin.css';
 import './trainer.css';
@@ -9,8 +7,6 @@ import './trainer.css';
 export default function TrainerLayout({ activeTab, onTabChange, children }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser } = useAuth();
-  const { me } = useTrainer();
 
   const handleTabClick = (tabId, path) => {
     if (onTabChange) {
@@ -30,15 +26,6 @@ export default function TrainerLayout({ activeTab, onTabChange, children }) {
       <div className="adm-top">
         <div className="adm-crumbs">
           CROSSWORKS ENTERPRISE / <strong>LEAD INSTRUCTOR PORTAL</strong>
-        </div>
-        <div className="adm-chip-user">
-          <div className="adm-chip-user__av" style={{ background: '#10b981' }}>
-            {me?.initials || 'DL'}
-          </div>
-          <div>
-            <strong>{currentUser?.name || me?.name || 'David Lim'}</strong>
-            <small>{me?.badge || 'LEAD TRAINER'}</small>
-          </div>
         </div>
       </div>
 
