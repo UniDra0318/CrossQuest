@@ -19,11 +19,15 @@ import {
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { fetchRecords } from '../services/api';
 
 export default function CompanyDashboard({ activeSubView, setActiveView }) {
   const { currentUser, token } = useAuth();
   const isFinance = currentUser?.role === 'finance';
+  const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
+  const isDark = effectiveTheme === 'dark';
+
   const companyCode = currentUser?.company_code || 'CORP_ALPHA';
   const [records, setRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -120,11 +124,11 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
           display: 'flex',
           flexWrap: 'wrap',
           gap: '10px',
-          background: '#ffffff',
+          background: isDark ? '#111827' : '#ffffff',
           padding: '12px 16px',
           borderRadius: '18px',
-          border: '1px solid var(--cq-line)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.02)'
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+          boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.02)'
         }}
       >
         {tabs.map(tab => {
@@ -143,15 +147,15 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                 borderRadius: '12px',
                 fontSize: '13px',
                 fontWeight: isActive ? 800 : 600,
-                color: isActive ? '#4f46e5' : '#64748b',
-                background: isActive ? '#eef2ff' : 'transparent',
-                border: isActive ? '1.5px solid #c7d2fe' : '1px solid transparent',
+                color: isActive ? (isDark ? '#c7d2fe' : '#4f46e5') : (isDark ? '#94a3b8' : '#64748b'),
+                background: isActive ? (isDark ? '#312e81' : '#eef2ff') : 'transparent',
+                border: isActive ? (isDark ? '1.5px solid #4338ca' : '1.5px solid #c7d2fe') : '1px solid transparent',
                 cursor: 'pointer',
-                boxShadow: isActive ? '0 2px 8px rgba(79, 70, 229, 0.12)' : 'none',
+                boxShadow: isActive ? (isDark ? '0 2px 8px rgba(79, 70, 229, 0.3)' : '0 2px 8px rgba(79, 70, 229, 0.12)') : 'none',
                 transition: 'all 0.15s ease'
               }}
             >
-              <Icon size={16} color={isActive ? '#4f46e5' : '#94a3b8'} />
+              <Icon size={16} color={isActive ? (isDark ? '#a78bfa' : '#4f46e5') : (isDark ? '#64748b' : '#94a3b8')} />
               <span>{tab.label}</span>
             </button>
           );
@@ -164,11 +168,11 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
           {/* Header Banner */}
           <div 
             style={{ 
-              background: '#ffffff', 
+              background: isDark ? '#111827' : '#ffffff', 
               borderRadius: '24px', 
               padding: '28px 32px', 
-              border: '1px solid var(--cq-line)', 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+              border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', 
+              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.03)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-start',
@@ -177,10 +181,10 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
             }}
           >
             <div>
-              <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px 0', color: '#0f172a' }}>
+              <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px 0', color: isDark ? '#f8fafc' : '#0f172a' }}>
                 {isFinance ? 'Enterprise Client Accounts & Compliance Oversight' : `${currentUser?.organization} - Compliance Portal`}
               </h2>
-              <p style={{ margin: 0, fontSize: '13.5px', color: '#64748b', lineHeight: 1.5 }}>
+              <p style={{ margin: 0, fontSize: '13.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.5 }}>
                 {isFinance 
                   ? 'Cross-tenant compliance audit, financial reconciliation metrics, and cryptographic isolation monitoring across all 39 enterprise client accounts.'
                   : 'Corporate training progress, audit verification, and data isolation oversight.'}
@@ -198,81 +202,81 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
 
           {/* Metric Tiles Matrix */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px' }}>
-            <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Enrolled Workforce</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Enrolled Workforce</span>
                 <Users size={18} color="#0284c7" />
               </div>
-              <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a' }}>{displayedRecords.length} Active</div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>{isFinance ? 'Across All Enterprise Cohorts' : `${currentUser?.organization} Cohort`}</div>
+              <div style={{ fontSize: '26px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>{displayedRecords.length} Active</div>
+              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>{isFinance ? 'Across All Enterprise Cohorts' : `${currentUser?.organization} Cohort`}</div>
             </div>
 
-            <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Compliance Completion</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Compliance Completion</span>
                 <CheckCircle2 size={18} color="#059669" />
               </div>
               <div style={{ fontSize: '26px', fontWeight: 800, color: '#059669' }}>
                 {Math.round((completed / (displayedRecords.length || 1)) * 100)}%
               </div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Mandatory Training Modules</div>
+              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>Mandatory Training Modules</div>
             </div>
 
-            <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Cohort Average Score</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Cohort Average Score</span>
                 <TrendingUp size={18} color="#0284c7" />
               </div>
               <div style={{ fontSize: '26px', fontWeight: 800, color: '#0284c7' }}>{avgScore}%</div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Demonstrated Competency</div>
+              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>Demonstrated Competency</div>
             </div>
 
-            <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Multi-Tenant Separation</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Multi-Tenant Separation</span>
                 <ShieldCheck size={18} color="#7c3aed" />
               </div>
               <div style={{ fontSize: '26px', fontWeight: 800, color: '#7c3aed' }}>Guaranteed</div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Strict Cryptographic Isolation</div>
+              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>Strict Cryptographic Isolation</div>
             </div>
           </div>
 
           {/* Employee Milestone Summary with Scrollable Table */}
           <div 
             style={{ 
-              background: '#ffffff', 
+              background: isDark ? '#111827' : '#ffffff', 
               borderRadius: '24px', 
               padding: '24px 28px', 
-              border: '1px solid var(--cq-line)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+              border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                 {isFinance ? 'Enterprise Participant Milestone Summary' : 'Employee Milestone Summary'}
               </h3>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
+              <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
                 {displayedRecords.length} records in scope
               </span>
             </div>
 
             {/* Scrollable Container with Sticky Table Header */}
-            <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
-                <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 2, borderBottom: '1px solid #e2e8f0' }}>
+                <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
                   <tr>
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>PARTICIPANT NAME</th>
-                    {isFinance && <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>TENANT / COMPANY</th>}
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>COURSE TITLE</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>ASSESSMENT SCORE</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>STATUS</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>PARTICIPANT NAME</th>
+                    {isFinance && <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>TENANT / COMPANY</th>}
+                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>COURSE TITLE</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>ASSESSMENT SCORE</th>
+                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>STATUS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {displayedRecords && displayedRecords.length > 0 ? (
                     displayedRecords.map((r) => (
-                    <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0f172a' }}>{r.traineeName}</td>
+                    <tr key={r.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>{r.traineeName}</td>
                       {isFinance && (
                         <td style={{ padding: '12px 16px' }}>
                           <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#334155', fontFamily: 'monospace' }}>
@@ -308,19 +312,19 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
       {currentTab === 'company_trainees' && (
         <div 
           style={{ 
-            background: '#ffffff', 
+            background: isDark ? '#111827' : '#ffffff', 
             borderRadius: '24px', 
             padding: '24px 28px', 
-            border: '1px solid var(--cq-line)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+            border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+            boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                 {isFinance ? 'Cross-Client Enterprise Training Records (Audit View)' : 'Company Employee Records (Strictly Isolated)'}
               </h3>
-              <p style={{ margin: 0, fontSize: '12.5px', color: '#64748b' }}>
+              <p style={{ margin: 0, fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
                 {isFinance 
                   ? 'All non-deleted enterprise training completion records across corporate partners.'
                   : 'Cross-client records from other client companies are strictly isolated.'}
@@ -339,10 +343,12 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                     width: '100%',
                     padding: '8px 12px 8px 34px',
                     fontSize: '12.5px',
-                    border: '1.5px solid #cbd5e1',
+                    border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
                     borderRadius: '10px',
                     outline: 'none',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    background: isDark ? '#1e293b' : '#ffffff',
+                    color: isDark ? '#f8fafc' : '#0f172a'
                   }}
                 />
               </div>
@@ -350,26 +356,26 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
           </div>
 
           {/* Scrollable Container with Sticky Table Header */}
-          <div style={{ maxHeight: '420px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ maxHeight: '420px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
-              <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 2, borderBottom: '1px solid #e2e8f0' }}>
+              <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
                 <tr>
-                  <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>EMPLOYEE / ATTENDEE</th>
-                  {isFinance && <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>TENANT CODE</th>}
-                  <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>COURSE NAME</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>COMPLETION DATE</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>CERTIFIED SCORE</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>STATUS</th>
+                  <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>EMPLOYEE / ATTENDEE</th>
+                  {isFinance && <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>TENANT CODE</th>}
+                  <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>COURSE NAME</th>
+                  <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>COMPLETION DATE</th>
+                  <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>CERTIFIED SCORE</th>
+                  <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>STATUS</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRecords && filteredRecords.length > 0 ? (
                   filteredRecords.map((r) => (
-                  <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <tr key={r.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontWeight: 700, color: '#0f172a' }}>{r.traineeName}</span>
-                        <span style={{ fontSize: '11px', color: '#64748b' }}>{r.traineeEmail}</span>
+                        <span style={{ fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>{r.traineeName}</span>
+                        <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>{r.traineeEmail}</span>
                       </div>
                     </td>
                     {isFinance && (
@@ -409,32 +415,32 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
       {currentTab === 'audit_certificate' && (
         <div 
           style={{ 
-            background: '#ffffff', 
+            background: isDark ? '#111827' : '#ffffff', 
             borderRadius: '24px', 
             padding: '28px 32px', 
-            border: '1px solid var(--cq-line)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+            border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+            boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
           }}
         >
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ margin: '0 0 6px', fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+            <h3 style={{ margin: '0 0 6px', fontSize: '18px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
               Data Privacy & Security Audit Certificate
             </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: isDark ? '#94a3b8' : '#64748b' }}>
               Cryptographically audited proof of zero cross-client record contamination and strict tenant isolation.
             </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', background: '#ecfdf5', borderRadius: '16px', border: '1px solid #a7f3d0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', borderRadius: '16px', border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0' }}>
               <ShieldCheck size={24} color="#059669" style={{ flexShrink: 0 }} />
-              <div style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.5 }}>
+              <div style={{ fontSize: '13px', color: isDark ? '#34d399' : '#065f46', lineHeight: 1.5 }}>
                 <strong>Security & Privacy Audit Guarantee</strong>
                 <div>All training records for {currentUser?.organization} are bound to strict organizational policies and defended by PostgreSQL Row-Level Security.</div>
               </div>
             </div>
 
-            <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '18px 22px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+            <div style={{ background: isDark ? '#0f172a' : '#f8fafc', borderRadius: '16px', padding: '18px 22px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '8px' }}>
                 <span style={{ color: '#64748b', fontWeight: 600 }}>Assigned Organization Code:</span>
                 <code style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1e293b' }}>{companyCode}</code>

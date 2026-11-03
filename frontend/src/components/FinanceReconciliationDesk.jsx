@@ -378,11 +378,11 @@ export default function FinanceReconciliationDesk() {
       {/* 1. DESK HEADER & REGULATORY SPEC STRIP */}
       <div 
         style={{ 
-          background: '#ffffff', 
+          background: isDark ? '#111827' : '#ffffff', 
           borderRadius: '24px', 
           padding: '28px 32px', 
-          border: '1px solid var(--cq-line)', 
-          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', 
+          boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.03)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
@@ -392,21 +392,21 @@ export default function FinanceReconciliationDesk() {
       >
         <div style={{ maxWidth: '820px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', padding: '3px 10px', borderRadius: '12px', border: '1px solid #ddd6fe' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#c4b5fd' : '#7c3aed', background: isDark ? 'rgba(124, 58, 237, 0.2)' : '#f5f3ff', padding: '3px 10px', borderRadius: '12px', border: isDark ? '1px solid rgba(124, 58, 237, 0.35)' : '1px solid #ddd6fe' }}>
               FR-22 / DAT-01 / DAT-08 COMPLIANT
             </span>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#059669', background: '#ecfdf5', padding: '3px 10px', borderRadius: '12px', border: '1px solid #a7f3d0' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#6ee7b7' : '#059669', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', padding: '3px 10px', borderRadius: '12px', border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0' }}>
               IN-MEMORY BILLING STRIP
             </span>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: '#0284c7', background: '#e0f2fe', padding: '3px 10px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#7dd3fc' : '#0284c7', background: isDark ? 'rgba(2, 132, 199, 0.2)' : '#e0f2fe', padding: '3px 10px', borderRadius: '12px', border: isDark ? '1px solid rgba(2, 132, 199, 0.35)' : '1px solid #bae6fd' }}>
               AUG 1, 2026 CUTOFF BASELINE
             </span>
           </div>
 
-          <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 8px 0', color: '#0f172a', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 8px 0', color: isDark ? '#f8fafc' : '#0f172a', letterSpacing: '-0.02em' }}>
             Pilot Data Ingestion & Reconciliation Desk
           </h2>
-          <p style={{ margin: 0, fontSize: '13.5px', color: '#64748b', lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: '13.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.6 }}>
             Controlled pre-screening pipeline for legacy Crossworks client training workbooks (<code>Training_Participants.xlsx</code> and <code>Sample-Data.xlsx</code>). Strips sensitive sales fields (SI #, PO #, Tax Form 2307), auto-pseudonymizes retail individuals (<code>INDIV-C026 &mdash; C040</code>), and verifies 100% physical-to-ordinal row reconciliation.
           </p>
         </div>
@@ -466,8 +466,8 @@ export default function FinanceReconciliationDesk() {
       {/* 2. WORKBOOK UPLOAD DROPZONE */}
       <div 
         style={{ 
-          background: '#f8fafc', 
-          border: '1.5px dashed #cbd5e1', 
+          background: isDark ? '#111827' : '#f8fafc', 
+          border: isDark ? '1.5px dashed #374151' : '1.5px dashed #cbd5e1', 
           borderRadius: '20px', 
           padding: '24px 28px',
           display: 'flex',
@@ -478,14 +478,14 @@ export default function FinanceReconciliationDesk() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#e0e7ff', color: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: isDark ? '#1e293b' : '#e0e7ff', color: isDark ? '#818cf8' : '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <UploadCloud size={26} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: '15px', color: '#1e293b' }}>
+            <div style={{ fontWeight: 800, fontSize: '15px', color: isDark ? '#f8fafc' : '#1e293b' }}>
               Stage New Training Participants Workbook (.xlsx / .csv)
             </div>
-            <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>
+            <div style={{ fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '2px' }}>
               Pre-screening actively strips SI/PO numbers, payment details, and applies SHA-256 deduplication.
             </div>
           </div>
@@ -535,21 +535,21 @@ export default function FinanceReconciliationDesk() {
       {/* 3. BATCH SELECTOR STRIP */}
       <div 
         style={{ 
-          background: '#ffffff', 
+          background: isDark ? '#111827' : '#ffffff', 
           borderRadius: '20px', 
           padding: '22px 26px', 
-          border: '1px solid var(--cq-line)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+          boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-          <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '11.5px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             ACTIVE STAGED IMPORT BATCHES:
           </span>
           <button
             type="button"
             onClick={() => loadBatches(false)}
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: '#4f46e5', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', color: isDark ? '#a78bfa' : '#4f46e5', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}
           >
             <RefreshCw size={13} />
             <span>Refresh Batches</span>
@@ -567,17 +567,17 @@ export default function FinanceReconciliationDesk() {
                 style={{
                   padding: '10px 16px',
                   borderRadius: '12px',
-                  border: isSelected ? '2px solid #4f46e5' : '1px solid #e2e8f0',
-                  background: isSelected ? '#f5f3ff' : '#ffffff',
-                  boxShadow: isSelected ? '0 4px 12px rgba(79, 70, 229, 0.15)' : 'none',
+                  border: isSelected ? (isDark ? '2px solid #818cf8' : '2px solid #4f46e5') : (isDark ? '1px solid #1f2937' : '1px solid #e2e8f0'),
+                  background: isSelected ? (isDark ? '#1e1b4b' : '#f5f3ff') : (isDark ? '#0f172a' : '#ffffff'),
+                  boxShadow: isSelected ? '0 4px 12px rgba(79, 70, 229, 0.25)' : 'none',
                   cursor: 'pointer',
                   textAlign: 'left',
                   transition: 'all 0.15s ease'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileSpreadsheet size={16} color={isSelected ? '#4f46e5' : '#64748b'} />
-                  <strong style={{ fontSize: '13px', color: isSelected ? '#4f46e5' : '#1e293b' }}>
+                  <FileSpreadsheet size={16} color={isSelected ? (isDark ? '#a78bfa' : '#4f46e5') : (isDark ? '#94a3b8' : '#64748b')} />
+                  <strong style={{ fontSize: '13px', color: isSelected ? (isDark ? '#f8fafc' : '#4f46e5') : (isDark ? '#f8fafc' : '#1e293b') }}>
                     {b.source_file_name}
                   </strong>
                   <span 
@@ -586,15 +586,27 @@ export default function FinanceReconciliationDesk() {
                       fontWeight: 800, 
                       padding: '2px 8px', 
                       borderRadius: '8px', 
-                      background: b.reconciled ? '#ecfdf5' : b.discrepancy_count > 0 ? '#fffbeb' : '#e0f2fe',
-                      color: b.reconciled ? '#059669' : b.discrepancy_count > 0 ? '#b45309' : '#0284c7',
-                      border: b.reconciled ? '1px solid #a7f3d0' : b.discrepancy_count > 0 ? '1px solid #fde68a' : '1px solid #bae6fd'
+                      background: b.reconciled 
+                        ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') 
+                        : b.discrepancy_count > 0 
+                          ? (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb') 
+                          : (isDark ? 'rgba(2, 132, 199, 0.2)' : '#e0f2fe'),
+                      color: b.reconciled 
+                        ? (isDark ? '#34d399' : '#059669') 
+                        : b.discrepancy_count > 0 
+                          ? (isDark ? '#fbbf24' : '#b45309') 
+                          : (isDark ? '#38bdf8' : '#0284c7'),
+                      border: b.reconciled 
+                        ? (isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0') 
+                        : b.discrepancy_count > 0 
+                          ? (isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a') 
+                          : (isDark ? '1px solid rgba(2, 132, 199, 0.35)' : '1px solid #bae6fd')
                     }}
                   >
                     {b.reconciled ? 'RECONCILED' : b.discrepancy_count > 0 ? `${b.discrepancy_count} DISCREPANCIES` : 'STAGED'}
                   </span>
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>
                   {b.record_count} total rows &bull; {b.in_scope_count} in-scope &bull; {new Date(b.loaded_at).toLocaleDateString()}
                 </div>
               </button>
@@ -606,40 +618,40 @@ export default function FinanceReconciliationDesk() {
       {/* 4. RECONCILIATION KPI MATRIX */}
       {selectedBatch && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px' }}>
-          <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Physical Workbook Rows</span>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Physical Workbook Rows</span>
               <FileSpreadsheet size={18} color="#0284c7" />
             </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a' }}>{report?.total_rows ?? selectedBatch.record_count}</div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>Raw Rows in File</div>
+            <div style={{ fontSize: '26px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>{report?.total_rows ?? selectedBatch.record_count}</div>
+            <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>Raw Rows in File</div>
           </div>
 
-          <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Expected In-Scope</span>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Expected In-Scope</span>
               <CheckCircle2 size={18} color="#059669" />
             </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#059669' }}>{report?.in_scope_rows ?? selectedBatch.in_scope_count}</div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>&ge; August 1, 2026 Cutoff</div>
+            <div style={{ fontSize: '26px', fontWeight: 800, color: isDark ? '#34d399' : '#059669' }}>{report?.in_scope_rows ?? selectedBatch.in_scope_count}</div>
+            <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>&ge; August 1, 2026 Cutoff</div>
           </div>
 
-          <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Pre-Cutoff Excluded</span>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Pre-Cutoff Excluded</span>
               <AlertTriangle size={18} color="#d97706" />
             </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#d97706' }}>{report?.pre_cutoff_rows ?? report?.pre_cutoff_excluded ?? selectedBatch.pre_cutoff_count}</div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>June 6, 2026 Quarantined</div>
+            <div style={{ fontSize: '26px', fontWeight: 800, color: isDark ? '#fbbf24' : '#d97706' }}>{report?.pre_cutoff_rows ?? report?.pre_cutoff_excluded ?? selectedBatch.pre_cutoff_count}</div>
+            <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>June 6, 2026 Quarantined</div>
           </div>
 
-          <div style={{ background: '#ffffff', borderRadius: '18px', padding: '20px', border: '1px solid var(--cq-line)', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+          <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>Distinct Client Accounts</span>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Distinct Client Accounts</span>
               <Building2 size={18} color="#7c3aed" />
             </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#7c3aed' }}>{report?.customer_breakdown?.length ?? report?.distinct_customers ?? selectedBatch.distinct_customers_count}</div>
-            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>24 Corporate + 15 Retail</div>
+            <div style={{ fontSize: '26px', fontWeight: 800, color: isDark ? '#c084fc' : '#7c3aed' }}>{report?.customer_breakdown?.length ?? report?.distinct_customers ?? selectedBatch.distinct_customers_count}</div>
+            <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>24 Corporate + 15 Retail</div>
           </div>
         </div>
       )}
@@ -659,45 +671,45 @@ export default function FinanceReconciliationDesk() {
       {/* 5. DISCREPANCY ISOLATION QUEUE (DAT-03, DAT-08, U-13) WITH STICKY SCROLL */}
       <div 
         style={{ 
-          background: '#ffffff', 
+          background: isDark ? '#111827' : '#ffffff', 
           borderRadius: '24px', 
           padding: '24px 28px', 
-          border: '1px solid var(--cq-line)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+          boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <div>
-            <h3 style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+            <h3 style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
               Discrepancy Quarantine Desk
             </h3>
-            <p style={{ margin: 0, fontSize: '12.5px', color: '#64748b' }}>
+            <p style={{ margin: 0, fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
               Automated anomaly detection: Pre-cutoff dates, duplicate participant submissions, and punctuation variants.
             </p>
           </div>
-          <span style={{ fontSize: '11.5px', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' }}>
+          <span style={{ fontSize: '11.5px', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', background: isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb', color: isDark ? '#fbbf24' : '#b45309', border: isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a' }}>
             {discrepancies.filter(d => !d.resolution).length} Action Items Pending
           </span>
         </div>
 
         {/* Scrollable Container with Sticky Table Header */}
-        <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
-            <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 2, borderBottom: '1px solid #e2e8f0' }}>
+            <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
               <tr>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569', width: '90px' }}>ROW #</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>ISSUE CLASSIFICATION</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>FIELD NAME</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>RESOLUTION STATUS</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>AUDIT REASON / LOG</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569', width: '110px', textAlign: 'right' }}>ACTION</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', width: '90px' }}>ROW #</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>ISSUE CLASSIFICATION</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>FIELD NAME</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>RESOLUTION STATUS</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>AUDIT REASON / LOG</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', width: '110px', textAlign: 'right' }}>ACTION</th>
               </tr>
             </thead>
             <tbody>
               {discrepancies.length > 0 ? (
                 discrepancies.map((d) => (
-                  <tr key={d.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '12px 16px', fontWeight: 800, fontFamily: 'monospace', color: '#1e293b' }}>#{d.source_row_no}</td>
+                  <tr key={d.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 800, fontFamily: 'monospace', color: isDark ? '#f8fafc' : '#1e293b' }}>#{d.source_row_no}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <span 
                         style={{ 
@@ -705,27 +717,39 @@ export default function FinanceReconciliationDesk() {
                           fontWeight: 700, 
                           padding: '3px 8px', 
                           borderRadius: '6px',
-                          background: d.issue_type === 'PRE_CUTOFF_DATE' ? '#fffbeb' : d.issue_type === 'DUPLICATE_PARTICIPANT' ? '#fff1f2' : '#f5f3ff',
-                          color: d.issue_type === 'PRE_CUTOFF_DATE' ? '#b45309' : d.issue_type === 'DUPLICATE_PARTICIPANT' ? '#be123c' : '#7c3aed',
-                          border: d.issue_type === 'PRE_CUTOFF_DATE' ? '1px solid #fde68a' : d.issue_type === 'DUPLICATE_PARTICIPANT' ? '1px solid #fecdd3' : '1px solid #ddd6fe'
+                          background: d.issue_type === 'PRE_CUTOFF_DATE' 
+                            ? (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb') 
+                            : d.issue_type === 'DUPLICATE_PARTICIPANT' 
+                              ? (isDark ? 'rgba(225, 29, 72, 0.2)' : '#fff1f2') 
+                              : (isDark ? 'rgba(124, 58, 237, 0.2)' : '#f5f3ff'),
+                          color: d.issue_type === 'PRE_CUTOFF_DATE' 
+                            ? (isDark ? '#fbbf24' : '#b45309') 
+                            : d.issue_type === 'DUPLICATE_PARTICIPANT' 
+                              ? (isDark ? '#fda4af' : '#be123c') 
+                              : (isDark ? '#c4b5fd' : '#7c3aed'),
+                          border: d.issue_type === 'PRE_CUTOFF_DATE' 
+                            ? (isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a') 
+                            : d.issue_type === 'DUPLICATE_PARTICIPANT' 
+                              ? (isDark ? '1px solid rgba(225, 29, 72, 0.35)' : '1px solid #fecdd3') 
+                              : (isDark ? '1px solid rgba(124, 58, 237, 0.35)' : '1px solid #ddd6fe')
                         }}
                       >
                         {d.issue_type}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: '#475569' }}>{d.field_name || '—'}</td>
+                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: isDark ? '#cbd5e1' : '#475569' }}>{d.field_name || '—'}</td>
                     <td style={{ padding: '12px 16px' }}>
                       {d.resolution ? (
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '3px 8px', borderRadius: '6px', border: '1px solid #a7f3d0' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#34d399' : '#059669', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', padding: '3px 8px', borderRadius: '6px', border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0' }}>
                           &#10004; {d.resolution}
                         </span>
                       ) : (
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#b45309', background: '#fffbeb', padding: '3px 8px', borderRadius: '6px', border: '1px solid #fde68a' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#fbbf24' : '#b45309', background: isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb', padding: '3px 8px', borderRadius: '6px', border: isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a' }}>
                           &#9888; PENDING REVIEW
                         </span>
                       )}
                     </td>
-                    <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '12px' }}>
+                    <td style={{ padding: '12px 16px', color: isDark ? '#94a3b8' : '#64748b', fontSize: '12px' }}>
                       {d.resolution_reason || (
                         <em>Requires explanation to merge, correct or accept.</em>
                       )}
@@ -774,23 +798,23 @@ export default function FinanceReconciliationDesk() {
       {/* Resolution Modal / Drawer */}
       {resolvingId && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: '#ffffff', borderRadius: '20px', padding: '28px', width: '500px', maxWidth: '100%', boxShadow: '0 20px 45px rgba(0,0,0,0.2)', border: '1px solid #e2e8f0' }}>
-            <h3 style={{ margin: '0 0 6px', fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+          <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '20px', padding: '28px', width: '500px', maxWidth: '100%', boxShadow: '0 20px 45px rgba(0,0,0,0.5)', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
+            <h3 style={{ margin: '0 0 6px', fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
               Resolve Discrepancy Quarantine Row
             </h3>
-            <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: '#64748b', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.5 }}>
               Specify the resolution action and a mandatory audit reason conforming to Chapter III Section 3.5.4.
             </p>
 
             <form onSubmit={handleResolveSubmit}>
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#334155', marginBottom: '6px' }}>
                   RESOLUTION ACTION:
                 </label>
                 <select
                   value={resolutionAction}
                   onChange={(e) => setResolutionAction(e.target.value)}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '13px', fontWeight: 600, color: '#1e293b' }}
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1', fontSize: '13px', fontWeight: 600, color: isDark ? '#f8fafc' : '#1e293b', background: isDark ? '#1e293b' : '#ffffff' }}
                 >
                   <option value="ACCEPT">ACCEPT (Override Flag)</option>
                   <option value="CORRECT">CORRECT (Fix Field Value)</option>
@@ -801,7 +825,7 @@ export default function FinanceReconciliationDesk() {
               </div>
 
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#334155', marginBottom: '6px' }}>
                   MANDATORY AUDIT REASON:
                 </label>
                 <textarea
@@ -810,7 +834,7 @@ export default function FinanceReconciliationDesk() {
                   value={resolutionReason}
                   onChange={(e) => setResolutionReason(e.target.value)}
                   placeholder="State the justification, historical verification, or standardized client name..."
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '12.5px', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1', fontSize: '12.5px', boxSizing: 'border-box', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a' }}
                 />
               </div>
 
@@ -819,7 +843,7 @@ export default function FinanceReconciliationDesk() {
                   type="button"
                   onClick={() => setResolvingId(null)}
                   disabled={resolvingLoading}
-                  style={{ padding: '9px 16px', borderRadius: '8px', background: '#f1f5f9', color: '#475569', border: 'none', fontWeight: 700, fontSize: '12.5px', cursor: 'pointer' }}
+                  style={{ padding: '9px 16px', borderRadius: '8px', background: isDark ? '#1e293b' : '#f1f5f9', color: isDark ? '#cbd5e1' : '#475569', border: isDark ? '1px solid #334155' : 'none', fontWeight: 700, fontSize: '12.5px', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
@@ -839,25 +863,25 @@ export default function FinanceReconciliationDesk() {
       {/* 6. RECONCILIATION SUMMARY REPORT & CUSTOMER BREAKDOWN (FR-22, DAT-08) WITH STICKY SCROLL */}
       <div 
         style={{ 
-          background: '#ffffff', 
+          background: isDark ? '#111827' : '#ffffff', 
           borderRadius: '24px', 
           padding: '24px 28px', 
-          border: '1px solid var(--cq-line)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+          boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+            <h3 style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
               Customer Distribution & Pseudonymization Audit
             </h3>
-            <p style={{ margin: 0, fontSize: '12.5px', color: '#64748b' }}>
+            <p style={{ margin: 0, fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
               Audit log of 39 distinct customer accounts with auto-pseudonymized self-paying individuals (INDIV-C026 &mdash; C040).
             </p>
           </div>
 
           <div style={{ position: 'relative', minWidth: '280px' }}>
-            <Search size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: '#94a3b8' }} />
+            <Search size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: isDark ? '#94a3b8' : '#64748b' }} />
             <input
               type="text"
               placeholder="Search customer account..."
@@ -867,31 +891,33 @@ export default function FinanceReconciliationDesk() {
                 width: '100%',
                 padding: '8px 12px 8px 36px',
                 fontSize: '12.5px',
-                border: '1.5px solid #cbd5e1',
+                border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
                 borderRadius: '10px',
                 outline: 'none',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#0f172a'
               }}
             />
           </div>
         </div>
 
         {/* Scrollable Container with Sticky Table Header */}
-        <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
-            <thead style={{ position: 'sticky', top: 0, background: '#f8fafc', zIndex: 2, borderBottom: '1px solid #e2e8f0' }}>
+            <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
               <tr>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>CLIENT ACCOUNT / CUSTOMER</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>ENTITY CLASSIFICATION</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569', textAlign: 'right' }}>RECONCILED RECORDS</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: '#475569' }}>SECURITY & DATA PROTECTION</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>CLIENT ACCOUNT / CUSTOMER</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>ENTITY CLASSIFICATION</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', textAlign: 'right' }}>RECONCILED RECORDS</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>SECURITY & DATA PROTECTION</th>
               </tr>
             </thead>
             <tbody>
               {filteredCustomers.length > 0 ? (
                 filteredCustomers.map((c, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0f172a' }}>
+                  <tr key={idx} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {c.is_pseudonymized_individual ? (
                           <UserCheck size={16} color="#0891b2" />
@@ -903,16 +929,16 @@ export default function FinanceReconciliationDesk() {
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       {c.is_pseudonymized_individual ? (
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#0891b2', background: '#ecfeff', padding: '3px 8px', borderRadius: '6px', border: '1px solid #a5f3fc' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#38bdf8' : '#0891b2', background: isDark ? 'rgba(8, 145, 178, 0.2)' : '#ecfeff', padding: '3px 8px', borderRadius: '6px', border: isDark ? '1px solid rgba(8, 145, 178, 0.35)' : '1px solid #a5f3fc' }}>
                           INDIVIDUAL RETAIL (SELF-PAYING)
                         </span>
                       ) : (
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7', background: '#e0f2fe', padding: '3px 8px', borderRadius: '6px', border: '1px solid #bae6fd' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#38bdf8' : '#0284c7', background: isDark ? 'rgba(2, 132, 199, 0.2)' : '#e0f2fe', padding: '3px 8px', borderRadius: '6px', border: isDark ? '1px solid rgba(2, 132, 199, 0.35)' : '1px solid #bae6fd' }}>
                           CORPORATE CLIENT
                         </span>
                       )}
                     </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 800, color: '#1e293b' }}>
+                    <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 800, color: isDark ? '#f8fafc' : '#1e293b' }}>
                       {c.row_count} records
                     </td>
                     <td style={{ padding: '12px 16px' }}>
