@@ -35,7 +35,7 @@ import {
   triggerExpirySweep,
   fetchQuizzes
 } from '../services/api';
-import Mascot from '../components/Mascot';
+import BitMascot from '../components/BitMascot/BitMascot';
 import '../styles/admin.css';
 import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
@@ -604,7 +604,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             <Award size={12} color="#fff" />
             {gamLoading ? 'LEVEL 1' : `LEVEL ${level ?? 1} • ${(points ?? 0).toLocaleString()} XP`}
           </span>
-          <Mascot />
+          <BitMascot size={210} />
         </div>
       </div>
 
