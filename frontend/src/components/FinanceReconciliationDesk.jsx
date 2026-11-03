@@ -25,6 +25,7 @@ import {
   commitImportBatch
 } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Rich Pilot Dataset Fallbacks for Defense Demonstration & Resilient Offline Rendering (Table 28, FR-22)
 export const FALLBACK_BATCHES = [
@@ -203,6 +204,7 @@ export const FALLBACK_DISCREPANCIES = {
 
 export default function FinanceReconciliationDesk() {
   const { token, currentUser } = useAuth();
+  const { isDark } = useTheme?.() || { isDark: false };
   const isAdmin = currentUser?.role === 'admin';
 
   const [batches, setBatches] = useState(FALLBACK_BATCHES);
