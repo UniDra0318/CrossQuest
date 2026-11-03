@@ -654,3 +654,66 @@ def test_tc_gam_13_quiz_catalog_and_authoring(client: TestClient, gamification_f
     assert list_resp.status_code == 200
     quizzes = list_resp.json()
     assert any(q["id"] == quiz_id for q in quizzes)
+
+
+def test_tc_live_quiz_broadcast(client: TestClient, gamification_fixture):
+    """TC-LIVE-01: Instant in-session live pop-up quiz broadcast lifecycle (FR-04, SEC-26)."""
+    user1 = gamification_fixture["user1"]
+    trainer = gamification_fixture["trainer"]
+    trainee_token = create_access_token(subject=user1.id)
+    trainer_token = create_access_token(subject=trainer.id)
+
+    # 1. Non-trainer / non-admin is forbidden from starting live quiz broadcast
+    fbd_resp = client.post(
+        "/api/v1/gamification/live-broadcast",
+        json={"quiz_id": "act-1", "title": "Zero-Trust Pop-Up Sprint"},
+        headers={"Authorization": f"Bearer {trainee_token}"}
+    )
+    assert fbd_resp.status_code == 403
+
+    # 2. Trainer triggers live pop-up broadcast
+    start_resp = client.post(
+        "/api/v1/gamification/live-broadcast",
+        json={
+            "quiz_id": "act-1",
+            "title": "Zero-Trust Pop-Up Sprint",
+            "instructor": "Lead Trainer David Lim",
+            "session_code": "SESS-2026-08A",
+            "duration_seconds": 300,
+            "questions_count": 4
+        },
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    assert start_resp.status_code == 200
+    b_data = start_resp.json()
+    assert b_data["active"] is True
+    assert b_data["quiz_id"] == "act-1"
+    assert b_data["session_code"] == "SESS-2026-08A"
+
+    # 3. Trainee queries active broadcast (instant pop-up check)
+    get_resp = client.get("/api/v1/gamification/live-broadcast")
+    assert get_resp.status_code == 200
+    res_data = get_resp.json()
+    assert res_data["active"] is True
+    assert res_data["broadcast"]["title"] == "Zero-Trust Pop-Up Sprint"
+
+    # 4. Trainee cannot end broadcast
+    fbd_end = client.post(
+        "/api/v1/gamification/live-broadcast/end",
+        headers={"Authorization": f"Bearer {trainee_token}"}
+    )
+    assert fbd_end.status_code == 403
+
+    # 5. Trainer ends live broadcast
+    end_resp = client.post(
+        "/api/v1/gamification/live-broadcast/end",
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    assert end_resp.status_code == 200
+    assert end_resp.json()["active"] is False
+
+    # 6. Verify broadcast is now inactive
+    final_get = client.get("/api/v1/gamification/live-broadcast")
+    assert final_get.status_code == 200
+    assert final_get.json()["active"] is False
+    assert final_get.json()["broadcast"] is None

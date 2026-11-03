@@ -226,6 +226,54 @@ export async function submitQuizAttempt(payload, token) {
   return null;
 }
 
+export async function broadcastLiveQuiz(payload, token) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('crossquest_auth_token') : null);
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    const res = await fetch(`${API_BASE}/gamification/live-broadcast`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn('API error broadcasting live quiz:', err);
+  }
+  return null;
+}
+
+export async function fetchActiveLiveBroadcast() {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`${API_BASE}/gamification/live-broadcast`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    // Network or fallback
+  }
+  return { active: false, broadcast: null };
+}
+
+export async function endLiveQuizBroadcast(token) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('crossquest_auth_token') : null);
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    const res = await fetch(`${API_BASE}/gamification/live-broadcast/end`, {
+      method: 'POST',
+      headers
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn('API error ending live quiz broadcast:', err);
+  }
+  return null;
+}
+
 export async function fetchStaffUsers(token) {
   try {
     const res = await authFetch(`${API_BASE}/users/`, {}, token);

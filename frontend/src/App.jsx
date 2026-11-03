@@ -12,6 +12,7 @@ import TraineeDashboard from './views/TraineeDashboard';
 import LandingView from './views/LandingView';
 import CryptoSandboxLab from './views/CryptoSandboxLab';
 import InstallPwaModal from './components/InstallPwaModal';
+import LiveQuizPopUpModal from './components/LiveQuizPopUpModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 import './styles/darkmode.css';
@@ -199,6 +200,7 @@ function MainAppShell({ activeSubPage }) {
         </main>
       </div>
 
+      <LiveQuizPopUpModal />
       <InstallPwaModal />
     </div>
   );

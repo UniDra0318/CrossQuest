@@ -13,6 +13,7 @@ import uuid
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Query
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -499,6 +500,63 @@ def submit_quiz_attempt(
         streak=streak,
         current_streak=streak
     )
+
+
+# In-memory live quiz broadcast state for instant pop-up assessments (FR-04, SEC-26)
+CURRENT_LIVE_BROADCAST: Optional[dict] = None
+
+class LiveBroadcastPayload(BaseModel):
+    quiz_id: str
+    title: str
+    instructor: Optional[str] = "Lead Trainer David Lim"
+    session_code: Optional[str] = "SESS-2026-08A"
+    duration_seconds: Optional[int] = 300
+    description: Optional[str] = None
+    questions_count: Optional[int] = 4
+
+@router.post("/live-broadcast")
+def start_live_quiz_broadcast(
+    payload: LiveBroadcastPayload,
+    current_user: User = Depends(get_current_user)
+):
+    """Trainer or Admin triggers an instant pop-up quiz broadcast across all active trainees (FR-04, SEC-26)."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers or administrators can broadcast live quizzes.")
+
+    global CURRENT_LIVE_BROADCAST
+    CURRENT_LIVE_BROADCAST = {
+        "active": True,
+        "quiz_id": payload.quiz_id,
+        "title": payload.title,
+        "instructor": payload.instructor or current_user.full_name or "Lead Trainer",
+        "session_code": payload.session_code or "SESS-2026-08A",
+        "duration_seconds": payload.duration_seconds or 300,
+        "description": payload.description or "Immediate live assessment initiated by your lead instructor.",
+        "questions_count": payload.questions_count or 4,
+        "started_at": datetime.utcnow().isoformat(),
+        "broadcast_id": str(uuid.uuid4())
+    }
+    return CURRENT_LIVE_BROADCAST
+
+@router.get("/live-broadcast")
+def get_live_quiz_broadcast():
+    """Returns the currently active live broadcast, if any."""
+    global CURRENT_LIVE_BROADCAST
+    if CURRENT_LIVE_BROADCAST and CURRENT_LIVE_BROADCAST.get("active"):
+        return {"active": True, "broadcast": CURRENT_LIVE_BROADCAST}
+    return {"active": False, "broadcast": None}
+
+@router.post("/live-broadcast/end")
+def end_live_quiz_broadcast(
+    current_user: User = Depends(get_current_user)
+):
+    """Trainer or Admin ends the active live broadcast."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers or administrators can end broadcasts.")
+
+    global CURRENT_LIVE_BROADCAST
+    CURRENT_LIVE_BROADCAST = None
+    return {"active": False, "message": "Live quiz broadcast ended."}
 
 
 @router.post("/quizzes/{quiz_id}/close")

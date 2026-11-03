@@ -40,9 +40,29 @@ export default function TrainerLayout({ activeTab, onTabChange, children }) {
             Zero-Trust cryptography course delivery, trainee certification workbench, and real-time competency analytics.
           </p>
 
-          <div className="trn-chips">
+          <div className="trn-chips" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span className="trn-glass">WATERS11 / BSW07 ENVELOPE ENGINE</span>
             <span className="trn-glass trn-glass--amber">MULTI-TENANT CRYPTOGRAPHIC ISOLATION</span>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('cq_open_trainer_broadcast_modal'))}
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
+                color: '#ffffff',
+                border: 'none',
+                fontWeight: 800,
+                cursor: 'pointer',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.4)',
+                fontSize: '0.82rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              ⚡ Instant Pop-Up Quiz
+            </button>
           </div>
 
           <div className="adm-tabs" style={{ marginTop: '20px' }}>
