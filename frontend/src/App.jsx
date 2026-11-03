@@ -36,7 +36,7 @@ export function resolveView(subPage, role) {
       case 'account_manager':
       case 'crossworks_staff': return 'staff_records';
       case 'trainer': return 'trainer_courses';
-      case 'finance': return 'finance_reconciliation';
+      case 'finance':
       case 'company_staff': return 'company_overview';
       case 'trainee': return 'trainee_quest';
       default: return 'overview';

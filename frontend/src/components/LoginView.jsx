@@ -27,14 +27,22 @@ export default function LoginView() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await loginWithCredentials(email, password);
+    const result = await loginWithCredentials(email, password);
     setLoading(false);
-    navigate('/dashboard');
+    if (result?.user?.role === 'finance') {
+      navigate('/finance/reconciliation');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
-  const handleRoleQuickSelect = (roleKey) => {
-    loginRole(roleKey);
-    navigate('/dashboard');
+  const handleRoleQuickSelect = async (roleKey) => {
+    const user = await loginRole(roleKey);
+    if (roleKey === 'finance' || user?.role === 'finance') {
+      navigate('/finance/reconciliation');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const roleList = [

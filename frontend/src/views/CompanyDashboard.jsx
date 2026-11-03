@@ -91,11 +91,9 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
     ? (displayedRecords.reduce((acc, r) => acc + (r.score || 0), 0) / displayedRecords.length).toFixed(1)
     : '0.0';
 
-  const currentTab = ['company_trainees', 'audit_certificate', 'finance_reconciliation'].includes(activeSubView)
+  const currentTab = ['company_trainees', 'audit_certificate', 'finance_reconciliation', 'company_overview'].includes(activeSubView)
     ? activeSubView
-    : (isFinance && (activeSubView === 'dashboard' || !activeSubView))
-      ? 'finance_reconciliation'
-      : 'company_overview';
+    : (isFinance ? 'finance_reconciliation' : 'company_overview');
 
   const tabs = isFinance ? [
     { id: 'finance_reconciliation', label: 'Pilot Data Ingestion & Reconciliation Desk', icon: FileSpreadsheet },
