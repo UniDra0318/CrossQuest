@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Users } from 'lucide-react';
 import { TableEmptyRow } from '../../components/TableEmptyState';
 import { useTrainer } from '../TrainerContext';
 

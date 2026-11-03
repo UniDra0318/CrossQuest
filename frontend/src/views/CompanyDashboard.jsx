@@ -13,6 +13,7 @@ import {
   Award, 
   AlertTriangle, 
   FileSpreadsheet,
+  FileText,
   Search
 } from 'lucide-react';
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
