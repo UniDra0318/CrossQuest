@@ -18,6 +18,27 @@ import {
 } from 'lucide-react';
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import SpinCube from '../components/SpinCube';
+import '../styles/admin.css';
+import '../staff/staff.css';
+
+const FINANCE_CUBE_FACES = [
+  { label: 'LEDGER', bg: '#0369a1' },
+  { label: 'AUDIT', bg: '#0f766e' },
+  { label: 'FR-22', bg: '#312e81' },
+  { label: 'RECON', bg: '#0284c7' },
+  { label: 'SHA-256', bg: '#047857' },
+  { label: 'CP-ABE', bg: '#4338ca' }
+];
+
+const COMPANY_CUBE_FACES = [
+  { label: 'ACCESS', bg: '#1e3a8a' },
+  { label: 'TENANT', bg: '#1d4ed8' },
+  { label: 'CP-ABE', bg: '#4338ca' },
+  { label: 'ROSTER', bg: '#2563eb' },
+  { label: 'POLICY', bg: '#0f766e' },
+  { label: 'VERIFIED', bg: '#047857' }
+];
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { fetchRecords } from '../services/api';
@@ -107,96 +128,94 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
+    <div className="adm-main company-dashboard" style={{ maxWidth: '1440px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {usingFallback && (
-        <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', color: '#92400e', padding: '12px 18px', borderRadius: '14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', color: '#92400e', padding: '12px 18px', borderRadius: '14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <AlertTriangle size={18} color="#d97706" style={{ flexShrink: 0 }} />
           <span>Notice: Displaying cached baseline compliance data. Database synchronization in progress.</span>
         </div>
       )}
 
-      {/* TOP NAVIGATION TABS STRIP (MODERNIZED PILLS) */}
-      <nav 
-        aria-label="Portal Sections" 
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '10px',
-          background: isDark ? '#111827' : '#ffffff',
-          padding: '12px 16px',
-          borderRadius: '18px',
-          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-          boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.02)'
-        }}
-      >
-        {tabs.map(tab => {
-          const Icon = tab.icon;
-          const isActive = currentTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveView && setActiveView(tab.id)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 18px',
-                borderRadius: '12px',
-                fontSize: '13px',
-                fontWeight: isActive ? 800 : 600,
-                color: isActive ? (isDark ? '#c7d2fe' : '#4f46e5') : (isDark ? '#94a3b8' : '#64748b'),
-                background: isActive ? (isDark ? '#312e81' : '#eef2ff') : 'transparent',
-                border: isActive ? (isDark ? '1.5px solid #4338ca' : '1.5px solid #c7d2fe') : '1px solid transparent',
-                cursor: 'pointer',
-                boxShadow: isActive ? (isDark ? '0 2px 8px rgba(79, 70, 229, 0.3)' : '0 2px 8px rgba(79, 70, 229, 0.12)') : 'none',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Icon size={16} color={isActive ? (isDark ? '#a78bfa' : '#4f46e5') : (isDark ? '#64748b' : '#94a3b8')} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* 1. TOP BREADCRUMB BAR */}
+      <div className="adm-top">
+        <div className="adm-crumbs">
+          {isFinance ? (
+            <>CROSSWORKS ENTERPRISE / <strong>FINANCE &amp; RECONCILIATION DESK</strong></>
+          ) : (
+            <>ENTERPRISE CLIENT PORTAL / <strong>{(currentUser?.organization || 'COMPANY').toUpperCase()} COMPLIANCE</strong></>
+          )}
+        </div>
+      </div>
 
-      {/* 1. COMPANY / ENTERPRISE OVERVIEW TAB */}
-      {currentTab === 'company_overview' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Header Banner */}
-          <div 
-            style={{ 
-              background: isDark ? '#111827' : '#ffffff', 
-              borderRadius: '24px', 
-              padding: '28px 32px', 
-              border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', 
-              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.03)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              flexWrap: 'wrap',
-              gap: '16px'
-            }}
-          >
-            <div>
-              <h2 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px 0', color: isDark ? '#f8fafc' : '#0f172a' }}>
-                {isFinance ? 'Enterprise Client Accounts & Compliance Oversight' : `${currentUser?.organization} - Compliance Portal`}
-              </h2>
-              <p style={{ margin: 0, fontSize: '13.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.5 }}>
-                {isFinance 
-                  ? 'Cross-tenant compliance audit, financial reconciliation metrics, and cryptographic isolation monitoring across all 39 enterprise client accounts.'
-                  : 'Corporate training progress, audit verification, and data isolation oversight.'}
-              </p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: '#059669', background: '#ecfdf5', padding: '4px 12px', borderRadius: '14px', border: '1px solid #a7f3d0' }}>
-                Tenant Isolation: Verified
-              </span>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', padding: '4px 12px', borderRadius: '14px', border: '1px solid #ddd6fe' }}>
-                CP-ABE Encryption: Active
-              </span>
-            </div>
+      {/* 2. 3D HERO BANNER WITH MATCHING DOCKED NAVIGATION TABS */}
+      <div className={`adm-hero ${isFinance ? 'adm-hero--finance' : 'adm-hero--company'}`}>
+        <div className="adm-hero__text">
+          <span className={`adm-pill ${isFinance ? 'adm-pill--cyan' : 'adm-pill--blue'}`}>
+            <span className="adm-live" /> {isFinance ? 'RECONCILIATION & AUDIT AUTHORITY' : 'CLIENT COMPLIANCE ACCESS'}
+          </span>
+          <h1>
+            {isFinance 
+              ? 'Enterprise Financial Reconciliation & Multi-Tenant Audit' 
+              : `${currentUser?.organization || 'Enterprise'} Workforce Compliance & Verification`}
+          </h1>
+          <p>
+            {isFinance
+              ? 'Controlled pre-screening pipeline, physical-to-ordinal row reconciliation, and cryptographic proof across all client cohorts.'
+              : 'Corporate training milestones, cryptographic access policy verification, and tamper-evident compliance certification.'}
+          </p>
+
+          <div className="stf-hero-chips">
+            {isFinance ? (
+              <>
+                <span className="stf-glass stf-glass--ok">FR-22 / DAT-01 / DAT-08 COMPLIANT</span>
+                <span className="stf-glass">IN-MEMORY BILLING STRIP</span>
+                <span className="stf-glass stf-glass--amber">AUG 1, 2026 CUTOFF BASELINE</span>
+              </>
+            ) : (
+              <>
+                <span className="stf-glass stf-glass--ok">TENANT ISOLATION: VERIFIED</span>
+                <span className="stf-glass">CP-ABE ENCRYPTION: ACTIVE</span>
+                <span className="stf-glass stf-glass--amber">{companyCode} AUTHORIZED SCOPE</span>
+              </>
+            )}
           </div>
+
+          <div className="adm-tabs" style={{ marginTop: '20px' }}>
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              const isActive = currentTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={isActive ? 'on' : ''}
+                  onClick={() => setActiveView && setActiveView(tab.id)}
+                >
+                  <Icon size={15} style={{ opacity: isActive ? 1 : 0.85 }} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 3D Visual Scene */}
+        <div className="adm-hero__cube">
+          <span className="adm-float adm-float--tl">
+            {isFinance ? 'ROW RECONCILIATION' : 'ROW-LEVEL ISOLATION'}
+          </span>
+          <span className="adm-float adm-float--br adm-float--orange">
+            {isFinance ? 'SHA-256 AUDIT LOG' : 'VERIFIED INTEGRITY'}
+          </span>
+          <SpinCube size={76} faces={isFinance ? FINANCE_CUBE_FACES : COMPANY_CUBE_FACES} />
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div style={{ marginTop: '24px' }}>
+        {/* 1. COMPANY / ENTERPRISE OVERVIEW TAB */}
+        {currentTab === 'company_overview' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
           {/* Metric Tiles Matrix */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px' }}>
@@ -464,6 +483,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
       {currentTab === 'finance_reconciliation' && (
         <FinanceReconciliationDesk />
       )}
+      </div>
     </div>
   );
 }

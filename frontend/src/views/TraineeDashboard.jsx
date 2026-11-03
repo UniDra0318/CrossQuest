@@ -36,6 +36,7 @@ import {
   fetchQuizzes
 } from '../services/api';
 import Mascot from '../components/Mascot';
+import '../styles/admin.css';
 import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
 import Podium from '../components/Podium';
@@ -516,7 +517,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   }
 
   return (
-    <div className="dashboard-content-layout">
+    <div className="adm-main trainee-dashboard" style={{ maxWidth: '1440px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* OFFLINE CONNECTIVITY NOTICE BANNER (SEC-26) */}
       {!isOnline && (
         <div style={{ background: '#451a03', border: '1px solid #f59e0b', color: '#fef3c7', padding: '14px 18px', borderRadius: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -527,118 +528,91 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         </div>
       )}
 
-      {/* IN-PAGE TRAINEE WORKSPACE TAB STRIP */}
-      <nav className="trainee-nav-tabs" aria-label="Trainee Sections" style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '8px',
-        marginBottom: '20px',
-        borderBottom: '1px solid #e2e8f0',
-        paddingBottom: '10px'
-      }}>
-        {traineeTabs.map(tab => {
-          const Icon = tab.icon;
-          const isActive = currentTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveView && setActiveView(tab.id)}
-              className={`trainee-tab-pill ${isActive ? 'active' : ''}`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 16px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: isActive ? '700' : '600',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Icon size={15} color={isActive ? '#4f46e5' : '#94a3b8'} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* 1. TOP BREADCRUMB BAR */}
+      <div className="adm-top">
+        <div className="adm-crumbs">
+          CROSSQUEST ENTERPRISE / <strong>TRAINEE LEARNING QUEST</strong>
+        </div>
+      </div>
 
+      {/* 2. 3D HERO BANNER WITH MATCHING DOCKED NAVIGATION TABS */}
+      <div className="adm-hero adm-hero--trainee">
+        <div className="adm-hero__text">
+          <span className="adm-pill adm-pill--amber">
+            <Sparkles size={11} className="text-gold" /> GAMIFIED ENTERPRISE LEARNING
+          </span>
+          <h1>Welcome back, {currentUser?.name || 'Trainee'}!</h1>
+          <p>
+            Complete interactive quests, earn tamper-evident certifications, and climb the corporate leaderboard.
+          </p>
+
+          {/* Enterprise Learning Action Buttons */}
+          {currentTab === 'trainee_quest' && (
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
+              <button 
+                type="button"
+                className={`template-cta-btn template-cta-btn--primary${!isOnline ? ' btn-disabled' : ''}`}
+                onClick={() => handleStartQuizById('act-1')}
+                disabled={!isOnline}
+                title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
+                style={{ padding: '8px 16px', fontSize: '13px' }}
+              >
+                <Play size={14} fill="currentColor" />
+                <span>Start Assigned Quest</span>
+              </button>
+              <button 
+                type="button"
+                className="template-cta-btn template-cta-btn--secondary"
+                onClick={() => {
+                  const el = document.getElementById('assigned-activities-section');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                style={{ padding: '8px 16px', fontSize: '13px' }}
+              >
+                <BookOpen size={14} />
+                <span>View All Modules</span>
+              </button>
+            </div>
+          )}
+
+          <div className="adm-tabs" style={{ marginTop: currentTab === 'trainee_quest' ? '6px' : '20px' }}>
+            {traineeTabs.map(tab => {
+              const Icon = tab.icon;
+              const isActive = currentTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={isActive ? 'on' : ''}
+                  onClick={() => setActiveView && setActiveView(tab.id)}
+                >
+                  <Icon size={15} style={{ opacity: isActive ? 1 : 0.85 }} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 3D Mascot Scene */}
+        <div className="adm-hero__cube">
+          <span className="adm-float adm-float--tl">
+            <Flame size={12} color="#f97316" fill="#f97316" />
+            {`${streakDays ?? currentUser?.streak ?? 1} DAYS STREAK`}
+          </span>
+          <span className="adm-float adm-float--br adm-float--orange">
+            <Award size={12} color="#fff" />
+            {gamLoading ? 'LEVEL 1' : `LEVEL ${level ?? 1} • ${(points ?? 0).toLocaleString()} XP`}
+          </span>
+          <Mascot />
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div style={{ marginTop: '24px' }}>
       {/* 1. MAIN TRAINEE QUEST VIEW */}
       {(currentTab === 'trainee_quest') && (
         <>
-          {/* 1. HERO BANNER WITH 3D MASCOT */}
-          <div className="template-hero-banner">
-            <div className="template-hero-left">
-              <div className="template-hero-badge">
-                <Sparkles size={13} className="text-gold" />
-                <span>CROSSQUEST GAMIFIED LEARNING</span>
-              </div>
-              <h1 className="template-hero-title">Welcome back, {currentUser?.name}!</h1>
-              <p className="template-hero-subtitle">
-                Complete today's interactive quest to extend your <strong>{Number.isFinite(Number(streakDays)) ? `${streakDays}-day` : '7-day'} streak</strong> and climb the corporate leaderboard.
-              </p>
-
-              {/* Enterprise Learning Action Buttons */}
-              <div className="template-hero-actions">
-                <button 
-                  className={`template-cta-btn template-cta-btn--primary${!isOnline ? ' btn-disabled' : ''}`}
-                  onClick={() => handleStartQuizById('act-1')}
-                  disabled={!isOnline}
-                  title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
-                >
-                  <Play size={16} fill="currentColor" />
-                  <span>Start Assigned Quest</span>
-                </button>
-                <button 
-                  className="template-cta-btn template-cta-btn--secondary"
-                  onClick={() => {
-                    const el = document.getElementById('assigned-activities-section');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  <BookOpen size={15} />
-                  <span>View All Modules</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="template-hero-right">
-              {/* Badges container on right */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                {/* Floating streak pill - live from backend */}
-                <div className="template-hero-streak-badge">
-                  <div className="streak-flame-circle">
-                    <Flame size={16} className="text-orange" fill="#ff6a00" />
-                  </div>
-                  <div className="streak-text-group">
-                    <span className="streak-val">
-                      {`${streakDays ?? currentUser?.streak ?? 1} Days`}
-                    </span>
-                    <span className="streak-lbl">ACTIVE STREAK</span>
-                  </div>
-                </div>
-
-                {/* Level & Points Pill */}
-                <div className="template-hero-streak-badge">
-                  <div className="streak-flame-circle" style={{ background: '#ecfdf5' }}>
-                    <Award size={16} color="#059669" />
-                  </div>
-                  <div className="streak-text-group">
-                    <span className="streak-val">
-                      {gamLoading ? '...' : `Level ${level ?? 1}`}
-                    </span>
-                    <span className="streak-lbl">{gamLoading ? '...' : `${(points ?? 0).toLocaleString()} XP`}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pure CSS 3D Quest Bot Mascot */}
-              <div className="template-mascot-container">
-                <Mascot />
-              </div>
-            </div>
-          </div>
 
           {/* 2. ASSIGNED COURSE ACTIVITIES (4 CARDS WITH 3D ISOMETRIC GRAPHICS) */}
           <div id="assigned-activities-section" className="template-section-block">
@@ -1317,6 +1291,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

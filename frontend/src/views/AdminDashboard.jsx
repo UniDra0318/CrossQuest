@@ -412,7 +412,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         </div>
       </div>
       {/* 2. 3D HERO BANNER WITH VIEW NAVIGATION TABS */}
-      <div className="adm-hero">
+      <div className="adm-hero adm-hero--admin">
         <div className="adm-hero__text">
           <span className="adm-pill">
             <span className="adm-live" /> ACTIVE AUTHORITY

@@ -30,7 +30,7 @@ export default function TrainerLayout({ activeTab, onTabChange, children }) {
       </div>
 
       {/* 2. 3D HERO BANNER */}
-      <div className="adm-hero">
+      <div className="adm-hero adm-hero--trainer">
         <div className="adm-hero__text">
           <span className="adm-pill adm-pill--green">
             <span className="adm-live" /> INSTRUCTOR ACCESS
