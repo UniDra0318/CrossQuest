@@ -38,6 +38,81 @@ export function usePagination(items = [], pageSize = 10, initialPage = 1) {
 }
 
 /**
+ * Compact header pagination control (e.g. for card toolbars and table headers)
+ */
+export function TablePaginationCompact({
+  currentPage = 1,
+  totalItems = 0,
+  pageSize = 10,
+  onPageChange,
+  style = {}
+}) {
+  const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
+  const isDark = effectiveTheme === 'dark';
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  if (totalItems <= pageSize) return null;
+
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '3px 8px',
+        borderRadius: '10px',
+        background: isDark ? 'rgba(30, 41, 59, 0.7)' : '#f1f5f9',
+        border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0',
+        fontSize: '12px',
+        ...style
+      }}
+    >
+      <button
+        type="button"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange?.(currentPage - 1)}
+        title="Previous Page"
+        style={{
+          border: 'none',
+          background: 'transparent',
+          color: isDark ? '#cbd5e1' : '#334155',
+          cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+          opacity: currentPage === 1 ? 0.35 : 1,
+          padding: '2px 4px',
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
+        <ChevronLeft size={14} />
+      </button>
+
+      <span style={{ fontWeight: 700, fontFamily: 'monospace', color: isDark ? '#f8fafc' : '#0f172a' }}>
+        {currentPage} / {totalPages}
+      </span>
+
+      <button
+        type="button"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange?.(currentPage + 1)}
+        title="Next Page"
+        style={{
+          border: 'none',
+          background: 'transparent',
+          color: isDark ? '#cbd5e1' : '#334155',
+          cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+          opacity: currentPage === totalPages ? 0.35 : 1,
+          padding: '2px 4px',
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
+        <ChevronRight size={14} />
+      </button>
+    </div>
+  );
+}
+
+/**
  * Standard table pagination controls with dark/light mode compatibility,
  * smart ellipsis windowing, and instant 10-item page navigation.
  */
@@ -97,13 +172,14 @@ export function TablePagination({
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: '12px',
-        padding: '14px 18px',
+        padding: '14px 20px',
         borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
-        background: isDark ? 'rgba(15, 23, 42, 0.65)' : '#ffffff',
-        borderRadius: '0 0 14px 14px',
+        background: isDark ? '#111827' : '#ffffff',
+        borderRadius: '0 0 16px 16px',
         fontSize: '12.5px',
         color: isDark ? '#94a3b8' : '#64748b',
         boxSizing: 'border-box',
+        width: '100%',
         ...style
       }}
     >

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TableEmptyRow } from './TableEmptyState';
-import { TablePagination, usePagination } from './TablePagination';
+import { TablePagination, TablePaginationCompact, usePagination } from './TablePagination';
 import {
   FileSpreadsheet,
   UploadCloud,
@@ -699,13 +699,21 @@ export default function FinanceReconciliationDesk() {
               Automated anomaly detection: Pre-cutoff dates, duplicate participant submissions, and punctuation variants.
             </p>
           </div>
-          <span style={{ fontSize: '11.5px', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', background: isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb', color: isDark ? '#fbbf24' : '#b45309', border: isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a' }}>
-            {discrepancies.filter(d => !d.resolution).length} Action Items Pending
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <TablePaginationCompact
+              currentPage={discPage}
+              totalItems={totalDiscrepancies}
+              pageSize={10}
+              onPageChange={setDiscPage}
+            />
+            <span style={{ fontSize: '11.5px', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', background: isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb', color: isDark ? '#fbbf24' : '#b45309', border: isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a' }}>
+              {discrepancies.filter(d => !d.resolution).length} Action Items Pending
+            </span>
+          </div>
         </div>
 
         {/* Scrollable Container with Sticky Table Header */}
-        <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
             <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
               <tr>
@@ -922,7 +930,7 @@ export default function FinanceReconciliationDesk() {
         </div>
 
         {/* Scrollable Container with Sticky Table Header */}
-        <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
             <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
               <tr>

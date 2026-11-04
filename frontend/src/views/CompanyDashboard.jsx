@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TableEmptyRow } from '../components/TableEmptyState';
-import { TablePagination, usePagination } from '../components/TablePagination';
+import { TablePagination, TablePaginationCompact, usePagination } from '../components/TablePagination';
 import { 
   Building2, 
   Users, 
@@ -273,13 +273,21 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
               <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                 {isFinance ? 'Enterprise Participant Milestone Summary' : 'Employee Milestone Summary'}
               </h3>
-              <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                {displayedRecords.length} records in scope
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <TablePaginationCompact
+                  currentPage={milestonePage}
+                  totalItems={totalMilestones}
+                  pageSize={10}
+                  onPageChange={setMilestonePage}
+                />
+                <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                  {displayedRecords.length} records in scope
+                </span>
+              </div>
             </div>
 
             {/* Scrollable Container with Sticky Table Header */}
-            <div style={{ maxHeight: '380px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
                 <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
                   <tr>
@@ -381,7 +389,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
           </div>
 
           {/* Scrollable Container with Sticky Table Header */}
-          <div style={{ maxHeight: '420px', overflowY: 'auto', overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
+          <div style={{ overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
               <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
                 <tr>

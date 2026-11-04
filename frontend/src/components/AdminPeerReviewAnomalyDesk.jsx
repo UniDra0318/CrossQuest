@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TableEmptyRow } from './TableEmptyState';
-import { TablePagination, usePagination } from './TablePagination';
+import { TablePagination, TablePaginationCompact, usePagination } from './TablePagination';
 import { 
   ShieldAlert, 
   AlertTriangle, 
@@ -670,8 +670,15 @@ export default function AdminPeerReviewAnomalyDesk() {
               </span>
             </div>
 
-            {/* Right: Search */}
-            <div style={{ position: 'relative', minWidth: '240px' }}>
+            {/* Right: Compact pagination & Search */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <TablePaginationCompact
+                currentPage={alertPage}
+                totalItems={totalAlerts}
+                pageSize={10}
+                onPageChange={setAlertPage}
+              />
+              <div style={{ position: 'relative', minWidth: '220px' }}>
               <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: themeStyles.textMuted }} />
               <input
                 type="text"
@@ -690,22 +697,18 @@ export default function AdminPeerReviewAnomalyDesk() {
                 }}
               />
             </div>
+            </div>
           </div>
 
-          {/* Alerts Feed (Contained & Scrollable) */}
+          {/* Alerts Feed (Natural Height, 10 items per page) */}
           <div 
-            className="adm-scroll"
             style={{ 
               display: 'flex', 
               flexDirection: 'column', 
               gap: '14px',
-              maxHeight: 'clamp(480px, calc(100vh - 360px), 720px)',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              padding: '6px 10px 16px 4px',
+              padding: '6px 0 16px 0',
               border: 'none',
-              borderRadius: '16px',
-              scrollbarWidth: 'thin'
+              borderRadius: '16px'
             }}
           >
             {filteredAlerts.length > 0 ? (

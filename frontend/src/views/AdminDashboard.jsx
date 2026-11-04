@@ -31,7 +31,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { TableEmptyBlock } from '../components/TableEmptyState';
-import { TablePagination, usePagination } from '../components/TablePagination';
+import { TablePagination, TablePaginationCompact, usePagination } from '../components/TablePagination';
 import { 
   admin as defaultAdmin, 
   overview as defaultOverview, 
@@ -751,7 +751,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </div>
             </div>
           </div>
-          <div className="adm-scroll">
+          <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
             <div className="adm-table">
               {/* Table Header */}
               <div className="adm-grid adm-grid--access adm-th">
@@ -931,7 +931,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             </button>
           </div>
 
-          <div className="adm-scroll" style={{ maxHeight: '440px', overflowY: 'auto' }}>
+          <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
             <div className="adm-table">
               <div className="adm-grid adm-th" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
                 <div>CLIENT COMPANY / TENANT</div>
@@ -1026,7 +1026,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               <h2>Master Record Vault</h2>
               <span className="adm-mono">Global store of multi-tenant cryptographic certificates & training records</span>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <TablePaginationCompact
+                currentPage={recordPage}
+                totalItems={totalRecords}
+                pageSize={10}
+                onPageChange={setRecordPage}
+              />
               <div className="adm-search">
                 <Search size={15} />
                 <input 
@@ -1047,7 +1053,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </button>
             </div>
           </div>
-          <div className="adm-scroll">
+          <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
             <div className="adm-table">
               <div className="adm-grid adm-grid--vault adm-th">
                 <div>RECORD ID</div>
