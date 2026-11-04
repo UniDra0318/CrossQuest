@@ -233,6 +233,7 @@ export async function getQuizzes(token) {
             answerLabel: q.answerLabel || q.targetHotspotLabel || '',
             pairs: q.pairs || [],
             diagramType: q.diagramType || 'security_pipeline',
+            diagramTitle: q.diagramTitle || undefined,
             points: q.points || 10,
             explanation: q.explanation || ''
           };
@@ -335,6 +336,7 @@ export async function addQuestion(quizId, q = {}, token) {
     pairs: q.pairs || [],
     diagramType: q.diagramType || 'security_pipeline',
     diagramType: q.diagramType || 'security_pipeline',
+    diagramTitle: q.diagramTitle || undefined,
     explanation: q.explanation || 'Verified compliance rubric citation.'
   };
 
@@ -388,6 +390,8 @@ export async function updateQuestion(quizId, qid, q = {}, token) {
     steps: q.steps || [],
     answerLabel: q.answerLabel || '',
     pairs: q.pairs || [],
+    diagramType: q.diagramType || 'security_pipeline',
+    diagramTitle: q.diagramTitle || undefined,
     explanation: q.explanation || 'Verified compliance rubric citation.'
   };
 
