@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TableEmptyRow } from './TableEmptyState';
+import { TablePagination, usePagination } from './TablePagination';
 import { 
   Key, 
   Lock, 
@@ -211,7 +212,7 @@ export default function SecurityDashboard({
               </thead>
               <tbody>
                 {filteredRecords && filteredRecords.length > 0 ? (
-                  filteredRecords.map((record) => {
+                  pagedSecRecords.map((record) => {
                   const authorized = canStaffDecrypt(record);
                   return (
                     <tr key={record.id} className="record-row">

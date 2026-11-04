@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TableEmptyRow } from '../components/TableEmptyState';
+import { TablePagination, usePagination } from '../components/TablePagination';
 import { 
   Building2, 
   Users, 
@@ -291,7 +292,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                 </thead>
                 <tbody>
                   {displayedRecords && displayedRecords.length > 0 ? (
-                    displayedRecords.map((r) => (
+                    pagedMilestones.map((r) => (
                     <tr key={r.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
                       <td style={{ padding: '12px 16px', fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>{r.traineeName}</td>
                       {isFinance && (
@@ -321,6 +322,13 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={milestonePage}
+              totalItems={totalMilestones}
+              pageSize={10}
+              onPageChange={setMilestonePage}
+              itemName="milestone records"
+            />
           </div>
         </div>
       )}
@@ -387,7 +395,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
               </thead>
               <tbody>
                 {filteredRecords && filteredRecords.length > 0 ? (
-                  filteredRecords.map((r) => (
+                  pagedTrainees.map((r) => (
                   <tr key={r.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>

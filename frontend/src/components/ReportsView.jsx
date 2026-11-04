@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TableEmptyRow } from './TableEmptyState';
+import { TablePagination, usePagination } from './TablePagination';
 import { 
   Building2, 
   FileText, 
@@ -115,7 +116,7 @@ export default function ReportsView({ clientCompanies, records, currentStaff }) 
             </thead>
             <tbody>
               {companyRecords && companyRecords.length > 0 ? (
-                companyRecords.map((r) => (
+                pagedCompanyRecords.map((r) => (
                 <tr key={r.id}>
                   <td>
                     <div className="trainee-info-cell">
@@ -147,6 +148,13 @@ export default function ReportsView({ clientCompanies, records, currentStaff }) 
               )}
             </tbody>
           </table>
+          <TablePagination
+            currentPage={repPage}
+            totalItems={totalCompanyRecords}
+            pageSize={10}
+            onPageChange={setRepPage}
+            itemName="participant records"
+          />
         </div>
       </div>
     </div>

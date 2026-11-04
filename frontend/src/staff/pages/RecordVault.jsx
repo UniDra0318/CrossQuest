@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
+import { TablePagination, usePagination } from '../../components/TablePagination';
 import { 
   Search, 
   Lock, 
@@ -87,7 +88,7 @@ export default function RecordVault() {
 
             {/* Table Rows */}
             {filtered && filtered.length > 0 ? (
-              filtered.map((r) => {
+              pagedVaultRecords.map((r) => {
               const isDecrypted = Boolean(decryptedRecords[r.id]);
               const decData = decryptedRecords[r.id];
               const isDenied = Boolean(deniedAttempts[r.id]);
@@ -212,6 +213,13 @@ export default function RecordVault() {
               />
             )}
           </div>
+          <TablePagination
+            currentPage={vaultPage}
+            totalItems={totalVaultRecords}
+            pageSize={10}
+            onPageChange={setVaultPage}
+            itemName="encrypted records"
+          />
         </div>
 
         {/* Protection Footer Note */}

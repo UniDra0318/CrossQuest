@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users } from 'lucide-react';
 import { TableEmptyRow } from '../../components/TableEmptyState';
+import { TablePagination, usePagination } from '../../components/TablePagination';
 import { useTrainer } from '../TrainerContext';
 
 export default function Grade() {
@@ -344,7 +345,7 @@ export default function Grade() {
               </thead>
               <tbody>
                 {currentSession?.records && currentSession.records.length > 0 ? (
-                  currentSession.records.map((rec) => {
+                  pagedRecords.map((rec) => {
                     const comp = completions[rec.record_id] || { status: rec.status, score: rec.score ?? 85 };
                     const isSessionDone = currentSession.trainer_signed_off;
                     const isFuture = currentSession.is_future_dated;

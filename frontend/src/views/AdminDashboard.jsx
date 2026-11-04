@@ -31,6 +31,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { TableEmptyBlock } from '../components/TableEmptyState';
+import { TablePagination, usePagination } from '../components/TablePagination';
 import { 
   admin as defaultAdmin, 
   overview as defaultOverview, 
@@ -762,7 +763,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </div>
               {/* Table Rows */}
               {filteredStaff && filteredStaff.length > 0 ? (
-                filteredStaff.map((user) => {
+                pagedStaff.map((user) => {
                 const isEditing = editingStaffId === user.id;
                 return (
                   <div key={user.id} className="adm-row">
@@ -885,6 +886,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               )}
             </div>
           </div>
+          <TablePagination
+            currentPage={staffPage}
+            totalItems={totalStaff}
+            pageSize={10}
+            onPageChange={setStaffPage}
+            itemName="staff accounts"
+          />
         </div>
 
         {/* =====================================================================
@@ -934,7 +942,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </div>
 
               {companiesList && companiesList.length > 0 ? (
-                companiesList.map((c) => (
+                pagedCompanies.map((c) => (
                 <div key={c.code} className="adm-row" style={{ padding: '16px 28px' }}>
                   <div className="adm-grid" style={{ gridTemplateColumns: '1.8fr 1.3fr 1.4fr 1.2fr 130px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1050,7 +1058,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <div style={{ textAlign: 'right' }}>STATUS</div>
               </div>
               {filteredRecords && filteredRecords.length > 0 ? (
-                filteredRecords.map((r) => (
+                pagedRecords.map((r) => (
                 <div key={r.id} className="adm-row adm-grid adm-grid--vault">
                   <div className="adm-recid">
                     <FileText size={13} />
@@ -1090,6 +1098,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               )}
             </div>
           </div>
+          <TablePagination
+            currentPage={recordPage}
+            totalItems={totalRecords}
+            pageSize={10}
+            onPageChange={setRecordPage}
+            itemName="master records"
+          />
         </div>
       )}
       {/* =====================================================================

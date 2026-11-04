@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TableEmptyRow } from './TableEmptyState';
+import { TablePagination, usePagination } from './TablePagination';
 import { 
   Search, 
   Lock, 
@@ -135,7 +136,7 @@ export default function RecordsView({
             </thead>
             <tbody>
               {filteredRecords && filteredRecords.length > 0 ? (
-                filteredRecords.map((r) => {
+                pagedRecords.map((r) => {
                 const canAccess = isAuthorized(r);
                 return (
                   <tr key={r.id}>
@@ -186,6 +187,13 @@ export default function RecordsView({
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={recPage}
+          totalItems={totalRecs}
+          pageSize={10}
+          onPageChange={setRecPage}
+          itemName="training records"
+        />
       </div>
 
       {/* Access Denied Feedback Modal */}

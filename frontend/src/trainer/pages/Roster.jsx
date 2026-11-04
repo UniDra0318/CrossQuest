@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Users } from 'lucide-react';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
+import { TablePagination, usePagination } from '../../components/TablePagination';
 import { useTrainer } from '../TrainerContext';
 
 export default function Roster({ onNavigateTab }) {
@@ -101,7 +102,7 @@ export default function Roster({ onNavigateTab }) {
               subtitle="Adjust your search query, cohort, or certification state to view participants."
             />
           ) : (
-            filtered.map((t) => (
+            pagedRoster.map((t) => (
               <div key={t.id} className="adm-row adm-grid trn-rgrid">
                 {/* 1. Trainee */}
                 <div className="adm-person">

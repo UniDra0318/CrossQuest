@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TableEmptyRow } from '../../components/TableEmptyState';
+import { TablePagination, usePagination } from '../../components/TablePagination';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Download, 
@@ -515,7 +516,7 @@ export default function Reports() {
                 </thead>
                 <tbody>
                   {filteredTrainees.length > 0 ? (
-                    filteredTrainees.map((t, idx) => {
+                    pagedTrainees.map((t, idx) => {
                       const isCompleted = t.status === 'Completed';
                       return (
                         <tr 
@@ -625,6 +626,13 @@ export default function Reports() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={repPage}
+              totalItems={totalTrainees}
+              pageSize={10}
+              onPageChange={setRepPage}
+              itemName="trainee reports"
+            />
 
             {/* Panel Footer */}
             <div style={{ padding: '14px 24px', background: isDark ? '#0f172a' : '#f8fafc', borderTop: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>

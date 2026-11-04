@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TableEmptyRow } from './TableEmptyState';
+import { TablePagination, usePagination } from './TablePagination';
 import {
   FileSpreadsheet,
   UploadCloud,
@@ -718,7 +719,7 @@ export default function FinanceReconciliationDesk() {
             </thead>
             <tbody>
               {discrepancies.length > 0 ? (
-                discrepancies.map((d) => (
+                pagedDiscrepancies.map((d) => (
                   <tr key={d.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
                     <td style={{ padding: '12px 16px', fontWeight: 800, fontFamily: 'monospace', color: isDark ? '#f8fafc' : '#1e293b' }}>#{d.source_row_no}</td>
                     <td style={{ padding: '12px 16px' }}>
@@ -804,6 +805,13 @@ export default function FinanceReconciliationDesk() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={discPage}
+          totalItems={totalDiscrepancies}
+          pageSize={10}
+          onPageChange={setDiscPage}
+          itemName="discrepancies"
+        />
       </div>
 
       {/* Resolution Modal / Drawer */}
@@ -926,7 +934,7 @@ export default function FinanceReconciliationDesk() {
             </thead>
             <tbody>
               {filteredCustomers.length > 0 ? (
-                filteredCustomers.map((c, idx) => (
+                pagedCustomers.map((c, idx) => (
                   <tr key={idx} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
                     <td style={{ padding: '12px 16px', fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -976,6 +984,13 @@ export default function FinanceReconciliationDesk() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={custPage}
+          totalItems={totalCustomers}
+          pageSize={10}
+          onPageChange={setCustPage}
+          itemName="client accounts"
+        />
       </div>
     </div>
   );

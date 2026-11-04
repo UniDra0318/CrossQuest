@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TableEmptyRow } from './TableEmptyState';
+import { TablePagination, usePagination } from './TablePagination';
 import { 
   ShieldAlert, 
   AlertTriangle, 
@@ -358,6 +359,27 @@ export default function AdminPeerReviewAnomalyDesk() {
   }, [accessLogs, logFilter, logSearch]);
 
   const unreviewedCount = alerts.filter(a => a.status !== 'CLOSED').length;
+  const {
+    currentPage: alertPage,
+    setCurrentPage: setAlertPage,
+    paginatedItems: pagedAlerts,
+    totalItems: totalAlerts
+  } = usePagination(filteredAlerts, 10);
+
+  const {
+    currentPage: logPage,
+    setCurrentPage: setLogPage,
+    paginatedItems: pagedLogs,
+    totalItems: totalLogs
+  } = usePagination(filteredLogs, 10);
+
+  const {
+    currentPage: recentAlertPage,
+    setCurrentPage: setRecentAlertPage,
+    paginatedItems: pagedRecentAlerts,
+    totalItems: totalRecentAlerts
+  } = usePagination(anomalyReport?.recent_alerts || [], 10);
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -687,7 +709,7 @@ export default function AdminPeerReviewAnomalyDesk() {
             }}
           >
             {filteredAlerts.length > 0 ? (
-              filteredAlerts.map((alert) => {
+              pagedAlerts.map((alert) => {
                 const isClosed = alert.status === 'CLOSED';
                 const isSubject = alert.subject_user_id && alert.subject_user_id === currentUser?.id;
                 const meta = alert.metadata_info || {};
@@ -936,10 +958,17 @@ export default function AdminPeerReviewAnomalyDesk() {
             )}
             {filteredAlerts.length > 3 && (
               <div style={{ textAlign: 'center', padding: '12px 0 6px 0', color: '#94a3b8', fontSize: '12px' }}>
-                End of {filteredAlerts.length} incident records &bull; Real-time audit telemetry active
+                Total {filteredAlerts.length} incident records &bull; Real-time audit telemetry active
               </div>
             )}
           </div>
+          <TablePagination
+            currentPage={alertPage}
+            totalItems={totalAlerts}
+            pageSize={10}
+            onPageChange={setAlertPage}
+            itemName="incident alerts"
+          />
         </div>
       )}
 
@@ -995,7 +1024,7 @@ export default function AdminPeerReviewAnomalyDesk() {
               </thead>
               <tbody>
                 {filteredLogs.length > 0 ? (
-                  filteredLogs.map((log) => {
+                  pagedLogs.map((log) => {
                     const isSuccess = log.outcome === 'SUCCESS';
                     return (
                       <tr key={log.id} style={{ borderBottom: themeStyles.borderSubtle }}>
@@ -1066,6 +1095,13 @@ export default function AdminPeerReviewAnomalyDesk() {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            currentPage={logPage}
+            totalItems={totalLogs}
+            pageSize={10}
+            onPageChange={setLogPage}
+            itemName="audit trail records"
+          />
         </div>
       )}
 
@@ -1516,7 +1552,7 @@ export default function AdminPeerReviewAnomalyDesk() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(anomalyReport?.recent_alerts || []).slice(0, 10).map((a) => (
+                  {pagedRecentAlerts.map((a) => (
                     <tr key={a.id} style={{ borderBottom: themeStyles.panelBorder }}>
                       <td style={{ padding: '12px 18px', color: themeStyles.textMuted, whiteSpace: 'nowrap' }}>
                         {a.created_at ? new Date(a.created_at).toLocaleString() : 'N/A'}
@@ -1551,6 +1587,13 @@ export default function AdminPeerReviewAnomalyDesk() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={recentAlertPage}
+              totalItems={totalRecentAlerts}
+              pageSize={10}
+              onPageChange={setRecentAlertPage}
+              itemName="executive incidents"
+            />
           </div>
         </div>
       )}
