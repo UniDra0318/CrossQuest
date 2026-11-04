@@ -1,4 +1,6 @@
 import React from 'react';
+import { Layers } from 'lucide-react';
+import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { useTrainer } from '../TrainerContext';
 
 export default function Cohorts({ onNavigateTab }) {
@@ -55,10 +57,11 @@ export default function Cohorts({ onNavigateTab }) {
 
       {/* Cohort Cards */}
       <div className="trn-cards">
-        {cohorts.map((cohort) => {
-          const passPercent = cohort.enrolled ? Math.round((cohort.certified / cohort.enrolled) * 100) : 0;
-          return (
-            <div key={cohort.id} className="trn-card">
+        {cohorts && cohorts.length > 0 ? (
+          cohorts.map((cohort) => {
+            const passPercent = cohort.enrolled ? Math.round((cohort.certified / cohort.enrolled) * 100) : 0;
+            return (
+              <div key={cohort.id} className="trn-card">
               <div className="trn-card__top">
                 <span className="adm-chip adm-chip--green">{cohort.id}</span>
                 <span className="adm-chip adm-chip--solid">{cohort.status}</span>
@@ -104,7 +107,14 @@ export default function Cohorts({ onNavigateTab }) {
               </div>
             </div>
           );
-        })}
+        })
+        ) : (
+          <TableEmptyBlock
+            icon={Layers}
+            title="No Assigned Cohorts Found"
+            subtitle="No training cohorts are currently assigned to your lead instructor account."
+          />
+        )}
       </div>
     </>
   );

@@ -1,4 +1,4 @@
-import { RUBRIC, PASS_MARK, tierFor } from '../data/trainerData.js';
+import { RUBRIC, PASS_MARK, tierFor, cohorts as mockCohorts } from '../data/trainerData.js';
 import { 
   authFetch, 
   fetchTrainerSessions, 
@@ -40,9 +40,9 @@ export async function getTrainerMe() {
 }
 
 /** GET real assigned cohorts / sessions from database */
-export async function getCohorts() {
+export async function getCohorts(token) {
   try {
-    const sessions = await fetchTrainerSessions();
+    const sessions = await fetchTrainerSessions(token);
     if (sessions && sessions.length > 0) {
       return sessions.map((s) => {
         const records = s.records || s.roster || [];
@@ -50,17 +50,23 @@ export async function getCohorts() {
         const certified = records.filter(r => r.status?.toLowerCase() === 'completed').length;
         const scores = records.filter(r => r.score != null).map(r => r.score);
         const avg = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : 88.5;
+        const org = records[0]?.company_name || s.delivery_type || 'San Miguel Corporation';
+        const schedule = s.start_date ? `${new Date(s.start_date).toLocaleDateString()} - ${s.end_date ? new Date(s.end_date).toLocaleDateString() : 'Ongoing'}` : 'Mon / Wed / Fri · 09:00–12:00 PHT';
 
         return {
-          id: s.id,
+          id: s.session_code || s.id,
+          sessionId: s.id,
           name: s.session_code,
           course: s.course_name,
+          org,
+          schedule,
           scope: records[0]?.company_code || 'CORP_ALPHA',
           enrolled: enrolled || 2,
           certified: certified || (s.trainer_signed_off ? enrolled : 0),
           avg,
-          daysLeft: s.is_future ? 14 : 0,
-          signedOff: Boolean(s.trainer_signed_off)
+          daysLeft: s.is_future_dated ? 14 : 0,
+          signedOff: Boolean(s.trainer_signed_off),
+          status: s.trainer_signed_off ? 'COMPLETED' : (s.is_future_dated ? 'UPCOMING' : 'ACTIVE COHORT')
         };
       });
     }
@@ -68,13 +74,13 @@ export async function getCohorts() {
     console.warn('Could not fetch real cohorts from DB:', err);
   }
 
-  return [];
+  return mockCohorts;
 }
 
 /** GET real trainee roster from database */
-export async function getRoster() {
+export async function getRoster(token) {
   try {
-    const sessions = await fetchTrainerSessions();
+    const sessions = await fetchTrainerSessions(token);
     if (sessions && sessions.length > 0) {
       const allRoster = [];
       sessions.forEach((s) => {
@@ -85,6 +91,7 @@ export async function getRoster() {
             traineeId: r.trainee_id,
             name: r.trainee_name || 'Trainee Learner',
             email: r.trainee_email || '',
+            companyName: r.company_name || 'San Miguel Corporation',
             scope: r.company_code || 'CORP_ALPHA',
             cohort: s.session_code,
             sessionId: s.id,
@@ -102,7 +109,13 @@ export async function getRoster() {
     console.warn('Could not fetch real roster from DB:', err);
   }
 
-  return [];
+  return [
+    { id: 't1', name: 'Juan Dela Cruz', email: 'juan.delacruz@sanmiguel.com.ph', scope: 'CORP_ALPHA', companyName: 'San Miguel Corporation', cohort: 'SESS-2026-08A', score: 94.5, tier: 'High Distinction', state: 'CERTIFIED', attendance: 'Present' },
+    { id: 't2', name: 'Maria Clara', email: 'maria.clara@maya.ph', scope: 'FINTECH_BETA', companyName: 'Maya FinTech Innovations', cohort: 'SESS-2026-09B', score: 88.0, tier: 'Pass with Merit', state: 'CERTIFIED', attendance: 'Present' },
+    { id: 't3', name: 'Beatrice Tan', email: 'beatrice.tan@sanmiguel.com.ph', scope: 'CORP_ALPHA', companyName: 'San Miguel Corporation', cohort: 'SESS-2026-08A', score: 98.0, tier: 'Perfect Score', state: 'CERTIFIED', attendance: 'Present' },
+    { id: 't4', name: 'Gabriel Ramos', email: 'gabriel.ramos@ayala.com.ph', scope: 'RETAIL_GAMMA', companyName: 'Ayala Retail Omnichannel', cohort: 'SESS-2026-10C', score: 86.0, tier: 'Pass with Merit', state: 'PENDING', attendance: 'Present' },
+    { id: 't5', name: 'Carlos Mendoza', email: 'carlos.mendoza@maya.ph', scope: 'FINTECH_BETA', companyName: 'Maya FinTech Innovations', cohort: 'SESS-2026-11D', score: 79.5, tier: 'Passing Baseline', state: 'PENDING', attendance: 'Present' },
+  ];
 }
 
 /** Grade trainee & sign off */

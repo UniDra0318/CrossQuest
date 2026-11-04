@@ -321,9 +321,7 @@ export async function updateStaffAttributes(userId, attrs, token) {
 
 export async function fetchTrainerSessions(token) {
   try {
-    const res = await fetch(`${API_BASE}/records/sessions/assigned`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/records/sessions/assigned`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for trainer sessions:", err);
