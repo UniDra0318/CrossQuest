@@ -69,7 +69,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [records, setRecords] = useState(defaultRecords);
   const [settings] = useState(defaultSettings);
   const [liveRules, setLiveRules] = useState([]);
-  const [editingStaffId, setEditingStaffId] = useState(null);
+  const [editingStaffUser, setEditingStaffUser] = useState(null);
 
   // Client Companies & Tenancy Registry State
   const DEFAULT_COMPANIES = [
@@ -360,7 +360,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   };
   // Start inline editing staff
   const startEditStaff = (user) => {
-    setEditingStaffId(user.id);
+    setEditingStaffUser(user);
     const roleNorm = (user.role || '').toLowerCase();
     const defaultLevel = roleNorm.includes('admin') ? 3 :
       (roleNorm.includes('account') || roleNorm.includes('staff') || roleNorm.includes('finance')) ? 2 : 1;
@@ -394,7 +394,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       }
       return s;
     }));
-    setEditingStaffId(null);
+    setEditingStaffUser(null);
   };
   const toggleClientInEdit = (clientCode) => {
     setEditForm(prev => {
@@ -811,7 +811,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               {/* Table Rows */}
               {filteredStaff && filteredStaff.length > 0 ? (
                 pagedStaff.map((user) => {
-                const isEditing = editingStaffId === user.id;
                 return (
                   <div key={user.id} className="adm-row">
                     <div className="adm-grid adm-grid--access">
@@ -906,75 +905,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         <button 
                           type="button" 
                           className="adm-btn adm-btn--light"
-                          onClick={() => isEditing ? setEditingStaffId(null) : startEditStaff(user)}
+                          onClick={() => startEditStaff(user)}
+                          title={`Edit roles and clearances for ${user.name}`}
                         >
                           <Edit2 size={13} />
-                          <span>{isEditing ? 'Close' : 'Edit Roles'}</span>
+                          <span>Edit Roles</span>
                         </button>
                       </div>
                     </div>
-                    {/* Inline Editor */}
-                    {isEditing && (
-                      <div className="adm-edit">
-                        <label>
-                          <span className="adm-label">ASSIGNED ROLE</span>
-                          <select 
-                            value={editForm.role}
-                            onChange={(e) => {
-                              const nextRole = e.target.value;
-                              const roleNorm = nextRole.toLowerCase();
-                              const autoLevel = roleNorm.includes('admin') ? 3 :
-                                (roleNorm.includes('staff') || roleNorm.includes('account') || roleNorm.includes('finance')) ? 2 : 1;
-                              setEditForm({ ...editForm, role: nextRole, level: autoLevel });
-                            }}
-                          >
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="CROSSWORKS STAFF">CROSSWORKS STAFF</option>
-                            <option value="TRAINER">TRAINER</option>
-                            <option value="COMPANY STAFF">COMPANY STAFF</option>
-                            <option value="TRAINEE">TRAINEE</option>
-                          </select>
-                        </label>
-                        <label>
-                          <span className="adm-label">CLEARANCE LEVEL (1–3)</span>
-                          <select 
-                            value={editForm.level}
-                            onChange={(e) => setEditForm({ ...editForm, level: Number(e.target.value) })}
-                          >
-                            <option value={1}>Level 1 (Standard)</option>
-                            <option value={2}>Level 2 (Supervisor)</option>
-                            <option value={3}>Level 3 (Executive Master)</option>
-                          </select>
-                        </label>
-                        <div style={{ width: '100%', marginTop: '4px' }}>
-                          <TenantAssignmentPicker
-                            selectedTenants={editForm.clients}
-                            onChange={(newClients) => setEditForm({ ...editForm, clients: newClients })}
-                            companies={companiesList}
-                            role={editForm.role}
-                            isDark={isDark}
-                            label="ASSIGNED CLIENT TENANTS (CP-ABE SCOPES)"
-                            helperText="Define cryptographic tenant boundaries. Staff holding this clearance can decrypt records for these companies only."
-                          />
-                        </div>
-                        <div className="adm-edit__act">
-                          <button 
-                            type="button" 
-                            className="adm-btn"
-                            onClick={() => setEditingStaffId(null)}
-                          >
-                            Cancel
-                          </button>
-                          <button 
-                            type="button" 
-                            className="adm-btn adm-btn-solid adm-chip--solid"
-                            onClick={() => handleSaveStaff(user.id)}
-                          >
-                            <Check size={13} /> Save Permissions
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })
@@ -1661,6 +1599,222 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       {/* =====================================================================
           PROVISION NEW USER MODAL (FR-02, SEC-01)
           ===================================================================== */}
+      {/* =====================================================================
+          3. STAFF PERMISSIONS & CLEARANCE EDIT MODAL (POPUP DIALOG)
+          ===================================================================== */}
+      {editingStaffUser && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingStaffUser(null);
+          }}
+        >
+          <div 
+            style={{
+              background: isDark ? '#0f172a' : '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '560px',
+              width: '100%',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+              border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: isDark ? '1px solid #1e293b' : '1px solid #f1f5f9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: isDark ? '#1e293b' : '#f8fafc'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '12px',
+                  background: isDark ? 'rgba(99, 102, 241, 0.2)' : '#e0e7ff',
+                  color: isDark ? '#c4b5fd' : '#4f46e5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Shield size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    Edit Staff Permissions
+                  </h3>
+                  <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                    {editingStaffUser.name} &bull; <span style={{ fontFamily: 'monospace' }}>{editingStaffUser.email}</span>
+                  </span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setEditingStaffUser(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: isDark ? '#94a3b8' : '#64748b',
+                  cursor: 'pointer',
+                  padding: '4px'
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSaveStaff(editingStaffUser.id);
+              }}
+              style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px' }}>
+                {/* Role Select */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, letterSpacing: '0.06em', color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
+                    ASSIGNED ROLE
+                  </label>
+                  <select 
+                    value={editForm.role}
+                    onChange={(e) => {
+                      const nextRole = e.target.value;
+                      const roleNorm = nextRole.toLowerCase();
+                      const autoLevel = roleNorm.includes('admin') ? 3 :
+                        (roleNorm.includes('staff') || roleNorm.includes('account') || roleNorm.includes('finance')) ? 2 : 1;
+                      setEditForm({ ...editForm, role: nextRole, level: autoLevel });
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: isDark ? '1px solid #334155' : '1.5px solid #cbd5e1',
+                      background: isDark ? '#1e293b' : '#ffffff',
+                      color: isDark ? '#f8fafc' : '#0f172a',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value="ADMIN">ADMIN (System Administrator)</option>
+                    <option value="ACCOUNT MANAGER">ACCOUNT MANAGER (Client Scoped)</option>
+                    <option value="CROSSWORKS STAFF">CROSSWORKS STAFF</option>
+                    <option value="FINANCE">FINANCE (Audit & Verification)</option>
+                    <option value="TRAINER">TRAINER (Sessions & Quizzes)</option>
+                    <option value="TRAINEE">TRAINEE (Learning Quests)</option>
+                  </select>
+                </div>
+
+                {/* Clearance Level */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, letterSpacing: '0.06em', color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
+                    CLEARANCE LEVEL
+                  </label>
+                  <select 
+                    value={editForm.level}
+                    onChange={(e) => setEditForm({ ...editForm, level: Number(e.target.value) })}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      border: isDark ? '1px solid #334155' : '1.5px solid #cbd5e1',
+                      background: isDark ? '#1e293b' : '#ffffff',
+                      color: isDark ? '#f8fafc' : '#0f172a',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <option value={1}>Level 1 (Standard Scope)</option>
+                    <option value={2}>Level 2 (Supervisor / Client Scope)</option>
+                    <option value={3}>Level 3 (Executive Master / Root)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Flexible Tenant Assignment Picker */}
+              <div>
+                <TenantAssignmentPicker
+                  selectedTenants={editForm.clients}
+                  onChange={(newClients) => setEditForm({ ...editForm, clients: newClients })}
+                  companies={companiesList}
+                  role={editForm.role}
+                  isDark={isDark}
+                  label="ASSIGNED CLIENT TENANTS (CP-ABE SCOPES)"
+                  helperText="Define cryptographic tenant boundaries. Personnel holding these attributes can decrypt records for these companies only."
+                />
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '10px',
+                marginTop: '6px',
+                paddingTop: '16px',
+                borderTop: isDark ? '1px solid #1e293b' : '1px solid #f1f5f9'
+              }}>
+                <button 
+                  type="button" 
+                  onClick={() => setEditingStaffUser(null)}
+                  style={{
+                    padding: '9px 18px',
+                    borderRadius: '10px',
+                    background: isDark ? '#334155' : '#f1f5f9',
+                    color: isDark ? '#cbd5e1' : '#475569',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '12.5px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  style={{
+                    padding: '9px 20px',
+                    borderRadius: '10px',
+                    background: '#6d28d9',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '12.5px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(109, 40, 217, 0.3)'
+                  }}
+                >
+                  <Check size={14} /> Save Permissions
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {isCreateUserOpen && (
         <div 
           style={{
