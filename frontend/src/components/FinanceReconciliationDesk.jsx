@@ -398,6 +398,20 @@ export default function FinanceReconciliationDesk() {
     c.customer_name.toLowerCase().includes(customerSearch.toLowerCase())
   );
 
+  const {
+    currentPage: discPage,
+    setCurrentPage: setDiscPage,
+    paginatedItems: pagedDiscrepancies,
+    totalItems: totalDiscrepancies
+  } = usePagination(discrepancies, 4);
+
+  const {
+    currentPage: custPage,
+    setCurrentPage: setCustPage,
+    paginatedItems: pagedCustomers,
+    totalItems: totalCustomers
+  } = usePagination(filteredCustomers, 4);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       

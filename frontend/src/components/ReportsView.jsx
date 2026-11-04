@@ -25,6 +25,13 @@ export default function ReportsView({ clientCompanies, records, currentStaff }) 
     ? `${Math.round((completedCount / companyRecords.length) * 100)}%`
     : '0%';
 
+  const {
+    currentPage: repPage,
+    setCurrentPage: setRepPage,
+    paginatedItems: pagedCompanyRecords,
+    totalItems: totalCompanyRecords
+  } = usePagination(companyRecords, 4);
+
   const handleExport = () => {
     setExported(true);
     setTimeout(() => setExported(false), 3000);

@@ -108,6 +108,13 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
     r.companyCode.toLowerCase().includes(recordSearch.toLowerCase())
   );
 
+  const {
+    currentPage: milestonePage,
+    setCurrentPage: setMilestonePage,
+    paginatedItems: pagedMilestones,
+    totalItems: totalMilestones
+  } = usePagination(filteredRecords, 4);
+
   const completed = displayedRecords.filter(r => r.status === 'completed').length;
   const avgScore = displayedRecords.length > 0 
     ? (displayedRecords.reduce((acc, r) => acc + (r.score || 0), 0) / displayedRecords.length).toFixed(1)

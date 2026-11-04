@@ -34,6 +34,13 @@ export default function RecordVault() {
     return true;
   });
 
+  const {
+    currentPage: vaultPage,
+    setCurrentPage: setVaultPage,
+    paginatedItems: pagedVaultRecords,
+    totalItems: totalVaultRecords
+  } = usePagination(filtered, 4);
+
   return (
     <div>
       {/* 1. FILTER BAR */}

@@ -71,6 +71,13 @@ export default function RecordsView({
     return matchesComp && matchesText;
   });
 
+  const {
+    currentPage: recPage,
+    setCurrentPage: setRecPage,
+    paginatedItems: pagedRecords,
+    totalItems: totalRecs
+  } = usePagination(filteredRecords, 4);
+
   return (
     <div className="records-view">
       {/* Top Filter and Search Bar */}

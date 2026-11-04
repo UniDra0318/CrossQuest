@@ -223,6 +223,13 @@ export default function Reports() {
     );
   }, [report, searchTerm]);
 
+  const {
+    currentPage: repPage,
+    setCurrentPage: setRepPage,
+    paginatedItems: pagedTrainees,
+    totalItems: totalTrainees
+  } = usePagination(filteredTrainees, 4);
+
   // Determine if currently selected company is assigned
   const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
   const isDark = effectiveTheme === 'dark';
