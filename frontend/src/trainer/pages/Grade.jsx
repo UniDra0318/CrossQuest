@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Users } from 'lucide-react';
+import { Users, CheckCircle2 } from 'lucide-react';
 import { TableEmptyRow } from '../../components/TableEmptyState';
 import { TablePagination, usePagination } from '../../components/TablePagination';
 import { useTrainer } from '../TrainerContext';
@@ -204,8 +204,8 @@ export default function Grade() {
                     padding: '8px 14px',
                     borderRadius: '8px',
                     border: isSelected ? '2px solid #6366f1' : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
-                    background: isSelected 
-                      ? (isDark ? '#1e1b4b' : '#ffffff') 
+                    background: isSelected
+                      ? (isDark ? '#1e1b4b' : '#ffffff')
                       : (isDark ? '#111827' : '#f8fafc'),
                     boxShadow: isSelected ? '0 2px 8px rgba(99, 102, 241, 0.25)' : 'none',
                     cursor: 'pointer',
@@ -305,7 +305,7 @@ export default function Grade() {
                   gap: '10px',
                 }}
               >
-                <span style={{ fontSize: '18px' }}>&#9989;</span>
+                <CheckCircle2 size={18} color="#10b981" />
                 <div>
                   <strong>Session Signed Off on {new Date(currentSession.trainer_sign_off_at).toLocaleString()}:</strong>
                   <span> All passing attendees have been certified. Trainer Notes: "{currentSession.trainer_sign_off_notes || 'All requirements completed.'}"</span>

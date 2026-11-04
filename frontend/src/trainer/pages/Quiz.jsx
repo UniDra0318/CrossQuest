@@ -24,7 +24,7 @@ import {
   RefreshCw,
   ShieldAlert
 } from 'lucide-react';
-import QuizDiagram from '../../components/QuizDiagram';
+import QuizDiagram, { AVAILABLE_DIAGRAM_ICONS, renderDiagramNodeIcon } from '../../components/QuizDiagram';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
 
@@ -46,7 +46,14 @@ export const DIAGRAM_TEMPLATES = [
     defaultPrompt: 'Examine the Sequential Pipeline Diagram below. Which stage performs core policy evaluation and access verification?',
     defaultTarget: 'Policy & Decryption Engine',
     defaultExplanation: 'The Core Engine evaluates operational policies and validates credentials before requests can access downstream data.',
-    components: ['Policy & Decryption Engine', 'API Gateway', 'Encrypted Storage Vault', 'Client Interface']
+    components: ['Policy & Decryption Engine', 'API Gateway', 'Encrypted Storage Vault', 'Client Interface'],
+    layout: 'pipeline',
+    defaultNodes: [
+      { id: 'node-1', title: 'Client Interface', subtitle: 'HTTPS Session Stream', iconType: 'users', color: 'cyan', badge: 'Client Ingress' },
+      { id: 'node-2', title: 'API Gateway', subtitle: 'OAuth JWT Bearer Gate', iconType: 'shield', color: 'purple', badge: 'Perimeter Guard' },
+      { id: 'node-3', title: 'Policy & Decryption Engine', subtitle: 'Evaluates Attribute Access Trees', iconType: 'lock', color: 'gold', badge: 'Core Engine' },
+      { id: 'node-4', title: 'Encrypted Storage Vault', subtitle: 'RLS Ciphertext Partition', iconType: 'database', color: 'emerald', badge: 'Persistent Storage' }
+    ]
   },
   {
     id: 'clearance_hierarchy',
@@ -57,7 +64,13 @@ export const DIAGRAM_TEMPLATES = [
     defaultPrompt: 'Analyze the Tiered Hierarchy Pyramid below. Which level holds authority restricted specifically to their assigned operational scope?',
     defaultTarget: 'Client Account & Portfolio Manager',
     defaultExplanation: 'Mid-level managers possess authority bounded strictly to their assigned organization partition.',
-    components: ['Root System Administrator', 'Client Account & Portfolio Manager', 'Instructor & Trainee Learner']
+    components: ['Root System Administrator', 'Client Account & Portfolio Manager', 'Instructor & Trainee Learner'],
+    layout: 'hierarchy',
+    defaultNodes: [
+      { id: 'node-1', title: 'Root System Administrator', subtitle: 'Full authority across all accounts and tenants', iconType: 'shield', color: 'purple', badge: 'Clearance Level 3' },
+      { id: 'node-2', title: 'Client Account & Portfolio Manager', subtitle: 'Authorized for assigned corporate accounts only', iconType: 'server', color: 'cyan', badge: 'Clearance Level 2' },
+      { id: 'node-3', title: 'Instructor & Trainee Learner', subtitle: 'Curriculum review and personal qualification testing', iconType: 'users', color: 'emerald', badge: 'Clearance Level 1' }
+    ]
   },
   {
     id: 'data_flow',
@@ -68,7 +81,13 @@ export const DIAGRAM_TEMPLATES = [
     defaultPrompt: 'Review the Relational Entity Matrix below. Which entity is responsible for executing processing activities under contractual instruction?',
     defaultTarget: 'Crossworks Training Service',
     defaultExplanation: 'The contracted service executes data processing workflows strictly pursuant to controller agreements.',
-    components: ['Crossworks Training Service', 'Corporate Employer', 'Trainee / Learner']
+    components: ['Crossworks Training Service', 'Corporate Employer', 'Trainee / Learner'],
+    layout: 'pipeline',
+    defaultNodes: [
+      { id: 'node-1', title: 'Trainee / Learner', subtitle: 'Owner of personal identification and qualification metrics', iconType: 'users', color: 'emerald', badge: 'Data Subject' },
+      { id: 'node-2', title: 'Corporate Employer', subtitle: 'Contractual entity deciding purposes of personnel qualification', iconType: 'server', color: 'cyan', badge: 'Controlling Entity (PIC)' },
+      { id: 'node-3', title: 'Crossworks Training Service', subtitle: 'Executes assessments strictly pursuant to controller agreements', iconType: 'shield', color: 'purple', badge: 'Processing Service (PIP)' }
+    ]
   },
   {
     id: 'tenant_partition',
@@ -79,7 +98,13 @@ export const DIAGRAM_TEMPLATES = [
     defaultPrompt: 'Examine the Dual-Partition Boundary Diagram below. Which component intercepts cross-domain requests and logs security alerts?',
     defaultTarget: 'Cryptographic Barrier Wall',
     defaultExplanation: 'The security barrier enforces strict boundary separation; cross-partition unauthorized attempts are rejected and flagged.',
-    components: ['Cryptographic Barrier Wall', 'Tenant Alpha Organization', 'Tenant Beta Organization']
+    components: ['Cryptographic Barrier Wall', 'Tenant Alpha Organization', 'Tenant Beta Organization'],
+    layout: 'pipeline',
+    defaultNodes: [
+      { id: 'node-1', title: 'Tenant Alpha Organization', subtitle: 'Encrypted ciphertext vault isolated by unique CP-ABE key', iconType: 'lock', color: 'cyan', badge: 'Partition A' },
+      { id: 'node-2', title: 'Cryptographic Barrier Wall', subtitle: 'Zero-Trust cross-boundary guard and anomaly detector', iconType: 'shield', color: 'rose', badge: 'Security Barrier' },
+      { id: 'node-3', title: 'Tenant Beta Organization', subtitle: 'Isolated ciphertext pool inaccessible to Tenant Alpha credentials', iconType: 'lock', color: 'purple', badge: 'Partition B' }
+    ]
   },
   {
     id: 'network_dmz',
@@ -90,7 +115,14 @@ export const DIAGRAM_TEMPLATES = [
     defaultPrompt: 'In this Perimeter Ingress Architecture, which node inspects incoming traffic payloads before forwarding to the internal service mesh?',
     defaultTarget: 'Inspection Firewall / WAF',
     defaultExplanation: 'The inspection firewall analyzes inbound requests against threat rules before traffic enters internal networks.',
-    components: ['Inspection Firewall / WAF', 'Ingress Reverse Proxy', 'Internal Service Mesh', 'External Network']
+    components: ['Inspection Firewall / WAF', 'Ingress Reverse Proxy', 'Internal Service Mesh', 'External Network'],
+    layout: 'pipeline',
+    defaultNodes: [
+      { id: 'node-1', title: 'External Network', subtitle: 'Client Request Stream', iconType: 'globe', color: 'cyan', badge: 'Untrusted Edge' },
+      { id: 'node-2', title: 'Inspection Firewall / WAF', subtitle: 'Layer 7 Threat Inspection Gate', iconType: 'shield', color: 'gold', badge: 'Layer 7 Filter' },
+      { id: 'node-3', title: 'Ingress Reverse Proxy', subtitle: 'mTLS Strict Mutual Authentication', iconType: 'server', color: 'purple', badge: 'Ingress Proxy' },
+      { id: 'node-4', title: 'Internal Service Mesh', subtitle: 'Core Microservices Private VPC', iconType: 'cpu', color: 'emerald', badge: 'Private VPC' }
+    ]
   },
   {
     id: 'pki_hierarchy',
@@ -101,7 +133,13 @@ export const DIAGRAM_TEMPLATES = [
     defaultPrompt: 'Which tier in the branching hierarchy is responsible for issuing derived session credentials to active participants?',
     defaultTarget: 'Domain Attribute Authority (CA)',
     defaultExplanation: 'The intermediate domain authority issues scoped ephemeral tokens derived from root cryptographic parameters.',
-    components: ['Master Cryptographic Authority', 'Domain Attribute Authority (CA)', 'Attribute Secret Key (Leaf)']
+    components: ['Master Cryptographic Authority', 'Domain Attribute Authority (CA)', 'Attribute Secret Key (Leaf)'],
+    layout: 'hierarchy',
+    defaultNodes: [
+      { id: 'node-1', title: 'Master Cryptographic Authority', subtitle: 'Root pairing parameters used to derive key polynomial shares', iconType: 'key', color: 'purple', badge: 'Root Authority' },
+      { id: 'node-2', title: 'Domain Attribute Authority (CA)', subtitle: 'Issues scoped client policy tokens to authorized personnel', iconType: 'server', color: 'cyan', badge: 'Intermediate CA' },
+      { id: 'node-3', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Key' }
+    ]
   }
 ];
 
@@ -160,9 +198,16 @@ export default function Quiz() {
         : ['', '', '', ''];
       setSequenceSteps(steps);
     } else if (type === 'hotspot') {
+      const template = DIAGRAM_TEMPLATES.find(t => t.id === q.diagramType) || DIAGRAM_TEMPLATES[0];
       setDiagramTemplateId(q.diagramType || 'security_pipeline');
       setCustomDiagramTitle(q.diagramTitle || '');
-      setHotspotTarget(q.answerLabel || q.prompt || '');
+      setHotspotTarget(q.answerLabel || template.defaultTarget);
+      setCustomLayout(q.customLayout || template.layout || 'pipeline');
+      if (Array.isArray(q.customNodes) && q.customNodes.length > 0) {
+        setCustomNodes(q.customNodes);
+      } else {
+        setCustomNodes(template.defaultNodes);
+      }
     } else {
       setNewQuestionAnswer(q.answerLabel || (Array.isArray(q.accepted) ? q.accepted.join(', ') : (q.answer || '')));
     }
@@ -207,6 +252,9 @@ export default function Quiz() {
   const [hotspotTarget, setHotspotTarget] = useState('');
   const [diagramTemplateId, setDiagramTemplateId] = useState('security_pipeline');
   const [customDiagramTitle, setCustomDiagramTitle] = useState('');
+  const [customLayout, setCustomLayout] = useState('pipeline');
+  const [customNodes, setCustomNodes] = useState(DIAGRAM_TEMPLATES[0].defaultNodes);
+  const [openIconPickerNodeId, setOpenIconPickerNodeId] = useState(null);
   const [showBuilderDiagramPreview, setShowBuilderDiagramPreview] = useState(true);
   const [rosterDiagramToggles, setRosterDiagramToggles] = useState({});
 
@@ -218,6 +266,63 @@ export default function Quiz() {
   if (loading && (!quizzes || quizzes.length === 0)) {
     return <div className="adm-state">Loading quiz assessment studio...</div>;
   }
+
+  const handleAddCustomNode = () => {
+    const nextIdx = customNodes.length + 1;
+    const colors = ['cyan', 'purple', 'emerald', 'gold', 'rose', 'blue'];
+    const nextColor = colors[(nextIdx - 1) % colors.length];
+    const newNode = {
+      id: `node-${Date.now()}`,
+      title: `Architectural Component ${nextIdx}`,
+      subtitle: `Security control & verification stage`,
+      iconType: 'shield',
+      color: nextColor,
+      badge: customLayout === 'hierarchy' ? `Tier Level ${nextIdx}` : `Stage ${nextIdx}`
+    };
+    setCustomNodes([...customNodes, newNode]);
+  };
+
+  const handleRemoveCustomNode = (nodeId) => {
+    if (customNodes.length <= 2) {
+      alert('Diagram must contain at least 2 components / stages.');
+      return;
+    }
+    const filtered = customNodes.filter(n => n.id !== nodeId);
+    setCustomNodes(filtered);
+    if (!filtered.some(n => n.title.toLowerCase() === hotspotTarget.toLowerCase())) {
+      setHotspotTarget(filtered[0]?.title || '');
+    }
+  };
+
+  const handleMoveCustomNode = (index, delta) => {
+    const targetIdx = index + delta;
+    if (targetIdx < 0 || targetIdx >= customNodes.length) return;
+    const updated = [...customNodes];
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setCustomNodes(updated);
+  };
+
+  const handleUpdateCustomNode = (nodeId, field, value) => {
+    setCustomNodes(customNodes.map(node => {
+      if (node.id === nodeId) {
+        if (field === 'title' && hotspotTarget.toLowerCase() === node.title.toLowerCase()) {
+          setHotspotTarget(value);
+        }
+        return { ...node, [field]: value };
+      }
+      return node;
+    }));
+  };
+
+  const handleSelectTemplate = (tmpl) => {
+    setDiagramTemplateId(tmpl.id);
+    setCustomLayout(tmpl.layout || 'pipeline');
+    setCustomNodes(tmpl.defaultNodes.map(n => ({ ...n })));
+    setHotspotTarget(tmpl.defaultTarget);
+    if (!customDiagramTitle) setCustomDiagramTitle(tmpl.name);
+  };
 
   const onCreateQuiz = async (e) => {
     e.preventDefault();
@@ -276,8 +381,12 @@ export default function Quiz() {
       const activeTemplate = DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId);
       payload.diagramType = diagramTemplateId;
       payload.diagramTitle = customDiagramTitle.trim() || undefined;
+      payload.customNodes = customNodes && customNodes.length > 0 ? customNodes : activeTemplate?.defaultNodes;
+      payload.customLayout = customLayout;
       payload.answerLabel = hotspotTarget.trim();
-      payload.options = activeTemplate?.components || [hotspotTarget.trim(), 'Secondary Node', 'Perimeter Gate', 'Data Vault'];
+      payload.options = customNodes && customNodes.length > 0
+        ? customNodes.map(n => n.title)
+        : (activeTemplate?.components || [hotspotTarget.trim(), 'Secondary Node', 'Perimeter Gate', 'Data Vault']);
     } else {
       if (!newQuestionAnswer.trim()) {
         alert('Please provide accepted answer term(s).');
@@ -879,6 +988,8 @@ export default function Quiz() {
                             setHotspotTarget(tmpl.defaultTarget);
                             setNewQuestionExplanation(tmpl.defaultExplanation);
                             if (!customDiagramTitle) setCustomDiagramTitle(tmpl.name);
+                            setCustomLayout(tmpl.layout || 'pipeline');
+                            setCustomNodes(tmpl.defaultNodes.map(n => ({ ...n })));
                           }
                         }}
                         title="Auto-fill recommended prompt, target component, and explanation for this archetype"
@@ -895,12 +1006,7 @@ export default function Quiz() {
                         return (
                           <div
                             key={tmpl.id}
-                            onClick={() => {
-                              setDiagramTemplateId(tmpl.id);
-                              if (!hotspotTarget || !tmpl.components.includes(hotspotTarget)) {
-                                setHotspotTarget(tmpl.defaultTarget);
-                              }
-                            }}
+                            onClick={() => handleSelectTemplate(tmpl)}
                             style={{
                               padding: '14px 16px',
                               borderRadius: '14px',
@@ -959,19 +1065,351 @@ export default function Quiz() {
                     />
                   </div>
 
-                  {/* 3. Quick-Pick Target Component Chips */}
+                  {/* 3. Interactive Diagram Objects, Layers & Icon Studio */}
+                  <div style={{
+                    padding: '16px',
+                    borderRadius: '14px',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #e2e8f0',
+                    background: isDark ? '#0b0f19' : '#f8fafc',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '14px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#f8fafc' : '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Sparkles size={14} className="text-purple" />
+                          <span>3. Architectural Objects & Layers Studio ({customNodes.length} Components)</span>
+                        </div>
+                        <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                          Customize icons, titles, roles, layer colors, or add additional stages.
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn--light"
+                          style={{ fontSize: '11.5px', padding: '5px 12px' }}
+                          onClick={() => setCustomLayout(customLayout === 'hierarchy' ? 'pipeline' : 'hierarchy')}
+                          title="Toggle between horizontal pipeline flow and vertical tiered pyramid hierarchy"
+                        >
+                          {customLayout === 'hierarchy' ? '📐 Layout: Vertical Hierarchy' : '➡️ Layout: Horizontal Pipeline'}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn--purple"
+                          style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                          onClick={handleAddCustomNode}
+                        >
+                          <Plus size={14} />
+                          <span>Add Object / Layer</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Nodes Customization Cards List */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {customNodes.map((node, nIdx) => {
+                        const isNodeTarget = hotspotTarget.trim().toLowerCase() === node.title.trim().toLowerCase();
+                        const isIconPickerOpen = openIconPickerNodeId === node.id;
+                        const colors = [
+                          { id: 'cyan', hex: '#06b6d4', label: 'Cyan' },
+                          { id: 'purple', hex: '#8b5cf6', label: 'Purple' },
+                          { id: 'emerald', hex: '#10b981', label: 'Emerald' },
+                          { id: 'gold', hex: '#f59e0b', label: 'Gold' },
+                          { id: 'rose', hex: '#f43f5e', label: 'Rose' },
+                          { id: 'blue', hex: '#3b82f6', label: 'Blue' }
+                        ];
+
+                        return (
+                          <div
+                            key={node.id || nIdx}
+                            style={{
+                              padding: '14px',
+                              borderRadius: '12px',
+                              border: isNodeTarget
+                                ? '2px solid #f59e0b'
+                                : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1'),
+                              background: isNodeTarget
+                                ? (isDark ? '#1e1b4b' : '#fffdf5')
+                                : (isDark ? '#111827' : '#ffffff'),
+                              boxShadow: isNodeTarget ? '0 4px 16px rgba(245, 158, 11, 0.2)' : 'none',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '10px',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {/* Card Top Row: Index, Badge input, Reorder, Target button, Delete */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{
+                                  fontSize: '11px',
+                                  fontWeight: 800,
+                                  padding: '3px 8px',
+                                  borderRadius: '6px',
+                                  background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9',
+                                  color: isDark ? '#f8fafc' : '#334155'
+                                }}>
+                                  #{nIdx + 1}
+                                </span>
+                                <input
+                                  type="text"
+                                  value={node.badge || ''}
+                                  placeholder="Stage / Tier Tag (e.g. Stage 1)"
+                                  onChange={(e) => handleUpdateCustomNode(node.id, 'badge', e.target.value)}
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0',
+                                    background: isDark ? '#0b0f19' : '#f8fafc',
+                                    color: isDark ? '#f8fafc' : '#1e293b',
+                                    outline: 'none',
+                                    width: '160px'
+                                  }}
+                                />
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {/* Hotspot toggle button */}
+                                <button
+                                  type="button"
+                                  onClick={() => setHotspotTarget(node.title)}
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 800,
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    border: isNodeTarget ? '1px solid #f59e0b' : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
+                                    background: isNodeTarget ? '#f59e0b' : 'transparent',
+                                    color: isNodeTarget ? '#ffffff' : (isDark ? '#cbd5e1' : '#64748b'),
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                  }}
+                                >
+                                  {isNodeTarget ? '★ Target Hotspot' : 'Set as Target'}
+                                </button>
+
+                                {/* Reorder buttons */}
+                                <button
+                                  type="button"
+                                  disabled={nIdx === 0}
+                                  onClick={() => handleMoveCustomNode(nIdx, -1)}
+                                  title="Move stage earlier"
+                                  style={{
+                                    padding: '4px 7px',
+                                    borderRadius: '6px',
+                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
+                                    background: isDark ? '#0b0f19' : '#f8fafc',
+                                    color: isDark ? '#f8fafc' : '#334155',
+                                    cursor: nIdx === 0 ? 'not-allowed' : 'pointer',
+                                    opacity: nIdx === 0 ? 0.4 : 1
+                                  }}
+                                >
+                                  ↑
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={nIdx === customNodes.length - 1}
+                                  onClick={() => handleMoveCustomNode(nIdx, 1)}
+                                  title="Move stage later"
+                                  style={{
+                                    padding: '4px 7px',
+                                    borderRadius: '6px',
+                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
+                                    background: isDark ? '#0b0f19' : '#f8fafc',
+                                    color: isDark ? '#f8fafc' : '#334155',
+                                    cursor: nIdx === customNodes.length - 1 ? 'not-allowed' : 'pointer',
+                                    opacity: nIdx === customNodes.length - 1 ? 0.4 : 1
+                                  }}
+                                >
+                                  ↓
+                                </button>
+
+                                {/* Remove button */}
+                                {customNodes.length > 2 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveCustomNode(node.id)}
+                                    title="Remove this stage"
+                                    style={{
+                                      padding: '4px 8px',
+                                      borderRadius: '6px',
+                                      border: isDark ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid #fecdd3',
+                                      background: isDark ? 'rgba(244, 63, 94, 0.15)' : '#fff1f2',
+                                      color: '#f43f5e',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Card Middle Row: Icon button & Color Pills & Inputs */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '12px', alignItems: 'center' }}>
+                              {/* Icon Picker Trigger */}
+                              <div style={{ position: 'relative' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setOpenIconPickerNodeId(isIconPickerOpen ? null : node.id)}
+                                  title="Click to change this component's icon"
+                                  style={{
+                                    width: '46px',
+                                    height: '46px',
+                                    borderRadius: '12px',
+                                    border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1',
+                                    background: isDark ? '#0b0f19' : '#f8fafc',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    position: 'relative'
+                                  }}
+                                >
+                                  {renderDiagramNodeIcon(node.iconType, `text-${node.color || 'purple'}`)}
+                                  <span style={{ fontSize: '8px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '1px' }}>icon</span>
+                                </button>
+
+                                {/* Icon Picker Palette Popover */}
+                                {isIconPickerOpen && (
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '52px',
+                                    left: 0,
+                                    zIndex: 50,
+                                    width: '280px',
+                                    padding: '12px',
+                                    borderRadius: '12px',
+                                    background: isDark ? '#1e293b' : '#ffffff',
+                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #cbd5e1',
+                                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(4, 1fr)',
+                                    gap: '6px'
+                                  }}>
+                                    {AVAILABLE_DIAGRAM_ICONS.map((iconItem) => (
+                                      <button
+                                        key={iconItem.id}
+                                        type="button"
+                                        onClick={() => {
+                                          handleUpdateCustomNode(node.id, 'iconType', iconItem.id);
+                                          setOpenIconPickerNodeId(null);
+                                        }}
+                                        style={{
+                                          padding: '8px 4px',
+                                          borderRadius: '8px',
+                                          border: node.iconType === iconItem.id
+                                            ? '2px solid #8b5cf6'
+                                            : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0'),
+                                          background: node.iconType === iconItem.id
+                                            ? (isDark ? 'rgba(139, 92, 246, 0.2)' : '#faf5ff')
+                                            : 'transparent',
+                                          display: 'flex',
+                                          flexDirection: 'column',
+                                          alignItems: 'center',
+                                          gap: '4px',
+                                          cursor: 'pointer'
+                                        }}
+                                        title={iconItem.label}
+                                      >
+                                        {renderDiagramNodeIcon(iconItem.id, `text-${node.color || 'purple'}`)}
+                                        <span style={{ fontSize: '9px', color: isDark ? '#cbd5e1' : '#475569', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '52px' }}>
+                                          {iconItem.id}
+                                        </span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Node Title & Subtitle inputs */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  <input
+                                    type="text"
+                                    value={node.title || ''}
+                                    placeholder="Component Title (e.g. Policy Engine)"
+                                    onChange={(e) => handleUpdateCustomNode(node.id, 'title', e.target.value)}
+                                    style={{
+                                      flex: 1,
+                                      padding: '8px 12px',
+                                      borderRadius: '8px',
+                                      border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1',
+                                      background: isDark ? '#0b0f19' : '#ffffff',
+                                      color: isDark ? '#f8fafc' : '#1e293b',
+                                      fontSize: '12.5px',
+                                      fontWeight: 700,
+                                      outline: 'none'
+                                    }}
+                                  />
+
+                                  {/* Color Theme Selector */}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    {colors.map((cOption) => (
+                                      <button
+                                        key={cOption.id}
+                                        type="button"
+                                        onClick={() => handleUpdateCustomNode(node.id, 'color', cOption.id)}
+                                        title={`Color: ${cOption.label}`}
+                                        style={{
+                                          width: '18px',
+                                          height: '18px',
+                                          borderRadius: '999px',
+                                          background: cOption.hex,
+                                          border: node.color === cOption.id ? '2px solid #ffffff' : 'none',
+                                          boxShadow: node.color === cOption.id ? '0 0 0 2px #8b5cf6' : 'none',
+                                          cursor: 'pointer'
+                                        }}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <input
+                                  type="text"
+                                  value={node.subtitle || ''}
+                                  placeholder="Role / Technical description (e.g. Evaluates user attributes and policy trees)"
+                                  onChange={(e) => handleUpdateCustomNode(node.id, 'subtitle', e.target.value)}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+                                    background: isDark ? '#0b0f19' : '#f8fafc',
+                                    color: isDark ? '#94a3b8' : '#64748b',
+                                    fontSize: '11.5px',
+                                    outline: 'none'
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 4. Target Hotspot Component Picker */}
                   <div>
                     <label style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                      3. Select Target Hotspot Component (Highlights dynamically on diagram):
+                      4. Target Hotspot Component (Highlights dynamically on diagram):
                     </label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                      {DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.components.map((comp) => {
-                        const isTarget = hotspotTarget.toLowerCase() === comp.toLowerCase();
+                      {customNodes.map((node) => {
+                        const isTarget = hotspotTarget.trim().toLowerCase() === node.title.trim().toLowerCase();
                         return (
                           <button
-                            key={comp}
+                            key={node.id || node.title}
                             type="button"
-                            onClick={() => setHotspotTarget(comp)}
+                            onClick={() => setHotspotTarget(node.title)}
                             style={{
                               padding: '6px 14px',
                               borderRadius: '8px',
@@ -989,25 +1427,23 @@ export default function Quiz() {
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '6px',
-                              transition: 'all 0.15s ease'
+                              gap: '6px'
                             }}
                           >
-                            {isTarget && <Check size={13} color="#10b981" />}
-                            <span>{comp}</span>
+                            {isTarget && <span>✓</span>}
+                            <span>{node.title}</span>
                           </button>
                         );
                       })}
                     </div>
-
                     <input
                       type="text"
-                      placeholder="e.g. Policy & Decryption Engine or type custom component name"
+                      placeholder="Or enter target component label..."
                       value={hotspotTarget}
                       onChange={(e) => setHotspotTarget(e.target.value)}
                       style={{
                         width: '100%',
-                        padding: '10px 14px',
+                        padding: '9px 14px',
                         border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1',
                         background: isDark ? '#0b0f19' : '#ffffff',
                         color: isDark ? '#f8fafc' : '#1e293b',
@@ -1019,28 +1455,36 @@ export default function Quiz() {
                     />
                   </div>
 
-                  {/* 4. RESULTING ARCHITECTURAL DIAGRAM (Live Render) */}
-                  <div style={{ marginTop: '6px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Eye size={14} color="#8b5cf6" /> 4. Resulting Architecture Diagram (Live Render):
+                  {/* 5. Resulting Architecture Diagram Live Render */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Eye size={13} />
+                        <span>5. Resulting Architecture Diagram (Live Render):</span>
                       </span>
                       <button
                         type="button"
                         className="trn-link"
-                        style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                        onClick={() => setShowBuilderDiagramPreview(prev => !prev)}
+                        style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}
+                        onClick={() => setShowBuilderDiagramPreview(!showBuilderDiagramPreview)}
                       >
-                        {showBuilderDiagramPreview ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                        <span>{showBuilderDiagramPreview ? 'Collapse Diagram' : 'Expand Diagram'}</span>
+                        {showBuilderDiagramPreview ? 'Collapse Preview' : 'Expand Preview'}
                       </button>
                     </div>
 
                     {showBuilderDiagramPreview && (
-                      <div style={{ borderRadius: '16px', overflow: 'hidden', border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0' }}>
+                      <div style={{
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1',
+                        background: isDark ? '#050811' : '#f1f5f9',
+                        padding: '4px'
+                      }}>
                         <QuizDiagram
                           type={diagramTemplateId}
-                          customTitle={customDiagramTitle || undefined}
+                          customNodes={customNodes}
+                          customLayout={customLayout}
+                          customTitle={customDiagramTitle || DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.name}
                           targetNode={hotspotTarget}
                         />
                       </div>
@@ -1342,6 +1786,8 @@ export default function Quiz() {
                               <QuizDiagram
                                 type={q.diagramType || 'security_pipeline'}
                                 customTitle={q.diagramTitle}
+                                customNodes={q.customNodes}
+                                customLayout={q.customLayout}
                                 targetNode={q.answerLabel}
                               />
                             </div>

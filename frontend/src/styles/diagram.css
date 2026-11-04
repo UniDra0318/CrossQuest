@@ -217,6 +217,36 @@ html.dark .hierarchy-level-card,
   border-color: rgba(255, 255, 255, 0.1);
 }
 
+.hierarchy-level-card.node-active-guard,
+.hierarchy-level-card.is-hotspot-target {
+  border: 2px solid #f59e0b !important;
+  background: #fffbeb !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25), 0 8px 24px rgba(245, 158, 11, 0.15) !important;
+}
+
+html.dark .hierarchy-level-card.node-active-guard,
+html.dark .hierarchy-level-card.is-hotspot-target,
+[data-theme="dark"] .hierarchy-level-card.node-active-guard,
+[data-theme="dark"] .hierarchy-level-card.is-hotspot-target {
+  background: #1e1b4b !important;
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .hierarchy-level-card.node-active-guard .tier-title-row h4,
+html.dark .hierarchy-level-card.is-hotspot-target .tier-title-row h4,
+[data-theme="dark"] .hierarchy-level-card.node-active-guard .tier-title-row h4,
+[data-theme="dark"] .hierarchy-level-card.is-hotspot-target .tier-title-row h4 {
+  color: #f8fafc !important;
+}
+
+html.dark .hierarchy-level-card.node-active-guard .tier-desc,
+html.dark .hierarchy-level-card.is-hotspot-target .tier-desc,
+[data-theme="dark"] .hierarchy-level-card.node-active-guard .tier-desc,
+[data-theme="dark"] .hierarchy-level-card.is-hotspot-target .tier-desc {
+  color: #cbd5e1 !important;
+}
+
 .tier-top {
   max-width: 440px;
   border-color: #8b5cf6;
@@ -344,6 +374,50 @@ html.dark .data-flow-card,
 [data-theme="dark"] .data-flow-card {
   background: #1e293b;
   border-color: rgba(255, 255, 255, 0.1);
+}
+
+.data-flow-card.node-active-guard,
+.data-flow-card.is-hotspot-target,
+.tenant-vault-box.node-active-guard,
+.tenant-vault-box.is-hotspot-target {
+  border: 2px solid #f59e0b !important;
+  background: #fffbeb !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25), 0 8px 24px rgba(245, 158, 11, 0.15) !important;
+}
+
+html.dark .data-flow-card.node-active-guard,
+html.dark .data-flow-card.is-hotspot-target,
+html.dark .tenant-vault-box.node-active-guard,
+html.dark .tenant-vault-box.is-hotspot-target,
+[data-theme="dark"] .data-flow-card.node-active-guard,
+[data-theme="dark"] .data-flow-card.is-hotspot-target,
+[data-theme="dark"] .tenant-vault-box.node-active-guard,
+[data-theme="dark"] .tenant-vault-box.is-hotspot-target {
+  background: #1e1b4b !important;
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .data-flow-card.node-active-guard .flow-card-title,
+html.dark .data-flow-card.is-hotspot-target .flow-card-title,
+[data-theme="dark"] .data-flow-card.node-active-guard .flow-card-title,
+[data-theme="dark"] .data-flow-card.is-hotspot-target .flow-card-title,
+html.dark .tenant-vault-box.node-active-guard .vault-client-name,
+html.dark .tenant-vault-box.is-hotspot-target .vault-client-name,
+[data-theme="dark"] .tenant-vault-box.node-active-guard .vault-client-name,
+[data-theme="dark"] .tenant-vault-box.is-hotspot-target .vault-client-name {
+  color: #f8fafc !important;
+}
+
+html.dark .data-flow-card.node-active-guard .flow-card-desc,
+html.dark .data-flow-card.is-hotspot-target .flow-card-desc,
+[data-theme="dark"] .data-flow-card.node-active-guard .flow-card-desc,
+[data-theme="dark"] .data-flow-card.is-hotspot-target .flow-card-desc,
+html.dark .tenant-vault-box.node-active-guard .vault-desc,
+html.dark .tenant-vault-box.is-hotspot-target .vault-desc,
+[data-theme="dark"] .tenant-vault-box.node-active-guard .vault-desc,
+[data-theme="dark"] .tenant-vault-box.is-hotspot-target .vault-desc {
+  color: #cbd5e1 !important;
 }
 
 .data-flow-card.highlight-card {

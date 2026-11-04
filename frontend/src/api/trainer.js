@@ -234,6 +234,8 @@ export async function getQuizzes(token) {
             pairs: q.pairs || [],
             diagramType: q.diagramType || 'security_pipeline',
             diagramTitle: q.diagramTitle || undefined,
+            customNodes: q.customNodes || undefined,
+            customLayout: q.customLayout || undefined,
             points: q.points || 10,
             explanation: q.explanation || ''
           };
@@ -335,8 +337,9 @@ export async function addQuestion(quizId, q = {}, token) {
     answerLabel: q.answerLabel || '',
     pairs: q.pairs || [],
     diagramType: q.diagramType || 'security_pipeline',
-    diagramType: q.diagramType || 'security_pipeline',
     diagramTitle: q.diagramTitle || undefined,
+    customNodes: q.customNodes || undefined,
+    customLayout: q.customLayout || undefined,
     explanation: q.explanation || 'Verified compliance rubric citation.'
   };
 
@@ -372,7 +375,11 @@ export async function addQuestion(quizId, q = {}, token) {
     accepted: q.accepted || [],
     steps: q.steps || [],
     answerLabel: q.answerLabel || '',
-    pairs: q.pairs || []
+    pairs: q.pairs || [],
+    diagramType: q.diagramType,
+    diagramTitle: q.diagramTitle,
+    customNodes: q.customNodes,
+    customLayout: q.customLayout
   };
 }
 
@@ -392,6 +399,8 @@ export async function updateQuestion(quizId, qid, q = {}, token) {
     pairs: q.pairs || [],
     diagramType: q.diagramType || 'security_pipeline',
     diagramTitle: q.diagramTitle || undefined,
+    customNodes: q.customNodes || undefined,
+    customLayout: q.customLayout || undefined,
     explanation: q.explanation || 'Verified compliance rubric citation.'
   };
 
@@ -424,6 +433,10 @@ export async function updateQuestion(quizId, qid, q = {}, token) {
     steps: q.steps || [],
     answerLabel: q.answerLabel || '',
     pairs: q.pairs || [],
+    diagramType: q.diagramType,
+    diagramTitle: q.diagramTitle,
+    customNodes: q.customNodes,
+    customLayout: q.customLayout,
     explanation: q.explanation || ''
   };
 }

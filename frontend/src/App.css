@@ -1476,7 +1476,7 @@
   justify-content: center;
   padding: 32px 16px 48px;
   background-color: var(--cq-lav-2);
-  background-image: 
+  background-image:
     radial-gradient(circle at 15% 20%, rgba(106, 43, 217, 0.08) 0%, transparent 45%),
     radial-gradient(circle at 85% 80%, rgba(255, 122, 26, 0.07) 0%, transparent 40%),
     radial-gradient(rgba(23, 16, 43, 0.06) 1.5px, transparent 1.5px);
@@ -3288,6 +3288,13 @@
   border-color: #f59e0b !important;
   background: #fffdf5 !important;
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.18) !important;
+}
+
+html.dark .node-active-guard,
+[data-theme="dark"] .node-active-guard {
+  border-color: #f59e0b !important;
+  background: #1e1b4b !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
 .node-icon-bubble {

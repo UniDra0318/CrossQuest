@@ -20,17 +20,68 @@ import {
   Cloud,
   Globe,
   Radio,
-  FileCode
+  FileCode,
+  Terminal,
+  Box,
+  FileText,
+  Zap,
+  Eye
 } from 'lucide-react';
 
-export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, imageCaption, targetNode }) {
+export const AVAILABLE_DIAGRAM_ICONS = [
+  { id: 'shield', label: 'Shield / Security' },
+  { id: 'database', label: 'Database / Vault' },
+  { id: 'server', label: 'Server / Host' },
+  { id: 'cloud', label: 'Cloud / Network' },
+  { id: 'lock', label: 'Lock / Cipher' },
+  { id: 'key', label: 'Key / Credential' },
+  { id: 'cpu', label: 'CPU / Processing' },
+  { id: 'users', label: 'Users / Subject' },
+  { id: 'globe', label: 'Globe / Internet' },
+  { id: 'terminal', label: 'Terminal / CLI' },
+  { id: 'box', label: 'Box / Package' },
+  { id: 'layers', label: 'Layers / Stack' },
+  { id: 'file', label: 'File / Document' },
+  { id: 'zap', label: 'Zap / Ingress' },
+  { id: 'radio', label: 'Radio / Broadcast' },
+  { id: 'eye', label: 'Eye / Audit' },
+  { id: 'check', label: 'Check / Verified' }
+];
+
+export const renderDiagramNodeIcon = (iconType, colorClass = '') => {
+  switch (iconType) {
+    case 'shield': return <Shield size={22} className={colorClass} />;
+    case 'database': return <Database size={22} className={colorClass} />;
+    case 'server': return <Server size={22} className={colorClass} />;
+    case 'cloud': return <Cloud size={22} className={colorClass} />;
+    case 'lock': return <Lock size={22} className={colorClass} />;
+    case 'key': return <Key size={22} className={colorClass} />;
+    case 'cpu': return <Cpu size={22} className={colorClass} />;
+    case 'users': return <Users size={22} className={colorClass} />;
+    case 'globe': return <Globe size={22} className={colorClass} />;
+    case 'terminal': return <Terminal size={22} className={colorClass} />;
+    case 'box': return <Box size={22} className={colorClass} />;
+    case 'layers': return <Layers size={22} className={colorClass} />;
+    case 'file': return <FileText size={22} className={colorClass} />;
+    case 'zap': return <Zap size={22} className={colorClass} />;
+    case 'radio': return <Radio size={22} className={colorClass} />;
+    case 'eye': return <Eye size={22} className={colorClass} />;
+    case 'check': return <CheckCircle2 size={22} className={colorClass} />;
+    default: return <Cpu size={22} className={colorClass} />;
+  }
+};
+
+export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, imageCaption, targetNode, customLayout }) {
   const [isZoomed, setIsZoomed] = useState(false);
 
-  const isTarget = (name) => {
-    if (!targetNode || !name) return false;
+  // Exact target comparison to prevent false-positive multiple highlights
+  const isTarget = (name, id = null) => {
+    if (!targetNode) return false;
     const t = String(targetNode).trim().toLowerCase();
+    if (id && String(id).trim().toLowerCase() === t) return true;
+    if (!name) return false;
     const n = String(name).trim().toLowerCase();
-    return t === n || n.includes(t) || t.includes(n);
+    return t === n;
   };
 
   // If an uploaded or URL image is provided for the diagram
@@ -48,35 +99,32 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
             onClick={() => setIsZoomed(true)}
             title="Click to view full-resolution diagram"
           >
-            <Maximize2 size={13} />
-            <span>Enlarge Diagram</span>
+            <Maximize2 size={14} />
+            <span>Enlarge</span>
           </button>
         </div>
 
-        <div className="diagram-image-frame" onClick={() => setIsZoomed(true)}>
+        <div className="diagram-image-wrapper">
           <img
             src={imageUrl}
-            alt={imageCaption || 'Architectural Diagram'}
-            className="diagram-rendered-img"
+            alt={customTitle || 'Technical Architectural Diagram'}
+            className="diagram-embedded-img"
+            onClick={() => setIsZoomed(true)}
           />
-          <div className="diagram-image-hover-hint">
-            <Maximize2 size={18} />
-            <span>Click to expand full size</span>
-          </div>
         </div>
 
         {imageCaption && (
           <div className="diagram-caption-footer">
-            <Sparkles size={13} className="text-purple flex-shrink-0" />
+            <AlertTriangle size={14} className="text-purple flex-shrink-0" />
             <span>{imageCaption}</span>
           </div>
         )}
 
-        {/* Fullscreen Lightbox Zoom Modal */}
+        {/* Modal Lightbox for Diagram Zoom */}
         {isZoomed && (
           <div className="diagram-lightbox-backdrop" onClick={() => setIsZoomed(false)}>
-            <div className="diagram-lightbox-content" onClick={(e) => e.stopPropagation()}>
-              <div className="diagram-lightbox-header flex-between">
+            <div className="diagram-lightbox-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="diagram-lightbox-header">
                 <span className="font-bold text-sm text-slate-800">{customTitle || imageCaption || 'Diagram View'}</span>
                 <button
                   type="button"
@@ -103,6 +151,52 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
   // If a custom node flow was authored
   if (customNodes && Array.isArray(customNodes) && customNodes.length > 0) {
+    const isHierarchyLayout = customLayout === 'hierarchy' || type === 'pki_hierarchy' || type === 'clearance_hierarchy';
+
+    if (isHierarchyLayout) {
+      return (
+        <div className="diagram-card-container">
+          <div className="diagram-header-strip">
+            <Sparkles size={16} className="text-purple" />
+            <span>{customTitle || 'CUSTOM TIERED ARCHITECTURAL HIERARCHY'}</span>
+          </div>
+
+          <div className="hierarchy-pyramid-container">
+            {customNodes.map((node, nIdx) => {
+              const matchesTarget = node.isTarget || isTarget(node.title, node.id);
+              const nodeColor = node.color || 'purple';
+
+              return (
+                <React.Fragment key={node.id || nIdx}>
+                  <div className={`hierarchy-level-card tier-custom ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}>
+                    <div className={`tier-rank-pill pill-${nodeColor}`}>
+                      <span>{node.badge || `TIER LEVEL ${nIdx + 1}`}</span>
+                      <span className={`tier-authority-badge ${matchesTarget ? 'badge-gold-glow' : ''}`}>
+                        {matchesTarget ? '★ TARGET HOTSPOT' : (node.tierScope || 'ARCHITECTURAL TIER')}
+                      </span>
+                    </div>
+                    <div className="tier-card-body">
+                      <div className="tier-title-row">
+                        {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
+                        <h4>{node.title || `Component ${nIdx + 1}`}</h4>
+                      </div>
+                      {node.subtitle && <p className="tier-desc">{node.subtitle}</p>}
+                    </div>
+                  </div>
+
+                  {nIdx < customNodes.length - 1 && (
+                    <div className="hierarchy-connector-flow">
+                      <ChevronDown size={18} className="hierarchy-arrow" />
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="diagram-card-container">
         <div className="diagram-header-strip">
@@ -112,20 +206,14 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
         <div className="diagram-pipeline-wrapper custom-flow-wrapper">
           {customNodes.map((node, nIdx) => {
-            const matchesTarget = node.isTarget || isTarget(node.title);
+            const matchesTarget = node.isTarget || isTarget(node.title, node.id);
             const nodeColor = node.color || 'purple';
 
             return (
               <React.Fragment key={node.id || nIdx}>
                 <div className={`pipeline-node node-${nodeColor} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}>
                   <div className={`node-icon-bubble bg-${nodeColor}-subtle ${matchesTarget ? 'pulse-slow' : ''}`}>
-                    {node.iconType === 'database' ? <Database size={22} className={`text-${nodeColor}`} /> :
-                     node.iconType === 'server' ? <Server size={22} className={`text-${nodeColor}`} /> :
-                     node.iconType === 'cloud' ? <Cloud size={22} className={`text-${nodeColor}`} /> :
-                     node.iconType === 'lock' ? <Lock size={22} className={`text-${nodeColor}`} /> :
-                     node.iconType === 'shield' ? <Shield size={22} className={`text-${nodeColor}`} /> :
-                     node.iconType === 'code' ? <FileCode size={22} className={`text-${nodeColor}`} /> :
-                     <Cpu size={22} className={`text-${nodeColor}`} />}
+                    {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
                   </div>
                   <div className="node-title">{node.title || `Stage ${nIdx + 1}`}</div>
                   <div className={`node-badge-tag ${matchesTarget ? 'badge-gold-glow' : ''}`}>
@@ -152,10 +240,10 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
   // 1. Generalized Sequential Process Pipeline
   if (type === 'security_pipeline' || type === 'sequential_pipeline') {
-    const tClient = isTarget('Client') || isTarget('Trainee');
-    const tGateway = isTarget('Gateway') || isTarget('API Gateway') || isTarget('Ingress');
-    const tEngine = isTarget('Engine') || isTarget('Policy Engine') || isTarget('CP-ABE') || (!targetNode);
-    const tDb = isTarget('Vault') || isTarget('Database') || isTarget('Storage');
+    const tClient = isTarget('Client Interface');
+    const tGateway = isTarget('API Gateway');
+    const tEngine = isTarget('Policy & Decryption Engine');
+    const tDb = isTarget('Encrypted Storage Vault');
 
     return (
       <div className="diagram-card-container">
@@ -240,9 +328,9 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
   // 2. Generalized Tiered Hierarchy Pyramid
   if (type === 'clearance_hierarchy' || type === 'tiered_pyramid') {
-    const tL3 = isTarget('Level 3') || isTarget('Administrator') || isTarget('Root');
-    const tL2 = isTarget('Level 2') || isTarget('Manager') || isTarget('Scope') || (!targetNode);
-    const tL1 = isTarget('Level 1') || isTarget('Trainee') || isTarget('Operator');
+    const tL3 = isTarget('Root System Administrator') || isTarget('Clearance Level 3');
+    const tL2 = isTarget('Client Account & Portfolio Manager') || isTarget('Clearance Level 2');
+    const tL1 = isTarget('Instructor & Trainee Learner') || isTarget('Clearance Level 1');
 
     return (
       <div className="diagram-card-container">
@@ -325,9 +413,9 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
   // 3. Generalized Relational Entity Matrix
   if (type === 'data_flow' || type === 'entity_matrix') {
-    const tSub = isTarget('Subject') || isTarget('Learner') || isTarget('Trainee');
-    const tCtrl = isTarget('Controller') || isTarget('Employer') || isTarget('PIC');
-    const tProc = isTarget('Processor') || isTarget('Service') || isTarget('PIP') || (!targetNode);
+    const tSub = isTarget('Trainee / Learner') || isTarget('Data Subject');
+    const tCtrl = isTarget('Corporate Employer') || isTarget('Controlling Entity (PIC)');
+    const tProc = isTarget('Crossworks Training Service') || isTarget('Processing Service (PIP)');
 
     return (
       <div className="diagram-card-container">
@@ -399,9 +487,9 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
   // 4. Generalized Dual-Partition Isolation Boundary
   if (type === 'tenant_partition' || type === 'partition_boundary') {
-    const tA = isTarget('Alpha') || isTarget('Tenant A') || isTarget('Partition A');
-    const tWall = isTarget('Barrier') || isTarget('Wall') || isTarget('Security Barrier') || (!targetNode);
-    const tB = isTarget('Beta') || isTarget('Tenant B') || isTarget('Partition B');
+    const tA = isTarget('Tenant Alpha Organization') || isTarget('Domain Partition A');
+    const tWall = isTarget('Cryptographic Barrier Wall') || isTarget('Cryptographic Barrier');
+    const tB = isTarget('Tenant Beta Organization') || isTarget('Domain Partition B');
 
     return (
       <div className="diagram-card-container">
@@ -457,10 +545,10 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
   // 5. Generalized Perimeter Ingress Gateway Flow
   if (type === 'network_dmz' || type === 'perimeter_gateway') {
-    const tEdge = isTarget('Internet') || isTarget('Public') || isTarget('Edge');
-    const tWaf = isTarget('WAF') || isTarget('Firewall') || isTarget('Inspection') || (!targetNode);
-    const tProxy = isTarget('Proxy') || isTarget('Ingress') || isTarget('Gateway');
-    const tMesh = isTarget('Mesh') || isTarget('VPC') || isTarget('Internal');
+    const tEdge = isTarget('External Network');
+    const tWaf = isTarget('Inspection Firewall / WAF');
+    const tProxy = isTarget('Ingress Reverse Proxy');
+    const tMesh = isTarget('Internal Service Mesh');
 
     return (
       <div className="diagram-card-container">
@@ -535,9 +623,9 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
 
   // 6. Generalized Key Derivation & Token Hierarchy Tree
   if (type === 'pki_hierarchy' || type === 'branching_tree') {
-    const tRoot = isTarget('Root') || isTarget('Master') || isTarget('Authority');
-    const tMid = isTarget('Intermediate') || isTarget('Domain') || isTarget('Tenant') || (!targetNode);
-    const tLeaf = isTarget('Ephemeral') || isTarget('Session') || isTarget('Secret Key');
+    const tRoot = isTarget('Master Cryptographic Authority') || isTarget('Root Authority Master Key');
+    const tMid = isTarget('Domain Attribute Authority (CA)') || isTarget('Intermediate Domain Authority');
+    const tLeaf = isTarget('Attribute Secret Key (Leaf)') || isTarget('Ephemeral Session Key');
 
     return (
       <div className="diagram-card-container">
@@ -607,5 +695,16 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
     );
   }
 
-  return null;
+  // Fallback generic pipeline
+  return (
+    <div className="diagram-card-container">
+      <div className="diagram-header-strip">
+        <Cpu size={16} className="text-cyan" />
+        <span>{customTitle || 'ARCHITECTURAL SCHEMATIC'}</span>
+      </div>
+      <div className="p-4 text-center text-sm text-secondary">
+        Architectural schematic initialized. Select or customize nodes to configure hot-spot component.
+      </div>
+    </div>
+  );
 }
