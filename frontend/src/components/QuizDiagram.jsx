@@ -194,10 +194,13 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               const isBase = idx === total - 1;
               const tierClass = isApex ? 'tier-apex' : isBase ? 'tier-base' : 'tier-mid';
 
-              // Dynamic stepped width for authentic pyramid taper
-              // Apex: 280px, Base: 620px, intermediate stepped proportionally
+              // Dynamic stepped scaling for authentic pyramid silhouette
+              // Apex: 320px, Base: 780px, intermediate tiers step smoothly and proportionally
               const widthRatio = total > 1 ? idx / (total - 1) : 0.5;
-              const calcWidth = Math.round(280 + (widthRatio * 340)); // 280px to 620px
+              const calcWidth = Math.round(320 + (widthRatio * 460)); // 320px (Apex) ➔ 780px (Base)
+              const padV = Math.round(11 + widthRatio * 6); // 11px ➔ 17px
+              const padH = Math.round(16 + widthRatio * 10); // 16px ➔ 26px
+              const titleSize = (13.5 + widthRatio * 1.5).toFixed(1); // 13.5px ➔ 15px
               const matchesTarget = isTarget(node.title, node.id);
               const nodeColor = node.color || (isApex ? 'purple' : isBase ? 'emerald' : 'cyan');
 
@@ -205,10 +208,19 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                 <React.Fragment key={node.id || idx}>
                   <div
                     className={`hierarchy-level-card ${tierClass} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}
-                    style={{ width: `${calcWidth}px` }}
+                    style={{
+                      width: `${calcWidth}px`,
+                      maxWidth: '96%',
+                      padding: `${padV}px ${padH}px`,
+                      boxShadow: isApex
+                        ? '0 6px 18px rgba(139, 92, 246, 0.22)'
+                        : isBase
+                        ? '0 8px 24px rgba(16, 185, 129, 0.22)'
+                        : '0 6px 20px rgba(6, 182, 212, 0.18)'
+                    }}
                   >
                     <div className={`tier-rank-pill pill-${nodeColor}`}>
-                      <span>{node.badge || (isApex ? 'LEVEL 3: APEX' : isBase ? 'LEVEL 1: BROAD FOUNDATION' : `LEVEL ${total - idx}: MID-TIER`)}</span>
+                      <span>{node.badge || (isApex ? `LEVEL ${total}: APEX PRIVILEGE` : isBase ? 'LEVEL 1: BROAD OPERATIONAL BASE' : `LEVEL ${total - idx}: SEGREGATED SCOPE`)}</span>
                       <span className={`tier-authority-badge ${matchesTarget ? 'badge-gold-glow' : ''}`}>
                         {matchesTarget ? '★ TARGET HOTSPOT' : (isApex ? 'ROOT AUTHORITY' : isBase ? 'INDIVIDUAL SCOPE' : 'PORTFOLIO SCOPE')}
                       </span>
@@ -216,7 +228,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                     <div className="tier-card-body">
                       <div className="tier-title-row">
                         {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
-                        <h4>{node.title}</h4>
+                        <h4 style={{ fontSize: `${titleSize}px`, fontWeight: 800 }}>{node.title}</h4>
                       </div>
                       {node.subtitle && <p className="tier-desc">{node.subtitle}</p>}
                     </div>
