@@ -48,6 +48,7 @@ import {
   fetchCompanies, 
   fetchStaffUsers, 
   fetchSystemOverview,
+  fetchAnomalyRules,
   updateStaffAttributes, 
   createUserApi, 
   createCompanyApi 
@@ -66,6 +67,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [anomalies, setAnomalies] = useState(defaultAnomalies);
   const [records, setRecords] = useState(defaultRecords);
   const [settings] = useState(defaultSettings);
+  const [liveRules, setLiveRules] = useState([]);
   const [editingStaffId, setEditingStaffId] = useState(null);
 
   // Client Companies & Tenancy Registry State
@@ -247,13 +249,17 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     async function loadAdminData() {
       if (!token) return;
       try {
-        const [dbRecords, dbAnomalies, dbCompanies, dbStaff, dbOverview] = await Promise.all([
+        const [dbRecords, dbAnomalies, dbCompanies, dbStaff, dbOverview, dbRules] = await Promise.all([
           fetchRecords(token),
           fetchAnomalies(token),
           fetchCompanies(token),
           fetchStaffUsers(token),
-          fetchSystemOverview(token)
+          fetchSystemOverview(token),
+          fetchAnomalyRules(token)
         ]);
+        if (dbRules && dbRules.length > 0) {
+          setLiveRules(dbRules);
+        }
         if (dbOverview) {
           setOverview(prev => ({
             ...prev,
@@ -402,6 +408,27 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     r.org.toLowerCase().includes(recordSearch.toLowerCase()) ||
     r.id.toLowerCase().includes(recordSearch.toLowerCase())
   );
+
+  const {
+    currentPage: staffPage,
+    setCurrentPage: setStaffPage,
+    paginatedItems: pagedStaff,
+    totalItems: totalStaff
+  } = usePagination(filteredStaff, 4);
+
+  const {
+    currentPage: companyPage,
+    setCurrentPage: setCompanyPage,
+    paginatedItems: pagedCompanies,
+    totalItems: totalCompanies
+  } = usePagination(companiesList, 4);
+
+  const {
+    currentPage: recordPage,
+    setCurrentPage: setRecordPage,
+    paginatedItems: pagedRecords,
+    totalItems: totalRecords
+  } = usePagination(filteredRecords, 4);
   return (
     <div className="adm-main admin-dashboard">
       {usingFallback && (
@@ -1013,7 +1040,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           ===================================================================== */}
       {activeSubView === 'anomalies' && (
         <div style={{ marginTop: '24px' }}>
-          <AdminPeerReviewAnomalyDesk />
+          <AdminPeerReviewAnomalyDesk onRuleUpdated={(updated) => setLiveRules(prev => prev.map(r => r.rule_code === updated.rule_code ? updated : r))} />
         </div>
       )}
       {/* =====================================================================
@@ -1160,21 +1187,50 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             </div>
             {/* Card 2: Anomaly Detection Thresholds */}
             <div className="adm-card">
-              <div className="adm-ptitle">
-                <span style={{ background: '#ff7a1a' }}>
-                  <Sliders size={22} />
-                </span>
-                <div>
-                  <h2>Anomaly Detection Thresholds</h2>
-                  <p>Rule- & threshold-based trigger levels</p>
+              <div className="adm-ptitle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <span style={{ background: '#ff7a1a' }}>
+                    <Sliders size={22} />
+                  </span>
+                  <div>
+                    <h2>Anomaly Detection Thresholds</h2>
+                    <p>Live active rule parameters (Table 22)</p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveView ? setActiveView('anomalies') : null}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    background: '#ff7a1a',
+                    color: '#ffffff',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  title="Tune thresholds in Anomaly Monitor"
+                >
+                  <Sliders size={13} />
+                  <span>Tune Thresholds &rarr;</span>
+                </button>
               </div>
               {/* Operating Window */}
               <div className="adm-field adm-field--window" style={{ marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span className="adm-label">STANDARD BUSINESS WINDOW</span>
-                  <strong style={{ fontSize: '13px' }}>
-                    {settings.anomaly.window.start} – {settings.anomaly.window.end} {settings.anomaly.window.tz}
+                  <strong style={{ fontSize: '13px', color: '#ff7a1a' }}>
+                    {(() => {
+                      const rAfter = liveRules.find(r => r.rule_code === 'S1_AFTER_HOURS');
+                      if (rAfter?.parameters?.start_hour !== undefined) {
+                        return `${String(rAfter.parameters.start_hour).padStart(2, '0')}:00 – ${String(rAfter.parameters.end_hour).padStart(2, '0')}:00 (${rAfter.parameters.tz || 'UTC+8'})`;
+                      }
+                      return `${settings.anomaly.window.start} – ${settings.anomaly.window.end} ${settings.anomaly.window.tz}`;
+                    })()}
                   </strong>
                 </div>
                 <div className="adm-window">
@@ -1204,10 +1260,20 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <span className="adm-label">CONSECUTIVE FAILED ATTEMPTS TRIGGER</span>
+                  <span className="adm-label">CONSECUTIVE FAILED ATTEMPTS TRIGGER (R2_FAILED_LOGINS)</span>
                   <div className="adm-thr__val">
-                    <b>{settings.anomaly.failedAttempts.count}</b>
-                    <span>failed requests within {settings.anomaly.failedAttempts.minutes} minutes</span>
+                    <b>
+                      {(() => {
+                        const rFailed = liveRules.find(r => r.rule_code === 'R2_FAILED_LOGINS_ACCOUNT') || liveRules.find(r => r.rule_code?.includes('FAILED_LOGINS'));
+                        return rFailed?.parameters?.threshold ?? settings.anomaly.failedAttempts.count;
+                      })()}
+                    </b>
+                    <span>
+                      failed requests within {(() => {
+                        const rFailed = liveRules.find(r => r.rule_code === 'R2_FAILED_LOGINS_ACCOUNT') || liveRules.find(r => r.rule_code?.includes('FAILED_LOGINS'));
+                        return rFailed?.parameters?.window_minutes ?? settings.anomaly.failedAttempts.minutes;
+                      })()} minutes
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1217,10 +1283,20 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   <Layers size={20} />
                 </div>
                 <div>
-                  <span className="adm-label">BURST DECRYPTION VOLUME THRESHOLD</span>
+                  <span className="adm-label">BURST VOLUME THRESHOLD (R3_BURST / R4_BULK)</span>
                   <div className="adm-thr__val">
-                    <b>{settings.anomaly.burstVolume.records}</b>
-                    <span>record decryptions within {settings.anomaly.burstVolume.minutes} minutes</span>
+                    <b>
+                      {(() => {
+                        const rBurst = liveRules.find(r => r.rule_code === 'R3_REPORT_BURSTS') || liveRules.find(r => r.rule_code === 'R4_BULK_EDIT') || liveRules.find(r => r.rule_code?.includes('BURST'));
+                        return rBurst?.parameters?.threshold ?? settings.anomaly.burstVolume.records;
+                      })()}
+                    </b>
+                    <span>
+                      record operations within {(() => {
+                        const rBurst = liveRules.find(r => r.rule_code === 'R3_REPORT_BURSTS') || liveRules.find(r => r.rule_code === 'R4_BULK_EDIT') || liveRules.find(r => r.rule_code?.includes('BURST'));
+                        return rBurst?.parameters?.window_minutes ?? settings.anomaly.burstVolume.minutes;
+                      })()} minutes
+                    </span>
                   </div>
                 </div>
               </div>

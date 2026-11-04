@@ -41,7 +41,7 @@ import {
   downloadAnomalyReportCsv
 } from '../services/api';
 
-export default function AdminPeerReviewAnomalyDesk() {
+export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
   const { token, currentUser } = useAuth();
   const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
   const isDark = effectiveTheme === 'dark';
@@ -378,6 +378,7 @@ export default function AdminPeerReviewAnomalyDesk() {
         reason: ruleReason
       }, token);
       setRules(prev => prev.map(r => r.rule_code === updated.rule_code ? updated : r));
+      onRuleUpdated?.(updated);
       setActionSuccessToast(`Rule ${updated.rule_code} parameters updated to v${updated.version_no}.`);
       setEditingRule(null);
       loadLogs();
