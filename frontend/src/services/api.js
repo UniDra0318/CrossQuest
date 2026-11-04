@@ -911,6 +911,20 @@ export async function addQuizQuestionApi(quizId, payload, token) {
   return null;
 }
 
+export async function updateQuizQuestionApi(quizId, questionId, payload, token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions/${questionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error updating quiz question:", err);
+  }
+  return null;
+}
+
 export async function deleteQuizQuestionApi(quizId, questionId, token) {
   try {
     const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions/${questionId}`, {

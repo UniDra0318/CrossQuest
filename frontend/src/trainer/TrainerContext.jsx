@@ -8,6 +8,7 @@ import {
   createQuiz,
   addQuestion,
   deleteQuestion,
+  updateQuestion,
   updateQuizSettings,
   resetQuizzes,
   getAnalytics,
@@ -277,6 +278,12 @@ export function TrainerProvider({ children }) {
     setQuizzes(updated);
   };
 
+  const handleUpdateQuestion = async (quizId, qid, q) => {
+    await updateQuestion(quizId, qid, q, token);
+    const updated = await getQuizzes(token);
+    setQuizzes(updated);
+  };
+
   const handleDeleteQuestion = async (quizId, qid) => {
     await deleteQuestion(quizId, qid, token);
     const updated = await getQuizzes(token);
@@ -327,6 +334,7 @@ export function TrainerProvider({ children }) {
         handleGrade,
         handleCreateQuiz,
         handleAddQuestion,
+        handleUpdateQuestion,
         handleDeleteQuestion,
         handleUpdateSettings,
         handleResetQuizzes,

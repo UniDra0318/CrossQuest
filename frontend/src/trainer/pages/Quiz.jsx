@@ -13,7 +13,9 @@ import {
   HelpCircle,
   Clock,
   Award,
-  ArrowRight
+  ArrowRight,
+  Edit3,
+  X
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
@@ -32,6 +34,7 @@ export default function Quiz() {
     quizzes,
     handleCreateQuiz,
     handleAddQuestion,
+    handleUpdateQuestion,
     handleDeleteQuestion,
     handleUpdateSettings,
     handleResetQuizzes,
@@ -43,6 +46,70 @@ export default function Quiz() {
   const [newQuestionPrompt, setNewQuestionPrompt] = useState('');
   const [newQuestionExplanation, setNewQuestionExplanation] = useState('');
   const [creatingQuiz, setCreatingQuiz] = useState(false);
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
+
+  const startEditingQuestion = (q) => {
+    setEditingQuestionId(q.id);
+
+    // Normalize question format
+    let type = q.type || 'kahoot';
+    if (type === 'multiple_choice') type = 'kahoot';
+    if (type === 'sequence_order') type = 'sequence';
+    if (type === 'diagram_analysis') type = 'hotspot';
+    setQuestionType(type);
+
+    setNewQuestionPrompt(q.prompt || q.question || '');
+    setNewQuestionExplanation(q.explanation || '');
+
+    if (type === 'kahoot') {
+      const opts = Array.isArray(q.options) && q.options.length >= 2
+        ? [...q.options, '', '', '', ''].slice(0, 4)
+        : ['', '', '', ''];
+      setKahootOptions(opts);
+      setKahootCorrectIdx(typeof q.answer === 'number' ? q.answer : 0);
+    } else if (type === 'matching') {
+      const pairs = Array.isArray(q.pairs) && q.pairs.length >= 2
+        ? [...q.pairs, { left: '', right: '' }, { left: '', right: '' }, { left: '', right: '' }, { left: '', right: '' }].slice(0, 4)
+        : [
+            { left: '', right: '' },
+            { left: '', right: '' },
+            { left: '', right: '' },
+            { left: '', right: '' }
+          ];
+      setMatchingPairs(pairs);
+    } else if (type === 'sequence') {
+      const steps = Array.isArray(q.steps) && q.steps.length >= 2
+        ? [...q.steps, '', '', '', ''].slice(0, 4)
+        : ['', '', '', ''];
+      setSequenceSteps(steps);
+    } else if (type === 'hotspot') {
+      setHotspotTarget(q.answerLabel || q.prompt || '');
+    } else {
+      setNewQuestionAnswer(q.answerLabel || (Array.isArray(q.accepted) ? q.accepted.join(', ') : (q.answer || '')));
+    }
+
+    const builderElem = document.getElementById('assessment-question-builder');
+    if (builderElem) {
+      builderElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingQuestionId(null);
+    setNewQuestionPrompt('');
+    setNewQuestionExplanation('');
+    setNewQuestionAnswer('');
+    setKahootOptions(['', '', '', '']);
+    setKahootCorrectIdx(0);
+    setMatchingPairs([
+      { left: '', right: '' },
+      { left: '', right: '' },
+      { left: '', right: '' },
+      { left: '', right: '' }
+    ]);
+    setSequenceSteps(['', '', '', '']);
+    setHotspotTarget('');
+  };
 
   // Multi-type question builder state
   const [questionType, setQuestionType] = useState('kahoot'); // 'kahoot' | 'matching' | 'identification' | 'sequence' | 'hotspot'
@@ -131,7 +198,13 @@ export default function Quiz() {
       payload.answer = newQuestionAnswer.trim();
     }
 
-    await handleAddQuestion(activeQuiz.id, payload);
+    if (editingQuestionId) {
+      await handleUpdateQuestion(activeQuiz.id, editingQuestionId, payload);
+    } else {
+      await handleAddQuestion(activeQuiz.id, payload);
+    }
+    cancelEditing();
+    return;
     setNewQuestionPrompt('');
     setNewQuestionExplanation('');
     setNewQuestionAnswer('');
@@ -203,7 +276,7 @@ export default function Quiz() {
                 key={q.id}
                 type="button"
                 className={isSelected ? 'on' : ''}
-                onClick={() => setActiveQuizId(q.id)}
+                onClick={() => { if (editingQuestionId) cancelEditing(); setActiveQuizId(q.id); }}
                 style={{
                   padding: '16px',
                   borderRadius: '16px',
@@ -353,10 +426,13 @@ export default function Quiz() {
                 POLISHED QUESTION BUILDER CARD (All 5 Question Formats)
                 ========================================================================= */}
             <form
+              id="assessment-question-builder"
               onSubmit={onAddQuestion}
               style={{
                 background: isDark ? '#111827' : '#f8fafc',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0',
+                border: editingQuestionId
+                  ? '2px solid #8b5cf6'
+                  : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0'),
                 borderRadius: '18px',
                 padding: '22px 24px',
                 display: 'flex',
@@ -365,6 +441,52 @@ export default function Quiz() {
                 boxShadow: isDark ? '0 12px 30px rgba(0, 0, 0, 0.3)' : '0 6px 18px rgba(0, 0, 0, 0.04)'
               }}
             >
+              {/* Editing Banner */}
+{editingQuestionId && (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    background: isDark ? 'rgba(139, 92, 246, 0.15)' : '#ede9fe',
+                    border: '1px solid #8b5cf6',
+                    marginBottom: '8px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Edit3 size={15} color="#8b5cf6" />
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#ddd6fe' : '#5b21b6' }}>
+                      Editing Question: <code>{editingQuestionId}</code>
+                    </span>
+                    <span className="adm-chip adm-chip--purple" style={{ fontSize: '10px' }}>
+                      EDIT MODE
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: isDark ? 'rgba(255, 255, 255, 0.1)' : '#ffffff',
+                      color: isDark ? '#f8fafc' : '#475569',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <X size={12} />
+                    <span>Cancel Edit</span>
+                  </button>
+                </div>
+              )}
+
               {/* Card Title & Format Selector */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '12px' }}>
@@ -697,14 +819,34 @@ export default function Quiz() {
                 />
               </div>
 
-              {/* Submit Button */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+              {/* Submit / Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px' }}>
+                {editingQuestionId && (
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: '10px',
+                      border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #cbd5e1',
+                      background: 'transparent',
+                      color: isDark ? '#cbd5e1' : '#64748b',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={!newQuestionPrompt.trim()}
                   className="adm-btn adm-btn-solid cq-btn--purple"
                   style={{
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                    background: editingQuestionId
+                      ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                      : 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '10px',
@@ -712,14 +854,16 @@ export default function Quiz() {
                     fontSize: '13px',
                     fontWeight: 700,
                     cursor: !newQuestionPrompt.trim() ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 4px 14px rgba(124, 58, 237, 0.35)',
+                    boxShadow: editingQuestionId
+                      ? '0 4px 14px rgba(16, 185, 129, 0.35)'
+                      : '0 4px 14px rgba(124, 58, 237, 0.35)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px'
                   }}
                 >
-                  <Plus size={16} />
-                  <span>Add Question to Assessment</span>
+                  {editingQuestionId ? <Check size={16} /> : <Plus size={16} />}
+                  <span>{editingQuestionId ? 'Save Question Changes' : 'Add Question to Assessment'}</span>
                 </button>
               </div>
             </form>
@@ -759,10 +903,15 @@ export default function Quiz() {
                       className="trn-q"
                       style={{
                         background: isDark ? '#111827' : '#ffffff',
-                        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--cq-line)',
+                        border: editingQuestionId === q.id
+                          ? '2px solid #8b5cf6'
+                          : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--cq-line)'),
                         borderRadius: '16px',
                         padding: '18px 20px',
-                        boxShadow: isDark ? '0 4px 16px rgba(0, 0, 0, 0.25)' : '0 2px 8px rgba(0, 0, 0, 0.03)'
+                        boxShadow: editingQuestionId === q.id
+                          ? '0 0 0 2px rgba(139, 92, 246, 0.25), 0 8px 24px rgba(0, 0, 0, 0.25)'
+                          : (isDark ? '0 4px 16px rgba(0, 0, 0, 0.25)' : '0 2px 8px rgba(0, 0, 0, 0.03)'),
+                        transition: 'all 0.15s ease'
                       }}
                     >
                       <div className="trn-q__top" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -772,19 +921,45 @@ export default function Quiz() {
                         <span className={`adm-chip ${formatInfo.chip}`} style={{ fontSize: '10px', padding: '3px 8px' }}>
                           {formatInfo.label}
                         </span>
-                        <button
-                          type="button"
-                          className="trn-link"
-                          style={{ marginLeft: 'auto', color: '#ef4444', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                          onClick={() => {
-                            if (window.confirm('Delete this question from assessment?')) {
-                              handleDeleteQuestion(activeQuiz.id, q.id);
-                            }
-                          }}
-                        >
-                          <Trash2 size={13} />
-                          <span>Delete</span>
-                        </button>
+                        {editingQuestionId === q.id && (
+                          <span className="adm-chip adm-chip--purple" style={{ fontSize: '10px', padding: '2px 8px', fontWeight: 700 }}>
+                            Editing
+                          </span>
+                        )}
+                        <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
+                          <button
+                            type="button"
+                            className="trn-link"
+                            style={{
+                              color: editingQuestionId === q.id ? '#a78bfa' : (isDark ? '#cbd5e1' : '#475569'),
+                              fontSize: '12px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontWeight: editingQuestionId === q.id ? 700 : 500,
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => startEditingQuestion(q)}
+                            title="Edit question prompt, format, options, or explanation"
+                          >
+                            <Edit3 size={13} />
+                            <span>{editingQuestionId === q.id ? 'Editing' : 'Edit'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="trn-link"
+                            style={{ color: '#ef4444', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                            onClick={() => {
+                              if (window.confirm('Delete this question from assessment?')) {
+                                if (editingQuestionId === q.id) cancelEditing();
+                                handleDeleteQuestion(activeQuiz.id, q.id);
+                              }
+                            }}
+                          >
+                            <Trash2 size={13} />
+                            <span>Delete</span>
+                          </button>
+                        </div>
                       </div>
 
                       <h3 style={{ margin: '10px 0 12px', fontSize: '15px', fontWeight: 700, color: isDark ? '#f8fafc' : '#1e293b', lineHeight: 1.4 }}>

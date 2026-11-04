@@ -646,6 +646,21 @@ def test_tc_gam_13_quiz_catalog_and_authoring(client: TestClient, gamification_f
     q_data = q_resp.json()
     assert q_data["question_text"].startswith("What is the primary")
 
+    # 2b. Trainer updates question
+    put_resp = client.put(
+        f"/api/v1/gamification/quizzes/{quiz_id}/questions/{q_data['id']}",
+        json={
+            "question_text": "Updated: What is the primary objective of STRIDE threat modeling?",
+            "options": ["Identify system threats and vulnerabilities", "Compile source code", "Deploy containers", "Format database"],
+            "correct_option": 0,
+            "points": 20,
+            "explanation": "Updated explanation."
+        },
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    assert put_resp.status_code == 200
+    assert put_resp.json()["question_text"].startswith("Updated:")
+
     # 3. Trainee lists quizzes from real DB
     list_resp = client.get(
         "/api/v1/gamification/quizzes",

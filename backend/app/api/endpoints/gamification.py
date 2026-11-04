@@ -272,6 +272,54 @@ def add_quiz_question(
     )
 
 
+@router.put("/quizzes/{quiz_id}/questions/{question_id}", response_model=QuizQuestionTraineeView)
+def update_quiz_question(
+    quiz_id: str,
+    question_id: str,
+    payload: QuizQuestionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Trainers and Admins update an existing quiz question and its answer key (SEC-26)."""
+    if current_user.role not in ("trainer", "admin"):
+        raise HTTPException(status_code=403, detail="Only trainers and administrators can update questions.")
+
+    question = db.query(QuizQuestion).filter(
+        QuizQuestion.id == question_id,
+        QuizQuestion.quiz_id == quiz_id
+    ).first()
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+
+    question.question_text = payload.question_text
+    question.options = payload.options
+    question.correct_answer = payload.correct_option
+    question.explanation = payload.explanation
+    question.points = payload.points
+
+    if question.answer_key:
+        question.answer_key.correct_answer = payload.correct_option
+        question.answer_key.explanation = payload.explanation
+    else:
+        answer_key = QuizAnswerKey(
+            question_id=question.id,
+            correct_answer=payload.correct_option,
+            explanation=payload.explanation
+        )
+        db.add(answer_key)
+
+    db.commit()
+    db.refresh(question)
+
+    return QuizQuestionTraineeView(
+        id=question.id,
+        quiz_id=question.quiz_id,
+        question_text=question.question_text,
+        options=question.options or [],
+        points=question.points or 10
+    )
+
+
 @router.delete("/quizzes/{quiz_id}/questions/{question_id}")
 def delete_quiz_question(
     quiz_id: str,
@@ -346,7 +394,7 @@ def submit_quiz_attempt(
     current_user: User = Depends(get_current_user)
 ):
     """Submits a quiz attempt with strictly server-side scoring (SEC-26).
-    
+
     Security Controls:
     - Rejects offline submissions if ENABLE_OFFLINE_QUIZZES is False.
     - Idempotent deduplication on attempt_id (PWA-04).
@@ -742,7 +790,7 @@ def get_leaderboard(
     current_user: User = Depends(get_current_user)
 ):
     """Fetches class or team leaderboard (GAM-04, Section 3.8.6, OI-03).
-    
+
     STRICT PRIVACY ENFORCEMENT (TC-GAM-06, TC-GAM-07):
     - Real trainee names, emails, and trainee codes are NEVER returned.
     - If company_only is True, filters to fellow trainees of the same company and respects opt-out.

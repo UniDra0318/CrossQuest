@@ -1,5 +1,5 @@
 import { RUBRIC, PASS_MARK, tierFor, cohorts as mockCohorts } from '../data/trainerData.js';
-import { QUIZ_DATABASE, getActiveQuizDatabase, addQuestionToQuizStorage, deleteQuestionFromQuizStorage, updateQuizMetadataStorage, resetQuizDatabaseToDefaults } from '../data/quizDatabase.js';
+import { QUIZ_DATABASE, getActiveQuizDatabase, addQuestionToQuizStorage, deleteQuestionFromQuizStorage, updateQuestionInQuizStorage, updateQuizMetadataStorage, resetQuizDatabaseToDefaults } from '../data/quizDatabase.js';
 import {
   authFetch,
   fetchTrainerSessions,
@@ -7,7 +7,8 @@ import {
   fetchQuizQuestionsApi,
   createQuizApi,
   addQuizQuestionApi,
-  deleteQuizQuestionApi
+  deleteQuizQuestionApi,
+  updateQuizQuestionApi
 } from '../services/api.js';
 
 const API_BASE = 'http://localhost:8000/api/v1';
@@ -367,6 +368,56 @@ export async function addQuestion(quizId, q = {}, token) {
     steps: q.steps || [],
     answerLabel: q.answerLabel || '',
     pairs: q.pairs || []
+  };
+}
+
+/** PUT /api/v1/gamification/quizzes/:id/questions/:qid -> Update question in storage & backend */
+export async function updateQuestion(quizId, qid, q = {}, token) {
+  let normType = q.type || 'kahoot';
+
+  const questionForStorage = {
+    id: qid,
+    type: normType === 'kahoot' ? 'multiple_choice' : normType === 'sequence' ? 'sequence_order' : normType === 'hotspot' ? 'diagram_analysis' : normType,
+    question: q.prompt,
+    options: q.options || [],
+    correctAnswer: typeof q.answer === 'number' ? q.answer : 0,
+    acceptedAnswers: q.accepted || [],
+    steps: q.steps || [],
+    answerLabel: q.answerLabel || '',
+    pairs: q.pairs || [],
+    explanation: q.explanation || 'Verified compliance rubric citation.'
+  };
+
+  try {
+    updateQuestionInQuizStorage(quizId, qid, questionForStorage);
+  } catch (e) {}
+
+  try {
+    const options = Array.isArray(q.options) && q.options.length > 0
+      ? q.options
+      : (q.pairs ? q.pairs.map(p => `${p.left} -> ${p.right}`) : ['Option A', 'Option B', 'Option C', 'Option D']);
+
+    const payload = {
+      question_text: q.prompt,
+      options: options,
+      correct_option: typeof q.answer === 'number' ? q.answer : 0,
+      points: 10,
+      explanation: q.explanation || 'Verified compliance rubric citation.'
+    };
+    await updateQuizQuestionApi(quizId, qid, payload, token);
+  } catch (err) {}
+
+  return {
+    id: qid,
+    type: normType,
+    prompt: q.prompt,
+    options: q.options || [],
+    answer: q.answer || 0,
+    accepted: q.accepted || [],
+    steps: q.steps || [],
+    answerLabel: q.answerLabel || '',
+    pairs: q.pairs || [],
+    explanation: q.explanation || ''
   };
 }
 
