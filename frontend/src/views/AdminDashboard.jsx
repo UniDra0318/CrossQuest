@@ -56,6 +56,7 @@ import {
 import SpinCube from '../components/SpinCube';
 import BitMascot from '../components/BitMascot/BitMascot';
 import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk';
+import TenantAssignmentPicker from '../components/TenantAssignmentPicker';
 import '../styles/admin.css';
 export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token, currentUser } = useAuth();
@@ -846,9 +847,59 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                       </div>
                       <div>
                         <div className="adm-wrap">
-                          {(user.clients || []).map((code) => (
-                            <span key={code} className="adm-org">{code}</span>
-                          ))}
+                          {(() => {
+                            const userClients = user.clients || [];
+                            const allCodes = (companiesList || []).map(c => c.code);
+                            const hasAll = allCodes.length > 0 && allCodes.every(c => userClients.includes(c));
+
+                            if (userClients.length === 0) {
+                              return (
+                                <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b', fontStyle: 'italic' }}>
+                                  None Assigned
+                                </span>
+                              );
+                            }
+                            if (hasAll && userClients.length >= 4) {
+                              return (
+                                <span 
+                                  className="adm-org" 
+                                  style={{
+                                    background: isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5',
+                                    color: isDark ? '#6ee7b7' : '#059669',
+                                    border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid #a7f3d0',
+                                    fontWeight: 800
+                                  }}
+                                  title={userClients.join(', ')}
+                                >
+                                  All Registered ({userClients.length})
+                                </span>
+                              );
+                            }
+                            if (userClients.length <= 3) {
+                              return userClients.map(code => (
+                                <span key={code} className="adm-org">{code}</span>
+                              ));
+                            }
+                            return (
+                              <>
+                                {userClients.slice(0, 2).map(code => (
+                                  <span key={code} className="adm-org">{code}</span>
+                                ))}
+                                <span 
+                                  className="adm-org" 
+                                  style={{ 
+                                    background: isDark ? '#312e81' : '#ede9fe', 
+                                    color: isDark ? '#c4b5fd' : '#6d28d9', 
+                                    fontWeight: 800,
+                                    cursor: 'help'
+                                  }}
+                                  title={userClients.join(', ')}
+                                >
+                                  +{userClients.length - 2} more
+                                </span>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
@@ -895,19 +946,17 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                             <option value={3}>Level 3 (Executive Master)</option>
                           </select>
                         </label>
-                        <fieldset>
-                          <legend className="adm-label">ASSIGNED CLIENT ORGANIZATIONS</legend>
-                          {clients.map((c) => (
-                            <label key={c} className="adm-check">
-                              <input 
-                                type="checkbox" 
-                                checked={editForm.clients.includes(c)}
-                                onChange={() => toggleClientInEdit(c)}
-                              />
-                              <span>{c}</span>
-                            </label>
-                          ))}
-                        </fieldset>
+                        <div style={{ width: '100%', marginTop: '4px' }}>
+                          <TenantAssignmentPicker
+                            selectedTenants={editForm.clients}
+                            onChange={(newClients) => setEditForm({ ...editForm, clients: newClients })}
+                            companies={companiesList}
+                            role={editForm.role}
+                            isDark={isDark}
+                            label="ASSIGNED CLIENT TENANTS (CP-ABE SCOPES)"
+                            helperText="Define cryptographic tenant boundaries. Staff holding this clearance can decrypt records for these companies only."
+                          />
+                        </div>
                         <div className="adm-edit__act">
                           <button 
                             type="button" 
@@ -1828,7 +1877,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     </label>
                     <select
                       value={newUserForm.role}
-                      onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })}
+                      onChange={(e) => {
+                        const nextRole = e.target.value;
+                        let defaultClients = newUserForm.assigned_client_accounts;
+                        if (nextRole === 'admin' && (companiesList || []).length > 0) {
+                          defaultClients = (companiesList || []).map(c => c.code);
+                        }
+                        setNewUserForm({ ...newUserForm, role: nextRole, assigned_client_accounts: defaultClients });
+                      }}
                       style={{
                         width: '100%',
                         padding: '10px 14px',
@@ -1849,44 +1905,17 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     </select>
                   </div>
 
-                  {/* Assigned Client Tenants (relevant for AM, Trainer, Trainee) */}
+                  {/* Flexible Assigned Client Tenants */}
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
-                      <span>ASSIGNED CLIENT TENANTS:</span>
-                      <span style={{ color: '#64748b', fontSize: '11px' }}>Cryptographic scope boundary</span>
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      {['CORP_ALPHA', 'BANK_DELTA', 'FINTECH_BETA', 'RETAIL_GAMMA'].map((cCode) => {
-                        const checked = newUserForm.assigned_client_accounts.includes(cCode);
-                        return (
-                          <div 
-                            key={cCode}
-                            onClick={() => handleToggleNewUserClient(cCode)}
-                            style={{
-                              padding: '8px 12px',
-                              borderRadius: '8px',
-                              border: checked ? '1.5px solid #7c3aed' : '1px solid #e2e8f0',
-                              background: checked ? '#f5f3ff' : '#ffffff',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '8px',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            <input 
-                              type="checkbox" 
-                              checked={checked}
-                              onChange={() => {}}
-                              style={{ accentColor: '#7c3aed' }}
-                            />
-                            <span style={{ fontSize: '12px', fontWeight: 700, color: checked ? '#6d28d9' : '#475569', fontFamily: 'monospace' }}>
-                              {cCode}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <TenantAssignmentPicker
+                      selectedTenants={newUserForm.assigned_client_accounts}
+                      onChange={(newTenants) => setNewUserForm({ ...newUserForm, assigned_client_accounts: newTenants })}
+                      companies={companiesList}
+                      role={newUserForm.role}
+                      isDark={isDark}
+                      label="ASSIGNED CLIENT TENANTS:"
+                      helperText="Cryptographic multi-tenant CP-ABE scope boundary"
+                    />
                   </div>
 
                   {/* Optional Initial Password */}
