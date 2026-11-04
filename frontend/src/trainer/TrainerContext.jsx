@@ -171,7 +171,7 @@ export function TrainerProvider({ children }) {
         getTrainerMe(),
         getCohorts(token),
         getRoster(token),
-        getQuizzes(),
+        getQuizzes(token),
         getAnalytics(selectedScope, token),
         fetchTrainerSessions(token),
       ]);
@@ -265,33 +265,33 @@ export function TrainerProvider({ children }) {
   };
 
   const handleCreateQuiz = async (title) => {
-    const created = await createQuiz(title);
-    const updated = await getQuizzes();
+    const created = await createQuiz(title, token);
+    const updated = await getQuizzes(token);
     setQuizzes(updated);
     return created;
   };
 
   const handleAddQuestion = async (quizId, q) => {
-    await addQuestion(quizId, q);
-    const updated = await getQuizzes();
+    await addQuestion(quizId, q, token);
+    const updated = await getQuizzes(token);
     setQuizzes(updated);
   };
 
   const handleDeleteQuestion = async (quizId, qid) => {
-    await deleteQuestion(quizId, qid);
-    const updated = await getQuizzes();
+    await deleteQuestion(quizId, qid, token);
+    const updated = await getQuizzes(token);
     setQuizzes(updated);
   };
 
   const handleUpdateSettings = async (quizId, settings) => {
     await updateQuizSettings(quizId, settings);
-    const updated = await getQuizzes();
+    const updated = await getQuizzes(token);
     setQuizzes(updated);
   };
 
   const handleResetQuizzes = async () => {
     await resetQuizzes();
-    const updated = await getQuizzes();
+    const updated = await getQuizzes(token);
     setQuizzes(updated);
   };
 

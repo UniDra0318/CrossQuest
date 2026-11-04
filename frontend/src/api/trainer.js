@@ -1,11 +1,13 @@
 import { RUBRIC, PASS_MARK, tierFor, cohorts as mockCohorts } from '../data/trainerData.js';
-import { 
-  authFetch, 
-  fetchTrainerSessions, 
-  fetchQuizzes, 
-  createQuizApi, 
-  addQuizQuestionApi, 
-  deleteQuizQuestionApi 
+import { QUIZ_DATABASE, getActiveQuizDatabase, addQuestionToQuizStorage, deleteQuestionFromQuizStorage, updateQuizMetadataStorage, resetQuizDatabaseToDefaults } from '../data/quizDatabase.js';
+import {
+  authFetch,
+  fetchTrainerSessions,
+  fetchQuizzes,
+  fetchQuizQuestionsApi,
+  createQuizApi,
+  addQuizQuestionApi,
+  deleteQuizQuestionApi
 } from '../services/api.js';
 
 const API_BASE = 'http://localhost:8000/api/v1';
@@ -157,86 +159,246 @@ export async function gradeTrainee(recordId, body = {}) {
   };
 }
 
-/** GET /api/v1/gamification/quizzes -> Real quizzes from database */
-export async function getQuizzes() {
+/** GET /api/v1/gamification/quizzes -> Real quizzes from database + Active Curriculum */
+export async function getQuizzes(token) {
+  const normalizedQuizzes = [];
+  const existingTitles = new Set();
+
+  // 1. Fetch backend database quizzes & their real questions
   try {
-    const list = await fetchQuizzes();
+    const list = await fetchQuizzes(token);
     if (list && list.length > 0) {
-      return list.map(q => ({
-        id: q.id,
-        category: q.course_name || 'Enterprise Curriculum',
-        title: q.title,
-        timePerQ: 45,
-        pass: 80,
-        questionsCount: q.questions_count,
-        isClosed: q.is_closed,
-        completed: q.completed,
-        score: q.score,
-        questions: []
-      }));
+      for (const q of list) {
+        existingTitles.add(q.title.toLowerCase().trim());
+        let questions = [];
+        try {
+          const dbQuestions = await fetchQuizQuestionsApi(q.id, token);
+          if (dbQuestions && dbQuestions.length > 0) {
+            questions = dbQuestions.map((item, idx) => ({
+              id: item.id || `q-${idx}`,
+              type: 'kahoot',
+              prompt: item.question_text || item.question || 'Course question',
+              options: Array.isArray(item.options) ? item.options : ['Option A', 'Option B', 'Option C', 'Option D'],
+              answer: item.correct_answer ?? item.correct_option ?? 0,
+              points: item.points || 10,
+              explanation: item.explanation || 'Standard course competency benchmark.'
+            }));
+          }
+        } catch (e) {
+          console.warn(`Could not load questions for quiz ${q.id}:`, e);
+        }
+
+        normalizedQuizzes.push({
+          id: q.id,
+          category: q.course_name || 'Enterprise Curriculum',
+          title: q.title,
+          timePerQ: 45,
+          pass: 80,
+          questionsCount: questions.length || q.questions_count || 0,
+          isClosed: q.is_closed,
+          completed: q.completed,
+          score: q.score,
+          questions
+        });
+      }
     }
   } catch (err) {
-    console.warn('Could not fetch real quizzes:', err);
+    console.warn('Could not fetch real quizzes from backend:', err);
   }
-  return [];
+
+  // 2. Load standard enterprise assessments from quizDatabase.js
+  try {
+    const activeDb = getActiveQuizDatabase();
+    if (activeDb) {
+      Object.values(activeDb).forEach((qObj) => {
+        const titleKey = qObj.title.toLowerCase().trim();
+        // If already present in backend list, merge any missing questions
+        const existingQuiz = normalizedQuizzes.find(item => item.title.toLowerCase().trim() === titleKey);
+
+        const mappedQuestions = (qObj.questions || []).map((q) => {
+          let normType = q.type || 'kahoot';
+          if (normType === 'multiple_choice') normType = 'kahoot';
+          else if (normType === 'sequence_order') normType = 'sequence';
+          else if (normType === 'diagram_analysis') normType = 'hotspot';
+
+          return {
+            id: q.id,
+            type: normType,
+            prompt: q.question || q.prompt || q.question_text || 'Assessment Prompt',
+            options: q.options || [],
+            answer: q.correctAnswer ?? q.answer ?? 0,
+            accepted: q.acceptedAnswers || q.accepted || [],
+            steps: q.steps || [],
+            answerLabel: q.answerLabel || q.targetHotspotLabel || '',
+            pairs: q.pairs || [],
+            points: q.points || 10,
+            explanation: q.explanation || ''
+          };
+        });
+
+        if (existingQuiz) {
+          // If the backend quiz had 0 questions, backfill from active curriculum database
+          if (existingQuiz.questions.length === 0 && mappedQuestions.length > 0) {
+            existingQuiz.questions = mappedQuestions;
+            existingQuiz.questionsCount = mappedQuestions.length;
+          }
+        } else {
+          // Append curriculum challenge
+          normalizedQuizzes.push({
+            id: qObj.id,
+            category: qObj.category || 'Enterprise Curriculum',
+            title: qObj.title,
+            timePerQ: qObj.timePerQuestion || 45,
+            pass: qObj.passingScore || 80,
+            questionsCount: mappedQuestions.length,
+            isClosed: false,
+            completed: false,
+            score: null,
+            questions: mappedQuestions
+          });
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('Could not load enterprise curriculum database:', err);
+  }
+
+  return normalizedQuizzes;
 }
 
-/** POST /api/v1/gamification/quizzes -> Create quiz in database */
-export async function createQuiz(title) {
-  const result = await createQuizApi({ title });
-  if (result) {
-    return {
-      id: result.id,
+/** POST /api/v1/gamification/quizzes -> Create quiz in database and storage */
+export async function createQuiz(title, token) {
+  let createdQuiz = null;
+  try {
+    const result = await createQuizApi({ title }, token);
+    if (result) {
+      createdQuiz = {
+        id: result.id,
+        category: 'Enterprise Curriculum',
+        title: result.title,
+        timePerQ: 45,
+        pass: 80,
+        questionsCount: 0,
+        questions: []
+      };
+    }
+  } catch (e) {
+    console.warn('Backend quiz creation failed, saving to curriculum storage:', e);
+  }
+
+  if (!createdQuiz) {
+    const fallbackId = `quiz-${Date.now()}`;
+    createdQuiz = {
+      id: fallbackId,
       category: 'Enterprise Curriculum',
-      title: result.title,
+      title,
       timePerQ: 45,
       pass: 80,
       questionsCount: 0,
       questions: []
     };
   }
-  return null;
+
+  try {
+    const qObj = {
+      id: createdQuiz.id,
+      title: createdQuiz.title,
+      category: createdQuiz.category,
+      timePerQuestion: 45,
+      passingScore: 80,
+      questions: []
+    };
+    const current = getActiveQuizDatabase();
+    current[createdQuiz.id] = qObj;
+    localStorage.setItem('crossquest_quiz_database', JSON.stringify(current));
+  } catch (e) {}
+
+  return createdQuiz;
 }
 
-/** POST /api/v1/gamification/quizzes/:id/questions -> Add question in database */
-export async function addQuestion(quizId, q = {}) {
-  const options = Array.isArray(q.options) && q.options.length > 0 
-    ? q.options 
-    : [q.answer || 'Correct Answer', 'Alternative 1', 'Alternative 2', 'Alternative 3'];
+/** POST /api/v1/gamification/quizzes/:id/questions -> Add question in database & storage */
+export async function addQuestion(quizId, q = {}, token) {
+  let normType = q.type || 'kahoot';
+  const newQuestionId = `q-${Date.now()}`;
 
-  const payload = {
-    question_text: q.prompt,
-    options: options,
-    correct_option: typeof q.answer === 'number' ? q.answer : 0,
-    points: 10,
-    explanation: q.explanation || 'Verified compliance answer per course specification.'
+  const questionForStorage = {
+    id: newQuestionId,
+    type: normType === 'kahoot' ? 'multiple_choice' : normType === 'sequence' ? 'sequence_order' : normType === 'hotspot' ? 'diagram_analysis' : normType,
+    question: q.prompt,
+    options: q.options || [],
+    correctAnswer: typeof q.answer === 'number' ? q.answer : 0,
+    acceptedAnswers: q.accepted || [],
+    steps: q.steps || [],
+    answerLabel: q.answerLabel || '',
+    pairs: q.pairs || [],
+    explanation: q.explanation || 'Verified compliance rubric citation.'
   };
 
-  const result = await addQuizQuestionApi(quizId, payload);
-  if (result) {
-    return {
-      id: result.id,
-      type: q.type || 'kahoot',
-      prompt: result.question_text,
-      options: result.options,
-      answer: payload.correct_option
+  // 1. Save to localStorage storage so it's instantly available
+  try {
+    addQuestionToQuizStorage(quizId, questionForStorage);
+  } catch (e) {}
+
+  // 2. If it's a backend quiz and format is multiple choice, also sync to FastAPI backend
+  try {
+    const options = Array.isArray(q.options) && q.options.length > 0
+      ? q.options
+      : (q.pairs ? q.pairs.map(p => `${p.left} -> ${p.right}`) : ['Option A', 'Option B', 'Option C', 'Option D']);
+
+    const payload = {
+      question_text: q.prompt,
+      options: options,
+      correct_option: typeof q.answer === 'number' ? q.answer : 0,
+      points: 10,
+      explanation: q.explanation || 'Verified compliance rubric citation.'
     };
+    await addQuizQuestionApi(quizId, payload, token);
+  } catch (err) {
+    // Backend sync optional
   }
-  return null;
+
+  return {
+    id: newQuestionId,
+    type: normType,
+    prompt: q.prompt,
+    options: q.options || [],
+    answer: q.answer || 0,
+    accepted: q.accepted || [],
+    steps: q.steps || [],
+    answerLabel: q.answerLabel || '',
+    pairs: q.pairs || []
+  };
 }
 
-/** DELETE /api/v1/gamification/quizzes/:id/questions/:qid -> Delete question in database */
-export async function deleteQuestion(quizId, qid) {
-  return await deleteQuizQuestionApi(quizId, qid);
+/** DELETE /api/v1/gamification/quizzes/:id/questions/:qid -> Delete question */
+export async function deleteQuestion(quizId, qid, token) {
+  try {
+    deleteQuestionFromQuizStorage(quizId, qid);
+  } catch (e) {}
+
+  try {
+    await deleteQuizQuestionApi(quizId, qid, token);
+  } catch (e) {}
+
+  return true;
 }
 
 /** Quiz settings update */
 export async function updateQuizSettings(quizId, s) {
+  try {
+    updateQuizMetadataStorage(quizId, {
+      timePerQuestion: Number(s.timePerQ) || 45,
+      passingScore: Number(s.pass) || 80
+    });
+  } catch (e) {}
   return { id: quizId, ...s };
 }
 
 /** Reset quizzes */
 export async function resetQuizzes() {
+  try {
+    resetQuizDatabaseToDefaults();
+  } catch (e) {}
   return {};
 }
 
@@ -247,8 +409,8 @@ export async function getAnalytics(scope = 'ALL', token) {
 
   const filtered = scope === 'ALL' ? roster : roster.filter(r => r.scope === scope);
   const scored = filtered.filter(r => r.score != null);
-  const meanScore = scored.length 
-    ? Math.round(scored.reduce((acc, r) => acc + (r.score || 0), 0) / scored.length * 10) / 10 
+  const meanScore = scored.length
+    ? Math.round(scored.reduce((acc, r) => acc + (r.score || 0), 0) / scored.length * 10) / 10
     : 88.5;
   const passing = scored.filter(r => r.score >= PASS_MARK).length;
   const tiers = ['Perfect Score', 'High Distinction', 'Pass with Merit', 'Passing Baseline'].map(tier => ({

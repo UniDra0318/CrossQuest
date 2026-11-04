@@ -202,9 +202,9 @@ export async function fetchTraineeGamification(traineeId, token) {
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500);
-    const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`, { 
-      headers, 
-      signal: controller.signal 
+    const res = await fetch(`${API_BASE}/gamification/trainee/${traineeId}`, {
+      headers,
+      signal: controller.signal
     });
     clearTimeout(timeoutId);
     if (res.ok) return await res.json();
@@ -869,6 +869,16 @@ export async function fetchQuizzes(token) {
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for quizzes:", err);
+  }
+  return [];
+}
+
+export async function fetchQuizQuestionsApi(quizId, token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error fetching quiz questions:", err);
   }
   return [];
 }
