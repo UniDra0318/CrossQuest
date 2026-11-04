@@ -172,7 +172,7 @@ export function TrainerProvider({ children }) {
         getCohorts(token),
         getRoster(token),
         getQuizzes(),
-        getAnalytics(selectedScope),
+        getAnalytics(selectedScope, token),
         fetchTrainerSessions(token),
       ]);
       setMe(u);
@@ -253,7 +253,7 @@ export function TrainerProvider({ children }) {
     setRoster(updated);
     const updatedCohorts = await getCohorts(token);
     setCohorts(updatedCohorts);
-    const updatedAnalytics = await getAnalytics(selectedScope);
+    const updatedAnalytics = await getAnalytics(selectedScope, token);
     setAnalytics(updatedAnalytics);
   };
 

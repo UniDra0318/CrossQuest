@@ -89,3 +89,174 @@
 .trn-tabs { display: flex; gap: 8px; padding: 6px; width: fit-content; max-width: 100%; background: #fff; border: 1px solid var(--cq-line); border-radius: 999px; }
 .trn-tabs button { color: #4b1ca3; background: transparent; }
 .trn-tabs button.on { background: var(--cq-purple); color: #fff; box-shadow: 0 3px 0 var(--cq-purple-dk); }
+
+/* =====================================================================
+   LEAD TRAINER PORTAL DARK MODE STYLING
+   ===================================================================== */
+html.dark .trn-card,
+[data-theme="dark"] .trn-card {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45) !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .trn-card h2,
+[data-theme="dark"] .trn-card h2 {
+  color: #f8fafc !important;
+}
+
+html.dark .trn-card .adm-mono,
+[data-theme="dark"] .trn-card .adm-mono {
+  color: #cbd5e1 !important;
+}
+
+html.dark .trn-card .trn-sched,
+[data-theme="dark"] .trn-card .trn-sched {
+  color: #94a3b8 !important;
+}
+
+html.dark .trn-card .adm-soft,
+[data-theme="dark"] .trn-card .adm-soft {
+  color: #94a3b8 !important;
+}
+
+html.dark .trn-card strong,
+[data-theme="dark"] .trn-card strong {
+  color: #f8fafc !important;
+}
+
+html.dark .trn-card .adm-btn--light,
+[data-theme="dark"] .trn-card .adm-btn--light {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
+}
+
+html.dark .trn-card .adm-btn--light:hover,
+[data-theme="dark"] .trn-card .adm-btn--light:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+html.dark .trn-card .adm-progress,
+[data-theme="dark"] .trn-card .adm-progress {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .trn-quizlist button,
+[data-theme="dark"] .trn-quizlist button {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .trn-quizlist button strong,
+[data-theme="dark"] .trn-quizlist button strong {
+  color: #f8fafc !important;
+}
+
+html.dark .trn-quizlist button small,
+[data-theme="dark"] .trn-quizlist button small {
+  color: #94a3b8 !important;
+}
+
+html.dark .trn-quizlist button.on,
+[data-theme="dark"] .trn-quizlist button.on {
+  background: #1e1b4b !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 10px 22px rgba(139, 92, 246, 0.3) !important;
+}
+
+html.dark .trn-q,
+[data-theme="dark"] .trn-q {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .trn-q h3,
+[data-theme="dark"] .trn-q h3 {
+  color: #f8fafc !important;
+}
+
+html.dark .trn-tiles li,
+[data-theme="dark"] .trn-tiles li {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .trn-tiles li.ok,
+[data-theme="dark"] .trn-tiles li.ok {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+}
+
+html.dark .trn-tier,
+[data-theme="dark"] .trn-tier {
+  background: rgba(99, 102, 241, 0.12) !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .trn-rubric label,
+[data-theme="dark"] .trn-rubric label {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .trn-rubric label:hover,
+[data-theme="dark"] .trn-rubric label:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+html.dark .trn-scorebox input[type="number"],
+[data-theme="dark"] .trn-scorebox input[type="number"] {
+  background: #0b0f19 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+html.dark .trn-form textarea,
+[data-theme="dark"] .trn-form textarea {
+  background: #0b0f19 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+html.dark .trn-rem,
+[data-theme="dark"] .trn-rem {
+  background: #111827 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .trn-bar small,
+[data-theme="dark"] .trn-bar small {
+  color: #94a3b8 !important;
+}
+
+html.dark .trn-filters .stf-select,
+[data-theme="dark"] .trn-filters .stf-select {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .trn-tabs,
+[data-theme="dark"] .trn-tabs {
+  background: #111827 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .trn-tabs button,
+[data-theme="dark"] .trn-tabs button {
+  color: #c4b5fd !important;
+}
+
+html.dark .trn-tabs button.on,
+[data-theme="dark"] .trn-tabs button.on {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+}

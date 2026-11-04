@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Users } from 'lucide-react';
 import { TableEmptyRow } from '../../components/TableEmptyState';
 import { TablePagination, usePagination } from '../../components/TablePagination';
 import { useTrainer } from '../TrainerContext';
 
 export default function Grade() {
+  const { isDark } = useTheme();
   const {
     sessions,
     selectedSessionId,
@@ -201,16 +203,18 @@ export default function Grade() {
                   style={{
                     padding: '8px 14px',
                     borderRadius: '8px',
-                    border: isSelected ? '2px solid #6366f1' : '1px solid #cbd5e1',
-                    background: isSelected ? '#ffffff' : '#f8fafc',
-                    boxShadow: isSelected ? '0 2px 8px rgba(99, 102, 241, 0.2)' : 'none',
+                    border: isSelected ? '2px solid #6366f1' : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
+                    background: isSelected 
+                      ? (isDark ? '#1e1b4b' : '#ffffff') 
+                      : (isDark ? '#111827' : '#f8fafc'),
+                    boxShadow: isSelected ? '0 2px 8px rgba(99, 102, 241, 0.25)' : 'none',
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.15s ease',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <strong style={{ fontSize: '13px', color: isSelected ? '#6366f1' : '#1e293b' }}>
+                    <strong style={{ fontSize: '13px', color: isSelected ? '#a5b4fc' : (isDark ? '#f8fafc' : '#1e293b') }}>
                       {sess.session_code}
                     </strong>
                     {sess.is_future_dated ? (
@@ -227,7 +231,7 @@ export default function Grade() {
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748b', maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {sess.course_name}
                   </div>
                 </button>
@@ -494,8 +498,8 @@ export default function Grade() {
 
           {/* Sign-off Form Controls (Only when session not yet signed off) */}
           {!currentSession?.trainer_signed_off && (
-            <div style={{ marginTop: '16px', background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+            <div style={{ marginTop: '16px', background: isDark ? '#111827' : '#f8fafc', padding: '16px', borderRadius: '8px', border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
                 TRAINER SESSION SIGN-OFF NOTES (AUDIT TRAIL):
               </label>
               <textarea
@@ -508,7 +512,9 @@ export default function Grade() {
                   width: '100%',
                   padding: '8px 12px',
                   fontSize: '12.5px',
-                  border: '1px solid #cbd5e1',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #cbd5e1',
+                  background: isDark ? '#0b0f19' : '#ffffff',
+                  color: isDark ? '#f8fafc' : '#1e293b',
                   borderRadius: '6px',
                   boxSizing: 'border-box',
                   fontFamily: 'inherit',
@@ -516,7 +522,7 @@ export default function Grade() {
               />
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                <span style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
                   Execution triggers immutable cryptographic certificate generation for all passing participants.
                 </span>
 
@@ -525,7 +531,7 @@ export default function Grade() {
                   disabled={currentSession?.is_future_dated || signingOff}
                   onClick={onExecuteSignOff}
                   style={{
-                    background: currentSession?.is_future_dated ? '#94a3b8' : '#6366f1',
+                    background: currentSession?.is_future_dated ? '#64748b' : '#6366f1',
                     color: '#ffffff',
                     border: 'none',
                     padding: '10px 20px',
@@ -537,7 +543,7 @@ export default function Grade() {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  {signingOff ? 'Processing Sign-Off...' : currentSession?.is_future_dated ? '&#128274; Sign-off Locked (Future Session)' : '&#9989; Execute Session Sign-Off & Issue Certificates'}
+                  {signingOff ? 'Processing Sign-Off...' : currentSession?.is_future_dated ? '🔒 Sign-off Locked (Future Session)' : '✅ Execute Session Sign-Off & Issue Certificates'}
                 </button>
               </div>
             </div>
@@ -686,7 +692,9 @@ export default function Grade() {
                     width: '100%',
                     padding: '8px 10px',
                     fontSize: '12px',
-                    border: '1px solid #cbd5e1',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #cbd5e1',
+                    background: isDark ? '#0b0f19' : '#ffffff',
+                    color: isDark ? '#f8fafc' : '#1e293b',
                     borderRadius: '6px',
                     boxSizing: 'border-box',
                     fontFamily: 'inherit',
@@ -712,25 +720,25 @@ export default function Grade() {
           <div className="adm-panel trn-pad">
             <span className="adm-label">TRAINEE COMPLIANCE PROFILE</span>
             <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: '6px' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>EVALUATION TARGET</div>
-                <div style={{ fontWeight: 800, fontSize: '14px', color: '#1e293b' }}>{currentTrainee?.name}</div>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>ID: {currentTrainee?.id}</div>
+              <div style={{ padding: '10px 14px', background: isDark ? '#111827' : '#f8fafc', borderRadius: '6px', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none' }}>
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>EVALUATION TARGET</div>
+                <div style={{ fontWeight: 800, fontSize: '14px', color: isDark ? '#f8fafc' : '#1e293b' }}>{currentTrainee?.name}</div>
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>ID: {currentTrainee?.id}</div>
               </div>
 
-              <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: '6px' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>ORGANIZATION SCOPE</div>
-                <div style={{ fontWeight: 700, fontSize: '13px', color: '#1e293b' }}>{currentTrainee?.scope}</div>
+              <div style={{ padding: '10px 14px', background: isDark ? '#111827' : '#f8fafc', borderRadius: '6px', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none' }}>
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>ORGANIZATION SCOPE</div>
+                <div style={{ fontWeight: 700, fontSize: '13px', color: isDark ? '#f8fafc' : '#1e293b' }}>{currentTrainee?.scope}</div>
               </div>
 
-              <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: '6px' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>COHORT CURRICULUM</div>
-                <div style={{ fontWeight: 700, fontSize: '13px', color: '#1e293b' }}>{currentTrainee?.cohort}</div>
+              <div style={{ padding: '10px 14px', background: isDark ? '#111827' : '#f8fafc', borderRadius: '6px', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none' }}>
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>COHORT CURRICULUM</div>
+                <div style={{ fontWeight: 700, fontSize: '13px', color: isDark ? '#f8fafc' : '#1e293b' }}>{currentTrainee?.cohort}</div>
               </div>
 
-              <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: '6px' }}>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>CERTIFICATION ISSUANCE RULE</div>
-                <div style={{ fontSize: '12px', color: '#334155', marginTop: '2px' }}>
+              <div style={{ padding: '10px 14px', background: isDark ? '#111827' : '#f8fafc', borderRadius: '6px', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none' }}>
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>CERTIFICATION ISSUANCE RULE</div>
+                <div style={{ fontSize: '12px', color: isDark ? '#cbd5e1' : '#334155', marginTop: '2px' }}>
                   Per Section 3.5.3 (FR-16), individual grading saves the evaluation record, but official certificate generation is strictly batch-triggered when the assigned Lead Trainer executes <strong>Cohort Session Sign-Off</strong> above.
                 </div>
               </div>

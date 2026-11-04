@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
 
 export default function Quiz() {
+  const { isDark } = useTheme();
   const {
     quizzes,
     handleCreateQuiz,
@@ -134,7 +136,9 @@ export default function Quiz() {
               style={{
                 flex: 1,
                 padding: '10px 12px',
-                border: '1px solid var(--cq-line)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid var(--cq-line)',
+                background: isDark ? '#0b0f19' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#1e293b',
                 borderRadius: '10px',
                 fontSize: '13px',
               }}
@@ -166,7 +170,7 @@ export default function Quiz() {
             </div>
 
             {/* Assessment settings sliders */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', margin: '20px 0', padding: '16px', background: 'var(--cq-lav-2)', borderRadius: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', margin: '20px 0', padding: '16px', background: isDark ? '#111827' : 'var(--cq-lav-2)', borderRadius: '16px', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none' }}>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700 }}>
                   <span>TIME PER QUESTION</span>
@@ -206,9 +210,9 @@ export default function Quiz() {
             </div>
 
             {/* Add question form with Multi-Format Question Type Selector */}
-            <form onSubmit={onAddQuestion} className="trn-draft" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <form onSubmit={onAddQuestion} className="trn-draft" style={{ background: isDark ? '#111827' : '#f8fafc', border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Select Question Format:
                 </span>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -225,9 +229,9 @@ export default function Quiz() {
                       style={{
                         padding: '6px 12px',
                         borderRadius: '10px',
-                        border: questionType === t.id ? '2px solid #7c3aed' : '1px solid #cbd5e1',
-                        background: questionType === t.id ? '#f5f3ff' : '#ffffff',
-                        color: questionType === t.id ? '#6d28d9' : '#475569',
+                        border: questionType === t.id ? '2px solid #7c3aed' : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
+                        background: questionType === t.id ? (isDark ? '#2e1065' : '#f5f3ff') : (isDark ? '#0b0f19' : '#ffffff'),
+                        color: questionType === t.id ? (isDark ? '#c4b5fd' : '#6d28d9') : (isDark ? '#94a3b8' : '#475569'),
                         fontWeight: 700,
                         fontSize: '12px',
                         cursor: 'pointer',
@@ -245,14 +249,14 @@ export default function Quiz() {
               </div>
 
               {/* Prompt Input */}
-              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569' }}>
                 QUESTION PROMPT
                 <input
                   type="text"
                   placeholder="e.g. Which control enforces 'never trust, always verify' on every request?"
                   value={newQuestionPrompt}
                   onChange={(e) => setNewQuestionPrompt(e.target.value)}
-                  style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #cbd5e1', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '10px 14px', border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1', background: isDark ? '#0b0f19' : '#ffffff', color: isDark ? '#f8fafc' : '#1e293b', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                 />
               </label>
 
@@ -272,8 +276,8 @@ export default function Quiz() {
                           gap: '8px', 
                           padding: '8px 12px', 
                           borderRadius: '10px', 
-                          border: kahootCorrectIdx === idx ? '2px solid #10b981' : '1px solid #cbd5e1',
-                          background: kahootCorrectIdx === idx ? '#ecfdf5' : '#ffffff'
+                          border: kahootCorrectIdx === idx ? '2px solid #10b981' : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
+                          background: kahootCorrectIdx === idx ? (isDark ? '#064e3b' : '#ecfdf5') : (isDark ? '#0b0f19' : '#ffffff')
                         }}
                       >
                         <input
@@ -283,7 +287,7 @@ export default function Quiz() {
                           onChange={() => setKahootCorrectIdx(idx)}
                           style={{ accentColor: '#10b981', cursor: 'pointer' }}
                         />
-                        <strong style={{ fontSize: '12px', color: kahootCorrectIdx === idx ? '#059669' : '#64748b' }}>{letter}.</strong>
+                        <strong style={{ fontSize: '12px', color: kahootCorrectIdx === idx ? (isDark ? '#6ee7b7' : '#059669') : (isDark ? '#94a3b8' : '#64748b') }}>{letter}.</strong>
                         <input
                           type="text"
                           placeholder={`Option ${letter}...`}
@@ -293,7 +297,7 @@ export default function Quiz() {
                             next[idx] = e.target.value;
                             setKahootOptions(next);
                           }}
-                          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '12.5px' }}
+                          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '12.5px', color: isDark ? '#f8fafc' : '#1e293b' }}
                         />
                       </div>
                     ))}
@@ -302,27 +306,27 @@ export default function Quiz() {
               )}
 
               {questionType === 'identification' && (
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569' }}>
                   ACCEPTED ANSWER(S) (COMMA-SEPARATED FOR VARIANTS)
                   <input
                     type="text"
                     placeholder="e.g. zero trust, zta, zero-trust architecture"
                     value={newQuestionAnswer}
                     onChange={(e) => setNewQuestionAnswer(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #cbd5e1', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 14px', border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1', background: isDark ? '#0b0f19' : '#ffffff', color: isDark ? '#f8fafc' : '#1e293b', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </label>
               )}
 
               {questionType === 'sequence' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569' }}>
                     ORDERED SEQUENCE STEPS (CHRONOLOGICAL 1 &rarr; 4):
                   </span>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                     {[1, 2, 3, 4].map((stepNum, idx) => (
-                      <div key={stepNum} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#ffffff' }}>
-                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#ede9fe', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>
+                      <div key={stepNum} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '10px', border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1', background: isDark ? '#0b0f19' : '#ffffff' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: isDark ? '#2e1065' : '#ede9fe', color: isDark ? '#c4b5fd' : '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>
                           {stepNum}
                         </span>
                         <input
@@ -334,7 +338,7 @@ export default function Quiz() {
                             next[idx] = e.target.value;
                             setSequenceSteps(next);
                           }}
-                          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '12.5px' }}
+                          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: '12.5px', color: isDark ? '#f8fafc' : '#1e293b' }}
                         />
                       </div>
                     ))}
@@ -343,14 +347,14 @@ export default function Quiz() {
               )}
 
               {questionType === 'hotspot' && (
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: '#475569' }}>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569' }}>
                   TARGET SECURITY COMPONENT LABEL (HOTSPOT ANSWER)
                   <input
                     type="text"
                     placeholder="e.g. CP-ABE Payload Encryption with Cryptographic Isolation"
                     value={hotspotTarget}
                     onChange={(e) => setHotspotTarget(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', border: '1.5px solid #cbd5e1', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 14px', border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1', background: isDark ? '#0b0f19' : '#ffffff', color: isDark ? '#f8fafc' : '#1e293b', borderRadius: '10px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </label>
               )}

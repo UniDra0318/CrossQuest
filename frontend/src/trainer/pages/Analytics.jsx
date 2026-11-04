@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
 
 export default function Analytics({ onNavigateTab }) {
+  const { isDark } = useTheme();
   const { analytics, selectedScope, setSelectedScope, setSelectedTraineeId, loading } = useTrainer();
 
   if (loading && !analytics) {
@@ -124,7 +126,7 @@ export default function Analytics({ onNavigateTab }) {
 
           <div style={{ marginTop: '16px', display: 'grid', gap: '12px' }}>
             {analytics?.benchmarks?.map((b) => (
-              <div key={b.format} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(23,16,43,.08)' }}>
+              <div key={b.format} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(23,16,43,.08)' }}>
                 <div>
                   <strong>{b.format}</strong>
                   {b.secs && <div className="adm-mono">{b.secs}s average response</div>}
@@ -157,7 +159,7 @@ export default function Analytics({ onNavigateTab }) {
               </div>
             ) : (
               analytics.remediation.map((r) => (
-                <div key={r.id} className="trn-rem" style={{ padding: '12px 14px', borderRadius: '12px', background: 'var(--cq-lav-2)' }}>
+                <div key={r.id} className="trn-rem" style={{ padding: '12px 14px', borderRadius: '12px', background: isDark ? '#111827' : 'var(--cq-lav-2)', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none' }}>
                   <div>
                     <strong>{r.name}</strong>
                     <div className="adm-mono">{r.cohort} · Score: {r.score != null ? `${r.score}%` : 'Pending'}</div>
