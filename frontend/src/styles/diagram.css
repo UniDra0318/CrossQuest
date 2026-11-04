@@ -828,3 +828,70 @@ html.dark .tree-stem-drop,
 html.dark .dmz-zone-untrusted .dmz-zone-header { color: #67e8f9; }
 html.dark .dmz-zone-enclave .dmz-zone-header { color: #fde68a; }
 html.dark .dmz-zone-private .dmz-zone-header { color: #6ee7b7; }
+
+/* Stepped Pyramid Authentic Silhouette */
+.pyramid-silhouette-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 10px 0 16px;
+}
+
+.pyramid-apex-icon {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #a855f7;
+  margin-bottom: 12px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  text-transform: uppercase;
+}
+
+/* Guaranteed High-Contrast Hotspot Target Styles */
+html.dark .hierarchy-level-card.node-active-guard,
+html.dark .hierarchy-level-card.is-hotspot-target,
+html.dark .tree-node-card.node-active-guard,
+html.dark .tree-node-card.is-hotspot-target,
+html.dark .tenant-vault-box.node-active-guard,
+html.dark .tenant-vault-box.is-hotspot-target,
+html.dark .data-flow-card.node-active-guard,
+html.dark .data-flow-card.is-hotspot-target,
+[data-theme="dark"] .hierarchy-level-card.node-active-guard,
+[data-theme="dark"] .hierarchy-level-card.is-hotspot-target,
+[data-theme="dark"] .tree-node-card.node-active-guard,
+[data-theme="dark"] .tree-node-card.is-hotspot-target,
+[data-theme="dark"] .tenant-vault-box.node-active-guard,
+[data-theme="dark"] .tenant-vault-box.is-hotspot-target,
+[data-theme="dark"] .data-flow-card.node-active-guard,
+[data-theme="dark"] .data-flow-card.is-hotspot-target {
+  background: #1e1b4b !important;
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  color: #ffffff !important;
+}
+
+html.dark .hierarchy-level-card.node-active-guard h4,
+html.dark .hierarchy-level-card.is-hotspot-target h4,
+html.dark .tree-node-card.node-active-guard h4,
+html.dark .tree-node-card.is-hotspot-target h4,
+[data-theme="dark"] .hierarchy-level-card.node-active-guard h4,
+[data-theme="dark"] .hierarchy-level-card.is-hotspot-target h4,
+[data-theme="dark"] .tree-node-card.node-active-guard h4,
+[data-theme="dark"] .tree-node-card.is-hotspot-target h4 {
+  color: #ffffff !important;
+}
+
+html.dark .hierarchy-level-card.node-active-guard .tier-desc,
+html.dark .hierarchy-level-card.is-hotspot-target .tier-desc,
+html.dark .tree-node-card.node-active-guard p,
+html.dark .tree-node-card.is-hotspot-target p,
+[data-theme="dark"] .hierarchy-level-card.node-active-guard .tier-desc,
+[data-theme="dark"] .hierarchy-level-card.is-hotspot-target .tier-desc,
+[data-theme="dark"] .tree-node-card.node-active-guard p,
+[data-theme="dark"] .tree-node-card.is-hotspot-target p {
+  color: #cbd5e1 !important;
+}

@@ -25,6 +25,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import QuizDiagram, { AVAILABLE_DIAGRAM_ICONS, renderDiagramNodeIcon } from '../../components/QuizDiagram';
+import DiagramStudioModal from '../../components/DiagramStudioModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
 
@@ -255,6 +256,8 @@ export default function Quiz() {
   const [customLayout, setCustomLayout] = useState('pipeline');
   const [customNodes, setCustomNodes] = useState(DIAGRAM_TEMPLATES[0].defaultNodes);
   const [openIconPickerNodeId, setOpenIconPickerNodeId] = useState(null);
+  const [isDiagramStudioOpen, setIsDiagramStudioOpen] = useState(false);
+  const [viewerModalQuestion, setViewerModalQuestion] = useState(null);
   const [showBuilderDiagramPreview, setShowBuilderDiagramPreview] = useState(true);
   const [rosterDiagramToggles, setRosterDiagramToggles] = useState({});
 
@@ -970,466 +973,120 @@ export default function Quiz() {
                 </div>
               )}
 
-              {/* 5. GENERALIZED DIAGRAM ARCHETYPES & RESULTING DIAGRAM */}
+              {/* 5. DIAGRAM ARCHITECTURE & STUDIO POP-UP LAUNCHER */}
               {questionType === 'hotspot' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  {/* 1. Structural Archetype Selection */}
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div style={{
+                  padding: '16px 18px',
+                  borderRadius: '14px',
+                  border: isDark ? '1.5px solid rgba(139, 92, 246, 0.35)' : '1.5px solid #ddd6fe',
+                  background: isDark ? 'linear-gradient(135deg, rgba(30, 27, 75, 0.45) 0%, rgba(15, 23, 42, 0.7) 100%)' : '#faf5ff',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  boxShadow: isDark ? '0 4px 16px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(139, 92, 246, 0.08)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div
+                        style={{
+                          width: '42px',
+                          height: '42px',
+                          borderRadius: '12px',
+                          background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#ffffff',
+                          boxShadow: '0 4px 14px rgba(124, 58, 237, 0.4)'
+                        }}
+                      >
+                        <Sparkles size={20} />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <strong style={{ fontSize: '14px', color: isDark ? '#f8fafc' : '#1e293b' }}>
+                            {customDiagramTitle || DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.name || 'Architectural Diagram'}
+                          </strong>
+                          <span
+                            className={`adm-chip ${DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.tagColor || 'adm-chip--purple'}`}
+                            style={{ fontSize: '9.5px', padding: '2px 8px' }}
+                          >
+                            {DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.badge || 'Architecture'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '3px' }}>
+                          {customNodes.length} Components · {customLayout === 'hierarchy' ? 'Vertical Hierarchy' : 'Horizontal Pipeline'} · Target: <strong style={{ color: '#f59e0b' }}>{hotspotTarget || 'None selected'}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pop-up Window Trigger Button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsDiagramStudioOpen(true)}
+                      style={{
+                        padding: '10px 20px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        fontSize: '12.5px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)'
+                      }}
+                      title="Open large pop-up window to customize and preview diagram without scrolling"
+                    >
+                      <Maximize2 size={15} />
+                      <span>Open Diagram Studio & Editor (Pop-Up)</span>
+                    </button>
+                  </div>
+
+                  {/* Inline Target Component Quick Select Bar */}
+                  <div style={{ borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0', paddingTop: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase' }}>
-                        1. Select Structural Diagram Archetype ({DIAGRAM_TEMPLATES.length} Generalized Types):
+                        Quick Select Target Hotspot:
                       </span>
                       <button
                         type="button"
                         className="trn-link"
-                        style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#8b5cf6', fontWeight: 700 }}
-                        onClick={() => {
-                          const tmpl = DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId);
-                          if (tmpl) {
-                            setNewQuestionPrompt(tmpl.defaultPrompt);
-                            setHotspotTarget(tmpl.defaultTarget);
-                            setNewQuestionExplanation(tmpl.defaultExplanation);
-                            setCustomDiagramTitle(tmpl.name);
-                            setCustomLayout(tmpl.layout || 'pipeline');
-                            setCustomNodes(tmpl.defaultNodes.map(n => ({ ...n })));
-                          }
-                        }}
-                        title="Auto-fill recommended prompt, target component, and explanation for this archetype"
+                        style={{ fontSize: '11px', color: '#8b5cf6', fontWeight: 700 }}
+                        onClick={() => setIsDiagramStudioOpen(true)}
                       >
-                        <Sparkles size={12} />
-                        <span>Apply Archetype Defaults</span>
+                        Edit Archetypes, Icons & Layers in Pop-Up ➔
                       </button>
                     </div>
 
-                    {/* Generalized Archetype Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '10px' }}>
-                      {DIAGRAM_TEMPLATES.map((tmpl) => {
-                        const isSelected = diagramTemplateId === tmpl.id;
-                        return (
-                          <div
-                            key={tmpl.id}
-                            onClick={() => handleSelectTemplate(tmpl)}
-                            style={{
-                              padding: '14px 16px',
-                              borderRadius: '14px',
-                              border: isSelected
-                                ? '2px solid #8b5cf6'
-                                : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1'),
-                              background: isSelected
-                                ? (isDark ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.22) 0%, rgba(30, 27, 75, 0.7) 100%)' : '#faf5ff')
-                                : (isDark ? '#0b0f19' : '#ffffff'),
-                              boxShadow: isSelected ? '0 4px 16px rgba(139, 92, 246, 0.28)' : 'none',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '6px',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <strong style={{ fontSize: '13px', color: isSelected ? '#a5b4fc' : (isDark ? '#f8fafc' : '#1e293b') }}>
-                                {tmpl.name}
-                              </strong>
-                              <span className={`adm-chip ${tmpl.tagColor}`} style={{ fontSize: '9.5px', padding: '2px 7px' }}>
-                                {tmpl.badge}
-                              </span>
-                            </div>
-                            <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.35 }}>
-                              {tmpl.desc}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 2. Optional Custom Diagram Title / Banner Header */}
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                      2. Diagram Header / Title (Optional Custom Title):
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={`e.g. ${DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.name || 'Custom Architectural Pipeline'}`}
-                      value={customDiagramTitle}
-                      onChange={(e) => setCustomDiagramTitle(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1',
-                        background: isDark ? '#0b0f19' : '#ffffff',
-                        color: isDark ? '#f8fafc' : '#1e293b',
-                        borderRadius: '10px',
-                        fontSize: '13px',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  {/* 3. Interactive Diagram Objects, Layers & Icon Studio */}
-                  <div style={{
-                    padding: '16px',
-                    borderRadius: '14px',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #e2e8f0',
-                    background: isDark ? '#0b0f19' : '#f8fafc',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '14px'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                      <div>
-                        <div style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#f8fafc' : '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Sparkles size={14} className="text-purple" />
-                          <span>3. Architectural Objects & Layers Studio ({customNodes.length} Components)</span>
-                        </div>
-                        <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                          Customize icons, titles, roles, layer colors, or add additional stages.
-                        </span>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <button
-                          type="button"
-                          className="adm-btn adm-btn--light"
-                          style={{ fontSize: '11.5px', padding: '5px 12px' }}
-                          onClick={() => setCustomLayout(customLayout === 'hierarchy' ? 'pipeline' : 'hierarchy')}
-                          title="Toggle between horizontal pipeline flow and vertical tiered pyramid hierarchy"
-                        >
-                          {customLayout === 'hierarchy' ? '📐 Layout: Vertical Hierarchy' : '➡️ Layout: Horizontal Pipeline'}
-                        </button>
-
-                        <button
-                          type="button"
-                          className="adm-btn adm-btn--purple"
-                          style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-                          onClick={handleAddCustomNode}
-                        >
-                          <Plus size={14} />
-                          <span>Add Object / Layer</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Nodes Customization Cards List */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {customNodes.map((node, nIdx) => {
-                        const isNodeTarget = hotspotTarget.trim().toLowerCase() === node.title.trim().toLowerCase();
-                        const isIconPickerOpen = openIconPickerNodeId === node.id;
-                        const colors = [
-                          { id: 'cyan', hex: '#06b6d4', label: 'Cyan' },
-                          { id: 'purple', hex: '#8b5cf6', label: 'Purple' },
-                          { id: 'emerald', hex: '#10b981', label: 'Emerald' },
-                          { id: 'gold', hex: '#f59e0b', label: 'Gold' },
-                          { id: 'rose', hex: '#f43f5e', label: 'Rose' },
-                          { id: 'blue', hex: '#3b82f6', label: 'Blue' }
-                        ];
-
-                        return (
-                          <div
-                            key={node.id || nIdx}
-                            style={{
-                              padding: '14px',
-                              borderRadius: '12px',
-                              border: isNodeTarget
-                                ? '2px solid #f59e0b'
-                                : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1'),
-                              background: isNodeTarget
-                                ? (isDark ? '#1e1b4b' : '#fffdf5')
-                                : (isDark ? '#111827' : '#ffffff'),
-                              boxShadow: isNodeTarget ? '0 4px 16px rgba(245, 158, 11, 0.2)' : 'none',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '10px',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            {/* Card Top Row: Index, Badge input, Reorder, Target button, Delete */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{
-                                  fontSize: '11px',
-                                  fontWeight: 800,
-                                  padding: '3px 8px',
-                                  borderRadius: '6px',
-                                  background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9',
-                                  color: isDark ? '#f8fafc' : '#334155'
-                                }}>
-                                  #{nIdx + 1}
-                                </span>
-                                <input
-                                  type="text"
-                                  value={node.badge || ''}
-                                  placeholder="Stage / Tier Tag (e.g. Stage 1)"
-                                  onChange={(e) => handleUpdateCustomNode(node.id, 'badge', e.target.value)}
-                                  style={{
-                                    fontSize: '11px',
-                                    fontWeight: 700,
-                                    padding: '4px 8px',
-                                    borderRadius: '6px',
-                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0',
-                                    background: isDark ? '#0b0f19' : '#f8fafc',
-                                    color: isDark ? '#f8fafc' : '#1e293b',
-                                    outline: 'none',
-                                    width: '160px'
-                                  }}
-                                />
-                              </div>
-
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                {/* Hotspot toggle button */}
-                                <button
-                                  type="button"
-                                  onClick={() => setHotspotTarget(node.title)}
-                                  style={{
-                                    fontSize: '11px',
-                                    fontWeight: 800,
-                                    padding: '4px 10px',
-                                    borderRadius: '6px',
-                                    border: isNodeTarget ? '1px solid #f59e0b' : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
-                                    background: isNodeTarget ? '#f59e0b' : 'transparent',
-                                    color: isNodeTarget ? '#ffffff' : (isDark ? '#cbd5e1' : '#64748b'),
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '4px'
-                                  }}
-                                >
-                                  {isNodeTarget ? '★ Target Hotspot' : 'Set as Target'}
-                                </button>
-
-                                {/* Reorder buttons */}
-                                <button
-                                  type="button"
-                                  disabled={nIdx === 0}
-                                  onClick={() => handleMoveCustomNode(nIdx, -1)}
-                                  title="Move stage earlier"
-                                  style={{
-                                    padding: '4px 7px',
-                                    borderRadius: '6px',
-                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
-                                    background: isDark ? '#0b0f19' : '#f8fafc',
-                                    color: isDark ? '#f8fafc' : '#334155',
-                                    cursor: nIdx === 0 ? 'not-allowed' : 'pointer',
-                                    opacity: nIdx === 0 ? 0.4 : 1
-                                  }}
-                                >
-                                  ↑
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={nIdx === customNodes.length - 1}
-                                  onClick={() => handleMoveCustomNode(nIdx, 1)}
-                                  title="Move stage later"
-                                  style={{
-                                    padding: '4px 7px',
-                                    borderRadius: '6px',
-                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
-                                    background: isDark ? '#0b0f19' : '#f8fafc',
-                                    color: isDark ? '#f8fafc' : '#334155',
-                                    cursor: nIdx === customNodes.length - 1 ? 'not-allowed' : 'pointer',
-                                    opacity: nIdx === customNodes.length - 1 ? 0.4 : 1
-                                  }}
-                                >
-                                  ↓
-                                </button>
-
-                                {/* Remove button */}
-                                {customNodes.length > 2 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveCustomNode(node.id)}
-                                    title="Remove this stage"
-                                    style={{
-                                      padding: '4px 8px',
-                                      borderRadius: '6px',
-                                      border: isDark ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid #fecdd3',
-                                      background: isDark ? 'rgba(244, 63, 94, 0.15)' : '#fff1f2',
-                                      color: '#f43f5e',
-                                      cursor: 'pointer'
-                                    }}
-                                  >
-                                    <Trash2 size={13} />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Card Middle Row: Icon button & Color Pills & Inputs */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '12px', alignItems: 'center' }}>
-                              {/* Icon Picker Trigger */}
-                              <div style={{ position: 'relative' }}>
-                                <button
-                                  type="button"
-                                  onClick={() => setOpenIconPickerNodeId(isIconPickerOpen ? null : node.id)}
-                                  title="Click to change this component's icon"
-                                  style={{
-                                    width: '46px',
-                                    height: '46px',
-                                    borderRadius: '12px',
-                                    border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1',
-                                    background: isDark ? '#0b0f19' : '#f8fafc',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    position: 'relative'
-                                  }}
-                                >
-                                  {renderDiagramNodeIcon(node.iconType, `text-${node.color || 'purple'}`)}
-                                  <span style={{ fontSize: '8px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '1px' }}>icon</span>
-                                </button>
-
-                                {/* Icon Picker Palette Popover */}
-                                {isIconPickerOpen && (
-                                  <div style={{
-                                    position: 'absolute',
-                                    top: '52px',
-                                    left: 0,
-                                    zIndex: 50,
-                                    width: '280px',
-                                    padding: '12px',
-                                    borderRadius: '12px',
-                                    background: isDark ? '#1e293b' : '#ffffff',
-                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #cbd5e1',
-                                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(4, 1fr)',
-                                    gap: '6px'
-                                  }}>
-                                    {AVAILABLE_DIAGRAM_ICONS.map((iconItem) => (
-                                      <button
-                                        key={iconItem.id}
-                                        type="button"
-                                        onClick={() => {
-                                          handleUpdateCustomNode(node.id, 'iconType', iconItem.id);
-                                          setOpenIconPickerNodeId(null);
-                                        }}
-                                        style={{
-                                          padding: '8px 4px',
-                                          borderRadius: '8px',
-                                          border: node.iconType === iconItem.id
-                                            ? '2px solid #8b5cf6'
-                                            : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0'),
-                                          background: node.iconType === iconItem.id
-                                            ? (isDark ? 'rgba(139, 92, 246, 0.2)' : '#faf5ff')
-                                            : 'transparent',
-                                          display: 'flex',
-                                          flexDirection: 'column',
-                                          alignItems: 'center',
-                                          gap: '4px',
-                                          cursor: 'pointer'
-                                        }}
-                                        title={iconItem.label}
-                                      >
-                                        {renderDiagramNodeIcon(iconItem.id, `text-${node.color || 'purple'}`)}
-                                        <span style={{ fontSize: '9px', color: isDark ? '#cbd5e1' : '#475569', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '52px' }}>
-                                          {iconItem.id}
-                                        </span>
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Node Title & Subtitle inputs */}
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                  <input
-                                    type="text"
-                                    value={node.title || ''}
-                                    placeholder="Component Title (e.g. Policy Engine)"
-                                    onChange={(e) => handleUpdateCustomNode(node.id, 'title', e.target.value)}
-                                    style={{
-                                      flex: 1,
-                                      padding: '8px 12px',
-                                      borderRadius: '8px',
-                                      border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1',
-                                      background: isDark ? '#0b0f19' : '#ffffff',
-                                      color: isDark ? '#f8fafc' : '#1e293b',
-                                      fontSize: '12.5px',
-                                      fontWeight: 700,
-                                      outline: 'none'
-                                    }}
-                                  />
-
-                                  {/* Color Theme Selector */}
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    {colors.map((cOption) => (
-                                      <button
-                                        key={cOption.id}
-                                        type="button"
-                                        onClick={() => handleUpdateCustomNode(node.id, 'color', cOption.id)}
-                                        title={`Color: ${cOption.label}`}
-                                        style={{
-                                          width: '18px',
-                                          height: '18px',
-                                          borderRadius: '999px',
-                                          background: cOption.hex,
-                                          border: node.color === cOption.id ? '2px solid #ffffff' : 'none',
-                                          boxShadow: node.color === cOption.id ? '0 0 0 2px #8b5cf6' : 'none',
-                                          cursor: 'pointer'
-                                        }}
-                                      />
-                                    ))}
-                                  </div>
-                                </div>
-
-                                <input
-                                  type="text"
-                                  value={node.subtitle || ''}
-                                  placeholder="Role / Technical description (e.g. Evaluates user attributes and policy trees)"
-                                  onChange={(e) => handleUpdateCustomNode(node.id, 'subtitle', e.target.value)}
-                                  style={{
-                                    padding: '6px 12px',
-                                    borderRadius: '8px',
-                                    border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
-                                    background: isDark ? '#0b0f19' : '#f8fafc',
-                                    color: isDark ? '#94a3b8' : '#64748b',
-                                    fontSize: '11.5px',
-                                    outline: 'none'
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 4. Target Hotspot Component Picker */}
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
-                      4. Target Hotspot Component (Highlights dynamically on diagram):
-                    </label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {customNodes.map((node) => {
-                        const isTarget = hotspotTarget.trim().toLowerCase() === node.title.trim().toLowerCase();
+                        const isTarget = hotspotTarget && hotspotTarget.trim().toLowerCase() === node.title.trim().toLowerCase();
                         return (
                           <button
                             key={node.id || node.title}
                             type="button"
                             onClick={() => setHotspotTarget(node.title)}
                             style={{
-                              padding: '6px 14px',
-                              borderRadius: '8px',
+                              padding: '5px 12px',
+                              borderRadius: '7px',
                               border: isTarget
-                                ? '1.5px solid #10b981'
+                                ? '1.5px solid #f59e0b'
                                 : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
                               background: isTarget
-                                ? (isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5')
-                                : (isDark ? '#0b0f19' : '#ffffff'),
+                                ? '#f59e0b'
+                                : (isDark ? '#111827' : '#ffffff'),
                               color: isTarget
-                                ? (isDark ? '#34d399' : '#065f46')
-                                : (isDark ? '#cbd5e1' : '#334155'),
-                              fontSize: '12px',
+                                ? '#ffffff'
+                                : (isDark ? '#cbd5e1' : '#475569'),
+                              fontSize: '11.5px',
                               fontWeight: isTarget ? 700 : 500,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '6px'
+                              gap: '4px'
                             }}
                           >
                             {isTarget && <span>✓</span>}
@@ -1438,59 +1095,6 @@ export default function Quiz() {
                         );
                       })}
                     </div>
-                    <input
-                      type="text"
-                      placeholder="Or enter target component label..."
-                      value={hotspotTarget}
-                      onChange={(e) => setHotspotTarget(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '9px 14px',
-                        border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1',
-                        background: isDark ? '#0b0f19' : '#ffffff',
-                        color: isDark ? '#f8fafc' : '#1e293b',
-                        borderRadius: '10px',
-                        fontSize: '13px',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  {/* 5. Resulting Architecture Diagram Live Render */}
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Eye size={13} />
-                        <span>5. Resulting Architecture Diagram (Live Render):</span>
-                      </span>
-                      <button
-                        type="button"
-                        className="trn-link"
-                        style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}
-                        onClick={() => setShowBuilderDiagramPreview(!showBuilderDiagramPreview)}
-                      >
-                        {showBuilderDiagramPreview ? 'Collapse Preview' : 'Expand Preview'}
-                      </button>
-                    </div>
-
-                    {showBuilderDiagramPreview && (
-                      <div style={{
-                        borderRadius: '16px',
-                        overflow: 'hidden',
-                        border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1',
-                        background: isDark ? '#050811' : '#f1f5f9',
-                        padding: '4px'
-                      }}>
-                        <QuizDiagram
-                          type={diagramTemplateId}
-                          customNodes={customNodes}
-                          customLayout={customLayout}
-                          customTitle={customDiagramTitle || DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.name}
-                          targetNode={hotspotTarget}
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -1768,18 +1372,30 @@ export default function Quiz() {
                             <span style={{ fontWeight: 700, color: isDark ? '#fb923c' : '#ea580c', background: isDark ? 'rgba(234, 88, 12, 0.15)' : '#ffedd5', padding: '2px 8px', borderRadius: '6px' }}>
                               {q.answerLabel || 'Target Node'}
                             </span>
-                            <button
-                              type="button"
-                              className="trn-link"
-                              style={{ marginLeft: 'auto', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#8b5cf6' }}
-                              onClick={() => {
-                                const qKey = q.id || idx;
-                                setRosterDiagramToggles(prev => ({ ...prev, [qKey]: prev[qKey] === false ? true : false }));
-                              }}
-                            >
-                              {rosterDiagramToggles[q.id || idx] === false ? <Eye size={12} /> : <EyeOff size={12} />}
-                              <span>{rosterDiagramToggles[q.id || idx] === false ? 'Show Resulting Diagram' : 'Hide Diagram'}</span>
-                            </button>
+                            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <button
+                                type="button"
+                                className="trn-link"
+                                style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#8b5cf6', fontWeight: 700 }}
+                                onClick={() => setViewerModalQuestion(q)}
+                                title="Open large pop-up window to view diagram clearly"
+                              >
+                                <Maximize2 size={12} />
+                                <span>View Large Pop-Up</span>
+                              </button>
+                              <button
+                                type="button"
+                                className="trn-link"
+                                style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: isDark ? '#94a3b8' : '#64748b' }}
+                                onClick={() => {
+                                  const qKey = q.id || idx;
+                                  setRosterDiagramToggles(prev => ({ ...prev, [qKey]: prev[qKey] === false ? true : false }));
+                                }}
+                              >
+                                {rosterDiagramToggles[q.id || idx] === false ? <Eye size={12} /> : <EyeOff size={12} />}
+                                <span>{rosterDiagramToggles[q.id || idx] === false ? 'Expand' : 'Collapse'}</span>
+                              </button>
+                            </div>
                           </div>
 
                           {/* Resulting Diagram is shown directly by default */}
@@ -1813,6 +1429,45 @@ export default function Quiz() {
           <div className="adm-state">Select an assessment from the left panel to edit its question roster.</div>
         )}
       </div>
+
+      {/* =========================================================================
+          DECENTLY BIG DIAGRAM STUDIO & EDITOR POP-UP WINDOW
+          ========================================================================= */}
+      <DiagramStudioModal
+        isOpen={isDiagramStudioOpen}
+        onClose={() => setIsDiagramStudioOpen(false)}
+        templates={DIAGRAM_TEMPLATES}
+        diagramTemplateId={diagramTemplateId}
+        onSelectTemplate={handleSelectTemplate}
+        customDiagramTitle={customDiagramTitle}
+        onChangeTitle={setCustomDiagramTitle}
+        customLayout={customLayout}
+        onChangeLayout={setCustomLayout}
+        customNodes={customNodes}
+        onAddNode={handleAddCustomNode}
+        onRemoveNode={handleRemoveCustomNode}
+        onMoveNode={handleMoveCustomNode}
+        onUpdateNode={handleUpdateCustomNode}
+        hotspotTarget={hotspotTarget}
+        onSelectTarget={setHotspotTarget}
+        isDark={isDark}
+      />
+
+      {/* READ-ONLY VIEW MODAL FOR ROSTER DIAGRAMS */}
+      {viewerModalQuestion && (
+        <DiagramStudioModal
+          isOpen={Boolean(viewerModalQuestion)}
+          onClose={() => setViewerModalQuestion(null)}
+          templates={DIAGRAM_TEMPLATES}
+          diagramTemplateId={viewerModalQuestion.diagramType || 'security_pipeline'}
+          customDiagramTitle={viewerModalQuestion.diagramTitle}
+          customLayout={viewerModalQuestion.customLayout || 'pipeline'}
+          customNodes={viewerModalQuestion.customNodes || DIAGRAM_TEMPLATES.find(t => t.id === viewerModalQuestion.diagramType)?.defaultNodes}
+          hotspotTarget={viewerModalQuestion.answerLabel}
+          isDark={isDark}
+          readOnly={true}
+        />
+      )}
     </div>
   );
 }

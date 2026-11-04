@@ -2,9 +2,12 @@ import React from 'react';
 import { Layers } from 'lucide-react';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { useTrainer } from '../TrainerContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function Cohorts({ onNavigateTab }) {
   const { cohorts, loading } = useTrainer();
+  const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
+  const isDark = effectiveTheme === 'dark';
 
   const totalEnrolled = cohorts.reduce((acc, c) => acc + (c.enrolled || 0), 0);
   const totalCertified = cohorts.reduce((acc, c) => acc + (c.certified || 0), 0);
@@ -61,16 +64,25 @@ export default function Cohorts({ onNavigateTab }) {
           cohorts.map((cohort) => {
             const passPercent = cohort.enrolled ? Math.round((cohort.certified / cohort.enrolled) * 100) : 0;
             return (
-              <div key={cohort.id} className="trn-card">
+              <div
+                key={cohort.id}
+                className="trn-card"
+                style={{
+                  background: isDark ? '#111827' : '#ffffff',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--cq-line)',
+                  boxShadow: isDark ? '0 18px 36px rgba(0, 0, 0, 0.45)' : '0 18px 36px rgba(106,43,217,.14)',
+                  color: isDark ? '#f8fafc' : '#0f172a'
+                }}
+              >
               <div className="trn-card__top">
                 <span className="adm-chip adm-chip--green">{cohort.id}</span>
                 <span className="adm-chip adm-chip--solid">{cohort.status}</span>
               </div>
 
-              <span className="adm-mono">{cohort.org}</span>
-              <h2>{cohort.course}</h2>
+              <span className="adm-mono" style={{ color: isDark ? '#cbd5e1' : '#64748b' }}>{cohort.org}</span>
+              <h2 style={{ color: isDark ? '#f8fafc' : '#0f172a' }}>{cohort.course}</h2>
 
-              <div className="trn-sched">
+              <div className="trn-sched" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
                 <span>📅 {cohort.schedule}</span>
               </div>
 
@@ -86,13 +98,18 @@ export default function Cohorts({ onNavigateTab }) {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', fontSize: '13px' }}>
                 <span className="adm-soft">Cohort Average:</span>
-                <strong style={{ fontSize: '15px' }}>{cohort.avg}%</strong>
+                <strong style={{ fontSize: '15px', color: isDark ? '#f8fafc' : '#0f172a' }}>{cohort.avg}%</strong>
               </div>
 
               <div className="trn-actions">
                 <button
                   type="button"
                   className="adm-btn adm-btn--light"
+                  style={{
+                    background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
+                    color: isDark ? '#f1f5f9' : '#0f172a',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid var(--cq-line)'
+                  }}
                   onClick={() => onNavigateTab && onNavigateTab('roster')}
                 >
                   Inspect Roster
