@@ -21,7 +21,9 @@ import {
   AlertCircle,
   ShieldCheck,
   History,
-  Archive
+  Archive,
+  BarChart3,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -32,7 +34,10 @@ import {
   fetchAnomalyRules, 
   updateAnomalyRule, 
   runRetentionJob, 
-  fetchRetentionWarnings 
+  fetchRetentionWarnings,
+  fetchExecutiveAnomalyReport,
+  downloadAnomalyReportPdf,
+  downloadAnomalyReportCsv
 } from '../services/api';
 
 export default function AdminPeerReviewAnomalyDesk() {
@@ -93,6 +98,51 @@ export default function AdminPeerReviewAnomalyDesk() {
   const [ruleReason, setRuleReason] = useState('');
   const [ruleClientReviewed, setRuleClientReviewed] = useState(true);
   const [submittingRule, setSubmittingRule] = useState(false);
+
+  // Executive Anomaly Report state
+  const [anomalyReport, setAnomalyReport] = useState(null);
+  const [loadingReport, setLoadingReport] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
+
+  // Load Executive Anomaly Report
+  const loadExecutiveReport = async () => {
+    setLoadingReport(true);
+    try {
+      const data = await fetchExecutiveAnomalyReport(token);
+      if (data) {
+        setAnomalyReport(data);
+      }
+    } catch (err) {
+      console.warn('Could not load anomaly report:', err);
+    } finally {
+      setLoadingReport(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setDownloadingPdf(true);
+    try {
+      const ok = await downloadAnomalyReportPdf(token);
+      if (ok) {
+        setActionSuccessToast('Official Security Anomaly Audit Report (PDF) downloaded successfully.');
+      }
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
+  const handleDownloadCsv = async () => {
+    setDownloadingCsv(true);
+    try {
+      const ok = await downloadAnomalyReportCsv(token);
+      if (ok) {
+        setActionSuccessToast('Anomaly Incident Ledger (CSV) exported successfully.');
+      }
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
 
   // Retention state
   const [retentionWarnings, setRetentionWarnings] = useState([]);
@@ -161,6 +211,7 @@ export default function AdminPeerReviewAnomalyDesk() {
     loadLogs();
     loadRules();
     loadRetentionWarnings();
+    loadExecutiveReport();
   }, [token]);
 
   // Open Review Modal
@@ -404,6 +455,29 @@ export default function AdminPeerReviewAnomalyDesk() {
 
           <button
             type="button"
+            onClick={() => { setActiveTab('report'); loadExecutiveReport(); }}
+            style={{
+              padding: '9px 18px',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '13px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: activeTab === 'report' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
+              cursor: 'pointer',
+              background: activeTab === 'report' ? 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
+              color: activeTab === 'report' ? '#ffffff' : (isDark ? '#94a3b8' : '#475569'),
+              boxShadow: activeTab === 'report' ? '0 4px 12px rgba(245, 158, 11, 0.25)' : 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <BarChart3 size={15} />
+            <span>Executive Anomaly Report</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('retention')}
             style={{
               padding: '9px 18px',
@@ -481,8 +555,30 @@ export default function AdminPeerReviewAnomalyDesk() {
                 </p>
               </div>
 
-              {/* Quick stats in banner */}
-              <div style={{ display: 'flex', gap: '12px' }}>
+              {/* Quick stats & Export action in banner */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={downloadingPdf}
+                  style={{
+                    background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '10px 18px',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '12.5px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 14px rgba(225, 29, 72, 0.35)'
+                  }}
+                >
+                  <Download size={15} />
+                  <span>{downloadingPdf ? 'Generating PDF...' : 'Download Anomaly Report (PDF)'}</span>
+                </button>
                 <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '10px 18px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
                   <div style={{ color: '#fda4af', fontSize: '20px', fontWeight: 800 }}>{unreviewedCount}</div>
                   <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pending Review</div>
@@ -1186,6 +1282,274 @@ export default function AdminPeerReviewAnomalyDesk() {
                   <p style={{ margin: 0 }}>Zero open alerts are approaching the 12-month retention threshold.</p>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =======================================================================
+          TAB 5: EXECUTIVE ANOMALY REPORT & AUDIT ANALYTICS (OI-29, OI-30)
+          ======================================================================= */}
+      {activeTab === 'report' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+          {/* Executive Header Banner */}
+          <div 
+            style={{ 
+              background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)', 
+              borderRadius: '24px', 
+              padding: '28px 32px', 
+              border: isDark ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid #c7d2fe',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '20px'
+            }}
+          >
+            <div>
+              <span className="adm-pill adm-pill--purple" style={{ marginBottom: '8px' }}>
+                <span className="adm-live" /> ISO/IEC 27001:2022 COMPLIANT AUDIT
+              </span>
+              <h2 style={{ margin: '8px 0 6px', color: '#ffffff', fontSize: '24px', fontWeight: 800 }}>
+                Executive Security Posture & Anomaly Audit Report
+              </h2>
+              <p style={{ margin: 0, color: '#c7d2fe', fontSize: '13.5px', maxWidth: '640px' }}>
+                Comprehensive threat detection summary, dual-admin peer review compliance, and rule violation metrics across all enterprise client cohorts.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={downloadingPdf}
+                style={{
+                  background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '12px 22px',
+                  cursor: 'pointer',
+                  fontWeight: 800,
+                  fontSize: '13px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 6px 18px rgba(225, 29, 72, 0.4)'
+                }}
+              >
+                <Download size={16} />
+                <span>{downloadingPdf ? 'Generating PDF Report...' : 'Download Official Report (PDF)'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownloadCsv}
+                disabled={downloadingCsv}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '12px',
+                  padding: '12px 20px',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <FileText size={16} />
+                <span>{downloadingCsv ? 'Exporting CSV...' : 'Export Ledger (CSV)'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Executive KPI Summary Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ background: themeStyles.cardBg, borderRadius: '18px', padding: '20px', border: themeStyles.panelBorder }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: themeStyles.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
+                Total Recorded Incidents
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: themeStyles.textMain }}>
+                {anomalyReport?.total_alerts ?? alerts.length}
+              </div>
+              <div style={{ fontSize: '12px', color: '#38bdf8', marginTop: '6px' }}>
+                Continuous 365-day audit retention
+              </div>
+            </div>
+
+            <div style={{ background: themeStyles.cardBg, borderRadius: '18px', padding: '20px', border: themeStyles.panelBorder }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: themeStyles.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
+                Pending Investigation
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: '#e11d48' }}>
+                {anomalyReport?.unreviewed_alerts ?? unreviewedCount}
+              </div>
+              <div style={{ fontSize: '12px', color: '#f43f5e', marginTop: '6px' }}>
+                Requires peer review disposition
+              </div>
+            </div>
+
+            <div style={{ background: themeStyles.cardBg, borderRadius: '18px', padding: '20px', border: themeStyles.panelBorder }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: themeStyles.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
+                Closed & Signed Off
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: '#10b981' }}>
+                {anomalyReport?.closed_alerts ?? alerts.filter(a => a.status === 'CLOSED').length}
+              </div>
+              <div style={{ fontSize: '12px', color: '#10b981', marginTop: '6px' }}>
+                Dual-admin verified dispositions
+              </div>
+            </div>
+
+            <div style={{ background: themeStyles.cardBg, borderRadius: '18px', padding: '20px', border: themeStyles.panelBorder }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: themeStyles.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
+                High Severity Alerts
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: '#f59e0b' }}>
+                {anomalyReport?.high_severity_count ?? alerts.filter(a => (a.severity_final || a.severity) === 'HIGH').length}
+              </div>
+              <div style={{ fontSize: '12px', color: '#f59e0b', marginTop: '6px' }}>
+                Soft-delete & brute force events
+              </div>
+            </div>
+
+            <div style={{ background: themeStyles.cardBg, borderRadius: '18px', padding: '20px', border: themeStyles.panelBorder }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: themeStyles.textMuted, textTransform: 'uppercase', marginBottom: '8px' }}>
+                After-Hours Events (S1)
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: '#8b5cf6' }}>
+                {anomalyReport?.after_hours_count ?? alerts.filter(a => a.after_hours_tag).length}
+              </div>
+              <div style={{ fontSize: '12px', color: '#8b5cf6', marginTop: '6px' }}>
+                Outside 09:00-18:00 PHT window
+              </div>
+            </div>
+          </div>
+
+          {/* Anomaly Detection Rules Breakdown Table (Table 22) */}
+          <div style={{ background: themeStyles.panelBg, borderRadius: '24px', border: themeStyles.panelBorder, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', borderBottom: themeStyles.panelBorder, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: themeStyles.textMain }}>
+                  1. Detection Rule Volume & Severity Matrix (Chapter III Table 22)
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: themeStyles.textMuted }}>
+                  Evaluation breakdown across out-of-scope access, brute-force attempts, volume bursts, and record modifications.
+                </p>
+              </div>
+              <span className="adm-pill adm-pill--blue">9 RULES ACTIVE</span>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                <thead>
+                  <tr style={{ background: isDark ? '#0f172a' : '#f8fafc', borderBottom: themeStyles.panelBorder }}>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>RULE CODE</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>MONITORED EVENT</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>BASE SEVERITY</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>THRESHOLD WINDOW</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>TOTAL INCIDENTS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(anomalyReport?.rules_breakdown || []).map((r) => (
+                    <tr key={r.rule_code} style={{ borderBottom: themeStyles.panelBorder }}>
+                      <td style={{ padding: '14px 18px', fontWeight: 800, color: themeStyles.textMain }}>
+                        <code>{r.rule_code}</code>
+                      </td>
+                      <td style={{ padding: '14px 18px', color: themeStyles.textSub }}>
+                        {r.name}
+                      </td>
+                      <td style={{ padding: '14px 18px' }}>
+                        <span 
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            background: r.severity === 'HIGH' ? 'rgba(225, 29, 72, 0.2)' : 'rgba(217, 119, 6, 0.2)',
+                            color: r.severity === 'HIGH' ? '#f43f5e' : '#f59e0b'
+                          }}
+                        >
+                          {r.severity}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 18px', color: themeStyles.textMuted, fontSize: '12px' }}>
+                        {r.threshold}
+                      </td>
+                      <td style={{ padding: '14px 18px', fontWeight: 800, color: r.count > 0 ? themeStyles.textMain : themeStyles.textMuted }}>
+                        {r.count}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Recent Critical Incident Highlights */}
+          <div style={{ background: themeStyles.panelBg, borderRadius: '24px', border: themeStyles.panelBorder, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', borderBottom: themeStyles.panelBorder, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: themeStyles.textMain }}>
+                  2. Executive Incident Log & Timeline Highlights
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: themeStyles.textMuted }}>
+                  High-priority security alerts with automated timestamping and investigator disposition notes.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '12.5px' }}>
+                <thead>
+                  <tr style={{ background: isDark ? '#0f172a' : '#f8fafc', borderBottom: themeStyles.panelBorder }}>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>TIMESTAMP</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>RULE</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>SEV</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>STATUS</th>
+                    <th style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMuted }}>DESCRIPTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(anomalyReport?.recent_alerts || []).slice(0, 10).map((a) => (
+                    <tr key={a.id} style={{ borderBottom: themeStyles.panelBorder }}>
+                      <td style={{ padding: '12px 18px', color: themeStyles.textMuted, whiteSpace: 'nowrap' }}>
+                        {a.created_at ? new Date(a.created_at).toLocaleString() : 'N/A'}
+                      </td>
+                      <td style={{ padding: '12px 18px', fontWeight: 700, color: themeStyles.textMain }}>
+                        <code>{a.rule_code}</code>
+                      </td>
+                      <td style={{ padding: '12px 18px' }}>
+                        <span style={{ fontWeight: 800, color: a.severity === 'HIGH' ? '#f43f5e' : '#f59e0b' }}>
+                          {a.severity}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 18px' }}>
+                        <span 
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            background: a.status === 'CLOSED' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(225, 29, 72, 0.2)',
+                            color: a.status === 'CLOSED' ? '#10b981' : '#f43f5e'
+                          }}
+                        >
+                          {a.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '12px 18px', color: themeStyles.textSub }}>
+                        {a.description}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

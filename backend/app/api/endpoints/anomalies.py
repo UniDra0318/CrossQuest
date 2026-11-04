@@ -1,6 +1,10 @@
 from typing import List, Optional
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
+import csv
+import io
+from app.services.pdf_generator import pdf_generator
+from app.anomaly.detector import anomaly_detector
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from app.core.database import get_db
@@ -13,6 +17,137 @@ from app.services.retention_service import run_retention_purge, get_retention_wa
 from app.api.deps import get_current_admin_user
 
 router = APIRouter()
+
+
+@router.get("/report")
+def get_executive_anomaly_report(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Generates an aggregated executive platform posture and access anomaly incident audit report (OI-29, OI-30)."""
+    alerts = db.query(AnomalyAlert).order_by(desc(AnomalyAlert.created_at)).all()
+    total_alerts = len(alerts)
+    unreviewed_alerts = len([a for a in alerts if a.status != "CLOSED"])
+    closed_alerts = len([a for a in alerts if a.status == "CLOSED"])
+    high_severity_count = len([a for a in alerts if (a.severity_final or a.severity) == "HIGH"])
+    medium_severity_count = len([a for a in alerts if (a.severity_final or a.severity) == "MEDIUM"])
+    low_severity_count = len([a for a in alerts if (a.severity_final or a.severity) == "LOW"])
+    after_hours_count = len([a for a in alerts if a.after_hours_tag])
+
+    # Rule breakdown
+    from app.models.entities import AnomalyRule
+    rules = db.query(AnomalyRule).all()
+    rule_counts = {}
+    for a in alerts:
+        rc = a.rule_code or "UNKNOWN"
+        rule_counts[rc] = rule_counts.get(rc, 0) + 1
+
+    rules_breakdown = []
+    for r in rules:
+        code = r.rule_code
+        params = r.parameters or {}
+        max_events = params.get('max_attempts') or params.get('max_failed_logins') or params.get('max_views') or params.get('max_reports') or params.get('max_edits') or 1
+        threshold_info = f"{max_events} events"
+        rules_breakdown.append({
+            "rule_code": code,
+            "name": r.description or code,
+            "severity": "HIGH" if "DELETION" in code else "MEDIUM",
+            "threshold": threshold_info,
+            "count": rule_counts.get(code, 0)
+        })
+    if not rules_breakdown:
+        for rc, cnt in rule_counts.items():
+            rules_breakdown.append({
+                "rule_code": rc,
+                "name": rc.replace("_", " "),
+                "severity": "HIGH" if "DELETION" in rc else "MEDIUM",
+                "threshold": "Threshold configured",
+                "count": cnt
+            })
+
+    recent_alerts = []
+    for a in alerts[:25]:
+        recent_alerts.append({
+            "id": a.id,
+            "rule_code": a.rule_code,
+            "severity": a.severity_final or a.severity,
+            "status": a.status,
+            "description": a.description,
+            "created_at": a.created_at.isoformat() if a.created_at else "",
+            "after_hours_tag": a.after_hours_tag,
+            "disposition": a.disposition
+        })
+
+    return {
+        "generated_at": datetime.now().strftime("%B %d, %Y %H:%M PHT"),
+        "generated_by": f"{admin_user.full_name} ({admin_user.role.upper()})",
+        "total_alerts": total_alerts,
+        "unreviewed_alerts": unreviewed_alerts,
+        "closed_alerts": closed_alerts,
+        "high_severity_count": high_severity_count,
+        "medium_severity_count": medium_severity_count,
+        "low_severity_count": low_severity_count,
+        "after_hours_count": after_hours_count,
+        "rules_breakdown": rules_breakdown,
+        "recent_alerts": recent_alerts
+    }
+
+
+@router.get("/report/pdf")
+def download_executive_anomaly_report_pdf(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Generates and downloads the official ReportLab Executive Anomaly & Platform Posture PDF Audit Report."""
+    report_data = get_executive_anomaly_report(db=db, admin_user=admin_user)
+    pdf_bytes = pdf_generator.generate_anomaly_report_pdf(report_data)
+    
+    filename = f"CrossQuest_Security_Anomaly_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
+
+
+@router.get("/report/csv")
+def download_anomaly_alerts_csv(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Exports all anomaly alerts into a CSV audit log."""
+    alerts = db.query(AnomalyAlert).order_by(desc(AnomalyAlert.created_at)).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Alert ID", "Created At (UTC)", "Rule Code", "Severity Base", 
+        "Severity Final", "Status", "After Hours", "Subject User ID", "Description", "Disposition"
+    ])
+    for a in alerts:
+        writer.writerow([
+            a.id,
+            a.created_at.isoformat() if a.created_at else "",
+            a.rule_code,
+            a.severity_base or a.severity,
+            a.severity_final or a.severity,
+            a.status,
+            "YES" if a.after_hours_tag else "NO",
+            a.subject_user_id or "",
+            a.description or "",
+            a.disposition or ""
+        ])
+    output.seek(0)
+    filename = f"CrossQuest_Anomaly_Ledger_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
+
 
 @router.get("/alerts", response_model=List[AnomalyAlertResponse])
 def get_anomaly_alerts(

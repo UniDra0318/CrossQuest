@@ -997,3 +997,33 @@ def test_tc_ano_27_detection_measurement_30_events_per_rule(
         f"Median: {median_latency*1000:.2f}ms | p95: {p95_latency*1000:.2f}ms | Max: {max_latency*1000:.2f}ms | "
         f"Missed detections: {missed_detections} | False alarms: {false_alarms}"
     )
+
+
+def test_tc_ano_28_executive_anomaly_report_and_exports(client: TestClient, admin_user: User):
+    """TC-ANO-28: Executive Security & Anomaly Audit Report generation, PDF rendering, and CSV exports (OI-29, OI-30)."""
+    admin_token = create_access_token(subject=admin_user.id)
+    headers = {"Authorization": f"Bearer {admin_token}"}
+
+    # 1. Query executive JSON report summary
+    res_json = client.get("/api/v1/anomalies/report", headers=headers)
+    assert res_json.status_code == 200
+    data = res_json.json()
+    assert "total_alerts" in data
+    assert "unreviewed_alerts" in data
+    assert "closed_alerts" in data
+    assert "high_severity_count" in data
+    assert "rules_breakdown" in data
+    assert len(data["rules_breakdown"]) > 0
+
+    # 2. Download executive ReportLab PDF report
+    res_pdf = client.get("/api/v1/anomalies/report/pdf", headers=headers)
+    assert res_pdf.status_code == 200
+    assert res_pdf.headers["content-type"] == "application/pdf"
+    assert len(res_pdf.content) > 1000
+    assert res_pdf.content[:4] == b"%PDF"
+
+    # 3. Export CSV ledger
+    res_csv = client.get("/api/v1/anomalies/report/csv", headers=headers)
+    assert res_csv.status_code == 200
+    assert "text/csv" in res_csv.headers["content-type"]
+    assert "Alert ID" in res_csv.text

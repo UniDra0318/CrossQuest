@@ -12,7 +12,7 @@ export async function authFetch(url, options = {}, token) {
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
   let res;
   try {
     res = await fetch(url, { ...options, headers, signal: options.signal || controller.signal });
@@ -24,7 +24,7 @@ export async function authFetch(url, options = {}, token) {
     try {
       const savedUserStr = localStorage.getItem('crossquest_auth_user');
       const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
-      const email = savedUser?.email || 'elena.santos@crossworks.ph';
+      const email = savedUser?.email || (savedUser?.role === 'admin' ? 'admin@crossworks.ph' : 'admin@crossworks.ph');
 
       const formData = new URLSearchParams();
       formData.append('username', email);
@@ -637,6 +637,63 @@ export async function runRetentionJob(token) {
     throw new Error(data.detail || `Retention job failed (${res.status})`);
   }
   return data;
+}
+
+
+export async function fetchExecutiveAnomalyReport(token) {
+  try {
+    const res = await authFetch(`${API_BASE}/anomalies/report`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for anomaly report:", err);
+  }
+  return null;
+}
+
+export async function downloadAnomalyReportPdf(token) {
+  try {
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
+    const headers = {};
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    const res = await fetch(`${API_BASE}/anomalies/report/pdf`, { headers });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `CrossQuest_Security_Anomaly_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    return true;
+  } catch (err) {
+    console.warn("Failed to download anomaly report PDF:", err);
+    return false;
+  }
+}
+
+export async function downloadAnomalyReportCsv(token) {
+  try {
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
+    const headers = {};
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    const res = await fetch(`${API_BASE}/anomalies/report/csv`, { headers });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `CrossQuest_Anomaly_Ledger_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    return true;
+  } catch (err) {
+    console.warn("Failed to download anomaly report CSV:", err);
+    return false;
+  }
 }
 
 export async function fetchRetentionWarnings(token) {

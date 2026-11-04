@@ -309,15 +309,19 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           }));
         }
         if (dbAnomalies && dbAnomalies.length > 0) {
-          setAnomalies(dbAnomalies.map(a => ({
-            id: a.id,
-            type: a.anomaly_type || 'OUT_OF_SCOPE',
-            name: 'Marcus Reyes',
-            email: 'marcus.am@crossworks.ph',
-            message: a.description || 'Unauthorized decryption attempt detected outside scope.',
-            at: a.created_at ? new Date(a.created_at).toLocaleString() : '2026-10-03 14:18:22',
-            status: a.is_reviewed ? 'RESOLVED' : 'UNREVIEWED'
-          })));
+          setAnomalies(dbAnomalies.map(a => {
+            const subject = (dbStaff || []).find(s => s.id === a.subject_user_id);
+            return {
+              id: a.id,
+              type: a.rule_code || 'OUT_OF_SCOPE',
+              name: subject?.full_name || subject?.name || 'Staff User',
+              email: subject?.email || (a.rule_code?.includes('DELETION') ? 'trainer.lead@crossworks.ph' : 'staff@crossworks.ph'),
+              message: a.description || 'Unauthorized decryption attempt detected outside scope.',
+              at: a.created_at ? new Date(a.created_at).toLocaleString() : '2026-10-03 14:18:22',
+              status: a.status === 'CLOSED' ? 'RESOLVED' : 'UNREVIEWED',
+              severity: a.severity_final || a.severity || 'MEDIUM'
+            };
+          }));
         }
       } catch (err) {
         console.warn("Could not load backend admin data, using robust local state:", err);
@@ -441,7 +445,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               className={activeSubView === 'anomalies' ? 'on' : ''} 
               onClick={() => setActiveView && setActiveView('anomalies')}
             >
-              Anomaly Monitor {unreviewedCount > 0 ? `(${unreviewedCount})` : ''}
+              Anomaly Monitor & Reports {unreviewedCount > 0 ? `(${unreviewedCount})` : ''}
             </button>
             <button 
               type="button"
@@ -564,7 +568,17 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               <div className="adm-panel">
                 <div className="adm-panel__head">
                   <h2>Recent Access Anomaly Alerts</h2>
-                  <span className="adm-chip adm-chip--red">{unreviewedCount} Unreviewed</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="adm-chip adm-chip--red">{unreviewedCount} Unreviewed</span>
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn-ghost"
+                      onClick={() => setActiveView && setActiveView('anomalies')}
+                      style={{ fontSize: '12px', padding: '4px 10px', color: '#38bdf8' }}
+                    >
+                      View Full Anomaly Report →
+                    </button>
+                  </div>
                 </div>
                 <div className="adm-stack">
                   {anomalies.slice(0, 3).map((item) => (
