@@ -264,7 +264,7 @@ export default function DiagramStudioModal({
                           key={tmpl.id}
                           onClick={() => {
                             if (onSelectTemplate) onSelectTemplate(tmpl);
-                            setActiveTab('editor');
+                            // Keep on archetypes tab when switching diagrams per user request
                           }}
                           style={{
                             padding: '12px 14px',
@@ -695,7 +695,11 @@ export default function DiagramStudioModal({
                 justifyContent: 'center'
               }}
             >
-              <div style={{ width: '100%', maxWidth: '980px' }}>
+              <div
+                key={`${diagramTemplateId}-${customLayout}-${customNodes.length}`}
+                className="diagram-canvas-animate"
+                style={{ width: '100%', maxWidth: '980px' }}
+              >
                 <QuizDiagram
                   type={diagramTemplateId}
                   customNodes={customNodes}
