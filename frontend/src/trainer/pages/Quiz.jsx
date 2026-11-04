@@ -321,7 +321,9 @@ export default function Quiz() {
     setCustomLayout(tmpl.layout || 'pipeline');
     setCustomNodes(tmpl.defaultNodes.map(n => ({ ...n })));
     setHotspotTarget(tmpl.defaultTarget);
-    if (!customDiagramTitle) setCustomDiagramTitle(tmpl.name);
+    setCustomDiagramTitle(tmpl.name);
+    setNewQuestionPrompt(tmpl.defaultPrompt);
+    setNewQuestionExplanation(tmpl.defaultExplanation);
   };
 
   const onCreateQuiz = async (e) => {
@@ -987,7 +989,7 @@ export default function Quiz() {
                             setNewQuestionPrompt(tmpl.defaultPrompt);
                             setHotspotTarget(tmpl.defaultTarget);
                             setNewQuestionExplanation(tmpl.defaultExplanation);
-                            if (!customDiagramTitle) setCustomDiagramTitle(tmpl.name);
+                            setCustomDiagramTitle(tmpl.name);
                             setCustomLayout(tmpl.layout || 'pipeline');
                             setCustomNodes(tmpl.defaultNodes.map(n => ({ ...n })));
                           }

@@ -46,10 +46,11 @@ html.dark .diagram-header-strip,
 .diagram-pipeline-wrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 14px;
   overflow-x: auto;
   padding: 10px 4px 18px;
+  flex-wrap: nowrap !important;
 }
 
 .pipeline-node {
@@ -247,21 +248,28 @@ html.dark .hierarchy-level-card.is-hotspot-target .tier-desc,
   color: #cbd5e1 !important;
 }
 
-.tier-top {
-  max-width: 440px;
+.tier-top,
+.tier-apex {
+  width: 290px !important;
+  max-width: 90% !important;
   border-color: #8b5cf6;
   background: #faf5ff;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.12);
 }
 html.dark .tier-top,
-[data-theme="dark"] .tier-top {
+html.dark .tier-apex,
+[data-theme="dark"] .tier-top,
+[data-theme="dark"] .tier-apex {
   background: rgba(139, 92, 246, 0.1);
   border-color: #8b5cf6;
 }
 
 .tier-mid {
-  max-width: 510px;
+  width: 450px !important;
+  max-width: 95% !important;
   border-color: #06b6d4;
   background: #ecfeff;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.1);
 }
 html.dark .tier-mid,
 [data-theme="dark"] .tier-mid {
@@ -270,9 +278,11 @@ html.dark .tier-mid,
 }
 
 .tier-base {
-  max-width: 580px;
+  width: 620px !important;
+  max-width: 100% !important;
   border-color: #10b981;
   background: #ecfdf5;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.1);
 }
 html.dark .tier-base,
 [data-theme="dark"] .tier-base {
@@ -642,3 +652,179 @@ html.dark .barrier-subtitle,
   color: #ffffff;
   margin-top: 6px;
 }
+
+/* =============================================================================
+   5. BRANCHING TREE (PKI / Key Derivation Tree)
+   ============================================================================= */
+.branching-tree-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  width: 100%;
+}
+
+.tree-root-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.tree-mid-row,
+.tree-leaf-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.tree-node-card {
+  flex: 0 1 290px;
+  min-width: 240px;
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+html.dark .tree-node-card,
+[data-theme="dark"] .tree-node-card {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tree-node-card.node-active-guard,
+.tree-node-card.is-hotspot-target {
+  border: 2px solid #f59e0b !important;
+  background: #fffbeb !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25), 0 8px 24px rgba(245, 158, 11, 0.15) !important;
+}
+
+html.dark .tree-node-card.node-active-guard,
+html.dark .tree-node-card.is-hotspot-target,
+[data-theme="dark"] .tree-node-card.node-active-guard,
+[data-theme="dark"] .tree-node-card.is-hotspot-target {
+  background: #1e1b4b !important;
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .tree-node-card.node-active-guard h4,
+html.dark .tree-node-card.is-hotspot-target h4,
+[data-theme="dark"] .tree-node-card.node-active-guard h4,
+[data-theme="dark"] .tree-node-card.is-hotspot-target h4 {
+  color: #f8fafc !important;
+}
+
+html.dark .tree-node-card.node-active-guard p,
+html.dark .tree-node-card.is-hotspot-target p,
+[data-theme="dark"] .tree-node-card.node-active-guard p,
+[data-theme="dark"] .tree-node-card.is-hotspot-target p {
+  color: #cbd5e1 !important;
+}
+
+.tree-branch-split {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 4px 0;
+}
+
+.tree-stem-vertical {
+  width: 2px;
+  height: 14px;
+  background: #8b5cf6;
+}
+
+.tree-rail-horizontal {
+  width: 100%;
+  height: 2px;
+  background: #8b5cf6;
+}
+
+.tree-stem-drops {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tree-stem-drop {
+  width: 2px;
+  height: 14px;
+  background: #8b5cf6;
+}
+
+html.dark .tree-stem-vertical,
+html.dark .tree-rail-horizontal,
+html.dark .tree-stem-drop,
+[data-theme="dark"] .tree-stem-vertical,
+[data-theme="dark"] .tree-rail-horizontal,
+[data-theme="dark"] .tree-stem-drop {
+  background: #a78bfa;
+}
+
+/* =============================================================================
+   6. PERIMETER DMZ INGRESS ZONES
+   ============================================================================= */
+.dmz-zones-container {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 10px 4px;
+}
+
+.dmz-zone {
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.dmz-zone-untrusted {
+  flex: 0 0 170px;
+  border: 1.5px solid #06b6d4;
+  background: rgba(6, 182, 212, 0.05);
+}
+
+.dmz-zone-enclave {
+  flex: 0 0 350px;
+  border: 1.5px dashed #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.dmz-zone-private {
+  flex: 0 0 180px;
+  border: 1.5px solid #10b981;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.dmz-zone-header {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dmz-zone-untrusted .dmz-zone-header { color: #0891b2; }
+.dmz-zone-enclave .dmz-zone-header { color: #d97706; }
+.dmz-zone-private .dmz-zone-header { color: #059669; }
+
+html.dark .dmz-zone-untrusted .dmz-zone-header { color: #67e8f9; }
+html.dark .dmz-zone-enclave .dmz-zone-header { color: #fde68a; }
+html.dark .dmz-zone-private .dmz-zone-header { color: #6ee7b7; }
