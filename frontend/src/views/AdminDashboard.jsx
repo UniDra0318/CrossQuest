@@ -250,6 +250,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [anomalyFilter, setAnomalyFilter] = useState('ALL');
   const [staffSearch, setStaffSearch] = useState('');
   const [recordSearch, setRecordSearch] = useState('');
+  const [companySearch, setCompanySearch] = useState('');
   const [copiedKey, setCopiedKey] = useState(false);
   const [usingFallback, setUsingFallback] = useState(false);
   // Sync real data from database if available
@@ -422,6 +423,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     s.name.toLowerCase().includes(staffSearch.toLowerCase()) || 
     s.email.toLowerCase().includes(staffSearch.toLowerCase())
   );
+  const filteredCompanies = companiesList.filter(c =>
+    (c.name || '').toLowerCase().includes(companySearch.toLowerCase()) ||
+    (c.code || '').toLowerCase().includes(companySearch.toLowerCase()) ||
+    (c.industry || '').toLowerCase().includes(companySearch.toLowerCase()) ||
+    (c.am_name || '').toLowerCase().includes(companySearch.toLowerCase())
+  );
   const filteredRecords = records.filter(r => 
     r.trainee.toLowerCase().includes(recordSearch.toLowerCase()) || 
     r.course.toLowerCase().includes(recordSearch.toLowerCase()) ||
@@ -441,7 +448,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     setCurrentPage: setCompanyPage,
     paginatedItems: pagedCompanies,
     totalItems: totalCompanies
-  } = usePagination(companiesList, 4);
+  } = usePagination(filteredCompanies, 4);
 
   const {
     currentPage: recordPage,
@@ -938,7 +945,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             CLIENT COMPANIES & MULTI-TENANT BOUNDARIES REGISTRY (DEDICATED PANEL)
             ===================================================================== */}
         <div className="adm-panel" style={{ marginTop: '32px' }}>
-          <div className="adm-panel__head">
+          <div className="adm-panel__head" style={{ flexWrap: 'wrap', gap: '14px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                 <Building2 size={20} color="#7c3aed" />
@@ -946,28 +953,45 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               </div>
               <span className="adm-mono">Institutional corporate clients with versioned CP-ABE access tokens (CLIENT&lt;CODE&gt;V1)</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsCreateCompanyOpen(true)}
-              style={{
-                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                color: '#ffffff',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Building2 size={15} />
-              <span>Register New Client Company</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <TablePaginationCompact
+                currentPage={companyPage}
+                totalItems={totalCompanies}
+                pageSize={4}
+                onPageChange={setCompanyPage}
+              />
+              <button
+                type="button"
+                onClick={() => setIsCreateCompanyOpen(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  borderRadius: '10px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Building2 size={15} />
+                <span>Register New Client Company</span>
+              </button>
+              <div className="adm-search">
+                <Search size={15} />
+                <input 
+                  type="text" 
+                  placeholder="Filter client companies or sector..." 
+                  value={companySearch}
+                  onChange={(e) => setCompanySearch(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
@@ -1043,6 +1067,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 />
               )}
             </div>
+            <TablePagination
+              currentPage={companyPage}
+              totalItems={totalCompanies}
+              pageSize={4}
+              onPageChange={setCompanyPage}
+              label="client companies"
+            />
           </div>
         </div>
         </>
