@@ -50,30 +50,41 @@ export const AVAILABLE_DIAGRAM_ICONS = [
   { id: 'check', label: 'Check / Verified' }
 ];
 
-export const renderDiagramNodeIcon = (iconType, colorClass = '') => {
+export const renderDiagramNodeIcon = (iconType, colorClass = '', size = 22) => {
   switch (iconType) {
-    case 'shield': return <Shield size={22} className={colorClass} />;
-    case 'database': return <Database size={22} className={colorClass} />;
-    case 'server': return <Server size={22} className={colorClass} />;
-    case 'cloud': return <Cloud size={22} className={colorClass} />;
-    case 'lock': return <Lock size={22} className={colorClass} />;
-    case 'key': return <Key size={22} className={colorClass} />;
-    case 'cpu': return <Cpu size={22} className={colorClass} />;
-    case 'users': return <Users size={22} className={colorClass} />;
-    case 'globe': return <Globe size={22} className={colorClass} />;
-    case 'terminal': return <Terminal size={22} className={colorClass} />;
-    case 'box': return <Box size={22} className={colorClass} />;
-    case 'layers': return <Layers size={22} className={colorClass} />;
-    case 'file': return <FileText size={22} className={colorClass} />;
-    case 'zap': return <Zap size={22} className={colorClass} />;
-    case 'radio': return <Radio size={22} className={colorClass} />;
-    case 'eye': return <Eye size={22} className={colorClass} />;
-    case 'check': return <CheckCircle2 size={22} className={colorClass} />;
-    default: return <Cpu size={22} className={colorClass} />;
+    case 'shield': return <Shield size={size} className={colorClass} />;
+    case 'database': return <Database size={size} className={colorClass} />;
+    case 'server': return <Server size={size} className={colorClass} />;
+    case 'cloud': return <Cloud size={size} className={colorClass} />;
+    case 'lock': return <Lock size={size} className={colorClass} />;
+    case 'key': return <Key size={size} className={colorClass} />;
+    case 'cpu': return <Cpu size={size} className={colorClass} />;
+    case 'users': return <Users size={size} className={colorClass} />;
+    case 'globe': return <Globe size={size} className={colorClass} />;
+    case 'terminal': return <Terminal size={size} className={colorClass} />;
+    case 'box': return <Box size={size} className={colorClass} />;
+    case 'layers': return <Layers size={size} className={colorClass} />;
+    case 'file': return <FileText size={size} className={colorClass} />;
+    case 'zap': return <Zap size={size} className={colorClass} />;
+    case 'radio': return <Radio size={size} className={colorClass} />;
+    case 'eye': return <Eye size={size} className={colorClass} />;
+    case 'check': return <CheckCircle2 size={size} className={colorClass} />;
+    default: return <Cpu size={size} className={colorClass} />;
   }
 };
 
-export default function QuizDiagram({ type = 'security_pipeline', customNodes, customTitle, imageUrl, imageCaption, targetNode, customLayout }) {
+export default function QuizDiagram({
+  type = 'security_pipeline',
+  customNodes,
+  customTitle,
+  imageUrl,
+  imageCaption,
+  targetNode,
+  customLayout,
+  activeNodeId,
+  onSelectNode,
+  scale = null
+}) {
   const [isZoomed, setIsZoomed] = useState(false);
 
   // Exact target comparison to prevent false-positive multiple highlights
@@ -82,16 +93,29 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
     const t = String(targetNode).trim().toLowerCase();
     if (id && String(id).trim().toLowerCase() === t) return true;
     if (!name) return false;
-    const n = String(name).trim().toLowerCase();
-    return t === n;
+    return t === String(name).trim().toLowerCase();
   };
 
-  // Determine dynamic orientation:
-  // Explicit customLayout takes precedence ('hierarchy' for vertical, 'pipeline' for horizontal).
-  // Default fallback: 'hierarchy' for pyramid & tree; 'pipeline' for sequential pipelines & matrices.
+  // Active editing node comparison
+  const isNodeEditing = (name, id = null) => {
+    if (!activeNodeId) return false;
+    const a = String(activeNodeId).trim().toLowerCase();
+    if (id && String(id).trim().toLowerCase() === a) return true;
+    if (!name) return false;
+    return a === String(name).trim().toLowerCase();
+  };
+
+  // Dynamic layout orientation
   const isVertical = customLayout
     ? customLayout === 'hierarchy'
     : (type === 'clearance_hierarchy' || type === 'pki_hierarchy');
+
+  // Dynamic responsive auto-scaling:
+  // As the number of objects grows, proportionally scale sizes so all objects fit cleanly
+  const totalCount = customNodes && customNodes.length > 0 ? customNodes.length : 3;
+  const autoScale = Math.max(0.62, Math.min(1.0, 1 - (Math.max(0, totalCount - 3) * 0.075)));
+  const currentScale = (scale !== null && scale !== undefined) ? scale : autoScale;
+  const iconSize = Math.max(14, Math.round(22 * currentScale));
 
   // If an uploaded or URL image is provided for the diagram
   if (imageUrl) {
@@ -153,7 +177,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   }
 
   // =========================================================================
-  // 1. TIERED HIERARCHY PYRAMID (True Stepped Scaling in Vertical or Horizontal)
+  // 1. TIERED HIERARCHY PYRAMID (Scaled Dynamically for Density & Selection)
   // =========================================================================
   if (type === 'clearance_hierarchy') {
     const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
@@ -182,7 +206,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               flexDirection: isVertical ? 'column' : 'row',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '12px',
+              gap: `${Math.round(12 * currentScale)}px`,
               overflowX: isVertical ? 'visible' : 'auto',
               padding: '10px 4px'
             }}
@@ -192,22 +216,32 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               const isBase = idx === total - 1;
               const tierClass = isApex ? 'tier-apex' : isBase ? 'tier-base' : 'tier-mid';
 
-              // Dynamic stepped scaling
+              // Dynamic stepped scaling factoring in autoScale / currentScale
               const ratio = total > 1 ? idx / (total - 1) : 0.5;
               const calcWidth = isVertical
-                ? (total === 1 ? 480 : Math.round(300 + (ratio * 480)))
-                : (total === 1 ? 260 : Math.round(200 + (ratio * 80)));
-              const calcMinHeight = isVertical ? 'auto' : `${Math.round(130 + (ratio * 120))}px`;
-              const padV = Math.round(11 + ratio * 6);
-              const padH = Math.round(16 + ratio * 10);
-              const titleSize = (13.5 + ratio * 1.5).toFixed(1);
+                ? (total === 1 ? Math.round(480 * currentScale) : Math.round((280 + (ratio * 460)) * currentScale))
+                : (total === 1 ? Math.round(250 * currentScale) : Math.round((190 + (ratio * 75)) * currentScale));
+              const calcMinHeight = isVertical ? 'auto' : `${Math.round((120 + (ratio * 110)) * currentScale)}px`;
+              const padV = Math.round((10 + ratio * 5) * currentScale);
+              const padH = Math.round((14 + ratio * 8) * currentScale);
+              const titleSize = ((13 + ratio * 1.5) * currentScale).toFixed(1);
+              const subtitleSize = (10.5 * currentScale).toFixed(1);
+
               const matchesTarget = isTarget(node.title, node.id);
+              const isEditing = isNodeEditing(node.title, node.id);
               const nodeColor = node.color || (isApex ? 'purple' : isBase ? 'emerald' : 'cyan');
 
               return (
                 <React.Fragment key={node.id || idx}>
                   <div
-                    className={`hierarchy-level-card ${tierClass} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}
+                    onClick={(e) => {
+                      if (onSelectNode) {
+                        e.stopPropagation();
+                        onSelectNode(node);
+                      }
+                    }}
+                    title={onSelectNode ? `Click to edit "${node.title}" in inspector` : undefined}
+                    className={`hierarchy-level-card ${tierClass} ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditing ? 'node-active-edit' : ''} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}
                     style={{
                       width: `${calcWidth}px`,
                       minHeight: calcMinHeight,
@@ -222,26 +256,31 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                     }}
                   >
                     <div className={`tier-rank-pill pill-${nodeColor}`}>
-                      <span>{node.badge || (isApex ? `LEVEL ${total}: APEX PRIVILEGE` : isBase ? 'LEVEL 1: BROAD OPERATIONAL BASE' : `LEVEL ${total - idx}: SEGREGATED SCOPE`)}</span>
-                      <span className={`tier-authority-badge ${matchesTarget ? 'badge-gold-glow' : ''}`}>
-                        {matchesTarget ? '★ TARGET HOTSPOT' : (isApex ? 'ROOT AUTHORITY' : isBase ? 'INDIVIDUAL SCOPE' : 'PORTFOLIO SCOPE')}
+                      <span style={{ fontSize: `${10.5 * currentScale}px` }}>
+                        {node.badge || (isApex ? `LEVEL ${total}: APEX PRIVILEGE` : isBase ? 'LEVEL 1: BROAD OPERATIONAL BASE' : `LEVEL ${total - idx}: SEGREGATED SCOPE`)}
                       </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {isEditing && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${9 * currentScale}px` }}>✏️ EDITING</span>}
+                        <span className={`tier-authority-badge ${matchesTarget ? 'badge-gold-glow' : ''}`} style={{ fontSize: `${9 * currentScale}px` }}>
+                          {matchesTarget ? '★ TARGET HOTSPOT' : (isApex ? 'ROOT AUTHORITY' : isBase ? 'INDIVIDUAL SCOPE' : 'PORTFOLIO SCOPE')}
+                        </span>
+                      </div>
                     </div>
                     <div className="tier-card-body">
-                      <div className="tier-title-row">
-                        {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
+                      <div className="tier-title-row" style={{ gap: `${Math.round(8 * currentScale)}px` }}>
+                        {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`, iconSize)}
                         <h4 style={{ fontSize: `${titleSize}px`, fontWeight: 800 }}>{node.title}</h4>
                       </div>
-                      {node.subtitle && <p className="tier-desc">{node.subtitle}</p>}
+                      {node.subtitle && <p className="tier-desc" style={{ fontSize: `${subtitleSize}px` }}>{node.subtitle}</p>}
                     </div>
                   </div>
 
                   {idx < total - 1 && (
                     <div className="hierarchy-connector-flow" style={{ flexShrink: 0 }}>
                       {isVertical ? (
-                        <ChevronDown size={18} className="hierarchy-arrow" />
+                        <ChevronDown size={Math.round(18 * currentScale)} className="hierarchy-arrow" />
                       ) : (
-                        <ArrowRight size={18} className="hierarchy-arrow" />
+                        <ArrowRight size={Math.round(18 * currentScale)} className="hierarchy-arrow" />
                       )}
                     </div>
                   )}
@@ -255,7 +294,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   }
 
   // =========================================================================
-  // 2. HIERARCHICAL BRANCHING TREE (True Dynamic Parent-Child Graph)
+  // 2. HIERARCHICAL BRANCHING TREE (Parent-Child Recursive Graph + Scaling)
   // =========================================================================
   if (type === 'pki_hierarchy') {
     const rawNodes = (customNodes && customNodes.length > 0) ? customNodes : [
@@ -264,7 +303,6 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
       { id: 'node-3', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Key', parentId: 'node-2' }
     ];
 
-    // Check if any node has parentId configured
     const hasConfiguredParents = rawNodes.some(n => n.parentId !== undefined && n.parentId !== null && n.parentId !== '');
     const nodes = hasConfiguredParents ? rawNodes : rawNodes.map((n, idx) => {
       if (idx === 0) return { ...n, parentId: null };
@@ -273,12 +311,14 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
       return { ...n, parentId: rawNodes[parentIdx].id };
     });
 
-    // Find root nodes
     const nodeIds = new Set(nodes.map(n => n.id));
     let rootNodes = nodes.filter(n => !n.parentId || !nodeIds.has(n.parentId));
     if (rootNodes.length === 0) {
       rootNodes = [nodes[0]];
     }
+
+    const cardWidth = Math.round(270 * currentScale);
+    const cardMinWidth = Math.round(205 * currentScale);
 
     const renderBranch = (node, visited = new Set()) => {
       const currentVisited = new Set(visited);
@@ -286,6 +326,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
 
       const children = nodes.filter(n => n.parentId === node.id && !currentVisited.has(n.id));
       const tNode = isTarget(node.title, node.id);
+      const isEditing = isNodeEditing(node.title, node.id);
       const color = node.color || 'purple';
 
       return (
@@ -302,8 +343,18 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
         >
           {/* Parent Node Card */}
           <div
-            className={`tree-node-card ${tNode ? 'node-active-guard is-hotspot-target' : ''}`}
+            onClick={(e) => {
+              if (onSelectNode) {
+                e.stopPropagation();
+                onSelectNode(node);
+              }
+            }}
+            title={onSelectNode ? `Click to edit "${node.title}" in inspector` : undefined}
+            className={`tree-node-card ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditing ? 'node-active-edit' : ''} ${tNode ? 'node-active-guard is-hotspot-target' : ''}`}
             style={{
+              width: `${cardWidth}px`,
+              minWidth: `${cardMinWidth}px`,
+              padding: `${Math.round(11 * currentScale)}px ${Math.round(13 * currentScale)}px`,
               borderLeft: `4px solid ${
                 color === 'cyan' ? '#06b6d4' :
                 color === 'purple' ? '#8b5cf6' :
@@ -315,19 +366,24 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             }}
           >
             <div className={`tier-rank-pill pill-${color}`}>
-              <span>{node.badge || (node.parentId ? 'Child Component' : 'Root Authority')}</span>
-              <span className={`tier-authority-badge ${tNode ? 'badge-gold-glow' : ''}`}>
-                {tNode ? '★ TARGET HOTSPOT' : (node.parentId ? 'SCOPED CREDENTIAL' : 'MASTER ROOT')}
+              <span style={{ fontSize: `${10 * currentScale}px` }}>
+                {node.badge || (node.parentId ? 'Child Component' : 'Root Authority')}
               </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {isEditing && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                <span className={`tier-authority-badge ${tNode ? 'badge-gold-glow' : ''}`} style={{ fontSize: `${8.5 * currentScale}px` }}>
+                  {tNode ? '★ TARGET HOTSPOT' : (node.parentId ? 'SCOPED CREDENTIAL' : 'MASTER ROOT')}
+                </span>
+              </div>
             </div>
-            <div className="tier-title-row">
-              {renderDiagramNodeIcon(node.iconType, `text-${color}`)}
-              <h4>{node.title}</h4>
+            <div className="tier-title-row" style={{ gap: `${Math.round(8 * currentScale)}px` }}>
+              {renderDiagramNodeIcon(node.iconType, `text-${color}`, iconSize)}
+              <h4 style={{ fontSize: `${(12.5 * currentScale).toFixed(1)}px` }}>{node.title}</h4>
             </div>
-            {node.subtitle && <p className="tier-desc">{node.subtitle}</p>}
+            {node.subtitle && <p className="tier-desc" style={{ fontSize: `${(10 * currentScale).toFixed(1)}px` }}>{node.subtitle}</p>}
           </div>
 
-          {/* Children Sub-Tree with Precise Forks */}
+          {/* Children Sub-Tree */}
           {children.length > 0 && (
             <div
               className={`tree-children-branch ${isVertical ? 'branch-col' : 'branch-row'}`}
@@ -340,24 +396,24 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               {/* Connector fork */}
               {isVertical ? (
                 <div className="tree-connector-fork-vertical">
-                  <div className="tree-stem-vertical" />
+                  <div className="tree-stem-vertical" style={{ height: `${Math.round(14 * currentScale)}px` }} />
                   {children.length > 1 && <div className="tree-rail-horizontal" />}
                   {children.length > 1 && (
                     <div className="tree-stem-drops">
                       {children.map((c) => (
-                        <div key={c.id} className="tree-stem-drop" />
+                        <div key={c.id} className="tree-stem-drop" style={{ height: `${Math.round(12 * currentScale)}px` }} />
                       ))}
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="tree-connector-fork-horizontal">
-                  <div className="tree-stem-horizontal" />
+                  <div className="tree-stem-horizontal" style={{ width: `${Math.round(18 * currentScale)}px` }} />
                   {children.length > 1 && <div className="tree-rail-vertical" />}
                   {children.length > 1 && (
                     <div className="tree-stem-horizontal-drops">
                       {children.map((c) => (
-                        <div key={c.id} className="tree-stem-horizontal-drop" />
+                        <div key={c.id} className="tree-stem-horizontal-drop" style={{ width: `${Math.round(14 * currentScale)}px` }} />
                       ))}
                     </div>
                   )}
@@ -370,7 +426,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                 style={{
                   display: 'flex',
                   flexDirection: isVertical ? 'row' : 'column',
-                  gap: isVertical ? '24px' : '16px',
+                  gap: isVertical ? `${Math.round(20 * currentScale)}px` : `${Math.round(14 * currentScale)}px`,
                   justifyContent: 'center',
                   alignItems: isVertical ? 'flex-start' : 'center'
                 }}
@@ -405,7 +461,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             style={{
               display: 'flex',
               flexDirection: isVertical ? 'row' : 'column',
-              gap: isVertical ? '32px' : '20px',
+              gap: isVertical ? `${Math.round(28 * currentScale)}px` : `${Math.round(18 * currentScale)}px`,
               justifyContent: 'center',
               alignItems: isVertical ? 'flex-start' : 'center'
             }}
@@ -441,6 +497,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
     const rightNodes = nodes.filter((_, idx) => idx > barrierIdx);
 
     const tWall = isTarget(barrierNode.title, barrierNode.id);
+    const isEditingWall = isNodeEditing(barrierNode.title, barrierNode.id);
 
     return (
       <div className="diagram-card-container">
@@ -456,7 +513,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             flexDirection: isVertical ? 'column' : 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '16px',
+            gap: `${Math.round(16 * currentScale)}px`,
             width: '100%',
             overflowX: isVertical ? 'visible' : 'auto'
           }}
@@ -466,33 +523,48 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             style={{
               display: 'flex',
               flexDirection: isVertical ? 'row' : 'column',
-              gap: '12px',
+              gap: `${Math.round(12 * currentScale)}px`,
               flex: 1,
               width: isVertical ? '100%' : 'auto',
-              minWidth: isVertical ? 'none' : '240px'
+              minWidth: isVertical ? 'none' : `${Math.round(220 * currentScale)}px`
             }}
           >
             {(leftNodes.length > 0 ? leftNodes : [nodes[0]]).map((tNode) => {
               const tA = isTarget(tNode.title, tNode.id);
+              const isEditingA = isNodeEditing(tNode.title, tNode.id);
               return (
-                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tA ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #06b6d4', flex: 1 }}>
-                  <div className="vault-top-banner banner-cyan" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div
+                  key={tNode.id || tNode.title}
+                  onClick={(e) => {
+                    if (onSelectNode) {
+                      e.stopPropagation();
+                      onSelectNode(tNode);
+                    }
+                  }}
+                  title={onSelectNode ? `Click to edit "${tNode.title}" in inspector` : undefined}
+                  className={`tenant-vault-box ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditingA ? 'node-active-edit' : ''} ${tA ? 'is-hotspot-target node-active-guard' : ''}`}
+                  style={{ border: '2px solid #06b6d4', flex: 1 }}
+                >
+                  <div className="vault-top-banner banner-cyan" style={{ display: 'flex', justifyContent: 'space-between', padding: `${Math.round(7 * currentScale)}px ${Math.round(12 * currentScale)}px` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Lock size={14} />
-                      <span>{tNode.badge || 'Domain Partition A'}</span>
+                      <Lock size={Math.round(13 * currentScale)} />
+                      <span style={{ fontSize: `${10.5 * currentScale}px` }}>{tNode.badge || 'Domain Partition A'}</span>
                     </div>
-                    {tA && <span className="tier-authority-badge badge-gold-glow">★ TARGET HOTSPOT</span>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {isEditingA && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                      {tA && <span className="tier-authority-badge badge-gold-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>★ TARGET HOTSPOT</span>}
+                    </div>
                   </div>
-                  <div className="vault-body">
-                    <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {renderDiagramNodeIcon(tNode.iconType, 'text-cyan')}
+                  <div className="vault-body" style={{ padding: `${Math.round(12 * currentScale)}px`, gap: `${Math.round(6 * currentScale)}px` }}>
+                    <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: `${Math.round(8 * currentScale)}px`, fontSize: `${(13 * currentScale).toFixed(1)}px` }}>
+                      {renderDiagramNodeIcon(tNode.iconType, 'text-cyan', iconSize)}
                       <span>{tNode.title}</span>
                     </div>
-                    <div className="vault-key-chip">
+                    <div className="vault-key-chip" style={{ fontSize: `${(9.5 * currentScale).toFixed(1)}px` }}>
                       <code>SCOPE:CORP_ALPHA · CIPHERTEXT POOL A</code>
                     </div>
-                    <p className="vault-desc">{tNode.subtitle}</p>
-                    <div style={{ marginTop: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(6, 182, 212, 0.08)', fontSize: '10.5px', color: '#0891b2', fontWeight: 600 }}>
+                    <p className="vault-desc" style={{ fontSize: `${(10.5 * currentScale).toFixed(1)}px` }}>{tNode.subtitle}</p>
+                    <div style={{ marginTop: '6px', padding: '4px 7px', borderRadius: '5px', background: 'rgba(6, 182, 212, 0.08)', fontSize: `${9.5 * currentScale}px`, color: '#0891b2', fontWeight: 600 }}>
                       🔒 Strict Row-Level Security Enforced
                     </div>
                   </div>
@@ -503,26 +575,37 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
 
           {/* Central Cryptographic Barrier Wall */}
           <div
-            className={`cryptographic-barrier-wall ${tWall ? 'is-hotspot-target node-active-guard' : ''}`}
+            onClick={(e) => {
+              if (onSelectNode) {
+                e.stopPropagation();
+                onSelectNode(barrierNode);
+              }
+            }}
+            title={onSelectNode ? `Click to edit "${barrierNode.title}" in inspector` : undefined}
+            className={`cryptographic-barrier-wall ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditingWall ? 'node-active-edit' : ''} ${tWall ? 'is-hotspot-target node-active-guard' : ''}`}
             style={{
               width: isVertical ? '100%' : 'auto',
-              minWidth: isVertical ? 'none' : '200px',
-              maxWidth: isVertical ? '540px' : 'none'
+              minWidth: isVertical ? 'none' : `${Math.round(180 * currentScale)}px`,
+              maxWidth: isVertical ? '520px' : 'none',
+              padding: `${Math.round(14 * currentScale)}px ${Math.round(12 * currentScale)}px`
             }}
           >
             <div className="barrier-shield-icon">
-              <AlertTriangle size={24} className="text-rose" />
+              <AlertTriangle size={Math.round(22 * currentScale)} className="text-rose" />
             </div>
-            <span className="barrier-title">{barrierNode.title}</span>
-            <span className="barrier-subtitle">{barrierNode.subtitle}</span>
+            <span className="barrier-title" style={{ fontSize: `${(12.5 * currentScale).toFixed(1)}px` }}>{barrierNode.title}</span>
+            <span className="barrier-subtitle" style={{ fontSize: `${(10 * currentScale).toFixed(1)}px` }}>{barrierNode.subtitle}</span>
 
-            <div style={{ marginTop: '4px', padding: '3px 8px', borderRadius: '4px', background: '#e11d48', color: '#ffffff', fontSize: '9px', fontWeight: 800 }}>
+            <div style={{ marginTop: '4px', padding: '3px 7px', borderRadius: '4px', background: '#e11d48', color: '#ffffff', fontSize: `${8.5 * currentScale}px`, fontWeight: 800 }}>
               ⛔ CROSS-DOMAIN ACCESS 403
             </div>
 
-            <span className={`tier-authority-badge ${tWall ? 'badge-gold-glow' : ''}`} style={{ marginTop: '4px' }}>
-              {tWall ? '★ TARGET HOTSPOT' : 'ISOLATION BOUNDARY'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+              {isEditingWall && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+              <span className={`tier-authority-badge ${tWall ? 'badge-gold-glow' : ''}`} style={{ fontSize: `${8.5 * currentScale}px` }}>
+                {tWall ? '★ TARGET HOTSPOT' : 'ISOLATION BOUNDARY'}
+              </span>
+            </div>
           </div>
 
           {/* Tenant B Enclosed Sandbox Enclave */}
@@ -530,33 +613,48 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             style={{
               display: 'flex',
               flexDirection: isVertical ? 'row' : 'column',
-              gap: '12px',
+              gap: `${Math.round(12 * currentScale)}px`,
               flex: 1,
               width: isVertical ? '100%' : 'auto',
-              minWidth: isVertical ? 'none' : '240px'
+              minWidth: isVertical ? 'none' : `${Math.round(220 * currentScale)}px`
             }}
           >
             {(rightNodes.length > 0 ? rightNodes : (nodes.length > 1 ? [nodes[nodes.length - 1]] : [])).map((tNode) => {
               const tB = isTarget(tNode.title, tNode.id);
+              const isEditingB = isNodeEditing(tNode.title, tNode.id);
               return (
-                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tB ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #8b5cf6', flex: 1 }}>
-                  <div className="vault-top-banner banner-purple" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div
+                  key={tNode.id || tNode.title}
+                  onClick={(e) => {
+                    if (onSelectNode) {
+                      e.stopPropagation();
+                      onSelectNode(tNode);
+                    }
+                  }}
+                  title={onSelectNode ? `Click to edit "${tNode.title}" in inspector` : undefined}
+                  className={`tenant-vault-box ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditingB ? 'node-active-edit' : ''} ${tB ? 'is-hotspot-target node-active-guard' : ''}`}
+                  style={{ border: '2px solid #8b5cf6', flex: 1 }}
+                >
+                  <div className="vault-top-banner banner-purple" style={{ display: 'flex', justifyContent: 'space-between', padding: `${Math.round(7 * currentScale)}px ${Math.round(12 * currentScale)}px` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Lock size={14} />
-                      <span>{tNode.badge || 'Domain Partition B'}</span>
+                      <Lock size={Math.round(13 * currentScale)} />
+                      <span style={{ fontSize: `${10.5 * currentScale}px` }}>{tNode.badge || 'Domain Partition B'}</span>
                     </div>
-                    {tB && <span className="tier-authority-badge badge-gold-glow">★ TARGET HOTSPOT</span>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {isEditingB && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                      {tB && <span className="tier-authority-badge badge-gold-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>★ TARGET HOTSPOT</span>}
+                    </div>
                   </div>
-                  <div className="vault-body">
-                    <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {renderDiagramNodeIcon(tNode.iconType, 'text-purple')}
+                  <div className="vault-body" style={{ padding: `${Math.round(12 * currentScale)}px`, gap: `${Math.round(6 * currentScale)}px` }}>
+                    <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: `${Math.round(8 * currentScale)}px`, fontSize: `${(13 * currentScale).toFixed(1)}px` }}>
+                      {renderDiagramNodeIcon(tNode.iconType, 'text-purple', iconSize)}
                       <span>{tNode.title}</span>
                     </div>
-                    <div className="vault-key-chip">
+                    <div className="vault-key-chip" style={{ fontSize: `${(9.5 * currentScale).toFixed(1)}px` }}>
                       <code>SCOPE:FINTECH_BETA · CIPHERTEXT POOL B</code>
                     </div>
-                    <p className="vault-desc">{tNode.subtitle}</p>
-                    <div style={{ marginTop: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.08)', fontSize: '10.5px', color: '#7c3aed', fontWeight: 600 }}>
+                    <p className="vault-desc" style={{ fontSize: `${(10.5 * currentScale).toFixed(1)}px` }}>{tNode.subtitle}</p>
+                    <div style={{ marginTop: '6px', padding: '4px 7px', borderRadius: '5px', background: 'rgba(139, 92, 246, 0.08)', fontSize: `${9.5 * currentScale}px`, color: '#7c3aed', fontWeight: 600 }}>
                       🛡️ Zero Shared Memory or State
                     </div>
                   </div>
@@ -570,7 +668,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   }
 
   // =========================================================================
-  // 4. PERIMETER INGRESS GATEWAY (DMZ Network Enclaves)
+  // 4. PERIMETER INGRESS GATEWAY (DMZ Network Enclaves + Scaling)
   // =========================================================================
   if (type === 'network_dmz') {
     const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
@@ -585,7 +683,9 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
     const dmzNodes = nodes.length > 2 ? nodes.slice(1, -1) : [];
 
     const tExt = isTarget(extNode.title, extNode.id);
+    const isEditingExt = isNodeEditing(extNode.title, extNode.id);
     const tMesh = meshNode ? isTarget(meshNode.title, meshNode.id) : false;
+    const isEditingMesh = meshNode ? isNodeEditing(meshNode.title, meshNode.id) : false;
 
     return (
       <div className="diagram-card-container">
@@ -601,7 +701,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             flexDirection: isVertical ? 'column' : 'row',
             alignItems: isVertical ? 'center' : 'stretch',
             justifyContent: 'space-between',
-            gap: '12px',
+            gap: `${Math.round(12 * currentScale)}px`,
             overflowX: isVertical ? 'visible' : 'auto',
             width: '100%'
           }}
@@ -609,27 +709,40 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           {/* ZONE 1: Untrusted Public Edge */}
           <div
             className="dmz-zone dmz-zone-untrusted"
-            style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+            style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none', padding: `${Math.round(12 * currentScale)}px` }}
           >
-            <div className="dmz-zone-header">
-              <Globe size={13} />
+            <div className="dmz-zone-header" style={{ fontSize: `${9.5 * currentScale}px` }}>
+              <Globe size={Math.round(13 * currentScale)} />
               <span>Zone 1: Public Edge</span>
             </div>
 
-            <div className={`pipeline-node ${tExt ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%', maxWidth: 'none' }}>
-              <div className="node-icon-bubble bg-cyan-subtle">
-                {renderDiagramNodeIcon(extNode.iconType, 'text-cyan')}
+            <div
+              onClick={(e) => {
+                if (onSelectNode) {
+                  e.stopPropagation();
+                  onSelectNode(extNode);
+                }
+              }}
+              title={onSelectNode ? `Click to edit "${extNode.title}" in inspector` : undefined}
+              className={`pipeline-node ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditingExt ? 'node-active-edit' : ''} ${tExt ? 'node-active-guard is-hotspot-target' : ''}`}
+              style={{ width: '100%', maxWidth: 'none', padding: `${Math.round(12 * currentScale)}px ${Math.round(10 * currentScale)}px` }}
+            >
+              <div className="node-icon-bubble bg-cyan-subtle" style={{ width: `${Math.round(40 * currentScale)}px`, height: `${Math.round(40 * currentScale)}px` }}>
+                {renderDiagramNodeIcon(extNode.iconType, 'text-cyan', iconSize)}
               </div>
-              <div className="node-title">{extNode.title}</div>
-              <div className={`node-badge-tag ${tExt ? 'badge-gold-glow' : ''}`}>
-                {tExt ? '★ Target Hotspot' : (extNode.badge || 'Public Edge')}
+              <div className="node-title" style={{ fontSize: `${(12.5 * currentScale).toFixed(1)}px` }}>{extNode.title}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                {isEditingExt && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                <div className={`node-badge-tag ${tExt ? 'badge-gold-glow' : ''}`} style={{ fontSize: `${9.5 * currentScale}px` }}>
+                  {tExt ? '★ Target Hotspot' : (extNode.badge || 'Public Edge')}
+                </div>
               </div>
-              <div className="node-desc">{extNode.subtitle}</div>
+              <div className="node-desc" style={{ fontSize: `${(10 * currentScale).toFixed(1)}px` }}>{extNode.subtitle}</div>
             </div>
           </div>
 
           <div className="pipeline-connector" style={{ transform: isVertical ? 'rotate(90deg)' : 'none', margin: isVertical ? '4px 0' : '0' }}>
-            <ArrowRight size={18} className="connector-arrow text-cyan" />
+            <ArrowRight size={Math.round(18 * currentScale)} className="connector-arrow text-cyan" />
           </div>
 
           {/* ZONE 2: DMZ Enclave */}
@@ -637,32 +750,46 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             <>
               <div
                 className="dmz-zone dmz-zone-enclave"
-                style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+                style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none', padding: `${Math.round(12 * currentScale)}px` }}
               >
-                <div className="dmz-zone-header">
-                  <ShieldCheck size={13} />
+                <div className="dmz-zone-header" style={{ fontSize: `${9.5 * currentScale}px` }}>
+                  <ShieldCheck size={Math.round(13 * currentScale)} />
                   <span>Zone 2: Perimeter DMZ Enclave ({dmzNodes.length} Stages)</span>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: `${Math.round(10 * currentScale)}px`, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                   {dmzNodes.map((dNode, dIdx) => {
                     const tD = isTarget(dNode.title, dNode.id);
+                    const isEditingD = isNodeEditing(dNode.title, dNode.id);
                     const dColor = dNode.color || 'gold';
                     return (
                       <React.Fragment key={dNode.id || dIdx}>
-                        <div className={`pipeline-node ${tD ? 'node-active-guard is-hotspot-target' : ''}`} style={{ flex: 1, minWidth: '130px' }}>
-                          <div className={`node-icon-bubble bg-${dColor}-subtle`}>
-                            {renderDiagramNodeIcon(dNode.iconType, `text-${dColor}`)}
+                        <div
+                          onClick={(e) => {
+                            if (onSelectNode) {
+                              e.stopPropagation();
+                              onSelectNode(dNode);
+                            }
+                          }}
+                          title={onSelectNode ? `Click to edit "${dNode.title}" in inspector` : undefined}
+                          className={`pipeline-node ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditingD ? 'node-active-edit' : ''} ${tD ? 'node-active-guard is-hotspot-target' : ''}`}
+                          style={{ flex: 1, minWidth: `${Math.round(120 * currentScale)}px`, padding: `${Math.round(12 * currentScale)}px ${Math.round(8 * currentScale)}px` }}
+                        >
+                          <div className={`node-icon-bubble bg-${dColor}-subtle`} style={{ width: `${Math.round(40 * currentScale)}px`, height: `${Math.round(40 * currentScale)}px` }}>
+                            {renderDiagramNodeIcon(dNode.iconType, `text-${dColor}`, iconSize)}
                           </div>
-                          <div className="node-title">{dNode.title}</div>
-                          <div className={`node-badge-tag ${tD ? 'badge-gold-glow' : ''}`}>
-                            {tD ? '★ Target Hotspot' : (dNode.badge || `Stage ${dIdx + 1}`)}
+                          <div className="node-title" style={{ fontSize: `${(12 * currentScale).toFixed(1)}px` }}>{dNode.title}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            {isEditingD && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                            <div className={`node-badge-tag ${tD ? 'badge-gold-glow' : ''}`} style={{ fontSize: `${9.5 * currentScale}px` }}>
+                              {tD ? '★ Target Hotspot' : (dNode.badge || `Stage ${dIdx + 1}`)}
+                            </div>
                           </div>
-                          <div className="node-desc">{dNode.subtitle}</div>
+                          <div className="node-desc" style={{ fontSize: `${(10 * currentScale).toFixed(1)}px` }}>{dNode.subtitle}</div>
                         </div>
 
                         {dIdx < dmzNodes.length - 1 && (
-                          <ArrowRight size={14} className="text-purple flex-shrink-0" />
+                          <ArrowRight size={Math.round(14 * currentScale)} className="text-purple flex-shrink-0" />
                         )}
                       </React.Fragment>
                     );
@@ -671,7 +798,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               </div>
 
               <div className="pipeline-connector" style={{ transform: isVertical ? 'rotate(90deg)' : 'none', margin: isVertical ? '4px 0' : '0' }}>
-                <ArrowRight size={18} className="connector-arrow text-emerald" />
+                <ArrowRight size={Math.round(18 * currentScale)} className="connector-arrow text-emerald" />
               </div>
             </>
           )}
@@ -680,22 +807,35 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           {meshNode && (
             <div
               className="dmz-zone dmz-zone-private"
-              style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+              style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none', padding: `${Math.round(12 * currentScale)}px` }}
             >
-              <div className="dmz-zone-header">
-                <Lock size={13} />
+              <div className="dmz-zone-header" style={{ fontSize: `${9.5 * currentScale}px` }}>
+                <Lock size={Math.round(13 * currentScale)} />
                 <span>Zone 3: Private VPC</span>
               </div>
 
-              <div className={`pipeline-node ${tMesh ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%', maxWidth: 'none' }}>
-                <div className="node-icon-bubble bg-emerald-subtle">
-                  {renderDiagramNodeIcon(meshNode.iconType, 'text-emerald')}
+              <div
+                onClick={(e) => {
+                  if (onSelectNode) {
+                    e.stopPropagation();
+                    onSelectNode(meshNode);
+                  }
+                }}
+                title={onSelectNode ? `Click to edit "${meshNode.title}" in inspector` : undefined}
+                className={`pipeline-node ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditingMesh ? 'node-active-edit' : ''} ${tMesh ? 'node-active-guard is-hotspot-target' : ''}`}
+                style={{ width: '100%', maxWidth: 'none', padding: `${Math.round(12 * currentScale)}px ${Math.round(10 * currentScale)}px` }}
+              >
+                <div className="node-icon-bubble bg-emerald-subtle" style={{ width: `${Math.round(40 * currentScale)}px`, height: `${Math.round(40 * currentScale)}px` }}>
+                  {renderDiagramNodeIcon(meshNode.iconType, 'text-emerald', iconSize)}
                 </div>
-                <div className="node-title">{meshNode.title}</div>
-                <div className={`node-badge-tag ${tMesh ? 'badge-gold-glow' : ''}`}>
-                  {tMesh ? '★ Target Hotspot' : (meshNode.badge || 'Private VPC')}
+                <div className="node-title" style={{ fontSize: `${(12.5 * currentScale).toFixed(1)}px` }}>{meshNode.title}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  {isEditingMesh && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                  <div className={`node-badge-tag ${tMesh ? 'badge-gold-glow' : ''}`} style={{ fontSize: `${9.5 * currentScale}px` }}>
+                    {tMesh ? '★ Target Hotspot' : (meshNode.badge || 'Private VPC')}
+                  </div>
                 </div>
-                <div className="node-desc">{meshNode.subtitle}</div>
+                <div className="node-desc" style={{ fontSize: `${(10 * currentScale).toFixed(1)}px` }}>{meshNode.subtitle}</div>
               </div>
             </div>
           )}
@@ -728,41 +868,57 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             flexDirection: isVertical ? 'column' : 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '12px',
+            gap: `${Math.round(12 * currentScale)}px`,
             overflowX: isVertical ? 'visible' : 'auto',
             width: '100%'
           }}
         >
           {nodes.map((node, idx) => {
             const matchesTarget = isTarget(node.title, node.id);
+            const isEditing = isNodeEditing(node.title, node.id);
             const nodeColor = node.color || (idx === 0 ? 'emerald' : idx === 1 ? 'cyan' : 'purple');
 
             return (
               <React.Fragment key={node.id || idx}>
                 <div
-                  className={`data-flow-card ${matchesTarget ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}
-                  style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+                  onClick={(e) => {
+                    if (onSelectNode) {
+                      e.stopPropagation();
+                      onSelectNode(node);
+                    }
+                  }}
+                  title={onSelectNode ? `Click to edit "${node.title}" in inspector` : undefined}
+                  className={`data-flow-card ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditing ? 'node-active-edit' : ''} ${matchesTarget ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}
+                  style={{
+                    width: isVertical ? '100%' : 'auto',
+                    minWidth: `${Math.round(150 * currentScale)}px`,
+                    maxWidth: isVertical ? '520px' : 'none',
+                    padding: `${Math.round(13 * currentScale)}px ${Math.round(13 * currentScale)}px`
+                  }}
                 >
                   <div className="flow-card-header">
-                    {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
-                    <span className={`flow-role-tag ${matchesTarget ? 'badge-gold-glow' : `tag-${nodeColor}`}`}>
-                      {matchesTarget ? '★ Target Hotspot' : (node.badge || `Entity ${idx + 1}`)}
-                    </span>
+                    {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`, iconSize)}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {isEditing && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                      <span className={`flow-role-tag ${matchesTarget ? 'badge-gold-glow' : `tag-${nodeColor}`}`} style={{ fontSize: `${9.5 * currentScale}px` }}>
+                        {matchesTarget ? '★ Target Hotspot' : (node.badge || `Entity ${idx + 1}`)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flow-card-title">{node.title}</div>
-                  <p className="flow-card-desc">{node.subtitle}</p>
-                  <div style={{ marginTop: 'auto', fontSize: '10px', color: '#059669', fontWeight: 600 }}>
+                  <div className="flow-card-title" style={{ fontSize: `${(13 * currentScale).toFixed(1)}px` }}>{node.title}</div>
+                  <p className="flow-card-desc" style={{ fontSize: `${(10.5 * currentScale).toFixed(1)}px` }}>{node.subtitle}</p>
+                  <div style={{ marginTop: 'auto', fontSize: `${9.5 * currentScale}px`, color: '#059669', fontWeight: 600 }}>
                     🛡️ Compliance Boundary Bound
                   </div>
                 </div>
 
                 {idx < nodes.length - 1 && (
                   <div className="flow-connector" style={{ flexDirection: isVertical ? 'row' : 'column' }}>
-                    <span className="flow-connector-label">Flow {idx + 1}</span>
+                    <span className="flow-connector-label" style={{ fontSize: `${9 * currentScale}px` }}>Flow {idx + 1}</span>
                     {isVertical ? (
-                      <ChevronDown size={18} className="text-cyan" />
+                      <ChevronDown size={Math.round(18 * currentScale)} className="text-cyan" />
                     ) : (
-                      <ArrowRight size={18} className="text-cyan" />
+                      <ArrowRight size={Math.round(18 * currentScale)} className="text-cyan" />
                     )}
                   </div>
                 )}
@@ -775,7 +931,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   }
 
   // =========================================================================
-  // 6. SEQUENTIAL PROCESS PIPELINE (Linear connected pipeline flow)
+  // 6. SEQUENTIAL PROCESS PIPELINE (Linear connected pipeline flow + Scaling)
   // =========================================================================
   const pipelineNodes = (customNodes && customNodes.length > 0) ? customNodes : [
     { id: 'step-1', title: 'Client Interface', subtitle: 'HTTPS Session Stream', iconType: 'users', color: 'cyan', badge: 'Client Ingress' },
@@ -798,7 +954,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           flexDirection: isVertical ? 'column' : 'row',
           alignItems: 'center',
           justifyContent: isVertical ? 'center' : 'flex-start',
-          gap: '14px',
+          gap: `${Math.round(14 * currentScale)}px`,
           overflowX: isVertical ? 'visible' : 'auto',
           width: '100%',
           padding: '10px 4px 18px'
@@ -806,22 +962,41 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
       >
         {pipelineNodes.map((node, idx) => {
           const matchesTarget = isTarget(node.title, node.id);
+          const isEditing = isNodeEditing(node.title, node.id);
           const nodeColor = node.color || 'purple';
 
           return (
             <React.Fragment key={node.id || idx}>
               <div
-                className={`pipeline-node node-${nodeColor} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}
-                style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '480px' : '200px' }}
+                onClick={(e) => {
+                  if (onSelectNode) {
+                    e.stopPropagation();
+                    onSelectNode(node);
+                  }
+                }}
+                title={onSelectNode ? `Click to edit "${node.title}" in inspector` : undefined}
+                className={`pipeline-node node-${nodeColor} ${onSelectNode ? 'diagram-node-clickable' : ''} ${isEditing ? 'node-active-edit' : ''} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}
+                style={{
+                  width: isVertical ? '100%' : 'auto',
+                  minWidth: `${Math.round(130 * currentScale)}px`,
+                  maxWidth: isVertical ? '480px' : `${Math.round(190 * currentScale)}px`,
+                  padding: `${Math.round(13 * currentScale)}px ${Math.round(10 * currentScale)}px`
+                }}
               >
-                <div className={`node-icon-bubble bg-${nodeColor}-subtle ${matchesTarget ? 'pulse-slow' : ''}`}>
-                  {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
+                <div
+                  className={`node-icon-bubble bg-${nodeColor}-subtle ${matchesTarget ? 'pulse-slow' : ''}`}
+                  style={{ width: `${Math.round(40 * currentScale)}px`, height: `${Math.round(40 * currentScale)}px` }}
+                >
+                  {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`, iconSize)}
                 </div>
-                <div className="node-title">{node.title}</div>
-                <div className={`node-badge-tag ${matchesTarget ? 'badge-gold-glow' : ''}`}>
-                  {matchesTarget ? '★ Target Hotspot' : (node.badge || `Stage ${idx + 1}`)}
+                <div className="node-title" style={{ fontSize: `${(12.5 * currentScale).toFixed(1)}px` }}>{node.title}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  {isEditing && <span className="tier-authority-badge badge-edit-glow" style={{ fontSize: `${8.5 * currentScale}px` }}>✏️ EDITING</span>}
+                  <div className={`node-badge-tag ${matchesTarget ? 'badge-gold-glow' : ''}`} style={{ fontSize: `${9.5 * currentScale}px` }}>
+                    {matchesTarget ? '★ Target Hotspot' : (node.badge || `Stage ${idx + 1}`)}
+                  </div>
                 </div>
-                {node.subtitle && <div className="node-desc">{node.subtitle}</div>}
+                {node.subtitle && <div className="node-desc" style={{ fontSize: `${(10 * currentScale).toFixed(1)}px` }}>{node.subtitle}</div>}
               </div>
 
               {idx < pipelineNodes.length - 1 && (
@@ -836,16 +1011,16 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                   <div
                     className="connector-line"
                     style={{
-                      width: isVertical ? '2px' : '24px',
-                      height: isVertical ? '20px' : '2px'
+                      width: isVertical ? '2px' : `${Math.round(22 * currentScale)}px`,
+                      height: isVertical ? `${Math.round(18 * currentScale)}px` : '2px'
                     }}
                   >
                     <div className={`connector-pulse-dot delay-${(idx % 3) + 1}`} />
                   </div>
                   {isVertical ? (
-                    <ChevronDown size={16} className="connector-arrow text-purple" />
+                    <ChevronDown size={Math.round(16 * currentScale)} className="connector-arrow text-purple" />
                   ) : (
-                    <ArrowRight size={16} className="connector-arrow text-purple" />
+                    <ArrowRight size={Math.round(16 * currentScale)} className="connector-arrow text-purple" />
                   )}
                 </div>
               )}

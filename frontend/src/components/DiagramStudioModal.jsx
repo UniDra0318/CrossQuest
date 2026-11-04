@@ -41,8 +41,31 @@ export default function DiagramStudioModal({
 }) {
   const [openIconPickerNodeId, setOpenIconPickerNodeId] = useState(null);
   const [activeTab, setActiveTab] = useState('editor'); // 'editor' | 'archetypes'
+  const [selectedNodeId, setSelectedNodeId] = useState(customNodes[0]?.id || null);
+  const [canvasScale, setCanvasScale] = useState(null); // null = responsive auto-scale
 
   if (!isOpen) return null;
+
+  // Responsive auto-scale calculation: scales down as node count increases
+  const autoScale = Math.max(0.62, Math.min(1.0, 1 - (Math.max(0, customNodes.length - 3) * 0.075)));
+
+  const handleSelectNodeToEdit = (nodeId) => {
+    setSelectedNodeId(nodeId);
+    if (activeTab !== 'editor') {
+      setActiveTab('editor');
+    }
+    setTimeout(() => {
+      const cardEl = document.getElementById(`studio-node-card-${nodeId}`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const titleInput = cardEl.querySelector('input[data-field="title"]');
+        if (titleInput) {
+          titleInput.focus();
+          titleInput.select();
+        }
+      }
+    }, 60);
+  };
 
   const currentTemplate = templates.find(t => t.id === diagramTemplateId) || templates[0] || {};
   const colors = [
@@ -409,24 +432,35 @@ export default function DiagramStudioModal({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {customNodes.map((node, nIdx) => {
                         const isNodeTarget = hotspotTarget && hotspotTarget.trim().toLowerCase() === node.title.trim().toLowerCase();
+                        const isSelected = selectedNodeId === node.id;
                         const isIconPickerOpen = openIconPickerNodeId === node.id;
 
                         return (
                           <div
                             key={node.id || nIdx}
+                            id={`studio-node-card-${node.id}`}
+                            onClick={() => setSelectedNodeId(node.id)}
                             style={{
                               padding: '12px',
                               borderRadius: '12px',
-                              border: isNodeTarget
-                                ? '2px solid #f59e0b'
-                                : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1'),
-                              background: isNodeTarget
-                                ? (isDark ? '#1e1b4b' : '#fffdf5')
-                                : (isDark ? '#111827' : '#ffffff'),
+                              border: isSelected
+                                ? (isDark ? '2px solid #8b5cf6' : '2px solid #7c3aed')
+                                : (isNodeTarget
+                                  ? '2px solid #f59e0b'
+                                  : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1')),
+                              background: isSelected
+                                ? (isDark ? 'rgba(139, 92, 246, 0.12)' : 'rgba(139, 92, 246, 0.05)')
+                                : (isNodeTarget
+                                  ? (isDark ? '#1e1b4b' : '#fffdf5')
+                                  : (isDark ? '#111827' : '#ffffff')),
+                              boxShadow: isSelected
+                                ? (isDark ? '0 0 0 3px rgba(139, 92, 246, 0.28), 0 8px 20px rgba(0, 0, 0, 0.4)' : '0 0 0 3px rgba(124, 58, 237, 0.2), 0 4px 14px rgba(124, 58, 237, 0.15)')
+                                : 'none',
                               display: 'flex',
                               flexDirection: 'column',
                               gap: '8px',
-                              transition: 'all 0.15s ease'
+                              transition: 'all 0.15s ease',
+                              cursor: 'pointer'
                             }}
                           >
                             {/* Card Top: Index, Badge, Reorder, Target, Delete */}
@@ -444,6 +478,20 @@ export default function DiagramStudioModal({
                                 >
                                   #{nIdx + 1}
                                 </span>
+                                {isSelected && (
+                                  <span
+                                    style={{
+                                      fontSize: '9px',
+                                      fontWeight: 800,
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      background: '#8b5cf6',
+                                      color: '#ffffff'
+                                    }}
+                                  >
+                                    ✏️ EDITING
+                                  </span>
+                                )}
                                 <input
                                   type="text"
                                   value={node.badge || ''}
@@ -609,8 +657,10 @@ export default function DiagramStudioModal({
                                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                   <input
                                     type="text"
+                                    data-field="title"
                                     value={node.title || ''}
                                     placeholder="Title"
+                                    onFocus={() => setSelectedNodeId(node.id)}
                                     onChange={(e) => onUpdateNode && onUpdateNode(node.id, 'title', e.target.value)}
                                     style={{
                                       flex: 1,
@@ -718,15 +768,17 @@ export default function DiagramStudioModal({
             {/* Canvas Header Strip */}
             <div
               style={{
-                padding: '12px 20px',
+                padding: '10px 20px',
                 borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: isDark ? 'rgba(11, 15, 25, 0.8)' : '#ffffff'
+                background: isDark ? 'rgba(11, 15, 25, 0.8)' : '#ffffff',
+                flexWrap: 'wrap',
+                gap: '10px'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <Eye size={15} color="#8b5cf6" />
                 <span style={{ fontSize: '12px', fontWeight: 800, color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Live Architecture Canvas
@@ -746,10 +798,93 @@ export default function DiagramStudioModal({
                     ★ Target: {hotspotTarget}
                   </span>
                 )}
+                <span style={{ fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', fontStyle: 'italic', marginLeft: '4px' }}>
+                  (Click any object on canvas to edit it)
+                </span>
               </div>
 
-              <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                {customNodes.length} Components Active
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                {/* Responsive Scale / Zoom Control */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: isDark ? '#111827' : '#e2e8f0',
+                    padding: '2px 6px',
+                    borderRadius: '8px',
+                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1'
+                  }}
+                >
+                  <span style={{ fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', padding: '0 4px', fontWeight: 600 }}>Scale:</span>
+                  <button
+                    type="button"
+                    onClick={() => setCanvasScale(prev => {
+                      const cur = prev !== null ? prev : autoScale;
+                      return Math.max(0.5, parseFloat((cur - 0.1).toFixed(2)));
+                    })}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: isDark ? '#cbd5e1' : '#334155',
+                      cursor: 'pointer',
+                      padding: '2px 6px',
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      borderRadius: '4px'
+                    }}
+                    title="Zoom Out (Scale down objects)"
+                  >
+                    -
+                  </button>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#f8fafc' : '#1e293b', minWidth: '36px', textAlign: 'center' }}>
+                    {Math.round((canvasScale !== null ? canvasScale : autoScale) * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCanvasScale(prev => {
+                      const cur = prev !== null ? prev : autoScale;
+                      return Math.min(1.3, parseFloat((cur + 0.1).toFixed(2)));
+                    })}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: isDark ? '#cbd5e1' : '#334155',
+                      cursor: 'pointer',
+                      padding: '2px 6px',
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      borderRadius: '4px'
+                    }}
+                    title="Zoom In (Scale up objects)"
+                  >
+                    +
+                  </button>
+                  {canvasScale !== null && (
+                    <button
+                      type="button"
+                      onClick={() => setCanvasScale(null)}
+                      style={{
+                        background: '#8b5cf6',
+                        border: 'none',
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        marginLeft: '4px'
+                      }}
+                      title="Reset to Responsive Auto-Scale"
+                    >
+                      Auto
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                  {customNodes.length} Components Active
+                </div>
               </div>
             </div>
 
@@ -776,6 +911,9 @@ export default function DiagramStudioModal({
                   customLayout={customLayout}
                   customTitle={customDiagramTitle || currentTemplate.name}
                   targetNode={hotspotTarget}
+                  activeNodeId={selectedNodeId}
+                  onSelectNode={(node) => handleSelectNodeToEdit(node.id)}
+                  scale={canvasScale}
                 />
               </div>
             </div>
