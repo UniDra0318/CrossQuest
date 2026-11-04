@@ -22,7 +22,8 @@ import {
   ChevronUp,
   EyeOff,
   RefreshCw,
-  ShieldAlert
+  ShieldAlert,
+  Maximize2
 } from 'lucide-react';
 import QuizDiagram, { AVAILABLE_DIAGRAM_ICONS, renderDiagramNodeIcon } from '../../components/QuizDiagram';
 import DiagramStudioModal from '../../components/DiagramStudioModal';
