@@ -95,7 +95,7 @@ export default function AdminPeerReviewAnomalyDesk() {
   const [rules, setRules] = useState([]);
   const [loadingRules, setLoadingRules] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
-  const [ruleParamInput, setRuleParamInput] = useState('');
+  const [ruleParams, setRuleParams] = useState({});
   const [ruleReason, setRuleReason] = useState('');
   const [ruleClientReviewed, setRuleClientReviewed] = useState(true);
   const [submittingRule, setSubmittingRule] = useState(false);
@@ -260,10 +260,107 @@ export default function AdminPeerReviewAnomalyDesk() {
     }
   };
 
+  // Formatted Parameter Display Helper
+  const renderRuleParameters = (params = {}) => {
+    if (!params || Object.keys(params).length === 0) {
+      return (
+        <span style={{ fontSize: '12px', color: themeStyles.textMuted, fontStyle: 'italic' }}>
+          None configured
+        </span>
+      );
+    }
+
+    const items = [];
+
+    if (params.threshold !== undefined) {
+      items.push({
+        label: 'Event Limit',
+        val: `${params.threshold} events`,
+        color: '#6366f1'
+      });
+    }
+
+    if (params.distinct_usernames_threshold !== undefined) {
+      items.push({
+        label: 'Target Accounts',
+        val: `${params.distinct_usernames_threshold} distinct`,
+        color: '#0ea5e9'
+      });
+    }
+
+    if (params.window_minutes !== undefined) {
+      items.push({
+        label: 'Window',
+        val: `${params.window_minutes} min`,
+        color: '#8b5cf6'
+      });
+    }
+
+    if (params.start_hour !== undefined && params.end_hour !== undefined) {
+      items.push({
+        label: 'Active Hours',
+        val: `${String(params.start_hour).padStart(2, '0')}:00 – ${String(params.end_hour).padStart(2, '0')}:00 (${params.tz || 'UTC+8'})`,
+        color: '#f59e0b'
+      });
+    }
+
+    if (params.thresholds && typeof params.thresholds === 'object') {
+      Object.entries(params.thresholds).forEach(([role, v]) => {
+        items.push({
+          label: `${role.replace(/_/g, ' ')} limit`,
+          val: `${v} records`,
+          color: '#10b981'
+        });
+      });
+    }
+
+    if (params.severity) {
+      items.push({
+        label: 'Severity',
+        val: params.severity,
+        color: params.severity === 'HIGH' ? '#f43f5e' : params.severity === 'MEDIUM' ? '#f59e0b' : '#38bdf8'
+      });
+    }
+
+    Object.keys(params).forEach((k) => {
+      if (!['threshold', 'distinct_usernames_threshold', 'window_minutes', 'start_hour', 'end_hour', 'tz', 'thresholds', 'severity'].includes(k)) {
+        items.push({
+          label: k.replace(/_/g, ' '),
+          val: String(params[k]),
+          color: '#64748b'
+        });
+      }
+    });
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        {items.map((item, i) => (
+          <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11.5px' }}>
+            <span style={{ color: themeStyles.textMuted, fontWeight: 600, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
+              {item.label}:
+            </span>
+            <span style={{ 
+              fontWeight: 700, 
+              fontFamily: 'monospace',
+              color: item.color,
+              background: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
+              padding: '2px 7px',
+              borderRadius: '5px',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0',
+              whiteSpace: 'nowrap'
+            }}>
+              {item.val}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   // Open Edit Rule Modal
   const openEditRuleModal = (rule) => {
     setEditingRule(rule);
-    setRuleParamInput(JSON.stringify(rule.parameters || {}, null, 2));
+    setRuleParams(JSON.parse(JSON.stringify(rule.parameters || {})));
     setRuleClientReviewed(Boolean(rule.client_reviewed));
     setRuleReason(`Threshold updated by ${currentUser?.name || 'Administrator'} (OI-08)`);
   };
@@ -273,18 +370,10 @@ export default function AdminPeerReviewAnomalyDesk() {
     e.preventDefault();
     if (!editingRule) return;
 
-    let parsedParams;
-    try {
-      parsedParams = JSON.parse(ruleParamInput);
-    } catch (err) {
-      alert('Invalid JSON in parameters field.');
-      return;
-    }
-
     setSubmittingRule(true);
     try {
       const updated = await updateAnomalyRule(editingRule.rule_code, {
-        parameters: parsedParams,
+        parameters: ruleParams,
         client_reviewed: ruleClientReviewed,
         reason: ruleReason
       }, token);
@@ -1148,20 +1237,7 @@ export default function AdminPeerReviewAnomalyDesk() {
                       {rule.description}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
-                      <pre style={{ 
-                        margin: 0, 
-                        fontSize: '11.5px', 
-                        background: themeStyles.subtleBox, 
-                        color: isDark ? '#a5b4fc' : '#1e293b', 
-                        border: themeStyles.subtleBoxBorder, 
-                        padding: '6px 10px', 
-                        borderRadius: '6px', 
-                        fontFamily: 'monospace', 
-                        maxWidth: '280px', 
-                        overflow: 'hidden' 
-                      }}>
-                        {JSON.stringify(rule.parameters || {}, null, 1)}
-                      </pre>
+                      {renderRuleParameters(rule.parameters)}
                     </td>
                     <td style={{ padding: '14px 16px', fontFamily: 'monospace', fontWeight: 700, color: themeStyles.textMain }}>
                       v{rule.version_no}
@@ -1886,28 +1962,337 @@ export default function AdminPeerReviewAnomalyDesk() {
             </div>
 
             <form onSubmit={handleSaveRule} style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textSub, marginBottom: '6px' }}>
-                  PARAMETERS (JSON FORMAT):
-                </label>
-                <textarea
-                  rows={6}
-                  value={ruleParamInput}
-                  onChange={(e) => setRuleParamInput(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '10px',
-                    border: themeStyles.inputBorder,
-                    fontFamily: 'monospace',
-                    fontSize: '12.5px',
-                    color: themeStyles.inputText,
-                    background: themeStyles.inputBg,
-                    outline: 'none'
-                  }}
-                />
+              {/* Rule Identity Card */}
+              <div style={{ padding: '12px 14px', borderRadius: '12px', background: isDark ? 'rgba(2, 132, 199, 0.12)' : '#f0f9ff', border: isDark ? '1px solid rgba(2, 132, 199, 0.3)' : '1px solid #bae6fd' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#0284c7' }}>
+                    {editingRule.rule_code}
+                  </span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: themeStyles.textMuted, background: isDark ? '#1e293b' : '#e0f2fe', padding: '2px 8px', borderRadius: '6px' }}>
+                    Current Version: v{editingRule.version_no}
+                  </span>
+                </div>
+                <div style={{ fontSize: '12px', color: themeStyles.textSub, lineHeight: 1.4 }}>
+                  {editingRule.description}
+                </div>
               </div>
 
+              {/* Generated Parameter Input Boxes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <span style={{ fontSize: '11.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: themeStyles.textMuted }}>
+                  Detection Parameter Values:
+                </span>
+
+                {/* 1. Threshold (if present or applicable) */}
+                {(ruleParams.threshold !== undefined || (!ruleParams.thresholds && !ruleParams.start_hour)) && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                      Event Threshold Limit (Count):
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={ruleParams.threshold ?? 1}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        setRuleParams(prev => ({ ...prev, threshold: isNaN(val) ? 1 : val }));
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: themeStyles.inputBorder,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: themeStyles.inputText,
+                        background: themeStyles.inputBg,
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '11px', color: themeStyles.textMuted }}>
+                      Minimum event occurrences required to trigger an alert.
+                    </span>
+                  </div>
+                )}
+
+                {/* 2. Window Minutes (if present or applicable) */}
+                {(ruleParams.window_minutes !== undefined || editingRule.rule_code.includes('BURST') || editingRule.rule_code.includes('FAILED_LOGINS') || editingRule.rule_code.includes('HIGH_RECORD') || editingRule.rule_code.includes('OUT_OF_SCOPE')) && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                      Observation Window (Minutes):
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={ruleParams.window_minutes ?? 15}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        setRuleParams(prev => ({ ...prev, window_minutes: isNaN(val) ? 1 : val }));
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: themeStyles.inputBorder,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: themeStyles.inputText,
+                        background: themeStyles.inputBg,
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '11px', color: themeStyles.textMuted }}>
+                      Rolling evaluation time window in minutes.
+                    </span>
+                  </div>
+                )}
+
+                {/* 3. Distinct Targeted Usernames (for R2-b IP failed logins) */}
+                {ruleParams.distinct_usernames_threshold !== undefined && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                      Distinct Targeted Usernames Threshold:
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={ruleParams.distinct_usernames_threshold ?? 3}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        setRuleParams(prev => ({ ...prev, distinct_usernames_threshold: isNaN(val) ? 1 : val }));
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: themeStyles.inputBorder,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: themeStyles.inputText,
+                        background: themeStyles.inputBg,
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '11px', color: themeStyles.textMuted }}>
+                      Dual threshold (OI-08): Minimum distinct user accounts targeted by the same IP.
+                    </span>
+                  </div>
+                )}
+
+                {/* 4. Role Thresholds (for R3-a High Record Access) */}
+                {ruleParams.thresholds && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                        Account Manager Limit (Records):
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={ruleParams.thresholds.account_manager ?? 30}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setRuleParams(prev => ({
+                            ...prev,
+                            thresholds: { ...prev.thresholds, account_manager: isNaN(val) ? 1 : val }
+                          }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: themeStyles.inputBorder,
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: themeStyles.inputText,
+                          background: themeStyles.inputBg,
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                        Trainer Limit (Records):
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={ruleParams.thresholds.trainer ?? 30}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setRuleParams(prev => ({
+                            ...prev,
+                            thresholds: { ...prev.thresholds, trainer: isNaN(val) ? 1 : val }
+                          }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: themeStyles.inputBorder,
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: themeStyles.inputText,
+                          background: themeStyles.inputBg,
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. Business Hours Start / End (for S1 After Hours) */}
+                {ruleParams.start_hour !== undefined && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                        Start Hour (24h):
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={ruleParams.start_hour ?? 9}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setRuleParams(prev => ({ ...prev, start_hour: isNaN(val) ? 9 : val }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: themeStyles.inputBorder,
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: themeStyles.inputText,
+                          background: themeStyles.inputBg,
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                        End Hour (24h):
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={ruleParams.end_hour ?? 18}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value, 10);
+                          setRuleParams(prev => ({ ...prev, end_hour: isNaN(val) ? 18 : val }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: themeStyles.inputBorder,
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: themeStyles.inputText,
+                          background: themeStyles.inputBg,
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                        Timezone:
+                      </label>
+                      <input
+                        type="text"
+                        value={ruleParams.tz ?? 'UTC+8'}
+                        onChange={(e) => {
+                          setRuleParams(prev => ({ ...prev, tz: e.target.value }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: themeStyles.inputBorder,
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: themeStyles.inputText,
+                          background: themeStyles.inputBg,
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. Base Severity (if present) */}
+                {ruleParams.severity !== undefined && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px' }}>
+                      Alert Base Severity:
+                    </label>
+                    <select
+                      value={ruleParams.severity ?? 'MEDIUM'}
+                      onChange={(e) => setRuleParams(prev => ({ ...prev, severity: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '8px',
+                        border: themeStyles.inputBorder,
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: themeStyles.inputText,
+                        background: themeStyles.inputBg,
+                        outline: 'none'
+                      }}
+                    >
+                      <option value="LOW">LOW</option>
+                      <option value="MEDIUM">MEDIUM</option>
+                      <option value="HIGH">HIGH</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Dynamic fields for any other custom keys */}
+                {Object.keys(ruleParams).map((k) => {
+                  if (['threshold', 'window_minutes', 'distinct_usernames_threshold', 'thresholds', 'start_hour', 'end_hour', 'tz', 'severity'].includes(k)) {
+                    return null;
+                  }
+                  return (
+                    <div key={k}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textMain, marginBottom: '5px', textTransform: 'capitalize' }}>
+                        {k.replace(/_/g, ' ')}:
+                      </label>
+                      <input
+                        type="text"
+                        value={ruleParams[k]}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setRuleParams(prev => ({ ...prev, [k]: !isNaN(Number(val)) && val.trim() !== '' ? Number(val) : val }));
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: '8px',
+                          border: themeStyles.inputBorder,
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: themeStyles.inputText,
+                          background: themeStyles.inputBg,
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Live Generated Summary Preview */}
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: isDark ? 'rgba(30, 41, 59, 0.45)' : '#f8fafc', border: themeStyles.inputBorder }}>
+                <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: themeStyles.textMuted, marginBottom: '6px' }}>
+                  Live Generated Output Parameters:
+                </span>
+                {renderRuleParameters(ruleParams)}
+              </div>
+
+              {/* Change Justification */}
               <div>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: themeStyles.textSub, marginBottom: '6px' }}>
                   CHANGE JUSTIFICATION (AUDIT TRAIL LOG):
