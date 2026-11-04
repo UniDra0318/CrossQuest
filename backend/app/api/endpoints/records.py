@@ -1,7 +1,9 @@
 import json
+import csv
+import io
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -120,6 +122,57 @@ def create_training_record(
     db.commit()
 
     return record
+
+
+@router.get("/export/csv")
+def export_training_records_csv(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Exports master training records vault into CSV for administrators and authorized managers (SEC-10, Table 17)."""
+    if current_user.role not in ("admin", "finance", "account_manager"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to export master training records vault."
+        )
+
+    query = db.query(TrainingRecord).filter(TrainingRecord.deleted_at == None)
+    if current_user.role == "account_manager":
+        assigned_codes = current_user.assigned_client_accounts or []
+        query = query.join(ClientCompany, TrainingRecord.company_at_completion_id == ClientCompany.id)\
+                     .filter(ClientCompany.code.in_(assigned_codes))
+
+    records = query.order_by(TrainingRecord.created_at.desc()).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Record ID", "Trainee Name", "Trainee Email", "Client Organization",
+        "Course Program", "Score", "Status", "Completion Date", "Policy"
+    ])
+    for r in records:
+        trainee = db.query(Trainee).filter(Trainee.id == r.trainee_id).first()
+        company = db.query(ClientCompany).filter(ClientCompany.id == r.company_at_completion_id).first()
+        writer.writerow([
+            r.id,
+            f"{trainee.first_name} {trainee.last_name}" if trainee else "",
+            trainee.email if trainee else "",
+            company.name if company else "",
+            r.course_name or "",
+            r.score if r.score is not None else "",
+            r.status or "",
+            r.completion_date.isoformat() if r.completion_date else "",
+            r.encryption_policy or ""
+        ])
+    output.seek(0)
+    filename = f"CrossQuest_Training_Records_Vault_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
 
 
 @router.get("/", response_model=List[TrainingRecordResponse])

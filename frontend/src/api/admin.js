@@ -5,7 +5,8 @@ import {
   fetchStaffUsers, 
   fetchAnomalies, 
   fetchSystemOverview,
-  exportAuditLogsCsv 
+  exportAuditLogsCsv,
+  exportVaultRecordsCsv
 } from '../services/api.js';
 
 const API_BASE = 'http://localhost:8000/api/v1';
@@ -96,6 +97,11 @@ export async function getRecords() {
 }
 
 /** Real CSV export of database audit logs */
-export async function exportAuditLogs() {
-  return await exportAuditLogsCsv();
+export async function exportAuditLogs(token) {
+  return await exportAuditLogsCsv(token);
+}
+
+/** Real CSV export of master vault training records */
+export async function exportVaultRecords(token) {
+  return await exportVaultRecordsCsv(token);
 }

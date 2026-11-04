@@ -577,6 +577,45 @@ def get_reconciliation_report(
     }
 
 
+@router.get("/batches/{batch_id}/reconciliation/csv")
+def download_reconciliation_csv(
+    batch_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Exports the formal Finance reconciliation customer breakdown and staging ledger into CSV (OI-10)."""
+    report_data = get_reconciliation_report(batch_id=batch_id, db=db, current_user=current_user)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["CrossQuest Financial Reconciliation Report (OI-10)"])
+    writer.writerow(["Batch ID", report_data.get("batch_id")])
+    writer.writerow(["Source File", report_data.get("source_file_name")])
+    writer.writerow(["Total Rows", report_data.get("total_rows")])
+    writer.writerow(["Quarantined Rows", report_data.get("quarantined_rows")])
+    writer.writerow(["Resolved Rows", report_data.get("resolved_rows")])
+    writer.writerow(["Reconciliation Rate", f"{report_data.get('reconciliation_rate', 0)}%"])
+    writer.writerow([])
+    writer.writerow(["Customer / Account", "Entity Classification", "Reconciled Records", "Data Protection Status"])
+    for cust in report_data.get("customer_breakdown", []):
+        is_indiv = cust.get("is_individual", False)
+        writer.writerow([
+            cust.get("customer_name"),
+            "INDIVIDUAL RETAIL (SELF-PAYING)" if is_indiv else "CORPORATE CLIENT",
+            cust.get("row_count"),
+            "PII Cryptographic Pseudonym" if is_indiv else "Multi-Tenant Isolated"
+        ])
+    output.seek(0)
+    filename = f"Finance_Reconciliation_Batch_{batch_id[:8]}.csv"
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
+
+
 @router.get("/batches/{batch_id}/reconciliation/pdf")
 def download_reconciliation_pdf(
     batch_id: str,

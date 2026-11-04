@@ -38,7 +38,8 @@ import {
   fetchRetentionWarnings,
   fetchExecutiveAnomalyReport,
   downloadAnomalyReportPdf,
-  downloadAnomalyReportCsv
+  downloadAnomalyReportCsv,
+  exportAuditLogsCsv
 } from '../services/api';
 
 export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
@@ -105,6 +106,20 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
   const [loadingReport, setLoadingReport] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
+  const [downloadingAuditLogsCsv, setDownloadingAuditLogsCsv] = useState(false);
+
+  const handleDownloadAuditLogsCsv = async () => {
+    if (downloadingAuditLogsCsv) return;
+    setDownloadingAuditLogsCsv(true);
+    try {
+      const ok = await exportAuditLogsCsv(token);
+      if (ok) {
+        setActionSuccessToast('Master Audit Trail (CSV) exported successfully.');
+      }
+    } finally {
+      setDownloadingAuditLogsCsv(false);
+    }
+  };
 
   // Load Executive Anomaly Report
   const loadExecutiveReport = async () => {
@@ -691,6 +706,27 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                   <Download size={15} />
                   <span>{downloadingPdf ? 'Generating PDF...' : 'Download Anomaly Report (PDF)'}</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadCsv}
+                  disabled={downloadingCsv}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    padding: '10px 16px',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '12.5px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <FileText size={15} />
+                  <span>{downloadingCsv ? 'Exporting...' : 'Export Ledger (CSV)'}</span>
+                </button>
                 <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '10px 18px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
                   <div style={{ color: '#fda4af', fontSize: '20px', fontWeight: 800 }}>{unreviewedCount}</div>
                   <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pending Review</div>
@@ -1078,7 +1114,7 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <select
                 value={logFilter}
                 onChange={(e) => setLogFilter(e.target.value)}
@@ -1099,6 +1135,30 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                 onChange={(e) => setLogSearch(e.target.value)}
                 style={{ padding: '6px 12px', borderRadius: '8px', border: themeStyles.inputBorder, fontSize: '12.5px', background: themeStyles.inputBg, color: themeStyles.inputText, outline: 'none' }}
               />
+
+              <button
+                type="button"
+                onClick={handleDownloadAuditLogsCsv}
+                disabled={downloadingAuditLogsCsv}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)',
+                  color: '#ffffff',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Download size={14} className={downloadingAuditLogsCsv ? 'spin-animation' : ''} />
+                <span>{downloadingAuditLogsCsv ? 'Exporting...' : 'Export Audit Trail (CSV)'}</span>
+              </button>
             </div>
           </div>
 

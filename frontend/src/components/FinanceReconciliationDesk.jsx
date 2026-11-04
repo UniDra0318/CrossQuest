@@ -24,7 +24,8 @@ import {
   resolveDiscrepancy,
   fetchReconciliationReport,
   commitImportBatch,
-  downloadBatchReconciliationPdf
+  downloadBatchReconciliationPdf,
+  downloadBatchReconciliationCsv
 } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -366,6 +367,19 @@ export default function FinanceReconciliationDesk() {
 
   // 6. Download PDF
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
+
+  const handleDownloadCsv = async () => {
+    if (!selectedBatchId || downloadingCsv) return;
+    setDownloadingCsv(true);
+    try {
+      await downloadBatchReconciliationCsv(selectedBatchId, token);
+    } catch (err) {
+      console.warn("Could not download reconciliation CSV:", err);
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
   const handleDownloadPdf = async () => {
     if (!selectedBatchId || downloadingPdf) return;
     setDownloadingPdf(true);
@@ -427,7 +441,7 @@ export default function FinanceReconciliationDesk() {
           <button
             type="button"
             onClick={handleDownloadPdf}
-            disabled={!selectedBatchId}
+            disabled={!selectedBatchId || downloadingPdf}
             style={{
               padding: '11px 20px',
               borderRadius: '12px',
@@ -444,8 +458,31 @@ export default function FinanceReconciliationDesk() {
               transition: 'all 0.15s ease'
             }}
           >
-            <Download size={15} />
-            <span>Download Reconciliation PDF</span>
+            <Download size={15} className={downloadingPdf ? 'spin-animation' : ''} />
+            <span>{downloadingPdf ? 'Generating PDF...' : 'Download Reconciliation PDF'}</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleDownloadCsv}
+            disabled={!selectedBatchId || downloadingCsv}
+            style={{
+              padding: '11px 18px',
+              borderRadius: '12px',
+              background: isDark ? '#1e293b' : '#f8fafc',
+              color: isDark ? '#e2e8f0' : '#334155',
+              border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: !selectedBatchId ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <FileText size={15} className={downloadingCsv ? 'spin-animation' : ''} />
+            <span>{downloadingCsv ? 'Exporting CSV...' : 'Export Ledger (CSV)'}</span>
           </button>
           
           {isAdmin && (

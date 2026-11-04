@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 import csv
 import io
+import json
 from app.services.pdf_generator import pdf_generator
 from app.anomaly.detector import anomaly_detector
 from sqlalchemy.orm import Session
@@ -269,6 +270,51 @@ def get_access_logs(
 ):
     """Fetches append-only audit log entries for Administrator compliance review (SEC-12, SEC-13)."""
     return db.query(AccessLog).order_by(desc(AccessLog.occurred_at)).limit(limit).all()
+
+
+@router.get("/logs/csv")
+def download_access_logs_csv(
+    limit: Optional[int] = None,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Exports immutable security audit trail logs into an official CSV report (SEC-12, SEC-13)."""
+    query = db.query(AccessLog).order_by(desc(AccessLog.occurred_at))
+    if limit and limit > 0:
+        query = query.limit(limit)
+    logs = query.all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "Log ID", "Occurred At (UTC)", "Actor User ID", "Actor Role",
+        "Event Type", "Resource Type", "Resource ID", "Outcome",
+        "Reason Code", "Source IP", "Details"
+    ])
+    for l in logs:
+        det_str = json.dumps(l.details) if l.details else ""
+        writer.writerow([
+            l.id,
+            l.occurred_at.isoformat() if l.occurred_at else "",
+            l.actor_user_id or "",
+            l.actor_role or "",
+            l.event_type or "",
+            l.resource_type or "",
+            l.resource_id or "",
+            l.outcome or "",
+            l.reason_code or "",
+            l.source_ip or "",
+            det_str
+        ])
+    output.seek(0)
+    filename = f"CrossQuest_Master_Audit_Trail_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
 
 
 @router.delete("/alerts/{alert_id}")

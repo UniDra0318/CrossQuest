@@ -41,7 +41,7 @@ import {
   records as defaultRecords, 
   settings as defaultSettings 
 } from '../data/adminData';
-import { exportAuditLogs } from '../api/admin';
+import { exportAuditLogs, exportVaultRecords } from '../api/admin';
 import { 
   fetchRecords, 
   fetchAnomalies, 
@@ -250,6 +250,47 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [anomalyFilter, setAnomalyFilter] = useState('ALL');
   const [staffSearch, setStaffSearch] = useState('');
   const [recordSearch, setRecordSearch] = useState('');
+  const [exportingAuditLogs, setExportingAuditLogs] = useState(false);
+  const [exportingVaultRecords, setExportingVaultRecords] = useState(false);
+  const [vaultToast, setVaultToast] = useState(null);
+
+  const handleExportAuditLogs = async () => {
+    if (exportingAuditLogs) return;
+    setExportingAuditLogs(true);
+    setVaultToast(null);
+    try {
+      const ok = await exportAuditLogs(token);
+      if (ok) {
+        setVaultToast({ type: 'success', text: 'Master Audit Logs (CSV) exported successfully.' });
+      } else {
+        setVaultToast({ type: 'error', text: 'Failed to export master audit logs.' });
+      }
+    } catch (err) {
+      setVaultToast({ type: 'error', text: err.message || 'Export error.' });
+    } finally {
+      setExportingAuditLogs(false);
+      setTimeout(() => setVaultToast(null), 4000);
+    }
+  };
+
+  const handleExportVaultRecords = async () => {
+    if (exportingVaultRecords) return;
+    setExportingVaultRecords(true);
+    setVaultToast(null);
+    try {
+      const ok = await exportVaultRecords(token);
+      if (ok) {
+        setVaultToast({ type: 'success', text: 'Master Vault Training Records (CSV) exported successfully.' });
+      } else {
+        setVaultToast({ type: 'error', text: 'Failed to export vault records.' });
+      }
+    } catch (err) {
+      setVaultToast({ type: 'error', text: err.message || 'Export error.' });
+    } finally {
+      setExportingVaultRecords(false);
+      setTimeout(() => setVaultToast(null), 4000);
+    }
+  };
   const [companySearch, setCompanySearch] = useState('');
   const [copiedKey, setCopiedKey] = useState(false);
   const [usingFallback, setUsingFallback] = useState(false);
@@ -1115,13 +1156,42 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               <button 
                 type="button" 
                 className="adm-btn adm-btn--light"
-                onClick={exportAuditLogs}
-                title="Download CSV audit log"
+                onClick={handleExportAuditLogs}
+                disabled={exportingAuditLogs}
+                title="Download CSV access & security audit log"
               >
-                <Download size={14} />
-                <span>Export Master Audit Logs (CSV)</span>
+                <Download size={14} className={exportingAuditLogs ? 'spin-animation' : ''} />
+                <span>{exportingAuditLogs ? 'Exporting Audit...' : 'Export Master Audit Logs (CSV)'}</span>
+              </button>
+              <button 
+                type="button" 
+                className="adm-btn adm-btn--light"
+                onClick={handleExportVaultRecords}
+                disabled={exportingVaultRecords}
+                title="Download CSV training records vault"
+              >
+                <FileText size={14} className={exportingVaultRecords ? 'spin-animation' : ''} />
+                <span>{exportingVaultRecords ? 'Exporting Vault...' : 'Export Vault Records (CSV)'}</span>
               </button>
             </div>
+            {vaultToast && (
+              <div style={{
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                marginTop: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: vaultToast.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                color: vaultToast.type === 'success' ? '#34d399' : '#f87171',
+                border: vaultToast.type === 'success' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)'
+              }}>
+                <CheckCircle2 size={14} />
+                <span>{vaultToast.text}</span>
+              </div>
+            )}
           </div>
           <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
             <div className="adm-table">

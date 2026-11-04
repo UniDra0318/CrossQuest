@@ -1,3 +1,21 @@
+export function triggerBlobDownload(blob, filename) {
+  const blobUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(() => {
+    try {
+      if (link.parentNode) link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      // ignore cleanup error
+    }
+  }, 2000);
+}
+
 const API_BASE = 'http://localhost:8000/api/v1';
 
 /**
@@ -475,41 +493,45 @@ export async function triggerExpirySweep(token) {
 }
 
 export async function downloadCertificatePdf(certificateId, token) {
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const res = await fetch(`${API_BASE}/certifications/${encodeURIComponent(certificateId)}/pdf`, {
-    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
   });
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.detail || `Failed to download certificate PDF (${res.status})`);
   }
   const blob = await res.blob();
-  const blobUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = blobUrl;
-  link.download = `Certificate_${certificateId}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(blobUrl);
+  triggerBlobDownload(blob, `Certificate_${certificateId}.pdf`);
+  return true;
 }
 
 export async function downloadBatchReconciliationPdf(batchId, token) {
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const res = await fetch(`${API_BASE}/imports/batches/${encodeURIComponent(batchId)}/reconciliation/pdf`, {
-    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
   });
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.detail || `Failed to download reconciliation PDF (${res.status})`);
   }
   const blob = await res.blob();
-  const blobUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = blobUrl;
-  link.download = `Finance_Reconciliation_Batch_${batchId.slice(0, 8)}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(blobUrl);
+  triggerBlobDownload(blob, `Finance_Reconciliation_Batch_${batchId.slice(0, 8)}.pdf`);
+  return true;
+}
+
+export async function downloadBatchReconciliationCsv(batchId, token) {
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
+  const res = await fetch(`${API_BASE}/imports/batches/${encodeURIComponent(batchId)}/reconciliation/csv`, {
+    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || `Failed to download reconciliation CSV (${res.status})`);
+  }
+  const blob = await res.blob();
+  triggerBlobDownload(blob, `Finance_Reconciliation_Batch_${batchId.slice(0, 8)}.csv`);
+  return true;
 }
 
 export async function fetchAssignedClientCompanies(token) {
@@ -542,6 +564,7 @@ export async function fetchClientReport(companyCode, { startDate, endDate, statu
 }
 
 export async function downloadClientReportPdf(companyCode, { startDate, endDate, statusFilter } = {}, token) {
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const query = new URLSearchParams();
   if (startDate) query.append('start_date', startDate);
   if (endDate) query.append('end_date', endDate);
@@ -549,21 +572,55 @@ export async function downloadClientReportPdf(companyCode, { startDate, endDate,
   const qStr = query.toString() ? `?${query.toString()}` : '';
 
   const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/pdf${qStr}`, {
-    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
   });
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.detail || `Failed to download report PDF (${res.status})`);
   }
   const blob = await res.blob();
-  const blobUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = blobUrl;
-  link.download = `Training_Report_${companyCode.toUpperCase()}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(blobUrl);
+  triggerBlobDownload(blob, `Training_Report_${companyCode.toUpperCase()}.pdf`);
+  return true;
+}
+
+export async function downloadClientReportCsv(companyCode, { startDate, endDate, statusFilter } = {}, token) {
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
+  const query = new URLSearchParams();
+  if (startDate) query.append('start_date', startDate);
+  if (endDate) query.append('end_date', endDate);
+  if (statusFilter && statusFilter !== 'ALL') query.append('status_filter', statusFilter);
+  const qStr = query.toString() ? `?${query.toString()}` : '';
+
+  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/csv${qStr}`, {
+    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || `Failed to export report CSV (${res.status})`);
+  }
+  const blob = await res.blob();
+  triggerBlobDownload(blob, `Training_Report_${companyCode.toUpperCase()}.csv`);
+  return true;
+}
+
+export async function downloadClientReportExcel(companyCode, { startDate, endDate, statusFilter } = {}, token) {
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
+  const query = new URLSearchParams();
+  if (startDate) query.append('start_date', startDate);
+  if (endDate) query.append('end_date', endDate);
+  if (statusFilter && statusFilter !== 'ALL') query.append('status_filter', statusFilter);
+  query.append('format', 'excel');
+  const qStr = `?${query.toString()}`;
+
+  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/export${qStr}`, {
+    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.detail || `Failed to export report Excel (${res.status})`);
+  }
+  const blob = await res.blob();
+  triggerBlobDownload(blob, `Training_Report_${companyCode.toUpperCase()}.xlsx`);
   return true;
 }
 
@@ -658,14 +715,7 @@ export async function downloadAnomalyReportPdf(token) {
     const res = await fetch(`${API_BASE}/anomalies/report/pdf`, { headers });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `CrossQuest_Security_Anomaly_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    triggerBlobDownload(blob, `CrossQuest_Security_Anomaly_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
     return true;
   } catch (err) {
     console.warn("Failed to download anomaly report PDF:", err);
@@ -681,14 +731,7 @@ export async function downloadAnomalyReportCsv(token) {
     const res = await fetch(`${API_BASE}/anomalies/report/csv`, { headers });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `CrossQuest_Anomaly_Ledger_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    triggerBlobDownload(blob, `CrossQuest_Anomaly_Ledger_${new Date().toISOString().slice(0, 10)}.csv`);
     return true;
   } catch (err) {
     console.warn("Failed to download anomaly report CSV:", err);
@@ -886,6 +929,22 @@ export async function deleteQuizApi(quizId, token) {
 
 export async function exportAuditLogsCsv(token) {
   try {
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
+    // First try dedicated backend CSV endpoint
+    try {
+      const resCsv = await fetch(`${API_BASE}/anomalies/logs/csv`, {
+        headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+      });
+      if (resCsv.ok) {
+        const blob = await resCsv.blob();
+        triggerBlobDownload(blob, `master-audit-logs-${Date.now()}.csv`);
+        return true;
+      }
+    } catch (e) {
+      console.warn("Backend logs CSV failed, trying JSON fallback:", e);
+    }
+
+    // Resilient fallback to JSON endpoint
     const res = await authFetch(`${API_BASE}/anomalies/logs?limit=500`, {}, token);
     if (!res.ok) throw new Error("Failed to load audit logs");
     const logs = await res.json();
@@ -904,14 +963,51 @@ export async function exportAuditLogsCsv(token) {
       l.source_ip
     ]);
     const text = [head, ...rows].map((r) => r.map(esc).join(',')).join('\n');
-
-    const url = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
-    const a = Object.assign(document.createElement('a'), { href: url, download: `master-audit-logs-${Date.now()}.csv` });
-    a.click();
-    URL.revokeObjectURL(url);
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, `master-audit-logs-${Date.now()}.csv`);
     return true;
   } catch (err) {
     console.warn("Failed to export audit logs CSV:", err);
+    return false;
+  }
+}
+
+export async function exportVaultRecordsCsv(token) {
+  try {
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
+    try {
+      const resCsv = await fetch(`${API_BASE}/records/export/csv`, {
+        headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+      });
+      if (resCsv.ok) {
+        const blob = await resCsv.blob();
+        triggerBlobDownload(blob, `master-training-records-${Date.now()}.csv`);
+        return true;
+      }
+    } catch (e) {
+      console.warn("Backend records export CSV failed, trying fallback:", e);
+    }
+
+    const res = await authFetch(`${API_BASE}/records`, {}, token);
+    if (!res.ok) throw new Error("Failed to load records");
+    const recs = await res.json();
+
+    const esc = (v) => `"${String(v ?? '').replaceAll('"', '""')}"`;
+    const head = ['record_id', 'course_name', 'status', 'score', 'completion_date', 'encryption_policy'];
+    const rows = (recs || []).map((r) => [
+      r.id,
+      r.course_name,
+      r.status,
+      r.score,
+      r.completion_date,
+      r.encryption_policy
+    ]);
+    const text = [head, ...rows].map((r) => r.map(esc).join(',')).join('\n');
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, `master-training-records-${Date.now()}.csv`);
+    return true;
+  } catch (err) {
+    console.warn("Failed to export training records CSV:", err);
     return false;
   }
 }

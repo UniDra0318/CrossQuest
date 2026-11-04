@@ -4,6 +4,7 @@ import { TablePagination, usePagination } from '../../components/TablePagination
 import { useSearchParams } from 'react-router-dom';
 import { 
   Download, 
+  FileSpreadsheet,
   FileText, 
   CheckCircle2, 
   BarChart3, 
@@ -25,7 +26,9 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { 
   fetchAssignedClientCompanies, 
   fetchClientReport, 
-  downloadClientReportPdf 
+  downloadClientReportPdf,
+  downloadClientReportCsv,
+  downloadClientReportExcel
 } from '../../services/api';
 import { buildReport } from '../../data/staffData';
 
@@ -45,6 +48,38 @@ export default function Reports() {
   const [report, setReport] = useState(null);
   const [loadingReport, setLoadingReport] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
+
+  const handleExportCsv = async () => {
+    if (errorDetails || downloadingCsv) return;
+    setDownloadingCsv(true);
+    setSuccessToast(null);
+
+    try {
+      await downloadClientReportCsv(selectedScope, { statusFilter }, token);
+      setSuccessToast(`Official Client Audit Ledger (CSV) downloaded for ${selectedScope}.`);
+    } catch (err) {
+      console.error('CSV download error:', err);
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (errorDetails || downloadingExcel) return;
+    setDownloadingExcel(true);
+    setSuccessToast(null);
+
+    try {
+      await downloadClientReportExcel(selectedScope, { statusFilter }, token);
+      setSuccessToast(`Official Client Training Workbook (Excel) downloaded for ${selectedScope}.`);
+    } catch (err) {
+      console.error('Excel download error:', err);
+    } finally {
+      setDownloadingExcel(false);
+    }
+  };
   const [errorDetails, setErrorDetails] = useState(null);
   const [successToast, setSuccessToast] = useState(null);
 
@@ -300,8 +335,8 @@ export default function Reports() {
             </button>
           </div>
 
-          {/* Right: PDF Export Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Right: Multi-Format Export Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <button
               type="button"
               onClick={handleExportPdf}
@@ -333,6 +368,52 @@ export default function Reports() {
                   <span>Export Official Audit PDF</span>
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              disabled={downloadingCsv || Boolean(errorDetails)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 16px',
+                borderRadius: '12px',
+                background: errorDetails ? '#cbd5e1' : (isDark ? '#1e293b' : '#f8fafc'),
+                color: errorDetails ? '#94a3b8' : (isDark ? '#e2e8f0' : '#334155'),
+                fontWeight: 700,
+                fontSize: '13.5px',
+                border: errorDetails ? 'none' : (isDark ? '1px solid #334155' : '1px solid #cbd5e1'),
+                cursor: errorDetails ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <FileSpreadsheet size={15} />
+              <span>{downloadingCsv ? 'Exporting CSV...' : 'Export CSV'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              disabled={downloadingExcel || Boolean(errorDetails)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 16px',
+                borderRadius: '12px',
+                background: errorDetails ? '#cbd5e1' : (isDark ? '#1e293b' : '#f8fafc'),
+                color: errorDetails ? '#94a3b8' : (isDark ? '#e2e8f0' : '#334155'),
+                fontWeight: 700,
+                fontSize: '13.5px',
+                border: errorDetails ? 'none' : (isDark ? '1px solid #334155' : '1px solid #cbd5e1'),
+                cursor: errorDetails ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <FileSpreadsheet size={15} color="#10b981" />
+              <span>{downloadingExcel ? 'Exporting Excel...' : 'Export Excel (.xlsx)'}</span>
             </button>
           </div>
         </div>
