@@ -629,7 +629,7 @@ export default function Reports() {
             <TablePagination
               currentPage={repPage}
               totalItems={totalTrainees}
-              pageSize={10}
+              pageSize={4}
               onPageChange={setRepPage}
               itemName="trainee reports"
             />

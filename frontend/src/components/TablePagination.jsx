@@ -1,12 +1,12 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, CornerDownLeft } from 'lucide-react';
 
 /**
- * Custom hook to easily slice any array to 10 items per page (or custom pageSize)
+ * Custom hook to easily slice any array to 4 items per page (or custom pageSize)
  * and manage current page boundaries when filters/search changes.
  */
-export function usePagination(items = [], pageSize = 10, initialPage = 1) {
+export function usePagination(items = [], pageSize = 4, initialPage = 1) {
   const [currentPage, setCurrentPage] = useState(initialPage);
   const totalItems = items ? items.length : 0;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
@@ -39,19 +39,40 @@ export function usePagination(items = [], pageSize = 10, initialPage = 1) {
 
 /**
  * Compact header pagination control (e.g. for card toolbars and table headers)
+ * Supports clicking the page number to jump directly to any page.
  */
 export function TablePaginationCompact({
   currentPage = 1,
   totalItems = 0,
-  pageSize = 10,
+  pageSize = 4,
   onPageChange,
   style = {}
 }) {
   const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
   const isDark = effectiveTheme === 'dark';
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const [isJumping, setIsJumping] = useState(false);
+  const [jumpVal, setJumpVal] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isJumping && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isJumping]);
 
   if (totalItems <= pageSize) return null;
+
+  const handleJumpSubmit = (e) => {
+    e.preventDefault();
+    const target = parseInt(jumpVal, 10);
+    if (!isNaN(target) && target >= 1 && target <= totalPages) {
+      onPageChange?.(target);
+    }
+    setIsJumping(false);
+    setJumpVal('');
+  };
 
   return (
     <div
@@ -86,9 +107,54 @@ export function TablePaginationCompact({
         <ChevronLeft size={14} />
       </button>
 
-      <span style={{ fontWeight: 700, fontFamily: 'monospace', color: isDark ? '#f8fafc' : '#0f172a' }}>
-        {currentPage} / {totalPages}
-      </span>
+      {isJumping ? (
+        <form onSubmit={handleJumpSubmit} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+          <input
+            ref={inputRef}
+            type="number"
+            min="1"
+            max={totalPages}
+            value={jumpVal}
+            onChange={(e) => setJumpVal(e.target.value)}
+            onBlur={() => setIsJumping(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setIsJumping(false);
+            }}
+            placeholder={String(currentPage)}
+            style={{
+              width: '38px',
+              height: '22px',
+              textAlign: 'center',
+              borderRadius: '6px',
+              border: isDark ? '1px solid #6366f1' : '1px solid #4f46e5',
+              background: isDark ? '#0f172a' : '#ffffff',
+              color: isDark ? '#f8fafc' : '#0f172a',
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '0 2px'
+            }}
+          />
+        </form>
+      ) : (
+        <span
+          onClick={() => {
+            setJumpVal(String(currentPage));
+            setIsJumping(true);
+          }}
+          title="Click to jump to page"
+          style={{
+            fontWeight: 700,
+            fontFamily: 'monospace',
+            color: isDark ? '#f8fafc' : '#0f172a',
+            cursor: 'pointer',
+            padding: '1px 4px',
+            borderRadius: '4px',
+            transition: 'background 0.15s ease'
+          }}
+        >
+          {currentPage} / {totalPages}
+        </span>
+      )}
 
       <button
         type="button"
@@ -114,12 +180,12 @@ export function TablePaginationCompact({
 
 /**
  * Standard table pagination controls with dark/light mode compatibility,
- * smart ellipsis windowing, and instant 10-item page navigation.
+ * interactive ellipsis for direct page jumping, and 4-item page navigation.
  */
 export function TablePagination({
   currentPage = 1,
   totalItems = 0,
-  pageSize = 10,
+  pageSize = 4,
   onPageChange,
   itemName = 'items',
   showIfSinglePage = false,
@@ -131,7 +197,19 @@ export function TablePagination({
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
-  // If there are 10 or fewer items and showIfSinglePage is false, do not display pagination
+  // Ellipsis Jump to Page State
+  const [jumpingIndex, setJumpingIndex] = useState(null); // 'left' | 'right' | null
+  const [jumpInput, setJumpInput] = useState('');
+  const jumpInputRef = useRef(null);
+
+  useEffect(() => {
+    if (jumpingIndex && jumpInputRef.current) {
+      jumpInputRef.current.focus();
+      jumpInputRef.current.select();
+    }
+  }, [jumpingIndex]);
+
+  // If there are pageSize or fewer items and showIfSinglePage is false, do not display pagination
   if (totalItems <= pageSize && !showIfSinglePage) {
     return null;
   }
@@ -139,28 +217,39 @@ export function TablePagination({
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(totalItems, currentPage * pageSize);
 
-  // Generate smart page list with ellipsis (e.g. [1, '...', 4, 5, 6, '...', 20])
+  // Generate smart page list with ellipsis (e.g. [1, '...left', 4, 5, 6, '...right', 20])
   const getPageNumbers = () => {
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
     if (currentPage <= 4) {
-      return [1, 2, 3, 4, 5, '...', totalPages];
+      return [1, 2, 3, 4, 5, '...right', totalPages];
     }
 
     if (currentPage >= totalPages - 3) {
-      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      return [1, '...left', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
     }
 
-    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+    return [1, '...left', currentPage - 1, currentPage, currentPage + 1, '...right', totalPages];
   };
 
   const pages = getPageNumbers();
 
   const handlePageClick = (page) => {
-    if (page === '...' || page === currentPage || page < 1 || page > totalPages) return;
+    if (typeof page === 'string' && page.startsWith('...')) return;
+    if (page === currentPage || page < 1 || page > totalPages) return;
     onPageChange?.(page);
+  };
+
+  const handleJumpSubmit = (e) => {
+    e.preventDefault();
+    const val = parseInt(jumpInput, 10);
+    if (!isNaN(val) && val >= 1 && val <= totalPages) {
+      onPageChange?.(val);
+      setJumpingIndex(null);
+      setJumpInput('');
+    }
   };
 
   return (
@@ -267,20 +356,99 @@ export function TablePagination({
           <span>Prev</span>
         </button>
 
-        {/* Page Number Buttons */}
+        {/* Page Number Buttons with Jump-To-Page on Ellipsis */}
         {pages.map((p, idx) => {
-          if (p === '...') {
+          if (typeof p === 'string' && p.startsWith('...')) {
+            const isThisJumping = jumpingIndex === p;
+            if (isThisJumping) {
+              return (
+                <form
+                  key={`jump-${idx}`}
+                  onSubmit={handleJumpSubmit}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                >
+                  <input
+                    ref={jumpInputRef}
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    value={jumpInput}
+                    onChange={(e) => setJumpInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setJumpingIndex(null);
+                    }}
+                    onBlur={() => {
+                      if (!jumpInput) setJumpingIndex(null);
+                    }}
+                    placeholder={`1-${totalPages}`}
+                    style={{
+                      width: '54px',
+                      height: '32px',
+                      textAlign: 'center',
+                      padding: '0 4px',
+                      borderRadius: '8px',
+                      border: isDark ? '1px solid #6366f1' : '1px solid #4f46e5',
+                      background: isDark ? '#0f172a' : '#ffffff',
+                      color: isDark ? '#f8fafc' : '#0f172a',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      outline: 'none',
+                      boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.25)'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    title="Jump to page"
+                    style={{
+                      height: '32px',
+                      padding: '0 8px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                      color: '#ffffff',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '2px'
+                    }}
+                  >
+                    <span>Go</span>
+                    <CornerDownLeft size={11} />
+                  </button>
+                </form>
+              );
+            }
+
             return (
-              <span
+              <button
                 key={`ellipsis-${idx}`}
+                type="button"
+                onClick={() => {
+                  setJumpingIndex(p);
+                  setJumpInput('');
+                }}
+                title={`Click to jump to any page (1 - ${totalPages})`}
                 style={{
-                  padding: '4px 8px',
-                  color: isDark ? '#64748b' : '#94a3b8',
-                  userSelect: 'none'
+                  minWidth: '32px',
+                  height: '32px',
+                  padding: '0 6px',
+                  borderRadius: '8px',
+                  border: isDark ? '1px dashed rgba(255, 255, 255, 0.2)' : '1px dashed #cbd5e1',
+                  background: isDark ? 'rgba(30, 41, 59, 0.35)' : '#f8fafc',
+                  color: isDark ? '#a5b4fc' : '#6366f1',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s ease'
                 }}
               >
                 &hellip;
-              </span>
+              </button>
             );
           }
 

@@ -151,7 +151,7 @@ export default function ReportsView({ clientCompanies, records, currentStaff }) 
           <TablePagination
             currentPage={repPage}
             totalItems={totalCompanyRecords}
-            pageSize={10}
+            pageSize={4}
             onPageChange={setRepPage}
             itemName="participant records"
           />

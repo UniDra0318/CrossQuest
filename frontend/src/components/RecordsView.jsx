@@ -190,7 +190,7 @@ export default function RecordsView({
         <TablePagination
           currentPage={recPage}
           totalItems={totalRecs}
-          pageSize={10}
+          pageSize={4}
           onPageChange={setRecPage}
           itemName="training records"
         />

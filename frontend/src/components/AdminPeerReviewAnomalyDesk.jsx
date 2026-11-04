@@ -364,21 +364,21 @@ export default function AdminPeerReviewAnomalyDesk() {
     setCurrentPage: setAlertPage,
     paginatedItems: pagedAlerts,
     totalItems: totalAlerts
-  } = usePagination(filteredAlerts, 10);
+  } = usePagination(filteredAlerts, 4);
 
   const {
     currentPage: logPage,
     setCurrentPage: setLogPage,
     paginatedItems: pagedLogs,
     totalItems: totalLogs
-  } = usePagination(filteredLogs, 10);
+  } = usePagination(filteredLogs, 4);
 
   const {
     currentPage: recentAlertPage,
     setCurrentPage: setRecentAlertPage,
     paginatedItems: pagedRecentAlerts,
     totalItems: totalRecentAlerts
-  } = usePagination(anomalyReport?.recent_alerts || [], 10);
+  } = usePagination(anomalyReport?.recent_alerts || [], 4);
 
 
   return (
@@ -675,7 +675,7 @@ export default function AdminPeerReviewAnomalyDesk() {
               <TablePaginationCompact
                 currentPage={alertPage}
                 totalItems={totalAlerts}
-                pageSize={10}
+                pageSize={4}
                 onPageChange={setAlertPage}
               />
               <div style={{ position: 'relative', minWidth: '220px' }}>
@@ -968,7 +968,7 @@ export default function AdminPeerReviewAnomalyDesk() {
           <TablePagination
             currentPage={alertPage}
             totalItems={totalAlerts}
-            pageSize={10}
+            pageSize={4}
             onPageChange={setAlertPage}
             itemName="incident alerts"
           />
@@ -1101,7 +1101,7 @@ export default function AdminPeerReviewAnomalyDesk() {
           <TablePagination
             currentPage={logPage}
             totalItems={totalLogs}
-            pageSize={10}
+            pageSize={4}
             onPageChange={setLogPage}
             itemName="audit trail records"
           />
@@ -1593,7 +1593,7 @@ export default function AdminPeerReviewAnomalyDesk() {
             <TablePagination
               currentPage={recentAlertPage}
               totalItems={totalRecentAlerts}
-              pageSize={10}
+              pageSize={4}
               onPageChange={setRecentAlertPage}
               itemName="executive incidents"
             />

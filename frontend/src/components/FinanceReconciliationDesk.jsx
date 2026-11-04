@@ -703,7 +703,7 @@ export default function FinanceReconciliationDesk() {
             <TablePaginationCompact
               currentPage={discPage}
               totalItems={totalDiscrepancies}
-              pageSize={10}
+              pageSize={4}
               onPageChange={setDiscPage}
             />
             <span style={{ fontSize: '11.5px', fontWeight: 800, padding: '4px 12px', borderRadius: '20px', background: isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb', color: isDark ? '#fbbf24' : '#b45309', border: isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a' }}>
@@ -816,7 +816,7 @@ export default function FinanceReconciliationDesk() {
         <TablePagination
           currentPage={discPage}
           totalItems={totalDiscrepancies}
-          pageSize={10}
+          pageSize={4}
           onPageChange={setDiscPage}
           itemName="discrepancies"
         />
@@ -995,7 +995,7 @@ export default function FinanceReconciliationDesk() {
         <TablePagination
           currentPage={custPage}
           totalItems={totalCustomers}
-          pageSize={10}
+          pageSize={4}
           onPageChange={setCustPage}
           itemName="client accounts"
         />

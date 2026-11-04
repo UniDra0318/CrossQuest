@@ -216,7 +216,7 @@ export default function RecordVault() {
           <TablePagination
             currentPage={vaultPage}
             totalItems={totalVaultRecords}
-            pageSize={10}
+            pageSize={4}
             onPageChange={setVaultPage}
             itemName="encrypted records"
           />

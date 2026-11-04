@@ -277,7 +277,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                 <TablePaginationCompact
                   currentPage={milestonePage}
                   totalItems={totalMilestones}
-                  pageSize={10}
+                  pageSize={4}
                   onPageChange={setMilestonePage}
                 />
                 <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
@@ -333,7 +333,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
             <TablePagination
               currentPage={milestonePage}
               totalItems={totalMilestones}
-              pageSize={10}
+              pageSize={4}
               onPageChange={setMilestonePage}
               itemName="milestone records"
             />

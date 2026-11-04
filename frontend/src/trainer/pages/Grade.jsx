@@ -30,6 +30,13 @@ export default function Grade() {
   const [signOffResult, setSignOffResult] = useState(null);
   const [signOffError, setSignOffError] = useState(null);
 
+  const {
+    currentPage: gradePage,
+    setCurrentPage: setGradePage,
+    paginatedItems: pagedRecords,
+    totalItems: totalGrades
+  } = usePagination(currentSession?.records || [], 4);
+
   // Initialize/sync completions from current session records
   useEffect(() => {
     if (currentSession && currentSession.records) {

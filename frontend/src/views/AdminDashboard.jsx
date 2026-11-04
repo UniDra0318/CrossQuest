@@ -889,7 +889,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           <TablePagination
             currentPage={staffPage}
             totalItems={totalStaff}
-            pageSize={10}
+            pageSize={4}
             onPageChange={setStaffPage}
             itemName="staff accounts"
           />
@@ -1030,7 +1030,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               <TablePaginationCompact
                 currentPage={recordPage}
                 totalItems={totalRecords}
-                pageSize={10}
+                pageSize={4}
                 onPageChange={setRecordPage}
               />
               <div className="adm-search">
@@ -1107,7 +1107,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           <TablePagination
             currentPage={recordPage}
             totalItems={totalRecords}
-            pageSize={10}
+            pageSize={4}
             onPageChange={setRecordPage}
             itemName="master records"
           />

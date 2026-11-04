@@ -20,6 +20,13 @@ export default function Roster({ onNavigateTab }) {
     return matchesSearch && matchesScope && matchesStatus;
   });
 
+  const {
+    currentPage: rosterPage,
+    setCurrentPage: setRosterPage,
+    paginatedItems: pagedRoster,
+    totalItems: totalRoster
+  } = usePagination(filtered, 4);
+
   const handleGradeTrainee = (id) => {
     setSelectedTraineeId(id);
     if (onNavigateTab) {
