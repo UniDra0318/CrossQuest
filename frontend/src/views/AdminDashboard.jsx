@@ -200,6 +200,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     if (userRes.ok) {
       setCreatedUserResult(userRes.data);
       const u = userRes.data.user;
+      const roleNorm = (u.role || 'STAFF').toLowerCase();
+      const defaultLevel = roleNorm.includes('admin') ? 3 :
+        (roleNorm.includes('account') || roleNorm.includes('finance') || roleNorm.includes('staff')) ? 2 : 1;
+      const level = (typeof u.clearance_level === 'number' && u.clearance_level >= 1 && u.clearance_level <= 3)
+        ? u.clearance_level
+        : defaultLevel;
+
       setStaffList(prev => [
         {
           id: u.id,
@@ -207,7 +214,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           initials: u.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
           email: u.email,
           role: u.role.replace(/_/g, ' ').toUpperCase(),
-          level: 1,
+          level: level,
           clients: u.assigned_client_accounts || ['CORP_ALPHA'],
           tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : u.role === 'finance' ? 'blue' : 'orange'
         },
@@ -285,16 +292,25 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           }));
         }
         if (dbStaff && dbStaff.length > 0) {
-          setStaffList(dbStaff.map(u => ({
-            id: u.id,
-            name: u.full_name || u.name,
-            initials: (u.full_name || u.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
-            email: u.email,
-            role: (u.role || 'STAFF').replace(/_/g, ' ').toUpperCase(),
-            level: u.clearance_level || 1,
-            clients: u.assigned_client_accounts || ['CORP_ALPHA'],
-            tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : 'orange'
-          })));
+          setStaffList(dbStaff.map(u => {
+            const roleNorm = (u.role || 'STAFF').toLowerCase();
+            const defaultLevel = roleNorm.includes('admin') ? 3 :
+              (roleNorm.includes('account') || roleNorm.includes('staff') || roleNorm.includes('finance')) ? 2 : 1;
+            const level = (typeof u.clearance_level === 'number' && u.clearance_level >= 1 && u.clearance_level <= 3)
+              ? u.clearance_level
+              : defaultLevel;
+
+            return {
+              id: u.id,
+              name: u.full_name || u.name,
+              initials: (u.full_name || u.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+              email: u.email,
+              role: (u.role || 'STAFF').replace(/_/g, ' ').toUpperCase(),
+              level: level,
+              clients: u.assigned_client_accounts || ['CORP_ALPHA'],
+              tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : 'orange'
+            };
+          }));
         }
         if (dbRecords && dbRecords.length > 0) {
           setRecords(dbRecords.map((r, idx) => {
@@ -344,9 +360,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   // Start inline editing staff
   const startEditStaff = (user) => {
     setEditingStaffId(user.id);
+    const roleNorm = (user.role || '').toLowerCase();
+    const defaultLevel = roleNorm.includes('admin') ? 3 :
+      (roleNorm.includes('account') || roleNorm.includes('staff') || roleNorm.includes('finance')) ? 2 : 1;
     setEditForm({
       role: user.role,
-      level: user.level || 1,
+      level: user.level || defaultLevel,
       clients: [...(user.clients || [])]
     });
   };
@@ -850,7 +869,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                           <span className="adm-label">ASSIGNED ROLE</span>
                           <select 
                             value={editForm.role}
-                            onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                            onChange={(e) => {
+                              const nextRole = e.target.value;
+                              const roleNorm = nextRole.toLowerCase();
+                              const autoLevel = roleNorm.includes('admin') ? 3 :
+                                (roleNorm.includes('staff') || roleNorm.includes('account') || roleNorm.includes('finance')) ? 2 : 1;
+                              setEditForm({ ...editForm, role: nextRole, level: autoLevel });
+                            }}
                           >
                             <option value="ADMIN">ADMIN</option>
                             <option value="CROSSWORKS STAFF">CROSSWORKS STAFF</option>

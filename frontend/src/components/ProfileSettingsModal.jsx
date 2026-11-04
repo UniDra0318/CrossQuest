@@ -532,7 +532,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                     </div>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: '999px', background: '#eef2ff', color: '#4338ca', fontSize: '11px', fontWeight: '800' }}>
-                    LEVEL 4 CLEARANCE
+                    {currentUser?.role === 'admin' ? 'LEVEL 3 ROOT CLEARANCE' : (currentUser?.role === 'account_manager' || currentUser?.role === 'finance') ? 'LEVEL 2 SUPERVISOR CLEARANCE' : 'LEVEL 1 STANDARD CLEARANCE'}
                   </span>
                 </div>
 

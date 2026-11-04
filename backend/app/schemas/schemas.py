@@ -11,6 +11,7 @@ class Token(BaseModel):
     user_id: Optional[str] = None
     full_name: Optional[str] = None
     assigned_client_accounts: List[str] = []
+    clearance_level: Optional[int] = None
     mfa_required: bool = False
     challenge_token: Optional[str] = None
 
@@ -42,6 +43,7 @@ class UserBase(BaseModel):
     full_name: str
     role: str # admin, account_manager, finance, trainer, trainee
     assigned_client_accounts: List[str] = []
+    clearance_level: Optional[int] = None
 
 class UserCreate(UserBase):
     password: str
@@ -79,6 +81,7 @@ class UserResponse(UserBase):
 class UserAttributeUpdate(BaseModel):
     role: Optional[str] = None
     assigned_client_accounts: Optional[List[str]] = None
+    clearance_level: Optional[int] = None
 
 
 

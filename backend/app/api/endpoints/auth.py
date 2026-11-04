@@ -182,10 +182,20 @@ def login_access_token(
     db.add(log)
     db.commit()
 
+    clearance = user.clearance_level
+    if not clearance:
+        if user.role == "admin":
+            clearance = 3
+        elif user.role in ("account_manager", "finance"):
+            clearance = 2
+        else:
+            clearance = 1
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "role": user.role,
+        "clearance_level": clearance,
         "user_id": user.id,
         "full_name": user.full_name,
         "assigned_client_accounts": user.assigned_client_accounts or [],
@@ -355,10 +365,20 @@ def verify_mfa_login(
     db.add(log)
     db.commit()
 
+    clearance = user.clearance_level
+    if not clearance:
+        if user.role == "admin":
+            clearance = 3
+        elif user.role in ("account_manager", "finance"):
+            clearance = 2
+        else:
+            clearance = 1
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
         "role": user.role,
+        "clearance_level": clearance,
         "user_id": user.id,
         "full_name": user.full_name,
         "assigned_client_accounts": user.assigned_client_accounts or [],

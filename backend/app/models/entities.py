@@ -42,6 +42,7 @@ class User(Base):
     full_name = Column(String(255), nullable=False)
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(50), nullable=False, default="account_manager")
+    clearance_level = Column(Integer, default=1, nullable=True)
     
     # Assigned client accounts for Account Managers (list of company codes, e.g. ["CORP_ALPHA"])
     assigned_client_accounts = Column(JSON, default=list)

@@ -95,7 +95,16 @@ def list_users(
     admin_user: User = Depends(get_current_admin_user)
 ):
     """Admin endpoint to list all system accounts (FR-01, FR-02)."""
-    return db.query(User).all()
+    users = db.query(User).all()
+    for u in users:
+        if not u.clearance_level:
+            if u.role == "admin":
+                u.clearance_level = 3
+            elif u.role in ("account_manager", "finance"):
+                u.clearance_level = 2
+            else:
+                u.clearance_level = 1
+    return users
 
 
 @router.post("/", response_model=UserActivationResponse)
@@ -114,6 +123,16 @@ def create_user_by_admin(
     if user_in.role.lower() not in valid_roles:
         raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}")
 
+    # Determine default clearance level by role if not explicitly provided
+    clearance = user_in.clearance_level
+    if not clearance:
+        if user_in.role.lower() == "admin":
+            clearance = 3
+        elif user_in.role.lower() in ("account_manager", "finance"):
+            clearance = 2
+        else:
+            clearance = 1
+
     # Generate initial password or use temporary
     raw_pwd = user_in.temporary_password or secrets.token_urlsafe(16)
     user = User(
@@ -121,6 +140,7 @@ def create_user_by_admin(
         full_name=user_in.full_name,
         hashed_password=get_password_hash(raw_pwd),
         role=user_in.role.lower(),
+        clearance_level=clearance,
         assigned_client_accounts=user_in.assigned_client_accounts or [],
         force_password_change=True,
         is_active=True
@@ -405,6 +425,9 @@ def update_user_attributes(
 
     if attrs.assigned_client_accounts is not None:
         user.assigned_client_accounts = attrs.assigned_client_accounts
+
+    if attrs.clearance_level is not None:
+        user.clearance_level = attrs.clearance_level
 
     db.commit()
     db.refresh(user)

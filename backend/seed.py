@@ -108,6 +108,7 @@ def seed_database():
             full_name="Dr. Sarah Jenkins",
             hashed_password=default_pwd,
             role="admin",
+            clearance_level=3,
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
             is_superuser=True
         )
@@ -117,6 +118,7 @@ def seed_database():
             full_name="Prof. Roel Traballo",
             hashed_password=default_pwd,
             role="admin",
+            clearance_level=3,
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
             is_superuser=True
         )
@@ -128,6 +130,7 @@ def seed_database():
             full_name="Marcus Reyes",
             hashed_password=default_pwd,
             role="account_manager",
+            clearance_level=2,
             assigned_client_accounts=["CORP_ALPHA", "BANK_DELTA"]
         )
         u_am2 = User(
@@ -136,6 +139,7 @@ def seed_database():
             full_name="Andrea Salazar",
             hashed_password=default_pwd,
             role="account_manager",
+            clearance_level=2,
             assigned_client_accounts=["FINTECH_BETA", "RETAIL_GAMMA"]
         )
 
@@ -146,6 +150,7 @@ def seed_database():
             full_name="Elena Santos",
             hashed_password=default_pwd,
             role="finance",
+            clearance_level=2,
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"]
         )
         u_fin2 = User(
@@ -154,6 +159,7 @@ def seed_database():
             full_name="Victor Cruz",
             hashed_password=default_pwd,
             role="finance",
+            clearance_level=2,
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"]
         )
 
