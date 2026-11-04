@@ -113,6 +113,13 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
     setCurrentPage: setMilestonePage,
     paginatedItems: pagedMilestones,
     totalItems: totalMilestones
+  } = usePagination(displayedRecords, 4);
+
+  const {
+    currentPage: traineePage,
+    setCurrentPage: setTraineePage,
+    paginatedItems: pagedTrainees,
+    totalItems: totalTrainees
   } = usePagination(filteredRecords, 4);
 
   const completed = displayedRecords.filter(r => r.status === 'completed').length;
@@ -371,7 +378,13 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <TablePaginationCompact
+                currentPage={traineePage}
+                totalItems={totalTrainees}
+                pageSize={4}
+                onPageChange={setTraineePage}
+              />
               <div style={{ position: 'relative', minWidth: '240px' }}>
                 <Search size={14} style={{ position: 'absolute', left: '12px', top: '10px', color: '#94a3b8' }} />
                 <input
@@ -448,6 +461,13 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            currentPage={traineePage}
+            totalItems={totalTrainees}
+            pageSize={4}
+            onPageChange={setTraineePage}
+            itemName="employee records"
+          />
         </div>
       )}
 
