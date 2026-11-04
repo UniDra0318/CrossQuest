@@ -170,7 +170,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   // 1. TIERED HIERARCHY PYRAMID (True Stepped Pyramid Silhouette)
   // =========================================================================
   if (type === 'clearance_hierarchy') {
-    const nodes = (customNodes && customNodes.length >= 3) ? customNodes : [
+    const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
       { id: 'node-1', title: 'Root System Administrator', subtitle: 'Full authority across all accounts and tenants', iconType: 'shield', color: 'purple', badge: 'Clearance Level 3' },
       { id: 'node-2', title: 'Client Account & Portfolio Manager', subtitle: 'Authorized for assigned corporate accounts only', iconType: 'server', color: 'cyan', badge: 'Clearance Level 2' },
       { id: 'node-3', title: 'Instructor & Trainee Learner', subtitle: 'Curriculum review and personal qualification testing', iconType: 'users', color: 'emerald', badge: 'Clearance Level 1' }
@@ -194,13 +194,12 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               const isBase = idx === total - 1;
               const tierClass = isApex ? 'tier-apex' : isBase ? 'tier-base' : 'tier-mid';
 
-              // Dynamic stepped scaling for authentic pyramid silhouette
-              // Apex: 320px, Base: 780px, intermediate tiers step smoothly and proportionally
+              // Dynamic stepped scaling for authentic pyramid silhouette across any number of nodes
               const widthRatio = total > 1 ? idx / (total - 1) : 0.5;
-              const calcWidth = Math.round(320 + (widthRatio * 460)); // 320px (Apex) ➔ 780px (Base)
+              const calcWidth = total === 1 ? 480 : Math.round(300 + (widthRatio * 480)); // 300px (Apex) ➔ 780px (Base)
               const padV = Math.round(11 + widthRatio * 6); // 11px ➔ 17px
               const padH = Math.round(16 + widthRatio * 10); // 16px ➔ 26px
-              const titleSize = (13.5 + widthRatio * 1.5).toFixed(1); // 13.5px ➔ 15px
+              const titleSize = (13.5 + widthRatio * 1.5).toFixed(1);
               const matchesTarget = isTarget(node.title, node.id);
               const nodeColor = node.color || (isApex ? 'purple' : isBase ? 'emerald' : 'cyan');
 
@@ -252,17 +251,34 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   // 2. HIERARCHICAL BRANCHING TREE (PKI / Key Derivation Tree)
   // =========================================================================
   if (type === 'pki_hierarchy') {
-    const rootNode = getNode(0, { id: 'root', title: 'Master Cryptographic Authority', subtitle: 'Root pairing parameters used to derive key polynomial shares', iconType: 'key', color: 'purple', badge: 'Root Authority' });
-    const midLeftNode = getNode(1, { id: 'mid-left', title: 'Domain Attribute Authority (CA)', subtitle: 'Issues scoped client policy tokens to authorized personnel', iconType: 'server', color: 'cyan', badge: 'Intermediate Domain CA' });
-    const midRightNode = getNode(2, { id: 'mid-right', title: 'Institutional Issuer CA', subtitle: 'Validates corporate directory clearance and department scopes', iconType: 'shield', color: 'blue', badge: 'Intermediate Org CA' });
-    const leafLeftNode = getNode(3, { id: 'leaf-left', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts matching ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Session Key' });
-    const leafRightNode = getNode(4, { id: 'leaf-right', title: 'Scoped Verification Token', subtitle: 'Time-bound cryptographic bearer token for access evaluation', iconType: 'lock', color: 'gold', badge: 'Target Identity Envelope' });
+    const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
+      { id: 'node-1', title: 'Master Cryptographic Authority', subtitle: 'Root pairing parameters used to derive key polynomial shares', iconType: 'key', color: 'purple', badge: 'Root Authority' },
+      { id: 'node-2', title: 'Domain Attribute Authority (CA)', subtitle: 'Issues scoped client policy tokens to authorized personnel', iconType: 'server', color: 'cyan', badge: 'Intermediate CA' },
+      { id: 'node-3', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Key' }
+    ];
+
+    // Dynamic Tree Tier Partitioning for ANY object count (1 to 10+)
+    const rootNode = nodes[0];
+    let midNodes = [];
+    let leafNodes = [];
+
+    if (nodes.length === 2) {
+      midNodes = [nodes[1]];
+    } else if (nodes.length === 3) {
+      midNodes = [nodes[1]];
+      leafNodes = [nodes[2]];
+    } else if (nodes.length === 4) {
+      midNodes = [nodes[1], nodes[2]];
+      leafNodes = [nodes[3]];
+    } else if (nodes.length === 5) {
+      midNodes = [nodes[1], nodes[2]];
+      leafNodes = [nodes[3], nodes[4]];
+    } else if (nodes.length > 5) {
+      midNodes = [nodes[1], nodes[2]];
+      leafNodes = nodes.slice(3); // Renders ALL remaining nodes! 6, 7, 8...
+    }
 
     const tRoot = isTarget(rootNode.title, rootNode.id);
-    const tMidLeft = isTarget(midLeftNode.title, midLeftNode.id);
-    const tMidRight = isTarget(midRightNode.title, midRightNode.id);
-    const tLeafLeft = isTarget(leafLeftNode.title, leafLeftNode.id);
-    const tLeafRight = isTarget(leafRightNode.title, leafRightNode.id);
 
     return (
       <div className="diagram-card-container">
@@ -276,7 +292,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           <div className="tree-root-row">
             <div className={`tree-node-card ${tRoot ? 'node-active-guard is-hotspot-target' : ''}`} style={{ borderLeft: '4px solid #8b5cf6' }}>
               <div className="tier-rank-pill pill-purple">
-                <span>{rootNode.badge}</span>
+                <span>{rootNode.badge || 'Root Authority'}</span>
                 <span className={`tier-authority-badge ${tRoot ? 'badge-gold-glow' : ''}`}>
                   {tRoot ? '★ TARGET HOTSPOT' : 'MASTER ROOT'}
                 </span>
@@ -289,89 +305,89 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             </div>
           </div>
 
-          {/* Branch Split 1: Root to 2 Intermediates */}
-          <div className="tree-branch-split">
-            <div className="tree-stem-vertical" />
-            <div className="tree-rail-horizontal" />
-            <div className="tree-stem-drops">
-              <div className="tree-stem-drop" />
-              <div className="tree-stem-drop" />
+          {/* Branch Split 1: Root to Intermediate Level */}
+          {midNodes.length > 0 && (
+            <div className="tree-branch-split">
+              <div className="tree-stem-vertical" />
+              {midNodes.length > 1 && <div className="tree-rail-horizontal" />}
+              <div className="tree-stem-drops">
+                {midNodes.map((_, i) => (
+                  <div key={i} className="tree-stem-drop" />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Level 2: Two Intermediate CAs Branching Out Side by Side */}
-          <div className="tree-mid-row">
-            {/* Intermediate CA 1 */}
-            <div className={`tree-node-card ${tMidLeft ? 'node-active-guard is-hotspot-target' : ''}`} style={{ borderLeft: '4px solid #06b6d4' }}>
-              <div className="tier-rank-pill pill-cyan">
-                <span>{midLeftNode.badge}</span>
-                <span className={`tier-authority-badge ${tMidLeft ? 'badge-gold-glow' : ''}`}>
-                  {tMidLeft ? '★ TARGET HOTSPOT' : 'CLIENT SCOPE'}
-                </span>
-              </div>
-              <div className="tier-title-row">
-                {renderDiagramNodeIcon(midLeftNode.iconType, `text-${midLeftNode.color || 'cyan'}`)}
-                <h4>{midLeftNode.title}</h4>
-              </div>
-              <p className="tier-desc">{midLeftNode.subtitle}</p>
+          {/* Level 2: Intermediate CAs */}
+          {midNodes.length > 0 && (
+            <div className="tree-mid-row">
+              {midNodes.map((mNode) => {
+                const tMid = isTarget(mNode.title, mNode.id);
+                const mColor = mNode.color || 'cyan';
+                return (
+                  <div
+                    key={mNode.id || mNode.title}
+                    className={`tree-node-card ${tMid ? 'node-active-guard is-hotspot-target' : ''}`}
+                    style={{ borderLeft: `4px solid ${mColor === 'cyan' ? '#06b6d4' : mColor === 'blue' ? '#3b82f6' : '#8b5cf6'}` }}
+                  >
+                    <div className={`tier-rank-pill pill-${mColor}`}>
+                      <span>{mNode.badge || 'Intermediate CA'}</span>
+                      <span className={`tier-authority-badge ${tMid ? 'badge-gold-glow' : ''}`}>
+                        {tMid ? '★ TARGET HOTSPOT' : 'INTERMEDIATE CA'}
+                      </span>
+                    </div>
+                    <div className="tier-title-row">
+                      {renderDiagramNodeIcon(mNode.iconType, `text-${mColor}`)}
+                      <h4>{mNode.title}</h4>
+                    </div>
+                    <p className="tier-desc">{mNode.subtitle}</p>
+                  </div>
+                );
+              })}
             </div>
-
-            {/* Intermediate CA 2 */}
-            <div className={`tree-node-card ${tMidRight ? 'node-active-guard is-hotspot-target' : ''}`} style={{ borderLeft: '4px solid #3b82f6' }}>
-              <div className="tier-rank-pill pill-cyan">
-                <span>{midRightNode.badge}</span>
-                <span className={`tier-authority-badge ${tMidRight ? 'badge-gold-glow' : ''}`}>
-                  {tMidRight ? '★ TARGET HOTSPOT' : 'ORG SCOPE'}
-                </span>
-              </div>
-              <div className="tier-title-row">
-                {renderDiagramNodeIcon(midRightNode.iconType, `text-${midRightNode.color || 'blue'}`)}
-                <h4>{midRightNode.title}</h4>
-              </div>
-              <p className="tier-desc">{midRightNode.subtitle}</p>
-            </div>
-          </div>
+          )}
 
           {/* Branch Split 2: Intermediates to Leaves */}
-          <div className="tree-branch-split">
-            <div className="tree-stem-drops">
-              <div className="tree-stem-drop" />
-              <div className="tree-stem-drop" />
+          {leafNodes.length > 0 && (
+            <div className="tree-branch-split">
+              <div className="tree-stem-vertical" />
+              {leafNodes.length > 1 && <div className="tree-rail-horizontal" />}
+              <div className="tree-stem-drops">
+                {leafNodes.map((_, i) => (
+                  <div key={i} className="tree-stem-drop" />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Level 3: Leaf Keys Branching Underneath */}
-          <div className="tree-leaf-row">
-            {/* Leaf 1 */}
-            <div className={`tree-node-card ${tLeafLeft ? 'node-active-guard is-hotspot-target' : ''}`} style={{ borderLeft: '4px solid #10b981' }}>
-              <div className="tier-rank-pill pill-emerald">
-                <span>{leafLeftNode.badge}</span>
-                <span className={`tier-authority-badge ${tLeafLeft ? 'badge-gold-glow' : ''}`}>
-                  {tLeafLeft ? '★ TARGET HOTSPOT' : 'USER DECRYPTION SHARE'}
-                </span>
-              </div>
-              <div className="tier-title-row">
-                {renderDiagramNodeIcon(leafLeftNode.iconType, `text-${leafLeftNode.color || 'emerald'}`)}
-                <h4>{leafLeftNode.title}</h4>
-              </div>
-              <p className="tier-desc">{leafLeftNode.subtitle}</p>
+          {/* Level 3: Leaf Keys & Tokens (All Remaining Nodes) */}
+          {leafNodes.length > 0 && (
+            <div className="tree-leaf-row">
+              {leafNodes.map((lNode) => {
+                const tLeaf = isTarget(lNode.title, lNode.id);
+                const lColor = lNode.color || 'emerald';
+                return (
+                  <div
+                    key={lNode.id || lNode.title}
+                    className={`tree-node-card ${tLeaf ? 'node-active-guard is-hotspot-target' : ''}`}
+                    style={{ borderLeft: `4px solid ${lColor === 'emerald' ? '#10b981' : lColor === 'gold' ? '#f59e0b' : '#8b5cf6'}` }}
+                  >
+                    <div className={`tier-rank-pill pill-${lColor}`}>
+                      <span>{lNode.badge || 'Leaf Key Share'}</span>
+                      <span className={`tier-authority-badge ${tLeaf ? 'badge-gold-glow' : ''}`}>
+                        {tLeaf ? '★ TARGET HOTSPOT' : 'LEAF CREDENTIAL'}
+                      </span>
+                    </div>
+                    <div className="tier-title-row">
+                      {renderDiagramNodeIcon(lNode.iconType, `text-${lColor}`)}
+                      <h4>{lNode.title}</h4>
+                    </div>
+                    <p className="tier-desc">{lNode.subtitle}</p>
+                  </div>
+                );
+              })}
             </div>
-
-            {/* Leaf 2 */}
-            <div className={`tree-node-card ${tLeafRight ? 'node-active-guard is-hotspot-target' : ''}`} style={{ borderLeft: '4px solid #f59e0b' }}>
-              <div className="tier-rank-pill pill-purple">
-                <span>{leafRightNode.badge}</span>
-                <span className={`tier-authority-badge ${tLeafRight ? 'badge-gold-glow' : ''}`}>
-                  {tLeafRight ? '★ TARGET HOTSPOT' : 'EPHEMERAL TOKEN'}
-                </span>
-              </div>
-              <div className="tier-title-row">
-                {renderDiagramNodeIcon(leafRightNode.iconType, `text-${leafRightNode.color || 'gold'}`)}
-                <h4>{leafRightNode.title}</h4>
-              </div>
-              <p className="tier-desc">{leafRightNode.subtitle}</p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     );
@@ -381,13 +397,27 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   // 3. DUAL-PARTITION BOUNDARY (Two Isolated Enclaves + Impenetrable Wall)
   // =========================================================================
   if (type === 'tenant_partition') {
-    const tenantANode = getNode(0, { id: 'alpha', title: 'Tenant Alpha Organization', subtitle: 'Encrypted ciphertext vault isolated by unique CP-ABE polynomial key', iconType: 'lock', color: 'cyan', badge: 'Domain Partition A' });
-    const barrierNode = getNode(1, { id: 'wall', title: 'Cryptographic Barrier Wall', subtitle: 'Zero-Trust cross-boundary guard and anomaly detector', iconType: 'shield', color: 'rose', badge: 'Security Barrier' });
-    const tenantBNode = getNode(2, { id: 'beta', title: 'Tenant Beta Organization', subtitle: 'Isolated ciphertext pool completely inaccessible to Tenant Alpha credentials', iconType: 'lock', color: 'purple', badge: 'Domain Partition B' });
+    const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
+      { id: 'node-1', title: 'Tenant Alpha Organization', subtitle: 'Encrypted ciphertext vault isolated by unique CP-ABE key', iconType: 'lock', color: 'cyan', badge: 'Partition A' },
+      { id: 'node-2', title: 'Cryptographic Barrier Wall', subtitle: 'Zero-Trust cross-boundary guard and anomaly detector', iconType: 'shield', color: 'rose', badge: 'Security Barrier' },
+      { id: 'node-3', title: 'Tenant Beta Organization', subtitle: 'Isolated ciphertext pool inaccessible to Tenant Alpha credentials', iconType: 'lock', color: 'purple', badge: 'Partition B' }
+    ];
 
-    const tA = isTarget(tenantANode.title, tenantANode.id);
+    // Find barrier node index (look for barrier/wall or default to middle index)
+    let barrierIdx = nodes.findIndex(n =>
+      n.title.toLowerCase().includes('barrier') ||
+      n.title.toLowerCase().includes('wall') ||
+      (n.badge && n.badge.toLowerCase().includes('barrier'))
+    );
+    if (barrierIdx === -1) {
+      barrierIdx = nodes.length > 2 ? Math.floor(nodes.length / 2) : (nodes.length > 1 ? 1 : 0);
+    }
+
+    const barrierNode = nodes[barrierIdx] || { title: 'Cryptographic Barrier Wall', subtitle: 'Zero-Trust cross-boundary guard', iconType: 'shield' };
+    const leftNodes = nodes.filter((_, idx) => idx < barrierIdx);
+    const rightNodes = nodes.filter((_, idx) => idx > barrierIdx);
+
     const tWall = isTarget(barrierNode.title, barrierNode.id);
-    const tB = isTarget(tenantBNode.title, tenantBNode.id);
 
     return (
       <div className="diagram-card-container">
@@ -397,29 +427,35 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
         </div>
 
         <div className="tenant-partition-container">
-          {/* Tenant A Enclosed Sandbox */}
-          <div className={`tenant-vault-box ${tA ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #06b6d4' }}>
-            <div className="vault-top-banner banner-cyan" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Lock size={14} />
-                <span>{tenantANode.badge}</span>
-              </div>
-              {tA && <span className="tier-authority-badge badge-gold-glow">★ TARGET HOTSPOT</span>}
-            </div>
-            <div className="vault-body">
-              <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {renderDiagramNodeIcon(tenantANode.iconType, 'text-cyan')}
-                <span>{tenantANode.title}</span>
-              </div>
-              <div className="vault-key-chip">
-                <code>SCOPE:CORP_ALPHA · CIPHERTEXT POOL A</code>
-              </div>
-              <p className="vault-desc">{tenantANode.subtitle}</p>
-
-              <div style={{ marginTop: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(6, 182, 212, 0.08)', fontSize: '10.5px', color: '#0891b2', fontWeight: 600 }}>
-                🔒 Strict Row-Level Security Enforced
-              </div>
-            </div>
+          {/* Tenant A Enclosed Sandbox Enclave (All Left Nodes) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minWidth: '240px' }}>
+            {(leftNodes.length > 0 ? leftNodes : [nodes[0]]).map((tNode) => {
+              const tA = isTarget(tNode.title, tNode.id);
+              return (
+                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tA ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #06b6d4' }}>
+                  <div className="vault-top-banner banner-cyan" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Lock size={14} />
+                      <span>{tNode.badge || 'Domain Partition A'}</span>
+                    </div>
+                    {tA && <span className="tier-authority-badge badge-gold-glow">★ TARGET HOTSPOT</span>}
+                  </div>
+                  <div className="vault-body">
+                    <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {renderDiagramNodeIcon(tNode.iconType, 'text-cyan')}
+                      <span>{tNode.title}</span>
+                    </div>
+                    <div className="vault-key-chip">
+                      <code>SCOPE:CORP_ALPHA · CIPHERTEXT POOL A</code>
+                    </div>
+                    <p className="vault-desc">{tNode.subtitle}</p>
+                    <div style={{ marginTop: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(6, 182, 212, 0.08)', fontSize: '10.5px', color: '#0891b2', fontWeight: 600 }}>
+                      🔒 Strict Row-Level Security Enforced
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Central Cryptographic Barrier Wall */}
@@ -439,29 +475,35 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             </span>
           </div>
 
-          {/* Tenant B Enclosed Sandbox */}
-          <div className={`tenant-vault-box ${tB ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #8b5cf6' }}>
-            <div className="vault-top-banner banner-purple" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Lock size={14} />
-                <span>{tenantBNode.badge}</span>
-              </div>
-              {tB && <span className="tier-authority-badge badge-gold-glow">★ TARGET HOTSPOT</span>}
-            </div>
-            <div className="vault-body">
-              <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {renderDiagramNodeIcon(tenantBNode.iconType, 'text-purple')}
-                <span>{tenantBNode.title}</span>
-              </div>
-              <div className="vault-key-chip">
-                <code>SCOPE:FINTECH_BETA · CIPHERTEXT POOL B</code>
-              </div>
-              <p className="vault-desc">{tenantBNode.subtitle}</p>
-
-              <div style={{ marginTop: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.08)', fontSize: '10.5px', color: '#7c3aed', fontWeight: 600 }}>
-                🛡️ Zero Shared Memory or State
-              </div>
-            </div>
+          {/* Tenant B Enclosed Sandbox Enclave (All Right Nodes) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minWidth: '240px' }}>
+            {(rightNodes.length > 0 ? rightNodes : (nodes.length > 1 ? [nodes[nodes.length - 1]] : [])).map((tNode) => {
+              const tB = isTarget(tNode.title, tNode.id);
+              return (
+                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tB ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #8b5cf6' }}>
+                  <div className="vault-top-banner banner-purple" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Lock size={14} />
+                      <span>{tNode.badge || 'Domain Partition B'}</span>
+                    </div>
+                    {tB && <span className="tier-authority-badge badge-gold-glow">★ TARGET HOTSPOT</span>}
+                  </div>
+                  <div className="vault-body">
+                    <div className="vault-client-name" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {renderDiagramNodeIcon(tNode.iconType, 'text-purple')}
+                      <span>{tNode.title}</span>
+                    </div>
+                    <div className="vault-key-chip">
+                      <code>SCOPE:FINTECH_BETA · CIPHERTEXT POOL B</code>
+                    </div>
+                    <p className="vault-desc">{tNode.subtitle}</p>
+                    <div style={{ marginTop: '8px', padding: '6px 8px', borderRadius: '6px', background: 'rgba(139, 92, 246, 0.08)', fontSize: '10.5px', color: '#7c3aed', fontWeight: 600 }}>
+                      🛡️ Zero Shared Memory or State
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -472,15 +514,22 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   // 4. PERIMETER INGRESS GATEWAY (DMZ Network Enclaves)
   // =========================================================================
   if (type === 'network_dmz') {
-    const extNode = getNode(0, { id: 'ext', title: 'External Network', subtitle: 'Untrusted Client Request Stream', iconType: 'globe', color: 'cyan', badge: 'Untrusted Edge' });
-    const wafNode = getNode(1, { id: 'waf', title: 'Inspection Firewall / WAF', subtitle: 'Layer 7 Threat Filter & Header Sanitization', iconType: 'shield', color: 'gold', badge: 'Threat Guard' });
-    const proxyNode = getNode(2, { id: 'proxy', title: 'Ingress Reverse Proxy', subtitle: 'Mutual TLS Termination & Bearer Validation', iconType: 'server', color: 'purple', badge: 'mTLS Gateway' });
-    const meshNode = getNode(3, { id: 'mesh', title: 'Internal Service Mesh', subtitle: 'Private VPC Microservices & Cluster Mesh', iconType: 'cpu', color: 'emerald', badge: 'Private VPC' });
+    const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
+      { id: 'node-1', title: 'External Network', subtitle: 'Client Request Stream', iconType: 'globe', color: 'cyan', badge: 'Untrusted Edge' },
+      { id: 'node-2', title: 'Inspection Firewall / WAF', subtitle: 'Layer 7 Threat Inspection Gate', iconType: 'shield', color: 'gold', badge: 'Layer 7 Filter' },
+      { id: 'node-3', title: 'Ingress Reverse Proxy', subtitle: 'mTLS Strict Mutual Authentication', iconType: 'server', color: 'purple', badge: 'Ingress Proxy' },
+      { id: 'node-4', title: 'Internal Service Mesh', subtitle: 'Core Microservices Private VPC', iconType: 'cpu', color: 'emerald', badge: 'Private VPC' }
+    ];
+
+    // Zone 1: First node (Public Edge)
+    const extNode = nodes[0];
+    // Zone 3: Last node (Private VPC) if total > 2
+    const meshNode = nodes.length > 2 ? nodes[nodes.length - 1] : (nodes.length === 2 ? nodes[1] : null);
+    // Zone 2: All intermediate inspection/gateway nodes (nodes.slice(1, -1))
+    const dmzNodes = nodes.length > 2 ? nodes.slice(1, -1) : [];
 
     const tExt = isTarget(extNode.title, extNode.id);
-    const tWaf = isTarget(wafNode.title, wafNode.id);
-    const tProxy = isTarget(proxyNode.title, proxyNode.id);
-    const tMesh = isTarget(meshNode.title, meshNode.id);
+    const tMesh = meshNode ? isTarget(meshNode.title, meshNode.id) : false;
 
     return (
       <div className="diagram-card-container">
@@ -503,7 +552,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               </div>
               <div className="node-title">{extNode.title}</div>
               <div className={`node-badge-tag ${tExt ? 'badge-gold-glow' : ''}`}>
-                {tExt ? '★ Target Hotspot' : extNode.badge}
+                {tExt ? '★ Target Hotspot' : (extNode.badge || 'Public Edge')}
               </div>
               <div className="node-desc">{extNode.subtitle}</div>
             </div>
@@ -513,80 +562,81 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             <ArrowRight size={18} className="connector-arrow text-cyan" />
           </div>
 
-          {/* ZONE 2: DMZ Enclave (Firewall + Proxy) */}
-          <div className="dmz-zone dmz-zone-enclave">
-            <div className="dmz-zone-header">
-              <ShieldCheck size={13} />
-              <span>Zone 2: Perimeter DMZ Enclave</span>
-            </div>
+          {/* ZONE 2: DMZ Enclave (All Intermediate Inspection & Security Gates) */}
+          {dmzNodes.length > 0 && (
+            <>
+              <div className="dmz-zone dmz-zone-enclave">
+                <div className="dmz-zone-header">
+                  <ShieldCheck size={13} />
+                  <span>Zone 2: Perimeter DMZ Enclave ({dmzNodes.length} Stages)</span>
+                </div>
 
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {/* WAF */}
-              <div className={`pipeline-node ${tWaf ? 'node-active-guard is-hotspot-target' : ''}`} style={{ flex: 1 }}>
-                <div className="node-icon-bubble bg-gold-subtle">
-                  {renderDiagramNodeIcon(wafNode.iconType, 'text-gold')}
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {dmzNodes.map((dNode, dIdx) => {
+                    const tD = isTarget(dNode.title, dNode.id);
+                    const dColor = dNode.color || 'gold';
+                    return (
+                      <React.Fragment key={dNode.id || dIdx}>
+                        <div className={`pipeline-node ${tD ? 'node-active-guard is-hotspot-target' : ''}`} style={{ flex: 1, minWidth: '130px' }}>
+                          <div className={`node-icon-bubble bg-${dColor}-subtle`}>
+                            {renderDiagramNodeIcon(dNode.iconType, `text-${dColor}`)}
+                          </div>
+                          <div className="node-title">{dNode.title}</div>
+                          <div className={`node-badge-tag ${tD ? 'badge-gold-glow' : ''}`}>
+                            {tD ? '★ Target Hotspot' : (dNode.badge || `Stage ${dIdx + 1}`)}
+                          </div>
+                          <div className="node-desc">{dNode.subtitle}</div>
+                        </div>
+
+                        {dIdx < dmzNodes.length - 1 && (
+                          <ArrowRight size={14} className="text-purple flex-shrink-0" />
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </div>
-                <div className="node-title">{wafNode.title}</div>
-                <div className={`node-badge-tag ${tWaf ? 'badge-gold-glow' : ''}`}>
-                  {tWaf ? '★ Target Hotspot' : wafNode.badge}
-                </div>
-                <div className="node-desc">{wafNode.subtitle}</div>
               </div>
 
-              <ArrowRight size={14} className="text-purple flex-shrink-0" />
-
-              {/* Reverse Proxy */}
-              <div className={`pipeline-node ${tProxy ? 'node-active-guard is-hotspot-target' : ''}`} style={{ flex: 1 }}>
-                <div className="node-icon-bubble bg-purple-subtle">
-                  {renderDiagramNodeIcon(proxyNode.iconType, 'text-purple')}
-                </div>
-                <div className="node-title">{proxyNode.title}</div>
-                <div className={`node-badge-tag ${tProxy ? 'badge-gold-glow' : ''}`}>
-                  {tProxy ? '★ Target Hotspot' : proxyNode.badge}
-                </div>
-                <div className="node-desc">{proxyNode.subtitle}</div>
+              <div className="pipeline-connector">
+                <ArrowRight size={18} className="connector-arrow text-emerald" />
               </div>
-            </div>
-          </div>
-
-          <div className="pipeline-connector">
-            <ArrowRight size={18} className="connector-arrow text-emerald" />
-          </div>
+            </>
+          )}
 
           {/* ZONE 3: Secure Private VPC */}
-          <div className="dmz-zone dmz-zone-private">
-            <div className="dmz-zone-header">
-              <Lock size={13} />
-              <span>Zone 3: Private VPC</span>
-            </div>
+          {meshNode && (
+            <div className="dmz-zone dmz-zone-private">
+              <div className="dmz-zone-header">
+                <Lock size={13} />
+                <span>Zone 3: Private VPC</span>
+              </div>
 
-            <div className={`pipeline-node ${tMesh ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%' }}>
-              <div className="node-icon-bubble bg-emerald-subtle">
-                {renderDiagramNodeIcon(meshNode.iconType, 'text-emerald')}
+              <div className={`pipeline-node ${tMesh ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%' }}>
+                <div className="node-icon-bubble bg-emerald-subtle">
+                  {renderDiagramNodeIcon(meshNode.iconType, 'text-emerald')}
+                </div>
+                <div className="node-title">{meshNode.title}</div>
+                <div className={`node-badge-tag ${tMesh ? 'badge-gold-glow' : ''}`}>
+                  {tMesh ? '★ Target Hotspot' : (meshNode.badge || 'Private VPC')}
+                </div>
+                <div className="node-desc">{meshNode.subtitle}</div>
               </div>
-              <div className="node-title">{meshNode.title}</div>
-              <div className={`node-badge-tag ${tMesh ? 'badge-gold-glow' : ''}`}>
-                {tMesh ? '★ Target Hotspot' : meshNode.badge}
-              </div>
-              <div className="node-desc">{meshNode.subtitle}</div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
   }
 
   // =========================================================================
-  // 5. RELATIONAL ENTITY MATRIX (Data Subject ➔ Controller ➔ Processor)
+  // 5. RELATIONAL ENTITY MATRIX (Data Subject ➔ Controller ➔ Processor ➔ ...)
   // =========================================================================
   if (type === 'data_flow') {
-    const subNode = getNode(0, { id: 'sub', title: 'Trainee / Learner', subtitle: 'Owner of personal training metrics and qualification records', iconType: 'users', color: 'emerald', badge: 'Data Subject' });
-    const ctrlNode = getNode(1, { id: 'ctrl', title: 'Corporate Employer', subtitle: 'Contractual entity determining purposes of personnel training', iconType: 'server', color: 'cyan', badge: 'Controlling Entity (PIC)' });
-    const procNode = getNode(2, { id: 'proc', title: 'Crossworks Training Service', subtitle: 'Executes assessments strictly pursuant to controller instructions', iconType: 'shield', color: 'purple', badge: 'Processing Service (PIP)' });
-
-    const tSub = isTarget(subNode.title, subNode.id);
-    const tCtrl = isTarget(ctrlNode.title, ctrlNode.id);
-    const tProc = isTarget(procNode.title, procNode.id);
+    const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
+      { id: 'node-1', title: 'Trainee / Learner', subtitle: 'Owner of personal identification and qualification metrics', iconType: 'users', color: 'emerald', badge: 'Data Subject' },
+      { id: 'node-2', title: 'Corporate Employer', subtitle: 'Contractual entity deciding purposes of personnel qualification', iconType: 'server', color: 'cyan', badge: 'Controlling Entity (PIC)' },
+      { id: 'node-3', title: 'Crossworks Training Service', subtitle: 'Executes assessments strictly pursuant to controller agreements', iconType: 'shield', color: 'purple', badge: 'Processing Service (PIP)' }
+    ];
 
     return (
       <div className="diagram-card-container">
@@ -596,61 +646,35 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
         </div>
 
         <div className="data-flow-container">
-          {/* Entity 1: Subject */}
-          <div className={`data-flow-card card-subject ${tSub ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}>
-            <div className="flow-card-header">
-              {renderDiagramNodeIcon(subNode.iconType, 'text-emerald')}
-              <span className={`flow-role-tag ${tSub ? 'badge-gold-glow' : 'tag-emerald'}`}>
-                {tSub ? '★ Target Hotspot' : subNode.badge}
-              </span>
-            </div>
-            <div className="flow-card-title">{subNode.title}</div>
-            <p className="flow-card-desc">{subNode.subtitle}</p>
-            <div style={{ marginTop: 'auto', fontSize: '10px', color: '#059669', fontWeight: 600 }}>
-              🛡️ Individual Rights & Consent
-            </div>
-          </div>
+          {nodes.map((node, idx) => {
+            const matchesTarget = isTarget(node.title, node.id);
+            const nodeColor = node.color || (idx === 0 ? 'emerald' : idx === 1 ? 'cyan' : 'purple');
 
-          <div className="flow-connector">
-            <span className="flow-connector-label">Enrollment Profile</span>
-            <ArrowRight size={18} className="text-cyan" />
-          </div>
+            return (
+              <React.Fragment key={node.id || idx}>
+                <div className={`data-flow-card ${matchesTarget ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}>
+                  <div className="flow-card-header">
+                    {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
+                    <span className={`flow-role-tag ${matchesTarget ? 'badge-gold-glow' : `tag-${nodeColor}`}`}>
+                      {matchesTarget ? '★ Target Hotspot' : (node.badge || `Entity ${idx + 1}`)}
+                    </span>
+                  </div>
+                  <div className="flow-card-title">{node.title}</div>
+                  <p className="flow-card-desc">{node.subtitle}</p>
+                  <div style={{ marginTop: 'auto', fontSize: '10px', color: '#059669', fontWeight: 600 }}>
+                    🛡️ Compliance Boundary Bound
+                  </div>
+                </div>
 
-          {/* Entity 2: Controller */}
-          <div className={`data-flow-card card-controller ${tCtrl ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}>
-            <div className="flow-card-header">
-              {renderDiagramNodeIcon(ctrlNode.iconType, 'text-cyan')}
-              <span className={`flow-role-tag ${tCtrl ? 'badge-gold-glow' : 'tag-cyan'}`}>
-                {tCtrl ? '★ Target Hotspot' : ctrlNode.badge}
-              </span>
-            </div>
-            <div className="flow-card-title">{ctrlNode.title}</div>
-            <p className="flow-card-desc">{ctrlNode.subtitle}</p>
-            <div style={{ marginTop: 'auto', fontSize: '10px', color: '#0891b2', fontWeight: 600 }}>
-              📋 Training Directive & Agreement
-            </div>
-          </div>
-
-          <div className="flow-connector">
-            <span className="flow-connector-label">Engages Assessment</span>
-            <ArrowRight size={18} className="text-purple" />
-          </div>
-
-          {/* Entity 3: Processor */}
-          <div className={`data-flow-card card-processor ${tProc ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}>
-            <div className="flow-card-header">
-              {renderDiagramNodeIcon(procNode.iconType, 'text-purple')}
-              <span className={`flow-role-tag ${tProc ? 'badge-gold-glow' : 'tag-purple'}`}>
-                {tProc ? '★ Target Hotspot' : procNode.badge}
-              </span>
-            </div>
-            <div className="flow-card-title">{procNode.title}</div>
-            <p className="flow-card-desc">{procNode.subtitle}</p>
-            <div className="flow-statutory-badge">
-              <CheckCircle2 size={12} />
-              <span>DPA 2012 / NPC Compliant PIP</span>
-            </div>
-          </div>
+                {idx < nodes.length - 1 && (
+                  <div className="flow-connector">
+                    <span className="flow-connector-label">Flow {idx + 1}</span>
+                    <ArrowRight size={18} className="text-cyan" />
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
     );
@@ -659,8 +683,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   // =========================================================================
   // 6. SEQUENTIAL PROCESS PIPELINE (Linear connected pipeline flow)
   // =========================================================================
-  // Default or explicit security_pipeline
-  const pipelineNodes = (customNodes && customNodes.length >= 2) ? customNodes : [
+  const pipelineNodes = (customNodes && customNodes.length > 0) ? customNodes : [
     { id: 'step-1', title: 'Client Interface', subtitle: 'HTTPS Session Stream', iconType: 'users', color: 'cyan', badge: 'Client Ingress' },
     { id: 'step-2', title: 'API Gateway', subtitle: 'OAuth JWT Bearer Gate', iconType: 'shield', color: 'purple', badge: 'Perimeter Guard' },
     { id: 'step-3', title: 'Policy & Decryption Engine', subtitle: 'Evaluates Attribute Access Trees', iconType: 'lock', color: 'gold', badge: 'Core Engine' },
