@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { 
-  Shield, 
-  Lock, 
-  Database, 
-  Users, 
-  ArrowRight, 
-  AlertTriangle, 
-  Layers, 
-  CheckCircle2, 
-  Key, 
+import {
+  Shield,
+  Lock,
+  Database,
+  Users,
+  ArrowRight,
+  AlertTriangle,
+  Layers,
+  CheckCircle2,
+  Key,
   Award,
   ChevronDown,
   Building,
@@ -35,8 +35,8 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
             <Layers size={16} className="text-purple" />
             <span>{customTitle || 'EXAMINATION ARCHITECTURAL DIAGRAM'}</span>
           </div>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="diagram-zoom-btn"
             onClick={() => setIsZoomed(true)}
             title="Click to view full-resolution diagram"
@@ -47,10 +47,10 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
         </div>
 
         <div className="diagram-image-frame" onClick={() => setIsZoomed(true)}>
-          <img 
-            src={imageUrl} 
-            alt={imageCaption || 'Architectural Diagram'} 
-            className="diagram-rendered-img" 
+          <img
+            src={imageUrl}
+            alt={imageCaption || 'Architectural Diagram'}
+            className="diagram-rendered-img"
           />
           <div className="diagram-image-hover-hint">
             <Maximize2 size={18} />
@@ -71,9 +71,9 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
             <div className="diagram-lightbox-content" onClick={(e) => e.stopPropagation()}>
               <div className="diagram-lightbox-header flex-between">
                 <span className="font-bold text-sm text-slate-800">{customTitle || imageCaption || 'Diagram View'}</span>
-                <button 
-                  type="button" 
-                  className="btn-icon-ghost" 
+                <button
+                  type="button"
+                  className="btn-icon-ghost"
                   onClick={() => setIsZoomed(false)}
                 >
                   <X size={20} />
@@ -407,6 +407,135 @@ export default function QuizDiagram({ type, customNodes, customTitle, imageUrl, 
                 <code>Key Attribute: COMPANY:FINTECH_BETA</code>
               </div>
               <p className="vault-desc">Isolated ciphertext pool completely inaccessible to Tenant Alpha credentials.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. Zero-Trust Ingress & Cloudflare WAF DMZ
+  if (type === 'network_dmz') {
+    return (
+      <div className="diagram-card-container">
+        <div className="diagram-header-strip">
+          <Cloud size={16} className="text-cyan" />
+          <span>ZERO-TRUST INGRESS & CLOUDFLARE WAF PERIMETER</span>
+        </div>
+
+        <div className="diagram-pipeline-wrapper">
+          <div className="pipeline-node">
+            <div className="node-icon-bubble bg-cyan-subtle">
+              <Globe size={22} className="text-cyan" />
+            </div>
+            <div className="node-title">Public Internet</div>
+            <div className="node-badge-tag">Untrusted Edge</div>
+            <div className="node-desc">Client HTTPS Requests</div>
+          </div>
+
+          <div className="pipeline-connector">
+            <div className="connector-line" />
+            <ArrowRight size={16} className="connector-arrow text-cyan" />
+          </div>
+
+          <div className="pipeline-node node-active-guard">
+            <div className="node-icon-bubble bg-gold-subtle">
+              <Shield size={22} className="text-gold" />
+            </div>
+            <div className="node-title">Cloudflare WAF</div>
+            <div className="node-badge-tag badge-gold-glow">DDoS & Layer 7 Inspection</div>
+            <div className="node-desc">OWASP Core Rule Set</div>
+          </div>
+
+          <div className="pipeline-connector">
+            <div className="connector-line" />
+            <ArrowRight size={16} className="connector-arrow text-purple" />
+          </div>
+
+          <div className="pipeline-node">
+            <div className="node-icon-bubble bg-purple-subtle">
+              <Server size={22} className="text-purple" />
+            </div>
+            <div className="node-title">Ingress Reverse Proxy</div>
+            <div className="node-badge-tag">mTLS Strict Gate</div>
+            <div className="node-desc">Mutual Authentication</div>
+          </div>
+
+          <div className="pipeline-connector">
+            <div className="connector-line" />
+            <ArrowRight size={16} className="connector-arrow text-emerald" />
+          </div>
+
+          <div className="pipeline-node">
+            <div className="node-icon-bubble bg-emerald-subtle">
+              <Cpu size={22} className="text-emerald" />
+            </div>
+            <div className="node-title">Internal Service Mesh</div>
+            <div className="node-badge-tag">Private VPC</div>
+            <div className="node-desc">FastAPI Microservices</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 6. CP-ABE Key Issuance & KMS Hierarchy
+  if (type === 'pki_hierarchy') {
+    return (
+      <div className="diagram-card-container">
+        <div className="diagram-header-strip">
+          <Key size={16} className="text-gold" />
+          <span>CP-ABE MASTER KEY & EPHEMERAL TOKEN HIERARCHY</span>
+        </div>
+
+        <div className="hierarchy-pyramid-container">
+          <div className="hierarchy-level-card tier-top">
+            <div className="tier-rank-pill pill-purple">
+              <span>ROOT AUTHORITY MASTER KEY (MK / PK)</span>
+              <span className="tier-authority-badge">BSW07 / SS512</span>
+            </div>
+            <div className="tier-card-body">
+              <div className="tier-title-row">
+                <Key size={20} className="text-purple" />
+                <h4>Master Cryptographic Authority</h4>
+              </div>
+              <p className="tier-desc">Root pairing parameters used to derive attribute-weighted private key polynomial shares.</p>
+            </div>
+          </div>
+
+          <div className="hierarchy-connector-flow">
+            <ChevronDown size={18} className="hierarchy-arrow" />
+          </div>
+
+          <div className="hierarchy-level-card tier-mid">
+            <div className="tier-rank-pill pill-cyan">
+              <span>TENANT INTERMEDIATE CA</span>
+              <span className="tier-authority-badge">ORGANIZATIONAL SCOPE</span>
+            </div>
+            <div className="tier-card-body">
+              <div className="tier-title-row">
+                <Building size={20} className="text-cyan" />
+                <h4>Domain Attribute Authority</h4>
+              </div>
+              <p className="tier-desc">Issues versioned client policy tokens (e.g. CLIENT:CORP_ALPHA:V1) to authorized personnel.</p>
+            </div>
+          </div>
+
+          <div className="hierarchy-connector-flow">
+            <ChevronDown size={18} className="hierarchy-arrow" />
+          </div>
+
+          <div className="hierarchy-level-card tier-base">
+            <div className="tier-rank-pill pill-emerald">
+              <span>EPHEMERAL SESSION KEY</span>
+              <span className="tier-authority-badge">DECRYPTION ENVELOPE</span>
+            </div>
+            <div className="tier-card-body">
+              <div className="tier-title-row">
+                <Lock size={20} className="text-emerald" />
+                <h4>Attribute Secret Key (SK)</h4>
+              </div>
+              <p className="tier-desc">User-bound polynomial key share that decrypts ciphers matching the embedded access tree.</p>
             </div>
           </div>
         </div>

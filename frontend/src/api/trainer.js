@@ -232,6 +232,7 @@ export async function getQuizzes(token) {
             steps: q.steps || [],
             answerLabel: q.answerLabel || q.targetHotspotLabel || '',
             pairs: q.pairs || [],
+            diagramType: q.diagramType || 'security_pipeline',
             points: q.points || 10,
             explanation: q.explanation || ''
           };
@@ -332,6 +333,8 @@ export async function addQuestion(quizId, q = {}, token) {
     steps: q.steps || [],
     answerLabel: q.answerLabel || '',
     pairs: q.pairs || [],
+    diagramType: q.diagramType || 'security_pipeline',
+    diagramType: q.diagramType || 'security_pipeline',
     explanation: q.explanation || 'Verified compliance rubric citation.'
   };
 

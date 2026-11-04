@@ -1,0 +1,570 @@
+/* =============================================================================
+   CrossQuest Architectural Diagrams (Zero-Trust, Multi-Tenant, Privacy, Hierarchy)
+   ============================================================================= */
+
+.diagram-card-container {
+  background: var(--cq-card, #ffffff);
+  border: 1px solid var(--cq-line, #e2e8f0);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+html.dark .diagram-card-container,
+[data-theme="dark"] .diagram-card-container {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.diagram-header-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display, monospace);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b5cf6;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cq-line, rgba(0, 0, 0, 0.06));
+}
+
+html.dark .diagram-header-strip,
+[data-theme="dark"] .diagram-header-strip {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* =============================================================================
+   1. PIPELINE NODES (Security Pipeline & DMZ)
+   ============================================================================= */
+.diagram-pipeline-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 10px 4px 18px;
+}
+
+.pipeline-node {
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+html.dark .pipeline-node,
+[data-theme="dark"] .pipeline-node {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pipeline-node.node-active-guard,
+.pipeline-node.is-hotspot-target {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25), 0 8px 20px rgba(245, 158, 11, 0.15);
+}
+
+html.dark .pipeline-node.node-active-guard,
+html.dark .pipeline-node.is-hotspot-target,
+[data-theme="dark"] .pipeline-node.node-active-guard,
+[data-theme="dark"] .pipeline-node.is-hotspot-target {
+  background: #2d2305;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+}
+
+.node-icon-bubble {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.bg-cyan-subtle { background: #ecfeff; color: #0891b2; }
+.bg-purple-subtle { background: #f5f3ff; color: #7c3aed; }
+.bg-gold-subtle { background: #fef3c7; color: #d97706; }
+.bg-emerald-subtle { background: #ecfdf5; color: #059669; }
+.bg-rose-subtle { background: #fff1f2; color: #e11d48; }
+
+html.dark .bg-cyan-subtle { background: rgba(8, 145, 178, 0.2); color: #22d3ee; }
+html.dark .bg-purple-subtle { background: rgba(124, 58, 237, 0.2); color: #a78bfa; }
+html.dark .bg-gold-subtle { background: rgba(217, 119, 6, 0.25); color: #fbbf24; }
+html.dark .bg-emerald-subtle { background: rgba(5, 150, 105, 0.2); color: #34d399; }
+html.dark .bg-rose-subtle { background: rgba(225, 29, 72, 0.2); color: #fb7185; }
+
+.node-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+html.dark .node-title,
+[data-theme="dark"] .node-title {
+  color: #f8fafc;
+}
+
+.node-badge-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+html.dark .node-badge-tag,
+[data-theme="dark"] .node-badge-tag {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.badge-gold-glow {
+  background: #fef3c7;
+  color: #b45309;
+  font-weight: 800;
+}
+
+html.dark .badge-gold-glow,
+[data-theme="dark"] .badge-gold-glow {
+  background: rgba(245, 158, 11, 0.25);
+  color: #fde68a;
+}
+
+.node-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+html.dark .node-desc,
+[data-theme="dark"] .node-desc {
+  color: #94a3b8;
+}
+
+.pipeline-connector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.connector-line {
+  width: 24px;
+  height: 2px;
+  background: #cbd5e1;
+  position: relative;
+}
+
+html.dark .connector-line,
+[data-theme="dark"] .connector-line {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.connector-arrow {
+  color: #8b5cf6;
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   2. HIERARCHY PYRAMID (Clearance Levels)
+   ============================================================================= */
+.hierarchy-pyramid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.hierarchy-level-card {
+  width: 100%;
+  max-width: 580px;
+  border-radius: 14px;
+  padding: 14px 18px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+html.dark .hierarchy-level-card,
+[data-theme="dark"] .hierarchy-level-card {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tier-top {
+  max-width: 440px;
+  border-color: #8b5cf6;
+  background: #faf5ff;
+}
+html.dark .tier-top,
+[data-theme="dark"] .tier-top {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: #8b5cf6;
+}
+
+.tier-mid {
+  max-width: 510px;
+  border-color: #06b6d4;
+  background: #ecfeff;
+}
+html.dark .tier-mid,
+[data-theme="dark"] .tier-mid {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: #06b6d4;
+}
+
+.tier-base {
+  max-width: 580px;
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+html.dark .tier-base,
+[data-theme="dark"] .tier-base {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10b981;
+}
+
+.tier-rank-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.pill-purple { color: #7c3aed; }
+.pill-cyan { color: #0891b2; }
+.pill-emerald { color: #059669; }
+
+html.dark .pill-purple { color: #c4b5fd; }
+html.dark .pill-cyan { color: #67e8f9; }
+html.dark .pill-emerald { color: #6ee7b7; }
+
+.tier-authority-badge {
+  font-size: 9.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+html.dark .tier-authority-badge {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tier-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-title-row h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+html.dark .tier-title-row h4,
+[data-theme="dark"] .tier-title-row h4 {
+  color: #f8fafc;
+}
+
+.tier-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+html.dark .tier-desc,
+[data-theme="dark"] .tier-desc {
+  color: #94a3b8;
+}
+
+.hierarchy-connector-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #8b5cf6;
+}
+
+/* =============================================================================
+   3. DATA FLOW MATRIX (R.A. 10173 Roles)
+   ============================================================================= */
+.data-flow-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 10px 4px;
+}
+
+.data-flow-card {
+  flex: 1;
+  min-width: 160px;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+html.dark .data-flow-card,
+[data-theme="dark"] .data-flow-card {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.data-flow-card.highlight-card {
+  border-color: #8b5cf6;
+  background: #faf5ff;
+  box-shadow: 0 4px 18px rgba(139, 92, 246, 0.15);
+}
+
+html.dark .data-flow-card.highlight-card,
+[data-theme="dark"] .data-flow-card.highlight-card {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: #8b5cf6;
+}
+
+.flow-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flow-role-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.tag-emerald { background: #d1fae5; color: #065f46; }
+.tag-cyan { background: #cffafe; color: #155e75; }
+.tag-purple { background: #ede9fe; color: #5b21b6; }
+
+html.dark .tag-emerald { background: rgba(5, 150, 105, 0.25); color: #6ee7b7; }
+html.dark .tag-cyan { background: rgba(6, 182, 212, 0.25); color: #67e8f9; }
+html.dark .tag-purple { background: rgba(124, 58, 237, 0.25); color: #c4b5fd; }
+
+.flow-card-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+html.dark .flow-card-title,
+[data-theme="dark"] .flow-card-title {
+  color: #f8fafc;
+}
+
+.flow-card-desc {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+html.dark .flow-card-desc,
+[data-theme="dark"] .flow-card-desc {
+  color: #94a3b8;
+}
+
+.flow-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.flow-connector-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #64748b;
+  max-width: 90px;
+  text-align: center;
+}
+
+html.dark .flow-connector-label,
+[data-theme="dark"] .flow-connector-label {
+  color: #94a3b8;
+}
+
+.flow-statutory-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+/* =============================================================================
+   4. TENANT PARTITIONING & CRYPTOGRAPHIC BARRIER
+   ============================================================================= */
+.tenant-partition-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 4px;
+}
+
+.tenant-vault-box {
+  flex: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+html.dark .tenant-vault-box,
+[data-theme="dark"] .tenant-vault-box {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.vault-top-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.banner-cyan { background: #06b6d4; color: #ffffff; }
+.banner-purple { background: #8b5cf6; color: #ffffff; }
+
+.vault-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vault-client-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+html.dark .vault-client-name,
+[data-theme="dark"] .vault-client-name {
+  color: #f8fafc;
+}
+
+.vault-key-chip {
+  font-size: 10.5px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: monospace;
+}
+
+html.dark .vault-key-chip,
+[data-theme="dark"] .vault-key-chip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.vault-desc {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+html.dark .vault-desc,
+[data-theme="dark"] .vault-desc {
+  color: #94a3b8;
+}
+
+.cryptographic-barrier-wall {
+  flex: 0 0 170px;
+  border: 2px dashed #f43f5e;
+  background: #fff1f2;
+  border-radius: 14px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+html.dark .cryptographic-barrier-wall,
+[data-theme="dark"] .cryptographic-barrier-wall {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: #f43f5e;
+}
+
+.barrier-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #e11d48;
+  letter-spacing: 0.04em;
+}
+
+html.dark .barrier-title,
+[data-theme="dark"] .barrier-title {
+  color: #fb7185;
+}
+
+.barrier-subtitle {
+  font-size: 10px;
+  color: #64748b;
+}
+
+html.dark .barrier-subtitle,
+[data-theme="dark"] .barrier-subtitle {
+  color: #cbd5e1;
+}
+
+.barrier-alert-tag {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #e11d48;
+  color: #ffffff;
+  margin-top: 6px;
+}

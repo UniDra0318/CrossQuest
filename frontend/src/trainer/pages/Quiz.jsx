@@ -15,8 +15,16 @@ import {
   Award,
   ArrowRight,
   Edit3,
-  X
+  X,
+  Cloud,
+  Key,
+  ChevronDown,
+  ChevronUp,
+  EyeOff,
+  RefreshCw,
+  ShieldAlert
 } from 'lucide-react';
+import QuizDiagram from '../../components/QuizDiagram';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
 
@@ -26,6 +34,75 @@ const QUESTION_FORMATS = [
   { id: 'identification', label: 'Identification', icon: FileText, iconChar: '✍️', tagColor: 'amber', desc: 'Direct term input with accepted variant matching' },
   { id: 'sequence', label: 'Sequence Order', icon: ListOrdered, iconChar: '🔢', tagColor: 'green', desc: 'Arrange operational steps in correct chronological order' },
   { id: 'hotspot', label: 'Diagram Hotspot', icon: Eye, iconChar: '🎯', tagColor: 'orange', desc: 'Identify target security component in architecture diagrams' }
+];
+
+export const DIAGRAM_TEMPLATES = [
+  {
+    id: 'security_pipeline',
+    name: 'Zero-Trust Security Pipeline',
+    badge: 'Cryptographic Architecture',
+    tagColor: 'adm-chip--cyan',
+    desc: 'Trainee Client ➔ API Gateway ➔ CP-ABE Policy Engine ➔ Encrypted Vault',
+    defaultPrompt: 'Analyze the Zero-Trust Architecture Diagram below. If an unauthorized actor bypasses the API Gateway, which layer prevents them from decrypting ciphertext data?',
+    defaultTarget: 'CP-ABE Policy Engine',
+    defaultExplanation: 'The CP-ABE Policy Engine verifies attribute polynomials and denies decryption unless the user holds matching corporate credentials.',
+    components: ['CP-ABE Policy Engine', 'API Gateway', 'Encrypted Vault', 'Trainee Client']
+  },
+  {
+    id: 'clearance_hierarchy',
+    name: 'Clearance Level Pyramid',
+    badge: 'Access Control',
+    tagColor: 'adm-chip--purple',
+    desc: 'Level 3 Root Admin ➔ Level 2 Account Manager ➔ Level 1 Trainee & Instructor',
+    defaultPrompt: 'Analyze the Clearance Level Pyramid below. Which level has cryptographic authority strictly isolated to their assigned corporate client scope?',
+    defaultTarget: 'Clearance Level 2 (Client Account Manager)',
+    defaultExplanation: 'Level 2 Account Managers hold attribute keys bounded strictly to their assigned client accounts (e.g. CORP_ALPHA) preventing cross-tenant visibility.',
+    components: ['Clearance Level 3 (System Administrator)', 'Clearance Level 2 (Client Account Manager)', 'Clearance Level 1 (Instructor & Trainee)']
+  },
+  {
+    id: 'data_flow',
+    name: 'Privacy Matrix (R.A. 10173)',
+    badge: 'Regulatory Compliance',
+    tagColor: 'adm-chip--rose',
+    desc: 'Data Subject (Trainee) ➔ Personal Info Controller (PIC) ➔ Processor (PIP)',
+    defaultPrompt: 'Review the Data Flow Diagram. Under R.A. 10173 (Data Privacy Act of 2012), what is the statutory classification of Crossworks Training Service?',
+    defaultTarget: 'Personal Info Processor (PIP)',
+    defaultExplanation: 'Crossworks acts as a Personal Information Processor (PIP) engaged under a Data Processing Agreement to deliver workforce certification.',
+    components: ['Personal Info Processor (PIP)', 'Personal Info Controller (PIC)', 'Data Subject (Trainee Learner)']
+  },
+  {
+    id: 'tenant_partition',
+    name: 'Multi-Tenant Isolation Boundary',
+    badge: 'Polynomial Isolation',
+    tagColor: 'adm-chip--amber',
+    desc: 'Tenant Alpha Partition ➔ Cryptographic Barrier Wall ➔ Tenant Beta Partition',
+    defaultPrompt: 'Examine the Multi-Tenant Architecture Diagram below. If an Account Manager attempts to decrypt records belonging to a different client partition, which control triggers an anomaly alert?',
+    defaultTarget: 'Cryptographic Barrier Wall',
+    defaultExplanation: 'The Cryptographic Barrier Wall enforces attribute-based polynomial isolation; cross-tenant decryption attempts fail and log security anomalies.',
+    components: ['Cryptographic Barrier Wall', 'Tenant Alpha Partition', 'Tenant Beta Partition']
+  },
+  {
+    id: 'network_dmz',
+    name: 'Zero-Trust Ingress & WAF',
+    badge: 'Perimeter Defense',
+    tagColor: 'adm-chip--blue',
+    desc: 'Public Internet ➔ Cloudflare Edge WAF ➔ Ingress Proxy ➔ Service Mesh',
+    defaultPrompt: 'In this Zero-Trust Ingress Architecture, which layer terminates external TLS traffic and inspects HTTP payloads for OWASP Top 10 injection attacks?',
+    defaultTarget: 'Cloudflare WAF',
+    defaultExplanation: 'The Cloudflare Edge WAF inspects inbound requests against OWASP Top 10 rule sets before traffic reaches internal microservices.',
+    components: ['Cloudflare WAF', 'Ingress Reverse Proxy', 'Internal Service Mesh', 'Public Internet']
+  },
+  {
+    id: 'pki_hierarchy',
+    name: 'CP-ABE Key & KMS Hierarchy',
+    badge: 'Key Management',
+    tagColor: 'adm-chip--green',
+    desc: 'Master Authority Root Key ➔ Tenant Intermediate CA ➔ Ephemeral Session Key',
+    defaultPrompt: 'Which cryptographic node in the PKI hierarchy is responsible for generating user-specific attribute secret keys for trainees?',
+    defaultTarget: 'Master Cryptographic Authority',
+    defaultExplanation: 'The Master Authority Root Key parameters are utilized to derive attribute-weighted private key polynomial shares.',
+    components: ['Master Cryptographic Authority', 'Tenant Intermediate CA', 'Attribute Secret Key (SK)']
+  }
 ];
 
 export default function Quiz() {
@@ -83,6 +160,7 @@ export default function Quiz() {
         : ['', '', '', ''];
       setSequenceSteps(steps);
     } else if (type === 'hotspot') {
+      setDiagramTemplateId(q.diagramType || 'security_pipeline');
       setHotspotTarget(q.answerLabel || q.prompt || '');
     } else {
       setNewQuestionAnswer(q.answerLabel || (Array.isArray(q.accepted) ? q.accepted.join(', ') : (q.answer || '')));
@@ -109,6 +187,7 @@ export default function Quiz() {
     ]);
     setSequenceSteps(['', '', '', '']);
     setHotspotTarget('');
+    setDiagramTemplateId('security_pipeline');
   };
 
   // Multi-type question builder state
@@ -124,6 +203,9 @@ export default function Quiz() {
   const [newQuestionAnswer, setNewQuestionAnswer] = useState('');
   const [sequenceSteps, setSequenceSteps] = useState(['', '', '', '']);
   const [hotspotTarget, setHotspotTarget] = useState('');
+  const [diagramTemplateId, setDiagramTemplateId] = useState('security_pipeline');
+  const [showBuilderDiagramPreview, setShowBuilderDiagramPreview] = useState(true);
+  const [rosterDiagramToggles, setRosterDiagramToggles] = useState({});
 
   // Fallback active quiz selection
   const activeQuiz = (quizzes && quizzes.length > 0)
@@ -188,7 +270,10 @@ export default function Quiz() {
         alert('Please specify the target component label for the hotspot.');
         return;
       }
+      const activeTemplate = DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId);
+      payload.diagramType = diagramTemplateId;
       payload.answerLabel = hotspotTarget.trim();
+      payload.options = activeTemplate?.components || [hotspotTarget.trim(), 'Secondary Node', 'Perimeter Gate', 'Data Vault'];
     } else {
       if (!newQuestionAnswer.trim()) {
         alert('Please provide accepted answer term(s).');
@@ -770,29 +855,159 @@ export default function Quiz() {
                 </div>
               )}
 
-              {/* 5. DIAGRAM HOTSPOT */}
+              {/* 5. DIAGRAM HOTSPOT & ARCHITECTURE TEMPLATES */}
               {questionType === 'hotspot' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase' }}>
-                    Target Security Component Label (Correct Hotspot Component):
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. CP-ABE Policy Engine or Encrypted Vault"
-                    value={hotspotTarget}
-                    onChange={(e) => setHotspotTarget(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1',
-                      background: isDark ? '#0b0f19' : '#ffffff',
-                      color: isDark ? '#f8fafc' : '#1e293b',
-                      borderRadius: '10px',
-                      fontSize: '13px',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Template Selection Header */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase' }}>
+                        1. Select Architectural Diagram Template ({DIAGRAM_TEMPLATES.length} Enterprise Types):
+                      </span>
+                      <button
+                        type="button"
+                        className="trn-link"
+                        style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#8b5cf6', fontWeight: 700 }}
+                        onClick={() => {
+                          const tmpl = DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId);
+                          if (tmpl) {
+                            setNewQuestionPrompt(tmpl.defaultPrompt);
+                            setHotspotTarget(tmpl.defaultTarget);
+                            setNewQuestionExplanation(tmpl.defaultExplanation);
+                          }
+                        }}
+                        title="Auto-fill recommended prompt, target component, and explanation for this diagram"
+                      >
+                        <Sparkles size={12} />
+                        <span>Apply Template Defaults</span>
+                      </button>
+                    </div>
+
+                    {/* Diagram Template Cards Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                      {DIAGRAM_TEMPLATES.map((tmpl) => {
+                        const isSelected = diagramTemplateId === tmpl.id;
+                        return (
+                          <div
+                            key={tmpl.id}
+                            onClick={() => setDiagramTemplateId(tmpl.id)}
+                            style={{
+                              padding: '12px 14px',
+                              borderRadius: '12px',
+                              border: isSelected
+                                ? '2px solid #8b5cf6'
+                                : (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1'),
+                              background: isSelected
+                                ? (isDark ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 27, 75, 0.6) 100%)' : '#faf5ff')
+                                : (isDark ? '#0b0f19' : '#ffffff'),
+                              boxShadow: isSelected ? '0 4px 14px rgba(139, 92, 246, 0.25)' : 'none',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <strong style={{ fontSize: '12.5px', color: isSelected ? '#a5b4fc' : (isDark ? '#f8fafc' : '#1e293b') }}>
+                                {tmpl.name}
+                              </strong>
+                              <span className={`adm-chip ${tmpl.tagColor}`} style={{ fontSize: '9px', padding: '2px 6px' }}>
+                                {tmpl.badge}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.3 }}>
+                              {tmpl.desc}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Quick-Pick Target Component Chips */}
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+                      2. Hotspot Target Component (Click to auto-assign):
+                    </label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                      {DIAGRAM_TEMPLATES.find(t => t.id === diagramTemplateId)?.components.map((comp) => {
+                        const isTarget = hotspotTarget.toLowerCase() === comp.toLowerCase();
+                        return (
+                          <button
+                            key={comp}
+                            type="button"
+                            onClick={() => setHotspotTarget(comp)}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              border: isTarget
+                                ? '1.5px solid #10b981'
+                                : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
+                              background: isTarget
+                                ? (isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5')
+                                : (isDark ? '#0b0f19' : '#ffffff'),
+                              color: isTarget
+                                ? (isDark ? '#34d399' : '#065f46')
+                                : (isDark ? '#cbd5e1' : '#334155'),
+                              fontSize: '12px',
+                              fontWeight: isTarget ? 700 : 500,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {isTarget && <Check size={13} color="#10b981" />}
+                            <span>{comp}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="e.g. CP-ABE Policy Engine or type custom component name"
+                      value={hotspotTarget}
+                      onChange={(e) => setHotspotTarget(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        border: isDark ? '1.5px solid rgba(255, 255, 255, 0.15)' : '1.5px solid #cbd5e1',
+                        background: isDark ? '#0b0f19' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#1e293b',
+                        borderRadius: '10px',
+                        fontSize: '13px',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+
+                  {/* Live Diagram Architecture Preview */}
+                  <div style={{ marginTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#94a3b8' : '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Eye size={13} color="#8b5cf6" /> Live Architecture Diagram Preview
+                      </span>
+                      <button
+                        type="button"
+                        className="trn-link"
+                        style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                        onClick={() => setShowBuilderDiagramPreview(prev => !prev)}
+                      >
+                        {showBuilderDiagramPreview ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        <span>{showBuilderDiagramPreview ? 'Collapse Preview' : 'Expand Preview'}</span>
+                      </button>
+                    </div>
+
+                    {showBuilderDiagramPreview && (
+                      <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0' }}>
+                        <QuizDiagram type={diagramTemplateId} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1053,15 +1268,41 @@ export default function Quiz() {
                         </ol>
                       )}
 
-                      {/* Diagram Hotspot */}
-                      {q.answerLabel && (
-                        <div style={{ fontSize: '13px', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span className="adm-soft" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
-                            Correct Target Component:
-                          </span>
-                          <span style={{ fontWeight: 700, color: isDark ? '#fb923c' : '#ea580c', background: isDark ? 'rgba(234, 88, 12, 0.15)' : '#ffedd5', padding: '2px 8px', borderRadius: '6px' }}>
-                            {q.answerLabel}
-                          </span>
+                      {/* Diagram Hotspot Details & Interactive Preview */}
+                      {(q.type === 'hotspot' || q.type === 'diagram_analysis') && (
+                        <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span className="adm-soft" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
+                              Template:
+                            </span>
+                            <span className="adm-chip adm-chip--purple" style={{ fontSize: '10.5px' }}>
+                              {DIAGRAM_TEMPLATES.find(t => t.id === (q.diagramType || 'security_pipeline'))?.name || (q.diagramType || 'Zero-Trust Pipeline')}
+                            </span>
+                            <span className="adm-soft" style={{ color: isDark ? '#94a3b8' : '#64748b', marginLeft: '6px' }}>
+                              Target:
+                            </span>
+                            <span style={{ fontWeight: 700, color: isDark ? '#fb923c' : '#ea580c', background: isDark ? 'rgba(234, 88, 12, 0.15)' : '#ffedd5', padding: '2px 8px', borderRadius: '6px' }}>
+                              {q.answerLabel || 'Target Node'}
+                            </span>
+                            <button
+                              type="button"
+                              className="trn-link"
+                              style={{ marginLeft: 'auto', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#8b5cf6' }}
+                              onClick={() => {
+                                const qKey = q.id || idx;
+                                setRosterDiagramToggles(prev => ({ ...prev, [qKey]: !prev[qKey] }));
+                              }}
+                            >
+                              {rosterDiagramToggles[q.id || idx] ? <EyeOff size={12} /> : <Eye size={12} />}
+                              <span>{rosterDiagramToggles[q.id || idx] ? 'Hide Diagram' : 'Preview Diagram'}</span>
+                            </button>
+                          </div>
+
+                          {rosterDiagramToggles[q.id || idx] && (
+                            <div style={{ marginTop: '6px', borderRadius: '12px', overflow: 'hidden' }}>
+                              <QuizDiagram type={q.diagramType || 'security_pipeline'} />
+                            </div>
+                          )}
                         </div>
                       )}
 
