@@ -138,9 +138,9 @@ export const DIAGRAM_TEMPLATES = [
     components: ['Master Cryptographic Authority', 'Domain Attribute Authority (CA)', 'Attribute Secret Key (Leaf)'],
     layout: 'hierarchy',
     defaultNodes: [
-      { id: 'node-1', title: 'Master Cryptographic Authority', subtitle: 'Root pairing parameters used to derive key polynomial shares', iconType: 'key', color: 'purple', badge: 'Root Authority' },
-      { id: 'node-2', title: 'Domain Attribute Authority (CA)', subtitle: 'Issues scoped client policy tokens to authorized personnel', iconType: 'server', color: 'cyan', badge: 'Intermediate CA' },
-      { id: 'node-3', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Key' }
+      { id: 'node-1', title: 'Master Cryptographic Authority', subtitle: 'Root pairing parameters used to derive key polynomial shares', iconType: 'key', color: 'purple', badge: 'Root Authority', parentId: null },
+      { id: 'node-2', title: 'Domain Attribute Authority (CA)', subtitle: 'Issues scoped client policy tokens to authorized personnel', iconType: 'server', color: 'cyan', badge: 'Intermediate CA', parentId: 'node-1' },
+      { id: 'node-3', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Key', parentId: 'node-2' }
     ]
   }
 ];
@@ -275,13 +275,15 @@ export default function Quiz() {
     const nextIdx = customNodes.length + 1;
     const colors = ['cyan', 'purple', 'emerald', 'gold', 'rose', 'blue'];
     const nextColor = colors[(nextIdx - 1) % colors.length];
+    const defaultParentId = customNodes.length > 0 ? customNodes[customNodes.length - 1].id : null;
     const newNode = {
       id: `node-${Date.now()}`,
       title: `Architectural Component ${nextIdx}`,
       subtitle: `Security control & verification stage`,
       iconType: 'shield',
       color: nextColor,
-      badge: customLayout === 'hierarchy' ? `Tier Level ${nextIdx}` : `Stage ${nextIdx}`
+      badge: customLayout === 'hierarchy' ? `Tier Level ${nextIdx}` : `Stage ${nextIdx}`,
+      parentId: defaultParentId
     };
     setCustomNodes([...customNodes, newNode]);
   };

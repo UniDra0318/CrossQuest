@@ -86,6 +86,13 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
     return t === n;
   };
 
+  // Determine dynamic orientation:
+  // Explicit customLayout takes precedence ('hierarchy' for vertical, 'pipeline' for horizontal).
+  // Default fallback: 'hierarchy' for pyramid & tree; 'pipeline' for sequential pipelines & matrices.
+  const isVertical = customLayout
+    ? customLayout === 'hierarchy'
+    : (type === 'clearance_hierarchy' || type === 'pki_hierarchy');
+
   // If an uploaded or URL image is provided for the diagram
   if (imageUrl) {
     return (
@@ -138,11 +145,6 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               <div className="diagram-lightbox-body">
                 <img src={imageUrl} alt="Enlarged Diagram" className="diagram-lightbox-img" />
               </div>
-              {imageCaption && (
-                <div className="diagram-lightbox-footer text-xs text-secondary">
-                  {imageCaption}
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -150,24 +152,8 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
     );
   }
 
-  // Helper to extract or fallback node data
-  const getNode = (idx, fallback) => {
-    if (customNodes && Array.isArray(customNodes) && customNodes[idx]) {
-      const n = customNodes[idx];
-      return {
-        id: n.id,
-        title: n.title || fallback.title,
-        subtitle: n.subtitle || fallback.subtitle,
-        iconType: n.iconType || fallback.iconType,
-        color: n.color || fallback.color,
-        badge: n.badge || fallback.badge
-      };
-    }
-    return fallback;
-  };
-
   // =========================================================================
-  // 1. TIERED HIERARCHY PYRAMID (True Stepped Pyramid Silhouette)
+  // 1. TIERED HIERARCHY PYRAMID (True Stepped Scaling in Vertical or Horizontal)
   // =========================================================================
   if (type === 'clearance_hierarchy') {
     const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
@@ -186,20 +172,35 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
         </div>
 
         <div className="pyramid-silhouette-wrapper">
-          <div className="pyramid-apex-icon">▲ PRIVILEGE APEX</div>
+          <div className="pyramid-apex-icon">{isVertical ? '▲ PRIVILEGE APEX' : '◀ PRIVILEGE APEX'}</div>
 
-          <div className="hierarchy-pyramid-container" style={{ width: '100%' }}>
+          <div
+            className={`hierarchy-pyramid-container ${isVertical ? 'pyramid-vertical' : 'pyramid-horizontal'}`}
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: isVertical ? 'column' : 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              overflowX: isVertical ? 'visible' : 'auto',
+              padding: '10px 4px'
+            }}
+          >
             {nodes.map((node, idx) => {
               const isApex = idx === 0;
               const isBase = idx === total - 1;
               const tierClass = isApex ? 'tier-apex' : isBase ? 'tier-base' : 'tier-mid';
 
-              // Dynamic stepped scaling for authentic pyramid silhouette across any number of nodes
-              const widthRatio = total > 1 ? idx / (total - 1) : 0.5;
-              const calcWidth = total === 1 ? 480 : Math.round(300 + (widthRatio * 480)); // 300px (Apex) ➔ 780px (Base)
-              const padV = Math.round(11 + widthRatio * 6); // 11px ➔ 17px
-              const padH = Math.round(16 + widthRatio * 10); // 16px ➔ 26px
-              const titleSize = (13.5 + widthRatio * 1.5).toFixed(1);
+              // Dynamic stepped scaling
+              const ratio = total > 1 ? idx / (total - 1) : 0.5;
+              const calcWidth = isVertical
+                ? (total === 1 ? 480 : Math.round(300 + (ratio * 480)))
+                : (total === 1 ? 260 : Math.round(200 + (ratio * 80)));
+              const calcMinHeight = isVertical ? 'auto' : `${Math.round(130 + (ratio * 120))}px`;
+              const padV = Math.round(11 + ratio * 6);
+              const padH = Math.round(16 + ratio * 10);
+              const titleSize = (13.5 + ratio * 1.5).toFixed(1);
               const matchesTarget = isTarget(node.title, node.id);
               const nodeColor = node.color || (isApex ? 'purple' : isBase ? 'emerald' : 'cyan');
 
@@ -209,8 +210,10 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                     className={`hierarchy-level-card ${tierClass} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}
                     style={{
                       width: `${calcWidth}px`,
-                      maxWidth: '96%',
+                      minHeight: calcMinHeight,
+                      maxWidth: isVertical ? '96%' : 'none',
                       padding: `${padV}px ${padH}px`,
+                      flexShrink: 0,
                       boxShadow: isApex
                         ? '0 6px 18px rgba(139, 92, 246, 0.22)'
                         : isBase
@@ -234,8 +237,12 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                   </div>
 
                   {idx < total - 1 && (
-                    <div className="hierarchy-connector-flow">
-                      <ChevronDown size={18} className="hierarchy-arrow" />
+                    <div className="hierarchy-connector-flow" style={{ flexShrink: 0 }}>
+                      {isVertical ? (
+                        <ChevronDown size={18} className="hierarchy-arrow" />
+                      ) : (
+                        <ArrowRight size={18} className="hierarchy-arrow" />
+                      )}
                     </div>
                   )}
                 </React.Fragment>
@@ -248,37 +255,133 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
   }
 
   // =========================================================================
-  // 2. HIERARCHICAL BRANCHING TREE (PKI / Key Derivation Tree)
+  // 2. HIERARCHICAL BRANCHING TREE (True Dynamic Parent-Child Graph)
   // =========================================================================
   if (type === 'pki_hierarchy') {
-    const nodes = (customNodes && customNodes.length > 0) ? customNodes : [
-      { id: 'node-1', title: 'Master Cryptographic Authority', subtitle: 'Root pairing parameters used to derive key polynomial shares', iconType: 'key', color: 'purple', badge: 'Root Authority' },
-      { id: 'node-2', title: 'Domain Attribute Authority (CA)', subtitle: 'Issues scoped client policy tokens to authorized personnel', iconType: 'server', color: 'cyan', badge: 'Intermediate CA' },
-      { id: 'node-3', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Key' }
+    const rawNodes = (customNodes && customNodes.length > 0) ? customNodes : [
+      { id: 'node-1', title: 'Master Cryptographic Authority', subtitle: 'Root pairing parameters used to derive key polynomial shares', iconType: 'key', color: 'purple', badge: 'Root Authority', parentId: null },
+      { id: 'node-2', title: 'Domain Attribute Authority (CA)', subtitle: 'Issues scoped client policy tokens to authorized personnel', iconType: 'server', color: 'cyan', badge: 'Intermediate CA', parentId: 'node-1' },
+      { id: 'node-3', title: 'Attribute Secret Key (Leaf)', subtitle: 'User-bound polynomial key share that decrypts ciphers', iconType: 'lock', color: 'emerald', badge: 'Ephemeral Key', parentId: 'node-2' }
     ];
 
-    // Dynamic Tree Tier Partitioning for ANY object count (1 to 10+)
-    const rootNode = nodes[0];
-    let midNodes = [];
-    let leafNodes = [];
+    // Check if any node has parentId configured
+    const hasConfiguredParents = rawNodes.some(n => n.parentId !== undefined && n.parentId !== null && n.parentId !== '');
+    const nodes = hasConfiguredParents ? rawNodes : rawNodes.map((n, idx) => {
+      if (idx === 0) return { ...n, parentId: null };
+      if (rawNodes.length <= 3) return { ...n, parentId: rawNodes[idx - 1].id };
+      const parentIdx = idx < 3 ? 0 : Math.floor((idx - 1) / 2);
+      return { ...n, parentId: rawNodes[parentIdx].id };
+    });
 
-    if (nodes.length === 2) {
-      midNodes = [nodes[1]];
-    } else if (nodes.length === 3) {
-      midNodes = [nodes[1]];
-      leafNodes = [nodes[2]];
-    } else if (nodes.length === 4) {
-      midNodes = [nodes[1], nodes[2]];
-      leafNodes = [nodes[3]];
-    } else if (nodes.length === 5) {
-      midNodes = [nodes[1], nodes[2]];
-      leafNodes = [nodes[3], nodes[4]];
-    } else if (nodes.length > 5) {
-      midNodes = [nodes[1], nodes[2]];
-      leafNodes = nodes.slice(3); // Renders ALL remaining nodes! 6, 7, 8...
+    // Find root nodes
+    const nodeIds = new Set(nodes.map(n => n.id));
+    let rootNodes = nodes.filter(n => !n.parentId || !nodeIds.has(n.parentId));
+    if (rootNodes.length === 0) {
+      rootNodes = [nodes[0]];
     }
 
-    const tRoot = isTarget(rootNode.title, rootNode.id);
+    const renderBranch = (node, visited = new Set()) => {
+      const currentVisited = new Set(visited);
+      currentVisited.add(node.id);
+
+      const children = nodes.filter(n => n.parentId === node.id && !currentVisited.has(n.id));
+      const tNode = isTarget(node.title, node.id);
+      const color = node.color || 'purple';
+
+      return (
+        <div
+          key={node.id}
+          className={`tree-branch-group ${isVertical ? 'branch-vertical' : 'branch-horizontal'}`}
+          style={{
+            display: 'flex',
+            flexDirection: isVertical ? 'column' : 'row',
+            alignItems: 'center',
+            position: 'relative',
+            flexShrink: 0
+          }}
+        >
+          {/* Parent Node Card */}
+          <div
+            className={`tree-node-card ${tNode ? 'node-active-guard is-hotspot-target' : ''}`}
+            style={{
+              borderLeft: `4px solid ${
+                color === 'cyan' ? '#06b6d4' :
+                color === 'purple' ? '#8b5cf6' :
+                color === 'emerald' ? '#10b981' :
+                color === 'gold' ? '#f59e0b' :
+                color === 'rose' ? '#e11d48' :
+                color === 'blue' ? '#3b82f6' : '#8b5cf6'
+              }`
+            }}
+          >
+            <div className={`tier-rank-pill pill-${color}`}>
+              <span>{node.badge || (node.parentId ? 'Child Component' : 'Root Authority')}</span>
+              <span className={`tier-authority-badge ${tNode ? 'badge-gold-glow' : ''}`}>
+                {tNode ? '★ TARGET HOTSPOT' : (node.parentId ? 'SCOPED CREDENTIAL' : 'MASTER ROOT')}
+              </span>
+            </div>
+            <div className="tier-title-row">
+              {renderDiagramNodeIcon(node.iconType, `text-${color}`)}
+              <h4>{node.title}</h4>
+            </div>
+            {node.subtitle && <p className="tier-desc">{node.subtitle}</p>}
+          </div>
+
+          {/* Children Sub-Tree with Precise Forks */}
+          {children.length > 0 && (
+            <div
+              className={`tree-children-branch ${isVertical ? 'branch-col' : 'branch-row'}`}
+              style={{
+                display: 'flex',
+                flexDirection: isVertical ? 'column' : 'row',
+                alignItems: 'center'
+              }}
+            >
+              {/* Connector fork */}
+              {isVertical ? (
+                <div className="tree-connector-fork-vertical">
+                  <div className="tree-stem-vertical" />
+                  {children.length > 1 && <div className="tree-rail-horizontal" />}
+                  {children.length > 1 && (
+                    <div className="tree-stem-drops">
+                      {children.map((c) => (
+                        <div key={c.id} className="tree-stem-drop" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="tree-connector-fork-horizontal">
+                  <div className="tree-stem-horizontal" />
+                  {children.length > 1 && <div className="tree-rail-vertical" />}
+                  {children.length > 1 && (
+                    <div className="tree-stem-horizontal-drops">
+                      {children.map((c) => (
+                        <div key={c.id} className="tree-stem-horizontal-drop" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Children Nodes Row or Column */}
+              <div
+                className={`tree-children-container ${isVertical ? 'children-row' : 'children-column'}`}
+                style={{
+                  display: 'flex',
+                  flexDirection: isVertical ? 'row' : 'column',
+                  gap: isVertical ? '24px' : '16px',
+                  justifyContent: 'center',
+                  alignItems: isVertical ? 'flex-start' : 'center'
+                }}
+              >
+                {children.map((child) => renderBranch(child, currentVisited))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
 
     return (
       <div className="diagram-card-container">
@@ -287,107 +390,28 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           <span>{customTitle || 'HIERARCHICAL BRANCHING TREE (PKI)'}</span>
         </div>
 
-        <div className="branching-tree-container">
-          {/* Level 1: Root Authority (Center) */}
-          <div className="tree-root-row">
-            <div className={`tree-node-card ${tRoot ? 'node-active-guard is-hotspot-target' : ''}`} style={{ borderLeft: '4px solid #8b5cf6' }}>
-              <div className="tier-rank-pill pill-purple">
-                <span>{rootNode.badge || 'Root Authority'}</span>
-                <span className={`tier-authority-badge ${tRoot ? 'badge-gold-glow' : ''}`}>
-                  {tRoot ? '★ TARGET HOTSPOT' : 'MASTER ROOT'}
-                </span>
-              </div>
-              <div className="tier-title-row">
-                {renderDiagramNodeIcon(rootNode.iconType, `text-${rootNode.color || 'purple'}`)}
-                <h4>{rootNode.title}</h4>
-              </div>
-              <p className="tier-desc">{rootNode.subtitle}</p>
-            </div>
+        <div
+          className={`branching-tree-container ${isVertical ? 'tree-layout-vertical' : 'tree-layout-horizontal'}`}
+          style={{
+            overflowX: 'auto',
+            padding: '14px 4px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <div
+            className={`tree-roots-wrapper ${isVertical ? 'roots-row' : 'roots-column'}`}
+            style={{
+              display: 'flex',
+              flexDirection: isVertical ? 'row' : 'column',
+              gap: isVertical ? '32px' : '20px',
+              justifyContent: 'center',
+              alignItems: isVertical ? 'flex-start' : 'center'
+            }}
+          >
+            {rootNodes.map((root) => renderBranch(root))}
           </div>
-
-          {/* Branch Split 1: Root to Intermediate Level */}
-          {midNodes.length > 0 && (
-            <div className="tree-branch-split">
-              <div className="tree-stem-vertical" />
-              {midNodes.length > 1 && <div className="tree-rail-horizontal" />}
-              <div className="tree-stem-drops">
-                {midNodes.map((_, i) => (
-                  <div key={i} className="tree-stem-drop" />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Level 2: Intermediate CAs */}
-          {midNodes.length > 0 && (
-            <div className="tree-mid-row">
-              {midNodes.map((mNode) => {
-                const tMid = isTarget(mNode.title, mNode.id);
-                const mColor = mNode.color || 'cyan';
-                return (
-                  <div
-                    key={mNode.id || mNode.title}
-                    className={`tree-node-card ${tMid ? 'node-active-guard is-hotspot-target' : ''}`}
-                    style={{ borderLeft: `4px solid ${mColor === 'cyan' ? '#06b6d4' : mColor === 'blue' ? '#3b82f6' : '#8b5cf6'}` }}
-                  >
-                    <div className={`tier-rank-pill pill-${mColor}`}>
-                      <span>{mNode.badge || 'Intermediate CA'}</span>
-                      <span className={`tier-authority-badge ${tMid ? 'badge-gold-glow' : ''}`}>
-                        {tMid ? '★ TARGET HOTSPOT' : 'INTERMEDIATE CA'}
-                      </span>
-                    </div>
-                    <div className="tier-title-row">
-                      {renderDiagramNodeIcon(mNode.iconType, `text-${mColor}`)}
-                      <h4>{mNode.title}</h4>
-                    </div>
-                    <p className="tier-desc">{mNode.subtitle}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Branch Split 2: Intermediates to Leaves */}
-          {leafNodes.length > 0 && (
-            <div className="tree-branch-split">
-              <div className="tree-stem-vertical" />
-              {leafNodes.length > 1 && <div className="tree-rail-horizontal" />}
-              <div className="tree-stem-drops">
-                {leafNodes.map((_, i) => (
-                  <div key={i} className="tree-stem-drop" />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Level 3: Leaf Keys & Tokens (All Remaining Nodes) */}
-          {leafNodes.length > 0 && (
-            <div className="tree-leaf-row">
-              {leafNodes.map((lNode) => {
-                const tLeaf = isTarget(lNode.title, lNode.id);
-                const lColor = lNode.color || 'emerald';
-                return (
-                  <div
-                    key={lNode.id || lNode.title}
-                    className={`tree-node-card ${tLeaf ? 'node-active-guard is-hotspot-target' : ''}`}
-                    style={{ borderLeft: `4px solid ${lColor === 'emerald' ? '#10b981' : lColor === 'gold' ? '#f59e0b' : '#8b5cf6'}` }}
-                  >
-                    <div className={`tier-rank-pill pill-${lColor}`}>
-                      <span>{lNode.badge || 'Leaf Key Share'}</span>
-                      <span className={`tier-authority-badge ${tLeaf ? 'badge-gold-glow' : ''}`}>
-                        {tLeaf ? '★ TARGET HOTSPOT' : 'LEAF CREDENTIAL'}
-                      </span>
-                    </div>
-                    <div className="tier-title-row">
-                      {renderDiagramNodeIcon(lNode.iconType, `text-${lColor}`)}
-                      <h4>{lNode.title}</h4>
-                    </div>
-                    <p className="tier-desc">{lNode.subtitle}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       </div>
     );
@@ -403,7 +427,6 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
       { id: 'node-3', title: 'Tenant Beta Organization', subtitle: 'Isolated ciphertext pool inaccessible to Tenant Alpha credentials', iconType: 'lock', color: 'purple', badge: 'Partition B' }
     ];
 
-    // Find barrier node index (look for barrier/wall or default to middle index)
     let barrierIdx = nodes.findIndex(n =>
       n.title.toLowerCase().includes('barrier') ||
       n.title.toLowerCase().includes('wall') ||
@@ -426,13 +449,33 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           <span>{customTitle || 'ISOLATED DUAL-PARTITION BOUNDARY'}</span>
         </div>
 
-        <div className="tenant-partition-container">
-          {/* Tenant A Enclosed Sandbox Enclave (All Left Nodes) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minWidth: '240px' }}>
+        <div
+          className={`tenant-partition-container ${isVertical ? 'tenant-partition-vertical' : 'tenant-partition-horizontal'}`}
+          style={{
+            display: 'flex',
+            flexDirection: isVertical ? 'column' : 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            width: '100%',
+            overflowX: isVertical ? 'visible' : 'auto'
+          }}
+        >
+          {/* Tenant A Enclosed Sandbox Enclave */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: isVertical ? 'row' : 'column',
+              gap: '12px',
+              flex: 1,
+              width: isVertical ? '100%' : 'auto',
+              minWidth: isVertical ? 'none' : '240px'
+            }}
+          >
             {(leftNodes.length > 0 ? leftNodes : [nodes[0]]).map((tNode) => {
               const tA = isTarget(tNode.title, tNode.id);
               return (
-                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tA ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #06b6d4' }}>
+                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tA ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #06b6d4', flex: 1 }}>
                   <div className="vault-top-banner banner-cyan" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Lock size={14} />
@@ -459,7 +502,14 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           </div>
 
           {/* Central Cryptographic Barrier Wall */}
-          <div className={`cryptographic-barrier-wall ${tWall ? 'is-hotspot-target node-active-guard' : ''}`} style={{ minWidth: '200px' }}>
+          <div
+            className={`cryptographic-barrier-wall ${tWall ? 'is-hotspot-target node-active-guard' : ''}`}
+            style={{
+              width: isVertical ? '100%' : 'auto',
+              minWidth: isVertical ? 'none' : '200px',
+              maxWidth: isVertical ? '540px' : 'none'
+            }}
+          >
             <div className="barrier-shield-icon">
               <AlertTriangle size={24} className="text-rose" />
             </div>
@@ -475,12 +525,21 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             </span>
           </div>
 
-          {/* Tenant B Enclosed Sandbox Enclave (All Right Nodes) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, minWidth: '240px' }}>
+          {/* Tenant B Enclosed Sandbox Enclave */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: isVertical ? 'row' : 'column',
+              gap: '12px',
+              flex: 1,
+              width: isVertical ? '100%' : 'auto',
+              minWidth: isVertical ? 'none' : '240px'
+            }}
+          >
             {(rightNodes.length > 0 ? rightNodes : (nodes.length > 1 ? [nodes[nodes.length - 1]] : [])).map((tNode) => {
               const tB = isTarget(tNode.title, tNode.id);
               return (
-                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tB ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #8b5cf6' }}>
+                <div key={tNode.id || tNode.title} className={`tenant-vault-box ${tB ? 'is-hotspot-target node-active-guard' : ''}`} style={{ border: '2px solid #8b5cf6', flex: 1 }}>
                   <div className="vault-top-banner banner-purple" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Lock size={14} />
@@ -521,11 +580,8 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
       { id: 'node-4', title: 'Internal Service Mesh', subtitle: 'Core Microservices Private VPC', iconType: 'cpu', color: 'emerald', badge: 'Private VPC' }
     ];
 
-    // Zone 1: First node (Public Edge)
     const extNode = nodes[0];
-    // Zone 3: Last node (Private VPC) if total > 2
     const meshNode = nodes.length > 2 ? nodes[nodes.length - 1] : (nodes.length === 2 ? nodes[1] : null);
-    // Zone 2: All intermediate inspection/gateway nodes (nodes.slice(1, -1))
     const dmzNodes = nodes.length > 2 ? nodes.slice(1, -1) : [];
 
     const tExt = isTarget(extNode.title, extNode.id);
@@ -538,15 +594,29 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           <span>{customTitle || 'PERIMETER INGRESS & GATEWAY ARCHITECTURE'}</span>
         </div>
 
-        <div className="dmz-zones-container">
+        <div
+          className={`dmz-zones-container ${isVertical ? 'dmz-vertical' : 'dmz-horizontal'}`}
+          style={{
+            display: 'flex',
+            flexDirection: isVertical ? 'column' : 'row',
+            alignItems: isVertical ? 'center' : 'stretch',
+            justifyContent: 'space-between',
+            gap: '12px',
+            overflowX: isVertical ? 'visible' : 'auto',
+            width: '100%'
+          }}
+        >
           {/* ZONE 1: Untrusted Public Edge */}
-          <div className="dmz-zone dmz-zone-untrusted">
+          <div
+            className="dmz-zone dmz-zone-untrusted"
+            style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+          >
             <div className="dmz-zone-header">
               <Globe size={13} />
               <span>Zone 1: Public Edge</span>
             </div>
 
-            <div className={`pipeline-node ${tExt ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%' }}>
+            <div className={`pipeline-node ${tExt ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%', maxWidth: 'none' }}>
               <div className="node-icon-bubble bg-cyan-subtle">
                 {renderDiagramNodeIcon(extNode.iconType, 'text-cyan')}
               </div>
@@ -558,20 +628,23 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
             </div>
           </div>
 
-          <div className="pipeline-connector">
+          <div className="pipeline-connector" style={{ transform: isVertical ? 'rotate(90deg)' : 'none', margin: isVertical ? '4px 0' : '0' }}>
             <ArrowRight size={18} className="connector-arrow text-cyan" />
           </div>
 
-          {/* ZONE 2: DMZ Enclave (All Intermediate Inspection & Security Gates) */}
+          {/* ZONE 2: DMZ Enclave */}
           {dmzNodes.length > 0 && (
             <>
-              <div className="dmz-zone dmz-zone-enclave">
+              <div
+                className="dmz-zone dmz-zone-enclave"
+                style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+              >
                 <div className="dmz-zone-header">
                   <ShieldCheck size={13} />
                   <span>Zone 2: Perimeter DMZ Enclave ({dmzNodes.length} Stages)</span>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                   {dmzNodes.map((dNode, dIdx) => {
                     const tD = isTarget(dNode.title, dNode.id);
                     const dColor = dNode.color || 'gold';
@@ -597,7 +670,7 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                 </div>
               </div>
 
-              <div className="pipeline-connector">
+              <div className="pipeline-connector" style={{ transform: isVertical ? 'rotate(90deg)' : 'none', margin: isVertical ? '4px 0' : '0' }}>
                 <ArrowRight size={18} className="connector-arrow text-emerald" />
               </div>
             </>
@@ -605,13 +678,16 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
 
           {/* ZONE 3: Secure Private VPC */}
           {meshNode && (
-            <div className="dmz-zone dmz-zone-private">
+            <div
+              className="dmz-zone dmz-zone-private"
+              style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+            >
               <div className="dmz-zone-header">
                 <Lock size={13} />
                 <span>Zone 3: Private VPC</span>
               </div>
 
-              <div className={`pipeline-node ${tMesh ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%' }}>
+              <div className={`pipeline-node ${tMesh ? 'node-active-guard is-hotspot-target' : ''}`} style={{ width: '100%', maxWidth: 'none' }}>
                 <div className="node-icon-bubble bg-emerald-subtle">
                   {renderDiagramNodeIcon(meshNode.iconType, 'text-emerald')}
                 </div>
@@ -645,14 +721,28 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
           <span>{customTitle || 'RELATIONAL ENTITY DATA MATRIX'}</span>
         </div>
 
-        <div className="data-flow-container">
+        <div
+          className={`data-flow-container ${isVertical ? 'data-flow-vertical' : 'data-flow-horizontal'}`}
+          style={{
+            display: 'flex',
+            flexDirection: isVertical ? 'column' : 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            overflowX: isVertical ? 'visible' : 'auto',
+            width: '100%'
+          }}
+        >
           {nodes.map((node, idx) => {
             const matchesTarget = isTarget(node.title, node.id);
             const nodeColor = node.color || (idx === 0 ? 'emerald' : idx === 1 ? 'cyan' : 'purple');
 
             return (
               <React.Fragment key={node.id || idx}>
-                <div className={`data-flow-card ${matchesTarget ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}>
+                <div
+                  className={`data-flow-card ${matchesTarget ? 'highlight-card is-hotspot-target node-active-guard' : ''}`}
+                  style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '520px' : 'none' }}
+                >
                   <div className="flow-card-header">
                     {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
                     <span className={`flow-role-tag ${matchesTarget ? 'badge-gold-glow' : `tag-${nodeColor}`}`}>
@@ -667,9 +757,13 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
                 </div>
 
                 {idx < nodes.length - 1 && (
-                  <div className="flow-connector">
+                  <div className="flow-connector" style={{ flexDirection: isVertical ? 'row' : 'column' }}>
                     <span className="flow-connector-label">Flow {idx + 1}</span>
-                    <ArrowRight size={18} className="text-cyan" />
+                    {isVertical ? (
+                      <ChevronDown size={18} className="text-cyan" />
+                    ) : (
+                      <ArrowRight size={18} className="text-cyan" />
+                    )}
                   </div>
                 )}
               </React.Fragment>
@@ -697,14 +791,29 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
         <span>{customTitle || 'SEQUENTIAL PROCESS PIPELINE ARCHITECTURE'}</span>
       </div>
 
-      <div className="diagram-pipeline-wrapper">
+      <div
+        className={`diagram-pipeline-wrapper ${isVertical ? 'pipeline-vertical' : 'pipeline-horizontal'}`}
+        style={{
+          display: 'flex',
+          flexDirection: isVertical ? 'column' : 'row',
+          alignItems: 'center',
+          justifyContent: isVertical ? 'center' : 'flex-start',
+          gap: '14px',
+          overflowX: isVertical ? 'visible' : 'auto',
+          width: '100%',
+          padding: '10px 4px 18px'
+        }}
+      >
         {pipelineNodes.map((node, idx) => {
           const matchesTarget = isTarget(node.title, node.id);
           const nodeColor = node.color || 'purple';
 
           return (
             <React.Fragment key={node.id || idx}>
-              <div className={`pipeline-node node-${nodeColor} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}>
+              <div
+                className={`pipeline-node node-${nodeColor} ${matchesTarget ? 'node-active-guard is-hotspot-target' : ''}`}
+                style={{ width: isVertical ? '100%' : 'auto', maxWidth: isVertical ? '480px' : '200px' }}
+              >
                 <div className={`node-icon-bubble bg-${nodeColor}-subtle ${matchesTarget ? 'pulse-slow' : ''}`}>
                   {renderDiagramNodeIcon(node.iconType, `text-${nodeColor}`)}
                 </div>
@@ -716,11 +825,28 @@ export default function QuizDiagram({ type = 'security_pipeline', customNodes, c
               </div>
 
               {idx < pipelineNodes.length - 1 && (
-                <div className="pipeline-connector">
-                  <div className="connector-line">
+                <div
+                  className="pipeline-connector"
+                  style={{
+                    flexDirection: isVertical ? 'column' : 'row',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <div
+                    className="connector-line"
+                    style={{
+                      width: isVertical ? '2px' : '24px',
+                      height: isVertical ? '20px' : '2px'
+                    }}
+                  >
                     <div className={`connector-pulse-dot delay-${(idx % 3) + 1}`} />
                   </div>
-                  <ArrowRight size={16} className="connector-arrow text-purple" />
+                  {isVertical ? (
+                    <ChevronDown size={16} className="connector-arrow text-purple" />
+                  ) : (
+                    <ArrowRight size={16} className="connector-arrow text-purple" />
+                  )}
                 </div>
               )}
             </React.Fragment>

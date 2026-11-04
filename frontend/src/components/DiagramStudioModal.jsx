@@ -14,7 +14,8 @@ import {
   Cloud,
   Lock,
   ArrowRight,
-  ChevronDown
+  ChevronDown,
+  GitBranch
 } from 'lucide-react';
 import QuizDiagram, { AVAILABLE_DIAGRAM_ICONS, renderDiagramNodeIcon } from './QuizDiagram';
 
@@ -327,26 +328,60 @@ export default function DiagramStudioModal({
                       />
                     </div>
 
-                    {/* Action Bar: Layout toggle + Add Object */}
+                    {/* Action Bar: Layout toggle (Vertical vs Horizontal) + Add Object */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                      <button
-                        type="button"
-                        onClick={() => onChangeLayout && onChangeLayout(customLayout === 'hierarchy' ? 'pipeline' : 'hierarchy')}
+                      <div
                         style={{
-                          flex: 1,
-                          padding: '6px 10px',
+                          display: 'inline-flex',
+                          background: isDark ? '#0b0f19' : '#e2e8f0',
+                          padding: '3px',
                           borderRadius: '8px',
-                          border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1',
-                          background: isDark ? '#111827' : '#ffffff',
-                          color: isDark ? '#cbd5e1' : '#334155',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          cursor: 'pointer'
+                          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1'
                         }}
-                        title="Toggle layout structure"
                       >
-                        {customLayout === 'hierarchy' ? '📐 Vertical Hierarchy' : '➡️ Horizontal Flow'}
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => onChangeLayout && onChangeLayout('hierarchy')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: customLayout === 'hierarchy' ? '#8b5cf6' : 'transparent',
+                            color: customLayout === 'hierarchy' ? '#ffffff' : (isDark ? '#94a3b8' : '#64748b'),
+                            fontSize: '11px',
+                            fontWeight: customLayout === 'hierarchy' ? 700 : 500,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                          title="Vertical Hierarchy (Top-to-Bottom Layout)"
+                        >
+                          <span>📐 Vertical</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onChangeLayout && onChangeLayout('pipeline')}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: customLayout === 'pipeline' ? '#8b5cf6' : 'transparent',
+                            color: customLayout === 'pipeline' ? '#ffffff' : (isDark ? '#94a3b8' : '#64748b'),
+                            fontSize: '11px',
+                            fontWeight: customLayout === 'pipeline' ? 700 : 500,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                          title="Horizontal Flow (Left-to-Right Layout)"
+                        >
+                          <span>➡️ Horizontal</span>
+                        </button>
+                      </div>
 
                       <button
                         type="button"
@@ -623,6 +658,41 @@ export default function DiagramStudioModal({
                                     outline: 'none'
                                   }}
                                 />
+
+                                {/* Parent Node Relationship Selector */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isDark ? '#94a3b8' : '#64748b', fontSize: '10.5px', fontWeight: 600, flexShrink: 0 }}>
+                                    <GitBranch size={12} style={{ color: '#8b5cf6' }} />
+                                    <span>Parent:</span>
+                                  </div>
+                                  <select
+                                    value={node.parentId || ''}
+                                    onChange={(e) => onUpdateNode && onUpdateNode(node.id, 'parentId', e.target.value || null)}
+                                    style={{
+                                      flex: 1,
+                                      padding: '3px 8px',
+                                      borderRadius: '5px',
+                                      border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1',
+                                      background: isDark ? '#0b0f19' : '#ffffff',
+                                      color: isDark ? '#f8fafc' : '#1e293b',
+                                      fontSize: '11px',
+                                      outline: 'none',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <option value="">None (Root Node)</option>
+                                    {customNodes
+                                      .filter((other) => other.id !== node.id)
+                                      .map((other) => {
+                                        const otherIdx = customNodes.indexOf(other) + 1;
+                                        return (
+                                          <option key={other.id} value={other.id}>
+                                            #{otherIdx} {other.title || `Component ${otherIdx}`}
+                                          </option>
+                                        );
+                                      })}
+                                  </select>
+                                </div>
                               </div>
                             </div>
                           </div>
