@@ -94,14 +94,14 @@ def seed_test_data(db_session: Session):
     db.refresh(t2)
 
     # 4. Training Sessions
-    from datetime import datetime
+    from datetime import datetime, timezone
     sess1 = db.query(TrainingSession).filter_by(session_code="SESS_BND_01").first()
     if not sess1:
         sess1 = TrainingSession(
             session_code="SESS_BND_01",
             course_name="Cybersecurity 101",
-            start_date=datetime.utcnow(),
-            end_date=datetime.utcnow(),
+            start_date=datetime.now(timezone.utc).replace(tzinfo=None),
+            end_date=datetime.now(timezone.utc).replace(tzinfo=None),
             delivery_type="Dedicated"
         )
         db.add(sess1)

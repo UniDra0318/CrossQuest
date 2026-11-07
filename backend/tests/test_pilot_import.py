@@ -250,9 +250,12 @@ def test_phase3_excel_workbook_pilot_ingestion_and_100_percent_reconciliation(cl
     admin = import_admin_and_staff["admin"]
     token = create_access_token(subject=admin.id)
 
-    excel_path = r"d:\Downloads\Training_Participants_dda05079-5c52-4e44-909e-a5adbf4567e0.xlsx"
+    env_path = os.getenv("CROSSQUEST_PILOT_WORKBOOK_PATH")
+    default_fixture = os.path.join(os.path.dirname(__file__), "fixtures", "synthetic_pilot_training_participants.xlsx")
+    fallback_path = r"d:\Downloads\Training_Participants_dda05079-5c52-4e44-909e-a5adbf4567e0.xlsx"
+    excel_path = env_path if (env_path and os.path.exists(env_path)) else (default_fixture if os.path.exists(default_fixture) else fallback_path)
     if not os.path.exists(excel_path):
-        pytest.skip(f"Pilot Excel file not found at {excel_path}")
+        pytest.skip(f"Pilot Excel file not found. Set CROSSQUEST_PILOT_WORKBOOK_PATH or ensure {default_fixture} exists.")
 
     with open(excel_path, "rb") as f:
         file_bytes = f.read()
@@ -325,9 +328,12 @@ def test_phase3_sample_data_drops_sales_and_billing_fields(client: TestClient, i
     admin = import_admin_and_staff["admin"]
     token = create_access_token(subject=admin.id)
 
-    excel_path = r"d:\Downloads\Sample-Data_84bce693-2ae3-4172-a698-6b791b0977c0.xlsx"
+    env_path = os.getenv("CROSSQUEST_SAMPLE_WORKBOOK_PATH")
+    default_fixture = os.path.join(os.path.dirname(__file__), "fixtures", "synthetic_sample_data.xlsx")
+    fallback_path = r"d:\Downloads\Sample-Data_84bce693-2ae3-4172-a698-6b791b0977c0.xlsx"
+    excel_path = env_path if (env_path and os.path.exists(env_path)) else (default_fixture if os.path.exists(default_fixture) else fallback_path)
     if not os.path.exists(excel_path):
-        pytest.skip(f"Sample-Data Excel file not found at {excel_path}")
+        pytest.skip(f"Sample-Data Excel file not found. Set CROSSQUEST_SAMPLE_WORKBOOK_PATH or ensure {default_fixture} exists.")
 
     with open(excel_path, "rb") as f:
         file_bytes = f.read()

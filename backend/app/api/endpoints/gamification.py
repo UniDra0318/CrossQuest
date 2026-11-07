@@ -494,7 +494,7 @@ def submit_quiz_attempt(
         score=earned_score,
         total_points=earned_points,
         is_scored=True,
-        submitted_at=datetime.utcnow()
+        submitted_at=datetime.now(timezone.utc).replace(tzinfo=None)
     )
     db.add(attempt)
 
@@ -581,7 +581,7 @@ def start_live_quiz_broadcast(
         "duration_seconds": payload.duration_seconds or 300,
         "description": payload.description or "Immediate live assessment initiated by your lead instructor.",
         "questions_count": payload.questions_count or 4,
-        "started_at": datetime.utcnow().isoformat(),
+        "started_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
         "broadcast_id": str(uuid.uuid4())
     }
     return CURRENT_LIVE_BROADCAST
@@ -622,7 +622,7 @@ def close_quiz_session(
         raise HTTPException(status_code=404, detail="Quiz not found")
 
     quiz.is_closed = True
-    quiz.closed_at = datetime.utcnow()
+    quiz.closed_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
     return {"status": "success", "quiz_id": quiz.id, "is_closed": True, "closed_at": quiz.closed_at}
 

@@ -1,10 +1,15 @@
 import uuid
-from datetime import datetime, date
+from datetime import datetime, timezone, date
 from sqlalchemy import (
     Column, String, Integer, Boolean, DateTime, Date, ForeignKey, Text, JSON, Float
 )
 from sqlalchemy.orm import relationship
 from app.core.database import Base
+
+def utc_now() -> datetime:
+    """Returns naive UTC datetime object for cross-database compatibility (PostgreSQL/SQLite) without Python 3.12+ deprecation."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 
 class ClientCompany(Base):
     __tablename__ = "client_companies"
@@ -14,7 +19,7 @@ class ClientCompany(Base):
     name = Column(String(200), nullable=False)
     client_type = Column(String(20), default="COMPANY", nullable=False) # "COMPANY" or "INDIVIDUAL" (FR-05)
     industry = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     trainees = relationship("Trainee", back_populates="current_company")
     training_records = relationship("TrainingRecord", back_populates="company_at_completion")
@@ -56,7 +61,7 @@ class User(Base):
     mfa_secret = Column(String(64), nullable=True) # Base32 secret for pyotp
     mfa_recovery_codes = Column(JSON, default=list) # List of SHA-256 hashed single-use recovery codes
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     # Relationships
     access_logs = relationship("AccessLog", back_populates="actor_user", foreign_keys="AccessLog.actor_user_id")
@@ -85,7 +90,7 @@ class Trainee(Base):
     leaderboard_opt_out = Column(Boolean, default=False) # OI-03 opt-out from company leaderboard
     current_streak = Column(Integer, default=0) # Activity streak in days
     last_activity_date = Column(Date, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     # Relationships
     user_account = relationship("User", back_populates="trainee_profile")
@@ -106,7 +111,7 @@ class TraineeAffiliation(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     trainee_id = Column(String(36), ForeignKey("trainees.id"), nullable=False)
     company_id = Column(String(36), ForeignKey("client_companies.id"), nullable=False)
-    valid_from = Column(DateTime, nullable=False, default=datetime.utcnow)
+    valid_from = Column(DateTime, nullable=False, default=utc_now)
     valid_to = Column(DateTime, nullable=True) # None = current active employer
 
     trainee = relationship("Trainee", back_populates="affiliations")
@@ -121,7 +126,7 @@ class Course(Base):
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     acronym_3 = Column(String(10), nullable=True) # Official pilot three-letter acronym (e.g. PMP, BSS, CRM, SEC)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     sessions = relationship("TrainingSession", back_populates="course")
 
@@ -138,7 +143,7 @@ class TrainingSession(Base):
     delivery_type = Column(String(50), default="Public") # Public, Dedicated
     delivery_mode = Column(String(50), default="F2F") # F2F, Online, Hybrid
     venue = Column(String(200), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     # Trainer Sign-off Workflow (Phase 2, Section 3.5.3)
     trainer_signed_off = Column(Boolean, default=False)
@@ -160,7 +165,7 @@ class AccountManagerAssignment(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     company_id = Column(String(36), ForeignKey("client_companies.id"), nullable=False)
-    valid_from = Column(DateTime, default=datetime.utcnow, nullable=False)
+    valid_from = Column(DateTime, default=utc_now, nullable=False)
     valid_to = Column(DateTime, nullable=True) # None = currently assigned
     assigned_by = Column(String(36), nullable=True)
 
@@ -175,7 +180,7 @@ class TrainerAssignment(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     session_id = Column(String(36), ForeignKey("training_sessions.id"), nullable=False)
-    valid_from = Column(DateTime, default=datetime.utcnow, nullable=False)
+    valid_from = Column(DateTime, default=utc_now, nullable=False)
     valid_to = Column(DateTime, nullable=True) # None = currently assigned
 
     user = relationship("User", back_populates="trainer_assignments")
@@ -216,8 +221,8 @@ class TrainingRecord(Base):
     # Soft deletion: hidden from non-Admins, audited immediately (DD-06, FR-08, Section 3.5.3)
     deleted_at = Column(DateTime, nullable=True)
     deleted_by = Column(String(36), ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     # Relationships
     trainee = relationship("Trainee", back_populates="training_records")
@@ -239,7 +244,7 @@ class TrainingRecordVersion(Base):
     payload_ciphertext = Column(Text, nullable=False)
     policy_tokens = Column(String(500), nullable=True)
     edited_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
-    edited_at = Column(DateTime, default=datetime.utcnow)
+    edited_at = Column(DateTime, default=utc_now)
     reason = Column(Text, nullable=True) # Mandatory reason logged for Admin and Finance edits
 
     record = relationship("TrainingRecord", back_populates="versions")
@@ -269,7 +274,7 @@ class Certificate(Base):
     cert_type_code = Column(String(50), ForeignKey("certification_types.code"), nullable=True)
     title = Column(String(200), nullable=False)
     serial_number = Column(String(50), unique=True, index=True, nullable=True) # AAAYYYYMMDD-01 format
-    issue_date = Column(DateTime, nullable=False, default=datetime.utcnow)
+    issue_date = Column(DateTime, nullable=False, default=utc_now)
     expiry_date = Column(DateTime, nullable=True) # Null for non-expiring Crossworks completion certificates (U-17, Section 3.8.2)
     expiry_basis = Column(String(255), default="Calculated: issue_date + 36 months")
     
@@ -304,7 +309,7 @@ class Notification(Base):
     title = Column(String(200), nullable=False)
     message = Column(Text, nullable=False)
     is_read = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     certificate = relationship("Certificate", back_populates="notifications")
 
@@ -324,7 +329,7 @@ class Quiz(Base):
     approved_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     approved_at = Column(DateTime, nullable=True)
     created_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     session = relationship("TrainingSession", back_populates="quizzes")
     questions = relationship("QuizQuestion", back_populates="quiz", cascade="all, delete-orphan")
@@ -360,7 +365,7 @@ class QuizAnswerKey(Base):
     question_id = Column(String(36), ForeignKey("quiz_questions.id", ondelete="CASCADE"), unique=True, nullable=False)
     correct_answer = Column(Integer, nullable=False) # Index (0-based)
     explanation = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     question = relationship("QuizQuestion", back_populates="answer_key")
 
@@ -377,7 +382,7 @@ class QuizAttempt(Base):
     score = Column(Float, default=0.0)
     total_points = Column(Integer, default=0)
     is_scored = Column(Boolean, default=True) # SEC-26 one scored attempt per quiz version
-    submitted_at = Column(DateTime, default=datetime.utcnow)
+    submitted_at = Column(DateTime, default=utc_now)
 
     quiz = relationship("Quiz", back_populates="attempts")
 
@@ -390,7 +395,7 @@ class Team(Base):
     session_id = Column(String(36), ForeignKey("training_sessions.id"), nullable=False)
     team_name = Column(String(100), nullable=False)
     created_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     session = relationship("TrainingSession", back_populates="teams")
     members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
@@ -418,7 +423,7 @@ class GamificationProgress(Base):
     quizzes_completed = Column(Integer, default=0)
     streak = Column(Integer, default=0)
     last_activity_date = Column(Date, nullable=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     trainee = relationship("Trainee", back_populates="gamification")
 
@@ -431,7 +436,7 @@ class AccessLog(Base):
     __tablename__ = "access_logs"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    occurred_at = Column(DateTime, default=datetime.utcnow, index=True)
+    occurred_at = Column(DateTime, default=utc_now, index=True)
     actor_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     actor_role = Column(String(50), nullable=True) # Role at occurrence
     
@@ -479,7 +484,7 @@ class AnomalyAlert(Base):
     
     # Supporting indicator & episode tracking (Table 13, Section 3.7.4)
     after_hours_tag = Column(Boolean, default=False)
-    episode_start = Column(DateTime, default=datetime.utcnow)
+    episode_start = Column(DateTime, default=utc_now)
     client_reviewed = Column(Boolean, default=False)
     
     # Alert lifecycle (Section 3.7.5)
@@ -493,7 +498,7 @@ class AnomalyAlert(Base):
     event_count = Column(Integer, default=1) # For aggregation
     description = Column(Text, nullable=False)
     metadata_info = Column(JSON, default=dict)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=utc_now, index=True)
 
     subject_user = relationship("User", foreign_keys=[subject_user_id])
     reviewed_by = relationship("User", foreign_keys=[reviewed_by_user_id])
@@ -507,7 +512,7 @@ class AlertEvent(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     alert_id = Column(String(36), ForeignKey("anomaly_alerts.id"), nullable=False)
     log_id = Column(String(36), ForeignKey("access_logs.id"), nullable=False)
-    linked_at = Column(DateTime, default=datetime.utcnow)
+    linked_at = Column(DateTime, default=utc_now)
 
     alert = relationship("AnomalyAlert", back_populates="events")
     log = relationship("AccessLog")
@@ -535,7 +540,7 @@ class AbeAttribute(Base):
     ref_code = Column(String(100), nullable=True)
     version = Column(Integer, default=1)
     status = Column(String(20), default="active") # active, staged, retired
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 
 class UserAbeKey(Base):
@@ -549,7 +554,7 @@ class UserAbeKey(Base):
     nonce = Column(String(64), nullable=True)
     key_ciphertext = Column(Text, nullable=False) # AES-GCM encrypted serialized private key
     kms_key_arn = Column(String(255), nullable=True)
-    issued_at = Column(DateTime, default=datetime.utcnow)
+    issued_at = Column(DateTime, default=utc_now)
     revoked_at = Column(DateTime, nullable=True)
     material_deleted_at = Column(DateTime, nullable=True)
 
@@ -582,7 +587,7 @@ class ImportBatch(Base):
     quarantined_count = Column(Integer, default=0) # Duplicate rows quarantined
     distinct_customers_count = Column(Integer, default=0) # Distinct client organizations
     reconciled = Column(Boolean, default=False)
-    loaded_at = Column(DateTime, default=datetime.utcnow)
+    loaded_at = Column(DateTime, default=utc_now)
     loaded_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
 
 
@@ -623,11 +628,11 @@ class UserSession(Base):
     expires_at = Column(DateTime, nullable=False)
     
     # Role-based idle timeout & 12-hour maximum lifetime (SEC-07, OI-17)
-    last_active_at = Column(DateTime, default=datetime.utcnow)
+    last_active_at = Column(DateTime, default=utc_now)
     idle_timeout_sec = Column(Integer, default=900) # Default 15m (900s admin/fin, 1800s am/trn, 3600s trainee)
     max_expires_at = Column(DateTime, nullable=True) # 12-hour absolute maximum session lifetime
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     user = relationship("User", back_populates="sessions")
 
@@ -641,7 +646,7 @@ class PasswordResetToken(Base):
     token_hash = Column(String(64), index=True, nullable=False)
     is_used = Column(Boolean, default=False)
     expires_at = Column(DateTime, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     user = relationship("User", back_populates="reset_tokens")
 
@@ -662,7 +667,7 @@ class ReencryptionJob(Base):
     status = Column(String(20), default="IN_PROGRESS") # IN_PROGRESS, COMPLETED, FAILED
     error_message = Column(Text, nullable=True)
     initiated_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     completed_at = Column(DateTime, nullable=True)
 
     initiated_by = relationship("User", foreign_keys=[initiated_by_user_id])
