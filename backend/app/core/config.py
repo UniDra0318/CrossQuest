@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
 
     # Database TLS Configuration (SEC-18)
-    DB_SSL_MODE: str = "require" # disable, allow, prefer, require, verify-ca, verify-full
+    DB_SSL_MODE: str = "prefer" # disable, allow, prefer, require, verify-ca, verify-full
     DB_SSL_CERT_PATH: Optional[str] = None
 
 

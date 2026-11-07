@@ -45,3 +45,5 @@ postgres_data/
 
 # Restricted Storage
 backend/storage/
+backend/keys/
+*.key

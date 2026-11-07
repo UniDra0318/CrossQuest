@@ -32,17 +32,20 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
+  // Navigation requests: Network-First so app updates never get stuck on stale white screen
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => {
-        // Fallback for offline navigation
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-      });
+      return fetch(event.request);
     })
   );
 });

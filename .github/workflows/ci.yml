@@ -60,3 +60,4 @@ jobs:
       - name: Build Production PWA Bundle
         working-directory: frontend
         run: npm run build
+

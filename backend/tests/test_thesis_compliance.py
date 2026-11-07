@@ -206,6 +206,7 @@ def test_fail_closed_production_charm_enforcement(monkeypatch):
     from app.core.config import settings
 
     monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr("app.crypto.cpabe_engine.CHARM_AVAILABLE", False)
     with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
         CPABEEngine()
 
@@ -216,6 +217,7 @@ def test_fail_closed_production_simulation_forbidden(monkeypatch):
     from app.core.config import settings
 
     monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(cpabe_engine, "charm_available", False)
 
     with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
         cpabe_engine.generate_user_private_key(["ROLEADMIN"])
