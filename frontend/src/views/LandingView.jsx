@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Play } from 'lucide-react';
+import { Shield, Play, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
 import Mascot from '../components/Mascot';
 import SpinCube from '../components/SpinCube';
@@ -15,6 +16,7 @@ import '../styles/home.css';
 
 export default function LandingView() {
   const navigate = useNavigate();
+  const { toggleTheme, isDark } = useTheme();
   const [pinCode, setPinCode] = useState('');
   const [ctaPinCode, setCtaPinCode] = useState('');
 
@@ -49,6 +51,15 @@ export default function LandingView() {
         </nav>
 
         <div className="site-header__actions">
+          <button
+            type="button"
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <button type="button" className="site-header__signin" onClick={() => navigate('/login')}>
             Sign in
           </button>

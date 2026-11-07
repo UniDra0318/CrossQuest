@@ -9,11 +9,11 @@ html.dark,
   --cq-ink-soft: #cbd5e1;
   --cq-body: #e2e8f0;
   
-  --cq-purple: #0f172a;
-  --cq-purple-dk: #020617;
+  --cq-purple: #38bdf8;
+  --cq-purple-dk: #0284c7;
   --cq-purple-deep: #090d16;
   --cq-purple-night: #030712;
-  --cq-lilac: #38bdf8;
+  --cq-lilac: #7dd3fc;
   
   --cq-lav: #0f172a;
   --cq-lav-2: #090d16;
@@ -1495,3 +1495,339 @@ html.dark .trn-tabs button.on,
   background: #7c3aed !important;
   color: #ffffff !important;
 }
+
+/* ==========================================================================
+   16. LANDING PAGE (HOME) DEEP DARK MODE STYLING
+   ========================================================================== */
+
+html.dark .home,
+[data-theme="dark"] .home {
+  background-color: #070b12 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Header & Navigation */
+html.dark .site-header,
+[data-theme="dark"] .site-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html.dark .site-nav a,
+html.dark .site-nav button,
+[data-theme="dark"] .site-nav a,
+[data-theme="dark"] .site-nav button {
+  color: #cbd5e1 !important;
+}
+
+html.dark .site-nav a:hover,
+html.dark .site-nav button:hover,
+[data-theme="dark"] .site-nav a:hover,
+[data-theme="dark"] .site-nav button:hover {
+  color: #38bdf8 !important;
+}
+
+html.dark .site-header__signin,
+[data-theme="dark"] .site-header__signin {
+  color: #f8fafc !important;
+}
+
+html.dark .site-header__signin:hover,
+[data-theme="dark"] .site-header__signin:hover {
+  color: #38bdf8 !important;
+}
+
+html.dark .logo__tag,
+[data-theme="dark"] .logo__tag {
+  color: #94a3b8 !important;
+}
+
+/* Theme toggle button in header */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 49, 77, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: #00314d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: #ffffff;
+  border-color: #f0605d;
+  transform: translateY(-1px);
+}
+
+html.dark .theme-toggle-btn,
+[data-theme="dark"] .theme-toggle-btn {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: #111827 !important;
+  color: #f59e0b !important;
+}
+
+html.dark .theme-toggle-btn:hover,
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background: #1e293b !important;
+  border-color: #38bdf8 !important;
+  color: #f8fafc !important;
+}
+
+/* Hero Section */
+html.dark .hero__box,
+[data-theme="dark"] .hero__box {
+  background-color: #0b0f19 !important;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .hero__meta,
+[data-theme="dark"] .hero__meta {
+  color: #94a3b8 !important;
+}
+
+html.dark .hero__meta span:last-child,
+[data-theme="dark"] .hero__meta span:last-child {
+  color: #38bdf8 !important;
+}
+
+html.dark .hero__title,
+[data-theme="dark"] .hero__title {
+  color: #f8fafc !important;
+}
+
+html.dark .hero__title span,
+[data-theme="dark"] .hero__title span {
+  color: #38bdf8 !important;
+}
+
+html.dark .hero__row,
+[data-theme="dark"] .hero__row {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .hero__kicker,
+[data-theme="dark"] .hero__kicker {
+  color: #94a3b8 !important;
+}
+
+html.dark .hero__lede,
+[data-theme="dark"] .hero__lede {
+  color: #cbd5e1 !important;
+}
+
+html.dark .hero__lede strong,
+[data-theme="dark"] .hero__lede strong {
+  color: #f8fafc !important;
+}
+
+html.dark .hero__hint,
+[data-theme="dark"] .hero__hint {
+  color: #94a3b8 !important;
+}
+
+html.dark .hero__hint:hover,
+[data-theme="dark"] .hero__hint:hover {
+  color: #38bdf8 !important;
+}
+
+/* 3D Stage elements */
+html.dark .stage,
+[data-theme="dark"] .stage {
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .stage__tile,
+[data-theme="dark"] .stage__tile {
+  background: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .stage__bracket,
+[data-theme="dark"] .stage__bracket {
+  border-color: #38bdf8 !important;
+}
+
+html.dark .stage__glow,
+[data-theme="dark"] .stage__glow {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.22), rgba(56, 189, 248, 0) 68%) !important;
+}
+
+html.dark .toast,
+[data-theme="dark"] .toast {
+  background: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .toast__tag,
+[data-theme="dark"] .toast__tag {
+  color: #94a3b8 !important;
+}
+
+html.dark .toast__title,
+[data-theme="dark"] .toast__title {
+  color: #f8fafc !important;
+}
+
+/* Bottom Tracks Bar (Dark Mode Fix for White-Out) */
+html.dark .tracks,
+[data-theme="dark"] .tracks {
+  background: #0d121f !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .tracks__label,
+[data-theme="dark"] .tracks__label {
+  color: #f8fafc !important;
+}
+
+html.dark .tracks__cell,
+[data-theme="dark"] .tracks__cell {
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .tracks__name,
+[data-theme="dark"] .tracks__name {
+  color: #f8fafc !important;
+}
+
+html.dark .tracks__count,
+[data-theme="dark"] .tracks__count {
+  color: #94a3b8 !important;
+}
+
+/* Steps Section */
+html.dark .cq-eyebrow,
+[data-theme="dark"] .cq-eyebrow {
+  color: #38bdf8 !important;
+}
+
+html.dark .cq-h2,
+[data-theme="dark"] .cq-h2 {
+  color: #f8fafc !important;
+}
+
+html.dark .step,
+[data-theme="dark"] .step {
+  background: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .step__no,
+[data-theme="dark"] .step__no {
+  color: #38bdf8 !important;
+}
+
+html.dark .step h3,
+[data-theme="dark"] .step h3 {
+  color: #f8fafc !important;
+}
+
+html.dark .step p,
+[data-theme="dark"] .step p {
+  color: #cbd5e1 !important;
+}
+
+/* Quest Map Band */
+html.dark .band,
+[data-theme="dark"] .band {
+  background: #060911 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+html.dark .band__lede,
+[data-theme="dark"] .band__lede {
+  color: #94a3b8 !important;
+}
+
+/* Badges & Leaderboard */
+html.dark .badge-card,
+[data-theme="dark"] .badge-card {
+  background: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .badge-card h3,
+[data-theme="dark"] .badge-card h3 {
+  color: #f8fafc !important;
+}
+
+html.dark .badge-card p,
+[data-theme="dark"] .badge-card p {
+  color: #94a3b8 !important;
+}
+
+html.dark .lb,
+[data-theme="dark"] .lb {
+  background: #111827 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5) !important;
+  color: #f8fafc !important;
+}
+
+html.dark .lb__title,
+[data-theme="dark"] .lb__title {
+  color: #f8fafc !important;
+}
+
+html.dark .lb__eyebrow,
+[data-theme="dark"] .lb__eyebrow {
+  color: #38bdf8 !important;
+}
+
+html.dark .lb__me,
+[data-theme="dark"] .lb__me {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .lb__me-name,
+[data-theme="dark"] .lb__me-name {
+  color: #f8fafc !important;
+}
+
+html.dark .lb__me-rank,
+[data-theme="dark"] .lb__me-rank {
+  color: #38bdf8 !important;
+}
+
+/* CTA Section */
+html.dark .cta,
+[data-theme="dark"] .cta {
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(135deg, #1e1145, #0a041c) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Footer */
+html.dark .site-footer,
+[data-theme="dark"] .site-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .site-footer__links a,
+html.dark .site-footer__links button,
+[data-theme="dark"] .site-footer__links a,
+[data-theme="dark"] .site-footer__links button {
+  color: #cbd5e1 !important;
+}
+
+html.dark .site-footer__links a:hover,
+html.dark .site-footer__links button:hover,
+[data-theme="dark"] .site-footer__links a:hover,
+[data-theme="dark"] .site-footer__links button:hover {
+  color: #38bdf8 !important;
+}
+
