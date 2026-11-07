@@ -20,6 +20,7 @@ import {
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import SpinCube from '../components/SpinCube';
+import PageHeader from '../components/PageHeader';
 import '../styles/admin.css';
 import '../staff/staff.css';
 
@@ -151,80 +152,50 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
         </div>
       )}
 
-      {/* 1. TOP BREADCRUMB BAR */}
-      <div className="adm-top">
-        <div className="adm-crumbs">
-          {isFinance ? (
-            <>CROSSWORKS ENTERPRISE / <strong>FINANCE &amp; RECONCILIATION DESK</strong></>
-          ) : (
-            <>ENTERPRISE CLIENT PORTAL / <strong>{(currentUser?.organization || 'COMPANY').toUpperCase()} COMPLIANCE</strong></>
-          )}
-        </div>
-      </div>
-
-      {/* 2. 3D HERO BANNER WITH MATCHING DOCKED NAVIGATION TABS */}
-      <div className={`adm-hero ${isFinance ? 'adm-hero--finance' : 'adm-hero--company'}`}>
-        <div className="adm-hero__text">
-          <span className={`adm-pill ${isFinance ? 'adm-pill--cyan' : 'adm-pill--blue'}`}>
-            <span className="adm-live" /> {isFinance ? 'RECONCILIATION & AUDIT AUTHORITY' : 'CLIENT COMPLIANCE ACCESS'}
-          </span>
-          <h1>
-            {isFinance 
-              ? 'Enterprise Financial Reconciliation & Multi-Tenant Audit' 
-              : `${currentUser?.organization || 'Enterprise'} Workforce Compliance & Verification`}
-          </h1>
-          <p>
-            {isFinance
-              ? 'Controlled pre-screening pipeline, physical-to-ordinal row reconciliation, and cryptographic proof across all client cohorts.'
-              : 'Corporate training milestones, cryptographic access policy verification, and tamper-evident compliance certification.'}
-          </p>
-
-          <div className="stf-hero-chips">
-            {isFinance ? (
-              <>
-                <span className="stf-glass stf-glass--ok">FR-22 / DAT-01 / DAT-08 COMPLIANT</span>
-                <span className="stf-glass">IN-MEMORY BILLING STRIP</span>
-                <span className="stf-glass stf-glass--amber">AUG 1, 2026 CUTOFF BASELINE</span>
-              </>
-            ) : (
-              <>
-                <span className="stf-glass stf-glass--ok">TENANT ISOLATION: VERIFIED</span>
-                <span className="stf-glass">CP-ABE ENCRYPTION: ACTIVE</span>
-                <span className="stf-glass stf-glass--amber">{companyCode} AUTHORIZED SCOPE</span>
-              </>
-            )}
-          </div>
-
-          <div className="adm-tabs" style={{ marginTop: '20px' }}>
-            {tabs.map(tab => {
-              const Icon = tab.icon;
-              const isActive = currentTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={isActive ? 'on' : ''}
-                  onClick={() => setActiveView && setActiveView(tab.id)}
-                >
-                  <Icon size={15} style={{ opacity: isActive ? 1 : 0.85 }} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 3D Visual Scene */}
-        <div className="adm-hero__cube">
-          <span className="adm-float adm-float--tl">
-            {isFinance ? 'ROW RECONCILIATION' : 'ROW-LEVEL ISOLATION'}
-          </span>
-          <span className="adm-float adm-float--br adm-float--orange">
-            {isFinance ? 'SHA-256 AUDIT LOG' : 'VERIFIED INTEGRITY'}
-          </span>
-          <SpinCube size={76} faces={isFinance ? FINANCE_CUBE_FACES : COMPANY_CUBE_FACES} />
-        </div>
-      </div>
+      {/* SLIM PAGE HEADER (Replaces 280px Hero Banner & 3D Cube per Section 5.1) */}
+      {(() => {
+        switch (currentTab) {
+          case 'company_overview':
+            return (
+              <PageHeader
+                title="Enterprise Accounts"
+                subtitle="Client organization compliance milestones, active rosters, and contract hours."
+                badge="ACCOUNTS"
+                badgeType="info"
+              />
+            );
+          case 'company_trainees':
+            return (
+              <PageHeader
+                title="Training Records"
+                subtitle="Browse and verify employee training completions across all client cohorts."
+                badge="RECORDS"
+                badgeType="default"
+              />
+            );
+          case 'audit_certificate':
+            return (
+              <PageHeader
+                title="Reports"
+                subtitle="Tamper-evident compliance reports, data integrity proofs, and certificates."
+                badge="AUDIT CERTIFICATE"
+                badgeType="warning"
+              />
+            );
+          case 'finance_reconciliation':
+          default:
+            return (
+              <PageHeader
+                title={isFinance ? "Home" : "Workforce Compliance"}
+                subtitle={isFinance
+                  ? "Pre-screening pipeline, physical-to-ordinal row reconciliation, and client cohort imports."
+                  : "Corporate training milestones and verified workforce completion records."}
+                badge={isFinance ? "RECONCILIATION DESK" : "COMPLIANCE ACTIVE"}
+                badgeType="success"
+              />
+            );
+        }
+      })()}
 
       {/* Main Content Area */}
       <div style={{ marginTop: '24px' }}>

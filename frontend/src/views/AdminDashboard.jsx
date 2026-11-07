@@ -57,6 +57,7 @@ import SpinCube from '../components/SpinCube';
 import BitMascot from '../components/BitMascot/BitMascot';
 import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk';
 import TenantAssignmentPicker from '../components/TenantAssignmentPicker';
+import PageHeader from '../components/PageHeader';
 import '../styles/admin.css';
 export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token, currentUser } = useAuth();
@@ -505,67 +506,104 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           <span>Notice: Displaying cached baseline data. Live telemetry synchronization in progress or server offline.</span>
         </div>
       )}
-      {/* 1. TOP STATUS BAR */}
-      <div className="adm-top">
-        <div className="adm-crumbs">
-          CROSSQUEST ENTERPRISE / <strong>ADMIN SECURITY CONSOLE</strong>
-        </div>
-      </div>
-      {/* 2. 3D HERO BANNER WITH VIEW NAVIGATION TABS */}
-      <div className="adm-hero adm-hero--admin">
-        <div className="adm-hero__text">
-          <span className="adm-pill">
-            <span className="adm-live" /> ACTIVE AUTHORITY
-          </span>
-          <h1>Executive Security & Platform Posture</h1>
-          <p>
-            Centralized monitoring for role-based access control, tenant isolation, and anomaly response across all enterprise cohorts.
-          </p>
-          <div className="adm-tabs">
-            <button 
-              type="button"
-              className={(!activeSubView || activeSubView === 'admin_overview') ? 'on' : ''} 
-              onClick={() => setActiveView && setActiveView('admin_overview')}
-            >
-              Security Overview
-            </button>
-            <button 
-              type="button"
-              className={activeSubView === 'attribute_authority' ? 'on' : ''} 
-              onClick={() => setActiveView && setActiveView('attribute_authority')}
-            >
-              Access Permissions
-            </button>
-            <button 
-              type="button"
-              className={activeSubView === 'anomalies' ? 'on' : ''} 
-              onClick={() => setActiveView && setActiveView('anomalies')}
-            >
-              Anomaly Monitor & Reports {unreviewedCount > 0 ? `(${unreviewedCount})` : ''}
-            </button>
-            <button 
-              type="button"
-              className={activeSubView === 'records_vault' ? 'on' : ''} 
-              onClick={() => setActiveView && setActiveView('records_vault')}
-            >
-              Master Record Vault
-            </button>
-            <button 
-              type="button"
-              className={activeSubView === 'system_settings' ? 'on' : ''} 
-              onClick={() => setActiveView && setActiveView('system_settings')}
-            >
-              Engine Settings
-            </button>
-          </div>
-        </div>
-        {/* Mascot Scene */}
-        <div className="adm-hero__cube">
-          <span className="adm-float adm-float--tl">AES-256 + RSA</span>
-          <span className="adm-float adm-float--br adm-float--orange">ROW-LEVEL SECURITY</span>
-          <BitMascot size={210} />
-        </div>
-      </div>
+      {/* SLIM PAGE HEADER (Replaces 280px Hero Banner & 3D Cube per Section 5.1) */}
+      {(() => {
+        switch (activeSubView) {
+          case 'records_vault':
+            return (
+              <PageHeader
+                title="Training Records"
+                subtitle="Encrypted multi-tenant training records with attribute-based access control."
+                badge="CRYPTOGRAPHIC VAULT"
+                badgeType="info"
+                actions={
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn--primary"
+                    onClick={handleExportVaultRecords}
+                    disabled={exportingVaultRecords}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Download size={14} />
+                    <span>{exportingVaultRecords ? 'Exporting...' : 'Export Records CSV'}</span>
+                  </button>
+                }
+              />
+            );
+          case 'attribute_authority':
+            return (
+              <PageHeader
+                title="People and Access"
+                subtitle="Manage enterprise staff clearances, tenant assignments, and client company registries."
+                badge="ACCESS CONTROL"
+                badgeType="default"
+                actions={
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn--primary"
+                      onClick={() => setIsAddUserModalOpen(true)}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <UserPlus size={14} />
+                      <span>Provision User</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn--secondary"
+                      onClick={() => setIsAddCompanyModalOpen(true)}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Building2 size={14} />
+                      <span>Register Client</span>
+                    </button>
+                  </div>
+                }
+              />
+            );
+          case 'anomalies':
+            return (
+              <PageHeader
+                title="Security Alerts"
+                subtitle="Peer-reviewed anomaly detection, dual-threshold rate limiting, and incident triage."
+                badge={unreviewedCount > 0 ? `${unreviewedCount} UNREVIEWED` : 'ALL CLEAR'}
+                badgeType={unreviewedCount > 0 ? 'warning' : 'success'}
+              />
+            );
+          case 'system_settings':
+            return (
+              <PageHeader
+                title="Settings"
+                subtitle="Platform security engine parameters, anomaly rules, and 12-month retention schedules."
+                badge="ACTIVE CONFIGURATION"
+                badgeType="default"
+              />
+            );
+          case 'admin_overview':
+          default:
+            return (
+              <PageHeader
+                title="Home"
+                subtitle="Platform health, security posture score, and operational activity across enterprise cohorts."
+                badge="AUTHORITY ACTIVE"
+                badgeType="success"
+                actions={
+                  unreviewedCount > 0 ? (
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn--primary"
+                      onClick={() => setActiveView && setActiveView('anomalies')}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <AlertTriangle size={14} />
+                      <span>Review {unreviewedCount} Pending Alert{unreviewedCount > 1 ? 's' : ''}</span>
+                    </button>
+                  ) : null
+                }
+              />
+            );
+        }
+      })()}
       {/* =====================================================================
           VIEW 1: SECURITY OVERVIEW
           ===================================================================== */}

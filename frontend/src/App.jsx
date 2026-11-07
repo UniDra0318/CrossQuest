@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginView from './components/LoginView';
 import ActivateAccount from './views/ActivateAccount';
 import Topbar from './components/Topbar';
+import Sidebar from './components/Sidebar';
 import AdminDashboard from './views/AdminDashboard';
 import StaffDashboard from './views/StaffDashboard';
 import TrainerDashboard from './views/TrainerDashboard';
@@ -128,42 +129,44 @@ function MainAppShell({ activeSubPage }) {
   };
 
   const getViewTitle = () => {
-    if (activeView === 'crypto_lab') return 'CP-ABE & AES-256-GCM Verification Sandbox';
+    if (activeView === 'crypto_lab') return 'Cryptographic Lab';
     switch (currentUser?.role) {
       case 'admin':
-        if (activeView === 'attribute_authority') return 'Access Permissions Authority';
-        if (activeView === 'anomalies') return 'Anomaly & Incident Monitor';
-        if (activeView === 'records_vault') return 'Master Record Vault';
-        if (activeView === 'system_settings') return 'Security Engine Settings';
-        return 'Administrator Control Center';
+        if (activeView === 'attribute_authority') return 'People and Access';
+        if (activeView === 'anomalies') return 'Security Alerts';
+        if (activeView === 'records_vault') return 'Training Records';
+        if (activeView === 'system_settings') return 'Settings';
+        return 'Home';
       case 'account_manager':
       case 'crossworks_staff':
-        if (activeView === 'assigned_clients') return 'Assigned Client Portfolios';
-        if (activeView === 'compliance_reports') return 'Client Compliance & Audit Reports';
-        return 'Crossworks Client Account Management';
+        if (activeView === 'assigned_clients') return 'My Clients';
+        if (activeView === 'compliance_reports') return 'Client Reports';
+        return 'Home';
       case 'trainer': 
-        if (activeView === 'quiz_creator') return 'Quiz & Assessment Creator Studio';
-        if (activeView === 'trainer_analytics') return 'Cohort Performance Analytics';
-        if (activeView === 'grade_entry') return 'Evaluation & Certification Workbench';
-        if (activeView === 'trainee_roster') return 'Enrolled Trainee Master Roster';
-        return 'Lead Trainer Course Delivery';
+        if (activeView === 'quiz_creator') return 'Quizzes and Teams';
+        if (activeView === 'trainer_analytics') return 'Results';
+        if (activeView === 'grade_entry') return 'Session Sign-off';
+        if (activeView === 'trainee_roster') return 'My Sessions';
+        return 'Home';
       case 'finance':
       case 'company_staff':
-        if (activeView === 'finance_reconciliation') return 'Finance Pilot Data Import & Reconciliation Desk';
-        if (activeView === 'company_trainees') return 'Employee Training Records';
-        if (activeView === 'audit_certificate') return 'Compliance & Audit Report';
-        return 'Client Organization Portal';
+        if (activeView === 'finance_reconciliation') return 'Import and Reconcile';
+        if (activeView === 'company_trainees') return 'Records';
+        if (activeView === 'audit_certificate') return 'Reports';
+        return 'Home';
       case 'trainee':
-        if (activeView === 'trainee_quiz') return 'Knowledge Quizzes Catalog';
-        if (activeView === 'trainee_badges') return 'Earned Badges & Achievements';
-        if (activeView === 'trainee_certs') return 'My Verified Certifications';
-        return 'Trainee Learning & Gamification Quest';
-      default: return 'Workspace';
+        if (activeView === 'trainee_quiz') return 'Quizzes';
+        if (activeView === 'trainee_badges') return 'Badges & Leaderboard';
+        if (activeView === 'trainee_certs') return 'Certificates';
+        return 'Home';
+      default: return 'Home';
     }
   };
 
   return (
     <div className="enterprise-layout">
+      {/* Persistent Navigation Sidebar (Section 4 & 5.1) */}
+      <Sidebar activeView={activeView} setActiveView={handleNavChange} />
 
       {/* Main Content Viewport */}
       <div className="enterprise-viewport">
@@ -432,14 +435,18 @@ function AppRoutes() {
         } 
       />
 
-      {/* CP-ABE Cryptographic Sandbox Lab for Capstone Defense Panelists */}
+      {/* CP-ABE Cryptographic Sandbox Lab for Capstone Defense Panelists (Section 5) */}
       <Route 
-        path="/crypto-lab" 
+        path="/demo/crypto-lab" 
         element={
           <ProtectedRoute>
             <MainAppShell activeSubPage="crypto_lab" />
           </ProtectedRoute>
         } 
+      />
+      <Route 
+        path="/crypto-lab" 
+        element={<Navigate to="/demo/crypto-lab" replace />} 
       />
 
       {/* Landing Page Route (Page 1 of Template) */}

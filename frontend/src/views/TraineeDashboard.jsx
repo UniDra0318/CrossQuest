@@ -37,6 +37,7 @@ import {
   downloadCertificatePdf
 } from '../services/api';
 import BitMascot from '../components/BitMascot/BitMascot';
+import PageHeader from '../components/PageHeader';
 import '../styles/admin.css';
 import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
@@ -529,85 +530,73 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         </div>
       )}
 
-      {/* 1. TOP BREADCRUMB BAR */}
-      <div className="adm-top">
-        <div className="adm-crumbs">
-          CROSSQUEST ENTERPRISE / <strong>TRAINEE LEARNING QUEST</strong>
-        </div>
-      </div>
-
-      {/* 2. 3D HERO BANNER WITH MATCHING DOCKED NAVIGATION TABS */}
-      <div className="adm-hero adm-hero--trainee">
-        <div className="adm-hero__text">
-          <span className="adm-pill adm-pill--amber">
-            <Sparkles size={11} className="text-gold" /> GAMIFIED ENTERPRISE LEARNING
-          </span>
-          <h1>Welcome back, {currentUser?.name || 'Trainee'}!</h1>
-          <p>
-            Complete interactive quests, earn tamper-evident certifications, and climb the corporate leaderboard.
-          </p>
-
-          {/* Enterprise Learning Action Buttons */}
-          {currentTab === 'trainee_quest' && (
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
-              <button 
-                type="button"
-                className={`template-cta-btn template-cta-btn--primary${!isOnline ? ' btn-disabled' : ''}`}
-                onClick={() => handleStartQuizById('act-1')}
-                disabled={!isOnline}
-                title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
-                style={{ padding: '8px 16px', fontSize: '13px' }}
-              >
-                <Play size={14} fill="currentColor" />
-                <span>Start Assigned Quest</span>
-              </button>
-              <button 
-                type="button"
-                className="template-cta-btn template-cta-btn--secondary"
-                onClick={() => {
-                  const el = document.getElementById('assigned-activities-section');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
-                style={{ padding: '8px 16px', fontSize: '13px' }}
-              >
-                <BookOpen size={14} />
-                <span>View All Modules</span>
-              </button>
-            </div>
-          )}
-
-          <div className="adm-tabs" style={{ marginTop: currentTab === 'trainee_quest' ? '6px' : '20px' }}>
-            {traineeTabs.map(tab => {
-              const Icon = tab.icon;
-              const isActive = currentTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={isActive ? 'on' : ''}
-                  onClick={() => setActiveView && setActiveView(tab.id)}
-                >
-                  <Icon size={15} style={{ opacity: isActive ? 1 : 0.85 }} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 3D Mascot Scene */}
-        <div className="adm-hero__cube">
-          <span className="adm-float adm-float--tl">
-            <Flame size={12} color="#f97316" fill="#f97316" />
-            {`${streakDays ?? currentUser?.streak ?? 1} DAYS STREAK`}
-          </span>
-          <span className="adm-float adm-float--br adm-float--orange">
-            <Award size={12} color="#fff" />
-            {gamLoading ? 'LEVEL 1' : `LEVEL ${level ?? 1} • ${(points ?? 0).toLocaleString()} XP`}
-          </span>
-          <BitMascot size={210} />
-        </div>
-      </div>
+      {/* SLIM PAGE HEADER (Replaces 280px Hero Banner per Section 5.1 & 5.6) */}
+      {(() => {
+        switch (currentTab) {
+          case 'trainee_certs':
+            return (
+              <PageHeader
+                title="Certificates"
+                subtitle="Your verified cryptographic credentials and external certifications."
+                badge="CREDENTIALS"
+                badgeType="info"
+                actions={
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn--primary"
+                    onClick={() => setIsExternalModalOpen(true)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <PlusCircle size={14} />
+                    <span>Add External Credential</span>
+                  </button>
+                }
+              />
+            );
+          case 'trainee_quiz':
+            return (
+              <PageHeader
+                title="Quizzes"
+                subtitle="Knowledge checks, interactive challenges, and competency assessments."
+                badge="ASSESSMENTS"
+                badgeType="default"
+              />
+            );
+          case 'trainee_badges':
+            return (
+              <PageHeader
+                title="Badges & Leaderboard"
+                subtitle="Earned achievement coins, streaks, and corporate peer rankings."
+                badge={`LEVEL ${level ?? 1}`}
+                badgeType="warning"
+              />
+            );
+          case 'trainee_quest':
+          default:
+            return (
+              <PageHeader
+                title={`Welcome back, ${currentUser?.name || 'Trainee'}!`}
+                subtitle="Complete daily interactive quests, extend your learning streak, and advance competencies."
+                badge={`${streakDays ?? currentUser?.streak ?? 1}-DAY STREAK`}
+                badgeType="success"
+                actions={
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      type="button"
+                      className={`template-cta-btn template-cta-btn--primary${!isOnline ? ' btn-disabled' : ''}`}
+                      onClick={() => handleStartQuizById('act-1')}
+                      disabled={!isOnline}
+                      style={{ padding: '8px 14px', fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Play size={13} fill="currentColor" />
+                      <span>Start Today's Quest</span>
+                    </button>
+                  </div>
+                }
+              />
+            );
+        }
+      })()}
 
       {/* Main Content Area */}
       <div style={{ marginTop: '24px' }}>

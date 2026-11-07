@@ -79,32 +79,13 @@ export default function Topbar({ activeViewTitle, streakDays }) {
   return (
     <>
       <header className="gamified-topbar">
-        {/* Left: Brand Logo & View Breadcrumb */}
-        <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div 
-            className="topbar-brand-link" 
-            style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}
-            onClick={() => navigate('/dashboard')}
-            title="CrossQuest Dashboard"
-          >
-            <img 
-              src={logoStacked} 
-              alt="CrossQuest" 
-              style={{ height: '36px', width: 'auto', display: 'block' }} 
-            />
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: '900', fontSize: '17px', letterSpacing: '-0.02em', color: '#1e1b4b', lineHeight: 1.1 }}>
-                CrossQuest
-              </span>
-              <span style={{ fontSize: '9px', fontWeight: '800', letterSpacing: '0.12em', color: '#6366f1', textTransform: 'uppercase' }}>
-                Enterprise Learning
-              </span>
-            </div>
-          </div>
-
-          <span style={{ color: '#cbd5e1', fontSize: '18px', fontWeight: '300' }}>/</span>
-
-          <span className="crumb-active" style={{ fontSize: '13.5px', fontWeight: '700', color: '#475569' }}>
+        {/* Left: Section Breadcrumb */}
+        <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '12px', fontWeight: '700', color: isDark ? '#94a3b8' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            CrossQuest
+          </span>
+          <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '14px', fontWeight: '400' }}>/</span>
+          <span className="crumb-active" style={{ fontSize: '14px', fontWeight: '800', color: isDark ? '#f8fafc' : '#0f172a' }}>
             {activeViewTitle}
           </span>
         </div>
@@ -437,36 +418,6 @@ export default function Topbar({ activeViewTitle, streakDays }) {
                     </span>
                     <ExternalLink size={12} color="#94a3b8" />
                   </button>
-
-                  {/* Action: CP-ABE Cryptographic Sandbox (Admin Only) */}
-                  {userRole === 'admin' && (
-                    <button
-                      type="button"
-                      onClick={() => { navigate('/crypto-lab'); setProfileOpen(false); }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        width: '100%',
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        background: 'transparent',
-                        border: '1px solid #e2e8f0',
-                        color: '#334155',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        marginTop: '6px'
-                      }}
-                      title="Interactive CP-ABE Cryptographic Sandbox"
-                    >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Shield size={13} color="#7c3aed" />
-                        <span>CP-ABE Cryptographic Lab</span>
-                      </span>
-                      <ExternalLink size={12} color="#94a3b8" />
-                    </button>
-                  )}
 
                   {/* Dev Role Switcher Section - Prominent & Highlighted */}
                   {import.meta.env.DEV && (
