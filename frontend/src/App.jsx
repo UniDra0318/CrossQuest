@@ -111,6 +111,44 @@ function MainAppShell({ activeSubPage }) {
   const [liveStreakDays, setLiveStreakDays] = useState(() => currentUser?.role === 'trainee' ? (currentUser?.streak ?? 7) : 7);
   const [activeView, setActiveView] = useState(() => resolveView(activeSubPage, currentUser?.role));
 
+  // Collapsible sidebar state persisted in localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cq_sidebar_collapsed');
+      return saved !== null ? saved === 'true' : false;
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('cq_sidebar_collapsed', String(next));
+      } catch {
+        /* ignore localStorage quota/disabled errors */
+      }
+      return next;
+    });
+  };
+
+  // Keyboard shortcut: Ctrl+B or Cmd+B to toggle sidebar navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        const targetTag = e.target?.tagName?.toLowerCase();
+        if (targetTag === 'input' || targetTag === 'textarea' || e.target?.isContentEditable) {
+          return;
+        }
+        e.preventDefault();
+        handleToggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Instantly synchronize topbar streak when dev role switcher changes active persona
   useEffect(() => {
     if (currentUser?.role === 'trainee') {
@@ -165,12 +203,22 @@ function MainAppShell({ activeSubPage }) {
 
   return (
     <div className="enterprise-layout">
-      {/* Persistent Navigation Sidebar (Section 4 & 5.1) */}
-      <Sidebar activeView={activeView} setActiveView={handleNavChange} />
+      {/* Persistent Navigation Sidebar with Collapse & Profile Support (Section 4 & 5.1) */}
+      <Sidebar 
+        activeView={activeView} 
+        setActiveView={handleNavChange} 
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={handleToggleSidebar}
+      />
 
       {/* Main Content Viewport */}
       <div className="enterprise-viewport">
-        <Topbar activeViewTitle={getViewTitle()} streakDays={liveStreakDays} />
+        <Topbar 
+          activeViewTitle={getViewTitle()} 
+          streakDays={liveStreakDays} 
+          isSidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={handleToggleSidebar}
+        />
 
         <main className="enterprise-page-area">
           <ErrorBoundary>
