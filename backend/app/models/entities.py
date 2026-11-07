@@ -120,6 +120,7 @@ class Course(Base):
     course_code = Column(String(50), unique=True, index=True, nullable=False)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
+    acronym_3 = Column(String(10), nullable=True) # Official pilot three-letter acronym (e.g. PMP, BSS, CRM, SEC)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     sessions = relationship("TrainingSession", back_populates="course")
@@ -269,7 +270,7 @@ class Certificate(Base):
     title = Column(String(200), nullable=False)
     serial_number = Column(String(50), unique=True, index=True, nullable=True) # AAAYYYYMMDD-01 format
     issue_date = Column(DateTime, nullable=False, default=datetime.utcnow)
-    expiry_date = Column(DateTime, nullable=False)
+    expiry_date = Column(DateTime, nullable=True) # Null for non-expiring Crossworks completion certificates (U-17, Section 3.8.2)
     expiry_basis = Column(String(255), default="Calculated: issue_date + 36 months")
     
     # Status is dynamically calculated on read: Valid, Expiring soon (<=90 days), Expired

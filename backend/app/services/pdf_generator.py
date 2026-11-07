@@ -1,4 +1,5 @@
 import io
+from typing import Optional
 from datetime import datetime
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, landscape, A4
@@ -44,7 +45,7 @@ class PDFGenerator:
         course_title: str,
         serial_number: str,
         issue_date: datetime,
-        expiry_date: datetime,
+        expiry_date: Optional[datetime] = None,
         company_name: str = "Crossworks Training & Consulting Corp.",
         trainer_name: str = "Prof. Roel Traballo",
         reissue_count: int = 0
@@ -156,15 +157,18 @@ class PDFGenerator:
         c.drawCentredString(width - 170, sig_y - 6, "Managing Director & Signatory")
 
         # 10. Serial Number, Dates, and Security Footer
-        issue_str = issue_date.strftime("%B %d, %Y")
-        expiry_str = expiry_date.strftime("%B %d, %Y")
+        issue_str = issue_date.strftime("%B %d, %Y") if issue_date else "N/A"
+        if expiry_date:
+            validity_line = f"Issue Date: {issue_str}    |    Valid Until: {expiry_date.strftime('%B %d, %Y')}"
+        else:
+            validity_line = f"Issue Date: {issue_str}    |    Status: Lifetime / Non-Expiring"
 
         c.setFont("Helvetica", 9)
         c.setFillColor(colors.HexColor("#4A5568"))
         c.drawCentredString(
             width / 2.0,
             sig_y + 16,
-            f"Issue Date: {issue_str}    |    Valid Until: {expiry_str}"
+            validity_line
         )
 
         # Serial number badge

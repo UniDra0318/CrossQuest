@@ -240,7 +240,7 @@ class CertificateResponse(BaseModel):
     title: str
     serial_number: Optional[str] = None
     issue_date: datetime
-    expiry_date: datetime
+    expiry_date: Optional[datetime] = None
     expiry_basis: str
     status: str # Valid, Expiring soon, Expired
     is_nearing_renewal: bool

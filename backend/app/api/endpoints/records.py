@@ -4,12 +4,12 @@ import io
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.entities import (
     TrainingRecord, TrainingRecordVersion, Trainee, ClientCompany, User, AccessLog,
-    AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate, GamificationProgress
+    AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate, GamificationProgress, Course
 )
 from app.schemas.schemas import (
     TrainingRecordCreate, TrainingRecordUpdate, TrainingRecordResponse, DecryptedRecordResponse,
@@ -139,8 +139,24 @@ def export_training_records_csv(
     query = db.query(TrainingRecord).filter(TrainingRecord.deleted_at == None)
     if current_user.role == "account_manager":
         assigned_codes = current_user.assigned_client_accounts or []
-        query = query.join(ClientCompany, TrainingRecord.company_at_completion_id == ClientCompany.id)\
-                     .filter(ClientCompany.code.in_(assigned_codes))
+        assigned_companies = db.query(ClientCompany.id).filter(ClientCompany.code.in_(assigned_codes)).all()
+        company_ids = [c[0] for c in assigned_companies]
+        shared_trainee_ids = [
+            t[0] for t in db.query(TrainingRecord.trainee_id)
+            .filter(
+                TrainingRecord.company_at_completion_id.in_(company_ids),
+                TrainingRecord.deleted_at == None
+            ).distinct().all()
+        ]
+        if shared_trainee_ids:
+            query = query.filter(
+                or_(
+                    TrainingRecord.company_at_completion_id.in_(company_ids),
+                    TrainingRecord.trainee_id.in_(shared_trainee_ids)
+                )
+            )
+        else:
+            query = query.filter(TrainingRecord.company_at_completion_id.in_(company_ids))
 
     records = query.order_by(TrainingRecord.created_at.desc()).all()
 
@@ -199,7 +215,24 @@ def list_training_records(
         assigned_codes = current_user.assigned_client_accounts or []
         assigned_companies = db.query(ClientCompany.id).filter(ClientCompany.code.in_(assigned_codes)).all()
         company_ids = [c[0] for c in assigned_companies]
-        query = query.filter(TrainingRecord.company_at_completion_id.in_(company_ids))
+        # Option B (Chapter III Section 3.2.1, FR-09..12):
+        # Account Managers view assigned clients plus full cross-company history of shared Trainees.
+        shared_trainee_ids = [
+            t[0] for t in db.query(TrainingRecord.trainee_id)
+            .filter(
+                TrainingRecord.company_at_completion_id.in_(company_ids),
+                TrainingRecord.deleted_at == None
+            ).distinct().all()
+        ]
+        if shared_trainee_ids:
+            query = query.filter(
+                or_(
+                    TrainingRecord.company_at_completion_id.in_(company_ids),
+                    TrainingRecord.trainee_id.in_(shared_trainee_ids)
+                )
+            )
+        else:
+            query = query.filter(TrainingRecord.company_at_completion_id.in_(company_ids))
     elif current_user.role == "trainer":
         assigned_sessions = db.query(TrainerAssignment.session_id).filter(TrainerAssignment.user_id == current_user.id).all()
         session_ids = [s[0] for s in assigned_sessions]
@@ -267,10 +300,28 @@ def decrypt_training_record(
 
     # 1. Scope check (Application-Level Authorization: SEC-02)
     is_in_scope = True
+    is_shared_trainee_view = False
     if current_user.role in ("admin", "finance"):
         is_in_scope = True
     elif current_user.role == "account_manager":
-        is_in_scope = company_code in (current_user.assigned_client_accounts or [])
+        assigned_codes = current_user.assigned_client_accounts or []
+        if company_code in assigned_codes:
+            is_in_scope = True
+        else:
+            # Option B (Chapter III Section 3.2.1, FR-09..12):
+            # Account Manager can view/decrypt records of a shared trainee who trained under an assigned company
+            assigned_companies = db.query(ClientCompany.id).filter(ClientCompany.code.in_(assigned_codes)).all()
+            company_ids = [c[0] for c in assigned_companies]
+            has_shared_record = db.query(TrainingRecord.id).filter(
+                TrainingRecord.trainee_id == record.trainee_id,
+                TrainingRecord.company_at_completion_id.in_(company_ids),
+                TrainingRecord.deleted_at == None
+            ).first() is not None
+            if has_shared_record:
+                is_in_scope = True
+                is_shared_trainee_view = True
+            else:
+                is_in_scope = False
     elif current_user.role == "trainer":
         is_assigned = (
             db.query(TrainerAssignment)
@@ -328,9 +379,13 @@ def decrypt_training_record(
             sessions = db.query(TrainingSession).filter(TrainingSession.id.in_(session_ids)).all()
             trainer_sessions = [s.session_code for s in sessions]
 
+    effective_assigned_companies = list(current_user.assigned_client_accounts or [])
+    if is_shared_trainee_view and company_code and company_code not in effective_assigned_companies:
+        effective_assigned_companies.append(company_code)
+
     user_attrs = cpabe_engine.build_user_attributes(
         role=current_user.role,
-        assigned_companies=current_user.assigned_client_accounts,
+        assigned_companies=effective_assigned_companies,
         assigned_sessions=trainer_sessions,
         trainee_code=my_trainee_code
     )
@@ -689,7 +744,12 @@ def sign_off_training_session(
             if not existing_cert:
                 company = db.query(ClientCompany).filter(ClientCompany.id == rec.company_at_completion_id).first()
                 company_code = company.code if company else "CRO"
-                serial = generate_cert_serial(db, company_code, now_utc)
+                course = db.query(Course).filter(Course.id == session.course_id).first() if session.course_id else None
+                course_tla = course.acronym_3 if course and course.acronym_3 else None
+                if not course_tla and session.course_name:
+                    course_tla = "".join([c for c in session.course_name.upper() if c.isalnum()])[:3]
+                training_start = session.start_date or now_utc
+                serial = generate_cert_serial(db, course_tla=course_tla, training_date=training_start, company_code=company_code)
 
                 cert = Certificate(
                     record_id=rec.id,
@@ -697,8 +757,8 @@ def sign_off_training_session(
                     title=f"Certificate of Completion - {session.course_name}",
                     serial_number=serial,
                     issue_date=now_utc,
-                    expiry_date=now_utc + timedelta(days=36 * 30),
-                    expiry_basis="Calculated: issue_date + 36 months validity",
+                    expiry_date=None,  # Crossworks completion certificates do not expire (U-17, Section 3.8.2)
+                    expiry_basis="Non-expiring completion certificate",
                     status="Valid"
                 )
                 db.add(cert)

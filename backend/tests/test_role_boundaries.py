@@ -296,18 +296,18 @@ def test_tc_aut_07_immediate_session_revocation_on_disable(client: TestClient, d
 # =========================================================================
 
 def test_tc_xcl_01_account_manager_company_filtering(client: TestClient, seed_test_data):
-    """TC-XCL-01: Account Manager for Alpha cannot view Company Beta records."""
+    """TC-XCL-01: Account Manager for Alpha cannot view Company Beta records of unshared trainees."""
     am_alpha = seed_test_data["am_alpha"]
+    rec_b = seed_test_data["rec_b"] # Trainee 2 record under Company Beta (never trained under Alpha)
     token = create_access_token(subject=am_alpha.id)
 
     resp = client.get("/api/v1/records/", headers={"Authorization": f"Bearer {token}"})
     assert resp.status_code == 200
     records = resp.json()
+    record_ids = [r["id"] for r in records]
 
-    # All returned records must belong to CORP_ALPHA
-    for r in records:
-        assert r["company_at_completion_id"] == seed_test_data["comp_alpha"].id
-        assert r["company_at_completion_id"] != seed_test_data["comp_beta"].id
+    # Unshared trainee record from Company Beta must NOT be visible to Alpha Account Manager
+    assert rec_b.id not in record_ids
 
 
 def test_tc_xcl_02_account_manager_decrypt_out_of_scope_denied(client: TestClient, seed_test_data):
@@ -423,3 +423,62 @@ def test_tc_xcl_08_admin_and_finance_cross_client_authority(client: TestClient, 
     # Finance decrypts both records
     assert client.post(f"/api/v1/records/{rec_a.id}/decrypt", headers={"Authorization": f"Bearer {fin_token}"}).status_code == 200
     assert client.post(f"/api/v1/records/{rec_b.id}/decrypt", headers={"Authorization": f"Bearer {fin_token}"}).status_code == 200
+
+
+def test_tc_xcl_09_option_b_shared_trainee_cross_company_viewing_and_write_blocking(client: TestClient, db_session: Session, seed_test_data):
+    """TC-XCL-09 (Option B Scope Rule, Section 3.2.1, U-01, CL-01):
+    Account Manager for Alpha can view and decrypt the Beta training record of a shared Trainee
+    who has trained under Company Alpha, but write/update operations for that Beta record are strictly blocked.
+    """
+    am_alpha = seed_test_data["am_alpha"]
+    t1 = seed_test_data["t1"] # Trainee with rec_a under Alpha
+    comp_beta = seed_test_data["comp_beta"]
+    token = create_access_token(subject=am_alpha.id)
+
+    # Encrypt a record for Trainee 1 completed at Company Beta
+    policy_beta = cpabe_engine.build_record_policy(
+        company_code=comp_beta.code,
+        trainee_code=t1.trainee_code
+    )
+    enc_beta = cpabe_engine.encrypt_record(
+        plaintext_data={"score": 88.5, "practical_lab": "Beta Advanced Lab"},
+        policy_str=policy_beta,
+        record_id=f"rec-{t1.trainee_code}",
+        version=1
+    )
+    rec_beta_shared = TrainingRecord(
+        trainee_id=t1.id,
+        company_at_completion_id=comp_beta.id,
+        course_name="Beta Cloud Security Program",
+        status="Completed",
+        score=88.5,
+        encryption_policy=policy_beta,
+        policy_version=1,
+        abe_ciphertext=enc_beta.get("abe_ciphertext"),
+        payload_ciphertext=enc_beta.get("payload_ciphertext"),
+        nonce=enc_beta.get("nonce"),
+        is_encrypted=True
+    )
+    db_session.add(rec_beta_shared)
+    db_session.commit()
+
+    # 1. Option B List View: am_alpha lists records; rec_beta_shared MUST be included because t1 trained under Alpha
+    resp_list = client.get("/api/v1/records/", headers={"Authorization": f"Bearer {token}"})
+    assert resp_list.status_code == 200
+    returned_ids = [r["id"] for r in resp_list.json()]
+    assert rec_beta_shared.id in returned_ids
+
+    # 2. Option B Decrypt View: am_alpha decrypts rec_beta_shared -> HTTP 200 and score 88.5 decrypted
+    resp_decrypt = client.post(f"/api/v1/records/{rec_beta_shared.id}/decrypt", headers={"Authorization": f"Bearer {token}"})
+    assert resp_decrypt.status_code == 200
+    dec_data = resp_decrypt.json()
+    assert dec_data["decrypted_content"]["score"] == 88.5
+
+    # 3. Option B Write Blocking: am_alpha attempts to modify rec_beta_shared -> HTTP 403 Forbidden
+    resp_update = client.put(
+        f"/api/v1/records/{rec_beta_shared.id}",
+        json={"status": "In progress", "score": 90.0, "reason": "Attempting cross-company edit"},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp_update.status_code == 403
+    assert "Cannot modify training records for unassigned client companies" in resp_update.json()["detail"]

@@ -397,36 +397,42 @@ def seed_database():
         db.add_all(affiliations)
         db.commit()
 
-        # 5. Courses (6 enterprise courses)
+        # 5. Courses (6 enterprise courses with Chapter III pilot TLAs)
         c_sec = Course(
             course_code="CRS-SEC01",
             name="Information Security Management & Governance",
-            description="Comprehensive enterprise risk and security framework aligned with ISO 27001 and NIST CSF 2.0."
+            description="Comprehensive enterprise risk and security framework aligned with ISO 27001 and NIST CSF 2.0.",
+            acronym_3="SEC"
         )
         c_pmp = Course(
             course_code="CRS-PMP01",
             name="PMP Exam Review & Agile Project Delivery",
-            description="Rigorous project lifecycle governance and Agile framework mastery."
+            description="Rigorous project lifecycle governance and Agile framework mastery.",
+            acronym_3="PMP"
         )
         c_cloud = Course(
             course_code="CRS-CLOUD01",
             name="Cloud Infrastructure Security & Zero-Trust Defense",
-            description="Zero-trust architecture, multi-tenant isolation, and cloud defense patterns."
+            description="Zero-trust architecture, multi-tenant isolation, and cloud defense patterns.",
+            acronym_3="CLD"
         )
         c_abe = Course(
             course_code="CRS-ABE01",
             name="CP-ABE Cryptographic Engineering & Privacy Compliance",
-            description="Advanced ciphertext-policy attribute-based encryption, envelope encryption, and key lifecycle management."
+            description="Advanced ciphertext-policy attribute-based encryption, envelope encryption, and key lifecycle management.",
+            acronym_3="ABE"
         )
         c_pia = Course(
             course_code="CRS-PIA01",
             name="Privacy Impact Assessment (PIA) & Multi-Tenant Data Governance",
-            description="Enterprise privacy risk assessment, data subject consent workflows, and regulatory audit compliance."
+            description="Enterprise privacy risk assessment, data subject consent workflows, and regulatory audit compliance.",
+            acronym_3="PIA"
         )
         c_ai = Course(
             course_code="CRS-AI01",
             name="Enterprise AI Governance & Prompt Security",
-            description="Safeguards against prompt injection, LLM data leakage, and automated agent privilege escalation."
+            description="Safeguards against prompt injection, LLM data leakage, and automated agent privilege escalation.",
+            acronym_3="EAI"
         )
         all_courses = [c_sec, c_pmp, c_cloud, c_abe, c_pia, c_ai]
         db.add_all(all_courses)

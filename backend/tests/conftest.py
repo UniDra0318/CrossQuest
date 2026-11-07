@@ -116,7 +116,8 @@ def setup_test_database():
             "ALTER TABLE training_sessions ADD COLUMN delivery_mode VARCHAR(50) DEFAULT 'F2F'",
             "ALTER TABLE quizzes ADD COLUMN is_approved BOOLEAN DEFAULT 0",
             "ALTER TABLE quizzes ADD COLUMN approved_by_user_id VARCHAR(36)",
-            "ALTER TABLE quizzes ADD COLUMN approved_at DATETIME"
+            "ALTER TABLE quizzes ADD COLUMN approved_at DATETIME",
+            "ALTER TABLE courses ADD COLUMN acronym_3 VARCHAR(10)"
         ]:
             try:
                 conn.execute(text(stmt))

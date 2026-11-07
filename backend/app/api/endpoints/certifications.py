@@ -19,10 +19,23 @@ router = APIRouter()
 PHT = timezone(timedelta(hours=8))
 
 
-def generate_cert_serial(db: Session, company_code: Optional[str], issue_date: datetime) -> str:
-    """Generates a standardized certificate serial in AAAYYYYMMDD-01 format (Phase 2, Section 3.8.2)."""
-    prefix = ((company_code or "CRO").replace("-", "").strip()[:3]).upper().ljust(3, "X")
-    date_str = issue_date.strftime("%Y%m%d")
+def generate_cert_serial(
+    db: Session,
+    course_tla_or_company: Optional[str] = None,
+    training_date: Optional[datetime] = None,
+    *,
+    course_tla: Optional[str] = None,
+    company_code: Optional[str] = None
+) -> str:
+    """Generates a standardized certificate serial in AAAYYYYMMDD-NN format (Phase 2, Section 3.8.2).
+    - AAA: course three-letter acronym (TLA, e.g. PMP, BSS, CRM) or client code fallback
+    - YYYYMMDD: first training day (session start_date) or issue_date
+    - NN: 2-digit sequence counter within session, starting at 01
+    """
+    tla_candidate = course_tla or (company_code if company_code else course_tla_or_company) or "CRO"
+    prefix = "".join([c for c in tla_candidate.upper() if c.isalnum()])[:3].ljust(3, "X")
+    dt = training_date or datetime.now(timezone.utc)
+    date_str = dt.strftime("%Y%m%d")
     base_pattern = f"{prefix}{date_str}-"
     
     existing = db.query(Certificate.serial_number).filter(
@@ -39,12 +52,17 @@ def generate_cert_serial(db: Session, company_code: Optional[str], issue_date: d
     next_idx = max(indices, default=0) + 1
     return f"{base_pattern}{next_idx:02d}"
 
-def compute_dynamic_cert_status(expiry_date: datetime, current_time: Optional[datetime] = None) -> str:
+
+def compute_dynamic_cert_status(expiry_date: Optional[datetime], current_time: Optional[datetime] = None) -> str:
     """Computes dynamic certificate status on read to prevent stale flags (Section 3.8.2, Figure 16).
+    - Non-expiring completion certificate: expiry_date is None -> Valid
     - Valid: > 90 days before expiry
     - Expiring soon: <= 90 days before expiry and >= 0 days remaining
     - Expired: day after expiry date (Asia/Manila / UTC+8)
     """
+    if expiry_date is None:
+        return "Valid"
+
     now = current_time or datetime.now(timezone.utc)
     if now.tzinfo is None:
         now = now.replace(tzinfo=timezone.utc)
@@ -85,6 +103,12 @@ def run_certification_expiry_sweep(db: Session, current_time: Optional[datetime]
     account_managers = db.query(User).filter(User.role == "account_manager", User.is_active == True).all()
 
     for cert in certificates:
+        if cert.expiry_date is None:
+            cert.status = "Valid"
+            cert.is_nearing_renewal = False
+            valid_count += 1
+            continue
+
         if cert.expiry_date.tzinfo is None:
             exp_pht = cert.expiry_date.replace(tzinfo=timezone.utc).astimezone(PHT).date()
         else:

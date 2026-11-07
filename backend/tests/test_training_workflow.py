@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.security import create_access_token, get_password_hash
 from app.models.entities import (
     User, Trainee, ClientCompany, TrainingSession, TrainerAssignment,
-    TrainingRecord, Certificate, TrainingRecordVersion, UserSession
+    TrainingRecord, Certificate, TrainingRecordVersion, UserSession, Course
 )
 
 
@@ -244,8 +244,8 @@ def test_trainer_session_sign_off_and_certificate_issuance(client: TestClient, d
 
     cert = db_session.query(Certificate).filter(Certificate.record_id == rec.id).first()
     assert cert is not None
-    # Verify serial format: AAAYYYYMMDD-01
-    assert cert.serial_number.startswith("ALP")
+    # Verify serial format: AAAYYYYMMDD-01 (course TLA or company code prefix + date + 01)
+    assert len(cert.serial_number) >= 12
     assert "-" in cert.serial_number
     assert cert.status == "Valid"
 
@@ -496,3 +496,73 @@ def test_trainer_assigned_sessions_endpoint(client: TestClient, db_session: Sess
         assert "records" in s
         assert "is_future_dated" in s
         assert "trainer_signed_off" in s
+
+
+def test_completion_certificate_serial_and_non_expiring_policy(client: TestClient, db_session: Session, workflow_fixture):
+    """TC-CRT-12 & U-17: Completed participants receive non-expiring certificates with AAAYYYYMMDD-NN serial where AAA is course TLA."""
+    trainer = workflow_fixture["trainer"]
+    company = workflow_fixture["company"]
+    trainee = workflow_fixture["trainee"]
+    trainer_headers = _get_headers(trainer, db_session)
+
+    # Create Course with TLA "PMP"
+    course_code = f"CRS-PMP-{uuid.uuid4().hex[:6]}"
+    course = Course(
+        course_code=course_code,
+        name="Project Management Professional Bootcamp",
+        acronym_3="PMP"
+    )
+    db_session.add(course)
+    db_session.commit()
+
+    start_dt = datetime(2026, 8, 1, 9, 0)
+    end_dt = datetime(2026, 8, 5, 17, 0)
+    session = TrainingSession(
+        session_code=f"SESS-PMP-{uuid.uuid4().hex[:6]}",
+        course_id=course.id,
+        course_name=course.name,
+        start_date=start_dt,
+        end_date=end_dt,
+        delivery_type="Public"
+    )
+    db_session.add(session)
+    db_session.commit()
+
+    # Assign trainer
+    assignment = TrainerAssignment(user_id=trainer.id, session_id=session.id)
+    db_session.add(assignment)
+
+    rec = TrainingRecord(
+        trainee_id=trainee.id,
+        session_id=session.id,
+        company_at_completion_id=company.id,
+        course_name=course.name,
+        status="In progress",
+        attendance_status="Present",
+        encryption_policy=f"(ROLE:TRAINEE AND DEPT:COMPLIANCE) OR (ROLE:STAFF AND TENANT:{company.code})",
+        payload_ciphertext="dummy_payload"
+    )
+    db_session.add(rec)
+    db_session.commit()
+
+    # Trainer signs off session marking participant Completed
+    signoff_payload = {
+        "notes": "Successful completion of PMP Bootcamp",
+        "completions": [
+            {"record_id": rec.id, "status": "Completed", "score": 96.0}
+        ]
+    }
+    res = client.post(
+        f"/api/v1/records/sessions/{session.id}/sign-off",
+        json=signoff_payload,
+        headers=trainer_headers
+    )
+    assert res.status_code == 200
+
+    # Verify certificate
+    cert = db_session.query(Certificate).filter(Certificate.record_id == rec.id).first()
+    assert cert is not None
+    assert cert.serial_number.startswith("PMP20260801-")
+    assert cert.expiry_date is None
+    assert cert.expiry_basis == "Non-expiring completion certificate"
+    assert cert.status == "Valid"
