@@ -381,15 +381,14 @@ def test_tc_xcl_06_trainee_cross_company_credential_mobility(db_session: Session
     trainee_key = cpabe_engine.generate_user_private_key(trainee_attrs)
 
     # Reconstruct encrypted record dict
-    engine_name = "charm-bsw07" if cpabe_engine.charm_available else "simulation"
     enc_pkg = {
         "policy": rec_a.encryption_policy,
         "policy_version": rec_a.policy_version,
         "abe_ciphertext": rec_a.abe_ciphertext,
         "payload_ciphertext": rec_a.payload_ciphertext,
         "nonce": rec_a.nonce,
-        "engine": engine_name,
     }
+    enc_pkg["engine"] = "charm-bsw07" if cpabe_engine.charm_available else "simulation"
 
     # Trainee can still decrypt the historical record completed at Company Alpha!
     decrypted = cpabe_engine.decrypt_record(enc_pkg, trainee_key, record_id=f"rec-{t1.trainee_code}")
