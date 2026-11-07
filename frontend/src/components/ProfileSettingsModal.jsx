@@ -22,13 +22,17 @@ import {
   Globe,
   Clock,
   Layers,
-  Send
+  Send,
+  QrCode,
+  Copy,
+  CheckCircle2
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { setupMfaApi, enableMfaApi } from '../services/api';
 
 export default function ProfileSettingsModal({ isOpen, onClose }) {
-  const { currentUser, DEMO_USERS } = useAuth();
+  const { currentUser, token, DEMO_USERS } = useAuth();
   const { 
     theme, 
     setTheme, 
@@ -49,6 +53,47 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
   const [phone, setPhone] = useState(currentUser?.phone || '+63 917 123 4567');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+
+  // MFA Enrollment State
+  const [showMfaEnroll, setShowMfaEnroll] = useState(false);
+  const [mfaSecret, setMfaSecret] = useState('');
+  const [mfaQrUri, setMfaQrUri] = useState('');
+  const [mfaInputCode, setMfaInputCode] = useState('');
+  const [mfaSetupLoading, setMfaSetupLoading] = useState(false);
+  const [mfaSetupError, setMfaSetupError] = useState(null);
+  const [mfaRecoveryCodes, setMfaRecoveryCodes] = useState([]);
+  const [mfaCopied, setMfaCopied] = useState(false);
+
+  const handleStartMfaSetup = async () => {
+    setShowMfaEnroll(true);
+    setMfaSetupLoading(true);
+    setMfaSetupError(null);
+    setMfaRecoveryCodes([]);
+    try {
+      const data = await setupMfaApi(token);
+      setMfaSecret(data.secret);
+      setMfaQrUri(data.qr_code_uri);
+    } catch (err) {
+      setMfaSetupError(err.message || 'Failed to start MFA setup. Please check connection.');
+    } finally {
+      setMfaSetupLoading(false);
+    }
+  };
+
+  const handleConfirmMfa = async (e) => {
+    e.preventDefault();
+    if (!mfaInputCode.trim()) return;
+    setMfaSetupLoading(true);
+    setMfaSetupError(null);
+    try {
+      const res = await enableMfaApi(mfaSecret, mfaInputCode.trim(), token);
+      setMfaRecoveryCodes(res.recovery_codes || []);
+    } catch (err) {
+      setMfaSetupError(err.message || 'Invalid verification code. Please check your authenticator.');
+    } finally {
+      setMfaSetupLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -516,10 +561,203 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                       <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>Cryptographic RFC 6238 time-based authenticator active</span>
                     </div>
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '999px', background: '#ecfdf5', color: '#059669', fontSize: '11px', fontWeight: '800' }}>
-                    ENFORCED
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={handleStartMfaSetup}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #10b981',
+                        background: 'transparent',
+                        color: '#10b981',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Configure TOTP
+                    </button>
+                    <span style={{ padding: '4px 10px', borderRadius: '999px', background: '#ecfdf5', color: '#059669', fontSize: '11px', fontWeight: '800' }}>
+                      ENFORCED
+                    </span>
+                  </div>
                 </div>
+
+                {/* Inline MFA Setup Drawer */}
+                {showMfaEnroll && (
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '16px',
+                    borderRadius: '12px',
+                    background: isDark ? '#0f172a' : '#f1f5f9',
+                    border: isDark ? '1px solid #334155' : '1px solid #cbd5e1'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <span style={{ fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <QrCode size={16} /> Link Google Authenticator
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowMfaEnroll(false)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: isDark ? '#94a3b8' : '#64748b' }}
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+
+                    {mfaSetupLoading && (
+                      <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', textAlign: 'center', padding: '16px' }}>
+                        Generating TOTP Secret and QR code...
+                      </div>
+                    )}
+
+                    {mfaSetupError && (
+                      <div style={{ padding: '8px 12px', borderRadius: '8px', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontSize: '12px', marginBottom: '10px' }}>
+                        {mfaSetupError}
+                      </div>
+                    )}
+
+                    {mfaRecoveryCodes.length > 0 ? (
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontWeight: '700', fontSize: '13px', marginBottom: '8px' }}>
+                          <CheckCircle2 size={16} /> Authenticator Successfully Linked!
+                        </div>
+                        <p style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', margin: '0 0 10px 0' }}>
+                          Save these single-use recovery codes in a secure password manager. Each code can be used once if you lose device access:
+                        </p>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(2, 1fr)',
+                          gap: '6px',
+                          background: isDark ? '#1e293b' : '#ffffff',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0'
+                        }}>
+                          {mfaRecoveryCodes.map((code, idx) => (
+                            <div key={idx} style={{ color: isDark ? '#38bdf8' : '#0284c7' }}>{code}</div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(mfaRecoveryCodes.join('\n'));
+                            setMfaCopied(true);
+                            setTimeout(() => setMfaCopied(false), 2000);
+                          }}
+                          style={{
+                            marginTop: '10px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            background: isDark ? '#334155' : '#e2e8f0',
+                            border: 'none',
+                            color: isDark ? '#f8fafc' : '#1e293b',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Copy size={13} />
+                          {mfaCopied ? 'Copied to Clipboard!' : 'Copy Recovery Codes'}
+                        </button>
+                      </div>
+                    ) : (
+                      mfaSecret && (
+                        <div>
+                          <p style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', margin: '0 0 12px 0' }}>
+                            Scan this QR code in Google Authenticator or enter the secret key manually:
+                          </p>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                            {mfaQrUri && (
+                              <img
+                                src={mfaQrUri}
+                                alt="TOTP QR Code"
+                                style={{
+                                  width: '160px',
+                                  height: '160px',
+                                  borderRadius: '8px',
+                                  border: '4px solid #ffffff',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                }}
+                              />
+                            )}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              background: isDark ? '#1e293b' : '#ffffff',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: '12px',
+                              fontWeight: '700'
+                            }}>
+                              <span>Key: {mfaSecret}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(mfaSecret);
+                                  setMfaCopied(true);
+                                  setTimeout(() => setMfaCopied(false), 2000);
+                                }}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                              >
+                                <Copy size={13} color={mfaCopied ? '#10b981' : (isDark ? '#94a3b8' : '#64748b')} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <form onSubmit={handleConfirmMfa} style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                              type="text"
+                              placeholder="6-digit code"
+                              value={mfaInputCode}
+                              onChange={(e) => setMfaInputCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              maxLength={6}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                                background: isDark ? '#1e293b' : '#ffffff',
+                                color: isDark ? '#f8fafc' : '#0f172a',
+                                fontFamily: 'var(--font-mono)',
+                                fontWeight: '700',
+                                fontSize: '14px',
+                                textAlign: 'center',
+                                letterSpacing: '4px'
+                              }}
+                            />
+                            <button
+                              type="submit"
+                              disabled={mfaSetupLoading || mfaInputCode.length !== 6}
+                              style={{
+                                padding: '8px 16px',
+                                borderRadius: '8px',
+                                background: '#10b981',
+                                border: 'none',
+                                color: '#ffffff',
+                                fontWeight: '700',
+                                fontSize: '12px',
+                                cursor: (mfaSetupLoading || mfaInputCode.length !== 6) ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              Verify & Activate
+                            </button>
+                          </form>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
 
                 <div style={{ height: '1px', background: isDark ? '#334155' : '#e2e8f0' }} />
 

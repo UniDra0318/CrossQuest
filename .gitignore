@@ -43,7 +43,10 @@ postgres_data/
 .vscode/
 .idea/
 
-# Restricted Storage
+# Restricted Storage & Test Credentials
 backend/storage/
 backend/keys/
 *.key
+TEST_CREDENTIALS.md
+credentials.json
+*credentials*

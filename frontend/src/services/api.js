@@ -1033,3 +1033,46 @@ export async function exportVaultRecordsCsv(token) {
     return false;
   }
 }
+
+/**
+ * MFA API functions: setup, enable, and verify Google Authenticator TOTP
+ */
+export async function setupMfaApi(token) {
+  const res = await authFetch(`${API_BASE}/auth/mfa/setup`, { method: 'POST' }, token);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to initialize MFA setup');
+  }
+  return res.json();
+}
+
+export async function enableMfaApi(secret, code, token) {
+  const res = await authFetch(
+    `${API_BASE}/auth/mfa/enable`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, code })
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Invalid MFA verification code');
+  }
+  return res.json();
+}
+
+export async function verifyMfaLoginApi(challengeToken, code) {
+  const res = await fetch(`${API_BASE}/auth/mfa/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ challenge_token: challengeToken, code })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Invalid MFA code or recovery code');
+  }
+  return res.json();
+}
+

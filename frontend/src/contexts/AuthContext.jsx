@@ -357,6 +357,17 @@ export function AuthProvider({ children }) {
 
       if (res.ok) {
         const data = await res.json();
+        // Check if MFA is required (SEC-01, OI-26)
+        if (data.mfa_required) {
+          return {
+            success: false,
+            mfa_required: true,
+            challenge_token: data.challenge_token,
+            role: data.role,
+            full_name: data.full_name
+          };
+        }
+
         setToken(data.access_token);
         localStorage.setItem('crossquest_auth_token', data.access_token);
 
@@ -379,16 +390,58 @@ export function AuthProvider({ children }) {
           localStorage.setItem('crossquest_auth_user', JSON.stringify(userObj));
           return { success: true, user: userObj };
         }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        return { success: false, error: err.detail || 'Incorrect email or password' };
       }
     } catch (err) {
-      console.warn("Backend login fallback to local simulation:", err);
+      console.warn("Backend login network error:", err);
+      return { success: false, error: 'Could not connect to authentication server. Check backend connection.' };
     }
 
-    const found = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
-    const fallbackUser = found || DEMO_USERS.admin;
-    setCurrentUser(fallbackUser);
-    localStorage.setItem('crossquest_auth_user', JSON.stringify(fallbackUser));
-    return { success: true, user: fallbackUser };
+    return { success: false, error: 'Invalid credentials' };
+  };
+
+  const completeMfaLogin = async (challengeToken, code) => {
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_token: challengeToken, code: code.trim() })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { success: false, error: err.detail || 'Invalid verification code' };
+      }
+
+      const data = await res.json();
+      setToken(data.access_token);
+      localStorage.setItem('crossquest_auth_token', data.access_token);
+
+      const userRes = await fetch('http://localhost:8000/api/v1/users/me', {
+        headers: { 'Authorization': `Bearer ${data.access_token}` }
+      });
+      if (userRes.ok) {
+        const profile = await userRes.json();
+        const userObj = {
+          ...profile,
+          name: profile.full_name,
+          initials: profile.full_name.split(' ').map(n => n[0]).join(''),
+          organization: profile.role === 'trainee' 
+            ? 'San Miguel Conglomerate' 
+            : 'Crossworks Training & Consulting',
+          assigned_companies: profile.assigned_client_accounts || ['CORP_ALPHA'],
+          streak: Number.isFinite(Number(profile.streak)) ? Number(profile.streak) : 7
+        };
+        setCurrentUser(userObj);
+        localStorage.setItem('crossquest_auth_user', JSON.stringify(userObj));
+        return { success: true, user: userObj };
+      }
+      return { success: true, user: { role: data.role, full_name: data.full_name } };
+    } catch (err) {
+      return { success: false, error: err.message || 'MFA network error' };
+    }
   };
 
   const logout = () => {
@@ -399,7 +452,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, token, loginRole, loginWithCredentials, logout, DEMO_USERS }}>
+    <AuthContext.Provider value={{ currentUser, token, loginRole, loginWithCredentials, completeMfaLogin, logout, DEMO_USERS }}>
       {children}
     </AuthContext.Provider>
   );

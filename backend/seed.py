@@ -14,10 +14,12 @@ Conforms to:
 import sys
 import os
 import json
+import hashlib
 from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from sqlalchemy import text
 from app.core.config import settings
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import get_password_hash
@@ -35,6 +37,13 @@ def seed_database():
         raise RuntimeError(
             f"Database seeding with hardcoded demo credentials is prohibited in '{settings.ENVIRONMENT}' environment (SEC-01)."
         )
+    print("Rebuilding database schema from SQLAlchemy models...")
+    with engine.connect() as conn:
+        if engine.dialect.name == "postgresql":
+            conn.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
+            conn.commit()
+        else:
+            Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
@@ -100,6 +109,12 @@ def seed_database():
 
         # 2. Seed Users across all 5 roles
         default_pwd = get_password_hash("password123")
+        admin_recovery_codes = [
+            hashlib.sha256(b"RECO-1111").hexdigest(),
+            hashlib.sha256(b"RECO-2222").hexdigest(),
+            hashlib.sha256(b"RECO-3333").hexdigest(),
+            hashlib.sha256(b"RECO-4444").hexdigest(),
+        ]
 
         # Admins
         u_admin1 = User(
@@ -110,7 +125,10 @@ def seed_database():
             role="admin",
             clearance_level=3,
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
-            is_superuser=True
+            is_superuser=True,
+            mfa_enabled=True,
+            mfa_secret="JBSWY3DPEHPK3PXP",
+            mfa_recovery_codes=admin_recovery_codes
         )
         u_admin2 = User(
             email="admin2@crossworks.ph",

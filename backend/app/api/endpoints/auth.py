@@ -122,8 +122,8 @@ def login_access_token(
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is disabled. Contact system administrator.")
 
-    # 1. MFA check for Admin & Finance roles (SEC-01, OI-26)
-    if user.role in ("admin", "finance") and user.mfa_enabled:
+    # 1. MFA check (SEC-01, OI-26)
+    if user.mfa_enabled:
         challenge_token = create_mfa_challenge_token(user.id)
         return {
             "mfa_required": True,
