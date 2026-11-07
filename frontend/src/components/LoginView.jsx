@@ -11,13 +11,17 @@ import {
   Award, 
   Key,
   ArrowLeft,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 export default function LoginView() {
   const { loginRole, loginWithCredentials, DEMO_USERS } = useAuth();
+  const { toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -60,15 +64,27 @@ export default function LoginView() {
 
   return (
     <div className="clean-login-viewport">
-      {/* Top Bar with Return to Landing Page */}
+      {/* Top Bar with Return to Landing Page & Theme Toggle */}
       <div className="login-top-bar">
         <button type="button" className="login-back-btn" onClick={() => navigate('/')}>
           <ArrowLeft size={15} />
           <span>Back to Landing Page</span>
         </button>
-        <div className="login-badge-pill">
-          <Sparkles size={12} />
-          <span>ENTERPRISE LMS</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            type="button"
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            style={{ width: '32px', height: '32px' }}
+          >
+            {isDark ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
+          <div className="login-badge-pill">
+            <Sparkles size={12} />
+            <span>ENTERPRISE LMS</span>
+          </div>
         </div>
       </div>
 

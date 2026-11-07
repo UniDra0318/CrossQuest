@@ -58,23 +58,24 @@ export default function ActivateAccount() {
   };
 
   return (
-    <div className="clean-login-viewport" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', background: '#f8fafc' }}>
+    <div className="clean-login-viewport" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       {/* Top Bar with Return to Sign In */}
       <div style={{ width: '100%', maxWidth: '480px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <button 
           type="button" 
           onClick={() => navigate('/login')}
-          style={{ background: 'none', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#64748b', cursor: 'pointer' }}
+          className="login-back-btn"
+          style={{ padding: '6px 14px' }}
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={15} />
           <span>Return to Sign In</span>
         </button>
-        <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', padding: '3px 10px', borderRadius: '12px' }}>
+        <span className="login-badge-pill" style={{ fontSize: '11px', padding: '3px 10px' }}>
           ENTERPRISE ONBOARDING
         </span>
       </div>
 
-      <div style={{ width: '100%', maxWidth: '480px', background: '#ffffff', borderRadius: '24px', padding: '36px 32px', boxShadow: '0 8px 30px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0' }}>
+      <div className="card-login-box" style={{ width: '100%', maxWidth: '480px', padding: '36px 32px' }}>
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <img 
@@ -83,10 +84,10 @@ export default function ActivateAccount() {
             style={{ height: '42px', margin: '0 auto 14px', cursor: 'pointer' }} 
             onClick={() => navigate('/')}
           />
-          <h1 style={{ margin: '0 0 6px 0', fontSize: '22px', fontWeight: 800, color: '#0f172a' }}>
+          <h1 className="login-brand-heading" style={{ margin: '0 0 6px 0', fontSize: '22px' }}>
             {isSuccess ? 'Account Activated!' : 'Activate Your Account'}
           </h1>
-          <p style={{ margin: 0, fontSize: '13.5px', color: '#64748b', lineHeight: 1.5 }}>
+          <p className="login-brand-subtext" style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.5 }}>
             {isSuccess 
               ? 'Your enterprise credentials and CP-ABE security keys are established.'
               : 'Complete your initial onboarding by setting your password.'}

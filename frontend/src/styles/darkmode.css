@@ -1831,3 +1831,202 @@ html.dark .site-footer__links button:hover,
   color: #38bdf8 !important;
 }
 
+/* ==========================================================================
+   17. LOGIN & ACTIVATION VIEW (CLEAN-LOGIN) DARK MODE STYLING
+   ========================================================================== */
+
+html.dark .clean-login-viewport,
+[data-theme="dark"] .clean-login-viewport {
+  background-color: #070b12 !important;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(240, 96, 93, 0.08) 0%, transparent 40%),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1.5px, transparent 1.5px) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Top Navigation Bar */
+html.dark .login-back-btn,
+[data-theme="dark"] .login-back-btn {
+  background: #111827 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .login-back-btn:hover,
+[data-theme="dark"] .login-back-btn:hover {
+  background: #1e293b !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+html.dark .login-badge-pill,
+[data-theme="dark"] .login-badge-pill {
+  background: rgba(56, 189, 248, 0.1) !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  color: #38bdf8 !important;
+}
+
+/* Brand Title & Subtext */
+html.dark .login-brand-heading,
+[data-theme="dark"] .login-brand-heading {
+  color: #f8fafc !important;
+}
+
+html.dark .login-brand-subtext,
+[data-theme="dark"] .login-brand-subtext {
+  color: #94a3b8 !important;
+}
+
+/* Main Login Box */
+html.dark .card-login-box,
+[data-theme="dark"] .card-login-box {
+  background: #0f172a !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Tabs: Sign In vs Quick Demo */
+html.dark .login-toggle-tabs,
+[data-theme="dark"] .login-toggle-tabs {
+  background: #090d16 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .toggle-tab-btn,
+[data-theme="dark"] .toggle-tab-btn {
+  color: #94a3b8 !important;
+}
+
+html.dark .toggle-tab-btn:hover,
+[data-theme="dark"] .toggle-tab-btn:hover {
+  color: #f8fafc !important;
+}
+
+html.dark .toggle-tab-btn.active,
+[data-theme="dark"] .toggle-tab-btn.active {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Form Inputs & Labels */
+html.dark .login-input-group label,
+[data-theme="dark"] .login-input-group label {
+  color: #cbd5e1 !important;
+}
+
+html.dark .input-field-wrap input,
+[data-theme="dark"] .input-field-wrap input {
+  background: #090d16 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+html.dark .input-field-wrap input:focus,
+[data-theme="dark"] .input-field-wrap input:focus {
+  background: #090d16 !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+}
+
+html.dark .input-field-icon,
+[data-theme="dark"] .input-field-icon {
+  color: #64748b !important;
+}
+
+html.dark .input-field-wrap input::placeholder,
+[data-theme="dark"] .input-field-wrap input::placeholder {
+  color: #64748b !important;
+}
+
+/* Form Extras (Remember Me & Forgot Password) */
+html.dark .remember-checkbox,
+[data-theme="dark"] .remember-checkbox {
+  color: #cbd5e1 !important;
+}
+
+html.dark .remember-checkbox input,
+[data-theme="dark"] .remember-checkbox input {
+  accent-color: #38bdf8 !important;
+}
+
+html.dark .forgot-pass-link,
+[data-theme="dark"] .forgot-pass-link {
+  color: #38bdf8 !important;
+}
+
+html.dark .forgot-pass-link:hover,
+[data-theme="dark"] .forgot-pass-link:hover {
+  color: #7dd3fc !important;
+}
+
+/* Submit Button */
+html.dark .login-submit-btn,
+[data-theme="dark"] .login-submit-btn {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4) !important;
+}
+
+html.dark .login-submit-btn:hover,
+[data-theme="dark"] .login-submit-btn:hover {
+  background: linear-gradient(135deg, #0369a1, #075985) !important;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5) !important;
+}
+
+/* Footer Hint */
+html.dark .login-footer-hint,
+[data-theme="dark"] .login-footer-hint {
+  color: #94a3b8 !important;
+}
+
+html.dark .login-footer-hint strong,
+[data-theme="dark"] .login-footer-hint strong {
+  color: #38bdf8 !important;
+}
+
+/* Quick Role Access List in Dark Mode */
+html.dark .demo-intro-text,
+[data-theme="dark"] .demo-intro-text {
+  color: #94a3b8 !important;
+}
+
+html.dark .demo-role-card-btn,
+[data-theme="dark"] .demo-role-card-btn {
+  background: #090d16 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+html.dark .demo-role-card-btn:hover,
+[data-theme="dark"] .demo-role-card-btn:hover {
+  background: #1e293b !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .demo-role-title,
+[data-theme="dark"] .demo-role-title {
+  color: #f8fafc !important;
+  font-weight: 700;
+}
+
+html.dark .demo-role-person,
+[data-theme="dark"] .demo-role-person {
+  color: #94a3b8 !important;
+}
+
+html.dark .demo-role-arrow,
+[data-theme="dark"] .demo-role-arrow {
+  color: #64748b !important;
+}
+
+html.dark .demo-role-card-btn:hover .demo-role-arrow,
+[data-theme="dark"] .demo-role-card-btn:hover .demo-role-arrow {
+  color: #38bdf8 !important;
+}
+
+
