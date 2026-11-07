@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 /**
  * Reusable animated shimmer skeleton placeholder for loading states.

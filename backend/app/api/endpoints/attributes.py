@@ -1,4 +1,4 @@
-﻿"""Attribute Authority, Tier-2 Revocation & Batch Re-encryption Endpoints.
+"""Attribute Authority, Tier-2 Revocation & Batch Re-encryption Endpoints.
 
 Implements Chapter III Section 3.6.4, 3.6.7 (DD-05, DD-09, SEC-05, OI-16):
 - Bumping attribute versions (e.g. CLIENTCORPALPHAV1 -> CLIENTCORPALPHAV2).

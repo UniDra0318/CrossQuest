@@ -1,4 +1,4 @@
-﻿"""Audit and Anomaly Alert Data Retention Service.
+"""Audit and Anomaly Alert Data Retention Service.
 
 Implements Chapter III Section 3.7.5 & OI-20:
 - Purges access audit logs older than 12 months (365 days).

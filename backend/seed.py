@@ -1,4 +1,4 @@
-﻿"""Seed script to populate CrossQuest database with comprehensive pilot data.
+"""Seed script to populate CrossQuest database with comprehensive pilot data.
 
 Conforms to:
 - Chapter I & III specification: 5 system roles (Admin, Account Manager, Finance, Trainer, Trainee).
