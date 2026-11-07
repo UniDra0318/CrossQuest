@@ -450,7 +450,7 @@ class AccessLog(Base):
 
 
 class AnomalyAlert(Base):
-    """Access Anomaly Alert entity with full lifecycle support (Table 22, Section 3.7.5, Figure 10).
+    """Access Anomaly Alert entity with full lifecycle support (Table 13, Section 3.7.5, Figure 10).
     
     Lifecycle:
     - NEW: freshly triggered by rule evaluator or immediate trigger (e.g. deletion)
@@ -477,7 +477,7 @@ class AnomalyAlert(Base):
     severity_final = Column(String(20), default="MEDIUM") # LOW, MEDIUM, HIGH (max is HIGH)
     severity = Column(String(20), default="MEDIUM") # Kept for backward compatibility
     
-    # Supporting indicator & episode tracking (Table 22, Section 3.7.4)
+    # Supporting indicator & episode tracking (Table 13, Section 3.7.4)
     after_hours_tag = Column(Boolean, default=False)
     episode_start = Column(DateTime, default=datetime.utcnow)
     client_reviewed = Column(Boolean, default=False)
@@ -514,7 +514,7 @@ class AlertEvent(Base):
 
 
 class AnomalyRule(Base):
-    """Rule definition and thresholds (Figure 10, Table 22, Section 3.7.3)."""
+    """Rule definition and thresholds (Figure 10, Table 13, Section 3.7.3)."""
     __tablename__ = "anomaly_rules"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

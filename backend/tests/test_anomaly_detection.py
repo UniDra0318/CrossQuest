@@ -5,7 +5,7 @@ Meets requirements:
 - SEC-15: Immutable alerts recorded for Administrator review only; no automatic account lock-out.
 - SEC-16: S1 After-hours is a supporting indicator and NEVER creates an alert alone.
 - Measure M4: Anomaly detector evaluation latency recording in nanoseconds.
-- Chapter III Table 20, Table 22, Section 3.7.3, 3.7.4, 3.7.5.
+- Chapter III Table 13, Section 3.7.3, 3.7.4, 3.7.5.
 """
 
 import pytest
@@ -95,7 +95,7 @@ def clean_anomaly_state(db_session: Session, test_user: User):
 # =========================================================================
 
 def test_tc_ano_01_r1_a_single_out_of_scope(db_session: Session, test_user: User):
-    """TC-ANO-01: Single out-of-scope access attempt generates Low severity alert (Table 22)."""
+    """TC-ANO-01: Single out-of-scope access attempt generates Low severity alert (Table 13)."""
     # Simulate single out-of-scope event during daytime
     business_hours = datetime(2026, 10, 21, 2, 0, tzinfo=timezone.utc) # 10:00 AM PHT
     alert = anomaly_detector.record_out_of_scope_attempt(

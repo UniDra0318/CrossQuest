@@ -1307,7 +1307,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   </span>
                   <div>
                     <h2>Anomaly Detection Thresholds</h2>
-                    <p>Live active rule parameters (Table 22)</p>
+                    <p>Live active rule parameters (Table 13)</p>
                   </div>
                 </div>
                 <button

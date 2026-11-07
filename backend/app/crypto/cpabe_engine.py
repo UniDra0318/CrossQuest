@@ -88,8 +88,34 @@ class CPABEEngine:
             except Exception:
                 self.group = PairingGroup("SS512")
             self.cpabe = CPabe_BSW07(self.group)
-            (self.master_public_key, self.master_secret_key) = self.cpabe.setup()
+
+            # Master key persistence: load existing keys if present, otherwise setup and persist (SEC-04)
+            mpk_path = getattr(settings, "CPABE_MASTER_PUBLIC_KEY_PATH", None)
+            msk_path = getattr(settings, "CPABE_MASTER_SECRET_KEY_PATH", None)
+
+            if mpk_path and msk_path and os.path.exists(mpk_path) and os.path.exists(msk_path):
+                with open(mpk_path, "rb") as f:
+                    self.master_public_key = bytesToObject(f.read(), self.group)
+                with open(msk_path, "rb") as f:
+                    self.master_secret_key = bytesToObject(f.read(), self.group)
+                logger.info(f"Loaded existing CP-ABE master keys from {mpk_path} and {msk_path}")
+            else:
+                (self.master_public_key, self.master_secret_key) = self.cpabe.setup()
+                if mpk_path and msk_path:
+                    os.makedirs(os.path.dirname(os.path.abspath(mpk_path)), exist_ok=True)
+                    os.makedirs(os.path.dirname(os.path.abspath(msk_path)), exist_ok=True)
+                    with open(mpk_path, "wb") as f:
+                        f.write(objectToBytes(self.master_public_key, self.group))
+                    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+                    msk_fd = os.open(msk_path, flags, 0o600)
+                    with open(msk_fd, "wb") as f:
+                        f.write(objectToBytes(self.master_secret_key, self.group))
+                    logger.info(f"Generated and persisted new CP-ABE master keys to {mpk_path} and {msk_path}")
         except Exception as e:
+            if getattr(settings, "ENVIRONMENT", "development") == "production":
+                raise RuntimeError(
+                    f"FAIL-CLOSED SECURITY ENFORCEMENT: Charm pairing group or master key initialization failed in production: {e}"
+                ) from e
             logger.warning(f"Could not initialize Charm pairing group: {e}. Defaulting to simulation mode.")
             self.charm_available = False
 
@@ -108,6 +134,15 @@ class CPABEEngine:
                 }
             except Exception as e:
                 logger.error(f"Charm keygen error: {e}")
+                if getattr(settings, "ENVIRONMENT", "development") == "production":
+                    raise RuntimeError(
+                        f"FAIL-CLOSED SECURITY ENFORCEMENT: Charm key generation failed in production: {e}"
+                    ) from e
+
+        if getattr(settings, "ENVIRONMENT", "development") == "production":
+            raise RuntimeError(
+                "FAIL-CLOSED SECURITY ENFORCEMENT: Simulation key generation is strictly forbidden in production (SEC-04, VR-24)."
+            )
 
         # Authenticated simulation key
         simulated_key = f"SIMKEY_{':'.join(sorted(sanitized_attrs))}"
@@ -163,7 +198,17 @@ class CPABEEngine:
                     "engine": "charm-bsw07"
                 }
             except Exception as e:
+                logger.error(f"Charm encryption failed: {e}")
+                if getattr(settings, "ENVIRONMENT", "development") == "production":
+                    raise RuntimeError(
+                        f"FAIL-CLOSED SECURITY ENFORCEMENT: Charm encryption failed in production: {e}"
+                    ) from e
                 logger.warning(f"Charm encryption failed: {e}. Falling back to simulation.")
+
+        if getattr(settings, "ENVIRONMENT", "development") == "production":
+            raise RuntimeError(
+                "FAIL-CLOSED SECURITY ENFORCEMENT: Simulation encryption is strictly forbidden in production (SEC-04, VR-24)."
+            )
 
         # Simulation mode: deterministic HKDF key derived from policy
         sim_secret = f"SIM_SECRET_{policy_str}".encode("utf-8")
@@ -229,7 +274,18 @@ class CPABEEngine:
                     info=b"crossquest-cpabe-aes256gcm",
                 )
                 aes_key = hkdf.derive(raw_element)
+            elif encrypted_record.get("engine") == "charm-bsw07" and not self.charm_available:
+                if getattr(settings, "ENVIRONMENT", "development") == "production":
+                    raise RuntimeError(
+                        "FAIL-CLOSED SECURITY ENFORCEMENT: Cannot decrypt Charm-BSW07 ciphertext without Charm native library in production."
+                    )
+                logger.error("Cannot decrypt Charm-BSW07 ciphertext without Charm native library.")
+                return None
             else:
+                if getattr(settings, "ENVIRONMENT", "development") == "production":
+                    raise RuntimeError(
+                        "FAIL-CLOSED SECURITY ENFORCEMENT: Simulation record decryption is strictly forbidden in production (SEC-04, VR-24)."
+                    )
                 sim_secret = f"SIM_SECRET_{policy}".encode("utf-8")
                 hkdf = HKDF(
                     algorithm=hashes.SHA256(),
@@ -243,6 +299,8 @@ class CPABEEngine:
             decrypted_bytes = aesgcm.decrypt(nonce, payload_cipher, aad)
             return json.loads(decrypted_bytes.decode("utf-8"))
         except Exception as e:
+            if getattr(settings, "ENVIRONMENT", "development") == "production" and isinstance(e, RuntimeError):
+                raise
             logger.debug(f"Decryption or GCM authentication tag verification failed: {e}")
             return None
 

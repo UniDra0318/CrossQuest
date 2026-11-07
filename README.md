@@ -42,13 +42,13 @@ Corporate training providers increasingly store sensitive learner data (assessme
    - Historical records retain the company attribute that was in effect at completion time to avoid mass re-encryption.
 
 2. **Ciphertext-Policy Attribute-Based Encryption (CP-ABE)**:
-   - Uses `Charm-Crypto` (BSW07 / Waters11 scheme) to embed policies directly into record ciphertexts.
+   - Uses `Charm-Crypto` (BSW07 scheme) to embed policies directly into record ciphertexts.
    - Policy format: `(ROLE:ACCOUNT_MANAGER AND COMPANY:CORP_ALPHA) OR ROLE:ADMIN`.
    - Built-in development fallback simulation for environments without C-pairing libraries.
 
 3. **Access Anomaly Detection Engine**:
    - **Out-of-Scope Access**: Detects staff requesting records from non-assigned client accounts.
-   - **Off-Hours Access**: Flags attempts outside business hours (08:00 - 19:00 UTC) or weekends.
+   - **Off-Hours Access**: Flags attempts outside business hours (Mon–Fri 09:00–18:00 Asia/Manila, UTC+8) or weekends.
    - **Repeated Failed Attempts**: Triggers alert when consecutive policy decryption failures exceed threshold.
    - **Abnormal Volume**: Flags burst access attempts within a sliding time window.
 

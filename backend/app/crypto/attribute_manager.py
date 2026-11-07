@@ -183,6 +183,19 @@ class AttributeManager:
                     logger.info(f"[AWS KMS] DEK successfully envelope-wrapped under AWS KMS key: {target_arn}")
                 except Exception as e:
                     logger.warning(f"[AWS KMS] Call failed ({e}); falling back to local AES-256-GCM envelope KEK.")
+                    if getattr(settings, "ENVIRONMENT", "development") == "production":
+                        raise RuntimeError(
+                            f"FAIL-CLOSED SECURITY ENFORCEMENT: AWS KMS key wrapping failed in production: {e}"
+                        ) from e
+            elif getattr(settings, "ENVIRONMENT", "development") == "production":
+                raise RuntimeError(
+                    f"FAIL-CLOSED SECURITY ENFORCEMENT: AWS KMS client could not be initialized for ARN '{target_arn}' in production."
+                )
+
+        if wrapped_payload is None and getattr(settings, "ENVIRONMENT", "development") == "production":
+            raise RuntimeError(
+                "FAIL-CLOSED SECURITY ENFORCEMENT: Local KEK envelope fallback is forbidden in production (SEC-06, DD-09)."
+            )
 
         # Fallback to local HKDF AES-256-GCM KEK
         if wrapped_payload is None:
@@ -227,6 +240,18 @@ class AttributeManager:
                         dek = resp["Plaintext"]
                     except Exception as e:
                         logger.warning(f"[AWS KMS] KMS unwrap failed: {e}")
+                        if getattr(settings, "ENVIRONMENT", "development") == "production":
+                            raise RuntimeError(
+                                f"FAIL-CLOSED SECURITY ENFORCEMENT: AWS KMS unwrap failed in production: {e}"
+                            ) from e
+                elif getattr(settings, "ENVIRONMENT", "development") == "production":
+                    raise RuntimeError(
+                        "FAIL-CLOSED SECURITY ENFORCEMENT: Cannot unwrap AWS KMS payload without AWS KMS client in production."
+                    )
+                if dek is None and getattr(settings, "ENVIRONMENT", "development") == "production":
+                    raise RuntimeError(
+                        "FAIL-CLOSED SECURITY ENFORCEMENT: AWS KMS key unwrapping failed in production."
+                    )
 
             # Local KEK unwrapping
             if dek is None:
@@ -249,6 +274,8 @@ class AttributeManager:
             decrypted_key_bytes = aesgcm.decrypt(nonce, key_ciphertext, b"crossquest-cpabe-dek-aad")
             return decrypted_key_bytes.decode("utf-8")
         except Exception as e:
+            if getattr(settings, "ENVIRONMENT", "development") == "production" and isinstance(e, RuntimeError):
+                raise
             logger.error(f"Envelope key decryption failed: {e}")
             return None
 

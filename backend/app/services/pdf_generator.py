@@ -734,8 +734,8 @@ class PDFGenerator:
         elements.append(kpi_table)
         elements.append(Spacer(1, 12))
 
-        # 4. Detection Rules & Activity Matrix (Table 22)
-        elements.append(Paragraph("<b>1. Anomaly Detection Rules & Volume Breakdown (Table 22)</b>", meta_label))
+        # 4. Detection Rules & Activity Matrix (Table 13)
+        elements.append(Paragraph("<b>1. Anomaly Detection Rules & Volume Breakdown (Table 13)</b>", meta_label))
         elements.append(Spacer(1, 4))
 
         rules_breakdown = report_data.get("rules_breakdown", [])

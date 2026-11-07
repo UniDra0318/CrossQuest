@@ -856,7 +856,7 @@ erDiagram
 
 ## 6. Anomaly Rules & Threshold Reference Table
 
-Every access event processed by CrossQuest is evaluated against **Chapter III Table 22** and hardened in Phase 4:
+Every access event processed by CrossQuest is evaluated against **Chapter III Table 13** and hardened in Phase 4:
 
 | Rule Code | Monitored Event | Window | Default Threshold | Base Severity | Final Escalation (S1 / Burst) | Action / Disposition |
 |---|---|---|---|---|---|---|

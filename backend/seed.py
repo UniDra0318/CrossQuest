@@ -9,7 +9,7 @@ Conforms to:
 - 12+ Training records with realistic encrypted payloads and audit versions.
 - Quizzes, questions, answer keys (SEC-26), and attempts.
 - Gamification progress with live streaks, points, levels, and badges.
-- Anomaly alerts with full review lifecycle and R1-R4 + S1 rules (Table 20).
+- Anomaly alerts with full review lifecycle and R1-R4 + S1 rules (Table 13).
 """
 import sys
 import os
@@ -943,7 +943,7 @@ def seed_database():
         db.add_all(logs)
         db.commit()
 
-        # 14. Anomaly Alerts (Table 20 Alert Lifecycle: NEW, UNDER_REVIEW, RESOLVED)
+        # 14. Anomaly Alerts (Table 13 Alert Lifecycle: NEW, UNDER_REVIEW, RESOLVED)
         alerts = [
             AnomalyAlert(
                 subject_user_id=u_am1.id,

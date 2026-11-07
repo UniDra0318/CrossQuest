@@ -4,15 +4,15 @@ services:
     container_name: crossquest-postgres
     restart: always
     environment:
-      POSTGRES_USER: crossquest_admin
-      POSTGRES_PASSWORD: crossquest_secret_password
-      POSTGRES_DB: crossquest_db
+      POSTGRES_USER: ${POSTGRES_USER:-crossquest_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crossquest_secret_password}
+      POSTGRES_DB: ${POSTGRES_DB:-crossquest_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U crossquest_admin -d crossquest_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crossquest_admin} -d ${POSTGRES_DB:-crossquest_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,13 +23,15 @@ services:
       dockerfile: Dockerfile
     container_name: crossquest-backend
     restart: always
+    # NOTE: Default values are intended strictly for local development/testing.
+    # In production, pass secure non-default secrets via environment variables or a .env file.
     environment:
-      DATABASE_URL: postgresql+psycopg2://crossquest_admin:crossquest_secret_password@postgres:5432/crossquest_db
-      SECRET_KEY: supersecretjwtkeyforcrossquestplatformchangeinproduction
-      ACCESS_TOKEN_EXPIRE_MINUTES: 1440
-      CONTEXT_SIGNING_SECRET: crossquest_internal_context_signing_secret_key_change_in_prod
-      AWS_ENDPOINT_URL: http://localstack:4566
-      AWS_DEFAULT_REGION: ap-southeast-1
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-crossquest_admin}:${POSTGRES_PASSWORD:-crossquest_secret_password}@postgres:5432/${POSTGRES_DB:-crossquest_db}}
+      SECRET_KEY: ${SECRET_KEY:-supersecretjwtkeyforcrossquestplatformchangeinproduction}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      CONTEXT_SIGNING_SECRET: ${CONTEXT_SIGNING_SECRET:-crossquest_internal_context_signing_secret_key_change_in_prod}
+      AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL:-http://localstack:4566}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-ap-southeast-1}
     ports:
       - "8000:8000"
     volumes:

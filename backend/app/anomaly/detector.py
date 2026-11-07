@@ -1,7 +1,7 @@
 """Access Anomaly Detection Engine for CrossQuest.
 
 Implements rule- and threshold-based anomaly monitoring as defined in
-Chapter I (SEC-14, SEC-15, SEC-16) and Chapter III Section 3.7 & Table 20.
+Chapter I (SEC-14, SEC-15, SEC-16) and Chapter III Section 3.7 & Table 13.
 
 Rules:
 - R1-a: Out-of-scope attempt (1 event) -> Low alert, aggregated daily.
@@ -31,7 +31,7 @@ from app.core.config import settings
 from app.models.entities import AccessLog, AnomalyAlert, User, TrainingRecord
 
 
-# Role-based thresholds for distinct record-detail views within 15 minutes (Table 22, R3-a)
+# Role-based thresholds for distinct record-detail views within 15 minutes (Table 13, R3-a)
 R3_A_THRESHOLDS = {
     "account_manager": 25,
     "trainer": 25,
@@ -46,7 +46,7 @@ SEVERITY_LEVELS = ["LOW", "MEDIUM", "HIGH"]
 
 def is_after_hours(dt: Optional[datetime] = None) -> bool:
     """Checks if a given UTC datetime falls outside Philippine business hours (Mon-Fri 09:00 - 18:00 UTC+8).
-    Chapter III Section 3.7.3 & Table 22: S1 After-hours indicator.
+    Chapter III Section 3.7.3 & Table 13: S1 After-hours indicator.
     """
     if dt is None:
         dt = datetime.now(timezone.utc)
@@ -82,7 +82,7 @@ def escalate_severity(base_severity: str) -> str:
 
 
 class AccessAnomalyDetector:
-    """Evaluates access events against Chapter III Table 22 rules."""
+    """Evaluates access events against Chapter III Table 13 rules."""
 
     @staticmethod
     def _create_or_update_alert(
@@ -98,7 +98,7 @@ class AccessAnomalyDetector:
         metadata = metadata_info or {}
         now = event_time or datetime.now(timezone.utc).replace(tzinfo=None)
         
-        # Evaluate S1 after-hours indicator (Table 22, Section 3.7.3)
+        # Evaluate S1 after-hours indicator (Table 13, Section 3.7.3)
         after_hours = is_after_hours(now)
         final_sev = base_severity
         tags = []
@@ -131,7 +131,7 @@ class AccessAnomalyDetector:
             db.refresh(existing_alert)
             return existing_alert
 
-        # Create new alert with full thesis fields (Figure 10, Table 22)
+        # Create new alert with full thesis fields (Figure 10, Table 13)
         alert = AnomalyAlert(
             subject_user_id=subject_user_id,
             rule_code=rule_code,

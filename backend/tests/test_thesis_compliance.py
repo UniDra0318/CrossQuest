@@ -102,7 +102,7 @@ def test_cpabe_tamper_detection():
 
 
 def test_anomaly_s1_never_alerts_alone():
-    """SEC-16 & Table 20: S1 After-hours is a supporting indicator and NEVER creates an alert alone."""
+    """SEC-16 & Table 13: S1 After-hours is a supporting indicator and NEVER creates an alert alone."""
     # escalate_severity verifies severity elevation (capped at HIGH per Section 3.7.3)
     assert escalate_severity("LOW") == "MEDIUM"
     assert escalate_severity("MEDIUM") == "HIGH"
@@ -198,3 +198,80 @@ def test_thesis_schema_models():
     assert ImportStagingRow.__tablename__ == "import_staging_rows"
     assert ImportDiscrepancy.__tablename__ == "import_discrepancies"
 
+
+
+def test_fail_closed_production_charm_enforcement(monkeypatch):
+    """SEC-04: CP-ABE engine refuses to initialize without Charm in production."""
+    from app.crypto.cpabe_engine import CPABEEngine
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
+        CPABEEngine()
+
+
+def test_fail_closed_production_simulation_forbidden(monkeypatch):
+    """SEC-04: Cannot generate simulated key or encrypt/decrypt in production."""
+    from app.crypto.cpabe_engine import cpabe_engine
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+
+    with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
+        cpabe_engine.generate_user_private_key(["ROLEADMIN"])
+
+    with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
+        cpabe_engine.encrypt_record({"test": "data"}, "ROLEADMIN")
+
+    fake_pkg = {
+        "policy": "ROLEADMIN",
+        "policy_version": 1,
+        "abe_ciphertext": "fake",
+        "payload_ciphertext": "fake",
+        "nonce": "fake",
+        "engine": "simulation"
+    }
+    with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
+        cpabe_engine.decrypt_record(fake_pkg, {"attributes": ["ROLEADMIN"], "key_data": "fake"})
+
+
+def test_fail_closed_kms_envelope_in_production(monkeypatch):
+    """SEC-06: Production envelope encryption refuses local KEK fallback."""
+    from app.crypto.attribute_manager import AttributeManager
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+
+    # Real KMS call fails / no client configured in production -> raises RuntimeError
+    with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
+        AttributeManager.envelope_encrypt_key("fake_key_data", kms_key_arn="arn:aws:kms:ap-southeast-1:123456789012:key/abc")
+
+    # Real KMS wrapped payload fails unwrap in production -> raises RuntimeError
+    fake_kms_wrapped = "QVdTS01TOmZha2VfYmxvYg==" # base64 of b"AWSKMS:fake_blob"
+    with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
+        AttributeManager.envelope_decrypt_key(fake_kms_wrapped, "bm9uY2U=", "Y2lwaGVy", kms_key_arn="arn:aws:kms:ap-southeast-1:123456789012:key/abc")
+
+
+def test_fail_closed_production_insecure_secrets(monkeypatch):
+    """SEC-06: Server startup check refuses default hardcoded secrets in production."""
+    from app.main import verify_fail_closed_crypto_environment
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+
+    # In test environment, native Charm is unavailable or secrets are default, so it should raise RuntimeError
+    with pytest.raises(RuntimeError, match="FAIL-CLOSED SECURITY ENFORCEMENT"):
+        verify_fail_closed_crypto_environment()
+
+
+def test_cors_middleware_restricted_origins():
+    """Verify CORS middleware is restricted to settings.ALLOWED_ORIGINS."""
+    from app.main import app
+    from app.core.config import settings
+    from starlette.middleware.cors import CORSMiddleware
+
+    cors_middlewares = [m for m in app.user_middleware if m.cls == CORSMiddleware]
+    assert len(cors_middlewares) == 1
+    allow_origins = cors_middlewares[0].kwargs.get("allow_origins", [])
+    assert allow_origins == settings.ALLOWED_ORIGINS
+    assert "*" not in allow_origins

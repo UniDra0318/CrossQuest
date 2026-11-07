@@ -350,7 +350,7 @@ def get_anomaly_rules(
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_current_admin_user)
 ):
-    """Lists anomaly detection rules and their approval status (Figure 10, Table 22)."""
+    """Lists anomaly detection rules and their approval status (Figure 10, Table 13)."""
     rules = db.query(AnomalyRule).all()
     if not rules:
         # Seed default rules

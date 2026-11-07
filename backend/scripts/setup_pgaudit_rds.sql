@@ -1,6 +1,6 @@
 ﻿-- ============================================================================
 -- CrossQuest Production Database Setup: pgAudit & RDS Logging Configuration
--- Requirement: OI-20, SEC-12, SEC-13, Chapter III Section 3.7 & Table 22
+-- Requirement: OI-20, SEC-12, SEC-13, Chapter III Section 3.7 & Table 13
 -- ============================================================================
 
 -- 1. Enable pgAudit extension (requires RDS parameter shared_preload_libraries = 'pgaudit')

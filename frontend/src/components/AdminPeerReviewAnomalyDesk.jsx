@@ -1606,12 +1606,12 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
             </div>
           </div>
 
-          {/* Anomaly Detection Rules Breakdown Table (Table 22) */}
+          {/* Anomaly Detection Rules Breakdown Table (Table 13) */}
           <div style={{ background: themeStyles.panelBg, borderRadius: '24px', border: themeStyles.panelBorder, overflow: 'hidden' }}>
             <div style={{ padding: '20px 24px', borderBottom: themeStyles.panelBorder, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: themeStyles.textMain }}>
-                  1. Detection Rule Volume & Severity Matrix (Chapter III Table 22)
+                  1. Detection Rule Volume & Severity Matrix (Chapter III Table 13)
                 </h3>
                 <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: themeStyles.textMuted }}>
                   Evaluation breakdown across out-of-scope access, brute-force attempts, volume bursts, and record modifications.

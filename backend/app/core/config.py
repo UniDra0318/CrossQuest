@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     CPABE_MASTER_PUBLIC_KEY_PATH: Optional[str] = "keys/mpk.key"
     CPABE_MASTER_SECRET_KEY_PATH: Optional[str] = "keys/msk.key"
 
-    # Anomaly Detection Thresholds (Chapter III Table 22, Section 3.7.3 & Phase 4)
+    # Anomaly Detection Thresholds (Chapter III Table 13, Section 3.7.3 & Phase 4)
     ANOMALY_WORK_HOURS_START: int = 9   # 09:00 PHT
     ANOMALY_WORK_HOURS_END: int = 18    # 18:00 PHT
     ANOMALY_FAILED_ATTEMPT_THRESHOLD: int = 5 # 5 failed logins (R2-a)
