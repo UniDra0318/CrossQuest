@@ -3644,6 +3644,7 @@
 .arena-center-timer {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .countdown-timer-chip {
@@ -3661,11 +3662,25 @@
   transition: all 0.2s ease;
 }
 
+.countdown-timer-chip.timer-warning {
+  background: #fffbeb;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
 .countdown-timer-chip.timer-critical {
   background: #fee2e2;
   border-color: #ef4444;
   color: #b91c1c;
   animation: pulseTimer 0.8s infinite alternate;
+}
+
+.timer-chip-status {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
 }
 
 @keyframes pulseTimer {
@@ -3807,7 +3822,27 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 6px 4px 10px 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom horizontal scrollbar for side-scrolling cells */
+.arena-cells-grid::-webkit-scrollbar {
+  height: 6px;
+}
+.arena-cells-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 999px;
+}
+.arena-cells-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.arena-cells-grid::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .arena-question-cell {
@@ -3826,6 +3861,7 @@
   user-select: none;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .arena-question-cell.cell-pending {
@@ -4000,6 +4036,112 @@
 @keyframes pulseBarGlow {
   0% { opacity: 0.85; filter: brightness(1); }
   100% { opacity: 1; filter: brightness(1.25); }
+}
+
+.arena-timer-bar-top.centered-timer-header {
+  justify-content: center;
+}
+
+.arena-timer-fraction-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: #64748b;
+  font-family: var(--font-fun, monospace);
+  letter-spacing: 0.03em;
+}
+
+/* Warning Banner: Unpausable & Auto-saved */
+.arena-session-warning-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  color: #92400e;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.08);
+}
+
+.warning-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.warning-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.save-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+  font-weight: 800;
+}
+
+.save-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: pulseDot 1.2s infinite alternate;
+}
+
+/* Unpausable Badge in Top Bar */
+.arena-unpausable-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  color: #92400e;
+  font-size: 11.5px;
+  font-weight: 800;
+  user-select: none;
+}
+
+.auto-saved-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 800;
+}
+
+/* Briefing screen notice */
+.briefing-unpausable-notice-box {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  color: #92400e;
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 /* Dashboard Course Activity Numbered Question Cells */

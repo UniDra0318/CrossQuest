@@ -174,9 +174,22 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const [floatingPoint, setFloatingPoint] = useState(null);
   const [pointsTotal, setPointsTotal] = useState(() => initialSession?.pointsTotal || 0);
   const timerRef = useRef(null);
+  const cellsContainerRef = useRef(null);
+  const activeCellRef = useRef(null);
 
   const currentQ = questions[currentIndex] || questions[0];
   const totalQuestions = questions.length;
+
+  // Auto-scroll active question cell horizontally into view when question changes
+  useEffect(() => {
+    if (stage === 'active' && activeCellRef.current) {
+      activeCellRef.current.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    }
+  }, [currentIndex, stage]);
 
   // SEC-26: Offline caching of questions and sync queue disabled
   const saveProgress = (overrides = {}) => {
@@ -733,6 +746,17 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               </div>
             )}
 
+            {/* Assessment Session Integrity & No Pause Policy Notice */}
+            <div className="briefing-unpausable-notice-box">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={18} className="text-amber flex-shrink-0" />
+                <strong>Continuous Assessment Session Protocol:</strong>
+              </div>
+              <div style={{ opacity: 0.9 }}>
+                Quizzes cannot be paused once initiated to preserve assessment integrity. If you experience an unstable internet connection, browser refresh, or unexpected interruption, your question answers and session progress are continuously auto-saved so you can resume immediately upon reconnecting.
+              </div>
+            </div>
+
             <div className="briefing-actions">
               <button 
                 className="btn-tactile btn-tactile-purple btn-begin-quiz"
@@ -909,6 +933,15 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </span>
           </div>
 
+          {/* Real-time Countdown Timer Centered in Middle */}
+          <div className="arena-center-timer">
+            <div className={`countdown-timer-chip ${timeLeft <= 10 ? 'timer-critical' : timeLeft <= 20 ? 'timer-warning' : ''}`}>
+              <Clock size={16} className={timeLeft <= 10 ? 'animate-pulse' : ''} />
+              <span className="timer-seconds-text">00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span>
+              <span className="timer-chip-status">{timeLeft <= 10 ? 'CRITICAL' : timeLeft <= 20 ? 'HURRY' : 'TIME REMAINING'}</span>
+            </div>
+          </div>
+
           <div className="arena-right-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {floatingPoint && (
               <div className="floating-points-pill">{floatingPoint}</div>
@@ -1035,17 +1068,37 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               )}
             </div>
 
-            <button 
-              className="btn-tactile btn-tactile-ghost btn-sm"
-              onClick={handleAbandon}
-              title="Pause and save current progress"
+            {/* Unpausable Assessment Protocol Badge */}
+            <div 
+              className="arena-unpausable-badge"
+              title="Assessment Session Integrity: This quiz cannot be paused. If your internet connection drops or your browser closes, your progress is automatically saved."
             >
-              Pause & Exit
-            </button>
+              <AlertTriangle size={13} className="text-amber" />
+              <span>No Pause</span>
+              <span className="auto-saved-tag">
+                <Check size={11} strokeWidth={3} /> Auto-Saved
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Question Progress Cells Grid */}
+        {/* Connection & Unpausable Session Warning Banner */}
+        <div className="arena-session-warning-banner">
+          <div className="warning-banner-left">
+            <AlertTriangle size={15} className="text-amber flex-shrink-0" />
+            <span>
+              <strong>Assessment in progress:</strong> You cannot pause the quiz. Your progress is continuously auto-saved if you experience an unstable connection or close your browser.
+            </span>
+          </div>
+          <div className="warning-banner-right">
+            <span className="save-status-indicator">
+              <span className="save-status-dot" />
+              <span>Auto-Saving Active</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Question Progress Cells Grid (Side-scrolling automatically) */}
         <div className="arena-progress-cells-container">
           <div className="arena-cells-header">
             <div className="arena-cells-label">
@@ -1059,7 +1112,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               <span className="legend-item"><span className="legend-dot dot-pending"></span>Pending</span>
             </div>
           </div>
-          <div className="arena-cells-grid">
+          <div className="arena-cells-grid" ref={cellsContainerRef}>
             {questions.map((q, idx) => {
               const isCurrent = idx === currentIndex;
               const rec = answersHistory[q.id];
@@ -1097,6 +1150,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               return (
                 <div 
                   key={q.id || idx}
+                  ref={isCurrent ? activeCellRef : null}
                   className={`arena-question-cell cell-${cellStatus}`}
                   title={`Question ${idx + 1}: ${isCurrent ? 'Current active question' : isPastAnswered ? (isPastCorrect ? 'Completed - Correct' : 'Completed - Incorrect') : 'Upcoming question'}`}
                 >
@@ -1113,17 +1167,10 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
         {/* Visible Depleting Countdown Timer Bar */}
         <div className="arena-timer-bar-section">
-          <div className="arena-timer-bar-top">
-            <div className={`arena-timer-clock-badge ${timeLeft <= 10 ? 'is-critical' : timeLeft <= 20 ? 'is-warning' : 'is-normal'}`}>
-              <Clock size={16} className={`timer-svg-icon ${timeLeft <= 10 ? 'animate-pulse' : ''}`} />
-              <span className="timer-seconds-text">00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span>
-              <span className="timer-status-hint">
-                {timeLeft <= 10 ? 'CRITICAL TIME!' : timeLeft <= 20 ? 'HURRY UP!' : 'TIME REMAINING'}
-              </span>
-            </div>
-            <div className="arena-timer-counter">
-              <span>{timeLeft}s remaining of {questionTimeLimit}s</span>
-            </div>
+          <div className="arena-timer-bar-top centered-timer-header">
+            <span className="arena-timer-fraction-text">
+              ⏱️ {timeLeft}s remaining of {questionTimeLimit}s
+            </span>
           </div>
           <div className="arena-timer-bar-track">
             <div 
@@ -1327,91 +1374,6 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           )}
         </div>
       </div>
-
-      {/* Modern In-App Pause & Exit Modal (Replaces browser window.confirm dialog) */}
-      {showExitConfirm && (
-        <div 
-          className="modal-backdrop-gamified"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(5px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999999,
-            padding: '20px'
-          }}
-          onClick={cancelExit}
-        >
-          <div 
-            className="card-gamified"
-            style={{
-              background: '#ffffff',
-              borderRadius: '20px',
-              padding: '32px 28px',
-              maxWidth: '440px',
-              width: '100%',
-              boxShadow: '0 24px 60px rgba(15, 23, 42, 0.22)',
-              border: '1.5px solid #e2e8f0',
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '16px'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div 
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                background: '#fef3c7',
-                color: '#d97706',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 16px rgba(217, 119, 6, 0.15)'
-              }}
-            >
-              <LogOut size={26} />
-            </div>
-
-            <div>
-              <h3 style={{ fontSize: '19px', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>
-                Pause & Exit Assessment?
-              </h3>
-              <p style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.5', margin: 0 }}>
-                Your current score and answered questions are preserved so you can resume the quest whenever you're ready.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '12px', width: '100%', marginTop: '8px' }}>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '700' }}
-                onClick={cancelExit}
-              >
-                Resume Quest
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                style={{ flex: 1, padding: '12px', borderRadius: '12px', fontWeight: '700', background: '#ef4444', color: '#fff', border: 'none' }}
-                onClick={confirmExit}
-              >
-                Confirm & Exit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

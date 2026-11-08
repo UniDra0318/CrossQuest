@@ -615,6 +615,55 @@ html.dark .activity-segment-cell.cell-empty,
   color: #64748b !important;
 }
 
+html.dark .arena-timer-fraction-text,
+[data-theme="dark"] .arena-timer-fraction-text {
+  color: #94a3b8 !important;
+}
+
+html.dark .arena-cells-grid::-webkit-scrollbar-track,
+[data-theme="dark"] .arena-cells-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .arena-cells-grid::-webkit-scrollbar-thumb,
+[data-theme="dark"] .arena-cells-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+html.dark .arena-session-warning-banner,
+[data-theme="dark"] .arena-session-warning-banner {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fde68a !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .save-status-indicator,
+[data-theme="dark"] .save-status-indicator {
+  background: rgba(0, 0, 0, 0.35) !important;
+  color: #fcd34d !important;
+}
+
+html.dark .arena-unpausable-badge,
+[data-theme="dark"] .arena-unpausable-badge {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #fcd34d !important;
+}
+
+html.dark .auto-saved-tag,
+[data-theme="dark"] .auto-saved-tag {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #6ee7b7 !important;
+}
+
+html.dark .briefing-unpausable-notice-box,
+[data-theme="dark"] .briefing-unpausable-notice-box {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fde68a !important;
+}
+
 html.dark .sequence-item-row,
 [data-theme="dark"] .sequence-item-row {
   background-color: #1e293b !important;
