@@ -844,242 +844,276 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     ];
 
     return (
-      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 28px 48px', boxSizing: 'border-box', overflowY: 'auto', transition: 'all 0.3s ease' }}>
-        <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '1040px', width: '94%' }}>
-          
-          {/* Recognition Tier Badge */}
-          <div className={`results-tier-pill ${passed ? 'tier-gold' : 'tier-amber'}`}>
-            <Crown size={14} />
-            <span>{tierTitle}</span>
-          </div>
-
-          <Trophy size={64} className="trophy-victory text-gold" />
-          <h2 className="results-heading">
-            {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
-          </h2>
-          <p className="results-subtext">
-            {passed 
-              ? 'Congratulations! You have satisfied corporate compliance criteria and verified key competencies under the Crossworks curriculum.'
-              : 'You have completed the module. Review your answers and explanations below to prepare for retake.'}
-          </p>
-
-          {/* Expanded 6-Metric High-Impact Stat Grid */}
-          <div className="results-stat-grid-6">
-            <div className="result-metric">
-              <div className="metric-big-num text-purple">{finalScorePct}%</div>
-              <div className="metric-tag">Accuracy ({correctCount}/{totalQuestions})</div>
-            </div>
-
-            <div className="result-metric">
-              <div className="metric-big-num text-gold">+{pointsTotal}</div>
-              <div className="metric-tag">Total Points & Speed Bonus</div>
-            </div>
-
-            <div className="result-metric">
-              <div className="metric-big-num text-cyan">⚡ {avgSpeedSec}s</div>
-              <div className="metric-tag">Avg Response Speed</div>
-            </div>
-
-            <div className="result-metric">
-              <div className="metric-big-num text-amber">🔥 {maxStreak}x</div>
-              <div className="metric-tag">Longest Streak Combo</div>
-            </div>
-
-            <div className="result-metric">
-              <div className="metric-big-num text-emerald">+{pointsTotal}</div>
-              <div className="metric-tag">Squad Contribution</div>
-            </div>
-
-            <div className="result-metric">
-              <div className={`metric-big-num ${passed ? 'text-green' : 'text-amber'}`}>
-                {passed ? 'QUALIFIED' : 'REVIEW'}
-              </div>
-              <div className="metric-tag">Compliance Standard</div>
-            </div>
-          </div>
-
-          {/* Interactive Gamification & Leaderboard Tabs Panel */}
-          <div className="results-interactive-panel">
-            <div className="results-panel-tabs">
-              <button 
-                type="button" 
-                className={`panel-tab-btn ${resultsTab === 'leaderboard' ? 'is-active' : ''}`}
-                onClick={() => setResultsTab('leaderboard')}
-              >
-                <Trophy size={15} />
-                <span>Live Cohort Leaderboard</span>
-              </button>
-              <button 
-                type="button" 
-                className={`panel-tab-btn ${resultsTab === 'teams' ? 'is-active' : ''}`}
-                onClick={() => setResultsTab('teams')}
-              >
-                <Users size={15} />
-                <span>Squad Battle Standings</span>
-              </button>
-              <button 
-                type="button" 
-                className={`panel-tab-btn ${resultsTab === 'xp' ? 'is-active' : ''}`}
-                onClick={() => setResultsTab('xp')}
-              >
-                <Sparkles size={15} />
-                <span>XP & Level Growth</span>
-              </button>
-            </div>
-
-            {/* TAB 1: LIVE COHORT LEADERBOARD */}
-            {resultsTab === 'leaderboard' && (
-              <div className="panel-tab-content animate-fadeIn">
-                <div className="leaderboard-live-status-bar flex-between">
-                  <div className="flex-align gap-8">
-                    <span className="live-pulse-dot" />
-                    <span className="live-status-text">LIVE COHORT STANDINGS &bull; SUMMER PILOT 2026</span>
+      <div 
+        className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} 
+        style={{ 
+          ...activeTheme.bgStyle, 
+          width: '100%', 
+          minHeight: '100vh', 
+          borderRadius: 0, 
+          padding: '16px 24px', 
+          boxSizing: 'border-box', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          overflowY: 'auto', 
+          transition: 'all 0.3s ease' 
+        }}
+      >
+        <div className="results-card-split" style={{ ...activeTheme.cardStyle, maxWidth: '1480px', width: '96%' }}>
+          <div className="results-split-layout">
+            
+            {/* LEFT COLUMN: Personal Performance, 6 Stats & Actions */}
+            <div className="results-col-left">
+              <div className="results-header-compact">
+                <div className="results-top-identity-row">
+                  <div className={`results-tier-pill ${passed ? 'tier-gold' : 'tier-amber'}`}>
+                    <Crown size={13} />
+                    <span>{tierTitle}</span>
                   </div>
-                  <span className="leaderboard-scope-tag">Ranked by Speed & Accuracy</span>
-                </div>
-
-                <div className="results-leaderboard-table">
-                  {liveLeaderboardData.map((p) => (
-                    <div 
-                      key={p.rank} 
-                      className={`res-leaderboard-row ${p.isUser ? 'row-user-highlight' : ''}`}
-                    >
-                      <div className="row-left flex-align gap-12">
-                        <span className={`res-rank-badge rank-${p.rank}`}>
-                          {p.badge}
-                        </span>
-                        <div className="res-avatar-pill">
-                          {p.avatar}
-                        </div>
-                        <div className="res-user-details">
-                          <div className="res-user-name flex-align gap-6">
-                            <span>{p.name}</span>
-                            {p.isUser && <span className="tag-you">YOU</span>}
-                          </div>
-                          <div className="res-user-role">{p.role}</div>
-                        </div>
-                      </div>
-
-                      <div className="row-right flex-align gap-20">
-                        <span className="res-stat-pill">⚡ {p.speed}</span>
-                        <span className="res-stat-pill text-emerald font-bold">🎯 {p.accuracy}</span>
-                        <span className="res-score-value">+{p.score} PTS</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="leaderboard-footer-callout flex-between">
-                  <span className="text-secondary text-xs">
-                    🏆 Cohort Placement: <strong>Top 7%</strong> among 28 certified enterprise participants.
-                  </span>
-                  <span className="rank-up-badge flex-align gap-4">
-                    <TrendingUp size={13} />
-                    <span>▲ +3 Rank Gain</span>
+                  <span className="badge-gamified badge-purple text-xs">
+                    {quiz.title}
                   </span>
                 </div>
-              </div>
-            )}
 
-            {/* TAB 2: TEAM SQUAD BATTLE */}
-            {resultsTab === 'teams' && (
-              <div className="panel-tab-content animate-fadeIn">
-                <div className="team-contribution-callout mb-16">
-                  <div className="flex-align gap-10">
-                    <div className="callout-icon-box">🛡️</div>
-                    <div>
-                      <h4 className="callout-title">High-Impact Squad Contribution!</h4>
-                      <p className="callout-sub">
-                        Your assessment added <strong>+{pointsTotal} PTS</strong> to <strong>Squad Alpha</strong>, keeping your team at #1!
-                      </p>
-                    </div>
+                <div className="results-title-group">
+                  <Trophy size={40} className="trophy-victory text-gold flex-shrink-0" />
+                  <div>
+                    <h2 className="results-heading-compact">
+                      {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
+                    </h2>
+                    <p className="results-subtext-compact">
+                      {passed 
+                        ? 'Compliance standards satisfied under Crossworks curriculum.'
+                        : 'Review answers and explanations below to prepare for retake.'}
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="team-standings-list">
-                  {teamStandingsData.map((t) => (
-                    <div 
-                      key={t.rank} 
-                      className={`team-standings-card ${t.isUserTeam ? 'card-user-team' : ''}`}
-                    >
-                      <div className="team-card-left flex-align gap-12">
-                        <div className="team-rank-box">#{t.rank}</div>
-                        <div className="team-info">
-                          <div className="team-name flex-align gap-8">
-                            <span>{t.icon}</span>
-                            <span>{t.teamName}</span>
-                            {t.isUserTeam && <span className="tag-your-team">YOUR SQUAD</span>}
+              {/* 6-Metric Compact Stat Grid */}
+              <div className="results-stat-grid-compact">
+                <div className="result-metric">
+                  <div className="metric-big-num text-purple">{finalScorePct}%</div>
+                  <div className="metric-tag">Accuracy ({correctCount}/{totalQuestions})</div>
+                </div>
+
+                <div className="result-metric">
+                  <div className="metric-big-num text-gold">+{pointsTotal}</div>
+                  <div className="metric-tag">Points & Speed Bonus</div>
+                </div>
+
+                <div className="result-metric">
+                  <div className="metric-big-num text-cyan">⚡ {avgSpeedSec}s</div>
+                  <div className="metric-tag">Avg Speed / Q</div>
+                </div>
+
+                <div className="result-metric">
+                  <div className="metric-big-num text-amber">🔥 {maxStreak}x</div>
+                  <div className="metric-tag">Streak Combo</div>
+                </div>
+
+                <div className="result-metric">
+                  <div className="metric-big-num text-emerald">+{pointsTotal}</div>
+                  <div className="metric-tag">Squad Contribution</div>
+                </div>
+
+                <div className="result-metric">
+                  <div className={`metric-big-num ${passed ? 'text-green' : 'text-amber'}`}>
+                    {passed ? 'QUALIFIED' : 'REVIEW'}
+                  </div>
+                  <div className="metric-tag">Standard Status</div>
+                </div>
+              </div>
+
+              {/* Left Column Action Row */}
+              <div className="results-action-col-row">
+                <button 
+                  type="button"
+                  className="btn-tactile btn-tactile-purple"
+                  onClick={() => setShowReviewModal(true)}
+                >
+                  <FileText size={15} />
+                  <span>Review Answer Details</span>
+                </button>
+                <button 
+                  type="button"
+                  className="btn-tactile btn-tactile-cyan"
+                  onClick={handleStartAssessment}
+                >
+                  <RotateCcw size={15} />
+                  <span>Retake</span>
+                </button>
+                <button 
+                  type="button"
+                  className="btn-tactile btn-tactile-gold"
+                  onClick={handleFinishAndReturn}
+                >
+                  <span>Dashboard</span>
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Interactive Leaderboards & Squad Standings */}
+            <div className="results-col-right">
+              <div className="results-interactive-panel-compact">
+                <div className="results-panel-tabs">
+                  <button 
+                    type="button" 
+                    className={`panel-tab-btn ${resultsTab === 'leaderboard' ? 'is-active' : ''}`}
+                    onClick={() => setResultsTab('leaderboard')}
+                  >
+                    <Trophy size={14} />
+                    <span>Live Cohort Leaderboard</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    className={`panel-tab-btn ${resultsTab === 'teams' ? 'is-active' : ''}`}
+                    onClick={() => setResultsTab('teams')}
+                  >
+                    <Users size={14} />
+                    <span>Squad Standings</span>
+                  </button>
+                  <button 
+                    type="button" 
+                    className={`panel-tab-btn ${resultsTab === 'xp' ? 'is-active' : ''}`}
+                    onClick={() => setResultsTab('xp')}
+                  >
+                    <Sparkles size={14} />
+                    <span>XP Growth</span>
+                  </button>
+                </div>
+
+                {/* TAB 1: LIVE COHORT LEADERBOARD */}
+                {resultsTab === 'leaderboard' && (
+                  <div className="panel-tab-content animate-fadeIn">
+                    <div className="leaderboard-live-status-bar flex-between" style={{ paddingBottom: '6px', marginBottom: '6px' }}>
+                      <div className="flex-align gap-8">
+                        <span className="live-pulse-dot" />
+                        <span className="live-status-text">LIVE COHORT STANDINGS &bull; SUMMER PILOT 2026</span>
+                      </div>
+                      <span className="leaderboard-scope-tag">Ranked by Speed & Accuracy</span>
+                    </div>
+
+                    <div className="results-leaderboard-table" style={{ gap: '6px' }}>
+                      {liveLeaderboardData.map((p) => (
+                        <div 
+                          key={p.rank} 
+                          className={`res-leaderboard-row ${p.isUser ? 'row-user-highlight' : ''}`}
+                        >
+                          <div className="row-left flex-align gap-10">
+                            <span className={`res-rank-badge rank-${p.rank}`}>
+                              {p.badge}
+                            </span>
+                            <div className="res-avatar-pill">
+                              {p.avatar}
+                            </div>
+                            <div className="res-user-details">
+                              <div className="res-user-name flex-align gap-6">
+                                <span>{p.name}</span>
+                                {p.isUser && <span className="tag-you">YOU</span>}
+                              </div>
+                              <div className="res-user-role">{p.role}</div>
+                            </div>
                           </div>
-                          <div className="team-meta text-xs text-secondary">
-                            {t.members} Active Members &bull; Average Accuracy: {t.accuracy}
+
+                          <div className="row-right flex-align gap-14">
+                            <span className="res-stat-pill">⚡ {p.speed}</span>
+                            <span className="res-stat-pill text-emerald font-bold">🎯 {p.accuracy}</span>
+                            <span className="res-score-value">+{p.score} PTS</span>
                           </div>
                         </div>
-                      </div>
+                      ))}
+                    </div>
 
-                      <div className="team-score-num">
-                        {t.score.toLocaleString()} PTS
+                    <div className="leaderboard-footer-callout flex-between" style={{ marginTop: '8px', paddingTop: '8px' }}>
+                      <span className="text-secondary text-xs">
+                        🏆 Cohort Placement: <strong>Top 7%</strong> of 28 participants.
+                      </span>
+                      <span className="rank-up-badge flex-align gap-4">
+                        <TrendingUp size={12} />
+                        <span>▲ +3 Rank Gain</span>
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 2: TEAM SQUAD BATTLE */}
+                {resultsTab === 'teams' && (
+                  <div className="panel-tab-content animate-fadeIn">
+                    <div className="team-contribution-callout mb-10" style={{ padding: '10px 14px' }}>
+                      <div className="flex-align gap-10">
+                        <div className="callout-icon-box" style={{ fontSize: '20px' }}>🛡️</div>
+                        <div>
+                          <h4 className="callout-title" style={{ fontSize: '13px' }}>High-Impact Squad Contribution!</h4>
+                          <p className="callout-sub" style={{ fontSize: '11.5px' }}>
+                            Your assessment credited <strong>+{pointsTotal} PTS</strong> to <strong>Squad Alpha</strong>, leading at #1!
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    <div className="team-standings-list" style={{ gap: '8px' }}>
+                      {teamStandingsData.map((t) => (
+                        <div 
+                          key={t.rank} 
+                          className={`team-standings-card ${t.isUserTeam ? 'card-user-team' : ''}`}
+                          style={{ padding: '10px 14px' }}
+                        >
+                          <div className="team-card-left flex-align gap-10">
+                            <div className="team-rank-box">#{t.rank}</div>
+                            <div className="team-info">
+                              <div className="team-name flex-align gap-6" style={{ fontSize: '13px' }}>
+                                <span>{t.icon}</span>
+                                <span>{t.teamName}</span>
+                                {t.isUserTeam && <span className="tag-your-team">YOUR SQUAD</span>}
+                              </div>
+                              <div className="team-meta text-xs text-secondary">
+                                {t.members} Members &bull; Avg Accuracy: {t.accuracy}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="team-score-num" style={{ fontSize: '14.5px' }}>
+                            {t.score.toLocaleString()} PTS
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: XP & PROGRESSION GROWTH */}
+                {resultsTab === 'xp' && (
+                  <div className="panel-tab-content animate-fadeIn">
+                    <div className="xp-growth-grid" style={{ gap: '10px' }}>
+                      <div className="xp-card" style={{ padding: '14px 10px' }}>
+                        <div className="xp-card-icon text-purple"><Sparkles size={20} /></div>
+                        <div className="xp-card-num text-purple" style={{ fontSize: '18px' }}>+{xpEarned} XP</div>
+                        <div className="xp-card-label" style={{ fontSize: '11.5px' }}>Corporate XP</div>
+                        <div className="xp-card-sub" style={{ fontSize: '10.5px' }}>Applied to Trainee Tier</div>
+                      </div>
+
+                      <div className="xp-card" style={{ padding: '14px 10px' }}>
+                        <div className="xp-card-icon text-amber"><Flame size={20} /></div>
+                        <div className="xp-card-num text-amber" style={{ fontSize: '18px' }}>{streakDays} Days</div>
+                        <div className="xp-card-label" style={{ fontSize: '11.5px' }}>Active Streak</div>
+                        <div className="xp-card-sub" style={{ fontSize: '10.5px' }}>Daily Multiplier 1.25x</div>
+                      </div>
+
+                      <div className="xp-card" style={{ padding: '14px 10px' }}>
+                        <div className="xp-card-icon text-emerald"><Shield size={20} /></div>
+                        <div className="xp-card-num text-emerald" style={{ fontSize: '16px' }}>AUDIT-PASS</div>
+                        <div className="xp-card-label" style={{ fontSize: '11.5px' }}>Sign-Off Status</div>
+                        <div className="xp-card-sub" style={{ fontSize: '10.5px' }}>August 1, 2026 Cutoff</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* TAB 3: XP & PROGRESSION GROWTH */}
-            {resultsTab === 'xp' && (
-              <div className="panel-tab-content animate-fadeIn">
-                <div className="xp-growth-grid">
-                  <div className="xp-card">
-                    <div className="xp-card-icon text-purple"><Sparkles size={24} /></div>
-                    <div className="xp-card-num text-purple">+{xpEarned} XP</div>
-                    <div className="xp-card-label">Corporate XP Gained</div>
-                    <div className="xp-card-sub">Applied to Trainee Tier</div>
-                  </div>
-
-                  <div className="xp-card">
-                    <div className="xp-card-icon text-amber"><Flame size={24} /></div>
-                    <div className="xp-card-num text-amber">{streakDays} Days</div>
-                    <div className="xp-card-label">Active Streak Preserved</div>
-                    <div className="xp-card-sub">Daily Login Multiplier 1.25x</div>
-                  </div>
-
-                  <div className="xp-card">
-                    <div className="xp-card-icon text-emerald"><Shield size={24} /></div>
-                    <div className="xp-card-num text-emerald">AUDIT-PASS</div>
-                    <div className="xp-card-label">Sign-Off Status</div>
-                    <div className="xp-card-sub">August 1, 2026 Cutoff Verified</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Action Row - Immediately visible, never pushed down off screen */}
-          <div className="results-action-primary-row">
-            <button 
-              type="button"
-              className="btn-tactile btn-tactile-purple"
-              onClick={() => setShowReviewModal(true)}
-            >
-              <FileText size={17} />
-              <span>Review Answer Details</span>
-            </button>
-            <button 
-              type="button"
-              className="btn-tactile btn-tactile-cyan"
-              onClick={handleStartAssessment}
-            >
-              <RotateCcw size={17} />
-              <span>Retake Assessment</span>
-            </button>
-            <button 
-              type="button"
-              className="btn-tactile btn-tactile-gold"
-              onClick={handleFinishAndReturn}
-            >
-              <span>Return to Dashboard</span>
-              <ArrowRight size={17} />
-            </button>
           </div>
         </div>
 

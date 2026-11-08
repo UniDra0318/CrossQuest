@@ -10937,3 +10937,188 @@ html.dark .node-active-guard,
   font-size: 11px;
   color: #64748b;
 }
+
+/* ==========================================================================
+   2-COLUMN SPLIT RESULTS DASHBOARD (ZERO-SCROLL VIEWPORT FIT)
+   ========================================================================== */
+
+.results-card-split {
+  width: 96%;
+  max-width: 1480px;
+  margin: auto;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 24px 28px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
+  box-sizing: border-box;
+  animation: fadeInDown 0.25s ease-out;
+}
+
+.results-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+@media (max-width: 980px) {
+  .results-split-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+/* Left Column: Personal Performance */
+.results-col-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+
+.results-header-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.results-top-identity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.results-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.results-heading-compact {
+  font-family: var(--font-fun);
+  font-size: 21px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.results-subtext-compact {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Compact 6-Stat Grid */
+.results-stat-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.results-stat-grid-compact .result-metric {
+  padding: 10px 12px;
+  border-radius: 12px;
+  gap: 2px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+}
+
+.results-stat-grid-compact .metric-big-num {
+  font-family: var(--font-fun);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.results-stat-grid-compact .metric-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* Left Column Action Buttons */
+.results-action-col-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.results-action-col-row .btn-tactile {
+  padding: 10px 18px;
+  font-size: 13.5px;
+}
+
+/* Right Column: Leaderboards & Standings */
+.results-col-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.results-interactive-panel-compact {
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.results-interactive-panel-compact .results-panel-tabs {
+  background: #ffffff;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+.results-interactive-panel-compact .panel-tab-btn {
+  padding: 11px 12px;
+  font-size: 12.5px;
+  gap: 6px;
+}
+
+.results-interactive-panel-compact .panel-tab-content {
+  padding: 14px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.results-interactive-panel-compact .res-leaderboard-row {
+  padding: 7px 12px;
+  border-radius: 10px;
+}
+
+.results-interactive-panel-compact .res-avatar-pill {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+
+.results-interactive-panel-compact .res-user-name {
+  font-size: 12.5px;
+}
+
+.results-interactive-panel-compact .res-user-role {
+  font-size: 10.5px;
+}
+
+.results-interactive-panel-compact .res-stat-pill {
+  font-size: 11px;
+}
+
+.results-interactive-panel-compact .res-score-value {
+  font-size: 13.5px;
+}
