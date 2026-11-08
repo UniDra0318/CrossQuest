@@ -27,7 +27,7 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
   const [search, setSearch] = useState('');
   const [filterCompany, setFilterCompany] = useState('ALL');
 
-  if (!isOpen) return null;
+  if (!isOpen || !import.meta.env.DEV) return null;
 
   const getRoleIcon = (role) => {
     switch(role) {

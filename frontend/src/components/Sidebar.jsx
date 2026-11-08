@@ -490,10 +490,12 @@ export default function Sidebar({
       />
 
       {/* Developer Multi-Tenant Sandbox Switcher Modal */}
-      <DevRoleSwitcherModal 
-        isOpen={showRoleModal} 
-        onClose={() => setShowRoleModal(false)} 
-      />
+      {import.meta.env.DEV && (
+        <DevRoleSwitcherModal 
+          isOpen={showRoleModal} 
+          onClose={() => setShowRoleModal(false)} 
+        />
+      )}
 
       {/* Security & Cryptographic Clearance Modal */}
       {showDetailsModal && (

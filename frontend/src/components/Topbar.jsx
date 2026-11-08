@@ -57,21 +57,18 @@ export default function Topbar({
             </div>
           )}
 
-          <div className="topbar-breadcrumbs" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {!isSidebarCollapsed && (
+          <div className="topbar-context" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '800', color: isDark ? '#f8fafc' : '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {currentUser?.title || (currentUser?.role ? currentUser.role.replace(/_/g, ' ').toUpperCase() : 'CROSSQUEST')}
+            </span>
+            {currentUser?.organization && (
               <>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: isDark ? '#94a3b8' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  CrossQuest
+                <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '13px' }}>•</span>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: isDark ? '#94a3b8' : '#64748b' }}>
+                  {currentUser.organization}
                 </span>
-                <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '14px', fontWeight: '400' }}>/</span>
               </>
             )}
-            {isSidebarCollapsed && (
-              <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '14px', fontWeight: '400' }}>/</span>
-            )}
-            <span className="crumb-active" style={{ fontSize: '14px', fontWeight: '800', color: isDark ? '#f8fafc' : '#0f172a' }}>
-              {activeViewTitle}
-            </span>
           </div>
         </div>
 
