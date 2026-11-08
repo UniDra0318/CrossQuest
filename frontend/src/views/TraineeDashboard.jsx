@@ -73,13 +73,40 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   const [leaderboardOptOut, setLeaderboardOptOut] = useState(false);
   const [gamLoading, setGamLoading] = useState(false);
 
+  // User-scoped progress helpers for seamless cross-account switching and reload persistence
+  const getUserProgressStorageKey = (user) => {
+    if (!user) return null;
+    const uid = user.id || user.email || 'trainee';
+    return `crossquest_trainee_progress_${uid}`;
+  };
+
+  const getSavedUserProgress = (user) => {
+    try {
+      const key = getUserProgressStorageKey(user);
+      if (!key) return null;
+      const raw = localStorage.getItem(key);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {
+      console.warn("Could not load user progress from storage:", e);
+    }
+    return null;
+  };
+
   // Active quiz state
   const [activeQuiz, setActiveQuiz] = useState(null);
-  const [quizScoreStatus, setQuizScoreStatus] = useState(() => currentUser?.quiz_progress || {
-    'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
-    'act-2': { completed: true, score: 95, segments: [true, true, true, true] },
-    'act-3': { completed: true, score: 90, segments: [true, true, true, false] },
-    'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+  const [quizScoreStatus, setQuizScoreStatus] = useState(() => {
+    const saved = getSavedUserProgress(currentUser);
+    const defaultProg = {
+      'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 90, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    };
+    return {
+      ...defaultProg,
+      ...(currentUser?.quiz_progress || {}),
+      ...(saved?.quiz_progress || {})
+    };
   });
 
   // Track online status (SEC-26: Offline quizzes disabled)
@@ -97,9 +124,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   // Immediately synchronize trainee persona when role switcher or account changes
   useEffect(() => {
     if (currentUser) {
+      const saved = getSavedUserProgress(currentUser);
       const curStreak = currentUser.streak ?? 1;
-      const curPoints = currentUser.points ?? 500;
-      const curLevel = currentUser.level ?? 1;
+      const curPoints = saved?.points ?? currentUser.points ?? 500;
+      const curLevel = saved?.level ?? currentUser.level ?? 1;
       setStreakDays(curStreak);
       setPoints(curPoints);
       setLevel(curLevel);
@@ -111,7 +139,13 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         'act-3': { completed: false, score: null, segments: [false, false, false, false] },
         'act-4': { completed: false, score: null, segments: [false, false, false, false] }
       };
-      setQuizScoreStatus(currentUser.quiz_progress || defaultProg);
+
+      const mergedProg = {
+        ...defaultProg,
+        ...(currentUser.quiz_progress || {}),
+        ...(saved?.quiz_progress || {})
+      };
+      setQuizScoreStatus(mergedProg);
     }
   }, [currentUser]);
 
@@ -403,21 +437,53 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     setActiveQuiz(q);
   };
 
-  // Quiz finish handler
+  // Quiz finish handler with immediate state update, localStorage persistence & backend sync
   const handleQuizFinish = async (resultData) => {
-    if (currentUser?.id) {
-      await submitQuizScore(currentUser.id, resultData.scorePercentage);
-    }
+    const earnedPoints = resultData.pointsEarned || 250;
+    const newPoints = (points ?? 0) + earnedPoints;
+    setPoints(newPoints);
 
-    setQuizScoreStatus(prev => ({
-      ...prev,
+    const updatedQuizStatus = {
+      ...quizScoreStatus,
       [resultData.quizId]: {
         completed: true,
-        score: resultData.scorePercentage
+        score: resultData.scorePercentage,
+        segments: [true, true, true, true]
       }
-    }));
+    };
+    setQuizScoreStatus(updatedQuizStatus);
 
-    setPoints(prev => (prev ?? 0) + (resultData.pointsEarned || 250));
+    // 1. Persist progress to user-scoped localStorage
+    try {
+      const storageKey = getUserProgressStorageKey(currentUser);
+      if (storageKey) {
+        const saved = getSavedUserProgress(currentUser) || {};
+        const toSave = {
+          ...saved,
+          quiz_progress: {
+            ...(saved.quiz_progress || {}),
+            ...updatedQuizStatus
+          },
+          points: newPoints,
+          quizzes_completed: (saved.quizzes_completed || currentUser?.quizzes_completed || 0) + 1
+        };
+        localStorage.setItem(storageKey, JSON.stringify(toSave));
+      }
+
+      // 2. Keep current user object synchronized in memory
+      if (currentUser) {
+        currentUser.quiz_progress = updatedQuizStatus;
+        currentUser.points = newPoints;
+      }
+    } catch (e) {
+      console.warn("Could not persist quiz progress:", e);
+    }
+
+    // 3. Sync with backend API
+    if (currentUser?.id) {
+      await submitQuizScore(currentUser.id, resultData.quizId, resultData.scorePercentage, token);
+    }
+
     setActiveQuiz(null);
   };
 

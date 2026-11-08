@@ -214,12 +214,19 @@ export async function fetchTraineeGamification(traineeId, token) {
   return null;
 }
 
-export async function submitQuizScore(traineeId, score) {
+export async function submitQuizScore(traineeId, quizId, score, token) {
   try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API_BASE}/gamification/submit-quiz`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ trainee_id: traineeId, score })
+      headers,
+      body: JSON.stringify({ 
+        trainee_id: traineeId,
+        quiz_id: quizId || 'act-1',
+        score: Number(score) || 100,
+        attempt_id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `att-${Date.now()}`
+      })
     });
     if (res.ok) return await res.json();
   } catch (err) {

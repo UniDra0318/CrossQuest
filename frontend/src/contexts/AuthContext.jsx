@@ -319,7 +319,32 @@ export function AuthProvider({ children }) {
 
 
   const loginRole = async (roleKey) => {
-    const user = DEMO_USERS[roleKey] || DEMO_USERS.admin;
+    const baseUser = DEMO_USERS[roleKey] || DEMO_USERS.admin;
+    const user = { ...baseUser };
+
+    // Re-hydrate any persisted progress for this persona across role switches
+    try {
+      const uid = user.id || user.email;
+      const savedRaw = localStorage.getItem(`crossquest_trainee_progress_${uid}`);
+      if (savedRaw) {
+        const saved = JSON.parse(savedRaw);
+        if (saved.quiz_progress) {
+          user.quiz_progress = { ...(user.quiz_progress || {}), ...saved.quiz_progress };
+        }
+        if (saved.points !== undefined) {
+          user.points = saved.points;
+        }
+        if (saved.level !== undefined) {
+          user.level = saved.level;
+        }
+        if (saved.quizzes_completed !== undefined) {
+          user.quizzes_completed = saved.quizzes_completed;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not re-hydrate persona progress:", e);
+    }
+
     setCurrentUser(user);
     localStorage.setItem('crossquest_auth_user', JSON.stringify(user));
 
