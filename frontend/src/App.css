@@ -8838,6 +8838,20 @@ html.dark .node-active-guard,
   margin: 0 auto;
 }
 
+/* Light Mode High-Contrast Accessibility (WCAG AAA) */
+html:not(.dark).high-contrast,
+html:not(.dark)[data-contrast="high"],
+[data-theme="light"].high-contrast,
+[data-theme="light"][data-contrast="high"] {
+  --cq-ink: #020617 !important;
+  --cq-line: #1e293b !important;
+}
+
+html:not(.dark).high-contrast *:not([style*="transparent"]):not([style*="border: none"]):not([style*="border:none"]):not(.no-border),
+html:not(.dark)[data-contrast="high"] *:not([style*="transparent"]):not([style*="border: none"]):not([style*="border:none"]):not(.no-border) {
+  border-color: #334155 !important;
+}
+
 /* Sidebar Modern Polish & Dark Mode Color Flip */
 .enterprise-sidebar {
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease, border-color 0.25s ease;
