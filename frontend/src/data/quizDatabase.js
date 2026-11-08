@@ -8,18 +8,18 @@
 export const QUIZ_DATABASE = {
   'act-1': {
     id: 'act-1',
-    title: 'Enterprise Security Audit Challenge',
-    instructor: 'Lead Trainer David Lim',
-    category: 'Information Security',
+    title: 'Agile PME & Project Management Challenge',
+    instructor: 'Lead Trainer Joey Ramos',
+    category: 'Project Management',
     headerColor: '#1368ce',
     timePerQuestion: 45, // seconds
     passingScore: 80,
     badgeAwarded: 'sec_champ',
-    description: 'Conduct a comprehensive zero-trust security audit across Crossworks multi-tenant infrastructure. Evaluate policy verification, identify out-of-scope access attempts, and audit cryptographic isolation boundaries.',
+    description: 'Master Agile Project Management and PME methodologies. Evaluate project critical paths, agile sprint governance, and earned value metrics under the Crossworks curriculum.',
     learningObjectives: [
-      'Understand zero-trust architecture and cryptographic policy bindings',
-      'Identify access anomalies and out-of-scope credential misuse',
-      'Analyze defense-in-depth database and encryption isolation pipelines'
+      'Master Agile frameworks, sprint planning, and daily standup workflows',
+      'Analyze Critical Path Method (CPM) and Earned Value Management (EVM)',
+      'Inspect retrospective adaptation pipelines and continuous improvement'
     ],
     questions: [
       {
@@ -126,18 +126,18 @@ export const QUIZ_DATABASE = {
 
   'act-2': {
     id: 'act-2',
-    title: 'Role-Based Access & Policy Verification',
-    instructor: 'Dr. Sarah Jenkins',
-    category: 'Access Control',
-    headerColor: '#06d6a0',
+    title: 'Executive Communication & CONNECT Simulation',
+    instructor: 'Lead Trainer Billy Fernandez',
+    category: 'Executive Leadership',
+    headerColor: '#059669',
     timePerQuestion: 45,
     passingScore: 80,
     badgeAwarded: 'crypto_knight',
-    description: 'Verify staff clearance levels, attribute issuing authority, and cryptographic key distribution mechanisms to prevent privilege escalation and unauthorized disclosures.',
+    description: 'Simulate executive-level communication and high-impact stakeholder negotiations under the Crossworks CONNECT framework. Master the Pyramid Principle and strategic dialogues.',
     learningObjectives: [
-      'Master clearance level hierarchies (Level 1, Level 2, Level 3)',
-      'Inspect Attribute Authority key generation and revocation procedures',
-      'Preserve multi-tenant segregation across personnel transitions'
+      'Master the CONNECT framework for high-stakes executive negotiations',
+      'Structure executive briefings using the Pyramid Principle',
+      'Deploy active listening and reflective paraphrasing across multi-tenant cohorts'
     ],
     questions: [
       {
@@ -244,18 +244,18 @@ export const QUIZ_DATABASE = {
 
   'act-3': {
     id: 'act-3',
-    title: 'Privacy Impact Assessment (PIA) Simulation',
-    instructor: 'Lead Trainer David Lim',
-    category: 'Privacy Management',
-    headerColor: '#e21b3c',
+    title: 'Supervisory Mastery & High-Impact Coaching',
+    instructor: 'Lead Trainer Jobert Cruz',
+    category: 'Supervisory Mastery',
+    headerColor: '#dc2626',
     timePerQuestion: 45,
     passingScore: 80,
     badgeAwarded: 'first_step',
-    description: 'Simulate a corporate Privacy Impact Assessment under statutory compliance frameworks. Audit data flow paths, evaluate risk thresholds, and implement cryptographic safeguards.',
+    description: 'Accelerate supervisory upskilling and situational leadership. Implement the GROW coaching model, performance delegation, and constructive feedback loops.',
     learningObjectives: [
-      'Understand the principles of personal data processing under privacy laws',
-      'Distinguish the roles of Personal Information Controller and Processor',
-      'Apply threshold-based anomaly detection to protect data subjects'
+      'Apply the GROW coaching methodology across developmental team dialogues',
+      'Navigate situational leadership models to delegate with high autonomy',
+      'Cultivate psychological safety and proactive mistake recovery within supervisory cohorts'
     ],
     questions: [
       {
@@ -362,18 +362,18 @@ export const QUIZ_DATABASE = {
 
   'act-4': {
     id: 'act-4',
-    title: 'Multi-Tenant Data Isolation & Security',
-    instructor: 'Prof. Roel Traballo',
-    category: 'Database Security',
-    headerColor: '#772ce8',
+    title: 'Business Continuity & ISO 31000 Risk Management',
+    instructor: 'Lead Trainer Owen Castillo',
+    category: 'Risk & Governance',
+    headerColor: '#7c3aed',
     timePerQuestion: 45,
     passingScore: 80,
     badgeAwarded: 'streak_master',
-    description: 'Deep dive into defense-in-depth multi-tenant security architecture. Analyze PostgreSQL database partitioning, CP-ABE ciphertext binding, and automated anomaly isolation.',
+    description: 'Analyze business impact, recovery time objectives (RTO), and risk evaluation matrices under the ISO 31000 framework and Crossworks BCM standards.',
     learningObjectives: [
-      'Master defense-in-depth isolation techniques for multi-tenant SaaS',
-      'Analyze row-level filtering and cryptographic policy boundaries',
-      'Prevent cross-tenant data leakage under strict enterprise audit SLAs'
+      'Master ISO 31000 principles for uncertainty and enterprise risk management',
+      'Differentiate Recovery Time Objective (RTO) vs. Recovery Point Objective (RPO)',
+      'Conduct Business Impact Analysis (BIA) to safeguard mission-critical activities'
     ],
     questions: [
       {

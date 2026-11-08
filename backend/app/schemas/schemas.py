@@ -202,6 +202,9 @@ class QuizListItem(BaseModel):
     title: str
     session_id: Optional[str] = None
     course_name: Optional[str] = None
+    instructor_name: Optional[str] = None
+    category: Optional[str] = None
+    header_color: Optional[str] = None
     version_no: int
     is_closed: bool
     is_approved: Optional[bool] = False

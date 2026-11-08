@@ -175,14 +175,52 @@ def list_quizzes(
                 score = att.score
 
         course_name = None
+        instructor_name = None
+        category = "Corporate Training"
+        header_color = "#1368ce"
+
         if q.session:
             course_name = getattr(q.session, 'course_name', None)
+
+        if q.created_by_user_id:
+            creator = db.query(User).filter(User.id == q.created_by_user_id).first()
+            if creator:
+                instructor_name = f"Lead Trainer {creator.full_name}" if "Trainer" not in creator.full_name else creator.full_name
+
+        if not instructor_name and q.session and getattr(q.session, 'trainer_sign_off_user_id', None):
+            tr_user = db.query(User).filter(User.id == q.session.trainer_sign_off_user_id).first()
+            if tr_user:
+                instructor_name = f"Lead Trainer {tr_user.full_name}"
+
+        # Align categories and colors based on course or title
+        low_title = (q.title + " " + (course_name or "")).lower()
+        if "project" in low_title or "agile" in low_title or "pme" in low_title or "pmp" in low_title:
+            category = "Project Management"
+            header_color = "#1368ce"
+            if not instructor_name: instructor_name = "Lead Trainer Joey Ramos"
+        elif "connect" in low_title or "communication" in low_title or "executive" in low_title or "leadership" in low_title:
+            category = "Executive Leadership"
+            header_color = "#059669"
+            if not instructor_name: instructor_name = "Lead Trainer Billy Fernandez"
+        elif "coach" in low_title or "supervis" in low_title or "upskilling" in low_title or "sup" in low_title:
+            category = "Supervisory Mastery"
+            header_color = "#dc2626"
+            if not instructor_name: instructor_name = "Lead Trainer Jobert Cruz"
+        elif "risk" in low_title or "continuity" in low_title or "bcm" in low_title or "iso" in low_title or "crm" in low_title:
+            category = "Risk & Governance"
+            header_color = "#7c3aed"
+            if not instructor_name: instructor_name = "Lead Trainer Owen Castillo"
+        else:
+            if not instructor_name: instructor_name = "Lead Trainer Joey Ramos"
 
         results.append(QuizListItem(
             id=q.id,
             title=q.title,
             session_id=q.session_id,
             course_name=course_name,
+            instructor_name=instructor_name,
+            category=category,
+            header_color=header_color,
             version_no=q.version_no,
             is_closed=q.is_closed,
             questions_count=q_count,

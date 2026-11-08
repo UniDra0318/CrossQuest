@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Award, 
   Flame, 
@@ -327,61 +327,95 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     await toggleLeaderboardOptOut(nextVal);
   };
 
-  // Quizzes list aligned with dynamic per-trainee progress status
-  const assignedActivities = [
-    {
-      id: 'act-1',
-      title: 'Enterprise Security Audit Challenge',
-      instructor: 'Lead Trainer David Lim',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.infosec.color,
-      category: TRACKS.infosec.name,
-      track: TRACKS.infosec,
-      progressSegments: quizScoreStatus['act-1']?.segments || (quizScoreStatus['act-1']?.completed ? [true, true, true, true] : [false, false, false, false]),
-      completed: quizScoreStatus['act-1']?.completed,
-      score: quizScoreStatus['act-1']?.score,
-      accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned'
-    },
-    {
-      id: 'act-2',
-      title: 'Role-Based Access & Policy Verification',
-      instructor: 'Dr. Sarah Jenkins',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.access.color,
-      category: TRACKS.access.name,
-      track: TRACKS.access,
-      progressSegments: quizScoreStatus['act-2']?.segments || (quizScoreStatus['act-2']?.completed ? [true, true, true, true] : [false, false, false, false]),
-      completed: quizScoreStatus['act-2']?.completed,
-      score: quizScoreStatus['act-2']?.score,
-      accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned'
-    },
-    {
-      id: 'act-3',
-      title: 'Privacy Impact Assessment (PIA) Simulation',
-      instructor: 'Lead Trainer David Lim',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.privacy.color,
-      category: TRACKS.privacy.name,
-      track: TRACKS.privacy,
-      progressSegments: quizScoreStatus['act-3']?.segments || (quizScoreStatus['act-3']?.completed ? [true, true, true, true] : [false, false, false, false]),
-      completed: quizScoreStatus['act-3']?.completed,
-      score: quizScoreStatus['act-3']?.score,
-      accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned'
-    },
-    {
-      id: 'act-4',
-      title: 'Multi-Tenant Data Isolation & Security',
-      instructor: 'Prof. Roel Traballo',
-      questionsCount: '5 QUESTIONS',
-      headerColor: TRACKS.database.color,
-      category: TRACKS.database.name,
-      track: TRACKS.database,
-      progressSegments: quizScoreStatus['act-4']?.segments || (quizScoreStatus['act-4']?.completed ? [true, true, true, true] : [false, false, false, false]),
-      completed: quizScoreStatus['act-4']?.completed,
-      score: quizScoreStatus['act-4']?.score,
-      accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned - Due in 3d'
+  // Quizzes list dynamically generated from database and live per-trainee progress
+  const assignedActivities = useMemo(() => {
+    if (realQuizzes && realQuizzes.length > 0) {
+      const sorted = [...realQuizzes].sort((a, b) => {
+        if (a.id.startsWith('act-') && !b.id.startsWith('act-')) return -1;
+        if (!a.id.startsWith('act-') && b.id.startsWith('act-')) return 1;
+        return 0;
+      });
+      return sorted.slice(0, 4).map((q, idx) => {
+        const status = quizScoreStatus[q.id] || quizScoreStatus[`act-${idx + 1}`] || {};
+        const qCount = q.questions_count || 5;
+        const trackFallback = idx === 0 ? TRACKS.infosec : idx === 1 ? TRACKS.access : idx === 2 ? TRACKS.privacy : TRACKS.database;
+        const defaultTrainer = idx === 0 ? 'Lead Trainer Joey Ramos' : idx === 1 ? 'Lead Trainer Billy Fernandez' : idx === 2 ? 'Lead Trainer Jobert Cruz' : 'Lead Trainer Owen Castillo';
+        const defaultCat = idx === 0 ? 'Project Management' : idx === 1 ? 'Executive Leadership' : idx === 2 ? 'Supervisory Mastery' : 'Risk & Governance';
+        const isDone = status.completed || q.completed;
+        const finalScore = status.score ?? q.score;
+
+        return {
+          id: q.id,
+          title: q.title,
+          instructor: q.instructor_name || defaultTrainer,
+          questionsCount: `${qCount} QUESTIONS`,
+          headerColor: q.header_color || trackFallback.color,
+          category: q.category || defaultCat,
+          track: trackFallback,
+          progressSegments: status.segments || (isDone ? [true, true, true, true] : [false, false, false, false]),
+          completed: isDone,
+          score: finalScore,
+          accuracy: isDone ? `${finalScore ?? 85}% accuracy` : 'Assigned - Due in 3d'
+        };
+      });
     }
-  ];
+
+    // Aligned fallback with real pilot programs and real trainers
+    return [
+      {
+        id: 'act-1',
+        title: 'Agile PME & Project Management Challenge',
+        instructor: 'Lead Trainer Joey Ramos',
+        questionsCount: '5 QUESTIONS',
+        headerColor: TRACKS.infosec.color,
+        category: 'Project Management',
+        track: TRACKS.infosec,
+        progressSegments: quizScoreStatus['act-1']?.segments || (quizScoreStatus['act-1']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        completed: quizScoreStatus['act-1']?.completed,
+        score: quizScoreStatus['act-1']?.score,
+        accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned - Due in 3d'
+      },
+      {
+        id: 'act-2',
+        title: 'Executive Communication & CONNECT Simulation',
+        instructor: 'Lead Trainer Billy Fernandez',
+        questionsCount: '5 QUESTIONS',
+        headerColor: TRACKS.access.color,
+        category: 'Executive Leadership',
+        track: TRACKS.access,
+        progressSegments: quizScoreStatus['act-2']?.segments || (quizScoreStatus['act-2']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        completed: quizScoreStatus['act-2']?.completed,
+        score: quizScoreStatus['act-2']?.score,
+        accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned - Due in 3d'
+      },
+      {
+        id: 'act-3',
+        title: 'Supervisory Mastery & High-Impact Coaching',
+        instructor: 'Lead Trainer Jobert Cruz',
+        questionsCount: '5 QUESTIONS',
+        headerColor: TRACKS.privacy.color,
+        category: 'Supervisory Mastery',
+        track: TRACKS.privacy,
+        progressSegments: quizScoreStatus['act-3']?.segments || (quizScoreStatus['act-3']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        completed: quizScoreStatus['act-3']?.completed,
+        score: quizScoreStatus['act-3']?.score,
+        accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned - Due in 3d'
+      },
+      {
+        id: 'act-4',
+        title: 'Business Continuity & ISO 31000 Risk Management',
+        instructor: 'Lead Trainer Owen Castillo',
+        questionsCount: '5 QUESTIONS',
+        headerColor: TRACKS.database.color,
+        category: 'Risk & Governance',
+        track: TRACKS.database,
+        progressSegments: quizScoreStatus['act-4']?.segments || (quizScoreStatus['act-4']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        completed: quizScoreStatus['act-4']?.completed,
+        score: quizScoreStatus['act-4']?.score,
+        accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned - Due in 3d'
+      }
+    ];
+  }, [realQuizzes, quizScoreStatus]);
 
 // Earned badges state synchronized with database
 

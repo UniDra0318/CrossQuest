@@ -5,11 +5,11 @@
 export const PASS_MARK = 75;
 
 export const me = {
-  name: 'David Lim',
-  initials: 'DL',
+  name: 'Joey Ramos',
+  initials: 'JR',
   role: 'Lead Training Instructor',
   badge: 'LEAD TRAINER',
-  email: 'david.lim@crossworks.ph',
+  email: 'joey.trainer@crossworks.ph',
   org: 'Crossworks Training & Consulting',
 };
 
