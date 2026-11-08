@@ -2745,4 +2745,97 @@ html.dark .sequence-item-row.step-submitted,
   background: #1e293b !important;
 }
 
+/* Results Screen Enriched Components Dark Mode */
+html.dark .results-domain-mastery-card,
+[data-theme="dark"] .results-domain-mastery-card {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.dark .domain-card-title,
+[data-theme="dark"] .domain-card-title {
+  color: #f8fafc !important;
+}
+
+html.dark .domain-name,
+[data-theme="dark"] .domain-name {
+  color: #cbd5e1 !important;
+}
+
+html.dark .domain-bar-track,
+[data-theme="dark"] .domain-bar-track {
+  background: #1e293b !important;
+}
+
+html.dark .results-readiness-callout,
+[data-theme="dark"] .results-readiness-callout {
+  background: rgba(30, 58, 138, 0.25) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+html.dark .readiness-title,
+[data-theme="dark"] .readiness-title {
+  color: #93c5fd !important;
+}
+
+html.dark .readiness-sub,
+[data-theme="dark"] .readiness-sub {
+  color: #bfdbfe !important;
+}
+
+html.dark .cohort-podium-strip,
+[data-theme="dark"] .cohort-podium-strip {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .podium-val,
+[data-theme="dark"] .podium-val {
+  color: #f8fafc !important;
+}
+
+html.dark .cohort-progress-container,
+[data-theme="dark"] .cohort-progress-container {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .squad-milestone-box,
+[data-theme="dark"] .squad-milestone-box {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .squad-mvp-ribbon,
+[data-theme="dark"] .squad-mvp-ribbon {
+  background: rgba(234, 179, 8, 0.15) !important;
+  border-color: rgba(234, 179, 8, 0.35) !important;
+  color: #fde047 !important;
+}
+
+html.dark .xp-level-progression-box,
+[data-theme="dark"] .xp-level-progression-box {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .xp-level-title,
+[data-theme="dark"] .xp-level-title {
+  color: #f8fafc !important;
+}
+
+html.dark .xp-receipt-item,
+[data-theme="dark"] .xp-receipt-item {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.dark .xp-badge-chip,
+[data-theme="dark"] .xp-badge-chip {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+
 

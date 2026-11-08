@@ -838,12 +838,15 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       { rank: 3, name: 'Marcus Vance', role: 'Security Analyst', score: 1890, accuracy: '88%', speed: '4.2s', isUser: false, avatar: 'MV', badge: '🥉 3rd' },
       { rank: 4, name: 'Elena Rostova', role: 'Compliance Officer', score: 1640, accuracy: '75%', speed: '5.0s', isUser: false, avatar: 'ER', badge: '#4' },
       { rank: 5, name: 'David Lim', role: 'Audit Specialist', score: 1510, accuracy: '75%', speed: '5.8s', isUser: false, avatar: 'DL', badge: '#5' },
+      { rank: 6, name: 'Maya Patel', role: 'Systems Architect', score: 1420, accuracy: '70%', speed: '6.1s', isUser: false, avatar: 'MP', badge: '#6' },
+      { rank: 7, name: 'Chris Chen', role: 'Cloud Engineer', score: 1380, accuracy: '65%', speed: '6.5s', isUser: false, avatar: 'CC', badge: '#7' },
     ];
 
     const teamStandingsData = [
-      { rank: 1, teamName: 'Squad Alpha (Agile & PME Operations)', score: 14350 + pointsTotal, accuracy: '94%', members: 6, isUserTeam: true, icon: '⚡' },
-      { rank: 2, teamName: 'Squad Bravo (Architecture & Zero-Trust)', score: 12890, accuracy: '86%', members: 5, isUserTeam: false, icon: '🛡️' },
-      { rank: 3, teamName: 'Squad Delta (Business Continuity & ISO 31000)', score: 11420, accuracy: '82%', members: 6, isUserTeam: false, icon: '🔥' },
+      { rank: 1, teamName: 'Squad Alpha (Agile & PME Operations)', score: 15185 + pointsTotal, accuracy: '94%', members: 6, isUserTeam: true, icon: '⚡', trend: '+280 Today' },
+      { rank: 2, teamName: 'Squad Bravo (Architecture & Zero-Trust)', score: 12890, accuracy: '86%', members: 5, isUserTeam: false, icon: '🛡️', trend: '+190 Today' },
+      { rank: 3, teamName: 'Squad Delta (Business Continuity & ISO 31000)', score: 11420, accuracy: '82%', members: 6, isUserTeam: false, icon: '🔥', trend: '+140 Today' },
+      { rank: 4, teamName: 'Squad Echo (DevOps & Cloud Resilience)', score: 10240, accuracy: '79%', members: 4, isUserTeam: false, icon: '🚀', trend: '+110 Today' },
     ];
 
     return (
@@ -930,6 +933,74 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 </div>
               </div>
 
+              {/* Curriculum Competency & Domain Mastery Breakdown */}
+              <div className="results-domain-mastery-card">
+                <div className="domain-card-header">
+                  <div className="flex-align gap-6">
+                    <Target size={15} className="text-purple" />
+                    <span className="domain-card-title">Curriculum Competency Mastery</span>
+                  </div>
+                  <span className="domain-status-pill">{passed ? 'Standards Satisfied' : 'Gap Analysis Active'}</span>
+                </div>
+
+                <div className="domain-bars-stack">
+                  <div className="domain-bar-row">
+                    <div className="domain-bar-meta">
+                      <span className="domain-name">Agile Frameworks & Scrum Ceremonies</span>
+                      <span className="domain-score text-purple">100% Mastery</span>
+                    </div>
+                    <div className="domain-bar-track">
+                      <div className="domain-bar-fill fill-purple" style={{ width: '100%' }} />
+                    </div>
+                  </div>
+
+                  <div className="domain-bar-row">
+                    <div className="domain-bar-meta">
+                      <span className="domain-name">Critical Path Method (CPM) & Project Scheduling</span>
+                      <span className="domain-score text-cyan">75% Proficient</span>
+                    </div>
+                    <div className="domain-bar-track">
+                      <div className="domain-bar-fill fill-cyan" style={{ width: '75%' }} />
+                    </div>
+                  </div>
+
+                  <div className="domain-bar-row">
+                    <div className="domain-bar-meta">
+                      <span className="domain-name">Cost Management & Earned Value (EVM)</span>
+                      <span className="domain-score text-amber">50% Developing</span>
+                    </div>
+                    <div className="domain-bar-track">
+                      <div className="domain-bar-fill fill-amber" style={{ width: '50%' }} />
+                    </div>
+                  </div>
+
+                  <div className="domain-bar-row">
+                    <div className="domain-bar-meta">
+                      <span className="domain-name">Quality Assurance, WBS & Definition of Done</span>
+                      <span className="domain-score text-emerald">80% Qualified</span>
+                    </div>
+                    <div className="domain-bar-track">
+                      <div className="domain-bar-fill fill-emerald" style={{ width: '80%' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Career Readiness & Retake Strategy Callout */}
+              <div className="results-readiness-callout">
+                <div className="readiness-icon-box">🎓</div>
+                <div className="readiness-text-box">
+                  <div className="readiness-title">
+                    {passed ? 'Target Certification Standard • PMP & CSM Aligned' : 'Retake Recommendation & Focus Strategy'}
+                  </div>
+                  <div className="readiness-sub">
+                    {passed 
+                      ? 'Performance satisfies corporate standards. You are cleared for enterprise project governance modules.' 
+                      : 'Review EVM formulas (CV = EV - AC) and CPM activity dependencies before attempting your next certified attempt.'}
+                  </div>
+                </div>
+              </div>
+
               {/* Left Column Action Row */}
               <div className="results-action-col-row">
                 <button 
@@ -992,7 +1063,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 {/* TAB 1: LIVE COHORT LEADERBOARD */}
                 {resultsTab === 'leaderboard' && (
                   <div className="panel-tab-content animate-fadeIn">
-                    <div className="leaderboard-live-status-bar flex-between" style={{ paddingBottom: '6px', marginBottom: '6px' }}>
+                    <div className="leaderboard-live-status-bar flex-between" style={{ paddingBottom: '2px', marginBottom: '2px' }}>
                       <div className="flex-align gap-8">
                         <span className="live-pulse-dot" />
                         <span className="live-status-text">LIVE COHORT STANDINGS &bull; SUMMER PILOT 2026</span>
@@ -1000,7 +1071,27 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       <span className="leaderboard-scope-tag">Ranked by Speed & Accuracy</span>
                     </div>
 
-                    <div className="results-leaderboard-table" style={{ gap: '6px' }}>
+                    {/* Cohort Analytics Podium Ribbon */}
+                    <div className="cohort-podium-strip">
+                      <div className="podium-tile">
+                        <span className="podium-val text-purple">28</span>
+                        <span className="podium-lbl">Candidates</span>
+                      </div>
+                      <div className="podium-tile">
+                        <span className="podium-val text-gold">1,620</span>
+                        <span className="podium-lbl">Median PTS</span>
+                      </div>
+                      <div className="podium-tile">
+                        <span className="podium-val text-cyan">3.1s</span>
+                        <span className="podium-lbl">Fastest / Q</span>
+                      </div>
+                      <div className="podium-tile">
+                        <span className="podium-val text-emerald">Top 7%</span>
+                        <span className="podium-lbl">Your Tier</span>
+                      </div>
+                    </div>
+
+                    <div className="results-leaderboard-table" style={{ gap: '5px' }}>
                       {liveLeaderboardData.map((p) => (
                         <div 
                           key={p.rank} 
@@ -1031,7 +1122,18 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       ))}
                     </div>
 
-                    <div className="leaderboard-footer-callout flex-between" style={{ marginTop: '8px', paddingTop: '8px' }}>
+                    {/* Cohort Milestone Progress */}
+                    <div className="cohort-progress-container">
+                      <div className="cohort-progress-header">
+                        <span>Cohort Benchmark Objective (85% Standard)</span>
+                        <span className="text-purple font-bold">78% Complete</span>
+                      </div>
+                      <div className="cohort-progress-track">
+                        <div className="cohort-progress-fill" style={{ width: '78%' }} />
+                      </div>
+                    </div>
+
+                    <div className="leaderboard-footer-callout flex-between" style={{ marginTop: '2px', paddingTop: '4px' }}>
                       <span className="text-secondary text-xs">
                         🏆 Cohort Placement: <strong>Top 7%</strong> of 28 participants.
                       </span>
@@ -1046,7 +1148,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 {/* TAB 2: TEAM SQUAD BATTLE */}
                 {resultsTab === 'teams' && (
                   <div className="panel-tab-content animate-fadeIn">
-                    <div className="team-contribution-callout mb-10" style={{ padding: '10px 14px' }}>
+                    <div className="team-contribution-callout" style={{ padding: '8px 12px' }}>
                       <div className="flex-align gap-10">
                         <div className="callout-icon-box" style={{ fontSize: '20px' }}>🛡️</div>
                         <div>
@@ -1058,23 +1160,34 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       </div>
                     </div>
 
-                    <div className="team-standings-list" style={{ gap: '8px' }}>
+                    {/* Squad Weekly Milestone Target */}
+                    <div className="squad-milestone-box">
+                      <div className="squad-milestone-header">
+                        <span>Squad Alpha Weekly Target (15,185 / 18,000 PTS)</span>
+                        <span className="text-emerald font-bold">84% Reached</span>
+                      </div>
+                      <div className="domain-bar-track">
+                        <div className="domain-bar-fill fill-emerald" style={{ width: '84%' }} />
+                      </div>
+                    </div>
+
+                    <div className="team-standings-list" style={{ gap: '6px' }}>
                       {teamStandingsData.map((t) => (
                         <div 
                           key={t.rank} 
                           className={`team-standings-card ${t.isUserTeam ? 'card-user-team' : ''}`}
-                          style={{ padding: '10px 14px' }}
+                          style={{ padding: '8px 12px' }}
                         >
                           <div className="team-card-left flex-align gap-10">
                             <div className="team-rank-box">#{t.rank}</div>
                             <div className="team-info">
-                              <div className="team-name flex-align gap-6" style={{ fontSize: '13px' }}>
+                              <div className="team-name flex-align gap-6" style={{ fontSize: '12.5px' }}>
                                 <span>{t.icon}</span>
                                 <span>{t.teamName}</span>
                                 {t.isUserTeam && <span className="tag-your-team">YOUR SQUAD</span>}
                               </div>
                               <div className="team-meta text-xs text-secondary">
-                                {t.members} Members &bull; Avg Accuracy: {t.accuracy}
+                                {t.members} Members &bull; Avg Accuracy: {t.accuracy} &bull; <span className="text-emerald font-bold">{t.trend}</span>
                               </div>
                             </div>
                           </div>
@@ -1085,32 +1198,93 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                         </div>
                       ))}
                     </div>
+
+                    {/* Squad MVP Ribbon */}
+                    <div className="squad-mvp-ribbon">
+                      <span>👑 Weekly Squad MVP: <strong>Dr. Sarah Jenkins</strong> (+3,450 Squad PTS)</span>
+                      <span className="badge-gamified badge-gold text-xs">1.25x Team Synergy</span>
+                    </div>
                   </div>
                 )}
 
                 {/* TAB 3: XP & PROGRESSION GROWTH */}
                 {resultsTab === 'xp' && (
                   <div className="panel-tab-content animate-fadeIn">
-                    <div className="xp-growth-grid" style={{ gap: '10px' }}>
-                      <div className="xp-card" style={{ padding: '14px 10px' }}>
-                        <div className="xp-card-icon text-purple"><Sparkles size={20} /></div>
-                        <div className="xp-card-num text-purple" style={{ fontSize: '18px' }}>+{xpEarned} XP</div>
-                        <div className="xp-card-label" style={{ fontSize: '11.5px' }}>Corporate XP</div>
-                        <div className="xp-card-sub" style={{ fontSize: '10.5px' }}>Applied to Trainee Tier</div>
+                    <div className="xp-growth-grid" style={{ gap: '8px' }}>
+                      <div className="xp-card" style={{ padding: '12px 10px' }}>
+                        <div className="xp-card-icon text-purple"><Sparkles size={18} /></div>
+                        <div className="xp-card-num text-purple" style={{ fontSize: '17px' }}>+{xpEarned} XP</div>
+                        <div className="xp-card-label" style={{ fontSize: '11px' }}>Corporate XP</div>
+                        <div className="xp-card-sub" style={{ fontSize: '10px' }}>Applied to Trainee Tier</div>
                       </div>
 
-                      <div className="xp-card" style={{ padding: '14px 10px' }}>
-                        <div className="xp-card-icon text-amber"><Flame size={20} /></div>
-                        <div className="xp-card-num text-amber" style={{ fontSize: '18px' }}>{streakDays} Days</div>
-                        <div className="xp-card-label" style={{ fontSize: '11.5px' }}>Active Streak</div>
-                        <div className="xp-card-sub" style={{ fontSize: '10.5px' }}>Daily Multiplier 1.25x</div>
+                      <div className="xp-card" style={{ padding: '12px 10px' }}>
+                        <div className="xp-card-icon text-amber"><Flame size={18} /></div>
+                        <div className="xp-card-num text-amber" style={{ fontSize: '17px' }}>{streakDays} Days</div>
+                        <div className="xp-card-label" style={{ fontSize: '11px' }}>Active Streak</div>
+                        <div className="xp-card-sub" style={{ fontSize: '10px' }}>Daily Multiplier 1.25x</div>
                       </div>
 
-                      <div className="xp-card" style={{ padding: '14px 10px' }}>
-                        <div className="xp-card-icon text-emerald"><Shield size={20} /></div>
-                        <div className="xp-card-num text-emerald" style={{ fontSize: '16px' }}>AUDIT-PASS</div>
-                        <div className="xp-card-label" style={{ fontSize: '11.5px' }}>Sign-Off Status</div>
-                        <div className="xp-card-sub" style={{ fontSize: '10.5px' }}>August 1, 2026 Cutoff</div>
+                      <div className="xp-card" style={{ padding: '12px 10px' }}>
+                        <div className="xp-card-icon text-emerald"><Shield size={18} /></div>
+                        <div className="xp-card-num text-emerald" style={{ fontSize: '15px' }}>AUDIT-PASS</div>
+                        <div className="xp-card-label" style={{ fontSize: '11px' }}>Sign-Off Status</div>
+                        <div className="xp-card-sub" style={{ fontSize: '10px' }}>August 1, 2026 Cutoff</div>
+                      </div>
+                    </div>
+
+                    {/* Level & Career Progression Track */}
+                    <div className="xp-level-progression-box">
+                      <div className="xp-level-header">
+                        <span className="xp-level-title">Level 4: Senior Agile Practitioner</span>
+                        <span className="xp-level-sub">Level 5: Project Architect ➔</span>
+                      </div>
+                      <div className="domain-bar-track">
+                        <div className="domain-bar-fill fill-purple" style={{ width: '68%' }} />
+                      </div>
+                      <div className="flex-between text-xs text-secondary">
+                        <span>3,420 / 5,000 XP (68% Complete)</span>
+                        <span className="text-purple font-bold">+1,580 XP to Level 5</span>
+                      </div>
+                    </div>
+
+                    {/* Session Gain Receipt Grid */}
+                    <div className="xp-receipt-grid">
+                      <div className="xp-receipt-item">
+                        <span className="xp-receipt-val">+200</span>
+                        <span className="xp-receipt-lbl">Base Quiz</span>
+                      </div>
+                      <div className="xp-receipt-item">
+                        <span className="xp-receipt-val text-gold">+{Math.round(pointsTotal * 0.15)}</span>
+                        <span className="xp-receipt-lbl">Accuracy Tier</span>
+                      </div>
+                      <div className="xp-receipt-item">
+                        <span className="xp-receipt-val text-cyan">+{Math.round(pointsTotal * 0.1)}</span>
+                        <span className="xp-receipt-lbl">Speed Bonus</span>
+                      </div>
+                      <div className="xp-receipt-item">
+                        <span className="xp-receipt-val text-emerald">+{xpEarned}</span>
+                        <span className="xp-receipt-lbl">Total XP Gain</span>
+                      </div>
+                    </div>
+
+                    {/* Badges Unlocked */}
+                    <div className="xp-badges-unlocked-grid">
+                      <div className="xp-badge-chip">
+                        <span>⚡</span>
+                        <span>Speed Velocity</span>
+                      </div>
+                      <div className="xp-badge-chip">
+                        <span>🛡️</span>
+                        <span>Zero-Trust SEC-26</span>
+                      </div>
+                      <div className="xp-badge-chip">
+                        <span>🔥</span>
+                        <span>Streak Shield</span>
+                      </div>
+                      <div className="xp-badge-chip">
+                        <span>🎯</span>
+                        <span>Milestone Master</span>
                       </div>
                     </div>
                   </div>
