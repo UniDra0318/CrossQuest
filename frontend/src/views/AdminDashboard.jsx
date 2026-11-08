@@ -631,11 +631,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       )}
 
       {activeSubView === 'anomalies' && (
-        <Alerts
-          anomalies={anomalies}
-          onDispositionComplete={handlePeerReviewComplete}
-          currentUser={currentUser}
-        />
+        <Alerts onRuleUpdated={() => {}} />
       )}
 
       {activeSubView === 'records_vault' && (
