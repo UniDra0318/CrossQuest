@@ -655,7 +655,7 @@ export default function FinanceReconciliationDesk() {
           </button>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
           {batches.map((b) => {
             const isSelected = b.id === selectedBatchId;
             return (
@@ -664,23 +664,41 @@ export default function FinanceReconciliationDesk() {
                 type="button"
                 onClick={() => setSelectedBatchId(b.id)}
                 style={{
-                  padding: '10px 16px',
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   border: isSelected ? (isDark ? '2px solid #818cf8' : '2px solid #4f46e5') : (isDark ? '1px solid #1f2937' : '1px solid #e2e8f0'),
                   background: isSelected ? (isDark ? '#1e1b4b' : '#f5f3ff') : (isDark ? '#0f172a' : '#ffffff'),
-                  boxShadow: isSelected ? '0 4px 12px rgba(79, 70, 229, 0.25)' : 'none',
+                  boxShadow: isSelected ? '0 4px 14px rgba(79, 70, 229, 0.22)' : 'none',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  boxSizing: 'border-box'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileSpreadsheet size={16} color={isSelected ? (isDark ? '#a78bfa' : '#4f46e5') : (isDark ? '#94a3b8' : '#64748b')} />
-                  <strong style={{ fontSize: '13px', color: isSelected ? (isDark ? '#f8fafc' : '#4f46e5') : (isDark ? '#f8fafc' : '#1e293b') }}>
-                    {b.source_file_name}
-                  </strong>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                    <FileSpreadsheet size={16} style={{ flexShrink: 0 }} color={isSelected ? (isDark ? '#a78bfa' : '#4f46e5') : (isDark ? '#94a3b8' : '#64748b')} />
+                    <strong 
+                      style={{ 
+                        fontSize: '13px', 
+                        whiteSpace: 'nowrap', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis',
+                        color: isSelected ? (isDark ? '#f8fafc' : '#4f46e5') : (isDark ? '#f8fafc' : '#1e293b') 
+                      }} 
+                      title={b.source_file_name}
+                    >
+                      {b.source_file_name}
+                    </strong>
+                  </div>
                   <span 
                     style={{ 
+                      flexShrink: 0,
+                      whiteSpace: 'nowrap',
                       fontSize: '10px', 
                       fontWeight: 800, 
                       padding: '2px 8px', 
@@ -705,7 +723,7 @@ export default function FinanceReconciliationDesk() {
                     {b.reconciled ? 'RECONCILED' : b.discrepancy_count > 0 ? `${b.discrepancy_count} DISCREPANCIES` : 'STAGED'}
                   </span>
                 </div>
-                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>
+                <div style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {b.record_count} total rows &bull; {b.in_scope_count} in-scope &bull; {new Date(b.loaded_at).toLocaleDateString()}
                 </div>
               </button>
@@ -804,25 +822,28 @@ export default function FinanceReconciliationDesk() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
             <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
               <tr>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', width: '90px' }}>ROW #</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>ISSUE CLASSIFICATION</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>FIELD NAME</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>RESOLUTION STATUS</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>AUDIT REASON / LOG</th>
-                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', width: '110px', textAlign: 'right' }}>ACTION</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', width: '80px', whiteSpace: 'nowrap' }}>ROW #</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', minWidth: '170px', whiteSpace: 'nowrap' }}>ISSUE CLASSIFICATION</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', minWidth: '130px', whiteSpace: 'nowrap' }}>FIELD NAME</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', minWidth: '200px', whiteSpace: 'nowrap' }}>RESOLUTION STATUS</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', minWidth: '260px' }}>AUDIT REASON / LOG</th>
+                <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', width: '100px', textAlign: 'right', whiteSpace: 'nowrap' }}>ACTION</th>
               </tr>
             </thead>
             <tbody>
               {discrepancies.length > 0 ? (
                 pagedDiscrepancies.map((d) => (
                   <tr key={d.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '12px 16px', fontWeight: 800, fontFamily: 'monospace', color: isDark ? '#f8fafc' : '#1e293b' }}>#{d.source_row_no}</td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 800, fontFamily: 'monospace', color: isDark ? '#f8fafc' : '#1e293b', whiteSpace: 'nowrap' }}>#{d.source_row_no}</td>
+                    <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
                       <span 
                         style={{ 
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          whiteSpace: 'nowrap',
                           fontSize: '11px', 
                           fontWeight: 700, 
-                          padding: '3px 8px', 
+                          padding: '4px 9px', 
                           borderRadius: '6px',
                           background: d.issue_type === 'PRE_CUTOFF_DATE' 
                             ? (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb') 
@@ -844,24 +865,54 @@ export default function FinanceReconciliationDesk() {
                         {d.issue_type}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: isDark ? '#cbd5e1' : '#475569' }}>{d.field_name || '—'}</td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ padding: '12px 16px', fontFamily: 'monospace', color: isDark ? '#cbd5e1' : '#475569', whiteSpace: 'nowrap' }}>{d.field_name || '—'}</td>
+                    <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
                       {d.resolution ? (
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#34d399' : '#059669', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', padding: '3px 8px', borderRadius: '6px', border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0' }}>
-                          &#10004; {d.resolution}
+                        <span 
+                          style={{ 
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            whiteSpace: 'nowrap',
+                            fontSize: '11px', 
+                            fontWeight: 700, 
+                            color: isDark ? '#34d399' : '#059669', 
+                            background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', 
+                            padding: '4px 10px', 
+                            borderRadius: '6px', 
+                            border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0' 
+                          }}
+                        >
+                          <span style={{ fontSize: '11px', lineHeight: 1 }}>&#10004;</span>
+                          <span>{d.resolution}</span>
                         </span>
                       ) : (
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#fbbf24' : '#b45309', background: isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb', padding: '3px 8px', borderRadius: '6px', border: isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a' }}>
-                          &#9888; PENDING REVIEW
+                        <span 
+                          style={{ 
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            whiteSpace: 'nowrap',
+                            fontSize: '11px', 
+                            fontWeight: 700, 
+                            color: isDark ? '#fbbf24' : '#b45309', 
+                            background: isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb', 
+                            padding: '4px 10px', 
+                            borderRadius: '6px', 
+                            border: isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a' 
+                          }}
+                        >
+                          <span style={{ fontSize: '11px', lineHeight: 1 }}>&#9888;</span>
+                          <span>PENDING REVIEW</span>
                         </span>
                       )}
                     </td>
-                    <td style={{ padding: '12px 16px', color: isDark ? '#94a3b8' : '#64748b', fontSize: '12px' }}>
+                    <td style={{ padding: '12px 16px', color: isDark ? '#94a3b8' : '#64748b', fontSize: '12px', lineHeight: 1.5 }}>
                       {d.resolution_reason || (
                         <em>Requires explanation to merge, correct or accept.</em>
                       )}
                     </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                    <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       {!d.resolution ? (
                         <button
                           type="button"
