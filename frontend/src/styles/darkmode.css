@@ -527,6 +527,94 @@ html.dark .countdown-timer-chip,
   color: #f8fafc !important;
 }
 
+html.dark .arena-progress-cells-container,
+[data-theme="dark"] .arena-progress-cells-container {
+  background: rgba(15, 23, 42, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .arena-cells-title,
+[data-theme="dark"] .arena-cells-title {
+  color: #94a3b8 !important;
+}
+
+html.dark .arena-cells-legend,
+[data-theme="dark"] .arena-cells-legend {
+  color: #94a3b8 !important;
+}
+
+html.dark .arena-question-cell.cell-pending,
+[data-theme="dark"] .arena-question-cell.cell-pending {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #64748b !important;
+}
+
+html.dark .arena-question-cell.cell-current-active,
+[data-theme="dark"] .arena-question-cell.cell-current-active {
+  background: rgba(99, 102, 241, 0.28) !important;
+  border-color: #818cf8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.3), 0 4px 14px rgba(99, 102, 241, 0.45) !important;
+}
+
+html.dark .arena-question-cell.cell-answered-correct,
+html.dark .arena-question-cell.cell-current-correct,
+[data-theme="dark"] .arena-question-cell.cell-answered-correct,
+[data-theme="dark"] .arena-question-cell.cell-current-correct {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+html.dark .arena-question-cell.cell-answered-wrong,
+html.dark .arena-question-cell.cell-current-wrong,
+[data-theme="dark"] .arena-question-cell.cell-answered-wrong,
+[data-theme="dark"] .arena-question-cell.cell-current-wrong {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+}
+
+html.dark .arena-timer-bar-track,
+[data-theme="dark"] .arena-timer-bar-track {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .arena-timer-clock-badge.is-normal,
+[data-theme="dark"] .arena-timer-clock-badge.is-normal {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  color: #6ee7b7 !important;
+}
+
+html.dark .arena-timer-clock-badge.is-warning,
+[data-theme="dark"] .arena-timer-clock-badge.is-warning {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  color: #fcd34d !important;
+}
+
+html.dark .arena-timer-clock-badge.is-critical,
+[data-theme="dark"] .arena-timer-clock-badge.is-critical {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: rgba(239, 68, 68, 0.55) !important;
+  color: #fca5a5 !important;
+}
+
+html.dark .arena-timer-counter,
+[data-theme="dark"] .arena-timer-counter {
+  color: #94a3b8 !important;
+}
+
+html.dark .activity-segment-cell.cell-empty,
+[data-theme="dark"] .activity-segment-cell.cell-empty {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #64748b !important;
+}
+
 html.dark .sequence-item-row,
 [data-theme="dark"] .sequence-item-row {
   background-color: #1e293b !important;

@@ -396,6 +396,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
   const accuracyPct = Math.round((correctCount / Math.max(1, currentIndex + (answeredState ? 1 : 0))) * 100);
   const finalScorePct = Math.round((correctCount / totalQuestions) * 100);
+  const questionTimeLimit = currentQ?.timeLimit || quiz.timePerQuestion || 45;
+  const timerPercent = Math.max(0, Math.min(100, (timeLeft / questionTimeLimit) * 100));
 
   // ==========================================
   // STAGE 1: PRE-QUIZ BRIEFING SCREEN
@@ -897,22 +899,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
             <span className="badge-gamified badge-purple">
-              Question {currentIndex + 1} of {totalQuestions}
-            </span>
-            <span className="badge-gamified badge-gold">
-              Accuracy: {correctCount} / {Math.max(1, currentIndex + (answeredState ? 1 : 0))} ({accuracyPct}%)
+              {quiz.title}
             </span>
             <span className="points-pill-top">
               <Zap size={13} className="text-gold" /> {pointsTotal} PTS
             </span>
-          </div>
-
-          {/* Real-time Countdown Timer */}
-          <div className="arena-center-timer">
-            <div className={`countdown-timer-chip ${timeLeft <= 10 ? 'timer-critical' : ''}`}>
-              <Clock size={16} />
-              <span>00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span>
-            </div>
+            <span className="badge-gamified badge-gold">
+              Accuracy: {correctCount}/{Math.max(1, currentIndex + (answeredState ? 1 : 0))} ({accuracyPct}%)
+            </span>
           </div>
 
           <div className="arena-right-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1051,12 +1045,92 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           </div>
         </div>
 
-        {/* Progress Bar Line */}
-        <div className="arena-progress-track">
-          <div 
-            className="arena-progress-fill" 
-            style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
-          />
+        {/* Question Progress Cells Grid */}
+        <div className="arena-progress-cells-container">
+          <div className="arena-cells-header">
+            <div className="arena-cells-label">
+              <span className="arena-cells-title">Question Progress</span>
+              <span className="arena-cells-badge">Question {currentIndex + 1} of {totalQuestions}</span>
+            </div>
+            <div className="arena-cells-legend">
+              <span className="legend-item"><span className="legend-dot dot-active"></span>Current</span>
+              <span className="legend-item"><span className="legend-dot dot-correct"></span>Correct</span>
+              <span className="legend-item"><span className="legend-dot dot-wrong"></span>Incorrect</span>
+              <span className="legend-item"><span className="legend-dot dot-pending"></span>Pending</span>
+            </div>
+          </div>
+          <div className="arena-cells-grid">
+            {questions.map((q, idx) => {
+              const isCurrent = idx === currentIndex;
+              const rec = answersHistory[q.id];
+              const isPastAnswered = !isCurrent && !!rec;
+              const isPastCorrect = isPastAnswered && rec.isCorrect;
+              const isPastWrong = isPastAnswered && !rec.isCorrect;
+
+              const isCurrentAnswered = isCurrent && answeredState !== null;
+              const isCurrentCorrect = isCurrentAnswered && answeredState === 'correct';
+              const isCurrentWrong = isCurrentAnswered && answeredState === 'wrong';
+
+              let cellStatus = 'pending';
+              let icon = null;
+
+              if (isCurrent) {
+                if (isCurrentCorrect) {
+                  cellStatus = 'current-correct';
+                  icon = <Check size={14} strokeWidth={3} />;
+                } else if (isCurrentWrong) {
+                  cellStatus = 'current-wrong';
+                  icon = <XCircle size={14} strokeWidth={2.5} />;
+                } else {
+                  cellStatus = 'current-active';
+                }
+              } else if (isPastAnswered) {
+                if (isPastCorrect) {
+                  cellStatus = 'answered-correct';
+                  icon = <Check size={14} strokeWidth={3} />;
+                } else {
+                  cellStatus = 'answered-wrong';
+                  icon = <XCircle size={14} strokeWidth={2.5} />;
+                }
+              }
+
+              return (
+                <div 
+                  key={q.id || idx}
+                  className={`arena-question-cell cell-${cellStatus}`}
+                  title={`Question ${idx + 1}: ${isCurrent ? 'Current active question' : isPastAnswered ? (isPastCorrect ? 'Completed - Correct' : 'Completed - Incorrect') : 'Upcoming question'}`}
+                >
+                  <span className="cell-number">{idx + 1}</span>
+                  {icon && <span className="cell-mini-icon">{icon}</span>}
+                  {isCurrent && !isCurrentAnswered && (
+                    <span className="cell-current-dot" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Visible Depleting Countdown Timer Bar */}
+        <div className="arena-timer-bar-section">
+          <div className="arena-timer-bar-top">
+            <div className={`arena-timer-clock-badge ${timeLeft <= 10 ? 'is-critical' : timeLeft <= 20 ? 'is-warning' : 'is-normal'}`}>
+              <Clock size={16} className={`timer-svg-icon ${timeLeft <= 10 ? 'animate-pulse' : ''}`} />
+              <span className="timer-seconds-text">00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span>
+              <span className="timer-status-hint">
+                {timeLeft <= 10 ? 'CRITICAL TIME!' : timeLeft <= 20 ? 'HURRY UP!' : 'TIME REMAINING'}
+              </span>
+            </div>
+            <div className="arena-timer-counter">
+              <span>{timeLeft}s remaining of {questionTimeLimit}s</span>
+            </div>
+          </div>
+          <div className="arena-timer-bar-track">
+            <div 
+              className={`arena-timer-bar-fill ${timeLeft <= 10 ? 'fill-critical' : timeLeft <= 20 ? 'fill-warning' : 'fill-normal'}`}
+              style={{ width: `${timerPercent}%` }}
+            />
+          </div>
         </div>
 
         {/* Question Area Box */}

@@ -40,7 +40,7 @@ export default function LiveQuizPopUpModal() {
   // Trainer modal state
   const [selectedQuizId, setSelectedQuizId] = useState('act-1');
   const [sessionCode, setSessionCode] = useState('SESS-2026-08A');
-  const [instructorName, setInstructorName] = useState(currentUser?.full_name || 'Lead Trainer David Lim');
+  const [instructorName, setInstructorName] = useState(currentUser?.full_name || 'Lead Trainer Joey Ramos');
 
   const quizDb = useMemo(() => getActiveQuizDatabase(), []);
 
@@ -79,7 +79,7 @@ export default function LiveQuizPopUpModal() {
     const payload = {
       quiz_id: qId,
       title: targetQuiz?.title || 'Interactive Live Assessment',
-      instructor: instructorName || 'Lead Trainer David Lim',
+      instructor: instructorName || 'Lead Trainer Joey Ramos',
       session_code: sessionCode || 'SESS-2026-08A',
       duration_seconds: 300,
       description: targetQuiz?.description || 'Immediate live assessment initiated by your lead instructor.',
@@ -505,7 +505,7 @@ export default function LiveQuizPopUpModal() {
               color: '#94a3b8',
               lineHeight: 1.5
             }}>
-              Initiated by <strong style={{ color: '#e2e8f0' }}>{liveBroadcast.instructor || 'Lead Trainer David Lim'}</strong> for cohort session <code style={{ color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>{liveBroadcast.session_code}</code>.
+              Initiated by <strong style={{ color: '#e2e8f0' }}>{liveBroadcast.instructor || 'Lead Trainer Joey Ramos'}</strong> for cohort session <code style={{ color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>{liveBroadcast.session_code}</code>.
             </p>
 
             {/* Quiz Info Badges */}

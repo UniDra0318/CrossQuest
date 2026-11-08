@@ -341,6 +341,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         const trackFallback = idx === 0 ? TRACKS.infosec : idx === 1 ? TRACKS.access : idx === 2 ? TRACKS.privacy : TRACKS.database;
         const defaultTrainer = idx === 0 ? 'Lead Trainer Joey Ramos' : idx === 1 ? 'Lead Trainer Billy Fernandez' : idx === 2 ? 'Lead Trainer Jobert Cruz' : 'Lead Trainer Owen Castillo';
         const defaultCat = idx === 0 ? 'Project Management' : idx === 1 ? 'Executive Leadership' : idx === 2 ? 'Supervisory Mastery' : 'Risk & Governance';
+        const defaultCubeLabel = idx === 0 ? 'AGILE' : idx === 1 ? 'LEAD' : idx === 2 ? 'COACH' : 'RISK';
         const isDone = status.completed || q.completed;
         const finalScore = status.score ?? q.score;
 
@@ -351,8 +352,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           questionsCount: `${qCount} QUESTIONS`,
           headerColor: q.header_color || trackFallback.color,
           category: q.category || defaultCat,
+          categoryLabel: defaultCubeLabel,
           track: trackFallback,
-          progressSegments: status.segments || (isDone ? [true, true, true, true] : [false, false, false, false]),
+          progressSegments: status.segments || (isDone ? [true, true, true, true, true] : [false, false, false, false, false]),
           completed: isDone,
           score: finalScore,
           accuracy: isDone ? `${finalScore ?? 85}% accuracy` : 'Assigned - Due in 3d'
@@ -369,8 +371,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.infosec.color,
         category: 'Project Management',
+        categoryLabel: 'AGILE',
         track: TRACKS.infosec,
-        progressSegments: quizScoreStatus['act-1']?.segments || (quizScoreStatus['act-1']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        progressSegments: quizScoreStatus['act-1']?.segments || (quizScoreStatus['act-1']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
         completed: quizScoreStatus['act-1']?.completed,
         score: quizScoreStatus['act-1']?.score,
         accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned - Due in 3d'
@@ -382,8 +385,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.access.color,
         category: 'Executive Leadership',
+        categoryLabel: 'LEAD',
         track: TRACKS.access,
-        progressSegments: quizScoreStatus['act-2']?.segments || (quizScoreStatus['act-2']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        progressSegments: quizScoreStatus['act-2']?.segments || (quizScoreStatus['act-2']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
         completed: quizScoreStatus['act-2']?.completed,
         score: quizScoreStatus['act-2']?.score,
         accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned - Due in 3d'
@@ -395,8 +399,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.privacy.color,
         category: 'Supervisory Mastery',
+        categoryLabel: 'COACH',
         track: TRACKS.privacy,
-        progressSegments: quizScoreStatus['act-3']?.segments || (quizScoreStatus['act-3']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        progressSegments: quizScoreStatus['act-3']?.segments || (quizScoreStatus['act-3']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
         completed: quizScoreStatus['act-3']?.completed,
         score: quizScoreStatus['act-3']?.score,
         accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned - Due in 3d'
@@ -408,8 +413,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.database.color,
         category: 'Risk & Governance',
+        categoryLabel: 'RISK',
         track: TRACKS.database,
-        progressSegments: quizScoreStatus['act-4']?.segments || (quizScoreStatus['act-4']?.completed ? [true, true, true, true] : [false, false, false, false]),
+        progressSegments: quizScoreStatus['act-4']?.segments || (quizScoreStatus['act-4']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
         completed: quizScoreStatus['act-4']?.completed,
         score: quizScoreStatus['act-4']?.score,
         accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned - Due in 3d'
@@ -730,7 +736,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                           color={act.track.color} 
                           top={act.track.top} 
                           right={act.track.right} 
-                          label={act.track.face.label} 
+                          label={act.categoryLabel || act.track.face.label} 
                         />
                       </div>
                     </div>
@@ -740,14 +746,22 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                       <h4 className="activity-title">{act.title}</h4>
                       <p className="activity-instructor">{act.instructor}</p>
 
-                      {/* Segmented Progress Indicator (4 pills) */}
-                      <div className="activity-segmented-bar">
+                      {/* Segmented Progress Indicator (Numbered Question Cells) */}
+                      <div className="activity-cells-bar">
                         {act.progressSegments.map((isFilled, idx) => (
                           <div 
                             key={idx} 
-                            className={`activity-segment-pill ${isFilled ? 'filled' : 'empty'}`}
-                            style={{ backgroundColor: isFilled ? act.headerColor : '#e2e8f0' }}
-                          />
+                            className={`activity-segment-cell ${isFilled ? 'cell-filled' : 'cell-empty'}`}
+                            style={{ 
+                              borderColor: isFilled ? act.headerColor : undefined,
+                              backgroundColor: isFilled ? `${act.headerColor}22` : undefined,
+                              color: isFilled ? act.headerColor : undefined
+                            }}
+                            title={`Question ${idx + 1}: ${isFilled ? 'Completed' : 'Pending'}`}
+                          >
+                            <span className="cell-num">{idx + 1}</span>
+                            {isFilled && <Check size={11} strokeWidth={3} className="cell-chk" />}
+                          </div>
                         ))}
                       </div>
 
