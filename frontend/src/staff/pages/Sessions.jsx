@@ -15,7 +15,9 @@ import {
   Laptop,
   CheckSquare,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  Award,
+  ClipboardList
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -35,6 +37,34 @@ const DEFAULT_TRAINERS = [
   { id: 'trainer-jobert', name: 'Jobert Cruz', title: 'Enterprise Data Trainer' },
   { id: 'trainer-owen', name: 'Owen Castillo', title: 'Security & App Dev Trainer' }
 ];
+
+const formatSessionDate = (dateStr) => {
+  if (!dateStr) return 'Date TBD';
+  try {
+    const clean = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    const [y, m, d] = clean.split('-');
+    if (!y || !m || !d) return dateStr;
+    const date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+};
+
+const getVenueDisplay = (sess) => {
+  if (sess?.venue && sess.venue.trim()) return sess.venue.trim();
+  if (sess?.delivery_mode === 'Online') return 'Online (Virtual Meeting)';
+  return 'Crossworks Makati Learning Hub';
+};
+
+const getTrainerDisplay = (sess) => {
+  if (sess?.trainers && sess.trainers.length > 0) return sess.trainers.join(', ');
+  if (sess?.assigned_trainers && sess.assigned_trainers.length > 0) {
+    const names = sess.assigned_trainers.map(t => t.trainer_name).filter(Boolean);
+    if (names.length > 0) return names.join(', ');
+  }
+  return sess?.trainer_name || 'Lead Trainer';
+};
 
 export default function Sessions() {
   const { currentUser, token } = useAuth();
@@ -357,7 +387,7 @@ export default function Sessions() {
       </div>
 
       {/* 3-Column Kanban Sessions Board */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'stretch' }}>
         
         {/* Column 1: Needs Attendance */}
         <div 
@@ -366,7 +396,10 @@ export default function Sessions() {
             borderRadius: '20px', 
             padding: '18px', 
             border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
-            minHeight: '480px'
+            minHeight: '520px',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -379,52 +412,90 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {columnNeedsAttendance.map(sess => (
-              <div
-                key={sess.id}
-                onClick={() => handleOpenDetail(sess)}
-                style={{
-                  background: isDark ? '#111827' : '#ffffff',
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+            {columnNeedsAttendance.length === 0 ? (
+              <div 
+                style={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  padding: '36px 20px', 
+                  textAlign: 'center',
+                  background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
                   borderRadius: '16px',
-                  padding: '16px',
-                  border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#fef3c7', color: '#b45309', fontFamily: 'monospace' }}>
-                    {sess.session_code}
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
-                    {sess.client_code}
-                  </span>
+                <div 
+                  style={{ 
+                    width: '46px', 
+                    height: '46px', 
+                    borderRadius: '14px', 
+                    background: isDark ? '#1e293b' : '#fef3c7', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    marginBottom: '12px' 
+                  }}
+                >
+                  <ClipboardList size={22} color={isDark ? '#f59e0b' : '#d97706'} />
                 </div>
-                <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
-                  {sess.course_name}
+                <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>
+                  All Rosters Logged
                 </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Calendar size={13} />
-                    <span>{sess.start_date}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={13} />
-                    <span>{sess.venue}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <UserCheck size={13} />
-                    <span>Trainer: {(sess.trainers || []).join(', ') || 'Assigned Lead Trainer'}</span>
-                  </div>
-                </div>
-                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700 }}>Record Roster</span>
-                  <ArrowRight size={13} color="#f59e0b" />
-                </div>
+                <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
+                  No sessions currently require initial attendance tracking or roster submission.
+                </p>
               </div>
-            ))}
+            ) : (
+              columnNeedsAttendance.map(sess => (
+                <div
+                  key={sess.id}
+                  onClick={() => handleOpenDetail(sess)}
+                  style={{
+                    background: isDark ? '#111827' : '#ffffff',
+                    borderRadius: '16px',
+                    padding: '16px',
+                    border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#fef3c7', color: '#b45309', fontFamily: 'monospace' }}>
+                      {sess.session_code}
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                      {sess.client_code || sess.client_company || 'All Clients'}
+                    </span>
+                  </div>
+                  <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    {sess.course_name}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Calendar size={13} />
+                      <span>{formatSessionDate(sess.start_date)}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <MapPin size={13} />
+                      <span>{getVenueDisplay(sess)}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <UserCheck size={13} />
+                      <span>Trainer: {getTrainerDisplay(sess)}</span>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700 }}>Record Roster</span>
+                    <ArrowRight size={13} color="#f59e0b" />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -435,7 +506,10 @@ export default function Sessions() {
             borderRadius: '20px', 
             padding: '18px', 
             border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
-            minHeight: '480px'
+            minHeight: '520px',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -448,52 +522,92 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {columnAwaitingSignOff.map(sess => (
-              <div
-                key={sess.id}
-                onClick={() => handleOpenDetail(sess)}
-                style={{
-                  background: isDark ? '#111827' : '#ffffff',
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+            {columnAwaitingSignOff.length === 0 ? (
+              <div 
+                style={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  padding: '36px 20px', 
+                  textAlign: 'center',
+                  background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
                   borderRadius: '16px',
-                  padding: '16px',
-                  border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#e0f2fe', color: '#0284c7', fontFamily: 'monospace' }}>
-                    {sess.session_code}
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
-                    {sess.client_code}
-                  </span>
+                <div 
+                  style={{ 
+                    width: '46px', 
+                    height: '46px', 
+                    borderRadius: '14px', 
+                    background: isDark ? '#1e293b' : '#e0f2fe', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    marginBottom: '12px' 
+                  }}
+                >
+                  <Clock size={22} color={isDark ? '#38bdf8' : '#0284c7'} />
                 </div>
-                <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
-                  {sess.course_name}
+                <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>
+                  No Pending Sign-Offs
                 </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Calendar size={13} />
-                    <span>{sess.start_date}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={13} />
-                    <span>{sess.venue}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <UserCheck size={13} />
-                    <span>Trainer: {(sess.trainers || []).join(', ') || 'Lead Trainer'}</span>
-                  </div>
-                </div>
-                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: '#0284c7', fontWeight: 700 }}>Attendance Logged</span>
-                  <CheckSquare size={13} color="#0284c7" />
-                </div>
+                <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
+                  Active cohorts are either awaiting attendance input or have already been certified.
+                </p>
               </div>
-            ))}
+            ) : (
+              columnAwaitingSignOff.map(sess => (
+                <div
+                  key={sess.id}
+                  onClick={() => handleOpenDetail(sess)}
+                  style={{
+                    background: isDark ? '#111827' : '#ffffff',
+                    borderRadius: '16px',
+                    padding: '16px',
+                    border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#e0f2fe', color: '#0284c7', fontFamily: 'monospace' }}>
+                      {sess.session_code}
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                      {sess.client_code || sess.client_company || 'All Clients'}
+                    </span>
+                  </div>
+                  <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    {sess.course_name}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Calendar size={13} />
+                      <span>{formatSessionDate(sess.start_date)}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <MapPin size={13} />
+                      <span>{getVenueDisplay(sess)}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <UserCheck size={13} />
+                      <span>Trainer: {getTrainerDisplay(sess)}</span>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '11px', color: '#0284c7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <CheckSquare size={12} color="#0284c7" />
+                      Attendance Logged • Awaiting Trainer
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -504,7 +618,10 @@ export default function Sessions() {
             borderRadius: '20px', 
             padding: '18px', 
             border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
-            minHeight: '480px'
+            minHeight: '520px',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -517,44 +634,96 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {columnCompleted.map(sess => (
-              <div
-                key={sess.id}
-                onClick={() => handleOpenDetail(sess)}
-                style={{
-                  background: isDark ? '#111827' : '#ffffff',
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+            {columnCompleted.length === 0 ? (
+              <div 
+                style={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  padding: '36px 20px', 
+                  textAlign: 'center',
+                  background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
                   borderRadius: '16px',
-                  padding: '16px',
-                  border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                  cursor: 'pointer',
-                  opacity: 0.9
+                  border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#ecfdf5', color: '#059669', fontFamily: 'monospace' }}>
-                    {sess.session_code}
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
-                    {sess.client_code}
-                  </span>
+                <div 
+                  style={{ 
+                    width: '46px', 
+                    height: '46px', 
+                    borderRadius: '14px', 
+                    background: isDark ? '#1e293b' : '#ecfdf5', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    marginBottom: '12px' 
+                  }}
+                >
+                  <Award size={22} color={isDark ? '#34d399' : '#059669'} />
                 </div>
-                <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
-                  {sess.course_name}
+                <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>
+                  No Completed Cohorts
                 </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <CheckCircle2 size={13} color="#059669" />
-                    <span>Signed Off & Verified</span>
+                <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
+                  Completed training sessions will appear here once trainer evaluation and certificate issuance are finalized.
+                </p>
+              </div>
+            ) : (
+              columnCompleted.map(sess => (
+                <div
+                  key={sess.id}
+                  onClick={() => handleOpenDetail(sess)}
+                  style={{
+                    background: isDark ? '#111827' : '#ffffff',
+                    borderRadius: '16px',
+                    padding: '16px',
+                    border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    cursor: 'pointer',
+                    opacity: 0.95,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#ecfdf5', color: '#059669', fontFamily: 'monospace' }}>
+                      {sess.session_code}
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                      {sess.client_code || sess.client_company || 'All Clients'}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <MapPin size={13} />
-                    <span>{sess.venue}</span>
+                  <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    {sess.course_name}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Calendar size={13} />
+                      <span>{formatSessionDate(sess.start_date)}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <MapPin size={13} />
+                      <span>{getVenueDisplay(sess)}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <UserCheck size={13} />
+                      <span>Trainer: {getTrainerDisplay(sess)}</span>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <CheckCircle2 size={12} color="#059669" />
+                      Signed Off & Certified
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      {sess.trainer_sign_off_at ? formatSessionDate(sess.trainer_sign_off_at) : 'Archived'}
+                    </span>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -710,9 +879,11 @@ export default function Sessions() {
                 </div>
                 <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>{activeSession.course_name}</h3>
                 <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
-                  <span>Venue: {activeSession.venue}</span>
+                  <span>Venue: {getVenueDisplay(activeSession)}</span>
                   <span>•</span>
-                  <span>Delivery: {activeSession.delivery_mode}</span>
+                  <span>Delivery: {activeSession.delivery_mode || 'F2F'}</span>
+                  <span>•</span>
+                  <span>Date: {formatSessionDate(activeSession.start_date)}</span>
                 </div>
               </div>
               <button type="button" onClick={() => setActiveSession(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
