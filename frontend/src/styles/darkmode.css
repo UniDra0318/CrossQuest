@@ -2402,3 +2402,54 @@ html.dark .summary-status-tag.tag-neutral,
   background: #334155 !important;
   color: #cbd5e1 !important;
 }
+/* Identification Workspace Dark Mode */
+html.dark .identification-card-panel,
+[data-theme="dark"] .identification-card-panel {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .ident-panel-badge,
+[data-theme="dark"] .ident-panel-badge {
+  background: rgba(168, 85, 247, 0.15) !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+  color: #c084fc !important;
+}
+
+html.dark .ident-hint-chip,
+[data-theme="dark"] .ident-hint-chip {
+  background: rgba(245, 158, 11, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #fde68a !important;
+}
+
+html.dark .ident-prompt-subtext,
+[data-theme="dark"] .ident-prompt-subtext {
+  color: #94a3b8 !important;
+}
+
+html.dark .identification-input,
+[data-theme="dark"] .identification-input {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .identification-input:focus,
+[data-theme="dark"] .identification-input:focus {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.2) !important;
+}
+
+html.dark .ident-helper-bar,
+[data-theme="dark"] .ident-helper-bar {
+  color: #94a3b8 !important;
+}
+
+html.dark .ident-kbd,
+[data-theme="dark"] .ident-kbd {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}

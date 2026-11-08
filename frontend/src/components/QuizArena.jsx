@@ -25,7 +25,10 @@ import {
   Lock,
   X,
   Palette,
-  ChevronDown
+  ChevronDown,
+  KeyRound,
+  Lightbulb,
+  CornerDownLeft
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
 import MatchingQuestion from './MatchingQuestion';
@@ -1018,8 +1021,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '16px 24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}>
-      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1780px', width: '100%', minHeight: 'calc(100vh - 32px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '20px 24px 48px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', transition: 'all 0.3s ease' }}>
+      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
@@ -1334,29 +1337,69 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </div>
           )}
 
-          {/* 2. IDENTIFICATION / TERM INPUT */}
+          {/* 2. IDENTIFICATION / TERM INPUT WORKSPACE */}
           {currentQ.type === 'identification' && (
-            <form onSubmit={handleIdentificationSubmit} className="identification-form-box">
-              <div className="identification-input-row">
-                <input
-                  type="text"
-                  className="identification-input"
-                  placeholder={currentQ.placeholder || "Enter your answer here..."}
-                  value={identificationInput}
-                  onChange={(e) => setIdentificationInput(e.target.value)}
-                  disabled={answeredState !== null}
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="btn-tactile btn-tactile-purple btn-ident-submit"
-                  disabled={answeredState !== null || !identificationInput.trim()}
-                >
-                  <span>Submit Answer</span>
-                  <ArrowRight size={16} />
-                </button>
+            <div className="identification-workspace-container">
+              <div className="identification-card-panel">
+                <div className="ident-panel-top">
+                  <div className="ident-panel-badge">
+                    <KeyRound size={15} className="text-purple" />
+                    <span>Term & Concept Verification</span>
+                  </div>
+                  <span className="ident-hint-chip">
+                    <Lightbulb size={13} className="text-amber" />
+                    <span>Case-Insensitive & Standard Acronyms</span>
+                  </span>
+                </div>
+
+                <div className="ident-prompt-subtext">
+                  Enter the exact management terminology, methodology name, or recognized acronym that answers the question.
+                </div>
+
+                <form onSubmit={handleIdentificationSubmit} className="identification-form-box">
+                  <div className="identification-input-row">
+                    <div className="identification-input-wrapper">
+                      <KeyRound size={19} className="input-prefix-icon text-purple" />
+                      <input
+                        type="text"
+                        className={`identification-input ${answeredState === 'correct' ? 'input-correct' : answeredState === 'wrong' ? 'input-wrong' : ''}`}
+                        placeholder={currentQ.placeholder || "Type your answer or acronym here..."}
+                        value={identificationInput}
+                        onChange={(e) => setIdentificationInput(e.target.value)}
+                        disabled={answeredState !== null}
+                        autoFocus
+                      />
+                      {answeredState === 'correct' && (
+                        <CheckCircle2 size={20} className="input-status-icon text-green" />
+                      )}
+                      {answeredState === 'wrong' && (
+                        <XCircle size={20} className="input-status-icon text-red" />
+                      )}
+                    </div>
+                    {answeredState === null && (
+                      <button
+                        type="submit"
+                        className="btn-tactile btn-tactile-purple btn-ident-submit"
+                        disabled={!identificationInput.trim()}
+                      >
+                        <span>Submit Answer</span>
+                        <CornerDownLeft size={16} />
+                      </button>
+                    )}
+                  </div>
+                </form>
+
+                <div className="ident-helper-bar">
+                  <span className="helper-item">
+                    Press <kbd className="ident-kbd">Enter ↵</kbd> to submit
+                  </span>
+                  <span className="helper-dot">&bull;</span>
+                  <span className="helper-item">
+                    Instant automated criteria validation
+                  </span>
+                </div>
               </div>
-            </form>
+            </div>
           )}
 
           {/* 3. SEQUENCE ORDERING / DRAG-AND-DROP REORDER */}
