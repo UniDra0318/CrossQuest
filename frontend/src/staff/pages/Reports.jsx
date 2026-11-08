@@ -30,65 +30,60 @@ import {
   downloadClientReportCsv,
   downloadClientReportExcel
 } from '../../services/api';
-import { buildReport } from '../../data/staffData';
 
 export default function Reports() {
   const { token, currentUser } = useAuth();
   const { portfolios } = useStaff();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Selected scope from URL query param or default
+  const assignedList = useMemo(() => {
+    return currentUser?.assigned_client_accounts || currentUser?.assigned_companies || [];
+  }, [currentUser]);
+
+  // Companies list
+  const [companiesList, setCompaniesList] = useState([]);
+
+  // Default to first assigned client if no specific query param is requested
   const paramScope = searchParams.get('scope');
-  const [selectedScope, setSelectedScope] = useState(paramScope || 'CORP_ALPHA');
+  const firstAssignedScope = useMemo(() => {
+    if (paramScope) return paramScope;
+    if (assignedList.length > 0 && assignedList[0] !== 'ALL') return assignedList[0];
+    const match = companiesList.find(c => c.is_assigned);
+    if (match) return match.code;
+    return companiesList[0]?.code || 'CORP_ALPHA';
+  }, [paramScope, assignedList, companiesList]);
+
+  const [selectedScope, setSelectedScope] = useState(paramScope || firstAssignedScope);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Helper: Check if a company code is within the current user's authorized scope
+  const isScopeAssigned = (scopeCode) => {
+    if (currentUser?.role === 'admin') return true;
+    if (companiesList.length > 0) {
+      const match = companiesList.find(c => c.code === scopeCode);
+      if (match) return Boolean(match.is_assigned);
+    }
+    return assignedList.includes(scopeCode);
+  };
+
   // Data states
-  const [companiesList, setCompaniesList] = useState([]);
   const [report, setReport] = useState(null);
   const [loadingReport, setLoadingReport] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [downloadingExcel, setDownloadingExcel] = useState(false);
-
-  const handleExportCsv = async () => {
-    if (errorDetails || downloadingCsv) return;
-    setDownloadingCsv(true);
-    setSuccessToast(null);
-
-    try {
-      await downloadClientReportCsv(selectedScope, { statusFilter }, token);
-      setSuccessToast(`Official Client Audit Ledger (CSV) downloaded for ${selectedScope}.`);
-    } catch (err) {
-      console.error('CSV download error:', err);
-    } finally {
-      setDownloadingCsv(false);
-    }
-  };
-
-  const handleExportExcel = async () => {
-    if (errorDetails || downloadingExcel) return;
-    setDownloadingExcel(true);
-    setSuccessToast(null);
-
-    try {
-      await downloadClientReportExcel(selectedScope, { statusFilter }, token);
-      setSuccessToast(`Official Client Training Workbook (Excel) downloaded for ${selectedScope}.`);
-    } catch (err) {
-      console.error('Excel download error:', err);
-    } finally {
-      setDownloadingExcel(false);
-    }
-  };
   const [errorDetails, setErrorDetails] = useState(null);
   const [successToast, setSuccessToast] = useState(null);
 
-  // Sync state if URL changes
+  // Sync selected scope when default resolved or query changes
   useEffect(() => {
     if (paramScope && paramScope !== selectedScope) {
       setSelectedScope(paramScope);
+    } else if (!paramScope && firstAssignedScope && selectedScope === 'CORP_ALPHA' && !assignedList.includes('CORP_ALPHA')) {
+      setSelectedScope(firstAssignedScope);
     }
-  }, [paramScope]);
+  }, [paramScope, firstAssignedScope]);
 
   // Load companies list with assigned metadata
   useEffect(() => {
@@ -106,7 +101,6 @@ export default function Reports() {
 
       // Fallback from context/portfolios
       if (isMounted && portfolios && portfolios.length > 0) {
-        const assignedList = currentUser?.assigned_client_accounts || currentUser?.assigned_companies || ['CORP_ALPHA'];
         setCompaniesList(portfolios.map(p => ({
           code: p.scope,
           name: p.name,
@@ -118,22 +112,41 @@ export default function Reports() {
     }
     loadCompanies();
     return () => { isMounted = false; };
-  }, [token, portfolios, currentUser]);
+  }, [token, portfolios, assignedList]);
 
-  // Load report data for selectedScope
+  // Load report data for selectedScope with strict boundary enforcement
   const loadReportData = async (scope = selectedScope, status = statusFilter) => {
     setLoadingReport(true);
     setErrorDetails(null);
     setSuccessToast(null);
 
+    // 1. Strict Boundary Check: If the scope is restricted, NEVER load or show learner data!
+    if (!isScopeAssigned(scope)) {
+      setErrorDetails({
+        type: 'OUT_OF_SCOPE',
+        scope,
+        message: `Account Manager ${currentUser?.name || 'User'} is strictly restricted from viewing training records and compliance reports for unassigned client '${scope}'.`,
+        code: 403
+      });
+      setReport(null);
+      setLoadingReport(false);
+      return;
+    }
+
+    // 2. Authorized scope: query live backend API
     try {
       const data = await fetchClientReport(scope, { statusFilter: status }, token);
       setReport(data);
     } catch (err) {
       console.warn('API report fetch failed, evaluating scope restriction:', err);
-      // Check if it's a 403 Out-of-Scope error
       const errMsg = err?.message || '';
-      if (errMsg.includes('Not authorized') || errMsg.includes('403') || errMsg.includes('unassigned')) {
+      if (
+        errMsg.includes('Not authorized') || 
+        errMsg.includes('403') || 
+        errMsg.includes('unassigned') ||
+        errMsg.includes('Forbidden') ||
+        errMsg.includes('denied')
+      ) {
         setErrorDetails({
           type: 'OUT_OF_SCOPE',
           scope,
@@ -142,42 +155,14 @@ export default function Reports() {
         });
         setReport(null);
       } else {
-        // Fallback to local mock data if server is unreachable
-        try {
-          const fallbackData = buildReport(scope);
-          setReport({
-            header: {
-              client_name: fallbackData.org,
-              client_code: fallbackData.scope,
-              generated_at: new Date().toISOString(),
-              generated_by_user: currentUser?.name || 'Marcus Reyes',
-              user_role: currentUser?.role || 'account_manager'
-            },
-            summary: {
-              total_records: fallbackData.totalTrainees,
-              completed_trainings: fallbackData.rows?.filter(r => r.status === 'Completed').length || 0,
-              average_score: fallbackData.averageScore,
-              compliance_rate: `${fallbackData.completionRate}%`
-            },
-            trainees: (fallbackData.rows || []).map(r => ({
-              record_id: r.id,
-              trainee_code: `TRN-${r.id.replace('rec-', '')}`,
-              trainee_name: r.trainee,
-              course_name: r.course,
-              training_date: '2026-10-15',
-              status: r.status,
-              score: r.score
-            }))
-          });
-        } catch (e) {
-          setErrorDetails({
-            type: 'ERROR',
-            scope,
-            message: 'Unable to load report data. Please check system connectivity.',
-            code: 500
-          });
-          setReport(null);
-        }
+        // Show clear error state without fake sample data (Step 1c)
+        setErrorDetails({
+          type: 'ERROR',
+          scope,
+          message: `Couldn't load records for ${scope}. Please check system connectivity and retry.`,
+          code: 500
+        });
+        setReport(null);
       }
     } finally {
       setLoadingReport(false);
@@ -468,7 +453,7 @@ export default function Reports() {
               <div style={{ marginTop: '16px' }}>
                 <button
                   type="button"
-                  onClick={() => handleScopeChange('CORP_ALPHA')}
+                  onClick={() => handleScopeChange(firstAssignedScope)}
                   style={{
                     padding: '8px 18px',
                     borderRadius: '10px',
@@ -480,11 +465,56 @@ export default function Reports() {
                     cursor: 'pointer'
                   }}
                 >
-                  Return to Authorized Portfolio (CORP_ALPHA)
+                  Return to Authorized Portfolio ({firstAssignedScope})
                 </button>
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 2b. GENERIC ERROR STATE (Step 1c: No fake sample data) */}
+      {errorDetails && errorDetails.type === 'ERROR' && (
+        <div 
+          style={{
+            background: isDark ? '#1e293b' : '#f8fafc',
+            border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+            borderRadius: '20px',
+            padding: '40px 28px',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px'
+          }}
+        >
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: isDark ? '#334155' : '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <AlertCircle size={24} color="#ef4444" />
+          </div>
+          <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+            Couldn't load client report
+          </h3>
+          <p style={{ margin: 0, fontSize: '13.5px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '420px', lineHeight: 1.5 }}>
+            {errorDetails.message || 'An error occurred while fetching training records for this client.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => loadReportData(selectedScope, statusFilter)}
+            style={{
+              marginTop: '8px',
+              padding: '9px 22px',
+              borderRadius: '10px',
+              background: 'var(--cq-brand-primary)',
+              color: '#fff',
+              border: 'none',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer'
+            }}
+          >
+            Retry
+          </button>
         </div>
       )}
 
