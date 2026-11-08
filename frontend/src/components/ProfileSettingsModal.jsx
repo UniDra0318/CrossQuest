@@ -37,7 +37,6 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
     theme, 
     setTheme, 
     isDark, 
-    toggleTheme,
     soundEffects, 
     setSoundEffects,
     compactMode, 
@@ -330,55 +329,6 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Quick Toggle Banner */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '14px 18px',
-                borderRadius: '14px',
-                background: isDark ? '#1e293b' : '#f1f5f9',
-                border: isDark ? '1px solid #334155' : '1px solid #e2e8f0'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {isDark ? <Moon size={20} color="#38bdf8" /> : <Sun size={20} color="#f59e0b" />}
-                  <div>
-                    <span style={{ fontWeight: '700', fontSize: '13.5px', display: 'block' }}>
-                      {isDark ? 'Dark Mode Active' : 'Light Mode Active'}
-                    </span>
-                    <span style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                      Click the switch to instantly toggle illumination
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  style={{
-                    width: '48px',
-                    height: '26px',
-                    borderRadius: '999px',
-                    background: isDark ? '#4f46e5' : '#cbd5e1',
-                    border: 'none',
-                    position: 'relative',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s ease',
-                    padding: '2px'
-                  }}
-                  title="Toggle Dark Mode"
-                >
-                  <div style={{
-                    width: '22px',
-                    height: '22px',
-                    borderRadius: '50%',
-                    background: '#ffffff',
-                    transform: isDark ? 'translateX(22px)' : 'translateX(0)',
-                    transition: 'transform 0.2s ease',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                  }} />
-                </button>
               </div>
 
               {/* Accessibility & Density Controls */}
