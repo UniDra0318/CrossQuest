@@ -180,7 +180,7 @@ export default function Sidebar({
               title="Go to Dashboard Home"
             >
               <img 
-                src={isDark ? logoStackedWhite : logoStacked} 
+                src={isDark ? logoStacked : logoStackedWhite} 
                 alt="CrossQuest Logo" 
                 className="sidebar-brand-img" 
               />
