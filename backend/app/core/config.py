@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional, List
 
@@ -38,7 +39,11 @@ class Settings(BaseSettings):
     ]
 
     # Database: Use postgresql+psycopg2 for postgres, or sqlite for standalone development
-    DATABASE_URL: str = "sqlite:///./crossquest_dev.db"
+    # Set USE_PILOT_DB=true in environment to point to the pilot database
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///./crossquest_pilot.db" if os.getenv("USE_PILOT_DB", "").lower() in ("true", "1") else "sqlite:///./crossquest_dev.db"
+    )
 
     # CP-ABE Configuration
     CPABE_MASTER_PUBLIC_KEY_PATH: Optional[str] = "keys/mpk.key"
