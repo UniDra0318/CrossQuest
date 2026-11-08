@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.core.security import create_access_token, get_password_hash
 from app.models.entities import (
     User, Trainee, ClientCompany, TrainingSession, TrainerAssignment,
-    TrainingRecord, Certificate, TrainingRecordVersion, UserSession, Course
+    TrainingRecord, Certificate, TrainingRecordVersion, UserSession, Course,
+    CertificationType
 )
 
 
@@ -39,6 +40,18 @@ def workflow_fixture(db_session: Session):
         db.add(comp)
         db.commit()
         db.refresh(comp)
+
+    # 1b. Ensure PMP CertificationType exists for foreign key constraints on PostgreSQL
+    pmp_cert = db.query(CertificationType).filter_by(code="PMP").first()
+    if not pmp_cert:
+        pmp_cert = CertificationType(
+            code="PMP",
+            name="Project Management Professional (PMP)",
+            validity_months=36,
+            validity_basis="standard"
+        )
+        db.add(pmp_cert)
+        db.commit()
 
     # 2. Users
     def get_or_create_user(email, username, role, assigned_accounts=None):

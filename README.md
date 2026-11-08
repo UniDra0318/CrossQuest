@@ -98,11 +98,12 @@ npm run dev
 
 ## 🎯 Scope at a Glance
 
-- **Pilot size:** 2 to 5 client companies (to be confirmed during requirements validation)
-- **Users:** Internal Crossworks staff only; client companies receive reports and do not hold system accounts
-- **Attribute authority:** Single authority managed by Crossworks
-- **Anomaly detection:** Rule- and threshold-based, not machine learning
-- **Test data:** Simulated or anonymized trainee data only
+- **Pilot Scope:** 40 client accounts (25 corporate companies and 15 self-paying individuals) covering 149 in-scope participant enrollments across 11 active training programs (and a 31-program catalog), with records dated August 1, 2026 onward.
+- **User Roles:** Five single-role account types: Administrators, Account Managers, Finance personnel, Trainers, and Trainees. Client companies do not hold system accounts and receive reports from authorized staff.
+- **Attribute Authority:** Single CP-ABE authority managed by Crossworks Administrators.
+- **Access Anomaly Detection:** Rule- and threshold-based monitoring across 4 categories (R1–R4 with after-hours indicator S1).
+- **PWA & Quizzes:** Installable Progressive Web Application with online-only quizzes (offline answer storage disabled for pilot per SEC-26).
+- **Test & Pilot Data:** Real-world pseudonymized pilot dataset ingested from Crossworks training spreadsheets with simulated CP-ABE ciphertexts and completion certificates.
 
 > **Out of scope:** blockchain-based multi-authority CP-ABE and machine-learning-based anomaly detection are identified as directions for future work.
 
