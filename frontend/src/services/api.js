@@ -454,6 +454,18 @@ export async function fetchCertificates(token) {
   return null;
 }
 
+export async function fetchMyTrainingRecords(token) {
+  try {
+    const res = await fetch(`${API_BASE}/records/`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for records:", err);
+  }
+  return null;
+}
+
 export async function submitExternalCredential(payload, token) {
   const res = await fetch(`${API_BASE}/certifications/external-renewal`, {
     method: 'POST',

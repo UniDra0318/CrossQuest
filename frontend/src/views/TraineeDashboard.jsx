@@ -18,7 +18,9 @@ import {
   Download,
   RefreshCw,
   PlusCircle,
-  FileCheck
+  FileCheck,
+  Building2,
+  Lock
 } from 'lucide-react';
 import { getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
@@ -29,6 +31,7 @@ import {
   toggleLeaderboardOptOut, 
   fetchCompanyLeaderboard,
   fetchCertificates,
+  fetchMyTrainingRecords,
   fetchCertificationTypes,
   submitExternalCredential,
   fetchExpiryNotifications,
@@ -591,17 +594,52 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     }
   };
 
-  // Trainee in-page tab options
-  const currentTab = ['trainee_quiz', 'trainee_badges', 'trainee_certs'].includes(activeSubView) 
+  // Training Records State (U-10: Cross-company training history)
+  const [trainingsList, setTrainingsList] = useState([]);
+  const [trainingsLoading, setTrainingsLoading] = useState(false);
+  const [trainingsError, setTrainingsError] = useState(null);
+  const [trainingsFilter, setTrainingsFilter] = useState('ALL');
+  const [trainingsSearch, setTrainingsSearch] = useState('');
+
+  const reloadTrainings = async () => {
+    setTrainingsLoading(true);
+    setTrainingsError(null);
+    try {
+      const records = await fetchMyTrainingRecords(token);
+      setTrainingsList(records || []);
+    } catch (err) {
+      console.warn('Failed reloading training records:', err);
+      setTrainingsError("Couldn't load records. Retry");
+      setTrainingsList([]);
+    } finally {
+      setTrainingsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      reloadTrainings();
+    }
+  }, [token]);
+
+  const trainingCompanies = useMemo(() => {
+    return Array.from(new Set(trainingsList.map(r => r.company_name).filter(Boolean)));
+  }, [trainingsList]);
+
+  const filteredTrainings = useMemo(() => {
+    return trainingsList.filter(r => {
+      const matchCompany = trainingsFilter === 'ALL' || r.company_name === trainingsFilter;
+      const matchSearch = !trainingsSearch || 
+        (r.course_name && r.course_name.toLowerCase().includes(trainingsSearch.toLowerCase())) ||
+        (r.company_name && r.company_name.toLowerCase().includes(trainingsSearch.toLowerCase()));
+      return matchCompany && matchSearch;
+    });
+  }, [trainingsList, trainingsFilter, trainingsSearch]);
+
+  // Trainee in-page view driven directly from route
+  const currentTab = ['trainee_quiz', 'trainee_badges', 'trainee_certs', 'trainee_trainings'].includes(activeSubView) 
     ? activeSubView 
     : 'trainee_quest';
-
-  const traineeTabs = [
-    { id: 'trainee_quest', label: 'Quest & Progress', icon: Flame },
-    { id: 'trainee_quiz', label: 'Knowledge Quizzes', icon: GraduationCap },
-    { id: 'trainee_badges', label: 'Earned Badges', icon: Award },
-    { id: 'trainee_certs', label: 'My Certifications', icon: BookOpen }
-  ];
 
   // =========================================================================
   // FULLSCREEN DISTRACTION-FREE QUIZ ARENA TAKEOVER
@@ -635,10 +673,19 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {/* SLIM PAGE HEADER (Replaces 280px Hero Banner per Section 5.1 & 5.6) */}
       {(() => {
         switch (currentTab) {
+          case 'trainee_trainings':
+            return (
+              <PageHeader
+                title="My Trainings"
+                subtitle="Full historical training transcript and completed courses across all companies."
+                badge="CROSS-COMPANY TRANSCRIPT"
+                badgeType="info"
+              />
+            );
           case 'trainee_certs':
             return (
               <PageHeader
-                title="Certificates"
+                title="Credentials"
                 subtitle="Your verified cryptographic credentials and external certifications."
                 badge="CREDENTIALS"
                 badgeType="info"
@@ -1038,7 +1085,137 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         </div>
       )}
 
-      {/* 4. CERTIFICATIONS SUB-VIEW (FR-18, FR-19, DAT-05, U-15) */}
+      {/* 4. MY TRAININGS SUB-VIEW (U-10: Cross-company training history) */}
+      {currentTab === 'trainee_trainings' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="card section-card">
+            <div className="card-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h3 className="card-title">Comprehensive Training Transcript</h3>
+                <p className="card-subtitle">
+                  Unified learning history across all client organizations, certified under CP-ABE data protection.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  placeholder="Filter courses or companies..."
+                  value={trainingsSearch}
+                  onChange={(e) => setTrainingsSearch(e.target.value)}
+                  className="stf-search-input"
+                  style={{ minWidth: '220px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                />
+                {trainingCompanies.length > 1 && (
+                  <select
+                    value={trainingsFilter}
+                    onChange={(e) => setTrainingsFilter(e.target.value)}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      background: 'var(--cq-card-bg, #ffffff)'
+                    }}
+                  >
+                    <option value="ALL">All Companies ({trainingsList.length})</option>
+                    {trainingCompanies.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                )}
+                <button
+                  type="button"
+                  className="adm-btn adm-btn-subtle"
+                  onClick={reloadTrainings}
+                  disabled={trainingsLoading}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <RefreshCw size={14} className={trainingsLoading ? 'spin-icon' : ''} />
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            {trainingsError ? (
+              <TableEmptyBlock
+                icon={AlertCircle}
+                title="Couldn't load records"
+                subtitle="A network error occurred while retrieving your cross-company training transcript."
+                action={
+                  <button type="button" className="adm-btn adm-btn--primary" onClick={reloadTrainings}>
+                    Retry
+                  </button>
+                }
+              />
+            ) : trainingsLoading ? (
+              <div style={{ padding: '48px', textAlign: 'center', color: '#64748b' }}>
+                Loading cross-company training history...
+              </div>
+            ) : filteredTrainings.length === 0 ? (
+              <TableEmptyBlock
+                icon={BookOpen}
+                title="No Training Records Found"
+                subtitle={trainingsSearch ? "No records matched your search filter." : "You have not completed any training sessions yet."}
+              />
+            ) : (
+              <div className="table-responsive" style={{ overflowX: 'auto', marginTop: '16px' }}>
+                <table className="adm-table">
+                  <thead>
+                    <tr>
+                      <th>Course Title</th>
+                      <th>Client Organization</th>
+                      <th>Completion Date</th>
+                      <th>Status</th>
+                      <th>Score / Grade</th>
+                      <th>Data Protection</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTrainings.map((rec) => (
+                      <tr key={rec.record_id || rec.id}>
+                        <td>
+                          <strong>{rec.course_name}</strong>
+                          {rec.course_code && (
+                            <div style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace' }}>
+                              {rec.course_code}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
+                            <Building2 size={14} color="#6366f1" />
+                            <span>{rec.company_name || 'Crossworks Partner'}</span>
+                          </span>
+                        </td>
+                        <td>
+                          {rec.completion_date ? new Date(rec.completion_date).toLocaleDateString() : '—'}
+                        </td>
+                        <td>
+                          <span className={`adm-chip ${rec.status === 'Completed' ? 'adm-chip--green' : rec.status === 'Not completed' ? 'adm-chip--red' : 'adm-chip--orange'}`}>
+                            {rec.status || 'Enrolled'}
+                          </span>
+                        </td>
+                        <td>
+                          <strong>{rec.score != null ? `${rec.score}%` : '—'}</strong>
+                        </td>
+                        <td>
+                          <span className="adm-chip adm-chip--blue" style={{ fontSize: '11px' }}>
+                            <Lock size={11} style={{ marginRight: '4px' }} />
+                            CP-ABE Verified
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 5. CERTIFICATIONS SUB-VIEW (FR-18, FR-19, DAT-05, U-15) */}
       {currentTab === 'trainee_certs' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Active Renewal Notifications Alert Banner */}

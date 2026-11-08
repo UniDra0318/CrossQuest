@@ -50,10 +50,11 @@ export const ROUTES = [
   { path: '/finance/import',  roles: ['finance'], label: 'Import & Reconcile', page: 'finance_reconciliation', icon: LayoutDashboard },
 
   // Trainee
-  { path: '/home',              roles: ['trainee'], label: 'Home',                 page: 'trainee_quest',  icon: Flame },
-  { path: '/home/certificates', roles: ['trainee'], label: 'Certificates',         page: 'trainee_certs',  icon: Award },
-  { path: '/home/quizzes',      roles: ['trainee'], label: 'Quizzes',              page: 'trainee_quiz',   icon: GraduationCap },
-  { path: '/home/badges',       roles: ['trainee'], label: 'Badges & Leaderboard', page: 'trainee_badges', icon: Sparkles },
+  { path: '/home',              roles: ['trainee'], label: 'Home',                 page: 'trainee_quest',     icon: Flame },
+  { path: '/home/trainings',    roles: ['trainee'], label: 'My Trainings',         page: 'trainee_trainings', icon: BookOpen },
+  { path: '/home/certificates', roles: ['trainee'], label: 'Credentials',          page: 'trainee_certs',     icon: Award },
+  { path: '/home/quizzes',      roles: ['trainee'], label: 'Quizzes',              page: 'trainee_quiz',      icon: GraduationCap },
+  { path: '/home/badges',       roles: ['trainee'], label: 'Badges & Leaderboard', page: 'trainee_badges',    icon: Sparkles },
 
   // Dev & Crypto Lab (Admin only)
   { path: '/demo/crypto-lab',   roles: ['admin'], label: null, page: 'crypto_lab' },

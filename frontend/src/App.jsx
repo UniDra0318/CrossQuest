@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Flame, BookOpen, Award, GraduationCap } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginView from './components/LoginView';
 import ActivateAccount from './views/ActivateAccount';
@@ -167,6 +168,44 @@ function MainAppShell({ page }) {
         </main>
       </div>
 
+      {/* Trainee Mobile Bottom Navigation Bar (< 768px) */}
+      {!isQuizActive && currentUser?.role === 'trainee' && (
+        <nav className="trainee-mobile-bottom-nav" aria-label="Trainee Mobile Navigation">
+          <button
+            type="button"
+            className={`trainee-bottom-nav-item ${page === 'trainee_quest' ? 'active' : ''}`}
+            onClick={() => navigate('/home')}
+          >
+            <Flame size={20} />
+            <span>Home</span>
+          </button>
+          <button
+            type="button"
+            className={`trainee-bottom-nav-item ${page === 'trainee_trainings' ? 'active' : ''}`}
+            onClick={() => navigate('/home/trainings')}
+          >
+            <BookOpen size={20} />
+            <span>My Trainings</span>
+          </button>
+          <button
+            type="button"
+            className={`trainee-bottom-nav-item ${page === 'trainee_certs' ? 'active' : ''}`}
+            onClick={() => navigate('/home/certificates')}
+          >
+            <Award size={20} />
+            <span>Credentials</span>
+          </button>
+          <button
+            type="button"
+            className={`trainee-bottom-nav-item ${page === 'trainee_quiz' ? 'active' : ''}`}
+            onClick={() => navigate('/home/quizzes')}
+          >
+            <GraduationCap size={20} />
+            <span>Quizzes</span>
+          </button>
+        </nav>
+      )}
+
       <LiveQuizPopUpModal />
       <InstallPwaModal />
     </div>
@@ -225,6 +264,7 @@ function AppRoutes() {
       <Route path="/trainer/quiz" element={<Navigate to="/trainer/quizzes" replace />} />
       <Route path="/trainer/analytics" element={<Navigate to="/trainer/results" replace />} />
       <Route path="/finance/reconciliation" element={<Navigate to="/finance/import" replace />} />
+      <Route path="/trainings" element={<Navigate to="/home/trainings" replace />} />
       <Route path="/courses" element={<Navigate to="/home" replace />} />
       <Route path="/quizzes" element={<Navigate to="/home/quizzes" replace />} />
       <Route path="/quiz" element={<Navigate to="/home/quizzes" replace />} />
