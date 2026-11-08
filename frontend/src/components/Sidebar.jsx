@@ -452,7 +452,7 @@ export default function Sidebar({
                         <Zap size={15} color="#ea580c" />
                         <span>DEV ROLE SWITCHER</span>
                       </span>
-                      <span className="dev-count-pill">14 PERSONAS</span>
+                      <span className="dev-count-pill">{Object.keys(DEMO_USERS).filter(k => k !== 'crossworks_staff' && k !== 'company_staff').length} PERSONAS</span>
                     </button>
 
                     <button

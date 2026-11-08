@@ -105,14 +105,15 @@ export default function LoginView() {
   const roleList = [
     { key: 'admin', title: 'Administrator', name: 'Dr. Sarah Jenkins', org: 'Crossworks Admin', icon: Shield, badgeClass: 'admin' },
     { key: 'admin_roel', title: 'Co-Administrator', name: 'Prof. Roel Traballo', org: 'Crossworks Admin', icon: Shield, badgeClass: 'admin' },
-    { key: 'account_manager', title: 'Account Manager (San Miguel & BDO)', name: 'Marcus Reyes', org: 'CORP_ALPHA • BANK_DELTA', icon: Key, badgeClass: 'staff' },
-    { key: 'am_andrea', title: 'Account Manager (Maya & Ayala)', name: 'Andrea Salazar', org: 'FINTECH_BETA • RETAIL_GAMMA', icon: Key, badgeClass: 'staff' },
-    { key: 'finance', title: 'Finance & Operations', name: 'Elena Santos', org: 'Crossworks Finance', icon: Building2, badgeClass: 'company' },
-    { key: 'trainer', title: 'Lead Trainer (San Miguel & Maya)', name: 'David Lim', org: 'Course Instructor', icon: GraduationCap, badgeClass: 'trainer' },
-    { key: 'trainer_maria', title: 'Lead Trainer (Ayala & BDO)', name: 'Maria Hernandez', org: 'Course Instructor', icon: GraduationCap, badgeClass: 'trainer' },
-    { key: 'trainee', title: 'Trainee (San Miguel)', name: 'Juan Dela Cruz', org: 'CORP_ALPHA • San Miguel', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_maria', title: 'Trainee (Maya FinTech)', name: 'Maria Clara', org: 'FINTECH_BETA • Maya FinTech', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_gabriel', title: 'Trainee (Ayala Retail)', name: 'Gabriel Ramos', org: 'RETAIL_GAMMA • Ayala Retail', icon: Award, badgeClass: 'trainee' }
+    { key: 'account_manager', title: 'Account Manager (Vertiv & Red Oak)', name: 'Sharon De Vera', org: 'VHL_2 • ROP_3', icon: Key, badgeClass: 'staff' },
+    { key: 'am_brian', title: 'Account Manager (IPRoyal & Amihan)', name: 'Brian Mendoza', org: 'IPROY_SERVI_2 • AMIHAN_SOLUTI_2', icon: Key, badgeClass: 'staff' },
+    { key: 'staff_vertiv', title: 'Client HR / L&D Manager', name: 'Elena Vance', org: 'Vertiv Holdings Ltd (VHL_2)', icon: Building2, badgeClass: 'company' },
+    { key: 'trainer', title: 'Lead Trainer (Cybersecurity & GenAI)', name: 'Joey Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
+    { key: 'trainer_billy', title: 'Senior Trainer (Cloud & Infra)', name: 'Billy Fernandez', org: 'Crossworks Senior Trainer', icon: GraduationCap, badgeClass: 'trainer' },
+    { key: 'trainee', title: 'Trainee (Vertiv Holdings)', name: 'Andrea Aguilar', org: 'VHL_2 • TRN-8000', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_ricardo', title: 'Trainee (IPRoyal Services)', name: 'Ricardo Ocampo', org: 'IPROY_SERVI_2 • TRN-8001', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_bea', title: 'Trainee (IPRoyal Services)', name: 'Bea Macaraeg', org: 'IPROY_SERVI_2 • TRN-8002', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_rafael', title: 'Trainee (Amihan Solutions)', name: 'Rafael Dizon', org: 'AMIHAN_SOLUTI_2 • TRN-8015', icon: Award, badgeClass: 'trainee' }
   ];
 
   return (
