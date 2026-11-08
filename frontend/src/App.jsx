@@ -133,6 +133,19 @@ function MainAppShell({ activeSubPage }) {
     });
   };
 
+  // Distraction-free quiz takeover state: removes sidebar and topbar when taking a quiz
+  const [isQuizActive, setIsQuizActive] = useState(false);
+
+  useEffect(() => {
+    const handleQuizState = (e) => {
+      if (typeof e.detail?.active === 'boolean') {
+        setIsQuizActive(e.detail.active);
+      }
+    };
+    window.addEventListener('cq_quiz_active_state', handleQuizState);
+    return () => window.removeEventListener('cq_quiz_active_state', handleQuizState);
+  }, []);
+
   // Keyboard shortcut: Ctrl+B or Cmd+B to toggle sidebar navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -202,25 +215,29 @@ function MainAppShell({ activeSubPage }) {
   };
 
   return (
-    <div className="enterprise-layout">
-      {/* Persistent Navigation Sidebar with Collapse & Profile Support (Section 4 & 5.1) */}
-      <Sidebar 
-        activeView={activeView} 
-        setActiveView={handleNavChange} 
-        isCollapsed={sidebarCollapsed}
-        onToggleCollapse={handleToggleSidebar}
-      />
+    <div className={`enterprise-layout ${isQuizActive ? 'quiz-mode-active' : ''}`}>
+      {/* Persistent Navigation Sidebar with Collapse & Profile Support (Hidden while taking a quiz) */}
+      {!isQuizActive && (
+        <Sidebar 
+          activeView={activeView} 
+          setActiveView={handleNavChange} 
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={handleToggleSidebar}
+        />
+      )}
 
       {/* Main Content Viewport */}
-      <div className="enterprise-viewport">
-        <Topbar 
-          activeViewTitle={getViewTitle()} 
-          streakDays={liveStreakDays} 
-          isSidebarCollapsed={sidebarCollapsed}
-          onToggleSidebar={handleToggleSidebar}
-        />
+      <div className={`enterprise-viewport ${isQuizActive ? 'viewport-quiz-active' : ''}`}>
+        {!isQuizActive && (
+          <Topbar 
+            activeViewTitle={getViewTitle()} 
+            streakDays={liveStreakDays} 
+            isSidebarCollapsed={sidebarCollapsed}
+            onToggleSidebar={handleToggleSidebar}
+          />
+        )}
 
-        <main className="enterprise-page-area">
+        <main className={`enterprise-page-area ${isQuizActive ? 'page-area-quiz-active' : ''}`}>
           <ErrorBoundary>
           {activeView === 'crypto_lab' ? (
             <CryptoSandboxLab />
@@ -243,7 +260,12 @@ function MainAppShell({ activeSubPage }) {
               )}
 
               {currentUser?.role === 'trainee' && (
-                <TraineeDashboard activeSubView={activeView} setActiveView={handleNavChange} onStreakLoad={setLiveStreakDays} />
+                <TraineeDashboard 
+                  activeSubView={activeView} 
+                  setActiveView={handleNavChange} 
+                  onStreakLoad={setLiveStreakDays}
+                  onQuizActiveChange={setIsQuizActive} 
+                />
               )}
             </>
           )}

@@ -45,7 +45,7 @@ import Podium from '../components/Podium';
 import { TRACKS } from '../data/tracks';
 import { badges as designBadges, leaderboard as designLeaderboard } from '../data/mock';
 
-export default function TraineeDashboard({ activeSubView, setActiveView, onStreakLoad }) {
+export default function TraineeDashboard({ activeSubView, setActiveView, onStreakLoad, onQuizActiveChange }) {
   const { currentUser, token } = useAuth();
   const [points, setPoints] = useState(() => currentUser?.points ?? 12877);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -54,6 +54,18 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   const [earnedBadges, setEarnedBadges] = useState(designBadges);
   const [realQuizzes, setRealQuizzes] = useState([]);
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  // Active quiz state
+  const [activeQuiz, setActiveQuiz] = useState(null);
+
+  // Notify parent shell to hide sidebar and topbar when a quiz is active
+  useEffect(() => {
+    const isTakingQuiz = Boolean(activeQuiz);
+    if (onQuizActiveChange) {
+      onQuizActiveChange(isTakingQuiz);
+    }
+    window.dispatchEvent(new CustomEvent('cq_quiz_active_state', { detail: { active: isTakingQuiz } }));
+  }, [activeQuiz, onQuizActiveChange]);
 
   // Live Certifications & Expiry Notifications State (FR-18, FR-19, DAT-05, U-15)
   const [liveCerts, setLiveCerts] = useState([]);
@@ -92,8 +104,6 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     return null;
   };
 
-  // Active quiz state
-  const [activeQuiz, setActiveQuiz] = useState(null);
   const [quizScoreStatus, setQuizScoreStatus] = useState(() => {
     const saved = getSavedUserProgress(currentUser);
     const defaultProg = {
@@ -613,7 +623,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   // =========================================================================
   if (activeQuiz) {
     return (
-      <div className="quiz-active-fullscreen-root" style={{ width: '100%', minHeight: 'calc(100vh - 65px)', margin: 0, padding: 0 }}>
+      <div className="quiz-active-fullscreen-root" style={{ width: '100%', minHeight: '100vh', margin: 0, padding: 0 }}>
         <QuizArena 
           quiz={activeQuiz}
           initialSession={null}

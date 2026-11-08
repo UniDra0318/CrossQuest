@@ -1302,18 +1302,53 @@
   background-color: #ffffff;
 }
 
+/* Full distraction-free takeover when taking quiz - completely remove sidebar and topbar */
+.enterprise-layout.quiz-mode-active .enterprise-sidebar,
+.enterprise-layout:has(.quiz-active-fullscreen-root) .enterprise-sidebar,
+.enterprise-layout:has(.quiz-fullscreen-wrapper) .enterprise-sidebar {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+.enterprise-layout.quiz-mode-active .enterprise-topbar,
+.enterprise-layout:has(.quiz-active-fullscreen-root) .enterprise-topbar,
+.enterprise-layout:has(.quiz-fullscreen-wrapper) .enterprise-topbar {
+  display: none !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.enterprise-layout.quiz-mode-active .enterprise-viewport,
+.enterprise-layout:has(.quiz-active-fullscreen-root) .enterprise-viewport,
+.enterprise-layout:has(.quiz-fullscreen-wrapper) .enterprise-viewport {
+  width: 100% !important;
+  max-width: 100vw !important;
+  flex: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+}
+
 .enterprise-page-area:has(.quiz-active-fullscreen-root),
-.enterprise-page-area:has(.quiz-fullscreen-wrapper) {
+.enterprise-page-area:has(.quiz-fullscreen-wrapper),
+.enterprise-layout.quiz-mode-active .enterprise-page-area {
   padding: 0 !important;
   max-width: 100% !important;
   width: 100% !important;
   margin: 0 !important;
   overflow-x: hidden;
+  background-color: transparent !important;
 }
 
 .quiz-active-fullscreen-root {
   width: 100%;
-  min-height: calc(100vh - 65px);
+  min-height: 100vh;
   margin: 0;
   padding: 0;
   display: flex;

@@ -138,9 +138,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Broadcast quiz active state to disable/remove sidebar and topbar
+    window.dispatchEvent(new CustomEvent('cq_quiz_active_state', { detail: { active: true } }));
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.dispatchEvent(new CustomEvent('cq_quiz_active_state', { detail: { active: false } }));
     };
   }, []);
 
@@ -422,7 +427,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
         style={{ 
           ...activeTheme.bgStyle, 
           width: '100%', 
-          minHeight: 'calc(100vh - 65px)', 
+          minHeight: '100vh', 
           borderRadius: 0, 
           padding: '24px 36px 36px', 
           boxSizing: 'border-box',
@@ -789,7 +794,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const historyList = Object.values(answersHistory);
 
     return (
-      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: 'calc(100vh - 65px)', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
+      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
         <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '1240px', width: '100%' }}>
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
@@ -917,7 +922,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: 'calc(100vh - 65px)', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
+    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
       <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1240px', width: '100%' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
