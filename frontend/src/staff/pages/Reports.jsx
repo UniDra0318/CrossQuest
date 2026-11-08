@@ -195,6 +195,36 @@ export default function Reports() {
     }
   };
 
+  const handleExportCsv = async () => {
+    if (errorDetails || downloadingCsv) return;
+    setDownloadingCsv(true);
+    setSuccessToast(null);
+
+    try {
+      await downloadClientReportCsv(selectedScope, { statusFilter }, token);
+      setSuccessToast(`Official Client Audit Ledger (CSV) downloaded for ${selectedScope}.`);
+    } catch (err) {
+      console.error('CSV download error:', err);
+    } finally {
+      setDownloadingCsv(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (errorDetails || downloadingExcel) return;
+    setDownloadingExcel(true);
+    setSuccessToast(null);
+
+    try {
+      await downloadClientReportExcel(selectedScope, { statusFilter }, token);
+      setSuccessToast(`Official Client Training Workbook (Excel) downloaded for ${selectedScope}.`);
+    } catch (err) {
+      console.error('Excel download error:', err);
+    } finally {
+      setDownloadingExcel(false);
+    }
+  };
+
   // Filter trainees by search term
   const filteredTrainees = useMemo(() => {
     if (!report?.trainees) return [];
