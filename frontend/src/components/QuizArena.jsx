@@ -851,16 +851,17 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           width: '100%', 
           minHeight: '100vh', 
           borderRadius: 0, 
-          padding: '16px 24px', 
+          padding: '20px 24px 48px', 
           boxSizing: 'border-box', 
           display: 'flex', 
+          flexDirection: 'column',
           alignItems: 'center', 
-          justifyContent: 'center', 
+          justifyContent: 'flex-start', 
           overflowY: 'auto', 
           transition: 'all 0.3s ease' 
         }}
       >
-        <div className="results-card-split" style={{ ...activeTheme.cardStyle, maxWidth: '1480px', width: '96%' }}>
+        <div className="results-card-split" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', minHeight: '560px', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
           <div className="results-split-layout">
             
             {/* LEFT COLUMN: Personal Performance, 6 Stats & Actions */}
@@ -1570,9 +1571,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 let feedbackClass = '';
 
                 if (answeredState !== null) {
-                  if (isCorrect) feedbackClass = 'tile-correct';
-                  else if (isSelected) feedbackClass = 'tile-wrong';
-                  else feedbackClass = 'tile-dimmed';
+                  if (showCorrectAnswers) {
+                    if (isCorrect) feedbackClass = 'tile-correct';
+                    else if (isSelected) feedbackClass = 'tile-wrong';
+                    else feedbackClass = 'tile-dimmed';
+                  } else {
+                    if (isSelected) feedbackClass = 'tile-selected-neutral';
+                    else feedbackClass = 'tile-dimmed';
+                  }
                 }
 
                 return (
@@ -1585,7 +1591,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                   >
                     <span className="tile-symbol">{tileStyle.symbol}</span>
                     <span className="tile-text">{opt}</span>
-                    {answeredState !== null && isCorrect && (
+                    {answeredState !== null && showCorrectAnswers && isCorrect && (
                       <CheckCircle2 size={24} className="tile-feedback-icon" />
                     )}
                   </button>
@@ -1646,6 +1652,21 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                   </div>
                 </form>
 
+                {/* Instant Solution Reveal for Identification */}
+                {answeredState === 'wrong' && showCorrectAnswers && (
+                  <div className="ident-solution-reveal animate-fadeIn">
+                    <span className="ident-solution-tag">
+                      <CheckCircle2 size={15} className="text-emerald" />
+                      Correct Term / Acronym:
+                    </span>
+                    <span className="ident-solution-text">
+                      {Array.isArray(currentQ.acceptedAnswers) && currentQ.acceptedAnswers.length > 0
+                        ? currentQ.acceptedAnswers.join('  •  ')
+                        : (currentQ.correctAnswer || currentQ.answer || 'N/A')}
+                    </span>
+                  </div>
+                )}
+
                 <div className="ident-helper-bar">
                   <span className="helper-item">
                     Press <kbd className="ident-kbd">Enter ↵</kbd> to submit
@@ -1666,37 +1687,60 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 Use the <strong>Up (▲)</strong> and <strong>Down (▼)</strong> arrow buttons to reorder the items into the correct chronological or architectural sequence:
               </div>
               <div className="sequence-items-list">
-                {(sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ)).map((itemText, idx, arr) => (
-                  <div 
-                    key={idx} 
-                    className={`sequence-item-row ${swappedIdx === idx ? 'seq-item-swapped' : ''}`}
-                  >
-                    <span className="seq-step-badge">{idx + 1}</span>
-                    <span className="seq-step-text">{itemText}</span>
-                    {answeredState === null && (
-                      <div className="seq-controls">
-                        <button 
-                          type="button"
-                          className="seq-arrow-btn"
-                          disabled={idx === 0}
-                          onClick={() => moveSequenceItem(idx, 'up')}
-                          title="Move step up"
-                        >
-                          <ArrowUp size={16} />
-                        </button>
-                        <button 
-                          type="button"
-                          className="seq-arrow-btn"
-                          disabled={idx === arr.length - 1}
-                          onClick={() => moveSequenceItem(idx, 'down')}
-                          title="Move step down"
-                        >
-                          <ArrowDown size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {(sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ)).map((itemText, idx, arr) => {
+                  const isAnswered = answeredState !== null;
+                  const isCorrectStep = isAnswered && Array.isArray(currentQ.correctOrder) && currentQ.correctOrder[idx] === itemText;
+                  
+                  let stepStatusClass = '';
+                  if (isAnswered) {
+                    if (showCorrectAnswers) {
+                      stepStatusClass = isCorrectStep ? 'step-in-place' : 'step-misplaced';
+                    } else {
+                      stepStatusClass = 'step-submitted';
+                    }
+                  }
+
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`sequence-item-row ${swappedIdx === idx ? 'seq-item-swapped' : ''} ${stepStatusClass}`}
+                    >
+                      <span className="seq-step-badge">{idx + 1}</span>
+                      <span className="seq-step-text">{itemText}</span>
+                      {isAnswered && showCorrectAnswers && (
+                        <div className="seq-step-status-chip">
+                          {isCorrectStep ? (
+                            <span className="chip-correct"><CheckCircle2 size={14} /> Correct Position</span>
+                          ) : (
+                            <span className="chip-misplaced"><XCircle size={14} /> Misplaced</span>
+                          )}
+                        </div>
+                      )}
+                      {!isAnswered && (
+                        <div className="seq-controls">
+                          <button 
+                            type="button"
+                            className="seq-arrow-btn"
+                            disabled={idx === 0}
+                            onClick={() => moveSequenceItem(idx, 'up')}
+                            title="Move step up"
+                          >
+                            <ArrowUp size={16} />
+                          </button>
+                          <button 
+                            type="button"
+                            className="seq-arrow-btn"
+                            disabled={idx === arr.length - 1}
+                            onClick={() => moveSequenceItem(idx, 'down')}
+                            title="Move step down"
+                          >
+                            <ArrowDown size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {answeredState === null && (
@@ -1708,6 +1752,25 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                     <Check size={16} />
                     <span>Verify & Submit Order</span>
                   </button>
+                </div>
+              )}
+
+              {/* REVEAL CORRECT SEQUENCE WHEN ANSWERED & WRONG */}
+              {answeredState === 'wrong' && showCorrectAnswers && Array.isArray(currentQ.correctOrder) && (
+                <div className="sequence-solution-panel animate-fadeIn">
+                  <div className="sequence-solution-header">
+                    <CheckCircle2 size={16} className="text-emerald" />
+                    <span>Certified Correct Sequence (Solution Key):</span>
+                  </div>
+                  <div className="sequence-solution-steps">
+                    {currentQ.correctOrder.map((stepText, sIdx) => (
+                      <div key={sIdx} className="sequence-solution-row">
+                        <span className="seq-solution-badge">{sIdx + 1}</span>
+                        <span className="seq-solution-text">{stepText}</span>
+                        <span className="seq-solution-phase-tag">Phase {sIdx + 1}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -1733,6 +1796,22 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                     ? '🎉 Correct! That is right!' 
                     : '❌ Incorrect or Time Expired'}
                 </div>
+                {answeredState === 'wrong' && showCorrectAnswers && (
+                  <div className="feedback-solution-box animate-fadeIn">
+                    <span className="feedback-solution-tag">Correct Solution:</span>
+                    <span className="feedback-solution-text">
+                      {currentQ.type === 'multiple_choice' || currentQ.type === 'diagram_analysis'
+                        ? (Array.isArray(currentQ.options) && currentQ.options[currentQ.correctAnswer] ? currentQ.options[currentQ.correctAnswer] : `Option ${currentQ.correctAnswer + 1}`)
+                        : currentQ.type === 'identification'
+                        ? (Array.isArray(currentQ.acceptedAnswers) && currentQ.acceptedAnswers.length > 0 ? currentQ.acceptedAnswers.join(' / ') : (currentQ.correctAnswer || currentQ.answer || 'N/A'))
+                        : currentQ.type === 'sequence_order'
+                        ? (Array.isArray(currentQ.correctOrder) ? currentQ.correctOrder.map((s, i) => `${i + 1}. ${s}`).join(' ➔ ') : '')
+                        : currentQ.type === 'matching'
+                        ? (Array.isArray(currentQ.pairs) ? currentQ.pairs.map(p => `${p.left.replace(/^\d+\.\s*/, '')} ➔ ${p.right.replace(/^[A-Z]\.\s*/, '')}`).join(' | ') : '')
+                        : ''}
+                    </span>
+                  </div>
+                )}
                 <div className="feedback-explanation">
                   {currentQ.explanation}
                 </div>

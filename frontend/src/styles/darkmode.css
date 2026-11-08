@@ -2593,3 +2593,80 @@ html.dark .results-heading-compact {
 html.dark .results-subtext-compact {
   color: #94a3b8 !important;
 }
+
+/* Sequence Step Indicators & Solutions in Dark Mode */
+html.dark .sequence-item-row.step-in-place,
+[data-theme="dark"] .sequence-item-row.step-in-place {
+  border-color: #059669 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+}
+
+html.dark .sequence-item-row.step-misplaced,
+[data-theme="dark"] .sequence-item-row.step-misplaced {
+  border-color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+html.dark .chip-correct,
+[data-theme="dark"] .chip-correct {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #6ee7b7 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+html.dark .chip-misplaced,
+[data-theme="dark"] .chip-misplaced {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+html.dark .sequence-solution-panel,
+[data-theme="dark"] .sequence-solution-panel {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+html.dark .sequence-solution-header,
+[data-theme="dark"] .sequence-solution-header {
+  color: #34d399 !important;
+}
+
+html.dark .sequence-solution-row,
+[data-theme="dark"] .sequence-solution-row {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .seq-solution-text,
+[data-theme="dark"] .seq-solution-text {
+  color: #f1f5f9 !important;
+}
+
+html.dark .seq-solution-phase-tag,
+[data-theme="dark"] .seq-solution-phase-tag {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #6ee7b7 !important;
+}
+
+html.dark .ident-solution-reveal,
+[data-theme="dark"] .ident-solution-reveal {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+html.dark .ident-solution-tag,
+[data-theme="dark"] .ident-solution-tag {
+  color: #34d399 !important;
+}
+
+html.dark .ident-solution-text,
+[data-theme="dark"] .ident-solution-text {
+  color: #6ee7b7 !important;
+}
+
+html.dark .feedback-solution-box,
+[data-theme="dark"] .feedback-solution-box {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+

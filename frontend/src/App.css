@@ -4509,6 +4509,147 @@
   justify-content: flex-end;
 }
 
+/* Sequence Step Status Indicators */
+.sequence-item-row.step-in-place {
+  border-color: #10b981 !important;
+  background: #f0fdf4 !important;
+}
+
+.sequence-item-row.step-misplaced {
+  border-color: #ef4444 !important;
+  background: #fef2f2 !important;
+}
+
+.seq-step-status-chip {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chip-correct {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid #86efac;
+}
+
+.chip-misplaced {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid #fca5a5;
+}
+
+/* Certified Solution Reveal Panel for Sequence Ordering */
+.sequence-solution-panel {
+  margin-top: 14px;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-sizing: border-box;
+}
+
+.sequence-solution-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #166534;
+  margin-bottom: 10px;
+}
+
+.sequence-solution-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sequence-solution-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-sizing: border-box;
+}
+
+.seq-solution-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: #10b981;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.seq-solution-text {
+  flex: 1;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.seq-solution-phase-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #047857;
+  background: #d1fae5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Identification Solution Reveal */
+.ident-solution-reveal {
+  margin-top: 12px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.ident-solution-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  color: #166534;
+  flex-shrink: 0;
+}
+
+.ident-solution-text {
+  font-weight: 700;
+  color: #047857;
+  word-break: break-word;
+}
+
 /* ==========================================================================
    HIGH-FIDELITY ARCHITECTURAL DIAGRAMS & FLOWS
    ========================================================================== */
@@ -4968,6 +5109,34 @@ html.dark .node-active-guard,
   font-size: 16px;
   font-weight: 800;
   margin-bottom: 4px;
+}
+
+.feedback-solution-box {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.07);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.feedback-solution-tag {
+  font-weight: 800;
+  color: inherit;
+  opacity: 0.95;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 11.5px;
+}
+
+.feedback-solution-text {
+  font-weight: 700;
+  color: inherit;
+  word-break: break-word;
 }
 
 .feedback-explanation {
@@ -10943,23 +11112,27 @@ html.dark .node-active-guard,
    ========================================================================== */
 
 .results-card-split {
-  width: 96%;
-  max-width: 1480px;
-  margin: auto;
+  width: 100%;
+  max-width: 1640px;
+  min-height: 560px;
+  margin: 0 auto;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 24px;
-  padding: 24px 28px;
+  border-radius: 26px;
+  padding: 30px 42px 36px;
   box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
   box-sizing: border-box;
   animation: fadeInDown 0.25s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 .results-split-layout {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
-  gap: 24px;
+  gap: 32px;
   align-items: stretch;
+  flex: 1;
 }
 
 @media (max-width: 980px) {
