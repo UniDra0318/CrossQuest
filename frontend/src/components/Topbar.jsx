@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Flame, 
-  Sun, 
-  Moon, 
   Zap, 
   PanelLeftClose, 
   PanelLeftOpen
@@ -16,7 +14,7 @@ import logoStacked from '../assets/crossquest-logo-stacked.svg';
 /**
  * Topbar - global header bar rendered by MainAppShell for all authenticated roles.
  * Includes sidebar collapse/expand toggle, contextual view breadcrumb, live streak indicator,
- * theme toggle, and dev role sandbox.
+ * and dev role sandbox.
  */
 export default function Topbar({ 
   activeViewTitle, 
@@ -27,7 +25,7 @@ export default function Topbar({
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [showRoleModal, setShowRoleModal] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark } = useTheme();
 
   return (
     <>
@@ -117,28 +115,6 @@ export default function Topbar({
               </span>
             </button>
           )}
-
-          {/* Quick Dark Mode Toggle Button */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '10px',
-              background: isDark ? '#1e293b' : '#f8fafc',
-              border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-              color: isDark ? '#38bdf8' : '#f59e0b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {isDark ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
 
           {/* Streak Pill - Trainees only */}
           {currentUser?.role === 'trainee' && (

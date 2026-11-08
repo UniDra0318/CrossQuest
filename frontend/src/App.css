@@ -706,6 +706,36 @@
   color: #ffffff;
 }
 
+.quick-action-btn.theme-mode-switch {
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.quick-action-btn.theme-mode-switch:hover {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
+}
+
+.quick-icon-btn.theme-mode-switch {
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.quick-icon-btn.theme-mode-switch:hover {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
+}
+
 /* Collapsed Mode Profile */
 .sidebar-user-collapsed {
   display: flex;

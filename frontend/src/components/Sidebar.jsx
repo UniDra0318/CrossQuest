@@ -254,6 +254,19 @@ export default function Sidebar({
                 </button>
                 <button
                   type="button"
+                  className="quick-icon-btn theme-mode-switch"
+                  onClick={toggleTheme}
+                  title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                  aria-label="Toggle Theme Mode"
+                >
+                  {isDark ? (
+                    <Sun size={15} style={{ color: '#38bdf8' }} />
+                  ) : (
+                    <Moon size={15} style={{ color: '#f59e0b' }} />
+                  )}
+                </button>
+                <button
+                  type="button"
                   className="quick-icon-btn logout"
                   onClick={handleLogout}
                   title="Sign Out"
@@ -296,12 +309,16 @@ export default function Sidebar({
 
                 <button
                   type="button"
-                  className="quick-action-btn"
+                  className="quick-action-btn theme-mode-switch"
                   onClick={toggleTheme}
                   title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                  aria-label="Toggle Theme Mode"
                 >
-                  {isDark ? <Sun size={15} /> : <Moon size={15} />}
-                  <span>{isDark ? 'Dark' : 'Light'}</span>
+                  {isDark ? (
+                    <Sun size={16} style={{ color: '#38bdf8' }} />
+                  ) : (
+                    <Moon size={16} style={{ color: '#f59e0b' }} />
+                  )}
                 </button>
 
                 <button

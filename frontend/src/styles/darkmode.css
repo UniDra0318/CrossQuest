@@ -2842,6 +2842,23 @@ html.dark .topbar-logo-img,
   filter: brightness(0) invert(1) !important;
 }
 
+html.dark .quick-action-btn.theme-mode-switch,
+[data-theme="dark"] .quick-action-btn.theme-mode-switch,
+html.dark .quick-icon-btn.theme-mode-switch,
+[data-theme="dark"] .quick-icon-btn.theme-mode-switch {
+  color: #38bdf8 !important;
+}
+
+html.dark .quick-action-btn.theme-mode-switch:hover,
+[data-theme="dark"] .quick-action-btn.theme-mode-switch:hover,
+html.dark .quick-icon-btn.theme-mode-switch:hover,
+[data-theme="dark"] .quick-icon-btn.theme-mode-switch:hover {
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #7dd3fc !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+}
+
+
 
 
 
