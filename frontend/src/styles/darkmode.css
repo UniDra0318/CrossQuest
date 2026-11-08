@@ -2453,3 +2453,118 @@ html.dark .ident-kbd,
   border-color: #475569 !important;
   color: #f8fafc !important;
 }
+/* Results Interactive Panel & Leaderboard Dark Mode */
+html.dark .results-interactive-panel,
+[data-theme="dark"] .results-interactive-panel {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.dark .results-panel-tabs,
+[data-theme="dark"] .results-panel-tabs {
+  background: #1e293b !important;
+  border-bottom-color: #334155 !important;
+}
+
+html.dark .panel-tab-btn,
+[data-theme="dark"] .panel-tab-btn {
+  color: #94a3b8 !important;
+}
+
+html.dark .panel-tab-btn:hover,
+[data-theme="dark"] .panel-tab-btn:hover {
+  color: #f8fafc !important;
+  background: #0f172a !important;
+}
+
+html.dark .panel-tab-btn.is-active,
+[data-theme="dark"] .panel-tab-btn.is-active {
+  color: #c084fc !important;
+  border-bottom-color: #a855f7 !important;
+  background: rgba(168, 85, 247, 0.12) !important;
+}
+
+html.dark .res-leaderboard-row,
+[data-theme="dark"] .res-leaderboard-row {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .res-leaderboard-row.row-user-highlight,
+[data-theme="dark"] .res-leaderboard-row.row-user-highlight {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.2), rgba(234, 179, 8, 0.15)) !important;
+  border-color: #a855f7 !important;
+}
+
+html.dark .res-user-name,
+[data-theme="dark"] .res-user-name {
+  color: #f8fafc !important;
+}
+
+html.dark .res-stat-pill,
+[data-theme="dark"] .res-stat-pill {
+  color: #cbd5e1 !important;
+}
+
+html.dark .team-contribution-callout,
+[data-theme="dark"] .team-contribution-callout {
+  background: rgba(37, 99, 235, 0.15) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+html.dark .callout-title,
+[data-theme="dark"] .callout-title {
+  color: #93c5fd !important;
+}
+
+html.dark .callout-sub,
+[data-theme="dark"] .callout-sub {
+  color: #bfdbfe !important;
+}
+
+html.dark .team-standings-card,
+[data-theme="dark"] .team-standings-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .team-standings-card.card-user-team,
+[data-theme="dark"] .team-standings-card.card-user-team {
+  background: rgba(37, 99, 235, 0.2) !important;
+  border-color: #3b82f6 !important;
+}
+
+html.dark .team-name,
+[data-theme="dark"] .team-name {
+  color: #f8fafc !important;
+}
+
+html.dark .xp-card,
+[data-theme="dark"] .xp-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .xp-card-label,
+[data-theme="dark"] .xp-card-label {
+  color: #f8fafc !important;
+}
+
+html.dark .xp-card-sub,
+[data-theme="dark"] .xp-card-sub {
+  color: #94a3b8 !important;
+}
+
+html.dark .results-tier-pill.tier-amber,
+[data-theme="dark"] .results-tier-pill.tier-amber {
+  background: #334155 !important;
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
+}
+
+html.dark .leaderboard-live-status-bar,
+html.dark .leaderboard-footer-callout,
+[data-theme="dark"] .leaderboard-live-status-bar,
+[data-theme="dark"] .leaderboard-footer-callout {
+  border-color: #334155 !important;
+}

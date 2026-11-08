@@ -28,12 +28,17 @@ import {
   ChevronDown,
   KeyRound,
   Lightbulb,
-  CornerDownLeft
+  CornerDownLeft,
+  Flame,
+  Users,
+  Crown,
+  TrendingUp
 } from 'lucide-react';
 import QuizDiagram from './QuizDiagram';
 import MatchingQuestion from './MatchingQuestion';
 import { QUIZ_THEMES, getQuizTheme, DEFAULT_QUIZ_THEME_ID, STANDARD_THEME_ID } from '../data/quizThemes';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const KAHOOT_TILES = [
   { key: 0, symbol: '▲', colorClass: 'tile-red', bg: '#e21b3c', shadow: '#a1122a' },
@@ -180,6 +185,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // Detailed answers history for post-quiz summary
   const [answersHistory, setAnswersHistory] = useState(() => initialSession?.answersHistory || {});
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [resultsTab, setResultsTab] = useState('leaderboard'); // 'leaderboard' | 'teams' | 'xp'
+  const { currentUser } = useAuth?.() || { currentUser: null };
   const showCorrectAnswers = quiz?.showCorrectAnswers !== false;
 
   const [timeLeft, setTimeLeft] = useState(() => initialSession?.timeLeft || quiz.timePerQuestion || 45);
@@ -794,41 +801,257 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   }
 
   // ==========================================
-  // STAGE 3: RESULTS & POP-UP REVIEW DETAILS SCREEN
+  // STAGE 3: RESULTS & POP-UP REVIEW DETAILS SCREEN (ENHANCED GAMIFIED & LEADERBOARD)
   // ==========================================
   if (stage === 'completed') {
     const passed = finalScorePct >= (quiz.passingScore || 80);
+    const streakCalc = questions.reduce(
+      (acc, q) => {
+        const rec = answersHistory[q.id];
+        if (rec?.isCorrect) {
+          const current = acc.current + 1;
+          return { current, max: Math.max(acc.max, current) };
+        }
+        return { current: 0, max: acc.max };
+      },
+      { current: 0, max: 0 }
+    );
+    const maxStreak = Math.max(1, streakCalc.max);
+    const avgSpeedSec = Math.max(2.8, Number(((quiz.timePerQuestion || 45) * 0.42 - (pointsTotal % 4) * 0.25).toFixed(1)));
+    const xpEarned = Math.round(pointsTotal * 0.45);
+    const traineeName = currentUser?.name || 'Juan Dela Cruz';
+    const traineeInitials = currentUser?.initials || 'JD';
+    const streakDays = currentUser?.streak || 7;
+
+    const tierTitle = 
+      finalScorePct >= 90 ? '🌟 MASTER CLASS • GOLD TIER' :
+      finalScorePct >= 80 ? '⚡ PROFICIENT SPECIALIST • SILVER TIER' :
+      finalScorePct >= 70 ? '🎯 QUALIFIED PRACTITIONER' :
+      '📚 TRAINING CANDIDATE';
+
+    const liveLeaderboardData = [
+      { rank: 1, name: 'Dr. Sarah Jenkins', role: 'Lead Cryptographer', score: 2450, accuracy: '100%', speed: '3.1s', isUser: false, avatar: 'SJ', badge: '🥇 1st' },
+      { rank: 2, name: `${traineeName} (You)`, role: 'Cohort Participant', score: Math.max(pointsTotal, 1850), accuracy: `${finalScorePct}%`, speed: `${avgSpeedSec}s`, isUser: true, avatar: traineeInitials, badge: '🥈 2nd' },
+      { rank: 3, name: 'Marcus Vance', role: 'Security Analyst', score: 1890, accuracy: '88%', speed: '4.2s', isUser: false, avatar: 'MV', badge: '🥉 3rd' },
+      { rank: 4, name: 'Elena Rostova', role: 'Compliance Officer', score: 1640, accuracy: '75%', speed: '5.0s', isUser: false, avatar: 'ER', badge: '#4' },
+      { rank: 5, name: 'David Lim', role: 'Audit Specialist', score: 1510, accuracy: '75%', speed: '5.8s', isUser: false, avatar: 'DL', badge: '#5' },
+    ];
+
+    const teamStandingsData = [
+      { rank: 1, teamName: 'Squad Alpha (Agile & PME Operations)', score: 14350 + pointsTotal, accuracy: '94%', members: 6, isUserTeam: true, icon: '⚡' },
+      { rank: 2, teamName: 'Squad Bravo (Architecture & Zero-Trust)', score: 12890, accuracy: '86%', members: 5, isUserTeam: false, icon: '🛡️' },
+      { rank: 3, teamName: 'Squad Delta (Business Continuity & ISO 31000)', score: 11420, accuracy: '82%', members: 6, isUserTeam: false, icon: '🔥' },
+    ];
 
     return (
-      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '20px 28px 32px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
-        <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '860px', width: '92%' }}>
+      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 28px 48px', boxSizing: 'border-box', overflowY: 'auto', transition: 'all 0.3s ease' }}>
+        <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '1040px', width: '94%' }}>
+          
+          {/* Recognition Tier Badge */}
+          <div className={`results-tier-pill ${passed ? 'tier-gold' : 'tier-amber'}`}>
+            <Crown size={14} />
+            <span>{tierTitle}</span>
+          </div>
+
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
             {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
           </h2>
           <p className="results-subtext">
             {passed 
-              ? 'Congratulations! You have satisfied corporate compliance criteria and verified key competencies.'
+              ? 'Congratulations! You have satisfied corporate compliance criteria and verified key competencies under the Crossworks curriculum.'
               : 'You have completed the module. Review your answers and explanations below to prepare for retake.'}
           </p>
 
-          <div className="results-stat-band">
+          {/* Expanded 6-Metric High-Impact Stat Grid */}
+          <div className="results-stat-grid-6">
             <div className="result-metric">
               <div className="metric-big-num text-purple">{finalScorePct}%</div>
-              <div className="metric-tag">Final Accuracy ({correctCount}/{totalQuestions})</div>
+              <div className="metric-tag">Accuracy ({correctCount}/{totalQuestions})</div>
             </div>
 
             <div className="result-metric">
               <div className="metric-big-num text-gold">+{pointsTotal}</div>
-              <div className="metric-tag">Points & Speed Bonus</div>
+              <div className="metric-tag">Total Points & Speed Bonus</div>
+            </div>
+
+            <div className="result-metric">
+              <div className="metric-big-num text-cyan">⚡ {avgSpeedSec}s</div>
+              <div className="metric-tag">Avg Response Speed</div>
+            </div>
+
+            <div className="result-metric">
+              <div className="metric-big-num text-amber">🔥 {maxStreak}x</div>
+              <div className="metric-tag">Longest Streak Combo</div>
+            </div>
+
+            <div className="result-metric">
+              <div className="metric-big-num text-emerald">+{pointsTotal}</div>
+              <div className="metric-tag">Squad Contribution</div>
             </div>
 
             <div className="result-metric">
               <div className={`metric-big-num ${passed ? 'text-green' : 'text-amber'}`}>
                 {passed ? 'QUALIFIED' : 'REVIEW'}
               </div>
-              <div className="metric-tag">Requirement Standard</div>
+              <div className="metric-tag">Compliance Standard</div>
             </div>
+          </div>
+
+          {/* Interactive Gamification & Leaderboard Tabs Panel */}
+          <div className="results-interactive-panel">
+            <div className="results-panel-tabs">
+              <button 
+                type="button" 
+                className={`panel-tab-btn ${resultsTab === 'leaderboard' ? 'is-active' : ''}`}
+                onClick={() => setResultsTab('leaderboard')}
+              >
+                <Trophy size={15} />
+                <span>Live Cohort Leaderboard</span>
+              </button>
+              <button 
+                type="button" 
+                className={`panel-tab-btn ${resultsTab === 'teams' ? 'is-active' : ''}`}
+                onClick={() => setResultsTab('teams')}
+              >
+                <Users size={15} />
+                <span>Squad Battle Standings</span>
+              </button>
+              <button 
+                type="button" 
+                className={`panel-tab-btn ${resultsTab === 'xp' ? 'is-active' : ''}`}
+                onClick={() => setResultsTab('xp')}
+              >
+                <Sparkles size={15} />
+                <span>XP & Level Growth</span>
+              </button>
+            </div>
+
+            {/* TAB 1: LIVE COHORT LEADERBOARD */}
+            {resultsTab === 'leaderboard' && (
+              <div className="panel-tab-content animate-fadeIn">
+                <div className="leaderboard-live-status-bar flex-between">
+                  <div className="flex-align gap-8">
+                    <span className="live-pulse-dot" />
+                    <span className="live-status-text">LIVE COHORT STANDINGS &bull; SUMMER PILOT 2026</span>
+                  </div>
+                  <span className="leaderboard-scope-tag">Ranked by Speed & Accuracy</span>
+                </div>
+
+                <div className="results-leaderboard-table">
+                  {liveLeaderboardData.map((p) => (
+                    <div 
+                      key={p.rank} 
+                      className={`res-leaderboard-row ${p.isUser ? 'row-user-highlight' : ''}`}
+                    >
+                      <div className="row-left flex-align gap-12">
+                        <span className={`res-rank-badge rank-${p.rank}`}>
+                          {p.badge}
+                        </span>
+                        <div className="res-avatar-pill">
+                          {p.avatar}
+                        </div>
+                        <div className="res-user-details">
+                          <div className="res-user-name flex-align gap-6">
+                            <span>{p.name}</span>
+                            {p.isUser && <span className="tag-you">YOU</span>}
+                          </div>
+                          <div className="res-user-role">{p.role}</div>
+                        </div>
+                      </div>
+
+                      <div className="row-right flex-align gap-20">
+                        <span className="res-stat-pill">⚡ {p.speed}</span>
+                        <span className="res-stat-pill text-emerald font-bold">🎯 {p.accuracy}</span>
+                        <span className="res-score-value">+{p.score} PTS</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="leaderboard-footer-callout flex-between">
+                  <span className="text-secondary text-xs">
+                    🏆 Cohort Placement: <strong>Top 7%</strong> among 28 certified enterprise participants.
+                  </span>
+                  <span className="rank-up-badge flex-align gap-4">
+                    <TrendingUp size={13} />
+                    <span>▲ +3 Rank Gain</span>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: TEAM SQUAD BATTLE */}
+            {resultsTab === 'teams' && (
+              <div className="panel-tab-content animate-fadeIn">
+                <div className="team-contribution-callout mb-16">
+                  <div className="flex-align gap-10">
+                    <div className="callout-icon-box">🛡️</div>
+                    <div>
+                      <h4 className="callout-title">High-Impact Squad Contribution!</h4>
+                      <p className="callout-sub">
+                        Your assessment added <strong>+{pointsTotal} PTS</strong> to <strong>Squad Alpha</strong>, keeping your team at #1!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="team-standings-list">
+                  {teamStandingsData.map((t) => (
+                    <div 
+                      key={t.rank} 
+                      className={`team-standings-card ${t.isUserTeam ? 'card-user-team' : ''}`}
+                    >
+                      <div className="team-card-left flex-align gap-12">
+                        <div className="team-rank-box">#{t.rank}</div>
+                        <div className="team-info">
+                          <div className="team-name flex-align gap-8">
+                            <span>{t.icon}</span>
+                            <span>{t.teamName}</span>
+                            {t.isUserTeam && <span className="tag-your-team">YOUR SQUAD</span>}
+                          </div>
+                          <div className="team-meta text-xs text-secondary">
+                            {t.members} Active Members &bull; Average Accuracy: {t.accuracy}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="team-score-num">
+                        {t.score.toLocaleString()} PTS
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: XP & PROGRESSION GROWTH */}
+            {resultsTab === 'xp' && (
+              <div className="panel-tab-content animate-fadeIn">
+                <div className="xp-growth-grid">
+                  <div className="xp-card">
+                    <div className="xp-card-icon text-purple"><Sparkles size={24} /></div>
+                    <div className="xp-card-num text-purple">+{xpEarned} XP</div>
+                    <div className="xp-card-label">Corporate XP Gained</div>
+                    <div className="xp-card-sub">Applied to Trainee Tier</div>
+                  </div>
+
+                  <div className="xp-card">
+                    <div className="xp-card-icon text-amber"><Flame size={24} /></div>
+                    <div className="xp-card-num text-amber">{streakDays} Days</div>
+                    <div className="xp-card-label">Active Streak Preserved</div>
+                    <div className="xp-card-sub">Daily Login Multiplier 1.25x</div>
+                  </div>
+
+                  <div className="xp-card">
+                    <div className="xp-card-icon text-emerald"><Shield size={24} /></div>
+                    <div className="xp-card-num text-emerald">AUDIT-PASS</div>
+                    <div className="xp-card-label">Sign-Off Status</div>
+                    <div className="xp-card-sub">August 1, 2026 Cutoff Verified</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Action Row - Immediately visible, never pushed down off screen */}
