@@ -62,7 +62,7 @@ describe('AdminPeerReviewAnomalyDesk baseline & tab functionality', () => {
     );
 
     // Switch to audit trail tab
-    fireEvent.click(screen.getByText(/Master Audit Trail/i));
+    fireEvent.click(screen.getByText(/Audit Trail/i));
 
     expect(screen.getByText('CRYPTOGRAPHIC_KEY_ROTATION')).toBeInTheDocument();
     expect(screen.getAllByText('RULE_MODIFIED').length).toBeGreaterThan(0);

@@ -736,28 +736,29 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
         style={{ 
           background: themeStyles.panelBg, 
           borderRadius: '20px', 
-          padding: '12px 20px', 
+          padding: '10px 16px', 
           border: themeStyles.panelBorder,
           boxShadow: isDark ? '0 4px 18px rgba(0,0,0,0.3)' : '0 4px 18px rgba(0,0,0,0.03)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '14px'
+          gap: '12px',
+          overflowX: 'auto'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <button
             type="button"
             onClick={() => setActiveTab('queue')}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '12px',
               fontWeight: 700,
-              fontSize: '13px',
+              fontSize: '12.5px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
+              whiteSpace: 'nowrap',
               border: 'none',
               cursor: 'pointer',
               background: activeTab === 'queue' ? 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
@@ -767,8 +768,8 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
               transition: 'all 0.15s ease'
             }}
           >
-            <ShieldAlert size={15} />
-            <span>Anomaly & Incident Queue</span>
+            <ShieldAlert size={14} />
+            <span>Incident Queue</span>
             {unreviewedCount > 0 && (
               <span style={{ background: activeTab === 'queue' ? '#ffffff' : '#e11d48', color: activeTab === 'queue' ? '#be123c' : '#ffffff', padding: '1px 7px', borderRadius: '20px', fontSize: '11px', fontWeight: 800 }}>
                 {unreviewedCount}
@@ -780,13 +781,14 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
             type="button"
             onClick={() => setActiveTab('audit_trail')}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '12px',
               fontWeight: 700,
-              fontSize: '13px',
+              fontSize: '12.5px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
+              whiteSpace: 'nowrap',
               border: activeTab === 'audit_trail' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               cursor: 'pointer',
               background: activeTab === 'audit_trail' ? 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
@@ -795,21 +797,22 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
               transition: 'all 0.15s ease'
             }}
           >
-            <History size={15} />
-            <span>Master Audit Trail ({accessLogs.length})</span>
+            <History size={14} />
+            <span>Audit Trail ({accessLogs.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('rules')}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '12px',
               fontWeight: 700,
-              fontSize: '13px',
+              fontSize: '12.5px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
+              whiteSpace: 'nowrap',
               border: activeTab === 'rules' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               cursor: 'pointer',
               background: activeTab === 'rules' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
@@ -818,7 +821,7 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
               transition: 'all 0.15s ease'
             }}
           >
-            <Sliders size={15} />
+            <Sliders size={14} />
             <span>Anomaly Rules ({rules.length})</span>
           </button>
 
@@ -826,13 +829,14 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
             type="button"
             onClick={() => { setActiveTab('report'); loadExecutiveReport(); }}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '12px',
               fontWeight: 700,
-              fontSize: '13px',
+              fontSize: '12.5px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
+              whiteSpace: 'nowrap',
               border: activeTab === 'report' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               cursor: 'pointer',
               background: activeTab === 'report' ? 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
@@ -841,21 +845,22 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
               transition: 'all 0.15s ease'
             }}
           >
-            <BarChart3 size={15} />
-            <span>Executive Anomaly Report</span>
+            <BarChart3 size={14} />
+            <span>Executive Report</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('retention')}
             style={{
-              padding: '9px 18px',
+              padding: '8px 14px',
               borderRadius: '12px',
               fontWeight: 700,
-              fontSize: '13px',
+              fontSize: '12.5px',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
+              whiteSpace: 'nowrap',
               border: activeTab === 'retention' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
               cursor: 'pointer',
               background: activeTab === 'retention' ? 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
@@ -864,14 +869,14 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
               transition: 'all 0.15s ease'
             }}
           >
-            <Archive size={15} />
-            <span>12-Month Retention Engine (OI-20)</span>
+            <Archive size={14} />
+            <span>Retention Engine (OI-20)</span>
           </button>
         </div>
 
         <button
           type="button"
-          onClick={() => { loadAlerts(); loadLogs(); loadRules(); loadRetentionWarnings(); }}
+          onClick={() => { loadAlerts(); loadLogs(); loadRules(); loadRetentionWarnings(); loadExecutiveReport(); }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -883,8 +888,11 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
             color: isDark ? '#cbd5e1' : '#475569',
             fontSize: '12.5px',
             fontWeight: 600,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
           }}
+          title="Synchronize all anomaly feeds and audit logs"
         >
           <RefreshCw size={13} className={loadingAlerts || loadingLogs ? 'spin-animation' : ''} />
           <span>Sync All</span>
