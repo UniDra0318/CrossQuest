@@ -3484,7 +3484,8 @@
 
 .briefing-card {
   width: 100%;
-  max-width: 1640px;
+  max-width: 1780px;
+  min-height: calc(100vh - 90px);
   margin: 0 auto;
   border-radius: 20px;
   overflow: hidden;
@@ -3633,15 +3634,17 @@
 
 .quiz-arena-card {
   width: 100%;
-  max-width: 1640px;
+  max-width: 1780px;
+  min-height: calc(100vh - 32px);
   margin: auto;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 24px;
-  padding: 34px 44px 44px;
+  border-radius: 26px;
+  padding: 32px 48px 40px;
   box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 20px;
   box-sizing: border-box;
 }
@@ -4243,7 +4246,9 @@
 .arena-question-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: space-between;
+  flex: 1;
+  gap: 24px;
 }
 
 .question-type-indicator {
@@ -4270,7 +4275,7 @@
 
 .arena-question-heading h2 {
   font-family: var(--font-fun);
-  font-size: 22px;
+  font-size: 25px;
   font-weight: 800;
   color: #0f172a;
   line-height: 1.4;
@@ -4290,9 +4295,10 @@
 .kahoot-tile-button {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 22px 24px;
-  border-radius: 14px;
+  gap: 20px;
+  padding: 28px 34px;
+  min-height: 108px;
+  border-radius: 16px;
   border: none;
   cursor: pointer;
   color: #ffffff;
@@ -4312,7 +4318,7 @@
 }
 
 .tile-symbol {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 900;
   line-height: 1;
   opacity: 0.9;
@@ -4321,9 +4327,9 @@
 
 .tile-text {
   font-family: var(--font-fun);
-  font-size: 15.5px;
+  font-size: 17.5px;
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.4;
   flex: 1;
 }
 

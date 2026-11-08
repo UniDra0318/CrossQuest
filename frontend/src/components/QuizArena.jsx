@@ -443,7 +443,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
         }}
       >
         {/* Arena Top Navigation Bar (Integrated cleanly over dynamic theme background) */}
-        <div style={{ width: '100%', maxWidth: '1640px', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ width: '100%', maxWidth: '1780px', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <button 
             type="button"
             className="btn-tactile btn-tactile-ghost"
@@ -486,7 +486,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           </div>
         </div>
 
-        <div className="briefing-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%' }}>
+        <div className="briefing-card" style={{ ...activeTheme.cardStyle, maxWidth: '1780px', width: '100%' }}>
           <div className="briefing-header-bar" style={{ backgroundColor: quiz.headerColor }}>
             <span className="briefing-category-tag">{quiz.category}</span>
             <h1 className="briefing-title">{quiz.title}</h1>
@@ -1018,8 +1018,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '20px 28px 32px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
-      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%' }}>
+    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '16px 24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease' }}>
+      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1780px', width: '100%', minHeight: 'calc(100vh - 32px)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
