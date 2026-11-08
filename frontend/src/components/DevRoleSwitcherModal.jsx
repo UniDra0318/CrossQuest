@@ -60,11 +60,11 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
   const companies = [
     { id: 'ALL', label: 'All Accounts' },
     { id: 'CROSSWORKS', label: 'Crossworks HQ' },
-    { id: 'CORP_ALPHA', label: 'San Miguel Corp' },
-    { id: 'FINTECH_BETA', label: 'Maya FinTech' },
-    { id: 'RETAIL_GAMMA', label: 'Ayala Retail' },
-    { id: 'BANK_DELTA', label: 'BDO Enterprise' },
-    { id: 'TELCO_EPSILON', label: 'Globe Telecom' }
+    { id: 'VHL_2', label: 'Vertiv Holdings' },
+    { id: 'IPROY_SERVI_2', label: 'IPRoyal Services' },
+    { id: 'AMIHAN_SOLUTI_2', label: 'Amihan Solutions' },
+    { id: 'EWALIC_2', label: 'EastWest Ageas' },
+    { id: 'ROP_3', label: 'Red Oak Properties' }
   ];
 
   const filteredPersonas = allPersonas.filter(u => {

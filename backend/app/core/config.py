@@ -38,11 +38,11 @@ class Settings(BaseSettings):
         "https://crossquest.xworks.ph"
     ]
 
-    # Database: Use postgresql+psycopg2 for postgres, or sqlite for standalone development
-    # Set USE_PILOT_DB=true in environment to point to the pilot database
+    # Database: Defaults to crossquest_pilot.db (real-world pilot dataset)
+    # Set USE_DEMO_DB=true to fall back to the synthetic test database crossquest_dev.db
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "sqlite:///./crossquest_pilot.db" if os.getenv("USE_PILOT_DB", "").lower() in ("true", "1") else "sqlite:///./crossquest_dev.db"
+        "sqlite:///./crossquest_dev.db" if os.getenv("USE_DEMO_DB", "").lower() in ("true", "1") else "sqlite:///./crossquest_pilot.db"
     )
 
     # CP-ABE Configuration

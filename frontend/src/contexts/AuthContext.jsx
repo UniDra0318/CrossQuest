@@ -3,125 +3,207 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 export const DEMO_USERS = {
   // --- ADMINISTRATORS ---
   admin: {
-    id: "usr-admin-01",
+    id: "016868d1-5238-49a4-9b3f-1cd205dbdc44",
     email: "admin@crossworks.ph",
     name: "Dr. Sarah Jenkins",
     title: "System Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
-    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+    assigned_companies: ["ALL"],
+    assigned_client_accounts: ["ALL"],
     initials: "SJ"
   },
   admin_roel: {
-    id: "usr-admin-02",
+    id: "d3c5e17f-1854-488d-8f0f-36ff72ed1745",
     email: "admin2@crossworks.ph",
     name: "Prof. Roel Traballo",
     title: "Co-Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
-    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+    assigned_companies: ["ALL"],
+    assigned_client_accounts: ["ALL"],
     initials: "RT"
   },
 
   // --- ACCOUNT MANAGERS ---
   account_manager: {
-    id: "usr-am-02",
-    email: "marcus.reyes@crossworks.ph",
-    name: "Marcus Reyes",
-    title: "AM: San Miguel & BDO (CORP_ALPHA, BANK_DELTA)",
+    id: "0525a57b-668d-46cf-ab3b-6f6862920a9c",
+    email: "sharon@crossworks.ph",
+    name: "Sharon De Vera",
+    title: "Account Manager (Vertiv, Red Oak, EastWest)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA", "BANK_DELTA"],
-    assigned_client_accounts: ["CORP_ALPHA", "BANK_DELTA"],
-    initials: "MR"
+    assigned_companies: ["VHL_2", "ROP_3", "EWALIC_2"],
+    assigned_client_accounts: ["VHL_2", "ROP_3", "EWALIC_2"],
+    initials: "SD"
   },
-  am_andrea: {
-    id: "usr-am-03",
-    email: "andrea.salazar@crossworks.ph",
-    name: "Andrea Salazar",
-    title: "AM: Maya & Ayala (FINTECH_BETA, RETAIL_GAMMA)",
+  am_brian: {
+    id: "8049c06b-c340-4d3f-8fca-1e83a4beb4f1",
+    email: "brian@crossworks.ph",
+    name: "Brian Mendoza",
+    title: "Account Manager (IPRoyal & Amihan)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["FINTECH_BETA", "RETAIL_GAMMA"],
-    assigned_client_accounts: ["FINTECH_BETA", "RETAIL_GAMMA"],
-    initials: "AS"
+    assigned_companies: ["IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    assigned_client_accounts: ["IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    initials: "BM"
   },
-
-  // --- FINANCE & OPERATIONS ---
-  finance: {
-    id: "usr-fin-03",
-    email: "elena.santos@crossworks.ph",
-    name: "Elena Santos",
-    title: "Finance & Operations Lead",
-    role: "finance",
+  am_quel: {
+    id: "d6cfb2eb-07d2-4629-8f41-60fee732c5d3",
+    email: "quel@crossworks.ph",
+    name: "Raquel 'Quel' Santos",
+    title: "Account Manager (Universal Robina & Isla LPG)",
+    role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
-    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
-    initials: "ES"
+    assigned_companies: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
+    assigned_client_accounts: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
+    initials: "QS"
   },
-  finance_victor: {
-    id: "usr-fin-04",
-    email: "victor.cruz@crossworks.ph",
-    name: "Victor Cruz",
-    title: "Financial Auditor",
-    role: "finance",
+  am_joey: {
+    id: "2cc2fae0-d941-4d81-9e55-04e822726a6a",
+    email: "joey.sales@crossworks.ph",
+    name: "Joey Ramos (Sales)",
+    title: "Account Manager (Ayala Land & Boehringer)",
+    role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
-    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"],
-    initials: "VC"
+    assigned_companies: ["AYALA_LAND_INC_2", "BIBSP_2"],
+    assigned_client_accounts: ["AYALA_LAND_INC_2", "BIBSP_2"],
+    initials: "JR"
+  },
+  am_cez: {
+    id: "e9c51def-d5a4-40ec-b61e-e3461921b8fe",
+    email: "cez@crossworks.ph",
+    name: "Cezanne Garcia",
+    title: "Account Manager (Enterprise Accounts)",
+    role: "account_manager",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["VHL_2", "AMIHAN_SOLUTI_2"],
+    assigned_client_accounts: ["VHL_2", "AMIHAN_SOLUTI_2"],
+    initials: "CG"
   },
 
   // --- TRAINERS ---
   trainer: {
-    id: "usr-trainer-04",
-    email: "david.lim@crossworks.ph",
-    name: "David Lim",
-    title: "Lead Trainer (San Miguel & Maya)",
+    id: "76be0c39-21c3-46ae-ba5d-0cb2dd203bfe",
+    email: "joey.trainer@crossworks.ph",
+    name: "Joey Ramos (Trainer)",
+    title: "Lead Technical Trainer (Cybersecurity & GenAI)",
     role: "trainer",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["CORP_ALPHA", "FINTECH_BETA"],
-    assigned_client_accounts: ["CORP_ALPHA", "FINTECH_BETA"],
-    initials: "DL"
+    assigned_companies: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    assigned_client_accounts: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    initials: "JR"
   },
-  trainer_maria: {
-    id: "usr-trainer-05",
-    email: "maria.hernandez@crossworks.ph",
-    name: "Maria Hernandez",
-    title: "Lead Trainer (Ayala & BDO)",
+  trainer_billy: {
+    id: "ad5d83e0-c70b-4bef-851e-6e4bddc44b87",
+    email: "billy@crossworks.ph",
+    name: "Billy Fernandez",
+    title: "Senior Trainer (Cloud & Infrastructure)",
     role: "trainer",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["RETAIL_GAMMA", "BANK_DELTA"],
-    assigned_client_accounts: ["RETAIL_GAMMA", "BANK_DELTA"],
-    initials: "MH"
+    assigned_companies: ["EWALIC_2", "ROP_3"],
+    assigned_client_accounts: ["EWALIC_2", "ROP_3"],
+    initials: "BF"
   },
-  trainer_alex: {
-    id: "usr-trainer-06",
-    email: "alex.santos@crossworks.ph",
-    name: "Engr. Alex Santos",
-    title: "Lead Trainer (Globe Telecom)",
+  trainer_jobert: {
+    id: "58b734d7-e08d-4fb4-829f-38fa0d53f4b1",
+    email: "jobert@crossworks.ph",
+    name: "Jobert Cruz",
+    title: "Senior Trainer (Enterprise Architecture & Data)",
     role: "trainer",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["TELCO_EPSILON"],
-    assigned_client_accounts: ["TELCO_EPSILON"],
-    initials: "AS"
+    assigned_companies: ["ISLA_LPG_CORPOR", "UNIVER_ROBINA_CORPOR_3"],
+    assigned_client_accounts: ["ISLA_LPG_CORPOR", "UNIVER_ROBINA_CORPOR_3"],
+    initials: "JC"
+  },
+  trainer_owen: {
+    id: "da0ea449-ace9-49a6-9ce8-5afdc4b4edd2",
+    email: "owen@crossworks.ph",
+    name: "Owen Castillo",
+    title: "Senior Trainer (Modern App Dev & Security)",
+    role: "trainer",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["AYALA_LAND_INC_2", "BIBSP_2"],
+    assigned_client_accounts: ["AYALA_LAND_INC_2", "BIBSP_2"],
+    initials: "OC"
   },
 
-  // --- TRAINEES WITH UNIQUE STREAKS, POINTS & QUIZ PROGRESS ---
+  // --- CLIENT COMPANY STAFF (HR / L&D) ---
+  staff_vertiv: {
+    id: "553b1112-b37b-4a4a-9e03-575caa636bea",
+    email: "staff@vertiv.com",
+    name: "Elena Vance",
+    title: "HR & Training Manager",
+    role: "company_staff",
+    organization: "Vertiv Holdings Ltd",
+    company_code: "VHL_2",
+    assigned_companies: ["VHL_2"],
+    assigned_client_accounts: ["VHL_2"],
+    initials: "EV"
+  },
+  staff_ewageas: {
+    id: "5265ad2f-ce42-4678-9ef4-cd8e198ba655",
+    email: "staff@ewageas.com",
+    name: "Maricar Ramos",
+    title: "L&D Coordinator",
+    role: "company_staff",
+    organization: "EastWest Ageas Life Insurance",
+    company_code: "EWALIC_2",
+    assigned_companies: ["EWALIC_2"],
+    assigned_client_accounts: ["EWALIC_2"],
+    initials: "MR"
+  },
+  staff_amihan: {
+    id: "17cdabee-f949-4077-8712-87a1a2713b10",
+    email: "staff@amihansolutions.com",
+    name: "Kenneth Sy",
+    title: "People & Culture Lead",
+    role: "company_staff",
+    organization: "Amihan Solutions",
+    company_code: "AMIHAN_SOLUTI_2",
+    assigned_companies: ["AMIHAN_SOLUTI_2"],
+    assigned_client_accounts: ["AMIHAN_SOLUTI_2"],
+    initials: "KS"
+  },
+  staff_iproyal: {
+    id: "e8f7aa1f-9496-43d5-b9c2-c7b482349488",
+    email: "staff@iproyal.com",
+    name: "Dmitri Volkov",
+    title: "Operations & Training Lead",
+    role: "company_staff",
+    organization: "IPRoyal Services",
+    company_code: "IPROY_SERVI_2",
+    assigned_companies: ["IPROY_SERVI_2"],
+    assigned_client_accounts: ["IPROY_SERVI_2"],
+    initials: "DV"
+  },
+  staff_redoak: {
+    id: "399cca6e-6923-4972-aa16-81225f1f3c8e",
+    email: "staff@redoak.com",
+    name: "Patricia Tan",
+    title: "HR Director",
+    role: "company_staff",
+    organization: "Red Oak Properties",
+    company_code: "ROP_3",
+    assigned_companies: ["ROP_3"],
+    assigned_client_accounts: ["ROP_3"],
+    initials: "PT"
+  },
+
+  // --- TRAINEES WITH REAL PILOT ACCOUNTS & RECORDS ---
   trainee: {
-    id: "4bf4b74e-d001-4ab5-8ccf-325565adf3b1",
-    email: "juan.delacruz@alpha-corp.ph",
-    name: "Juan Dela Cruz",
-    title: "San Miguel Corp (CORP_ALPHA)",
+    id: "e335aea7-fe01-436f-a05c-9db2fee10cfd",
+    email: "andrea.aguilar@vertiv.com",
+    name: "Andrea Aguilar",
+    title: "Vertiv Holdings Ltd (VHL_2)",
     role: "trainee",
-    organization: "San Miguel Conglomerate Holdings",
-    trainee_code: "TRN-9021",
-    display_name: "CyberKnight9021",
-    company_code: "CORP_ALPHA",
-    assigned_companies: ["CORP_ALPHA"],
-    streak: 7,
-    points: 12877,
+    organization: "Vertiv Holdings Ltd",
+    trainee_code: "TRN-8000",
+    display_name: "AndreaVertiv",
+    company_code: "VHL_2",
+    assigned_companies: ["VHL_2"],
+    streak: 8,
+    points: 13500,
     level: 4,
     quizzes_completed: 3,
     quiz_progress: {
@@ -130,127 +212,196 @@ export const DEMO_USERS = {
       'act-3': { completed: true, score: 90, segments: [true, true, true, false] },
       'act-4': { completed: false, score: null, segments: [false, false, false, false] }
     },
-    initials: "JD"
+    initials: "AA"
   },
-  trainee_beatrice: {
-    id: "ebda330c-24f7-4625-b713-acafbc0d4f00",
-    email: "beatrice.tan@alpha-corp.ph",
-    name: "Beatrice Tan",
-    title: "San Miguel Corp (CORP_ALPHA)",
+  trainee_ricardo: {
+    id: "35076d4f-7548-4131-8dd1-6fc07389b17d",
+    email: "ricardo.ocampo@iproyal.com",
+    name: "Ricardo Ocampo",
+    title: "IPRoyal Services (IPROY_SERVI_2)",
     role: "trainee",
-    organization: "San Miguel Conglomerate Holdings",
-    trainee_code: "TRN-9045",
-    display_name: "BeaSecOps",
-    company_code: "CORP_ALPHA",
-    assigned_companies: ["CORP_ALPHA"],
-    streak: 5,
-    points: 9450,
+    organization: "IPRoyal Services",
+    trainee_code: "TRN-8001",
+    display_name: "RicardoOps",
+    company_code: "IPROY_SERVI_2",
+    assigned_companies: ["IPROY_SERVI_2"],
+    streak: 6,
+    points: 10200,
     level: 3,
     quizzes_completed: 2,
     quiz_progress: {
-      'act-1': { completed: true, score: 75, segments: [true, true, true, false] },
-      'act-2': { completed: true, score: 80, segments: [true, true, true, false] },
-      'act-3': { completed: false, score: null, segments: [true, false, false, false] },
+      'act-1': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
       'act-4': { completed: false, score: null, segments: [false, false, false, false] }
     },
-    initials: "BT"
+    initials: "RO"
   },
-  trainee_maria: {
-    id: "b45c7419-02c7-4aa6-bc17-04f9568c213b",
-    email: "maria.clara@maya-fintech.ph",
-    name: "Maria Clara",
-    title: "Maya FinTech (FINTECH_BETA)",
+  trainee_bea: {
+    id: "82dd244c-84c5-4831-9381-279bd9fd5c37",
+    email: "bea.macaraeg@iproyal.com",
+    name: "Bea Macaraeg",
+    title: "IPRoyal Services (IPROY_SERVI_2)",
     role: "trainee",
-    organization: "Maya FinTech Digital Innovations",
-    trainee_code: "TRN-9088",
-    display_name: "MayaFinPro",
-    company_code: "FINTECH_BETA",
-    assigned_companies: ["FINTECH_BETA"],
-    streak: 12,
-    points: 15200,
+    organization: "IPRoyal Services",
+    trainee_code: "TRN-8002",
+    display_name: "BeaMacaraeg",
+    company_code: "IPROY_SERVI_2",
+    assigned_companies: ["IPROY_SERVI_2"],
+    streak: 11,
+    points: 14800,
     level: 5,
     quizzes_completed: 4,
     quiz_progress: {
       'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
       'act-2': { completed: true, score: 100, segments: [true, true, true, true] },
       'act-3': { completed: true, score: 95, segments: [true, true, true, true] },
-      'act-4': { completed: true, score: 90, segments: [true, true, true, true] }
+      'act-4': { completed: true, score: 92, segments: [true, true, true, true] }
     },
-    initials: "MC"
+    initials: "BM"
   },
-  trainee_liam: {
-    id: "403cd7cd-a014-42e0-8165-f16e8ed85371",
-    email: "liam.chen@maya-fintech.ph",
-    name: "Liam Chen",
-    title: "Maya FinTech (FINTECH_BETA)",
+  trainee_rafael: {
+    id: "d4799846-9779-4b67-acc5-09a5d69a0ade",
+    email: "rafael.dizon@amihansolutions.com",
+    name: "Rafael Dizon",
+    title: "Amihan Solutions (AMIHAN_SOLUTI_2)",
     role: "trainee",
-    organization: "Maya FinTech Digital Innovations",
-    trainee_code: "TRN-9092",
-    display_name: "LiamDevSec",
-    company_code: "FINTECH_BETA",
-    assigned_companies: ["FINTECH_BETA"],
+    organization: "Amihan Solutions",
+    trainee_code: "TRN-8015",
+    display_name: "RafaelDev",
+    company_code: "AMIHAN_SOLUTI_2",
+    assigned_companies: ["AMIHAN_SOLUTI_2"],
     streak: 4,
-    points: 7800,
+    points: 8100,
     level: 2,
     quizzes_completed: 1,
     quiz_progress: {
-      'act-1': { completed: true, score: 80, segments: [true, true, false, false] },
-      'act-2': { completed: false, score: null, segments: [true, false, false, false] },
-      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
-      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
-    },
-    initials: "LC"
-  },
-  trainee_gabriel: {
-    id: "ddcb84b6-48aa-4bdb-a73f-19919d6730fa",
-    email: "g.ramos@ayala-retail.ph",
-    name: "Gabriel Ramos",
-    title: "Ayala Retail (RETAIL_GAMMA)",
-    role: "trainee",
-    organization: "Ayala Retail Omnichannel Corp",
-    trainee_code: "TRN-9114",
-    display_name: "RetailOpsRamos",
-    company_code: "RETAIL_GAMMA",
-    assigned_companies: ["RETAIL_GAMMA"],
-    streak: 4,
-    points: 11300,
-    level: 3,
-    quizzes_completed: 2,
-    quiz_progress: {
       'act-1': { completed: true, score: 85, segments: [true, true, true, false] },
-      'act-2': { completed: true, score: 90, segments: [true, true, true, false] },
+      'act-2': { completed: false, score: null, segments: [false, false, false, false] },
       'act-3': { completed: false, score: null, segments: [false, false, false, false] },
       'act-4': { completed: false, score: null, segments: [false, false, false, false] }
     },
-    initials: "GR"
+    initials: "RD"
   },
-  trainee_chloe: {
-    id: "bd398658-8eff-4215-975a-baf703936d7f",
-    email: "chloe.garcia@ayala-retail.ph",
-    name: "Chloe Garcia",
-    title: "Ayala Retail (RETAIL_GAMMA)",
+  trainee_rowena: {
+    id: "7084364a-d26c-4154-b10f-b5c0cac75fe5",
+    email: "rowena.cabrera@ewageas.com",
+    name: "Rowena Cabrera",
+    title: "EastWest Ageas (EWALIC_2)",
     role: "trainee",
-    organization: "Ayala Retail Omnichannel Corp",
-    trainee_code: "TRN-9125",
-    display_name: "ChloeCloud",
-    company_code: "RETAIL_GAMMA",
-    assigned_companies: ["RETAIL_GAMMA"],
+    organization: "EastWest Ageas Life Insurance",
+    trainee_code: "TRN-8032",
+    display_name: "RowenaEW",
+    company_code: "EWALIC_2",
+    assigned_companies: ["EWALIC_2"],
     streak: 9,
-    points: 14600,
+    points: 12400,
     level: 4,
     quizzes_completed: 3,
     quiz_progress: {
       'act-1': { completed: true, score: 95, segments: [true, true, true, true] },
-      'act-2': { completed: true, score: 92, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 90, segments: [true, true, true, false] },
       'act-3': { completed: true, score: 88, segments: [true, true, true, false] },
       'act-4': { completed: false, score: null, segments: [false, false, false, false] }
     },
-    initials: "CG"
+    initials: "RC"
+  },
+  trainee_joshua: {
+    id: "0244b2b1-e722-4461-a5a2-4c1299e7f439",
+    email: "jjavier@islalpg.com",
+    name: "Joshua Javier",
+    title: "Isla LPG (ISLA_LPG_CORPOR)",
+    role: "trainee",
+    organization: "Isla LPG Corporation",
+    trainee_code: "TRN-8049",
+    display_name: "JoshuaLPG",
+    company_code: "ISLA_LPG_CORPOR",
+    assigned_companies: ["ISLA_LPG_CORPOR"],
+    streak: 5,
+    points: 9900,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 80, segments: [true, true, false, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "JJ"
+  },
+  trainee_arvin: {
+    id: "78ef52e6-69f3-4be7-88fa-e8c6b78984be",
+    email: "arvin.natividad@urc.com.ph",
+    name: "Arvin Natividad",
+    title: "Universal Robina (UNIVER_ROBINA_CORPOR_3)",
+    role: "trainee",
+    organization: "Universal Robina Corporation",
+    trainee_code: "TRN-8139",
+    display_name: "ArvinURC",
+    company_code: "UNIVER_ROBINA_CORPOR_3",
+    assigned_companies: ["UNIVER_ROBINA_CORPOR_3"],
+    streak: 7,
+    points: 11800,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "AN"
+  },
+  trainee_camille: {
+    id: "d0068942-b729-4ae4-8611-916b94884110",
+    email: "camille.morales@boehringer-ingelheim.com",
+    name: "Camille Morales",
+    title: "Boehringer Ingelheim (BIBSP_2)",
+    role: "trainee",
+    organization: "Boehringer Ingelheim",
+    trainee_code: "TRN-8071",
+    display_name: "CamilleBI",
+    company_code: "BIBSP_2",
+    assigned_companies: ["BIBSP_2"],
+    streak: 10,
+    points: 14200,
+    level: 4,
+    quizzes_completed: 3,
+    quiz_progress: {
+      'act-1': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "CM"
+  },
+  trainee_vincent: {
+    id: "7ee5f39e-efb0-4c1a-afdd-0b680128e924",
+    email: "santos.vincent@ayalaland.com.ph",
+    name: "Vincent Santos",
+    title: "Ayala Land (AYALA_LAND_INC_2)",
+    role: "trainee",
+    organization: "Ayala Land Inc",
+    trainee_code: "TRN-8088",
+    display_name: "VincentAyala",
+    company_code: "AYALA_LAND_INC_2",
+    assigned_companies: ["AYALA_LAND_INC_2"],
+    streak: 6,
+    points: 10500,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-2': { completed: true, score: 80, segments: [true, true, false, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "VS"
   }
 };
 
 DEMO_USERS.crossworks_staff = DEMO_USERS.account_manager;
-DEMO_USERS.company_staff = DEMO_USERS.finance;
+DEMO_USERS.company_staff = DEMO_USERS.staff_vertiv;
 
 const AuthContext = createContext();
 
