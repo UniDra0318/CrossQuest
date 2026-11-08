@@ -433,7 +433,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           width: '100%', 
           minHeight: '100vh', 
           borderRadius: 0, 
-          padding: '24px 36px 36px', 
+          padding: '20px 28px 32px', 
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',
@@ -443,7 +443,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
         }}
       >
         {/* Arena Top Navigation Bar (Integrated cleanly over dynamic theme background) */}
-        <div style={{ width: '92%', maxWidth: '1080px', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ width: '100%', maxWidth: '1640px', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <button 
             type="button"
             className="btn-tactile btn-tactile-ghost"
@@ -486,7 +486,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           </div>
         </div>
 
-        <div className="briefing-card" style={{ ...activeTheme.cardStyle, maxWidth: '1080px', width: '92%' }}>
+        <div className="briefing-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%' }}>
           <div className="briefing-header-bar" style={{ backgroundColor: quiz.headerColor }}>
             <span className="briefing-category-tag">{quiz.category}</span>
             <h1 className="briefing-title">{quiz.title}</h1>
@@ -797,7 +797,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const passed = finalScorePct >= (quiz.passingScore || 80);
 
     return (
-      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
+      <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '20px 28px 32px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
         <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '860px', width: '92%' }}>
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
@@ -1018,8 +1018,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
-      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1080px', width: '92%' }}>
+    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '20px 28px 32px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
+      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
