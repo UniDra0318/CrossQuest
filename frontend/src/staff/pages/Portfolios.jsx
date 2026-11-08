@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, Lock, ArrowRight, ShieldCheck, Users, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -13,6 +13,9 @@ export default function Portfolios() {
   const isDark = effectiveTheme === 'dark';
   const scrollContainerRef = useRef(null);
 
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
   const assignedScopes = currentUser?.assigned_client_accounts || currentUser?.assigned_companies || me?.scopes || ['CORP_ALPHA', 'BANK_DELTA'];
 
   // Prioritize active/assigned client portfolios first, followed by restricted portfolios
@@ -26,12 +29,34 @@ export default function Portfolios() {
     });
   }, [portfolios, assignedScopes]);
 
+  const checkScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      checkScroll();
+      el.addEventListener('scroll', checkScroll, { passive: true });
+      window.addEventListener('resize', checkScroll);
+      return () => {
+        el.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+      };
+    }
+  }, [sortedPortfolios]);
+
   const handleScroll = (direction) => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -360 : 360,
+        left: direction === 'left' ? -380 : 380,
         behavior: 'smooth'
       });
+      setTimeout(checkScroll, 350);
     }
   };
 
@@ -65,74 +90,96 @@ export default function Portfolios() {
           <span className="adm-pill adm-pill--blue" style={{ margin: 0 }}>
             AUTHORIZED SCOPES: {assignedScopes.join(', ')}
           </span>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              type="button"
-              onClick={() => handleScroll('left')}
-              title="Scroll Left"
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '10px',
-                border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                background: isDark ? '#1e293b' : '#ffffff',
-                color: isDark ? '#cbd5e1' : '#475569',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => handleScroll('right')}
-              title="Scroll Right"
-              style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '10px',
-                border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                background: isDark ? '#1e293b' : '#ffffff',
-                color: isDark ? '#cbd5e1' : '#475569',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Side-Scrolling Horizontal Container */}
-      <div 
-        ref={scrollContainerRef}
-        className="stf-cards"
-        style={{ 
-          display: 'flex', 
-          flexWrap: 'nowrap', 
-          gap: '24px', 
-          marginTop: '24px', 
-          overflowX: 'auto', 
-          overflowY: 'hidden',
-          paddingBottom: '20px',
-          paddingTop: '6px',
-          paddingLeft: '4px',
-          paddingRight: '4px',
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'thin'
-        }}
-      >
-        {sortedPortfolios.map((p) => {
-          const isMine = assignedScopes.includes(p.scope);
+      {/* Side-Scrolling Carousel with Floating Side Arrows */}
+      <div style={{ position: 'relative', marginTop: '24px' }}>
+        {/* Left Side Scroll Arrow */}
+        {canScrollLeft && (
+          <button
+            type="button"
+            onClick={() => handleScroll('left')}
+            title="Scroll Left"
+            aria-label="Scroll Left"
+            style={{
+              position: 'absolute',
+              left: '-16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 20,
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+              background: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              color: isDark ? '#f8fafc' : '#0f172a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ChevronLeft size={22} />
+          </button>
+        )}
+
+        {/* Right Side Scroll Arrow */}
+        {canScrollRight && (
+          <button
+            type="button"
+            onClick={() => handleScroll('right')}
+            title="Scroll Right"
+            aria-label="Scroll Right"
+            style={{
+              position: 'absolute',
+              right: '-16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 20,
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+              background: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              color: isDark ? '#f8fafc' : '#0f172a',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <ChevronRight size={22} />
+          </button>
+        )}
+
+        {/* Side-Scrolling Horizontal Container */}
+        <div 
+          ref={scrollContainerRef}
+          className="stf-cards"
+          style={{ 
+            display: 'flex', 
+            flexWrap: 'nowrap', 
+            gap: '24px', 
+            overflowX: 'auto', 
+            overflowY: 'hidden',
+            paddingBottom: '20px',
+            paddingTop: '6px',
+            paddingLeft: '4px',
+            paddingRight: '4px',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin'
+          }}
+        >
+          {sortedPortfolios.map((p) => {
+            const isMine = assignedScopes.includes(p.scope);
 
           return (
             <div 
@@ -243,6 +290,7 @@ export default function Portfolios() {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
