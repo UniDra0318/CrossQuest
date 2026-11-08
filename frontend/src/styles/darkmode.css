@@ -2837,5 +2837,11 @@ html.dark .xp-badge-chip,
   color: #f1f5f9 !important;
 }
 
+html.dark .topbar-logo-img,
+[data-theme="dark"] .topbar-logo-img {
+  filter: brightness(0) invert(1) !important;
+}
+
+
 
 

@@ -20,8 +20,6 @@ import {
   RefreshCw,
   ShieldCheck,
   ShieldAlert,
-  PanelLeftClose,
-  PanelLeftOpen,
   ChevronUp,
   ChevronDown,
   Sun,
@@ -169,9 +167,9 @@ export default function Sidebar({
   return (
     <>
       <aside className={`enterprise-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-        {/* Brand Header */}
-        <div className="sidebar-brand-wrapper">
-          {!isCollapsed ? (
+        {/* Brand Header (Only shown when expanded; when collapsed, brand moves to Topbar and hide button is removed) */}
+        {!isCollapsed && (
+          <div className="sidebar-brand-wrapper">
             <div 
               className="sidebar-brand" 
               onClick={() => {
@@ -185,33 +183,8 @@ export default function Sidebar({
                 ENTERPRISE LEARNING
               </span>
             </div>
-          ) : (
-            <div 
-              className="sidebar-brand-collapsed"
-              onClick={() => {
-                setActiveView(navItems[0]?.id || 'admin_overview');
-                navigate('/dashboard');
-              }}
-              title="CrossQuest Enterprise"
-            >
-              <div className="collapsed-cq-monogram">
-                <span>CQ</span>
-              </div>
-            </div>
-          )}
-
-          {onToggleCollapse && (
-            <button
-              type="button"
-              className="sidebar-toggle-action"
-              onClick={onToggleCollapse}
-              title={isCollapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}
-              aria-label="Toggle Sidebar"
-            >
-              {isCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
-            </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Role Banner */}
         {!isCollapsed ? (

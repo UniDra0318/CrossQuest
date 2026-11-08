@@ -475,7 +475,7 @@
 }
 
 .sidebar-role-banner-collapsed {
-  margin: 10px 12px;
+  margin: 16px 12px 10px;
   height: 32px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
@@ -1136,6 +1136,24 @@
   background: #f1f5f9;
   color: #0f172a;
   border-color: #cbd5e1;
+}
+
+/* Collapsed brand logo in Topbar */
+.topbar-brand-logo-collapsed {
+  display: flex;
+  align-items: center;
+  transition: transform 0.15s ease;
+}
+
+.topbar-brand-logo-collapsed:hover {
+  transform: translateY(-1px);
+}
+
+.topbar-logo-img {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
 /* Security clearance details modal */

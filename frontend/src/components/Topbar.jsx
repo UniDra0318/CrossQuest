@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Flame, 
   Sun, 
@@ -10,6 +11,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import DevRoleSwitcherModal from './DevRoleSwitcherModal';
 import { useAuth } from '../contexts/AuthContext';
+import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 /**
  * Topbar - global header bar rendered by MainAppShell for all authenticated roles.
@@ -22,6 +24,7 @@ export default function Topbar({
   isSidebarCollapsed = false, 
   onToggleSidebar 
 }) {
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [showRoleModal, setShowRoleModal] = useState(false);
   const { isDark, toggleTheme } = useTheme();
@@ -30,7 +33,7 @@ export default function Topbar({
     <>
       <header className="gamified-topbar">
         {/* Left: Sidebar Collapse/Expand Toggle & Section Breadcrumb */}
-        <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           {onToggleSidebar && (
             <button
               type="button"
@@ -43,11 +46,33 @@ export default function Topbar({
             </button>
           )}
 
+          {isSidebarCollapsed && (
+            <div 
+              className="topbar-brand-logo-collapsed"
+              onClick={() => navigate('/dashboard')}
+              title="Go to Dashboard Home"
+              style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            >
+              <img 
+                src={logoStacked} 
+                alt="CrossQuest Logo" 
+                className="topbar-logo-img" 
+              />
+            </div>
+          )}
+
           <div className="topbar-breadcrumbs" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', color: isDark ? '#94a3b8' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              CrossQuest
-            </span>
-            <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '14px', fontWeight: '400' }}>/</span>
+            {!isSidebarCollapsed && (
+              <>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: isDark ? '#94a3b8' : '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  CrossQuest
+                </span>
+                <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '14px', fontWeight: '400' }}>/</span>
+              </>
+            )}
+            {isSidebarCollapsed && (
+              <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '14px', fontWeight: '400' }}>/</span>
+            )}
             <span className="crumb-active" style={{ fontSize: '14px', fontWeight: '800', color: isDark ? '#f8fafc' : '#0f172a' }}>
               {activeViewTitle}
             </span>
