@@ -1,11 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Layers } from 'lucide-react';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { useTrainer } from '../TrainerContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
-export default function Cohorts({ onNavigateTab }) {
+export default function Cohorts() {
   const { cohorts, loading } = useTrainer();
+  const navigate = useNavigate();
   const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
   const isDark = effectiveTheme === 'dark';
 
@@ -63,6 +65,11 @@ export default function Cohorts({ onNavigateTab }) {
         {cohorts && cohorts.length > 0 ? (
           cohorts.map((cohort) => {
             const passPercent = cohort.enrolled ? Math.round((cohort.certified / cohort.enrolled) * 100) : 0;
+            const isSignedOff = Boolean(cohort.signed_off || cohort.trainer_signed_off || cohort.status === 'Completed');
+            const isFuture = !isSignedOff && cohort.schedule && new Date(cohort.schedule.split(' ')[0]) > new Date();
+            const sessionStatus = isSignedOff ? 'Signed off' : isFuture ? 'Future' : 'Awaiting sign-off';
+            const statusClass = isSignedOff ? 'adm-chip--green' : isFuture ? 'adm-chip--blue' : 'adm-chip--orange';
+
             return (
               <div
                 key={cohort.id}
@@ -76,7 +83,7 @@ export default function Cohorts({ onNavigateTab }) {
               >
               <div className="trn-card__top">
                 <span className="adm-chip adm-chip--green">{cohort.id}</span>
-                <span className="adm-chip adm-chip--solid">{cohort.status}</span>
+                <span className={`adm-chip ${statusClass}`}>{sessionStatus}</span>
               </div>
 
               <span className="adm-mono" style={{ color: isDark ? '#cbd5e1' : '#64748b' }}>{cohort.org}</span>
@@ -101,25 +108,14 @@ export default function Cohorts({ onNavigateTab }) {
                 <strong style={{ fontSize: '15px', color: isDark ? '#f8fafc' : '#0f172a' }}>{cohort.avg}%</strong>
               </div>
 
-              <div className="trn-actions">
-                <button
-                  type="button"
-                  className="adm-btn adm-btn--light"
-                  style={{
-                    background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#ffffff',
-                    color: isDark ? '#f1f5f9' : '#0f172a',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid var(--cq-line)'
-                  }}
-                  onClick={() => onNavigateTab && onNavigateTab('roster')}
-                >
-                  Inspect Roster
-                </button>
+              <div className="trn-actions" style={{ marginTop: '16px' }}>
                 <button
                   type="button"
                   className="adm-btn adm-btn-solid cq-btn--purple"
-                  onClick={() => onNavigateTab && onNavigateTab('grade')}
+                  style={{ width: '100%' }}
+                  onClick={() => navigate(`/trainer/sessions/${cohort.id}`)}
                 >
-                  Grade Trainees
+                  Inspect Session (Roster & Sign-off)
                 </button>
               </div>
             </div>

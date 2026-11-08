@@ -14,22 +14,13 @@ import './trainer.css';
 export default function TrainerLayout({ activeTab, onTabChange, children }) {
   const renderHeader = () => {
     switch (activeTab) {
-      case 'roster':
+      case 'session_detail':
         return (
           <PageHeader
-            title="My Sessions"
-            subtitle="Enrolled trainees, attendance checklists, and cohort participants."
+            title="Session Workspace"
+            subtitle="Inspect cohort roster, participant attendance, and execute sign-off."
             badge="INSTRUCTOR"
             badgeType="info"
-          />
-        );
-      case 'grade':
-        return (
-          <PageHeader
-            title="Session Sign-off"
-            subtitle="Verify participant completion, enter evaluations, and execute session sign-off."
-            badge="SIGN-OFF"
-            badgeType="warning"
           />
         );
       case 'quiz':
@@ -54,7 +45,7 @@ export default function TrainerLayout({ activeTab, onTabChange, children }) {
       default:
         return (
           <PageHeader
-            title="Home"
+            title="Sessions"
             subtitle="Active training cohorts, scheduled course deliveries, and upcoming sessions."
             badge="ACTIVE INSTRUCTOR"
             badgeType="success"

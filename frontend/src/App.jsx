@@ -219,7 +219,9 @@ function AppRoutes() {
       <Route path="/admin/access" element={<Navigate to="/admin/people" replace />} />
       <Route path="/admin/vault" element={<Navigate to="/admin/records" replace />} />
       <Route path="/admin/anomalies" element={<Navigate to="/admin/alerts" replace />} />
-      <Route path="/trainer/roster" element={<Navigate to="/trainer/sessions" replace />} />
+      <Route path="/trainer/roster" element={<Navigate to="/trainer" replace />} />
+      <Route path="/trainer/sessions" element={<Navigate to="/trainer" replace />} />
+      <Route path="/trainer/grade" element={<Navigate to="/trainer" replace />} />
       <Route path="/trainer/quiz" element={<Navigate to="/trainer/quizzes" replace />} />
       <Route path="/trainer/analytics" element={<Navigate to="/trainer/results" replace />} />
       <Route path="/finance/reconciliation" element={<Navigate to="/finance/import" replace />} />
@@ -243,7 +245,7 @@ function AppRoutes() {
         path="/trainees" 
         element={
           currentRole === 'trainer' 
-            ? <Navigate to="/trainer/sessions" replace /> 
+            ? <Navigate to="/trainer" replace /> 
             : currentRole === 'finance' 
               ? <Navigate to="/finance" replace /> 
               : <Navigate to="/am" replace />

@@ -39,11 +39,10 @@ export const ROUTES = [
   { path: '/am/records',     roles: ['account_manager'], label: null,       page: 'records_vault',       icon: FileText },
 
   // Trainer
-  { path: '/trainer',          roles: ['trainer'], label: 'Home',              page: 'trainer_courses',   icon: LayoutDashboard },
-  { path: '/trainer/sessions', roles: ['trainer'], label: 'My Sessions',       page: 'trainee_roster',    icon: BookOpen },
-  { path: '/trainer/grade',    roles: ['trainer'], label: 'Session Sign-off',  page: 'grade_entry',       icon: CheckSquare },
-  { path: '/trainer/quizzes',  roles: ['trainer'], label: 'Quizzes and Teams', page: 'quiz_creator',      icon: Sparkles },
-  { path: '/trainer/results',  roles: ['trainer'], label: 'Results',           page: 'trainer_analytics', icon: BarChart3 },
+  { path: '/trainer',              roles: ['trainer'], label: 'Sessions',          page: 'trainer_courses',        icon: LayoutDashboard },
+  { path: '/trainer/sessions/:id', roles: ['trainer'], label: null,                page: 'trainer_session_detail', icon: BookOpen },
+  { path: '/trainer/quizzes',      roles: ['trainer'], label: 'Quizzes and Teams', page: 'quiz_creator',           icon: Sparkles },
+  { path: '/trainer/results',      roles: ['trainer'], label: 'Results',           page: 'trainer_analytics',      icon: BarChart3 },
 
   // Finance
   { path: '/finance',         roles: ['finance'], label: 'Records',            page: 'company_trainees',       icon: FileText },
