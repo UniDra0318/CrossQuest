@@ -5881,9 +5881,9 @@ html.dark .node-active-guard,
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 28px;
+  gap: clamp(56px, 7vw, 92px);
   min-height: 200px;
-  padding: 2px 0;
+  padding: 4px 0;
 }
 
 .matching-svg-layer {
@@ -5942,16 +5942,16 @@ html.dark .node-active-guard,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 6px 12px;
+  gap: 12px;
+  padding: 7px 14px;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
+  border-radius: 11px;
   cursor: pointer;
   user-select: none;
   transition: all 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  min-height: 38px;
+  min-height: 40px;
 }
 
 .matching-item-card:hover {
@@ -11301,17 +11301,17 @@ html.dark .node-active-guard,
 
 .results-heading-compact {
   font-family: var(--font-fun);
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: 900;
   color: #0f172a;
   margin: 0;
   line-height: 1.25;
 }
 
 .results-subtext-compact {
-  font-size: 13px;
+  font-size: 14px;
   color: #475569;
-  line-height: 1.4;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -11319,27 +11319,32 @@ html.dark .node-active-guard,
 .results-stat-grid-compact {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 14px;
   width: 100%;
 }
 
 .results-stat-grid-compact .result-metric {
-  padding: 16px 14px;
-  border-radius: 14px;
-  gap: 4px;
+  padding: 18px 16px;
+  border-radius: 16px;
+  gap: 5px;
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .results-stat-grid-compact .metric-big-num {
   font-family: var(--font-fun);
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 900;
   line-height: 1.1;
 }
 
 .results-stat-grid-compact .metric-tag {
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #64748b;
   white-space: nowrap;
@@ -11350,14 +11355,14 @@ html.dark .node-active-guard,
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-top: 6px;
+  gap: 14px;
+  margin-top: 10px;
 }
 
 .results-action-col-row .btn-tactile {
-  padding: 12px 20px;
-  font-size: 14px;
-  border-radius: 12px;
+  padding: 13px 22px;
+  font-size: 14.5px;
+  border-radius: 14px;
 }
 
 /* Right Column: Leaderboards & Standings */
@@ -11372,7 +11377,7 @@ html.dark .node-active-guard,
   height: 100%;
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
-  border-radius: 20px;
+  border-radius: 22px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -11385,58 +11390,58 @@ html.dark .node-active-guard,
 }
 
 .results-interactive-panel-compact .panel-tab-btn {
-  padding: 13px 16px;
-  font-size: 13.5px;
+  padding: 15px 20px;
+  font-size: 14.5px;
   font-weight: 800;
-  gap: 8px;
+  gap: 9px;
 }
 
 .results-interactive-panel-compact .panel-tab-content {
-  padding: 18px 20px;
+  padding: 22px 24px;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 14px;
 }
 
 .results-interactive-panel-compact .res-leaderboard-row {
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
 }
 
 .results-interactive-panel-compact .res-avatar-pill {
-  width: 32px;
-  height: 32px;
-  font-size: 12px;
-}
-
-.results-interactive-panel-compact .res-user-name {
+  width: 36px;
+  height: 36px;
   font-size: 13.5px;
 }
 
+.results-interactive-panel-compact .res-user-name {
+  font-size: 14.5px;
+}
+
 .results-interactive-panel-compact .res-user-role {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .results-interactive-panel-compact .res-stat-pill {
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: 13px;
+  padding: 5px 12px;
 }
 
 .results-interactive-panel-compact .res-score-value {
-  font-size: 14.5px;
+  font-size: 16px;
 }
 
 /* Competency & Domain Mastery Stack */
 .results-domain-mastery-card {
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 14px 18px;
+  border-radius: 18px;
+  padding: 18px 22px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .domain-card-header {
@@ -11447,7 +11452,7 @@ html.dark .node-active-guard,
 
 .domain-card-title {
   font-family: var(--font-fun);
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 800;
   color: #0f172a;
   text-transform: uppercase;
@@ -11455,9 +11460,9 @@ html.dark .node-active-guard,
 }
 
 .domain-status-pill {
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 800;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 999px;
   background: #e0e7ff;
   color: #4338ca;
@@ -11466,35 +11471,36 @@ html.dark .node-active-guard,
 .domain-bars-stack {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 11px;
 }
 
 .domain-bar-row {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
 }
 
 .domain-bar-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .domain-name {
   color: #334155;
+  font-size: 13px;
 }
 
 .domain-score {
   font-weight: 800;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .domain-bar-track {
   width: 100%;
-  height: 6px;
+  height: 8px;
   background: #e2e8f0;
   border-radius: 999px;
   overflow: hidden;
@@ -11515,47 +11521,47 @@ html.dark .node-active-guard,
 .results-readiness-callout {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-  padding: 10px 14px;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 16px;
+  padding: 14px 18px;
 }
 
 .readiness-icon-box {
-  font-size: 24px;
+  font-size: 28px;
   flex-shrink: 0;
 }
 
 .readiness-text-box {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .readiness-title {
   font-family: var(--font-fun);
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 800;
   color: #1e40af;
 }
 
 .readiness-sub {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: #3b82f6;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 /* Cohort Analytics Podium Ribbon */
 .cohort-podium-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 12px 16px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  margin-bottom: 4px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  margin-bottom: 2px;
 }
 
 .podium-tile {
@@ -11563,18 +11569,18 @@ html.dark .node-active-guard,
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 2px;
+  gap: 3px;
 }
 
 .podium-val {
   font-family: var(--font-fun);
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: 900;
   color: #0f172a;
 }
 
 .podium-lbl {
-  font-size: 9.5px;
+  font-size: 10.5px;
   font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
@@ -11584,25 +11590,25 @@ html.dark .node-active-guard,
 .cohort-progress-container {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 8px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 11px 16px;
 }
 
 .cohort-progress-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #475569;
 }
 
 .cohort-progress-track {
   width: 100%;
-  height: 6px;
+  height: 8px;
   background: #e2e8f0;
   border-radius: 999px;
   overflow: hidden;
@@ -11617,19 +11623,19 @@ html.dark .node-active-guard,
 /* Squad Standings Additions */
 .squad-milestone-box {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .squad-milestone-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #334155;
 }
@@ -11639,10 +11645,10 @@ html.dark .node-active-guard,
   align-items: center;
   justify-content: space-between;
   background: #fefce8;
-  border: 1px solid #fef08a;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-size: 11.5px;
+  border: 1.5px solid #fef08a;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-size: 13px;
   color: #854d0e;
   font-weight: 700;
 }
@@ -11650,12 +11656,12 @@ html.dark .node-active-guard,
 /* Career & XP Level Progression */
 .xp-level-progression-box {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 12px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .xp-level-header {
@@ -11666,13 +11672,13 @@ html.dark .node-active-guard,
 
 .xp-level-title {
   font-family: var(--font-fun);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 800;
   color: #0f172a;
 }
 
 .xp-level-sub {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #772ce8;
 }
@@ -11680,30 +11686,30 @@ html.dark .node-active-guard,
 .xp-receipt-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 10px;
 }
 
 .xp-receipt-item {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 8px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 2px;
+  gap: 4px;
 }
 
 .xp-receipt-val {
   font-family: var(--font-fun);
-  font-size: 13.5px;
+  font-size: 16px;
   font-weight: 900;
   color: #772ce8;
 }
 
 .xp-receipt-lbl {
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #64748b;
 }
@@ -11711,18 +11717,18 @@ html.dark .node-active-guard,
 .xp-badges-unlocked-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 10px;
 }
 
 .xp-badge-chip {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 6px 8px;
-  font-size: 10.5px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
   font-weight: 700;
   color: #334155;
 }

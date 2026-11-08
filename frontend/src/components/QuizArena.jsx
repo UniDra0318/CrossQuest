@@ -884,7 +884,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 </div>
 
                 <div className="results-title-group">
-                  <Trophy size={40} className="trophy-victory text-gold flex-shrink-0" />
+                  <Trophy size={46} className="trophy-victory text-gold flex-shrink-0" />
                   <div>
                     <h2 className="results-heading-compact">
                       {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
@@ -898,7 +898,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 </div>
               </div>
 
-              {/* 6-Metric Compact Stat Grid */}
+              {/* 6-Metric Stat Grid */}
               <div className="results-stat-grid-compact">
                 <div className="result-metric">
                   <div className="metric-big-num text-purple">{finalScorePct}%</div>
@@ -937,7 +937,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               <div className="results-domain-mastery-card">
                 <div className="domain-card-header">
                   <div className="flex-align gap-6">
-                    <Target size={15} className="text-purple" />
+                    <Target size={17} className="text-purple" />
                     <span className="domain-card-title">Curriculum Competency Mastery</span>
                   </div>
                   <span className="domain-status-pill">{passed ? 'Standards Satisfied' : 'Gap Analysis Active'}</span>
@@ -1148,12 +1148,12 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 {/* TAB 2: TEAM SQUAD BATTLE */}
                 {resultsTab === 'teams' && (
                   <div className="panel-tab-content animate-fadeIn">
-                    <div className="team-contribution-callout" style={{ padding: '8px 12px' }}>
-                      <div className="flex-align gap-10">
-                        <div className="callout-icon-box" style={{ fontSize: '20px' }}>🛡️</div>
+                    <div className="team-contribution-callout" style={{ padding: '12px 16px' }}>
+                      <div className="flex-align gap-12">
+                        <div className="callout-icon-box" style={{ fontSize: '26px' }}>🛡️</div>
                         <div>
-                          <h4 className="callout-title" style={{ fontSize: '13px' }}>High-Impact Squad Contribution!</h4>
-                          <p className="callout-sub" style={{ fontSize: '11.5px' }}>
+                          <h4 className="callout-title" style={{ fontSize: '14.5px', fontWeight: 800 }}>High-Impact Squad Contribution!</h4>
+                          <p className="callout-sub" style={{ fontSize: '12.5px', margin: '2px 0 0' }}>
                             Your assessment credited <strong>+{pointsTotal} PTS</strong> to <strong>Squad Alpha</strong>, leading at #1!
                           </p>
                         </div>
@@ -1171,28 +1171,28 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       </div>
                     </div>
 
-                    <div className="team-standings-list" style={{ gap: '6px' }}>
+                    <div className="team-standings-list" style={{ gap: '10px' }}>
                       {teamStandingsData.map((t) => (
                         <div 
                           key={t.rank} 
                           className={`team-standings-card ${t.isUserTeam ? 'card-user-team' : ''}`}
-                          style={{ padding: '8px 12px' }}
+                          style={{ padding: '12px 16px' }}
                         >
-                          <div className="team-card-left flex-align gap-10">
-                            <div className="team-rank-box">#{t.rank}</div>
+                          <div className="team-card-left flex-align gap-12">
+                            <div className="team-rank-box" style={{ width: '32px', height: '32px', fontSize: '14px' }}>#{t.rank}</div>
                             <div className="team-info">
-                              <div className="team-name flex-align gap-6" style={{ fontSize: '12.5px' }}>
-                                <span>{t.icon}</span>
+                              <div className="team-name flex-align gap-6" style={{ fontSize: '14px' }}>
+                                <span style={{ fontSize: '16px' }}>{t.icon}</span>
                                 <span>{t.teamName}</span>
                                 {t.isUserTeam && <span className="tag-your-team">YOUR SQUAD</span>}
                               </div>
-                              <div className="team-meta text-xs text-secondary">
+                              <div className="team-meta text-xs text-secondary" style={{ fontSize: '12px', marginTop: '2px' }}>
                                 {t.members} Members &bull; Avg Accuracy: {t.accuracy} &bull; <span className="text-emerald font-bold">{t.trend}</span>
                               </div>
                             </div>
                           </div>
 
-                          <div className="team-score-num" style={{ fontSize: '14.5px' }}>
+                          <div className="team-score-num" style={{ fontSize: '16px' }}>
                             {t.score.toLocaleString()} PTS
                           </div>
                         </div>
@@ -1202,7 +1202,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                     {/* Squad MVP Ribbon */}
                     <div className="squad-mvp-ribbon">
                       <span>👑 Weekly Squad MVP: <strong>Dr. Sarah Jenkins</strong> (+3,450 Squad PTS)</span>
-                      <span className="badge-gamified badge-gold text-xs">1.25x Team Synergy</span>
+                      <span className="badge-gamified badge-gold text-xs" style={{ fontSize: '11.5px' }}>1.25x Team Synergy</span>
                     </div>
                   </div>
                 )}
@@ -1210,26 +1210,26 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 {/* TAB 3: XP & PROGRESSION GROWTH */}
                 {resultsTab === 'xp' && (
                   <div className="panel-tab-content animate-fadeIn">
-                    <div className="xp-growth-grid" style={{ gap: '8px' }}>
-                      <div className="xp-card" style={{ padding: '12px 10px' }}>
-                        <div className="xp-card-icon text-purple"><Sparkles size={18} /></div>
-                        <div className="xp-card-num text-purple" style={{ fontSize: '17px' }}>+{xpEarned} XP</div>
-                        <div className="xp-card-label" style={{ fontSize: '11px' }}>Corporate XP</div>
-                        <div className="xp-card-sub" style={{ fontSize: '10px' }}>Applied to Trainee Tier</div>
+                    <div className="xp-growth-grid" style={{ gap: '12px' }}>
+                      <div className="xp-card" style={{ padding: '18px 14px', minHeight: '94px' }}>
+                        <div className="xp-card-icon text-purple"><Sparkles size={22} /></div>
+                        <div className="xp-card-num text-purple" style={{ fontSize: '22px' }}>+{xpEarned} XP</div>
+                        <div className="xp-card-label" style={{ fontSize: '12.5px' }}>Corporate XP</div>
+                        <div className="xp-card-sub" style={{ fontSize: '11px' }}>Applied to Trainee Tier</div>
                       </div>
 
-                      <div className="xp-card" style={{ padding: '12px 10px' }}>
-                        <div className="xp-card-icon text-amber"><Flame size={18} /></div>
-                        <div className="xp-card-num text-amber" style={{ fontSize: '17px' }}>{streakDays} Days</div>
-                        <div className="xp-card-label" style={{ fontSize: '11px' }}>Active Streak</div>
-                        <div className="xp-card-sub" style={{ fontSize: '10px' }}>Daily Multiplier 1.25x</div>
+                      <div className="xp-card" style={{ padding: '18px 14px', minHeight: '94px' }}>
+                        <div className="xp-card-icon text-amber"><Flame size={22} /></div>
+                        <div className="xp-card-num text-amber" style={{ fontSize: '22px' }}>{streakDays} Days</div>
+                        <div className="xp-card-label" style={{ fontSize: '12.5px' }}>Active Streak</div>
+                        <div className="xp-card-sub" style={{ fontSize: '11px' }}>Daily Multiplier 1.25x</div>
                       </div>
 
-                      <div className="xp-card" style={{ padding: '12px 10px' }}>
-                        <div className="xp-card-icon text-emerald"><Shield size={18} /></div>
-                        <div className="xp-card-num text-emerald" style={{ fontSize: '15px' }}>AUDIT-PASS</div>
-                        <div className="xp-card-label" style={{ fontSize: '11px' }}>Sign-Off Status</div>
-                        <div className="xp-card-sub" style={{ fontSize: '10px' }}>August 1, 2026 Cutoff</div>
+                      <div className="xp-card" style={{ padding: '18px 14px', minHeight: '94px' }}>
+                        <div className="xp-card-icon text-emerald"><Shield size={22} /></div>
+                        <div className="xp-card-num text-emerald" style={{ fontSize: '18px' }}>AUDIT-PASS</div>
+                        <div className="xp-card-label" style={{ fontSize: '12.5px' }}>Sign-Off Status</div>
+                        <div className="xp-card-sub" style={{ fontSize: '11px' }}>August 1, 2026 Cutoff</div>
                       </div>
                     </div>
 
@@ -1242,7 +1242,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       <div className="domain-bar-track">
                         <div className="domain-bar-fill fill-purple" style={{ width: '68%' }} />
                       </div>
-                      <div className="flex-between text-xs text-secondary">
+                      <div className="flex-between text-xs text-secondary" style={{ fontSize: '12px' }}>
                         <span>3,420 / 5,000 XP (68% Complete)</span>
                         <span className="text-purple font-bold">+1,580 XP to Level 5</span>
                       </div>
@@ -1271,21 +1271,27 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                     {/* Badges Unlocked */}
                     <div className="xp-badges-unlocked-grid">
                       <div className="xp-badge-chip">
-                        <span>⚡</span>
+                        <span style={{ fontSize: '15px' }}>⚡</span>
                         <span>Speed Velocity</span>
                       </div>
                       <div className="xp-badge-chip">
-                        <span>🛡️</span>
+                        <span style={{ fontSize: '15px' }}>🛡️</span>
                         <span>Zero-Trust SEC-26</span>
                       </div>
                       <div className="xp-badge-chip">
-                        <span>🔥</span>
+                        <span style={{ fontSize: '15px' }}>🔥</span>
                         <span>Streak Shield</span>
                       </div>
                       <div className="xp-badge-chip">
-                        <span>🎯</span>
+                        <span style={{ fontSize: '15px' }}>🎯</span>
                         <span>Milestone Master</span>
                       </div>
+                    </div>
+
+                    {/* Season Career Track Milestone */}
+                    <div className="squad-mvp-ribbon" style={{ marginTop: '2px' }}>
+                      <span>🚀 <strong>Season 4 Career Benchmark:</strong> On track for Level 5 Certification.</span>
+                      <span className="badge-gamified badge-purple text-xs" style={{ fontSize: '11px' }}>Top 5% Growth</span>
                     </div>
                   </div>
                 )}
