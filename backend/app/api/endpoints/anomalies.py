@@ -79,9 +79,20 @@ def get_executive_anomaly_report(
             "disposition": a.disposition
         })
 
+    # Resolve co-administrator from database for dual-admin peer review sign-off
+    co_admin = db.query(User).filter(User.role == "admin", User.id != admin_user.id).first()
+    co_admin_name = co_admin.full_name if co_admin else "Prof. Roel Traballo"
+    co_admin_title = "Co-Administrator (Peer Review Authority)"
+
+    primary_title = "Principal Consultant & Primary Administrator" if ("Joey" in (admin_user.full_name or "") or admin_user.email == "joey.mallari@xworks.ph") else (getattr(admin_user, "title", None) or "Lead System Administrator")
+
     return {
         "generated_at": datetime.now().strftime("%B %d, %Y %H:%M PHT"),
-        "generated_by": f"{admin_user.full_name} ({admin_user.role.upper()})",
+        "generated_by": f"{admin_user.full_name} ({primary_title})",
+        "primary_admin_name": admin_user.full_name or "Primary Administrator",
+        "primary_admin_title": primary_title,
+        "co_admin_name": co_admin_name,
+        "co_admin_title": co_admin_title,
         "total_alerts": total_alerts,
         "unreviewed_alerts": unreviewed_alerts,
         "closed_alerts": closed_alerts,

@@ -568,14 +568,19 @@ class PDFGenerator:
         elements.append(Spacer(1, 14))
 
         # 6. Signatory Sign-off Block (OI-10)
+        prepared_by_name = report_data.get("prepared_by_name") or report_data.get("finance_officer_name") or "Finance Officer"
+        prepared_by_title = report_data.get("prepared_by_title") or "Finance Officer — Legacy Reconciliation Authority"
+        verified_by_name = report_data.get("verified_by_name") or report_data.get("admin_name") or "Joselito 'Joey' Mallari Jr."
+        verified_by_title = report_data.get("verified_by_title") or "Principal Consultant & Primary Administrator"
+
         sig_data = [
             [
                 Paragraph("<b>Prepared By:</b>", meta_label),
                 Paragraph("<b>Reviewed & Verified By:</b>", meta_label)
             ],
             [
-                Paragraph("________________________________________<br/><b>Finance Officer</b><br/>Crossworks Training and Consulting Corp.", meta_val),
-                Paragraph("________________________________________<br/><b>System Administrator</b><br/>Crossworks Training and Consulting Corp.", meta_val)
+                Paragraph(f"________________________________________<br/><b>{prepared_by_name}</b><br/>{prepared_by_title}<br/>Crossworks Training and Consulting Corp.", meta_val),
+                Paragraph(f"________________________________________<br/><b>{verified_by_name}</b><br/>{verified_by_title}<br/>Crossworks Training and Consulting Corp.", meta_val)
             ]
         ]
         sig_table = Table(sig_data, colWidths=[260, 260])
@@ -674,7 +679,11 @@ class PDFGenerator:
 
         # 2. Executive Metadata Box
         generated_at = report_data.get("generated_at", datetime.now().strftime("%B %d, %Y %H:%M PHT"))
-        generated_by = report_data.get("generated_by", "Dr. Sarah Jenkins (Lead Administrator)")
+        primary_admin_name = report_data.get("primary_admin_name") or "Joselito 'Joey' Mallari Jr."
+        primary_admin_title = report_data.get("primary_admin_title") or "Principal Consultant & Primary Administrator"
+        co_admin_name = report_data.get("co_admin_name") or "Prof. Roel Traballo"
+        co_admin_title = report_data.get("co_admin_title") or "Co-Administrator (Peer Review Authority)"
+        generated_by = report_data.get("generated_by") or f"{primary_admin_name} ({primary_admin_title})"
         
         meta_data = [
             [
@@ -818,8 +827,8 @@ class PDFGenerator:
                 Paragraph("<b>Co-Administrator (Peer Review Sign-off):</b>", meta_label)
             ],
             [
-                Paragraph("________________________________________<br/><b>Dr. Sarah Jenkins</b><br/>Lead System Administrator", meta_val),
-                Paragraph("________________________________________<br/><b>Prof. Roel Traballo</b><br/>Co-Administrator (Peer Review Authority)", meta_val)
+                Paragraph(f"________________________________________<br/><b>{primary_admin_name}</b><br/>{primary_admin_title}", meta_val),
+                Paragraph(f"________________________________________<br/><b>{co_admin_name}</b><br/>{co_admin_title}", meta_val)
             ]
         ]
         sig_table = Table(sig_data, colWidths=[260, 260])

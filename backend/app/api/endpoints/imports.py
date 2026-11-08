@@ -624,7 +624,22 @@ def download_reconciliation_pdf(
 ):
     """Downloads the formal Finance reconciliation report PDF (ReportLab, OI-10)."""
     report_data = get_reconciliation_report(batch_id=batch_id, db=db, current_user=current_user)
-    pdf_bytes = pdf_generator.generate_finance_reconciliation_pdf(report_data)
+    
+    # Dynamically resolve prepared_by (uploader/finance) and verified_by (admin)
+    loaded_user = db.query(User).filter(User.id == report_data.get("loaded_by_user_id")).first()
+    finance_name = (loaded_user.full_name if loaded_user else None) or current_user.full_name or "Finance Officer"
+    
+    admin_reviewer = db.query(User).filter(User.role == "admin").order_by(User.created_at.asc()).first()
+    admin_name = admin_reviewer.full_name if admin_reviewer else "Joselito 'Joey' Mallari Jr."
+    admin_title = "Principal Consultant & Primary Administrator" if "Joey" in admin_name else "Lead System Administrator"
+
+    enriched_data = dict(report_data)
+    enriched_data["prepared_by_name"] = finance_name
+    enriched_data["prepared_by_title"] = "Finance Officer — Legacy Reconciliation Authority"
+    enriched_data["verified_by_name"] = admin_name
+    enriched_data["verified_by_title"] = admin_title
+
+    pdf_bytes = pdf_generator.generate_finance_reconciliation_pdf(enriched_data)
 
     return Response(
         content=pdf_bytes,
