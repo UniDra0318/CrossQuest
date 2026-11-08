@@ -12,3 +12,4 @@ export default function Alerts({ anomalies, onDispositionComplete, currentUser }
     </div>
   );
 }
+

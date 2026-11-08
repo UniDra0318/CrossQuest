@@ -197,3 +197,4 @@ export default function RecordsVault({ records = [], token }) {
     </div>
   );
 }
+
