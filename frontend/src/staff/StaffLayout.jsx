@@ -23,7 +23,7 @@ export default function StaffLayout({ activeTab, onTabChange, children }) {
         return (
           <PageHeader
             title="Sessions"
-            subtitle="Training cohort scheduling, participant attendance tracking, and trainer hand-off."
+            subtitle="Training cohort scheduling, participant attendance tracking, and trainer hand-off. Click any active session to edit."
             badge={assignedScope ? `CLIENTS: ${assignedScope}` : 'ACTIVE SESSIONS'}
             badgeType="success"
           />

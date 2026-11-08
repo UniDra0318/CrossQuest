@@ -1,23 +1,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
-  Plus, 
-  Search, 
-  X, 
-  UserCheck, 
-  Building2, 
+import {
+  Calendar,
+  MapPin,
+  Users,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Search,
+  X,
+  UserCheck,
+  Building2,
   HelpCircle,
   Laptop,
   CheckSquare,
   ShieldAlert,
   ArrowRight,
   Award,
-  ClipboardList
+  ClipboardList,
+  Pencil,
+  Edit3,
+  Lock,
+  Eye,
+  Info
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -320,19 +325,19 @@ export default function Sessions() {
 
   return (
     <div className="am-sessions-page" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      
+
       {/* Client Switcher & Actions Strip */}
-      <div 
-        style={{ 
-          background: isDark ? '#111827' : '#ffffff', 
-          borderRadius: '20px', 
-          padding: '16px 24px', 
+      <div
+        style={{
+          background: isDark ? '#111827' : '#ffffff',
+          borderRadius: '20px',
+          padding: '16px 24px',
           border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          flexWrap: 'wrap', 
-          gap: '16px' 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -386,15 +391,50 @@ export default function Sessions() {
         </button>
       </div>
 
+      {/* Editorial Guidance Strip */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px',
+          padding: '12px 20px',
+          background: isDark ? 'rgba(2, 132, 199, 0.08)' : '#f0f9ff',
+          border: isDark ? '1px solid rgba(2, 132, 199, 0.2)' : '1px solid #bae6fd',
+          borderRadius: '16px',
+          fontSize: '12.5px',
+          color: isDark ? '#94a3b8' : '#334155'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Info size={16} color="#0284c7" />
+          <span>
+            <strong>Interactive Cohorts:</strong> Click any session card with the <span style={{ color: '#0284c7', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Pencil size={11} /> Editable</span> badge to update participant attendance, roster status, and practical evaluation scores.
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '11.5px' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: isDark ? '#fbbf24' : '#b45309', fontWeight: 700 }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b' }} /> Needs Attendance
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#0284c7', fontWeight: 700 }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0284c7' }} /> Awaiting Trainer
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 700 }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#059669' }} /> Certified
+          </span>
+        </div>
+      </div>
+
       {/* 3-Column Kanban Sessions Board */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'stretch' }}>
-        
+
         {/* Column 1: Needs Attendance */}
-        <div 
-          style={{ 
-            background: isDark ? '#0b1120' : '#f8fafc', 
-            borderRadius: '20px', 
-            padding: '18px', 
+        <div
+          style={{
+            background: isDark ? '#0b1120' : '#f8fafc',
+            borderRadius: '20px',
+            padding: '18px',
             border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
             minHeight: '520px',
             display: 'flex',
@@ -414,30 +454,30 @@ export default function Sessions() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
             {columnNeedsAttendance.length === 0 ? (
-              <div 
-                style={{ 
-                  flex: 1, 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  padding: '36px 20px', 
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '36px 20px',
                   textAlign: 'center',
                   background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
                   borderRadius: '16px',
                   border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
                 }}
               >
-                <div 
-                  style={{ 
-                    width: '46px', 
-                    height: '46px', 
-                    borderRadius: '14px', 
-                    background: isDark ? '#1e293b' : '#fef3c7', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    marginBottom: '12px' 
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: isDark ? '#1e293b' : '#fef3c7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '12px'
                   }}
                 >
                   <ClipboardList size={22} color={isDark ? '#f59e0b' : '#d97706'} />
@@ -454,23 +494,43 @@ export default function Sessions() {
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
+                  className={`am-session-card ${isDark ? 'is-dark' : 'is-light'}`}
+                  title="Click to log and edit participant attendance & roster"
                   style={{
                     background: isDark ? '#111827' : '#ffffff',
                     borderRadius: '16px',
                     padding: '16px',
                     border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    cursor: 'pointer'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#fef3c7', color: '#b45309', fontFamily: 'monospace' }}>
                       {sess.session_code}
                     </span>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
-                      {sess.client_code || sess.client_company || 'All Clients'}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                        {sess.client_code || sess.client_company || 'All Clients'}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          padding: '2px 7px',
+                          borderRadius: '6px',
+                          background: isDark ? 'rgba(245, 158, 11, 0.18)' : '#fef3c7',
+                          color: isDark ? '#fbbf24' : '#b45309',
+                          border: isDark ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid #fde68a',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          letterSpacing: '0.02em'
+                        }}
+                      >
+                        <Pencil size={10} /> Editable Roster
+                      </span>
+                    </div>
                   </div>
                   <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                     {sess.course_name}
@@ -490,8 +550,28 @@ export default function Sessions() {
                     </div>
                   </div>
                   <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700 }}>Record Roster</span>
-                    <ArrowRight size={13} color="#f59e0b" />
+                    <span style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <Clock size={12} color="#f59e0b" />
+                      Roster Pending
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        color: isDark ? '#fbbf24' : '#b45309',
+                        fontWeight: 700,
+                        background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fef3c7',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        border: isDark ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid #fde68a',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <Pencil size={11} />
+                      Log & Edit Roster
+                      <ArrowRight size={11} />
+                    </span>
                   </div>
                 </div>
               ))
@@ -500,11 +580,11 @@ export default function Sessions() {
         </div>
 
         {/* Column 2: Awaiting Trainer Sign-Off */}
-        <div 
-          style={{ 
-            background: isDark ? '#0b1120' : '#f8fafc', 
-            borderRadius: '20px', 
-            padding: '18px', 
+        <div
+          style={{
+            background: isDark ? '#0b1120' : '#f8fafc',
+            borderRadius: '20px',
+            padding: '18px',
             border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
             minHeight: '520px',
             display: 'flex',
@@ -524,30 +604,30 @@ export default function Sessions() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
             {columnAwaitingSignOff.length === 0 ? (
-              <div 
-                style={{ 
-                  flex: 1, 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  padding: '36px 20px', 
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '36px 20px',
                   textAlign: 'center',
                   background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
                   borderRadius: '16px',
                   border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
                 }}
               >
-                <div 
-                  style={{ 
-                    width: '46px', 
-                    height: '46px', 
-                    borderRadius: '14px', 
-                    background: isDark ? '#1e293b' : '#e0f2fe', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    marginBottom: '12px' 
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: isDark ? '#1e293b' : '#e0f2fe',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '12px'
                   }}
                 >
                   <Clock size={22} color={isDark ? '#38bdf8' : '#0284c7'} />
@@ -564,23 +644,43 @@ export default function Sessions() {
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
+                  className={`am-session-card ${isDark ? 'is-dark' : 'is-light'}`}
+                  title="Click to edit participant attendance & roster before trainer certification"
                   style={{
                     background: isDark ? '#111827' : '#ffffff',
                     borderRadius: '16px',
                     padding: '16px',
                     border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+                    cursor: 'pointer'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#e0f2fe', color: '#0284c7', fontFamily: 'monospace' }}>
                       {sess.session_code}
                     </span>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
-                      {sess.client_code || sess.client_company || 'All Clients'}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                        {sess.client_code || sess.client_company || 'All Clients'}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          padding: '2px 7px',
+                          borderRadius: '6px',
+                          background: isDark ? 'rgba(2, 132, 199, 0.18)' : '#e0f2fe',
+                          color: isDark ? '#38bdf8' : '#0284c7',
+                          border: isDark ? '1px solid rgba(2, 132, 199, 0.35)' : '1px solid #bae6fd',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          letterSpacing: '0.02em'
+                        }}
+                      >
+                        <Pencil size={10} /> Editable
+                      </span>
+                    </div>
                   </div>
                   <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                     {sess.course_name}
@@ -602,7 +702,25 @@ export default function Sessions() {
                   <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '11px', color: '#0284c7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <CheckSquare size={12} color="#0284c7" />
-                      Attendance Logged • Awaiting Trainer
+                      Attendance Logged
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        color: isDark ? '#38bdf8' : '#0284c7',
+                        fontWeight: 700,
+                        background: isDark ? 'rgba(2, 132, 199, 0.15)' : '#e0f2fe',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        border: isDark ? '1px solid rgba(2, 132, 199, 0.35)' : '1px solid #bae6fd',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <Pencil size={11} />
+                      Edit Roster
+                      <ArrowRight size={11} />
                     </span>
                   </div>
                 </div>
@@ -612,11 +730,11 @@ export default function Sessions() {
         </div>
 
         {/* Column 3: Completed */}
-        <div 
-          style={{ 
-            background: isDark ? '#0b1120' : '#f8fafc', 
-            borderRadius: '20px', 
-            padding: '18px', 
+        <div
+          style={{
+            background: isDark ? '#0b1120' : '#f8fafc',
+            borderRadius: '20px',
+            padding: '18px',
             border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
             minHeight: '520px',
             display: 'flex',
@@ -636,30 +754,30 @@ export default function Sessions() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
             {columnCompleted.length === 0 ? (
-              <div 
-                style={{ 
-                  flex: 1, 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  padding: '36px 20px', 
+              <div
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '36px 20px',
                   textAlign: 'center',
                   background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
                   borderRadius: '16px',
                   border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
                 }}
               >
-                <div 
-                  style={{ 
-                    width: '46px', 
-                    height: '46px', 
-                    borderRadius: '14px', 
-                    background: isDark ? '#1e293b' : '#ecfdf5', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    marginBottom: '12px' 
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '14px',
+                    background: isDark ? '#1e293b' : '#ecfdf5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '12px'
                   }}
                 >
                   <Award size={22} color={isDark ? '#34d399' : '#059669'} />
@@ -676,6 +794,8 @@ export default function Sessions() {
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
+                  className={`am-session-card ${isDark ? 'is-dark' : 'is-light'}`}
+                  title="Click to view certified records and audit sign-off details"
                   style={{
                     background: isDark ? '#111827' : '#ffffff',
                     borderRadius: '16px',
@@ -683,17 +803,35 @@ export default function Sessions() {
                     border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                     cursor: 'pointer',
-                    opacity: 0.95,
-                    transition: 'all 0.15s ease'
+                    opacity: 0.95
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#ecfdf5', color: '#059669', fontFamily: 'monospace' }}>
                       {sess.session_code}
                     </span>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
-                      {sess.client_code || sess.client_company || 'All Clients'}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>
+                        {sess.client_code || sess.client_company || 'All Clients'}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          padding: '2px 7px',
+                          borderRadius: '6px',
+                          background: isDark ? 'rgba(5, 150, 105, 0.18)' : '#ecfdf5',
+                          color: isDark ? '#34d399' : '#059669',
+                          border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          letterSpacing: '0.02em'
+                        }}
+                      >
+                        <Lock size={10} /> Certified
+                      </span>
+                    </div>
                   </div>
                   <h4 style={{ margin: '0 0 10px', fontSize: '14px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                     {sess.course_name}
@@ -717,8 +855,21 @@ export default function Sessions() {
                       <CheckCircle2 size={12} color="#059669" />
                       Signed Off & Certified
                     </span>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>
-                      {sess.trainer_sign_off_at ? formatSessionDate(sess.trainer_sign_off_at) : 'Archived'}
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        color: isDark ? '#94a3b8' : '#64748b',
+                        fontWeight: 600,
+                        background: isDark ? '#1e293b' : '#f1f5f9',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      <Eye size={11} />
+                      View Roster
                     </span>
                   </div>
                 </div>
@@ -733,7 +884,7 @@ export default function Sessions() {
       {showNewModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '24px', width: '100%', maxWidth: '620px', padding: '28px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)' }}>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>Schedule New Training Session</h3>
@@ -865,7 +1016,7 @@ export default function Sessions() {
       {activeSession && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '24px', width: '100%', maxWidth: '820px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)' }}>
-            
+
             {/* Header */}
             <div style={{ padding: '24px', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
@@ -886,9 +1037,29 @@ export default function Sessions() {
                   <span>Date: {formatSessionDate(activeSession.start_date)}</span>
                 </div>
               </div>
-              <button type="button" onClick={() => setActiveSession(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
-                <X size={20} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '4px 10px',
+                  borderRadius: '8px',
+                  background: activeSession.trainer_signed_off ? (isDark ? 'rgba(5, 150, 105, 0.15)' : '#ecfdf5') : (isDark ? 'rgba(2, 132, 199, 0.15)' : '#e0f2fe'),
+                  color: activeSession.trainer_signed_off ? '#059669' : '#0284c7',
+                  border: activeSession.trainer_signed_off ? '1px solid rgba(5, 150, 105, 0.3)' : '1px solid rgba(2, 132, 199, 0.3)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}>
+                  {activeSession.trainer_signed_off ? (
+                    <><Lock size={12} /> Certified Record (Read-Only)</>
+                  ) : (
+                    <><Pencil size={12} /> Live Editable Roster</>
+                  )}
+                </span>
+                <button type="button" onClick={() => setActiveSession(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Participants Attendance Table */}
@@ -905,9 +1076,21 @@ export default function Sessions() {
                   <thead style={{ background: isDark ? '#0f172a' : '#f8fafc', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
                     <tr>
                       <th style={{ padding: '10px 14px', fontWeight: 700 }}>PARTICIPANT</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>ATTENDANCE</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>AM STATUS</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>SCORE (OPTIONAL)</th>
+                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          ATTENDANCE <Pencil size={11} color="#0284c7" />
+                        </span>
+                      </th>
+                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          AM STATUS <Pencil size={11} color="#0284c7" />
+                        </span>
+                      </th>
+                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          SCORE (OPTIONAL) <Pencil size={11} color="#0284c7" />
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -954,15 +1137,15 @@ export default function Sessions() {
                               <option value="Not completed">Not completed</option>
                             </select>
 
-                            <span 
+                            <span
                               title="Completed status requires Trainer Sign-Off verification and cannot be assigned by Account Manager"
-                              style={{ 
-                                padding: '4px 8px', 
-                                borderRadius: '6px', 
-                                background: isDark ? '#1e293b' : '#f1f5f9', 
-                                color: isDark ? '#64748b' : '#94a3b8', 
-                                fontSize: '11px', 
-                                fontWeight: 700, 
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                background: isDark ? '#1e293b' : '#f1f5f9',
+                                color: isDark ? '#64748b' : '#94a3b8',
+                                fontSize: '11px',
+                                fontWeight: 700,
                                 cursor: 'not-allowed',
                                 display: 'inline-flex',
                                 alignItems: 'center',

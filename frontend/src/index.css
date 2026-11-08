@@ -223,3 +223,24 @@ h1, h2, h3, h4, h5, h6 {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* Account Manager Session Cards */
+.am-session-card {
+  position: relative;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  cursor: pointer;
+}
+
+.am-session-card:hover {
+  transform: translateY(-3px);
+}
+
+.am-session-card.is-dark:hover {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.35), 0 0 0 1px rgba(56, 189, 248, 0.3);
+}
+
+.am-session-card.is-light:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.18), 0 0 0 1px rgba(2, 132, 199, 0.2);
+}
