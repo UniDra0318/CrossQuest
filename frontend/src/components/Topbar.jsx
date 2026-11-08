@@ -63,8 +63,8 @@ export default function Topbar({
             </span>
             {currentUser?.organization && (
               <>
-                <span style={{ color: isDark ? '#475569' : '#cbd5e1', fontSize: '13px' }}>•</span>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: isDark ? '#94a3b8' : '#64748b' }}>
+                <span style={{ color: isDark ? '#475569' : '#94a3b8', fontSize: '13px' }}>•</span>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: isDark ? '#cbd5e1' : '#334155' }}>
                   {currentUser.organization}
                 </span>
               </>

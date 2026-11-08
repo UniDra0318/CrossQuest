@@ -116,3 +116,4 @@ if log_count == 0:
 
 db.commit()
 print("All DB seeds successfully committed!")
+

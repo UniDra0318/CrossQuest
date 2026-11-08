@@ -2017,19 +2017,27 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
             }}
           >
             {/* Modal Header */}
-            <div style={{ padding: '22px 28px', background: '#1e293b', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ 
+              padding: '22px 28px', 
+              background: isDark ? '#1e293b' : '#f8fafc', 
+              borderBottom: isDark ? '1px solid #334155' : '1px solid #e2e8f0', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between' 
+            }}>
               <div>
-                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', fontWeight: 700 }}>
+                <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: isDark ? '#94a3b8' : '#64748b', fontWeight: 700 }}>
                   PEER REVIEW WORKBENCH • OI-30
                 </span>
-                <h3 style={{ margin: '4px 0 0 0', fontSize: '18px', fontWeight: 800 }}>
+                <h3 style={{ margin: '4px 0 0 0', fontSize: '18px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                   Incident Resolution Sign-Off
                 </h3>
               </div>
               <button 
                 type="button" 
                 onClick={() => setSelectedAlertForReview(null)}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                style={{ background: 'none', border: 'none', color: isDark ? '#94a3b8' : '#64748b', cursor: 'pointer', padding: '4px' }}
+                aria-label="Close modal"
               >
                 <X size={20} />
               </button>
@@ -2254,7 +2262,7 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                 <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#e0f2fe', fontWeight: 700 }}>
                   THRESHOLD TUNING • OI-08
                 </span>
-                <h3 style={{ margin: '2px 0 0 0', fontSize: '17px', fontWeight: 800 }}>
+                <h3 style={{ margin: '2px 0 0 0', fontSize: '17px', fontWeight: 800, color: '#ffffff' }}>
                   Tune Rule: {editingRule.rule_code}
                 </h3>
               </div>
@@ -2262,6 +2270,7 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                 type="button" 
                 onClick={() => setEditingRule(null)}
                 style={{ background: 'none', border: 'none', color: '#ffffff', cursor: 'pointer' }}
+                aria-label="Close modal"
               >
                 <X size={18} />
               </button>
