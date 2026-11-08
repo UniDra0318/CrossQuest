@@ -7,6 +7,7 @@ export function TableEmptyRow({
   icon: Icon = Inbox,
   title = 'No records found',
   subtitle = 'There are no items to display at this time.',
+  action = null,
   style = {}
 }) {
   const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
@@ -47,6 +48,11 @@ export function TableEmptyRow({
               {subtitle}
             </div>
           )}
+          {action && (
+            <div style={{ marginTop: '8px' }}>
+              {action}
+            </div>
+          )}
         </div>
       </td>
     </tr>
@@ -57,6 +63,7 @@ export function TableEmptyBlock({
   icon: Icon = Inbox,
   title = 'No records found',
   subtitle = 'There are no items to display at this time.',
+  action = null,
   className = 'adm-row',
   style = {}
 }) {
@@ -100,6 +107,11 @@ export function TableEmptyBlock({
       {subtitle && (
         <div style={{ fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '420px', lineHeight: 1.45 }}>
           {subtitle}
+        </div>
+      )}
+      {action && (
+        <div style={{ marginTop: '8px' }}>
+          {action}
         </div>
       )}
     </div>

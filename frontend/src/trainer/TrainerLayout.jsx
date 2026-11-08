@@ -27,7 +27,7 @@ export default function TrainerLayout({ activeTab, onTabChange, children }) {
         return (
           <PageHeader
             title="Session Sign-off"
-            subtitle="Verify participant completion, enter final evaluations, and issue certificates."
+            subtitle="Verify participant completion, enter evaluations, and execute session sign-off."
             badge="SIGN-OFF"
             badgeType="warning"
           />

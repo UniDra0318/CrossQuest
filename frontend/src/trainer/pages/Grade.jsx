@@ -45,8 +45,8 @@ export default function Grade() {
       const initial = {};
       currentSession.records.forEach((rec) => {
         initial[rec.record_id] = {
-          status: rec.status === 'Completed' ? 'Completed' : 'Completed', // default to Completed for review
-          score: rec.score ?? 85,
+          status: rec.status === 'Completed' || rec.status === 'Not completed' ? rec.status : null,
+          score: rec.score != null ? rec.score : '',
         };
       });
       setCompletions(initial);
@@ -81,31 +81,50 @@ export default function Grade() {
     setCompletions((prev) => ({
       ...prev,
       [recordId]: {
-        ...(prev[recordId] || { score: 85 }),
+        ...(prev[recordId] || { score: '' }),
         status: newStatus,
       },
     }));
   };
 
   const handleAttendeeScoreChange = (recordId, newScore) => {
-    const val = Math.min(100, Math.max(0, Number(newScore) || 0));
+    let val = '';
+    if (newScore !== '' && newScore !== null && newScore !== undefined) {
+      val = Math.min(100, Math.max(0, Number(newScore) || 0));
+    }
     setCompletions((prev) => ({
       ...prev,
       [recordId]: {
-        ...(prev[recordId] || { status: 'Completed' }),
+        ...(prev[recordId] || { status: null }),
         score: val,
       },
     }));
   };
 
+  const records = currentSession?.records || [];
+  const totalAttendees = records.length;
+  const completedCount = records.filter(r => completions[r.record_id]?.status === 'Completed').length;
+  const notCompletedCount = records.filter(r => completions[r.record_id]?.status === 'Not completed').length;
+  const decidedCount = completedCount + notCompletedCount;
+  const allDecided = totalAttendees > 0 && decidedCount === totalAttendees;
+
   // Submit session-level sign-off
   const onExecuteSignOff = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!currentSession) return;
     if (currentSession.is_future_dated) {
       setSignOffError('Future-dated sessions cannot be signed off before the scheduled training date (Asia/Manila timezone).');
       return;
     }
+    if (!allDecided) {
+      setSignOffError(`All participants must be explicitly marked Completed or Not completed before sign-off (${decidedCount}/${totalAttendees} marked).`);
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Mark ${completedCount} Completed, ${notCompletedCount} Not completed? Certificates will be issued for ${completedCount}.`
+    );
+    if (!confirmed) return;
 
     setSigningOff(true);
     setSignOffError(null);
@@ -117,16 +136,16 @@ export default function Grade() {
         completions: Object.entries(completions).map(([recordId, data]) => ({
           record_id: recordId,
           status: data.status,
-          score: data.score,
+          score: (data.score !== '' && data.score !== null && !isNaN(Number(data.score))) ? Number(data.score) : null,
         })),
       };
 
       const res = await handleSignOffSession(currentSession.id, payload);
       setSignOffResult({
         sessionCode: currentSession.session_code,
-        certificatesIssued: res.certificates_issued ?? res.participants_updated ?? 1,
-        participantsUpdated: res.participants_updated ?? 1,
-        message: 'Training session officially signed off! Official certificates with verifiable serial IDs (AAAYYYYMMDD-01) have been generated.',
+        certificatesIssued: res.certificates_issued ?? res.participants_updated ?? completedCount,
+        participantsUpdated: res.participants_updated ?? totalAttendees,
+        message: 'Training session officially signed off! Official certificates with verifiable serial IDs have been generated.',
       });
     } catch (err) {
       setSignOffError(err.message || 'Failed to sign off training session.');
@@ -404,8 +423,8 @@ export default function Grade() {
                                   fontWeight: 700,
                                   border: 'none',
                                   cursor: isFuture ? 'not-allowed' : 'pointer',
-                                  background: comp.status === 'Completed' ? '#10b981' : '#f8fafc',
-                                  color: comp.status === 'Completed' ? '#ffffff' : '#64748b',
+                                  background: comp?.status === 'Completed' ? '#10b981' : (isDark ? '#1e293b' : '#f8fafc'),
+                                  color: comp?.status === 'Completed' ? '#ffffff' : (isDark ? '#94a3b8' : '#64748b'),
                                 }}
                               >
                                 &#10004; Completed
@@ -420,8 +439,8 @@ export default function Grade() {
                                   fontWeight: 700,
                                   border: 'none',
                                   cursor: isFuture ? 'not-allowed' : 'pointer',
-                                  background: comp.status === 'Not completed' ? '#ef4444' : '#f8fafc',
-                                  color: comp.status === 'Not completed' ? '#ffffff' : '#64748b',
+                                  background: comp?.status === 'Not completed' ? '#ef4444' : (isDark ? '#1e293b' : '#f8fafc'),
+                                  color: comp?.status === 'Not completed' ? '#ffffff' : (isDark ? '#94a3b8' : '#64748b'),
                                 }}
                               >
                                 &#10006; Not completed
@@ -443,10 +462,11 @@ export default function Grade() {
                               max="100"
                               step="0.5"
                               disabled={isFuture}
-                              value={comp.score}
+                              value={comp?.score ?? ''}
                               onChange={(e) => handleAttendeeScoreChange(rec.record_id, e.target.value)}
+                              placeholder="Optional"
                               style={{
-                                width: '70px',
+                                width: '75px',
                                 padding: '4px 8px',
                                 fontSize: '12px',
                                 border: '1px solid #cbd5e1',
@@ -528,22 +548,29 @@ export default function Grade() {
 
                 <button
                   type="button"
-                  disabled={currentSession?.is_future_dated || signingOff}
+                  disabled={currentSession?.is_future_dated || signingOff || !allDecided}
                   onClick={onExecuteSignOff}
+                  title={!allDecided ? `Please explicitly mark every participant as Completed or Not completed (${decidedCount}/${totalAttendees} marked)` : undefined}
                   style={{
-                    background: currentSession?.is_future_dated ? '#64748b' : '#6366f1',
+                    background: (currentSession?.is_future_dated || !allDecided) ? '#94a3b8' : '#6366f1',
                     color: '#ffffff',
                     border: 'none',
                     padding: '10px 20px',
                     borderRadius: '8px',
                     fontWeight: 800,
                     fontSize: '13px',
-                    cursor: currentSession?.is_future_dated ? 'not-allowed' : 'pointer',
-                    boxShadow: currentSession?.is_future_dated ? 'none' : '0 4px 12px rgba(99, 102, 241, 0.35)',
+                    cursor: (currentSession?.is_future_dated || !allDecided) ? 'not-allowed' : 'pointer',
+                    boxShadow: (currentSession?.is_future_dated || !allDecided) ? 'none' : '0 4px 12px rgba(99, 102, 241, 0.35)',
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  {signingOff ? 'Processing Sign-Off...' : currentSession?.is_future_dated ? '🔒 Sign-off Locked (Future Session)' : '✅ Execute Session Sign-Off & Issue Certificates'}
+                  {signingOff
+                    ? 'Processing Sign-Off...'
+                    : currentSession?.is_future_dated
+                    ? '🔒 Sign-off Locked (Future Session)'
+                    : !allDecided
+                    ? `⚠️ Sign-Off Pending Evaluation (${decidedCount}/${totalAttendees} Marked)`
+                    : '✅ Execute Session Sign-Off'}
                 </button>
               </div>
             </div>

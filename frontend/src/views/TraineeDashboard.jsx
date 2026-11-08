@@ -38,6 +38,7 @@ import {
 } from '../services/api';
 import BitMascot from '../components/BitMascot/BitMascot';
 import PageHeader from '../components/PageHeader';
+import { TableEmptyBlock } from '../components/TableEmptyState';
 import '../styles/admin.css';
 import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
@@ -69,6 +70,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
   // Live Certifications & Expiry Notifications State (FR-18, FR-19, DAT-05, U-15)
   const [liveCerts, setLiveCerts] = useState([]);
+  const [certsLoading, setCertsLoading] = useState(false);
+  const [certsError, setCertsError] = useState(null);
   const [certNotifications, setCertNotifications] = useState([]);
   const [certTypes, setCertTypes] = useState([]);
   const [showExternalModal, setShowExternalModal] = useState(false);
@@ -438,46 +441,17 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   const displayCertificates = (liveCerts && liveCerts.length > 0) ? liveCerts.map(c => ({
     id: c.id,
     title: c.title,
-    serialNumber: c.serial_number || 'CQ-2026-PENDING',
-    clientCompany: currentUser?.organization || 'San Miguel Conglomerate Holdings',
-    issuedOn: c.issue_date ? new Date(c.issue_date).toLocaleDateString() : '2026-08-15',
-    expiresOn: c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : '2029-08-15',
-    daysUntilExpiry: Math.max(0, Math.ceil(((new Date(c.expiry_date || Date.now())) - Date.now()) / (1000 * 60 * 60 * 24))),
+    serialNumber: c.serial_number || '',
+    clientCompany: c.client_company || currentUser?.organization || '',
+    issuedOn: c.issue_date ? new Date(c.issue_date).toLocaleDateString() : '',
+    expiresOn: c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : '',
+    daysUntilExpiry: c.expiry_date ? Math.max(0, Math.ceil(((new Date(c.expiry_date)) - Date.now()) / (1000 * 60 * 60 * 24))) : null,
     isRenewalApproaching: c.is_nearing_renewal || c.status === 'Expiring soon',
     status: c.status || 'Valid',
     isSelfReported: Boolean(c.is_self_reported),
-    credentialUrl: c.credential_url,
-    hash: `SERIAL:${c.serial_number || c.id?.substring(0, 8)}`
-  })) : [
-    {
-      id: 'cert-01',
-      title: 'ISO 31000 Certified Risk Manager',
-      serialNumber: 'SMC20260815-01',
-      clientCompany: currentUser?.organization || 'San Miguel Conglomerate Holdings',
-      issuedOn: '2026-08-15',
-      expiresOn: '2029-08-15',
-      daysUntilExpiry: 1018,
-      isRenewalApproaching: false,
-      status: 'Valid',
-      isSelfReported: false,
-      credentialUrl: null,
-      hash: 'SERIAL:SMC20260815-01'
-    },
-    {
-      id: 'cert-02',
-      title: 'Project Management Professional (PMP)',
-      serialNumber: 'SMC20231201-01',
-      clientCompany: currentUser?.organization || 'San Miguel Conglomerate Holdings',
-      issuedOn: '2023-12-01',
-      expiresOn: '2026-12-12',
-      daysUntilExpiry: 42,
-      isRenewalApproaching: true,
-      status: 'Expiring soon',
-      isSelfReported: true,
-      credentialUrl: 'https://www.credly.com/badges/juan-delacruz-pmp-2023',
-      hash: 'SERIAL:SMC20231201-01'
-    }
-  ];
+    credentialUrl: c.credential_url || null,
+    hash: c.serial_number ? `SERIAL:${c.serial_number}` : (c.id ? `ID:${c.id.substring(0, 8)}` : '')
+  })) : [];
 
   // Start quiz by ID (from assigned card or catalog)
   const handleStartQuizById = (quizId) => {
@@ -544,17 +518,29 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
   // Certification Handlers (FR-18, FR-19, DAT-05, U-15)
   const reloadCerts = async () => {
+    setCertsLoading(true);
+    setCertsError(null);
     try {
       const [cList, nList] = await Promise.all([
         fetchCertificates(token),
         fetchExpiryNotifications(token)
       ]);
-      if (cList) setLiveCerts(cList);
+      setLiveCerts(cList || []);
       if (nList) setCertNotifications(nList);
     } catch (err) {
       console.warn('Failed reloading certificates:', err);
+      setCertsError("Couldn't load records. Retry");
+      setLiveCerts([]);
+    } finally {
+      setCertsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      reloadCerts();
+    }
+  }, [token]);
 
   const handleExternalSubmit = async (e) => {
     e.preventDefault();
@@ -1147,7 +1133,26 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               </div>
             </div>
 
-            {displayCertificates.length === 0 ? (
+            {certsError ? (
+              <div style={{ padding: '24px' }}>
+                <TableEmptyBlock
+                  icon={AlertTriangle}
+                  title="Couldn't load records. Retry"
+                  subtitle="A network error occurred while loading your certificates."
+                  action={
+                    <button
+                      type="button"
+                      className="btn btn-secondary flex-align gap-8"
+                      onClick={reloadCerts}
+                      style={{ fontSize: '12.5px' }}
+                    >
+                      <RefreshCw size={14} />
+                      <span>Retry</span>
+                    </button>
+                  }
+                />
+              </div>
+            ) : displayCertificates.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8' }}>
                 <Shield size={48} style={{ margin: '0 auto 16px', opacity: 0.4 }} />
                 <h4 style={{ fontWeight: '700', marginBottom: '8px', color: '#64748b' }}>No certifications yet</h4>

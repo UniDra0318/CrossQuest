@@ -397,10 +397,6 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     }
     loadAdminData();
   }, [token]);
-  // Acknowledge / resolve anomaly
-  const handleResolveAnomaly = (id) => {
-    setAnomalies(prev => prev.map(a => a.id === id ? { ...a, status: 'RESOLVED' } : a));
-  };
   // Start inline editing staff
   const startEditStaff = (user) => {
     setEditingStaffUser(user);
@@ -747,9 +743,10 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         <button 
                           type="button" 
                           className="adm-btn adm-btn-solid adm-chip--solid"
-                          onClick={() => handleResolveAnomaly(item.id)}
+                          onClick={() => setActiveView && setActiveView('anomalies')}
+                          title="Open Peer Review Desk to investigate and resolve anomaly"
                         >
-                          <CheckCircle2 size={13} /> Acknowledge
+                          <Shield size={13} /> Review
                         </button>
                       )}
                     </div>

@@ -15,7 +15,8 @@ import {
   AlertTriangle, 
   FileSpreadsheet,
   FileText,
-  Search
+  Search,
+  RefreshCw
 } from 'lucide-react';
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import LoadingSkeleton from '../components/LoadingSkeleton';
@@ -55,46 +56,51 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
   const [records, setRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
+  const [recordsError, setRecordsError] = useState(null);
   const [recordSearch, setRecordSearch] = useState('');
 
-  useEffect(() => {
-    async function loadCompanyData() {
-      setIsLoading(true);
-      try {
-        const dbRecords = await fetchRecords(token);
-        if (dbRecords && dbRecords.length > 0) {
-          const mapped = dbRecords.map((r, idx) => {
-            const code = r.company_code || (
-              r.encryption_policy?.includes('FINTECH_BETA') ? 'FINTECH_BETA' :
-              r.encryption_policy?.includes('RETAIL_GAMMA') ? 'RETAIL_GAMMA' :
-              r.encryption_policy?.includes('BANK_DELTA') ? 'BANK_DELTA' :
-              r.encryption_policy?.includes('TELCO_EPSILON') ? 'TELCO_EPSILON' : 'CORP_ALPHA'
-            );
-            return {
-              id: r.id,
-              traineeName: r.trainee_name || `Learner ${idx + 1}`,
-              traineeEmail: r.trainee_email || `employee${idx + 1}@${code.toLowerCase()}.ph`,
-              companyCode: code,
-              companyName: r.company_name || code,
-              courseName: r.course_name,
-              status: r.status || 'completed',
-              score: r.score != null ? r.score : 90.0,
-              completionDate: r.completion_date ? new Date(r.completion_date).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : '2026-09-20')
-            };
-          });
-          setRecords(mapped);
-          setUsingFallback(false);
-        } else {
-          setRecords([]);
-          setUsingFallback(false);
-        }
-      } catch (err) {
-        console.warn("Could not load company records:", err);
-        setUsingFallback(true);
-      } finally {
-        setIsLoading(false);
+  const loadCompanyData = async () => {
+    setIsLoading(true);
+    setRecordsError(null);
+    try {
+      const dbRecords = await fetchRecords(token);
+      if (dbRecords && dbRecords.length > 0) {
+        const mapped = dbRecords.map((r) => {
+          const code = r.company_code || (
+            r.encryption_policy?.includes('FINTECH_BETA') ? 'FINTECH_BETA' :
+            r.encryption_policy?.includes('RETAIL_GAMMA') ? 'RETAIL_GAMMA' :
+            r.encryption_policy?.includes('BANK_DELTA') ? 'BANK_DELTA' :
+            r.encryption_policy?.includes('TELCO_EPSILON') ? 'TELCO_EPSILON' : 'CORP_ALPHA'
+          );
+          return {
+            id: r.id,
+            traineeName: r.trainee_name || '',
+            traineeEmail: r.trainee_email || '',
+            companyCode: code,
+            companyName: r.company_name || code,
+            courseName: r.course_name || '',
+            status: r.status || '',
+            score: r.score != null ? r.score : null,
+            completionDate: r.completion_date ? new Date(r.completion_date).toLocaleDateString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : '')
+          };
+        });
+        setRecords(mapped);
+        setUsingFallback(false);
+      } else {
+        setRecords([]);
+        setUsingFallback(false);
       }
+    } catch (err) {
+      console.warn("Could not load company records:", err);
+      setRecords([]);
+      setRecordsError("Couldn't load records. Retry");
+      setUsingFallback(false);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadCompanyData();
   }, [token]);
 
@@ -393,13 +399,41 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                 </tr>
               </thead>
               <tbody>
-                {filteredRecords && filteredRecords.length > 0 ? (
+                {recordsError ? (
+                  <TableEmptyRow
+                    colSpan={isFinance ? 6 : 5}
+                    icon={AlertTriangle}
+                    title="Couldn't load records. Retry"
+                    subtitle="A communication error occurred while retrieving training vault records."
+                    action={
+                      <button
+                        type="button"
+                        onClick={loadCompanyData}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                          background: isDark ? '#1e293b' : '#ffffff',
+                          color: isDark ? '#f8fafc' : '#0f172a',
+                          fontWeight: 600,
+                          fontSize: '12.5px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <RefreshCw size={13} /> Retry
+                      </button>
+                    }
+                  />
+                ) : filteredRecords && filteredRecords.length > 0 ? (
                   pagedTrainees.map((r) => (
                   <tr key={r.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>{r.traineeName}</span>
-                        <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>{r.traineeEmail}</span>
+                        <span style={{ fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>{r.traineeName || '—'}</span>
+                        {r.traineeEmail && <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>{r.traineeEmail}</span>}
                       </div>
                     </td>
                     {isFinance && (
@@ -409,10 +443,10 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                         </span>
                       </td>
                     )}
-                    <td style={{ padding: '12px 16px', color: '#334155' }}>{r.courseName}</td>
-                    <td style={{ padding: '12px 16px', color: '#64748b' }}>{r.completionDate || 'In Progress'}</td>
+                    <td style={{ padding: '12px 16px', color: '#334155' }}>{r.courseName || '—'}</td>
+                    <td style={{ padding: '12px 16px', color: '#64748b' }}>{r.completionDate || (r.status === 'completed' ? '—' : 'In Progress')}</td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{ color: '#059669', fontWeight: 800 }}>{r.score}%</span>
+                      <span style={{ color: '#059669', fontWeight: 800 }}>{r.score != null ? `${r.score}%` : '—'}</span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: r.status === 'completed' ? '#ecfdf5' : '#fffbeb', color: r.status === 'completed' ? '#059669' : '#b45309', border: r.status === 'completed' ? '1px solid #a7f3d0' : '1px solid #fde68a' }}>
