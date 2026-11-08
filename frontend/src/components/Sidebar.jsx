@@ -37,7 +37,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { toggleLeaderboardOptOut } from '../services/api';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DevRoleSwitcherModal from './DevRoleSwitcherModal';
-import logoStacked from '../assets/crossquest-logo-stacked.svg';
+import logoStackedWhite from '../assets/crossquest-logo-stacked-white.svg';
 
 /**
  * Sidebar - single unified persistent navigation sidebar for all authenticated roles.
@@ -178,7 +178,7 @@ export default function Sidebar({
               }}
               title="Go to Dashboard Home"
             >
-              <img src={logoStacked} alt="CrossQuest Logo" className="sidebar-brand-img" />
+              <img src={logoStackedWhite} alt="CrossQuest Logo" className="sidebar-brand-img" />
               <span className="sidebar-brand-sub-badge">
                 ENTERPRISE LEARNING
               </span>

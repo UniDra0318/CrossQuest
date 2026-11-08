@@ -343,9 +343,10 @@
    ========================================= */
 .enterprise-sidebar {
   width: 260px;
-  background-color: #002236 !important;
+  background-color: #163859 !important;
+  background: linear-gradient(180deg, #183e63 0%, #133352 100%) !important;
   color: #ffffff !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -368,7 +369,7 @@
   justify-content: space-between;
   padding: 18px 16px 14px;
   position: relative;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .enterprise-sidebar.collapsed .sidebar-brand-wrapper {
@@ -399,7 +400,7 @@
   font-size: 8.5px;
   font-weight: 800;
   letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
   font-family: var(--font-fun);
 }
@@ -621,7 +622,7 @@
   height: 10px;
   border-radius: 50%;
   background: #10b981;
-  border: 2px solid #002236;
+  border: 2px solid #163859;
 }
 
 .user-info-text {
@@ -8819,8 +8820,9 @@ html.dark .node-active-guard,
 
 /* Sidebar Modern Polish (Crossworks Corporate) */
 .enterprise-sidebar {
-  background-color: #002236 !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: #163859 !important;
+  background: linear-gradient(180deg, #183e63 0%, #133352 100%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .sidebar-brand-sub-badge {
