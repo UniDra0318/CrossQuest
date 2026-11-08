@@ -553,9 +553,7 @@ export async function downloadBatchReconciliationCsv(batchId, token) {
 
 export async function fetchAssignedClientCompanies(token) {
   try {
-    const res = await fetch(`${API_BASE}/reports/assigned-companies`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-    });
+    const res = await authFetch(`${API_BASE}/reports/assigned-companies`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API fallback for assigned companies:", err);
@@ -570,27 +568,24 @@ export async function fetchClientReport(companyCode, { startDate, endDate, statu
   if (statusFilter && statusFilter !== 'ALL') query.append('status_filter', statusFilter);
   const qStr = query.toString() ? `?${query.toString()}` : '';
 
-  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}${qStr}`, {
-    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-  });
+  const res = await authFetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}${qStr}`, {}, token);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.detail || `Failed to fetch client report (${res.status})`);
+    const error = new Error(data.detail || `Failed to fetch client report (${res.status})`);
+    error.status = res.status;
+    throw error;
   }
   return data;
 }
 
 export async function downloadClientReportPdf(companyCode, { startDate, endDate, statusFilter } = {}, token) {
-  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const query = new URLSearchParams();
   if (startDate) query.append('start_date', startDate);
   if (endDate) query.append('end_date', endDate);
   if (statusFilter && statusFilter !== 'ALL') query.append('status_filter', statusFilter);
   const qStr = query.toString() ? `?${query.toString()}` : '';
 
-  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/pdf${qStr}`, {
-    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
-  });
+  const res = await authFetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/pdf${qStr}`, {}, token);
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.detail || `Failed to download report PDF (${res.status})`);
@@ -601,16 +596,13 @@ export async function downloadClientReportPdf(companyCode, { startDate, endDate,
 }
 
 export async function downloadClientReportCsv(companyCode, { startDate, endDate, statusFilter } = {}, token) {
-  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const query = new URLSearchParams();
   if (startDate) query.append('start_date', startDate);
   if (endDate) query.append('end_date', endDate);
   if (statusFilter && statusFilter !== 'ALL') query.append('status_filter', statusFilter);
   const qStr = query.toString() ? `?${query.toString()}` : '';
 
-  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/csv${qStr}`, {
-    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
-  });
+  const res = await authFetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/csv${qStr}`, {}, token);
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.detail || `Failed to export report CSV (${res.status})`);
@@ -621,7 +613,6 @@ export async function downloadClientReportCsv(companyCode, { startDate, endDate,
 }
 
 export async function downloadClientReportExcel(companyCode, { startDate, endDate, statusFilter } = {}, token) {
-  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const query = new URLSearchParams();
   if (startDate) query.append('start_date', startDate);
   if (endDate) query.append('end_date', endDate);
@@ -629,9 +620,7 @@ export async function downloadClientReportExcel(companyCode, { startDate, endDat
   query.append('format', 'excel');
   const qStr = `?${query.toString()}`;
 
-  const res = await fetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/export${qStr}`, {
-    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
-  });
+  const res = await authFetch(`${API_BASE}/reports/company/${encodeURIComponent(companyCode)}/export${qStr}`, {}, token);
   if (!res.ok) {
     const errData = await res.json().catch(() => ({}));
     throw new Error(errData.detail || `Failed to export report Excel (${res.status})`);

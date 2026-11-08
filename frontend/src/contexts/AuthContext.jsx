@@ -419,7 +419,8 @@ export function AuthProvider({ children }) {
       if (!activeUser?.email) return;
 
       const storedToken = localStorage.getItem('crossquest_auth_token');
-      if (!storedToken || !token) {
+      const storedEmail = localStorage.getItem('crossquest_auth_email');
+      if (!storedToken || !token || storedEmail !== activeUser.email) {
         try {
           const formData = new URLSearchParams();
           formData.append('username', activeUser.email);
@@ -433,6 +434,7 @@ export function AuthProvider({ children }) {
             const data = await res.json();
             setToken(data.access_token);
             localStorage.setItem('crossquest_auth_token', data.access_token);
+            localStorage.setItem('crossquest_auth_email', activeUser.email);
           }
         } catch (e) {
           console.warn("AuthContext auto-sync warning:", e);
@@ -488,6 +490,7 @@ export function AuthProvider({ children }) {
         const data = await res.json();
         setToken(data.access_token);
         localStorage.setItem('crossquest_auth_token', data.access_token);
+        localStorage.setItem('crossquest_auth_email', user.email);
       }
     } catch (e) {
       console.warn("Could not acquire backend token for role switch:", e);

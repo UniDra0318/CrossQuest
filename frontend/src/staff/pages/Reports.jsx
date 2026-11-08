@@ -141,13 +141,14 @@ export default function Reports() {
     } catch (err) {
       console.warn('API report fetch failed, evaluating scope restriction:', err);
       const errMsg = err?.message || '';
-      if (
-        errMsg.includes('Not authorized') || 
-        errMsg.includes('403') || 
+      const is403 = err?.status === 403 ||
+        errMsg.includes('Not authorized') ||
+        errMsg.includes('403') ||
         errMsg.includes('unassigned') ||
         errMsg.includes('Forbidden') ||
-        errMsg.includes('denied')
-      ) {
+        errMsg.includes('denied');
+
+      if (is403) {
         setErrorDetails({
           type: 'OUT_OF_SCOPE',
           scope,
@@ -156,12 +157,12 @@ export default function Reports() {
         });
         setReport(null);
       } else {
-        // Show clear error state without fake sample data (Step 1c)
+        // Show clear error state without fake sample data
         setErrorDetails({
           type: 'ERROR',
           scope,
-          message: `Couldn't load records for ${scope}. Please check system connectivity and retry.`,
-          code: 500
+          message: errMsg || `Couldn't load records for ${scope}. Please check system connectivity and retry.`,
+          code: err?.status || 500
         });
         setReport(null);
       }
