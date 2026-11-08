@@ -4,25 +4,25 @@ export const DEMO_USERS = {
   // --- ADMINISTRATORS ---
   admin: {
     id: "016868d1-5238-49a4-9b3f-1cd205dbdc44",
-    email: "admin@crossworks.ph",
-    name: "Dr. Sarah Jenkins",
-    title: "System Administrator",
+    email: "joey.mallari@xworks.ph",
+    name: "Joselito 'Joey' Mallari Jr.",
+    title: "Principal Consultant & Primary Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["ALL"],
     assigned_client_accounts: ["ALL"],
-    initials: "SJ"
+    initials: "JM"
   },
-  admin_roel: {
+  admin_general: {
     id: "d3c5e17f-1854-488d-8f0f-36ff72ed1745",
-    email: "admin2@crossworks.ph",
-    name: "Prof. Roel Traballo",
-    title: "Co-Administrator",
+    email: "info@crossworks.ph",
+    name: "Crossworks Administration",
+    title: "Operations & Peer Review Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["ALL"],
     assigned_client_accounts: ["ALL"],
-    initials: "RT"
+    initials: "CA"
   },
 
   // --- ACCOUNT MANAGERS ---

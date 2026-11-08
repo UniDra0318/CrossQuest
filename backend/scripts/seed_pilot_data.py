@@ -96,9 +96,9 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
     # 2. System Administrators
     print("\n[1/7] Provisioning Administrator Accounts...")
     u_admin1 = User(
-        email="admin@crossworks.ph",
-        username="admin_sarah",
-        full_name="Dr. Sarah Jenkins",
+        email="joey.mallari@xworks.ph",
+        username="joey_mallari",
+        full_name="Joselito 'Joey' Mallari Jr.",
         hashed_password=default_pwd,
         role="admin",
         clearance_level=3,
@@ -106,9 +106,9 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
         is_superuser=True
     )
     u_admin2 = User(
-        email="admin2@crossworks.ph",
-        username="admin_roel",
-        full_name="Prof. Roel Traballo",
+        email="info@crossworks.ph",
+        username="admin_general",
+        full_name="Crossworks Administration",
         hashed_password=default_pwd,
         role="admin",
         clearance_level=3,

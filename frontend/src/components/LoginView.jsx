@@ -103,8 +103,8 @@ export default function LoginView() {
   };
 
   const roleList = [
-    { key: 'admin', title: 'Administrator', name: 'Dr. Sarah Jenkins', org: 'Crossworks Admin', icon: Shield, badgeClass: 'admin' },
-    { key: 'admin_roel', title: 'Co-Administrator', name: 'Prof. Roel Traballo', org: 'Crossworks Admin', icon: Shield, badgeClass: 'admin' },
+    { key: 'admin', title: 'Principal Consultant & Admin', name: 'Joselito "Joey" Mallari Jr.', org: 'Crossworks Leadership', icon: Shield, badgeClass: 'admin' },
+    { key: 'admin_general', title: 'Operations Administrator', name: 'Crossworks Administration', org: 'Crossworks Operations', icon: Shield, badgeClass: 'admin' },
     { key: 'account_manager', title: 'Account Manager (Vertiv & Red Oak)', name: 'Sharon De Vera', org: 'VHL_2 • ROP_3', icon: Key, badgeClass: 'staff' },
     { key: 'am_brian', title: 'Account Manager (IPRoyal & Amihan)', name: 'Brian Mendoza', org: 'IPROY_SERVI_2 • AMIHAN_SOLUTI_2', icon: Key, badgeClass: 'staff' },
     { key: 'staff_vertiv', title: 'Client HR / L&D Manager', name: 'Elena Vance', org: 'Vertiv Holdings Ltd (VHL_2)', icon: Building2, badgeClass: 'company' },
