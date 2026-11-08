@@ -4138,6 +4138,32 @@
   animation: pulseDot 1.2s infinite alternate;
 }
 
+/* Clean Auto-Save Badge in Top Bar */
+.arena-autosave-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #065f46;
+  font-family: var(--font-fun, sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+  user-select: none;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.12);
+}
+
+.autosave-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseDot 1.4s infinite alternate;
+}
+
 /* Unpausable Badge in Top Bar */
 .arena-unpausable-badge {
   display: inline-flex;

@@ -630,6 +630,14 @@ html.dark .arena-cells-grid::-webkit-scrollbar-thumb,
   background: rgba(255, 255, 255, 0.22) !important;
 }
 
+html.dark .arena-autosave-badge,
+[data-theme="dark"] .arena-autosave-badge {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #6ee7b7 !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
 html.dark .arena-session-warning-banner,
 [data-theme="dark"] .arena-session-warning-banner {
   background: rgba(245, 158, 11, 0.12) !important;

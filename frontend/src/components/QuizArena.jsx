@@ -751,14 +751,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               </div>
             )}
 
-            {/* Assessment Session Integrity & No Pause Policy Notice */}
-            <div className="briefing-unpausable-notice-box">
+            {/* Continuous Auto-Save Protection Notice */}
+            <div className="briefing-unpausable-notice-box" style={{ background: 'rgba(16, 185, 129, 0.08)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#065f46' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertTriangle size={18} className="text-amber flex-shrink-0" />
-                <strong>Continuous Assessment Session Protocol:</strong>
+                <CheckCircle2 size={18} className="text-emerald flex-shrink-0" />
+                <strong>Continuous Auto-Save Protected:</strong>
               </div>
               <div style={{ opacity: 0.9 }}>
-                Quizzes cannot be paused once initiated to preserve assessment integrity. If you experience an unstable internet connection, browser refresh, or unexpected interruption, your question answers and session progress are continuously auto-saved so you can resume immediately upon reconnecting.
+                Your progress and answers are continuously saved to your account in real time. If you experience an unstable connection or close your browser, you can resume seamlessly without losing completed questions.
               </div>
             </div>
 
@@ -938,15 +938,6 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </span>
           </div>
 
-          {/* Real-time Countdown Timer Centered in Middle */}
-          <div className="arena-center-timer">
-            <div className={`countdown-timer-chip ${timeLeft <= 10 ? 'timer-critical' : timeLeft <= 20 ? 'timer-warning' : ''}`}>
-              <Clock size={16} className={timeLeft <= 10 ? 'animate-pulse' : ''} />
-              <span className="timer-seconds-text">00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span>
-              <span className="timer-chip-status">{timeLeft <= 10 ? 'CRITICAL' : timeLeft <= 20 ? 'HURRY' : 'TIME REMAINING'}</span>
-            </div>
-          </div>
-
           <div className="arena-right-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {floatingPoint && (
               <div className="floating-points-pill">{floatingPoint}</div>
@@ -1073,33 +1064,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               )}
             </div>
 
-            {/* Unpausable Assessment Protocol Badge */}
+            {/* Clean Auto-Save Indicator */}
             <div 
-              className="arena-unpausable-badge"
-              title="Assessment Session Integrity: This quiz cannot be paused. If your internet connection drops or your browser closes, your progress is automatically saved."
+              className="arena-autosave-badge"
+              title="All answers and progress are continuously saved in real time."
             >
-              <AlertTriangle size={13} className="text-amber" />
-              <span>No Pause</span>
-              <span className="auto-saved-tag">
-                <Check size={11} strokeWidth={3} /> Auto-Saved
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Connection & Unpausable Session Warning Banner */}
-        <div className="arena-session-warning-banner">
-          <div className="warning-banner-left">
-            <AlertTriangle size={15} className="text-amber flex-shrink-0" />
-            <span>
-              <strong>Assessment in progress:</strong> You cannot pause the quiz. Your progress is continuously auto-saved if you experience an unstable connection or close your browser.
-            </span>
-          </div>
-          <div className="warning-banner-right">
-            <span className="save-status-indicator">
-              <span className="save-status-dot" />
+              <span className="autosave-pulse-dot" />
               <span>Auto-Saving Active</span>
-            </span>
+            </div>
           </div>
         </div>
 
@@ -1170,12 +1142,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           </div>
         </div>
 
-        {/* Visible Depleting Countdown Timer Bar */}
+        {/* Visible Depleting Countdown Timer Bar with Pill Timer */}
         <div className="arena-timer-bar-section">
           <div className="arena-timer-bar-top centered-timer-header">
-            <span className="arena-timer-fraction-text">
-              ⏱️ {timeLeft}s remaining of {questionTimeLimit}s
-            </span>
+            <div className={`arena-timer-clock-badge ${timeLeft <= 10 ? 'is-critical' : timeLeft <= 20 ? 'is-warning' : 'is-normal'}`}>
+              <Clock size={16} className={`timer-svg-icon ${timeLeft <= 10 ? 'animate-pulse' : ''}`} />
+              <span className="timer-seconds-text">00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}</span>
+              <span className="timer-status-hint">TIME REMAINING</span>
+            </div>
           </div>
           <div className="arena-timer-bar-track">
             <div 
