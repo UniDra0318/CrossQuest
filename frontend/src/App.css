@@ -3483,8 +3483,8 @@
 }
 
 .briefing-card {
-  width: 100%;
-  max-width: 1240px;
+  width: 92%;
+  max-width: 1080px;
   margin: 0 auto;
   border-radius: 20px;
   overflow: hidden;
@@ -3632,13 +3632,13 @@
    ========================================================================== */
 
 .quiz-arena-card {
-  width: 100%;
-  max-width: 940px;
+  width: 92%;
+  max-width: 1080px;
   margin: auto;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 24px;
-  padding: 28px 36px 36px;
+  padding: 32px 42px 42px;
   box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
@@ -4984,8 +4984,8 @@ html.dark .node-active-guard,
    ========================================================================== */
 
 .results-card {
-  width: 100%;
-  max-width: 760px;
+  width: 92%;
+  max-width: 860px;
   margin: auto;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
@@ -5239,6 +5239,126 @@ html.dark .node-active-guard,
   align-items: center;
   gap: 14px;
   margin-top: 10px;
+}
+
+.results-action-primary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 14px;
+  width: 100%;
+}
+
+/* Results Review Pop-up Modal */
+.results-review-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.results-review-modal-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 24px;
+  max-width: 980px;
+  width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.results-review-modal-header {
+  padding: 20px 28px;
+  border-bottom: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #ffffff;
+}
+
+.review-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.results-review-modal-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.results-review-modal-footer {
+  padding: 16px 28px;
+  border-top: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+}
+
+.review-hidden-notice {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.summary-item-card.item-neutral {
+  border-left: 5px solid #94a3b8;
+}
+
+.summary-status-tag.tag-neutral {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.ans-neutral {
+  color: #334155;
+}
+
+.ans-hidden {
+  color: #94a3b8;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.explanation-hidden {
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 12px;
+  border-radius: 10px;
+  padding: 12px 14px;
 }
 
 /* ==========================================================================

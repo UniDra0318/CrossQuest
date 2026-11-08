@@ -14,6 +14,7 @@ export const QUIZ_DATABASE = {
     headerColor: '#1368ce',
     timePerQuestion: 45,
     passingScore: 80,
+    showCorrectAnswers: true,
     badgeAwarded: 'sec_champ',
     description: 'Master Agile Project Management and PME methodologies. Evaluate project critical paths, agile sprint governance, and earned value metrics under the Crossworks curriculum.',
     learningObjectives: [
@@ -131,6 +132,7 @@ export const QUIZ_DATABASE = {
     headerColor: '#059669',
     timePerQuestion: 45,
     passingScore: 80,
+    showCorrectAnswers: true,
     badgeAwarded: 'crypto_knight',
     description: 'Simulate executive-level communication and high-impact stakeholder negotiations under the Crossworks CONNECT framework. Master the Pyramid Principle and strategic dialogues.',
     learningObjectives: [
@@ -248,6 +250,7 @@ export const QUIZ_DATABASE = {
     headerColor: '#dc2626',
     timePerQuestion: 45,
     passingScore: 80,
+    showCorrectAnswers: true,
     badgeAwarded: 'first_step',
     description: 'Accelerate supervisory upskilling and situational leadership. Implement the GROW coaching model, performance delegation, and constructive feedback loops.',
     learningObjectives: [
@@ -365,6 +368,7 @@ export const QUIZ_DATABASE = {
     headerColor: '#7c3aed',
     timePerQuestion: 45,
     passingScore: 80,
+    showCorrectAnswers: true,
     badgeAwarded: 'streak_master',
     description: 'Analyze business impact, recovery time objectives (RTO), and risk evaluation matrices under the ISO 31000 framework and Crossworks BCM standards.',
     learningObjectives: [

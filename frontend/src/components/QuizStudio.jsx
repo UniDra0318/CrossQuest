@@ -112,7 +112,8 @@ export default function QuizStudio() {
     timePerQuestion: 45,
     passingScore: 80,
     description: '',
-    headerColor: '#772ce8'
+    headerColor: '#772ce8',
+    showCorrectAnswers: true
   });
 
   // New Quiz state
@@ -122,6 +123,7 @@ export default function QuizStudio() {
   const [newQuizTime, setNewQuizTime] = useState(45);
   const [newQuizPassing, setNewQuizPassing] = useState(80);
   const [newQuizColor, setNewQuizColor] = useState('#772ce8');
+  const [newQuizShowCorrectAnswers, setNewQuizShowCorrectAnswers] = useState(true);
 
   const selectedQuiz = quizDb[selectedQuizId] || Object.values(quizDb)[0];
 
@@ -236,7 +238,8 @@ export default function QuizStudio() {
       timePerQuestion: selectedQuiz.timePerQuestion || 45,
       passingScore: selectedQuiz.passingScore || 80,
       description: selectedQuiz.description || '',
-      headerColor: selectedQuiz.headerColor || '#772ce8'
+      headerColor: selectedQuiz.headerColor || '#772ce8',
+      showCorrectAnswers: selectedQuiz.showCorrectAnswers !== false
     });
     setShowEditQuizModal(true);
   };
@@ -255,7 +258,8 @@ export default function QuizStudio() {
       timePerQuestion: parseInt(quizMetaForm.timePerQuestion) || 45,
       passingScore: parseInt(quizMetaForm.passingScore) || 80,
       description: quizMetaForm.description.trim(),
-      headerColor: quizMetaForm.headerColor
+      headerColor: quizMetaForm.headerColor,
+      showCorrectAnswers: quizMetaForm.showCorrectAnswers !== false
     });
 
     setQuizDb(getActiveQuizDatabase());
@@ -400,6 +404,7 @@ export default function QuizStudio() {
       headerColor: newQuizColor,
       timePerQuestion: parseInt(newQuizTime) || 45,
       passingScore: parseInt(newQuizPassing) || 80,
+      showCorrectAnswers: newQuizShowCorrectAnswers !== false,
       badgeAwarded: 'crypto_knight',
       description: newQuizDesc.trim() || 'Custom enterprise training module published by Lead Course Instructor.',
       learningObjectives: [
@@ -1547,6 +1552,17 @@ export default function QuizStudio() {
                       <Award size={13} className="text-gold" />
                       <strong>Passing Threshold:</strong> {selectedQuiz.passingScore}%
                     </span>
+                    <span className="flex-align gap-6">
+                      {selectedQuiz.showCorrectAnswers !== false ? (
+                        <span className="badge badge-emerald text-xs flex-align gap-4" title="Trainees can view answers and solutions in results review">
+                          <Eye size={12} /> Solutions Visible
+                        </span>
+                      ) : (
+                        <span className="badge badge-amber text-xs flex-align gap-4" title="Trainees can see submitted answers but solutions are kept hidden">
+                          <Lock size={12} /> Solutions Hidden
+                        </span>
+                      )}
+                    </span>
                   </div>
 
                   <button 
@@ -1827,6 +1843,23 @@ export default function QuizStudio() {
                 />
               </div>
 
+              <div className="form-group mb-16 p-12 bg-neutral-surface border-rounded" style={{ border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '10px' }}>
+                <label className="flex-align gap-10 cursor-pointer" style={{ margin: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={quizMetaForm.showCorrectAnswers !== false}
+                    onChange={(e) => setQuizMetaForm({ ...quizMetaForm, showCorrectAnswers: e.target.checked })}
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--brand-primary, #772ce8)', cursor: 'pointer' }}
+                  />
+                  <div>
+                    <div className="font-semibold text-sm">Reveal Correct Solutions in Results Review</div>
+                    <div className="text-secondary text-xs">
+                      When disabled, participants can inspect their submitted answers, but correct keys and explanations remain hidden.
+                    </div>
+                  </div>
+                </label>
+              </div>
+
               <div className="modal-actions flex-between pt-16 border-top">
                 <button
                   type="button"
@@ -1961,6 +1994,23 @@ export default function QuizStudio() {
                   value={newQuizDesc}
                   onChange={(e) => setNewQuizDesc(e.target.value)}
                 />
+              </div>
+
+              <div className="form-group mb-16 p-12 bg-neutral-surface border-rounded" style={{ border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '10px' }}>
+                <label className="flex-align gap-10 cursor-pointer" style={{ margin: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={newQuizShowCorrectAnswers}
+                    onChange={(e) => setNewQuizShowCorrectAnswers(e.target.checked)}
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--brand-primary, #772ce8)', cursor: 'pointer' }}
+                  />
+                  <div>
+                    <div className="font-semibold text-sm">Reveal Correct Solutions in Results Review</div>
+                    <div className="text-secondary text-xs">
+                      When disabled, participants can inspect their submitted answers, but correct keys and explanations remain hidden.
+                    </div>
+                  </div>
+                </label>
               </div>
 
               <div className="modal-actions flex-between pt-16 border-top">

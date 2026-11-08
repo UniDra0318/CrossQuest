@@ -22,6 +22,8 @@ import {
   FileText,
   Shuffle,
   LogOut,
+  Lock,
+  X,
   Palette,
   ChevronDown
 } from 'lucide-react';
@@ -174,6 +176,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
   // Detailed answers history for post-quiz summary
   const [answersHistory, setAnswersHistory] = useState(() => initialSession?.answersHistory || {});
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const showCorrectAnswers = quiz?.showCorrectAnswers !== false;
 
   const [timeLeft, setTimeLeft] = useState(() => initialSession?.timeLeft || quiz.timePerQuestion || 45);
   const [floatingPoint, setFloatingPoint] = useState(null);
@@ -439,7 +443,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
         }}
       >
         {/* Arena Top Navigation Bar (Integrated cleanly over dynamic theme background) */}
-        <div style={{ width: '100%', maxWidth: '1240px', marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ width: '92%', maxWidth: '1080px', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <button 
             type="button"
             className="btn-tactile btn-tactile-ghost"
@@ -482,7 +486,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           </div>
         </div>
 
-        <div className="briefing-card" style={{ ...activeTheme.cardStyle, maxWidth: '1240px', width: '100%' }}>
+        <div className="briefing-card" style={{ ...activeTheme.cardStyle, maxWidth: '1080px', width: '92%' }}>
           <div className="briefing-header-bar" style={{ backgroundColor: quiz.headerColor }}>
             <span className="briefing-category-tag">{quiz.category}</span>
             <h1 className="briefing-title">{quiz.title}</h1>
@@ -787,15 +791,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   }
 
   // ==========================================
-  // STAGE 3: RESULTS & DETAILED SUMMARY SCREEN
+  // STAGE 3: RESULTS & POP-UP REVIEW DETAILS SCREEN
   // ==========================================
   if (stage === 'completed') {
     const passed = finalScorePct >= (quiz.passingScore || 80);
-    const historyList = Object.values(answersHistory);
 
     return (
       <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
-        <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '1240px', width: '100%' }}>
+        <div className="results-card" style={{ ...activeTheme.cardStyle, maxWidth: '860px', width: '92%' }}>
           <Trophy size={64} className="trophy-victory text-gold" />
           <h2 className="results-heading">
             {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
@@ -825,95 +828,188 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
             </div>
           </div>
 
-          {/* QUESTION-BY-QUESTION REVIEW SUMMARY */}
-          <div className="results-summary-section">
-            <div className="results-summary-header">
-              <div className="summary-title-group">
-                <FileText size={20} className="text-purple" />
-                <h3>Question-by-Question Assessment Summary</h3>
-              </div>
-              <span className="summary-score-chip">
-                {correctCount} of {totalQuestions} Correct ({finalScorePct}%)
-              </span>
-            </div>
-
-            <div className="results-summary-list">
-              {questions.map((q, qIdx) => {
-                const rec = answersHistory[q.id];
-                const isCorrect = rec?.isCorrect;
-
-                return (
-                  <div key={q.id} className={`summary-item-card ${isCorrect ? 'item-correct' : 'item-wrong'}`}>
-                    <div className="summary-item-top">
-                      <div className="summary-q-meta">
-                        <span className="summary-q-num">Q{qIdx + 1}</span>
-                        <span className="summary-q-type-badge">
-                          {q.type === 'multiple_choice' && 'Multiple Choice'}
-                          {q.type === 'identification' && 'Identification'}
-                          {q.type === 'sequence_order' && 'Sequence Reordering'}
-                          {q.type === 'diagram_analysis' && 'Diagram Analysis'}
-                          {q.type === 'matching' && 'Matching Pairs'}
-                        </span>
-                      </div>
-                      <span className={`summary-status-tag ${isCorrect ? 'tag-correct' : 'tag-wrong'}`}>
-                        {isCorrect ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                        <span>{isCorrect ? 'Correct (+200 PTS)' : 'Incorrect (0 PTS)'}</span>
-                      </span>
-                    </div>
-
-                    <div className="summary-q-text">{q.question}</div>
-
-                    {q.imageUrl && (
-                      <div className="summary-image-thumbnail-box">
-                        <img src={q.imageUrl} alt="Reference Diagram" className="summary-thumbnail-img" />
-                        {q.imageCaption && <span className="summary-thumbnail-caption">{q.imageCaption}</span>}
-                      </div>
-                    )}
-
-                    <div className="summary-answers-grid">
-                      <div className="summary-answer-col user-answer">
-                        <span className="ans-label">Your Submitted Answer:</span>
-                        <div className={`ans-value ${isCorrect ? 'ans-green' : 'ans-red'}`}>
-                          {rec?.userAnswer || '(No answer provided)'}
-                        </div>
-                      </div>
-
-                      {!isCorrect && (
-                        <div className="summary-answer-col correct-answer">
-                          <span className="ans-label">Correct Solution:</span>
-                          <div className="ans-value ans-solution">
-                            {rec?.correctAnswer}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="summary-explanation-box">
-                      <div className="explanation-title">Explanation & Analysis:</div>
-                      <p>{q.explanation}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="results-action-row">
+          {/* Action Row - Immediately visible, never pushed down off screen */}
+          <div className="results-action-primary-row">
             <button 
+              type="button"
               className="btn-tactile btn-tactile-purple"
+              onClick={() => setShowReviewModal(true)}
+            >
+              <FileText size={17} />
+              <span>Review Answer Details</span>
+            </button>
+            <button 
+              type="button"
+              className="btn-tactile btn-tactile-cyan"
               onClick={handleStartAssessment}
             >
-              <RotateCcw size={16} />
+              <RotateCcw size={17} />
               <span>Retake Assessment</span>
             </button>
             <button 
+              type="button"
               className="btn-tactile btn-tactile-gold"
               onClick={handleFinishAndReturn}
             >
               <span>Return to Dashboard</span>
+              <ArrowRight size={17} />
             </button>
           </div>
         </div>
+
+        {/* POP-UP MODAL: QUESTION-BY-QUESTION REVIEW DETAILS */}
+        {showReviewModal && (
+          <div className="results-review-modal-backdrop" onClick={() => setShowReviewModal(false)}>
+            <div 
+              className="results-review-modal-card animate-scaleIn" 
+              onClick={(e) => e.stopPropagation()}
+              style={activeTheme.cardStyle}
+            >
+              <div className="results-review-modal-header">
+                <div className="summary-title-group">
+                  <FileText size={22} className="text-purple" />
+                  <div>
+                    <h3 className="modal-title" style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>
+                      Assessment Detailed Review
+                    </h3>
+                    <p className="text-secondary text-xs" style={{ margin: '2px 0 0' }}>
+                      {showCorrectAnswers 
+                        ? 'Verify submitted answers against certified answer keys and explanations.' 
+                        : 'Review questions and your submitted responses (Instructor solutions hidden).'}
+                    </p>
+                  </div>
+                </div>
+                <div className="review-header-right">
+                  <span className="summary-score-chip">
+                    {showCorrectAnswers 
+                      ? `${correctCount} of ${totalQuestions} Correct (${finalScorePct}%)`
+                      : `${totalQuestions} Questions Completed`}
+                  </span>
+                  <button 
+                    type="button" 
+                    className="btn-icon-ghost" 
+                    onClick={() => setShowReviewModal(false)}
+                    aria-label="Close review"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="results-review-modal-body">
+                {!showCorrectAnswers && (
+                  <div className="review-hidden-notice">
+                    <Lock size={16} />
+                    <span>Correct solutions and explanatory notes are hidden by the quiz instructor for this module. You can still inspect your submitted responses.</span>
+                  </div>
+                )}
+
+                <div className="results-summary-list">
+                  {questions.map((q, qIdx) => {
+                    const rec = answersHistory[q.id];
+                    const isCorrect = rec?.isCorrect;
+
+                    return (
+                      <div 
+                        key={q.id} 
+                        className={`summary-item-card ${!showCorrectAnswers ? 'item-neutral' : (isCorrect ? 'item-correct' : 'item-wrong')}`}
+                      >
+                        <div className="summary-item-top">
+                          <div className="summary-q-meta">
+                            <span className="summary-q-num">Q{qIdx + 1}</span>
+                            <span className="summary-q-type-badge">
+                              {q.type === 'multiple_choice' && 'Multiple Choice'}
+                              {q.type === 'identification' && 'Identification'}
+                              {q.type === 'sequence_order' && 'Sequence Reordering'}
+                              {q.type === 'diagram_analysis' && 'Diagram Analysis'}
+                              {q.type === 'matching' && 'Matching Pairs'}
+                            </span>
+                          </div>
+
+                          {showCorrectAnswers ? (
+                            <span className={`summary-status-tag ${isCorrect ? 'tag-correct' : 'tag-wrong'}`}>
+                              {isCorrect ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                              <span>{isCorrect ? 'Correct (+200 PTS)' : 'Incorrect (0 PTS)'}</span>
+                            </span>
+                          ) : (
+                            <span className="summary-status-tag tag-neutral">
+                              <CheckCircle size={14} />
+                              <span>Answer Submitted</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="summary-q-text">{q.question}</div>
+
+                        {q.imageUrl && (
+                          <div className="summary-image-thumbnail-box">
+                            <img src={q.imageUrl} alt="Reference Diagram" className="summary-thumbnail-img" />
+                            {q.imageCaption && <span className="summary-thumbnail-caption">{q.imageCaption}</span>}
+                          </div>
+                        )}
+
+                        <div className="summary-answers-grid">
+                          <div className="summary-answer-col user-answer">
+                            <span className="ans-label">Your Submitted Answer:</span>
+                            <div className={`ans-value ${showCorrectAnswers ? (isCorrect ? 'ans-green' : 'ans-red') : 'ans-neutral'}`}>
+                              {rec?.userAnswer || '(No answer provided)'}
+                            </div>
+                          </div>
+
+                          {showCorrectAnswers ? (
+                            !isCorrect && (
+                              <div className="summary-answer-col correct-answer">
+                                <span className="ans-label">Correct Solution:</span>
+                                <div className="ans-value ans-solution">
+                                  {rec?.correctAnswer}
+                                </div>
+                              </div>
+                            )
+                          ) : (
+                            <div className="summary-answer-col masked-answer">
+                              <span className="ans-label">Correct Solution:</span>
+                              <div className="ans-value ans-hidden">
+                                <Lock size={13} />
+                                <span>Hidden by Quiz Instructor</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {showCorrectAnswers ? (
+                          <div className="summary-explanation-box">
+                            <div className="explanation-title">Explanation & Analysis:</div>
+                            <p style={{ margin: 0 }}>{q.explanation}</p>
+                          </div>
+                        ) : (
+                          <div className="summary-explanation-box explanation-hidden">
+                            <Lock size={14} />
+                            <span>Detailed analysis and correct solutions are hidden per instructor settings.</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="results-review-modal-footer">
+                <span className="text-secondary text-xs">
+                  {showCorrectAnswers 
+                    ? 'All answers verified against Crossworks course curriculum standards.' 
+                    : 'Instructor answer protection enabled.'}
+                </span>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => setShowReviewModal(false)}
+                >
+                  Close Review
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -923,7 +1019,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // ==========================================
   return (
     <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px 36px 36px', boxSizing: 'border-box', transition: 'all 0.3s ease' }}>
-      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1240px', width: '100%' }}>
+      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1080px', width: '92%' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">

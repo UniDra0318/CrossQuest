@@ -2288,6 +2288,117 @@ html.dark .spec-val-org,
 [data-theme="dark"] .spec-val-org {
   color: #f8fafc !important;
 }
+/* ==========================================================================
+   RESULTS CARD & POPUP REVIEW MODAL DARK MODE
+   ========================================================================== */
 
+html.dark .result-metric,
+[data-theme="dark"] .result-metric {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-color: #334155 !important;
+}
 
+html.dark .results-heading,
+[data-theme="dark"] .results-heading {
+  color: #f8fafc !important;
+}
 
+html.dark .results-subtext,
+[data-theme="dark"] .results-subtext {
+  color: #94a3b8 !important;
+}
+
+html.dark .results-review-modal-card,
+[data-theme="dark"] .results-review-modal-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+html.dark .results-review-modal-header,
+[data-theme="dark"] .results-review-modal-header {
+  background: #1e293b !important;
+  border-bottom-color: #334155 !important;
+}
+
+html.dark .results-review-modal-footer,
+[data-theme="dark"] .results-review-modal-footer {
+  background: #0f172a !important;
+  border-top-color: #334155 !important;
+}
+
+html.dark .summary-item-card,
+[data-theme="dark"] .summary-item-card {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.dark .summary-item-card.item-neutral,
+[data-theme="dark"] .summary-item-card.item-neutral {
+  border-left-color: #64748b !important;
+}
+
+html.dark .summary-item-card.item-correct,
+[data-theme="dark"] .summary-item-card.item-correct {
+  border-left-color: #10b981 !important;
+}
+
+html.dark .summary-item-card.item-wrong,
+[data-theme="dark"] .summary-item-card.item-wrong {
+  border-left-color: #ef4444 !important;
+}
+
+html.dark .summary-q-text,
+[data-theme="dark"] .summary-q-text {
+  color: #f8fafc !important;
+}
+
+html.dark .summary-answer-col,
+[data-theme="dark"] .summary-answer-col {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .ans-neutral,
+[data-theme="dark"] .ans-neutral {
+  color: #e2e8f0 !important;
+}
+
+html.dark .ans-hidden,
+[data-theme="dark"] .ans-hidden {
+  color: #64748b !important;
+}
+
+html.dark .summary-explanation-box,
+[data-theme="dark"] .summary-explanation-box {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .explanation-hidden,
+[data-theme="dark"] .explanation-hidden {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+}
+
+html.dark .review-hidden-notice,
+[data-theme="dark"] .review-hidden-notice {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #fcd34d !important;
+}
+
+html.dark .summary-score-chip,
+[data-theme="dark"] .summary-score-chip {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .summary-status-tag.tag-neutral,
+[data-theme="dark"] .summary-status-tag.tag-neutral {
+  background: #334155 !important;
+  color: #cbd5e1 !important;
+}
