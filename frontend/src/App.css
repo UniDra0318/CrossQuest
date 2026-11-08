@@ -3635,8 +3635,8 @@
 .quiz-arena-card {
   width: 100%;
   max-width: 1640px;
-  min-height: 560px;
-  margin: 0 auto;
+  min-height: calc(100vh - 48px);
+  margin: auto;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 26px;
@@ -11114,12 +11114,12 @@ html.dark .node-active-guard,
 .results-card-split {
   width: 100%;
   max-width: 1640px;
-  min-height: 560px;
-  margin: 0 auto;
+  min-height: calc(100vh - 48px);
+  margin: auto;
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 26px;
-  padding: 30px 42px 36px;
+  padding: 34px 44px;
   box-shadow: 0 20px 48px rgba(15, 23, 42, 0.08);
   box-sizing: border-box;
   animation: fadeInDown 0.25s ease-out;
@@ -11130,7 +11130,7 @@ html.dark .node-active-guard,
 .results-split-layout {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
-  gap: 32px;
+  gap: 36px;
   align-items: stretch;
   flex: 1;
 }
@@ -11147,14 +11147,14 @@ html.dark .node-active-guard,
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   text-align: left;
 }
 
 .results-header-compact {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .results-top-identity-row {
@@ -11168,12 +11168,12 @@ html.dark .node-active-guard,
 .results-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .results-heading-compact {
   font-family: var(--font-fun);
-  font-size: 21px;
+  font-size: 24px;
   font-weight: 800;
   color: #0f172a;
   margin: 0;
@@ -11181,37 +11181,37 @@ html.dark .node-active-guard,
 }
 
 .results-subtext-compact {
-  font-size: 12px;
+  font-size: 13px;
   color: #475569;
   line-height: 1.4;
   margin: 0;
 }
 
-/* Compact 6-Stat Grid */
+/* 6-Stat Grid */
 .results-stat-grid-compact {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 12px;
   width: 100%;
 }
 
 .results-stat-grid-compact .result-metric {
-  padding: 10px 12px;
-  border-radius: 12px;
-  gap: 2px;
+  padding: 16px 14px;
+  border-radius: 14px;
+  gap: 4px;
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
 }
 
 .results-stat-grid-compact .metric-big-num {
   font-family: var(--font-fun);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1.1;
 }
 
 .results-stat-grid-compact .metric-tag {
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #64748b;
   white-space: nowrap;
@@ -11222,19 +11222,21 @@ html.dark .node-active-guard,
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
+  gap: 12px;
+  margin-top: 6px;
 }
 
 .results-action-col-row .btn-tactile {
-  padding: 10px 18px;
-  font-size: 13.5px;
+  padding: 12px 20px;
+  font-size: 14px;
+  border-radius: 12px;
 }
 
 /* Right Column: Leaderboards & Standings */
 .results-col-right {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .results-interactive-panel-compact {
@@ -11242,7 +11244,7 @@ html.dark .node-active-guard,
   height: 100%;
   background: #f8fafc;
   border: 1.5px solid #e2e8f0;
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -11255,43 +11257,45 @@ html.dark .node-active-guard,
 }
 
 .results-interactive-panel-compact .panel-tab-btn {
-  padding: 11px 12px;
-  font-size: 12.5px;
-  gap: 6px;
+  padding: 13px 16px;
+  font-size: 13.5px;
+  font-weight: 800;
+  gap: 8px;
 }
 
 .results-interactive-panel-compact .panel-tab-content {
-  padding: 14px 16px;
+  padding: 18px 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
 }
 
 .results-interactive-panel-compact .res-leaderboard-row {
-  padding: 7px 12px;
-  border-radius: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
 }
 
 .results-interactive-panel-compact .res-avatar-pill {
-  width: 28px;
-  height: 28px;
-  font-size: 11px;
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
 }
 
 .results-interactive-panel-compact .res-user-name {
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
 .results-interactive-panel-compact .res-user-role {
-  font-size: 10.5px;
-}
-
-.results-interactive-panel-compact .res-stat-pill {
   font-size: 11px;
 }
 
+.results-interactive-panel-compact .res-stat-pill {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
 .results-interactive-panel-compact .res-score-value {
-  font-size: 13.5px;
+  font-size: 14.5px;
 }

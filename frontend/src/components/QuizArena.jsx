@@ -851,17 +851,17 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           width: '100%', 
           minHeight: '100vh', 
           borderRadius: 0, 
-          padding: '20px 24px 48px', 
+          padding: '24px', 
           boxSizing: 'border-box', 
           display: 'flex', 
           flexDirection: 'column',
           alignItems: 'center', 
-          justifyContent: 'flex-start', 
+          justifyContent: 'center', 
           overflowY: 'auto', 
           transition: 'all 0.3s ease' 
         }}
       >
-        <div className="results-card-split" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', minHeight: '560px', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="results-card-split" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', minHeight: 'calc(100vh - 48px)', margin: 'auto', display: 'flex', flexDirection: 'column' }}>
           <div className="results-split-layout">
             
             {/* LEFT COLUMN: Personal Performance, 6 Stats & Actions */}
@@ -1279,8 +1279,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '20px 24px 48px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', transition: 'all 0.3s ease' }}>
-      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
+    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', transition: 'all 0.3s ease' }}>
+      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', minHeight: 'calc(100vh - 48px)', margin: 'auto', display: 'flex', flexDirection: 'column' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
