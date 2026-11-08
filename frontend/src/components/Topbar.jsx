@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Flame, 
-  Zap, 
   PanelLeftClose, 
   PanelLeftOpen
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import DevRoleSwitcherModal from './DevRoleSwitcherModal';
 import { useAuth } from '../contexts/AuthContext';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
+import logoStackedWhite from '../assets/crossquest-logo-stacked-white.svg';
 
 /**
  * Topbar - global header bar rendered by MainAppShell for all authenticated roles.
- * Includes sidebar collapse/expand toggle, contextual view breadcrumb, live streak indicator,
- * and dev role sandbox.
+ * Includes sidebar collapse/expand toggle, contextual view breadcrumb, and live streak indicator.
  */
 export default function Topbar({ 
   activeViewTitle, 
@@ -24,7 +22,6 @@ export default function Topbar({
 }) {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [showRoleModal, setShowRoleModal] = useState(false);
   const { isDark } = useTheme();
 
   return (
@@ -52,7 +49,7 @@ export default function Topbar({
               style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
             >
               <img 
-                src={logoStacked} 
+                src={isDark ? logoStackedWhite : logoStacked} 
                 alt="CrossQuest Logo" 
                 className="topbar-logo-img" 
               />
@@ -77,45 +74,8 @@ export default function Topbar({
           </div>
         </div>
 
-        {/* Right: Trainee Streak, Dev Role Switcher, and Theme Toggle */}
+        {/* Right: Trainee Streak */}
         <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Prominent High-Visibility Dev Role Switcher Pill */}
-          {import.meta.env.DEV && (
-            <button
-              type="button"
-              className="dev-switcher-topbar-pill"
-              onClick={() => setShowRoleModal(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 14px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
-                color: '#ffffff',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 3px 10px rgba(245, 158, 11, 0.35)',
-                fontWeight: '800',
-                fontSize: '12px',
-                transition: 'transform 0.15s ease'
-              }}
-              title="Open Developer Role Switcher Sandbox (14 personas across 5 companies)"
-            >
-              <Zap size={14} />
-              <span>DEV ROLE SWITCHER</span>
-              <span style={{
-                padding: '2px 7px',
-                borderRadius: '999px',
-                background: 'rgba(255, 255, 255, 0.28)',
-                fontSize: '11px',
-                fontWeight: '800'
-              }}>
-                {currentUser?.name?.split(' ')[0] || 'User'}
-              </span>
-            </button>
-          )}
-
           {/* Streak Pill - Trainees only */}
           {currentUser?.role === 'trainee' && (
             <div 
@@ -166,12 +126,6 @@ export default function Topbar({
           )}
         </div>
       </header>
-
-      {/* Developer Role Switcher Modal (Multi-Tenant Sandbox) */}
-      <DevRoleSwitcherModal 
-        isOpen={showRoleModal} 
-        onClose={() => setShowRoleModal(false)} 
-      />
     </>
   );
 }
