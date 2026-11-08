@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { ROLE_HOME } from '../routes/routeConfig';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
 import logoStackedWhite from '../assets/crossquest-logo-stacked-white.svg';
 
@@ -44,7 +45,7 @@ export default function Topbar({
           {isSidebarCollapsed && (
             <div 
               className="topbar-brand-logo-collapsed"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate(ROLE_HOME[currentUser?.role || 'trainee'] || '/home')}
               title="Go to Dashboard Home"
               style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
             >

@@ -39,6 +39,7 @@ import ProfileSettingsModal from './ProfileSettingsModal';
 import DevRoleSwitcherModal from './DevRoleSwitcherModal';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
 import logoStackedWhite from '../assets/crossquest-logo-stacked-white.svg';
+import { ROUTES, ROLE_HOME } from '../routes/routeConfig';
 
 /**
  * Sidebar - single unified persistent navigation sidebar for all authenticated roles.
@@ -68,58 +69,7 @@ export default function Sidebar({
   const isDark = theme === 'dark';
   const userRole = currentUser?.role || 'trainee';
 
-  // Role-specific navigation items per Section 4 of the UI/UX Improvement Plan
-  const getNavItems = () => {
-    switch (userRole) {
-      case 'admin':
-        return [
-          { id: 'admin_overview', label: 'Home', icon: LayoutDashboard },
-          { id: 'records_vault', label: 'Training Records', icon: FileText },
-          { id: 'attribute_authority', label: 'People and Access', icon: Users },
-          { id: 'anomalies', label: 'Alerts', icon: ShieldAlert },
-          { id: 'system_settings', label: 'Settings', icon: Settings }
-        ];
-
-      case 'account_manager':
-      case 'crossworks_staff':
-        return [
-          { id: 'staff_records', label: 'Home', icon: LayoutDashboard },
-          { id: 'assigned_clients', label: 'My Clients', icon: Building2 },
-          { id: 'compliance_reports', label: 'Client Reports', icon: BarChart3 }
-        ];
-
-      case 'trainer':
-        return [
-          { id: 'trainer_courses', label: 'Home', icon: LayoutDashboard },
-          { id: 'trainee_roster', label: 'My Sessions', icon: BookOpen },
-          { id: 'grade_entry', label: 'Session Sign-off', icon: CheckSquare },
-          { id: 'quiz_creator', label: 'Quizzes and Teams', icon: Sparkles },
-          { id: 'trainer_analytics', label: 'Results', icon: BarChart3 }
-        ];
-
-      case 'finance':
-      case 'company_staff':
-        return [
-          { id: 'finance_reconciliation', label: 'Home', icon: LayoutDashboard },
-          { id: 'company_overview', label: 'Enterprise Accounts', icon: Building2 },
-          { id: 'company_trainees', label: 'Records', icon: FileText },
-          { id: 'audit_certificate', label: 'Reports', icon: ShieldCheck }
-        ];
-
-      case 'trainee':
-        return [
-          { id: 'trainee_quest', label: 'Home', icon: Flame },
-          { id: 'trainee_certs', label: 'Certificates', icon: Award },
-          { id: 'trainee_quiz', label: 'Quizzes', icon: GraduationCap },
-          { id: 'trainee_badges', label: 'Badges & Leaderboard', icon: Sparkles }
-        ];
-
-      default:
-        return [];
-    }
-  };
-
-  const navItems = getNavItems();
+  const navItems = ROUTES.filter(r => r.roles.includes(userRole) && r.label);
 
   const formatRoleLabel = (role) => {
     switch (role) {
@@ -174,8 +124,7 @@ export default function Sidebar({
             <div 
               className="sidebar-brand" 
               onClick={() => {
-                setActiveView(navItems[0]?.id || 'admin_overview');
-                navigate('/dashboard');
+                navigate(ROLE_HOME[userRole] || '/home');
               }}
               title="Go to Dashboard Home"
             >
@@ -213,13 +162,18 @@ export default function Sidebar({
           <ul className="nav-list">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeView === item.id;
+              const isActive = (item.page && activeView === item.page) || window.location.pathname === item.path;
               return (
-                <li key={item.id}>
+                <li key={item.path}>
                   <button
                     type="button"
                     className={`sidebar-nav-btn ${isActive ? 'active' : ''}`}
-                    onClick={() => setActiveView(item.id)}
+                    onClick={() => {
+                      if (setActiveView && item.page) {
+                        setActiveView(item.page);
+                      }
+                      navigate(item.path);
+                    }}
                     title={isCollapsed ? item.label : undefined}
                   >
                     <Icon size={17} className="nav-btn-icon" />

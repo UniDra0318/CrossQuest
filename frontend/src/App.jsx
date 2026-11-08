@@ -15,101 +15,30 @@ import CryptoSandboxLab from './views/CryptoSandboxLab';
 import InstallPwaModal from './components/InstallPwaModal';
 import LiveQuizPopUpModal from './components/LiveQuizPopUpModal';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ROUTES, ROLE_HOME } from './routes/routeConfig';
 import './App.css';
 import './styles/darkmode.css';
 
-// Protected Route wrapper
-function ProtectedRoute({ children }) {
+/**
+ * Role-aware route guard ensuring UX consistency and immediate canonical redirection.
+ */
+export function RoleGuard({ roles, children }) {
   const { currentUser } = useAuth();
-  if (!currentUser) {
-    return <Navigate to="/login" replace />;
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (!roles.includes(currentUser.role)) {
+    return <Navigate to={ROLE_HOME[currentUser.role] || '/login'} replace />;
   }
   return children;
 }
 
-/**
- * Pure mapping helper: resolves canonical view ID based on subPage string and user role.
- * Single source of truth for both initial state and route synchronization.
- */
-export function resolveView(subPage, role) {
-  if (!subPage || subPage === 'dashboard') {
-    switch (role) {
-      case 'admin': return 'admin_overview';
-      case 'account_manager':
-      case 'crossworks_staff': return 'staff_records';
-      case 'trainer': return 'trainer_courses';
-      case 'finance':
-      case 'company_staff': return 'company_overview';
-      case 'trainee': return 'trainee_quest';
-      default: return 'overview';
-    }
-  }
-
-  switch (subPage) {
-    case 'admin_overview': return 'admin_overview';
-    case 'attribute_authority': return 'attribute_authority';
-    case 'records_vault': return 'records_vault';
-    case 'trainer_courses': return 'trainer_courses';
-    case 'trainee_roster': return 'trainee_roster';
-    case 'grade_entry': return 'grade_entry';
-    case 'quiz_creator': return 'quiz_creator';
-    case 'trainer_analytics': return 'trainer_analytics';
-    case 'quizzes': return role === 'trainer' ? 'quiz_creator' : 'trainee_quiz';
-    case 'badges': return 'trainee_badges';
-    case 'certifications': return 'trainee_certs';
-    case 'records': return role === 'admin' ? 'records_vault' : 'staff_records';
-    case 'trainees': return role === 'trainer' ? 'trainee_roster' : 'company_trainees';
-    case 'courses': return role === 'trainer' ? 'trainer_courses' : 'trainee_quest';
-    case 'anomalies': return 'anomalies';
-    case 'compliance':
-    case 'audit': return role === 'company_staff' || role === 'finance' ? 'audit_certificate' : 'compliance_reports';
-    case 'analytics': return 'trainer_analytics';
-    case 'settings': return 'system_settings';
-    case 'assigned_clients': return 'assigned_clients';
-    case 'reconciliation':
-    case 'finance_reconciliation': return 'finance_reconciliation';
-    case 'crypto_lab': return 'crypto_lab';
-    default: return subPage;
-  }
-}
-
-/**
- * Maps a viewId to its canonical URL route so navigation and browser history stay in sync.
- */
-export function getRouteForView(viewId, role) {
-  switch (viewId) {
-    case 'admin_overview': return '/admin';
-    case 'attribute_authority': return '/admin/access';
-    case 'anomalies': return role === 'admin' ? '/admin/anomalies' : '/anomalies';
-    case 'records_vault': return '/admin/vault';
-    case 'system_settings': return role === 'admin' ? '/admin/settings' : '/settings';
-    case 'trainee_quiz':
-    case 'quiz_creator': return '/quizzes';
-    case 'trainee_badges': return '/badges';
-    case 'trainee_certs': return '/certifications';
-    case 'staff_records': return '/staff';
-    case 'assigned_clients': return '/staff/portfolios';
-    case 'compliance_reports': return (role === 'crossworks_staff' || role === 'account_manager') ? '/staff/reports' : '/compliance';
-    case 'trainer_courses': return '/trainer';
-    case 'trainee_roster': return role === 'trainer' ? '/trainer/roster' : '/trainees';
-    case 'grade_entry': return '/trainer/grade';
-    case 'trainer_analytics': return '/trainer/analytics';
-    case 'company_trainees': return '/trainees';
-    case 'trainee_quest': return '/courses';
-    case 'audit_certificate': return '/compliance';
-    case 'finance_reconciliation': return '/finance/reconciliation';
-    case 'company_overview': return '/dashboard';
-    case 'crypto_lab': return '/crypto-lab';
-    default: return '/dashboard';
-  }
-}
-
-function MainAppShell({ activeSubPage }) {
+function MainAppShell({ page }) {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+
   // Trainee streak lifted here so Topbar can display live value
-  const [liveStreakDays, setLiveStreakDays] = useState(() => currentUser?.role === 'trainee' ? (currentUser?.streak ?? 7) : 7);
-  const [activeView, setActiveView] = useState(() => resolveView(activeSubPage, currentUser?.role));
+  const [liveStreakDays, setLiveStreakDays] = useState(() => 
+    currentUser?.role === 'trainee' ? (currentUser?.streak ?? 7) : 7
+  );
 
   // Collapsible sidebar state persisted in localStorage
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -162,64 +91,29 @@ function MainAppShell({ activeSubPage }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Instantly synchronize topbar streak when dev role switcher changes active persona
+  // Instantly synchronize topbar streak when role switcher changes active persona
   useEffect(() => {
     if (currentUser?.role === 'trainee') {
       setLiveStreakDays(currentUser?.streak ?? 1);
     }
   }, [currentUser]);
 
-  // Keep activeView synchronized with current route prop
-  useEffect(() => {
-    setActiveView(resolveView(activeSubPage, currentUser?.role));
-  }, [activeSubPage, currentUser?.role]);
-
-  const handleNavChange = (viewId) => {
-    setActiveView(viewId);
-    navigate(getRouteForView(viewId, currentUser?.role));
-  };
-
-  const getViewTitle = () => {
-    if (activeView === 'crypto_lab') return 'Cryptographic Lab';
-    switch (currentUser?.role) {
-      case 'admin':
-        if (activeView === 'attribute_authority') return 'People and Access';
-        if (activeView === 'anomalies') return 'Security Alerts';
-        if (activeView === 'records_vault') return 'Training Records';
-        if (activeView === 'system_settings') return 'Settings';
-        return 'Home';
-      case 'account_manager':
-      case 'crossworks_staff':
-        if (activeView === 'assigned_clients') return 'My Clients';
-        if (activeView === 'compliance_reports') return 'Client Reports';
-        return 'Home';
-      case 'trainer': 
-        if (activeView === 'quiz_creator') return 'Quizzes and Teams';
-        if (activeView === 'trainer_analytics') return 'Results';
-        if (activeView === 'grade_entry') return 'Session Sign-off';
-        if (activeView === 'trainee_roster') return 'My Sessions';
-        return 'Home';
-      case 'finance':
-      case 'company_staff':
-        if (activeView === 'finance_reconciliation') return 'Import and Reconcile';
-        if (activeView === 'company_trainees') return 'Records';
-        if (activeView === 'audit_certificate') return 'Reports';
-        return 'Home';
-      case 'trainee':
-        if (activeView === 'trainee_quiz') return 'Quizzes';
-        if (activeView === 'trainee_badges') return 'Badges & Leaderboard';
-        if (activeView === 'trainee_certs') return 'Certificates';
-        return 'Home';
-      default: return 'Home';
+  const handleNavChange = (targetPage) => {
+    const targetRoute = ROUTES.find(r => r.page === targetPage && r.roles.includes(currentUser?.role));
+    if (targetRoute) {
+      navigate(targetRoute.path);
     }
   };
 
+  const matchedRoute = ROUTES.find(r => r.page === page && r.roles.includes(currentUser?.role));
+  const activeTitle = matchedRoute?.label || (page === 'crypto_lab' ? 'Cryptographic Lab' : 'Home');
+
   return (
     <div className={`enterprise-layout ${isQuizActive ? 'quiz-mode-active' : ''}`}>
-      {/* Persistent Navigation Sidebar with Collapse & Profile Support (Hidden while taking a quiz) */}
+      {/* Persistent Navigation Sidebar with Collapse & Profile Support */}
       {!isQuizActive && (
         <Sidebar 
-          activeView={activeView} 
+          activeView={page} 
           setActiveView={handleNavChange} 
           isCollapsed={sidebarCollapsed}
           onToggleCollapse={handleToggleSidebar}
@@ -230,7 +124,7 @@ function MainAppShell({ activeSubPage }) {
       <div className={`enterprise-viewport ${isQuizActive ? 'viewport-quiz-active' : ''}`}>
         {!isQuizActive && (
           <Topbar 
-            activeViewTitle={getViewTitle()} 
+            activeViewTitle={activeTitle} 
             streakDays={liveStreakDays} 
             isSidebarCollapsed={sidebarCollapsed}
             onToggleSidebar={handleToggleSidebar}
@@ -239,36 +133,36 @@ function MainAppShell({ activeSubPage }) {
 
         <main className={`enterprise-page-area ${isQuizActive ? 'page-area-quiz-active' : ''}`}>
           <ErrorBoundary>
-          {activeView === 'crypto_lab' ? (
-            <CryptoSandboxLab />
-          ) : (
-            <>
-              {currentUser?.role === 'admin' && (
-                <AdminDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-              )}
+            {page === 'crypto_lab' ? (
+              <CryptoSandboxLab />
+            ) : (
+              <>
+                {currentUser?.role === 'admin' && (
+                  <AdminDashboard activeSubView={page} setActiveView={handleNavChange} />
+                )}
 
-              {(currentUser?.role === 'crossworks_staff' || currentUser?.role === 'account_manager') && (
-                <StaffDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-              )}
+                {currentUser?.role === 'account_manager' && (
+                  <StaffDashboard activeSubView={page} setActiveView={handleNavChange} />
+                )}
 
-              {currentUser?.role === 'trainer' && (
-                <TrainerDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-              )}
+                {currentUser?.role === 'trainer' && (
+                  <TrainerDashboard activeSubView={page} setActiveView={handleNavChange} />
+                )}
 
-              {(currentUser?.role === 'company_staff' || currentUser?.role === 'finance') && (
-                <CompanyDashboard activeSubView={activeView} setActiveView={handleNavChange} />
-              )}
+                {currentUser?.role === 'finance' && (
+                  <CompanyDashboard activeSubView={page} setActiveView={handleNavChange} />
+                )}
 
-              {currentUser?.role === 'trainee' && (
-                <TraineeDashboard 
-                  activeSubView={activeView} 
-                  setActiveView={handleNavChange} 
-                  onStreakLoad={setLiveStreakDays}
-                  onQuizActiveChange={setIsQuizActive} 
-                />
-              )}
-            </>
-          )}
+                {currentUser?.role === 'trainee' && (
+                  <TraineeDashboard 
+                    activeSubView={page} 
+                    setActiveView={handleNavChange} 
+                    onStreakLoad={setLiveStreakDays}
+                    onQuizActiveChange={setIsQuizActive} 
+                  />
+                )}
+              </>
+            )}
           </ErrorBoundary>
         </main>
       </div>
@@ -282,252 +176,97 @@ function MainAppShell({ activeSubPage }) {
 // Top level App with Routes
 function AppRoutes() {
   const { currentUser } = useAuth();
+  const currentRole = currentUser?.role || 'trainee';
+  const roleHome = ROLE_HOME[currentRole] || '/home';
 
   return (
     <Routes>
-      {/* Login Route */}
+      {/* Public Unauthenticated Routes */}
+      <Route path="/" element={<LandingView />} />
+      <Route path="/landing" element={<LandingView />} />
       <Route path="/login" element={<LoginView />} />
       <Route path="/activate" element={<ActivateAccount />} />
 
-      {/* Main Application Routes */}
+      {/* Single Route Table generation with RoleGuard */}
+      {ROUTES.map((route) => {
+        if (route.page === 'crypto_lab' && !import.meta.env.DEV) {
+          return null;
+        }
+        return (
+          <Route 
+            key={route.path}
+            path={route.path}
+            element={
+              <RoleGuard roles={route.roles}>
+                <MainAppShell page={route.page} />
+              </RoleGuard>
+            }
+          />
+        );
+      })}
+
+      {/* Canonical Role Home Redirection */}
       <Route 
         path="/dashboard" 
         element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="dashboard" />
-          </ProtectedRoute>
-        } 
+          currentUser ? <Navigate to={roleHome} replace /> : <Navigate to="/login" replace />} 
       />
-      <Route 
-        path="/quizzes" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="quizzes" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/quiz" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="quizzes" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/finance/reconciliation" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="finance_reconciliation" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/badges" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="badges" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/certifications" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="certifications" />
-          </ProtectedRoute>
-        } 
-      />
+
+      {/* Legacy and Convenience Path Redirects */}
+      <Route path="/staff" element={<Navigate to="/am" replace />} />
+      <Route path="/staff/portfolios" element={<Navigate to="/am/clients" replace />} />
+      <Route path="/staff/reports" element={<Navigate to="/am/reports" replace />} />
+      <Route path="/admin/access" element={<Navigate to="/admin/people" replace />} />
+      <Route path="/admin/vault" element={<Navigate to="/admin/records" replace />} />
+      <Route path="/admin/anomalies" element={<Navigate to="/admin/alerts" replace />} />
+      <Route path="/trainer/roster" element={<Navigate to="/trainer/sessions" replace />} />
+      <Route path="/trainer/quiz" element={<Navigate to="/trainer/quizzes" replace />} />
+      <Route path="/trainer/analytics" element={<Navigate to="/trainer/results" replace />} />
+      <Route path="/finance/reconciliation" element={<Navigate to="/finance/import" replace />} />
+      <Route path="/courses" element={<Navigate to="/home" replace />} />
+      <Route path="/quizzes" element={<Navigate to="/home/quizzes" replace />} />
+      <Route path="/quiz" element={<Navigate to="/home/quizzes" replace />} />
+      <Route path="/badges" element={<Navigate to="/home/badges" replace />} />
+      <Route path="/certifications" element={<Navigate to="/home/certificates" replace />} />
+      <Route path="/certificates" element={<Navigate to="/home/certificates" replace />} />
       <Route 
         path="/records" 
         element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="records" />
-          </ProtectedRoute>
+          currentRole === 'admin' 
+            ? <Navigate to="/admin/records" replace /> 
+            : currentRole === 'finance' 
+              ? <Navigate to="/finance" replace /> 
+              : <Navigate to="/am" replace />
         } 
       />
       <Route 
         path="/trainees" 
         element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="trainees" />
-          </ProtectedRoute>
+          currentRole === 'trainer' 
+            ? <Navigate to="/trainer/sessions" replace /> 
+            : currentRole === 'finance' 
+              ? <Navigate to="/finance" replace /> 
+              : <Navigate to="/am" replace />
         } 
       />
-      <Route 
-        path="/courses" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="courses" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/anomalies" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="anomalies" />
-          </ProtectedRoute>
-        } 
-      />
+      <Route path="/anomalies" element={<Navigate to="/admin/alerts" replace />} />
       <Route 
         path="/compliance" 
         element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="compliance" />
-          </ProtectedRoute>
+          currentRole === 'finance' 
+            ? <Navigate to="/finance/reports" replace /> 
+            : <Navigate to="/am/reports" replace />
         } 
       />
-      <Route 
-        path="/analytics" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="analytics" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/settings" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="settings" />
-          </ProtectedRoute>
-        } 
-      />
-
-      {/* Admin Specific Console Routes */}
-      <Route 
-        path="/admin" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="admin_overview" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/access" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="attribute_authority" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/anomalies" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="anomalies" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/vault" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="records_vault" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/settings" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="settings" />
-          </ProtectedRoute>
-        } 
-      />
-
-      {/* Crossworks Staff Specific Portal Routes */}
-      <Route 
-        path="/staff" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="staff_records" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/staff/portfolios" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="assigned_clients" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/staff/reports" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="compliance_reports" />
-          </ProtectedRoute>
-        } 
-      />
-
-      {/* Crossworks Trainer Specific Portal Routes */}
-      <Route 
-        path="/trainer" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="trainer_courses" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/trainer/roster" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="trainee_roster" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/trainer/grade" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="grade_entry" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/trainer/quiz" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="quiz_creator" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/trainer/analytics" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="trainer_analytics" />
-          </ProtectedRoute>
-        } 
-      />
-
-      {/* CP-ABE Cryptographic Sandbox Lab for Capstone Defense Panelists (Section 5) */}
-      <Route 
-        path="/demo/crypto-lab" 
-        element={
-          <ProtectedRoute>
-            <MainAppShell activeSubPage="crypto_lab" />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/crypto-lab" 
-        element={<Navigate to="/demo/crypto-lab" replace />} 
-      />
-
-      {/* Landing Page Route (Page 1 of Template) */}
-      <Route path="/" element={<LandingView />} />
-      <Route path="/landing" element={<LandingView />} />
+      <Route path="/analytics" element={<Navigate to="/trainer/results" replace />} />
+      <Route path="/settings" element={<Navigate to="/admin/settings" replace />} />
+      <Route path="/crypto-lab" element={<Navigate to="/demo/crypto-lab" replace />} />
 
       {/* Fallback Catch-all */}
       <Route 
         path="*" 
         element={
-          currentUser ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />
+          currentUser ? <Navigate to={roleHome} replace /> : <Navigate to="/" replace />
         } 
       />
     </Routes>

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { ROLE_HOME } from '../routes/routeConfig';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 export default function LoginView() {
@@ -57,11 +58,8 @@ export default function LoginView() {
       return;
     }
 
-    if (result?.user?.role === 'finance') {
-      navigate('/finance/reconciliation');
-    } else {
-      navigate('/dashboard');
-    }
+    const role = result?.user?.role || 'trainee';
+    navigate(ROLE_HOME[role] || '/home');
   };
 
   const handleMfaSubmit = async (e) => {
@@ -78,11 +76,8 @@ export default function LoginView() {
       return;
     }
 
-    if (result?.user?.role === 'finance') {
-      navigate('/finance/reconciliation');
-    } else {
-      navigate('/dashboard');
-    }
+    const role = result?.user?.role || 'trainee';
+    navigate(ROLE_HOME[role] || '/home');
   };
 
   const handleBackToCredentials = () => {
@@ -95,11 +90,8 @@ export default function LoginView() {
 
   const handleRoleQuickSelect = async (roleKey) => {
     const user = await loginRole(roleKey);
-    if (roleKey === 'finance' || user?.role === 'finance') {
-      navigate('/finance/reconciliation');
-    } else {
-      navigate('/dashboard');
-    }
+    const role = user?.role || roleKey || 'trainee';
+    navigate(ROLE_HOME[role] || '/home');
   };
 
   const roleList = [
@@ -107,7 +99,7 @@ export default function LoginView() {
     { key: 'admin_general', title: 'Operations Administrator', name: 'Crossworks Administration', org: 'Crossworks Operations', icon: Shield, badgeClass: 'admin' },
     { key: 'account_manager', title: 'Account Manager (Vertiv & Red Oak)', name: 'Sharon De Vera', org: 'VHL_2 • ROP_3', icon: Key, badgeClass: 'staff' },
     { key: 'am_brian', title: 'Account Manager (IPRoyal & Amihan)', name: 'Brian Mendoza', org: 'IPROY_SERVI_2 • AMIHAN_SOLUTI_2', icon: Key, badgeClass: 'staff' },
-    { key: 'staff_vertiv', title: 'Client HR / L&D Manager', name: 'Elena Vance', org: 'Vertiv Holdings Ltd (VHL_2)', icon: Building2, badgeClass: 'company' },
+    { key: 'finance', title: 'Finance & Operations Specialist', name: 'Elena Vance', org: 'Crossworks Operations & Billing', icon: Building2, badgeClass: 'finance' },
     { key: 'trainer', title: 'Lead Trainer (Cybersecurity & GenAI)', name: 'Joey Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
     { key: 'trainer_billy', title: 'Senior Trainer (Cloud & Infra)', name: 'Billy Fernandez', org: 'Crossworks Senior Trainer', icon: GraduationCap, badgeClass: 'trainer' },
     { key: 'trainee', title: 'Trainee (Vertiv Holdings)', name: 'Andrea Aguilar', org: 'VHL_2 • TRN-8000', icon: Award, badgeClass: 'trainee' },

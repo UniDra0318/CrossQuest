@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   X, 
   Zap, 
@@ -16,10 +17,12 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { ROLE_HOME } from '../routes/routeConfig';
 
 export default function DevRoleSwitcherModal({ isOpen, onClose }) {
   const { currentUser, loginRole, DEMO_USERS } = useAuth();
   const { isDark } = useTheme();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState('');
   const [filterCompany, setFilterCompany] = useState('ALL');
@@ -252,8 +255,10 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
             return (
               <div
                 key={u.key}
-                onClick={() => {
-                  loginRole(u.key);
+                onClick={async () => {
+                  const loggedUser = await loginRole(u.key);
+                  const targetRole = loggedUser?.role || u.role;
+                  navigate(ROLE_HOME[targetRole] || '/home');
                   onClose();
                 }}
                 style={{

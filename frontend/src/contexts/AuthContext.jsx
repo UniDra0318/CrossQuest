@@ -128,66 +128,30 @@ export const DEMO_USERS = {
     initials: "OC"
   },
 
-  // --- CLIENT COMPANY STAFF (HR / L&D) ---
-  staff_vertiv: {
+  // --- FINANCE & OPERATIONS ---
+  finance: {
     id: "553b1112-b37b-4a4a-9e03-575caa636bea",
-    email: "staff@vertiv.com",
+    email: "finance@crossworks.ph",
     name: "Elena Vance",
-    title: "HR & Training Manager",
-    role: "company_staff",
-    organization: "Vertiv Holdings Ltd",
-    company_code: "VHL_2",
-    assigned_companies: ["VHL_2"],
-    assigned_client_accounts: ["VHL_2"],
+    title: "Finance & Operations Specialist",
+    role: "finance",
+    organization: "Crossworks Operations & Billing",
+    company_code: "CROSSWORKS",
+    assigned_companies: ["ALL"],
+    assigned_client_accounts: ["ALL"],
     initials: "EV"
   },
-  staff_ewageas: {
+  finance_maricar: {
     id: "5265ad2f-ce42-4678-9ef4-cd8e198ba655",
-    email: "staff@ewageas.com",
+    email: "maricar.finance@crossworks.ph",
     name: "Maricar Ramos",
-    title: "L&D Coordinator",
-    role: "company_staff",
-    organization: "EastWest Ageas Life Insurance",
-    company_code: "EWALIC_2",
-    assigned_companies: ["EWALIC_2"],
-    assigned_client_accounts: ["EWALIC_2"],
+    title: "Billing & Audit Analyst",
+    role: "finance",
+    organization: "Crossworks Operations & Billing",
+    company_code: "CROSSWORKS",
+    assigned_companies: ["ALL"],
+    assigned_client_accounts: ["ALL"],
     initials: "MR"
-  },
-  staff_amihan: {
-    id: "17cdabee-f949-4077-8712-87a1a2713b10",
-    email: "staff@amihansolutions.com",
-    name: "Kenneth Sy",
-    title: "People & Culture Lead",
-    role: "company_staff",
-    organization: "Amihan Solutions",
-    company_code: "AMIHAN_SOLUTI_2",
-    assigned_companies: ["AMIHAN_SOLUTI_2"],
-    assigned_client_accounts: ["AMIHAN_SOLUTI_2"],
-    initials: "KS"
-  },
-  staff_iproyal: {
-    id: "e8f7aa1f-9496-43d5-b9c2-c7b482349488",
-    email: "staff@iproyal.com",
-    name: "Dmitri Volkov",
-    title: "Operations & Training Lead",
-    role: "company_staff",
-    organization: "IPRoyal Services",
-    company_code: "IPROY_SERVI_2",
-    assigned_companies: ["IPROY_SERVI_2"],
-    assigned_client_accounts: ["IPROY_SERVI_2"],
-    initials: "DV"
-  },
-  staff_redoak: {
-    id: "399cca6e-6923-4972-aa16-81225f1f3c8e",
-    email: "staff@redoak.com",
-    name: "Patricia Tan",
-    title: "HR Director",
-    role: "company_staff",
-    organization: "Red Oak Properties",
-    company_code: "ROP_3",
-    assigned_companies: ["ROP_3"],
-    assigned_client_accounts: ["ROP_3"],
-    initials: "PT"
   },
 
   // --- TRAINEES WITH REAL PILOT ACCOUNTS & RECORDS ---
@@ -401,7 +365,16 @@ export const DEMO_USERS = {
 };
 
 DEMO_USERS.crossworks_staff = DEMO_USERS.account_manager;
-DEMO_USERS.company_staff = DEMO_USERS.staff_vertiv;
+DEMO_USERS.company_staff = DEMO_USERS.finance;
+DEMO_USERS.staff_vertiv = DEMO_USERS.finance;
+
+export function normalizeRole(role) {
+  if (!role) return 'trainee';
+  const r = String(role).toLowerCase().trim();
+  if (r === 'crossworks_staff') return 'account_manager';
+  if (r === 'company_staff') return 'finance';
+  return r;
+}
 
 const AuthContext = createContext();
 
@@ -417,6 +390,7 @@ export function AuthProvider({ children }) {
         );
         if (matchingDemo) {
           const upgraded = { ...matchingDemo, ...parsed };
+          upgraded.role = normalizeRole(upgraded.role);
           // Ensure streak, points, level, and quiz_progress from DEMO_USERS if missing or stale
           if (upgraded.points === undefined || upgraded.quiz_progress === undefined) {
             upgraded.streak = matchingDemo.streak;
@@ -426,6 +400,7 @@ export function AuthProvider({ children }) {
           }
           return upgraded;
         }
+        parsed.role = normalizeRole(parsed.role);
         return parsed;
       }
       return null;
@@ -472,6 +447,7 @@ export function AuthProvider({ children }) {
   const loginRole = async (roleKey) => {
     const baseUser = DEMO_USERS[roleKey] || DEMO_USERS.admin;
     const user = { ...baseUser };
+    user.role = normalizeRole(user.role);
 
     // Re-hydrate any persisted progress for this persona across role switches
     try {
@@ -554,6 +530,7 @@ export function AuthProvider({ children }) {
           const profile = await userRes.json();
           const userObj = {
             ...profile,
+            role: normalizeRole(profile.role),
             name: profile.full_name,
             initials: profile.full_name.split(' ').map(n => n[0]).join(''),
             organization: profile.role === 'trainee' 
@@ -602,6 +579,7 @@ export function AuthProvider({ children }) {
         const profile = await userRes.json();
         const userObj = {
           ...profile,
+          role: normalizeRole(profile.role),
           name: profile.full_name,
           initials: profile.full_name.split(' ').map(n => n[0]).join(''),
           organization: profile.role === 'trainee' 
@@ -614,7 +592,7 @@ export function AuthProvider({ children }) {
         localStorage.setItem('crossquest_auth_user', JSON.stringify(userObj));
         return { success: true, user: userObj };
       }
-      return { success: true, user: { role: data.role, full_name: data.full_name } };
+      return { success: true, user: { role: normalizeRole(data.role), full_name: data.full_name } };
     } catch (err) {
       return { success: false, error: err.message || 'MFA network error' };
     }
