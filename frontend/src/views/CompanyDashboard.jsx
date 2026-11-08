@@ -116,13 +116,6 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
   );
 
   const {
-    currentPage: milestonePage,
-    setCurrentPage: setMilestonePage,
-    paginatedItems: pagedMilestones,
-    totalItems: totalMilestones
-  } = usePagination(displayedRecords, 4);
-
-  const {
     currentPage: traineePage,
     setCurrentPage: setTraineePage,
     paginatedItems: pagedTrainees,
@@ -134,20 +127,9 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
     ? (displayedRecords.reduce((acc, r) => acc + (r.score || 0), 0) / displayedRecords.length).toFixed(1)
     : '0.0';
 
-  const currentTab = ['company_trainees', 'audit_certificate', 'finance_reconciliation', 'company_overview'].includes(activeSubView)
+  const currentTab = ['company_trainees', 'audit_certificate', 'finance_reconciliation'].includes(activeSubView)
     ? activeSubView
-    : (isFinance ? 'finance_reconciliation' : 'company_overview');
-
-  const tabs = isFinance ? [
-    { id: 'finance_reconciliation', label: 'Pilot Data Ingestion & Reconciliation Desk', icon: FileSpreadsheet },
-    { id: 'company_overview', label: 'Enterprise Client Accounts & Compliance', icon: Building2 },
-    { id: 'company_trainees', label: 'Cross-Client Training Records', icon: Users },
-    { id: 'audit_certificate', label: 'Financial Audit & Integrity Certificate', icon: ShieldCheck }
-  ] : [
-    { id: 'company_overview', label: 'Company Compliance', icon: Building2 },
-    { id: 'company_trainees', label: 'Employee Records', icon: Users },
-    { id: 'audit_certificate', label: 'Compliance & Audit Report', icon: ShieldCheck }
-  ];
+    : 'company_trainees';
 
   return (
     <div className="adm-main company-dashboard" style={{ maxWidth: '1440px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
@@ -158,27 +140,9 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
         </div>
       )}
 
-      {/* SLIM PAGE HEADER (Replaces 280px Hero Banner & 3D Cube per Section 5.1) */}
+      {/* SLIM PAGE HEADER */}
       {(() => {
         switch (currentTab) {
-          case 'company_overview':
-            return (
-              <PageHeader
-                title="Enterprise Accounts"
-                subtitle="Client organization compliance milestones, active rosters, and contract hours."
-                badge="ACCOUNTS"
-                badgeType="info"
-              />
-            );
-          case 'company_trainees':
-            return (
-              <PageHeader
-                title="Training Records"
-                subtitle="Browse and verify employee training completions across all client cohorts."
-                badge="RECORDS"
-                badgeType="default"
-              />
-            );
           case 'audit_certificate':
             return (
               <PageHeader
@@ -189,15 +153,22 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
               />
             );
           case 'finance_reconciliation':
+            return (
+              <PageHeader
+                title="Import & Reconcile"
+                subtitle="Pre-screening pipeline, physical-to-ordinal row reconciliation, and client cohort imports."
+                badge="RECONCILIATION DESK"
+                badgeType="success"
+              />
+            );
+          case 'company_trainees':
           default:
             return (
               <PageHeader
-                title={isFinance ? "Home" : "Workforce Compliance"}
-                subtitle={isFinance
-                  ? "Pre-screening pipeline, physical-to-ordinal row reconciliation, and client cohort imports."
-                  : "Corporate training milestones and verified workforce completion records."}
-                badge={isFinance ? "RECONCILIATION DESK" : "COMPLIANCE ACTIVE"}
-                badgeType="success"
+                title="Records"
+                subtitle="Browse and verify employee training completions across all client cohorts."
+                badge="RECORDS"
+                badgeType="default"
               />
             );
         }
@@ -205,135 +176,8 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
 
       {/* Main Content Area */}
       <div style={{ marginTop: '24px' }}>
-        {/* 1. COMPANY / ENTERPRISE OVERVIEW TAB */}
-        {currentTab === 'company_overview' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-          {/* Metric Tiles Matrix */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px' }}>
-            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Enrolled Workforce</span>
-                <Users size={18} color="#0284c7" />
-              </div>
-              <div style={{ fontSize: '26px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>{displayedRecords.length} Active</div>
-              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>{isFinance ? 'Across All Enterprise Cohorts' : `${currentUser?.organization} Cohort`}</div>
-            </div>
-
-            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Compliance Completion</span>
-                <CheckCircle2 size={18} color="#059669" />
-              </div>
-              <div style={{ fontSize: '26px', fontWeight: 800, color: '#059669' }}>
-                {Math.round((completed / (displayedRecords.length || 1)) * 100)}%
-              </div>
-              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>Mandatory Training Modules</div>
-            </div>
-
-            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Cohort Average Score</span>
-                <TrendingUp size={18} color="#0284c7" />
-              </div>
-              <div style={{ fontSize: '26px', fontWeight: 800, color: '#0284c7' }}>{avgScore}%</div>
-              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>Demonstrated Competency</div>
-            </div>
-
-            <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '18px', padding: '20px', border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)', boxShadow: isDark ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.02)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>Multi-Tenant Separation</span>
-                <ShieldCheck size={18} color="#7c3aed" />
-              </div>
-              <div style={{ fontSize: '26px', fontWeight: 800, color: '#7c3aed' }}>Guaranteed</div>
-              <div style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>Strict Cryptographic Isolation</div>
-            </div>
-          </div>
-
-          {/* Employee Milestone Summary with Scrollable Table */}
-          <div 
-            style={{ 
-              background: isDark ? '#111827' : '#ffffff', 
-              borderRadius: '24px', 
-              padding: '24px 28px', 
-              border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
-                {isFinance ? 'Enterprise Participant Milestone Summary' : 'Employee Milestone Summary'}
-              </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <TablePaginationCompact
-                  currentPage={milestonePage}
-                  totalItems={totalMilestones}
-                  pageSize={4}
-                  onPageChange={setMilestonePage}
-                />
-                <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                  {displayedRecords.length} records in scope
-                </span>
-              </div>
-            </div>
-
-            {/* Scrollable Container with Sticky Table Header */}
-            <div style={{ overflowX: 'auto', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', width: '100%', boxSizing: 'border-box' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
-                <thead style={{ position: 'sticky', top: 0, background: isDark ? '#0f172a' : '#f8fafc', zIndex: 2, borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
-                  <tr>
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>PARTICIPANT NAME</th>
-                    {isFinance && <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>TENANT / COMPANY</th>}
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>COURSE TITLE</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>ASSESSMENT SCORE</th>
-                    <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>STATUS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedRecords && displayedRecords.length > 0 ? (
-                    pagedMilestones.map((r) => (
-                    <tr key={r.id} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>{r.traineeName}</td>
-                      {isFinance && (
-                        <td style={{ padding: '12px 16px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#334155', fontFamily: 'monospace' }}>
-                            {r.companyCode}
-                          </span>
-                        </td>
-                      )}
-                      <td style={{ padding: '12px 16px', color: '#334155' }}>{r.courseName}</td>
-                      <td style={{ padding: '12px 16px' }}><span style={{ color: '#059669', fontWeight: 800 }}>{r.score}%</span></td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: r.status === 'completed' ? '#ecfdf5' : '#fffbeb', color: r.status === 'completed' ? '#059669' : '#b45309', border: r.status === 'completed' ? '1px solid #a7f3d0' : '1px solid #fde68a' }}>
-                          {r.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                  ) : (
-                    <TableEmptyRow
-                      colSpan={isFinance ? 5 : 4}
-                      icon={FileText}
-                      title="No Attestation Records Available"
-                      subtitle="No training records have been submitted or synchronized for this tenant yet."
-                    />
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <TablePagination
-              currentPage={milestonePage}
-              totalItems={totalMilestones}
-              pageSize={4}
-              onPageChange={setMilestonePage}
-              itemName="milestone records"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* 2. COMPANY TRAINEES TAB */}
-      {currentTab === 'company_trainees' && (
+        {/* 1. RECORDS TAB */}
+        {currentTab === 'company_trainees' && (
         <div 
           style={{ 
             background: isDark ? '#111827' : '#ffffff', 

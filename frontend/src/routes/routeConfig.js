@@ -46,8 +46,8 @@ export const ROUTES = [
 
   // Finance
   { path: '/finance',         roles: ['finance'], label: 'Records',            page: 'company_trainees',       icon: FileText },
-  { path: '/finance/import',  roles: ['finance'], label: 'Import & Reconcile', page: 'finance_reconciliation', icon: LayoutDashboard },
   { path: '/finance/reports', roles: ['finance'], label: 'Reports',            page: 'audit_certificate',      icon: ShieldCheck },
+  { path: '/finance/import',  roles: ['finance'], label: 'Import & Reconcile', page: 'finance_reconciliation', icon: LayoutDashboard },
 
   // Trainee
   { path: '/home',              roles: ['trainee'], label: 'Home',                 page: 'trainee_quest',  icon: Flame },

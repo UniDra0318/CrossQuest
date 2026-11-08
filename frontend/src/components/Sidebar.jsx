@@ -69,7 +69,31 @@ export default function Sidebar({
   const isDark = theme === 'dark';
   const userRole = currentUser?.role || 'trainee';
 
-  const navItems = ROUTES.filter(r => r.roles.includes(userRole) && r.label);
+  const [importCompleted, setImportCompleted] = useState(() => {
+    try {
+      return localStorage.getItem('cq_finance_import_completed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  React.useEffect(() => {
+    const handleImportUpdate = () => {
+      try {
+        setImportCompleted(localStorage.getItem('cq_finance_import_completed') === 'true');
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener('cq_import_status_change', handleImportUpdate);
+    return () => window.removeEventListener('cq_import_status_change', handleImportUpdate);
+  }, []);
+
+  const navItems = ROUTES.filter(r => {
+    if (!r.roles.includes(userRole) || !r.label) return false;
+    if (userRole === 'finance' && r.path === '/finance/import' && importCompleted) return false;
+    return true;
+  });
 
   const formatRoleLabel = (role) => {
     switch (role) {

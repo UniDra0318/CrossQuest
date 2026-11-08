@@ -356,6 +356,12 @@ export default function FinanceReconciliationDesk() {
     try {
       const res = await commitImportBatch(selectedBatchId, token);
       setCommitMessage(`Successfully committed batch! ${res.committed_records || res.message || 'Records encrypted and persisted.'}`);
+      try {
+        localStorage.setItem('cq_finance_import_completed', 'true');
+        window.dispatchEvent(new CustomEvent('cq_import_status_change'));
+      } catch {
+        /* ignore */
+      }
       await loadBatchDetails(selectedBatchId);
       await loadBatches(false);
     } catch (err) {
@@ -497,6 +503,36 @@ export default function FinanceReconciliationDesk() {
           >
             <FileText size={15} className={downloadingCsv ? 'spin-animation' : ''} />
             <span>{downloadingCsv ? 'Exporting CSV...' : 'Export Ledger (CSV)'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const currentStatus = localStorage.getItem('cq_finance_import_completed') === 'true';
+              const nextStatus = !currentStatus;
+              localStorage.setItem('cq_finance_import_completed', String(nextStatus));
+              window.dispatchEvent(new CustomEvent('cq_import_status_change'));
+              if (nextStatus) {
+                alert('Import marked as complete. The Import & Reconcile tab has been hidden from the primary sidebar.');
+              }
+            }}
+            style={{
+              padding: '11px 18px',
+              borderRadius: '12px',
+              background: isDark ? '#1e293b' : '#f8fafc',
+              color: isDark ? '#e2e8f0' : '#334155',
+              border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+            title="Mark import workflow complete to hide this tool from the primary sidebar"
+          >
+            <CheckCircle2 size={15} color="#059669" />
+            <span>Mark Import Complete</span>
           </button>
           
           {isAdmin && (
