@@ -36,6 +36,7 @@ export const ROUTES = [
   { path: '/am',             roles: ['account_manager'], label: 'Sessions', page: 'am_sessions',        icon: LayoutDashboard },
   { path: '/am/clients',     roles: ['account_manager'], label: 'Clients',  page: 'assigned_clients',   icon: Building2 },
   { path: '/am/reports',     roles: ['account_manager'], label: 'Reports',  page: 'compliance_reports', icon: BarChart3 },
+  { path: '/am/records',     roles: ['account_manager'], label: null,       page: 'records_vault',       icon: FileText },
 
   // Trainer
   { path: '/trainer',          roles: ['trainer'], label: 'Home',              page: 'trainer_courses',   icon: LayoutDashboard },

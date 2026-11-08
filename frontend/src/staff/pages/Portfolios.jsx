@@ -92,7 +92,7 @@ export default function Portfolios() {
                     type="button"
                     className="adm-btn adm-btn-solid adm-chip--solid stf-cta"
                     style={{ flex: 1, margin: 0 }}
-                    onClick={() => navigate('/staff')}
+                    onClick={() => navigate('/am/records?client=' + p.scope)}
                   >
                     <span>Records</span>
                     <ArrowRight size={14} />
@@ -107,7 +107,7 @@ export default function Portfolios() {
                       border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
                       color: isDark ? '#f8fafc' : '#334155'
                     }}
-                    onClick={() => navigate(`/staff/reports?scope=${p.scope}`)}
+                    onClick={() => navigate('/am/reports?client=' + p.scope)}
                   >
                     <FileText size={14} />
                     <span>Audit Report</span>

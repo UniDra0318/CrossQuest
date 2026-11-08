@@ -173,3 +173,44 @@ export async function getReport(scope) {
 export async function exportReportPdf() {
   window.print();
 }
+
+/** GET /api/v1/records/sessions -> List all training sessions */
+export async function getTrainingSessions() {
+  try {
+    const res = await authFetch(`${API_BASE}/records/sessions`);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('Could not fetch training sessions:', err);
+  }
+  return [];
+}
+
+/** POST /api/v1/records/sessions -> Create a new training session */
+export async function createTrainingSession(payload) {
+  const res = await authFetch(`${API_BASE}/records/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to create training session');
+  }
+  return await res.json();
+}
+
+/** PUT /api/v1/records/:id -> Update participant attendance and progress */
+export async function updateParticipantAttendance(recordId, payload) {
+  const res = await authFetch(`${API_BASE}/records/${recordId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to update attendance');
+  }
+  return await res.json();
+}

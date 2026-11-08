@@ -15,14 +15,23 @@ export default function StaffLayout({ activeTab, onTabChange, children }) {
   const { currentUser } = useAuth();
 
   const assignedScope = currentUser?.assigned_client_accounts?.join(', ') || 
-    currentUser?.assigned_companies?.join(', ') || 'CORP_ALPHA, BANK_DELTA';
+    currentUser?.assigned_companies?.join(', ') || '';
 
   const renderHeader = () => {
     switch (activeTab) {
+      case 'sessions':
+        return (
+          <PageHeader
+            title="Sessions"
+            subtitle="Training cohort scheduling, participant attendance tracking, and trainer hand-off."
+            badge={assignedScope ? `CLIENTS: ${assignedScope}` : 'ACTIVE SESSIONS'}
+            badgeType="success"
+          />
+        );
       case 'portfolios':
         return (
           <PageHeader
-            title="My Clients"
+            title="Clients"
             subtitle="Assigned enterprise client accounts and workforce training contracts."
             badge="PORTFOLIO"
             badgeType="info"
@@ -31,7 +40,7 @@ export default function StaffLayout({ activeTab, onTabChange, children }) {
       case 'reports':
         return (
           <PageHeader
-            title="Client Reports"
+            title="Reports"
             subtitle="Training completion audits, attendance summaries, and certification status."
             badge="COMPLIANCE"
             badgeType="default"
@@ -41,9 +50,9 @@ export default function StaffLayout({ activeTab, onTabChange, children }) {
       default:
         return (
           <PageHeader
-            title="Home"
-            subtitle="Training progress, attendance status, and verification for your assigned clients."
-            badge={`SCOPE: ${assignedScope}`}
+            title="Training Records"
+            subtitle="Encrypted training records within your authorized client scope."
+            badge={assignedScope ? `SCOPE: ${assignedScope}` : 'VAULT RECORDS'}
             badgeType="success"
           />
         );
