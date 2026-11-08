@@ -2670,3 +2670,79 @@ html.dark .feedback-solution-box,
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
+/* Timeout Dark Mode Overrides */
+html.dark .kahoot-feedback-banner.banner-wrong.banner-timeout,
+[data-theme="dark"] .kahoot-feedback-banner.banner-wrong.banner-timeout {
+  background: rgba(234, 88, 12, 0.14) !important;
+  border-color: rgba(234, 88, 12, 0.4) !important;
+  color: #fdba74 !important;
+}
+
+html.dark .kahoot-feedback-banner.banner-wrong.banner-timeout .feedback-headline,
+[data-theme="dark"] .kahoot-feedback-banner.banner-wrong.banner-timeout .feedback-headline {
+  color: #fb923c !important;
+}
+
+html.dark .kahoot-feedback-banner.banner-wrong.banner-timeout .feedback-explanation,
+[data-theme="dark"] .kahoot-feedback-banner.banner-wrong.banner-timeout .feedback-explanation {
+  color: #fed7aa !important;
+}
+
+html.dark .arena-question-cell.cell-answered-timeout,
+html.dark .arena-question-cell.cell-current-timeout,
+[data-theme="dark"] .arena-question-cell.cell-answered-timeout,
+[data-theme="dark"] .arena-question-cell.cell-current-timeout {
+  background: rgba(234, 88, 12, 0.15) !important;
+  border-color: #f97316 !important;
+  color: #fb923c !important;
+}
+
+html.dark .arena-question-cell.cell-current-timeout,
+[data-theme="dark"] .arena-question-cell.cell-current-timeout {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3), 0 4px 14px rgba(249, 115, 22, 0.4) !important;
+}
+
+html.dark .summary-status-tag.tag-timeout,
+[data-theme="dark"] .summary-status-tag.tag-timeout {
+  background: rgba(234, 88, 12, 0.2) !important;
+  color: #fb923c !important;
+  border-color: rgba(234, 88, 12, 0.4) !important;
+}
+
+html.dark .ans-value.ans-amber,
+[data-theme="dark"] .ans-value.ans-amber {
+  color: #fb923c !important;
+  background: rgba(234, 88, 12, 0.12) !important;
+  border-color: rgba(234, 88, 12, 0.3) !important;
+}
+
+html.dark .identification-input.input-timeout,
+[data-theme="dark"] .identification-input.input-timeout {
+  border-color: #f97316 !important;
+  background: rgba(234, 88, 12, 0.1) !important;
+  color: #fdba74 !important;
+}
+
+html.dark .sequence-col-title.user-order-title,
+[data-theme="dark"] .sequence-col-title.user-order-title {
+  color: #94a3b8 !important;
+}
+
+html.dark .sequence-col-title.solution-order-title,
+[data-theme="dark"] .sequence-col-title.solution-order-title {
+  color: #34d399 !important;
+}
+
+html.dark .sequence-item-row.solution-row,
+[data-theme="dark"] .sequence-item-row.solution-row {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+html.dark .sequence-item-row.step-submitted,
+[data-theme="dark"] .sequence-item-row.step-submitted {
+  border-color: #334155 !important;
+  background: #1e293b !important;
+}
+
+

@@ -250,7 +250,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
   const handleTimeExpire = () => {
     if (answeredState !== null) return;
-    evaluateAnswer(false, 'Time Expired');
+    evaluateAnswer(false, 'Time Expired', true);
   };
 
   const handleStartAssessment = () => {
@@ -323,7 +323,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     evaluateAnswer(isCorrect, userAns);
   };
 
-  const evaluateAnswer = (isCorrect, userAns) => {
+  const evaluateAnswer = (isCorrect, userAns, isTimeout = false) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
     let finalCorrect = correctCount;
@@ -340,6 +340,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       setPointsTotal(finalPoints);
       setFloatingPoint(`+${questionPoints} PTS!`);
       setTimeout(() => setFloatingPoint(null), 1200);
+    } else if (isTimeout) {
+      setAnsweredState('timeout');
     } else {
       setAnsweredState('wrong');
     }
@@ -360,9 +362,10 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
         questionIndex: currentIndex + 1,
         questionText: currentQ.question,
         questionType: currentQ.type,
-        userAnswer: userAns || 'No Answer',
+        userAnswer: isTimeout ? 'Time Expired (No response submitted)' : (userAns || 'No Answer'),
         correctAnswer: correctAns,
         isCorrect: isCorrect,
+        isTimeout: isTimeout,
         explanation: currentQ.explanation
       }
     };
@@ -372,7 +375,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     saveProgress({ 
       correctCount: finalCorrect, 
       pointsTotal: finalPoints, 
-      answeredState: isCorrect ? 'correct' : 'wrong',
+      answeredState: isCorrect ? 'correct' : (isTimeout ? 'timeout' : 'wrong'),
       answersHistory: newHistory
     });
   };
@@ -1188,10 +1191,22 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                           </div>
 
                           {showCorrectAnswers ? (
-                            <span className={`summary-status-tag ${isCorrect ? 'tag-correct' : 'tag-wrong'}`}>
-                              {isCorrect ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                              <span>{isCorrect ? 'Correct (+200 PTS)' : 'Incorrect (0 PTS)'}</span>
-                            </span>
+                            isCorrect ? (
+                              <span className="summary-status-tag tag-correct">
+                                <CheckCircle2 size={14} />
+                                <span>Correct (+200 PTS)</span>
+                              </span>
+                            ) : rec?.isTimeout ? (
+                              <span className="summary-status-tag tag-timeout">
+                                <Clock size={14} />
+                                <span>Time Expired (0 PTS)</span>
+                              </span>
+                            ) : (
+                              <span className="summary-status-tag tag-wrong">
+                                <XCircle size={14} />
+                                <span>Incorrect (0 PTS)</span>
+                              </span>
+                            )
                           ) : (
                             <span className="summary-status-tag tag-neutral">
                               <CheckCircle size={14} />
@@ -1212,7 +1227,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                         <div className="summary-answers-grid">
                           <div className="summary-answer-col user-answer">
                             <span className="ans-label">Your Submitted Answer:</span>
-                            <div className={`ans-value ${showCorrectAnswers ? (isCorrect ? 'ans-green' : 'ans-red') : 'ans-neutral'}`}>
+                            <div className={`ans-value ${showCorrectAnswers ? (isCorrect ? 'ans-green' : rec?.isTimeout ? 'ans-amber' : 'ans-red') : 'ans-neutral'}`}>
                               {rec?.userAnswer || '(No answer provided)'}
                             </div>
                           </div>
@@ -1279,8 +1294,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   // STAGE 2: ACTIVE FOCUSED QUIZ ARENA (NO SIDEBAR / NO TOPBAR)
   // ==========================================
   return (
-    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflowY: 'auto', transition: 'all 0.3s ease' }}>
-      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', minHeight: 'calc(100vh - 48px)', margin: 'auto', display: 'flex', flexDirection: 'column' }}>
+    <div className={`quiz-fullscreen-wrapper ${wrapperThemeClass}`} style={{ ...activeTheme.bgStyle, width: '100%', minHeight: '100vh', borderRadius: 0, padding: '16px 24px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto', transition: 'all 0.3s ease' }}>
+      <div className="quiz-arena-card" style={{ ...activeTheme.cardStyle, maxWidth: '1640px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
         {/* Top Control Bar */}
         <div className="arena-top-control-bar">
           <div className="arena-left-meta">
@@ -1443,6 +1458,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               <span className="legend-item"><span className="legend-dot dot-active"></span>Current</span>
               <span className="legend-item"><span className="legend-dot dot-correct"></span>Correct</span>
               <span className="legend-item"><span className="legend-dot dot-wrong"></span>Incorrect</span>
+              <span className="legend-item"><span className="legend-dot dot-timeout"></span>Timeout</span>
               <span className="legend-item"><span className="legend-dot dot-pending"></span>Pending</span>
             </div>
           </div>
@@ -1452,10 +1468,12 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               const rec = answersHistory[q.id];
               const isPastAnswered = !isCurrent && !!rec;
               const isPastCorrect = isPastAnswered && rec.isCorrect;
-              const isPastWrong = isPastAnswered && !rec.isCorrect;
+              const isPastTimeout = isPastAnswered && (rec.isTimeout || rec.userAnswer?.includes('Time Expired'));
+              const isPastWrong = isPastAnswered && !rec.isCorrect && !isPastTimeout;
 
               const isCurrentAnswered = isCurrent && answeredState !== null;
               const isCurrentCorrect = isCurrentAnswered && answeredState === 'correct';
+              const isCurrentTimeout = isCurrentAnswered && answeredState === 'timeout';
               const isCurrentWrong = isCurrentAnswered && answeredState === 'wrong';
 
               let cellStatus = 'pending';
@@ -1465,6 +1483,9 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 if (isCurrentCorrect) {
                   cellStatus = 'current-correct';
                   icon = <Check size={14} strokeWidth={3} />;
+                } else if (isCurrentTimeout) {
+                  cellStatus = 'current-timeout';
+                  icon = <Clock size={14} strokeWidth={2.5} />;
                 } else if (isCurrentWrong) {
                   cellStatus = 'current-wrong';
                   icon = <XCircle size={14} strokeWidth={2.5} />;
@@ -1475,6 +1496,9 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 if (isPastCorrect) {
                   cellStatus = 'answered-correct';
                   icon = <Check size={14} strokeWidth={3} />;
+                } else if (isPastTimeout) {
+                  cellStatus = 'answered-timeout';
+                  icon = <Clock size={14} strokeWidth={2.5} />;
                 } else {
                   cellStatus = 'answered-wrong';
                   icon = <XCircle size={14} strokeWidth={2.5} />;
@@ -1486,7 +1510,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                   key={q.id || idx}
                   ref={isCurrent ? activeCellRef : null}
                   className={`arena-question-cell cell-${cellStatus}`}
-                  title={`Question ${idx + 1}: ${isCurrent ? 'Current active question' : isPastAnswered ? (isPastCorrect ? 'Completed - Correct' : 'Completed - Incorrect') : 'Upcoming question'}`}
+                  title={`Question ${idx + 1}: ${isCurrent ? 'Current active question' : isPastAnswered ? (isPastCorrect ? 'Completed - Correct' : isPastTimeout ? 'Completed - Timed Out' : 'Completed - Incorrect') : 'Upcoming question'}`}
                 >
                   <span className="cell-number">{idx + 1}</span>
                   {icon && <span className="cell-mini-icon">{icon}</span>}
@@ -1625,7 +1649,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       <KeyRound size={19} className="input-prefix-icon text-purple" />
                       <input
                         type="text"
-                        className={`identification-input ${answeredState === 'correct' ? 'input-correct' : answeredState === 'wrong' ? 'input-wrong' : ''}`}
+                        className={`identification-input ${answeredState === 'correct' ? 'input-correct' : answeredState === 'timeout' ? 'input-timeout' : answeredState === 'wrong' ? 'input-wrong' : ''}`}
                         placeholder={currentQ.placeholder || "Type your answer or acronym here..."}
                         value={identificationInput}
                         onChange={(e) => setIdentificationInput(e.target.value)}
@@ -1634,6 +1658,9 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       />
                       {answeredState === 'correct' && (
                         <CheckCircle2 size={20} className="input-status-icon text-green" />
+                      )}
+                      {answeredState === 'timeout' && (
+                        <Clock size={20} className="input-status-icon text-amber" />
                       )}
                       {answeredState === 'wrong' && (
                         <XCircle size={20} className="input-status-icon text-red" />
@@ -1653,7 +1680,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                 </form>
 
                 {/* Instant Solution Reveal for Identification */}
-                {answeredState === 'wrong' && showCorrectAnswers && (
+                {answeredState !== null && answeredState !== 'correct' && showCorrectAnswers && (
                   <div className="ident-solution-reveal animate-fadeIn">
                     <span className="ident-solution-tag">
                       <CheckCircle2 size={15} className="text-emerald" />
@@ -1683,40 +1710,19 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
           {/* 3. SEQUENCE ORDERING / DRAG-AND-DROP REORDER */}
           {currentQ.type === 'sequence_order' && (
             <div className="sequence-reorder-container">
-              <div className="sequence-instructions">
-                Use the <strong>Up (▲)</strong> and <strong>Down (▼)</strong> arrow buttons to reorder the items into the correct chronological or architectural sequence:
-              </div>
-              <div className="sequence-items-list">
-                {(sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ)).map((itemText, idx, arr) => {
-                  const isAnswered = answeredState !== null;
-                  const isCorrectStep = isAnswered && Array.isArray(currentQ.correctOrder) && currentQ.correctOrder[idx] === itemText;
-                  
-                  let stepStatusClass = '';
-                  if (isAnswered) {
-                    if (showCorrectAnswers) {
-                      stepStatusClass = isCorrectStep ? 'step-in-place' : 'step-misplaced';
-                    } else {
-                      stepStatusClass = 'step-submitted';
-                    }
-                  }
-
-                  return (
-                    <div 
-                      key={idx} 
-                      className={`sequence-item-row ${swappedIdx === idx ? 'seq-item-swapped' : ''} ${stepStatusClass}`}
-                    >
-                      <span className="seq-step-badge">{idx + 1}</span>
-                      <span className="seq-step-text">{itemText}</span>
-                      {isAnswered && showCorrectAnswers && (
-                        <div className="seq-step-status-chip">
-                          {isCorrectStep ? (
-                            <span className="chip-correct"><CheckCircle2 size={14} /> Correct Position</span>
-                          ) : (
-                            <span className="chip-misplaced"><XCircle size={14} /> Misplaced</span>
-                          )}
-                        </div>
-                      )}
-                      {!isAnswered && (
+              {answeredState === null ? (
+                <>
+                  <div className="sequence-instructions">
+                    Use the <strong>Up (▲)</strong> and <strong>Down (▼)</strong> arrow buttons to reorder the items into the correct chronological or architectural sequence:
+                  </div>
+                  <div className="sequence-items-list">
+                    {(sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ)).map((itemText, idx, arr) => (
+                      <div 
+                        key={idx} 
+                        className={`sequence-item-row ${swappedIdx === idx ? 'seq-item-swapped' : ''}`}
+                      >
+                        <span className="seq-step-badge">{idx + 1}</span>
+                        <span className="seq-step-text">{itemText}</span>
                         <div className="seq-controls">
                           <button 
                             type="button"
@@ -1737,40 +1743,71 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                             <ArrowDown size={16} />
                           </button>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {answeredState === null && (
-                <div className="sequence-action-row">
-                  <button
-                    className="btn-tactile btn-tactile-purple"
-                    onClick={handleSequenceVerify}
-                  >
-                    <Check size={16} />
-                    <span>Verify & Submit Order</span>
-                  </button>
-                </div>
-              )}
-
-              {/* REVEAL CORRECT SEQUENCE WHEN ANSWERED & WRONG */}
-              {answeredState === 'wrong' && showCorrectAnswers && Array.isArray(currentQ.correctOrder) && (
-                <div className="sequence-solution-panel animate-fadeIn">
-                  <div className="sequence-solution-header">
-                    <CheckCircle2 size={16} className="text-emerald" />
-                    <span>Certified Correct Sequence (Solution Key):</span>
-                  </div>
-                  <div className="sequence-solution-steps">
-                    {currentQ.correctOrder.map((stepText, sIdx) => (
-                      <div key={sIdx} className="sequence-solution-row">
-                        <span className="seq-solution-badge">{sIdx + 1}</span>
-                        <span className="seq-solution-text">{stepText}</span>
-                        <span className="seq-solution-phase-tag">Phase {sIdx + 1}</span>
                       </div>
                     ))}
                   </div>
+
+                  <div className="sequence-action-row">
+                    <button
+                      className="btn-tactile btn-tactile-purple"
+                      onClick={handleSequenceVerify}
+                    >
+                      <Check size={16} />
+                      <span>Verify & Submit Order</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* WHEN ANSWERED: COMPACT 2-COLUMN SIDE-BY-SIDE SPLIT THAT FITS WITHOUT SCROLLING */
+                <div className="sequence-comparison-split animate-fadeIn">
+                  {/* Left Col: Your Submitted Order */}
+                  <div className="sequence-col-box">
+                    <div className="sequence-col-title user-order-title">
+                      <span>Your Submitted Sequence:</span>
+                    </div>
+                    <div className="sequence-items-list compact-list">
+                      {(sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ)).map((itemText, idx) => {
+                        const isCorrectStep = Array.isArray(currentQ.correctOrder) && currentQ.correctOrder[idx] === itemText;
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`sequence-item-row compact-row ${showCorrectAnswers ? (isCorrectStep ? 'step-in-place' : 'step-misplaced') : 'step-submitted'}`}
+                          >
+                            <span className="seq-step-badge compact-badge">{idx + 1}</span>
+                            <span className="seq-step-text compact-text">{itemText}</span>
+                            {showCorrectAnswers && (
+                              <div className="seq-step-status-chip">
+                                {isCorrectStep ? (
+                                  <span className="chip-correct"><CheckCircle2 size={13} /> In Place</span>
+                                ) : (
+                                  <span className="chip-misplaced"><XCircle size={13} /> Misplaced</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Right Col: Certified Correct Sequence */}
+                  {showCorrectAnswers && Array.isArray(currentQ.correctOrder) && (
+                    <div className="sequence-col-box">
+                      <div className="sequence-col-title solution-order-title">
+                        <CheckCircle2 size={15} className="text-emerald" />
+                        <span>Certified Correct Sequence:</span>
+                      </div>
+                      <div className="sequence-items-list compact-list">
+                        {currentQ.correctOrder.map((stepText, sIdx) => (
+                          <div key={sIdx} className="sequence-item-row compact-row solution-row">
+                            <span className="seq-step-badge compact-badge solution-badge">{sIdx + 1}</span>
+                            <span className="seq-step-text compact-text">{stepText}</span>
+                            <span className="seq-solution-phase-tag">Phase {sIdx + 1}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1789,14 +1826,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
           {/* Feedback Drawer */}
           {answeredState !== null && (
-            <div className={`kahoot-feedback-banner ${answeredState === 'correct' ? 'banner-correct' : 'banner-wrong'}`}>
+            <div className={`kahoot-feedback-banner ${answeredState === 'correct' ? 'banner-correct' : answeredState === 'timeout' ? 'banner-wrong banner-timeout' : 'banner-wrong'}`}>
               <div className="feedback-left">
                 <div className="feedback-headline">
-                  {answeredState === 'correct' 
-                    ? '🎉 Correct! That is right!' 
-                    : '❌ Incorrect or Time Expired'}
+                  {answeredState === 'correct' && '🎉 Correct! That is right!'}
+                  {answeredState === 'wrong' && '❌ Incorrect Answer'}
+                  {answeredState === 'timeout' && '⏰ Time Expired!'}
                 </div>
-                {answeredState === 'wrong' && showCorrectAnswers && (
+                {answeredState !== 'correct' && showCorrectAnswers && currentQ.type !== 'sequence_order' && (
                   <div className="feedback-solution-box animate-fadeIn">
                     <span className="feedback-solution-tag">Correct Solution:</span>
                     <span className="feedback-solution-text">
@@ -1804,8 +1841,6 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                         ? (Array.isArray(currentQ.options) && currentQ.options[currentQ.correctAnswer] ? currentQ.options[currentQ.correctAnswer] : `Option ${currentQ.correctAnswer + 1}`)
                         : currentQ.type === 'identification'
                         ? (Array.isArray(currentQ.acceptedAnswers) && currentQ.acceptedAnswers.length > 0 ? currentQ.acceptedAnswers.join(' / ') : (currentQ.correctAnswer || currentQ.answer || 'N/A'))
-                        : currentQ.type === 'sequence_order'
-                        ? (Array.isArray(currentQ.correctOrder) ? currentQ.correctOrder.map((s, i) => `${i + 1}. ${s}`).join(' ➔ ') : '')
                         : currentQ.type === 'matching'
                         ? (Array.isArray(currentQ.pairs) ? currentQ.pairs.map(p => `${p.left.replace(/^\d+\.\s*/, '')} ➔ ${p.right.replace(/^[A-Z]\.\s*/, '')}`).join(' | ') : '')
                         : ''}
