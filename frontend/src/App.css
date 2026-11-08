@@ -807,15 +807,16 @@
   left: 12px;
   width: 290px;
   z-index: 230;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background-color: #14324f !important;
+  background: linear-gradient(180deg, #183e63 0%, #133352 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: 16px;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  color: #0f172a;
+  color: #ffffff !important;
 }
 
 .sidebar-profile-popover.collapsed-flyout {
@@ -829,7 +830,7 @@
   align-items: center;
   gap: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .popover-avatar {
@@ -856,7 +857,7 @@
 .popover-name {
   font-size: 14px;
   font-weight: 800;
-  color: #0f172a;
+  color: #ffffff !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -864,7 +865,7 @@
 
 .popover-email {
   font-size: 11.5px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.65) !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -877,15 +878,17 @@
   margin-top: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: rgba(240, 96, 93, 0.2) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(240, 96, 93, 0.35) !important;
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .popover-scope-box {
-  background: #f8fafc;
+  background: rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 12px;
@@ -902,11 +905,11 @@
 }
 
 .scope-label {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.65) !important;
 }
 
 .scope-value {
-  color: #0f172a;
+  color: #ffffff !important;
   font-weight: 700;
   max-width: 170px;
   overflow: hidden;
@@ -915,18 +918,18 @@
 }
 
 .scope-code {
-  color: #4f46e5;
+  color: #38bdf8 !important;
   font-weight: 700;
 }
 
 .scope-status {
-  color: #059669;
+  color: #34d399 !important;
   font-weight: 700;
 }
 
 .popover-privacy-box {
-  background: #fdf4ff;
-  border: 1px solid #fae8ff;
+  background: rgba(147, 51, 234, 0.18) !important;
+  border: 1px solid rgba(147, 51, 234, 0.35) !important;
   border-radius: 10px;
   padding: 10px 12px;
   display: flex;
@@ -942,12 +945,12 @@
 .privacy-title {
   font-size: 12px;
   font-weight: 700;
-  color: #86198f;
+  color: #e9d5ff !important;
 }
 
 .privacy-sub {
   font-size: 11px;
-  color: #a21caf;
+  color: #c084fc !important;
 }
 
 .privacy-toggle-btn {
@@ -969,8 +972,8 @@
 }
 
 .privacy-toggle-btn.public {
-  background: #e2e8f0;
-  color: #475569;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .popover-action-btn {
@@ -980,9 +983,9 @@
   width: 100%;
   padding: 9px 12px;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #1e293b;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
   font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
@@ -990,12 +993,19 @@
 }
 
 .popover-action-btn:hover {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
 }
 
 .popover-action-btn.subtle {
-  background: transparent;
-  color: #475569;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.popover-action-btn.subtle:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
 }
 
 .popover-action-btn .btn-left {
@@ -1006,12 +1016,12 @@
 
 .popover-action-btn .btn-tag {
   font-size: 11px;
-  color: #6366f1;
+  color: #38bdf8 !important;
   font-weight: 800;
 }
 
 .popover-dev-section {
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
   padding-top: 10px;
   display: flex;
   flex-direction: column;
@@ -1025,9 +1035,9 @@
   justify-content: space-between;
   padding: 9px 12px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border: 1.5px solid #fcd34d;
-  color: #92400e;
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fde68a !important;
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
@@ -1050,10 +1060,14 @@
   padding: 4px 6px;
   background: none;
   border: none;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.7) !important;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.popover-quick-personas-btn:hover {
+  color: #ffffff !important;
 }
 
 .popover-personas-list {
@@ -1062,7 +1076,10 @@
   gap: 4px;
   max-height: 220px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px;
 }
 
 .persona-item-btn {
@@ -1073,7 +1090,7 @@
   border-radius: 6px;
   border: none;
   background: transparent;
-  color: #334155;
+  color: rgba(255, 255, 255, 0.85) !important;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -1082,22 +1099,23 @@
 }
 
 .persona-item-btn:hover {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
 }
 
 .persona-item-btn.selected {
-  background: #eef2ff;
-  color: #4338ca;
+  background: rgba(2, 132, 199, 0.25) !important;
+  color: #38bdf8 !important;
   font-weight: 700;
 }
 
 .persona-icon {
   flex-shrink: 0;
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .persona-item-btn.selected .persona-icon {
-  color: #4f46e5;
+  color: #38bdf8;
 }
 
 .persona-text {
@@ -1112,18 +1130,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 12px;
+  color: #ffffff !important;
 }
 
 .persona-role {
   font-size: 10px;
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.6) !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .persona-check {
-  color: #4f46e5;
+  color: #38bdf8;
   flex-shrink: 0;
 }
 
@@ -1135,9 +1154,9 @@
   width: 100%;
   padding: 9px 12px;
   border-radius: 10px;
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  color: #fca5a5 !important;
   font-size: 12.5px;
   font-weight: 800;
   cursor: pointer;
@@ -1145,7 +1164,8 @@
 }
 
 .popover-logout-btn:hover {
-  background: #fecaca;
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #ffffff !important;
 }
 
 /* Sidebar toggle button in Topbar */
@@ -9023,95 +9043,100 @@ html.dark .quick-icon-btn.theme-mode-switch,
 
 html.dark .sidebar-profile-popover,
 [data-theme="dark"] .sidebar-profile-popover {
-  background: #eaedf2 !important;
-  border: 1px solid #d8dee8 !important;
-  color: #0f172a !important;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18) !important;
+  background-color: #14324f !important;
+  background: linear-gradient(180deg, #183e63 0%, #133352 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
 }
 
 html.dark .popover-user-header,
 [data-theme="dark"] .popover-user-header {
-  border-bottom: 1px solid #d8dee8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 html.dark .popover-name,
 [data-theme="dark"] .popover-name {
-  color: #0f172a !important;
+  color: #ffffff !important;
 }
 
 html.dark .popover-email,
 [data-theme="dark"] .popover-email {
-  color: #64748b !important;
+  color: rgba(255, 255, 255, 0.65) !important;
 }
 
 html.dark .popover-scope-box,
 [data-theme="dark"] .popover-scope-box {
-  background: #ffffff !important;
-  border: 1px solid #d8dee8 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  background: rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
 }
 
 html.dark .popover-scope-box .scope-label,
 [data-theme="dark"] .popover-scope-box .scope-label {
-  color: #64748b !important;
+  color: rgba(255, 255, 255, 0.65) !important;
 }
 
 html.dark .popover-scope-box .scope-value,
 [data-theme="dark"] .popover-scope-box .scope-value {
-  color: #0f172a !important;
+  color: #ffffff !important;
 }
 
 html.dark .popover-action-btn,
 [data-theme="dark"] .popover-action-btn {
-  background: #ffffff !important;
-  border: 1px solid #d8dee8 !important;
-  color: #1e293b !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 html.dark .popover-action-btn:hover,
 [data-theme="dark"] .popover-action-btn:hover {
-  background: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
 }
 
 html.dark .popover-action-btn.subtle,
 [data-theme="dark"] .popover-action-btn.subtle {
-  background: #ffffff !important;
-  border: 1px solid #d8dee8 !important;
-  color: #475569 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 html.dark .popover-action-btn.subtle:hover,
 [data-theme="dark"] .popover-action-btn.subtle:hover {
-  background: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
 }
 
 html.dark .popover-dev-section,
 [data-theme="dark"] .popover-dev-section {
-  border-top: 1px solid #d8dee8 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 html.dark .popover-quick-personas-btn,
 [data-theme="dark"] .popover-quick-personas-btn {
-  color: #64748b !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 html.dark .popover-personas-list,
 [data-theme="dark"] .popover-personas-list {
-  background: #ffffff !important;
-  border: 1px solid #d8dee8 !important;
-  border-radius: 10px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
   padding: 6px !important;
 }
 
 html.dark .persona-item-btn:hover,
 [data-theme="dark"] .persona-item-btn:hover {
-  background: #f1f5f9 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
 }
 
 html.dark .persona-item-btn.selected,
 [data-theme="dark"] .persona-item-btn.selected {
-  background: #eef2ff !important;
+  background: rgba(2, 132, 199, 0.25) !important;
+  color: #38bdf8 !important;
 }
 
 html.dark .enterprise-layout,

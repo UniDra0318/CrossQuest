@@ -2191,15 +2191,16 @@ html.dark .sidebar-collapse-toggle-btn:hover,
 
 html.dark .sidebar-profile-popover,
 [data-theme="dark"] .sidebar-profile-popover {
-  background: #0f172a !important;
-  border-color: #334155 !important;
+  background-color: #14324f !important;
+  background: linear-gradient(180deg, #183e63 0%, #133352 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
   color: #f8fafc !important;
 }
 
 html.dark .popover-user-header,
 [data-theme="dark"] .popover-user-header {
-  border-bottom-color: #1e293b !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 html.dark .popover-name,
@@ -2214,13 +2215,13 @@ html.dark .popover-email,
 
 html.dark .popover-scope-box,
 [data-theme="dark"] .popover-scope-box {
-  background: #1e293b !important;
-  border: 1px solid #334155 !important;
+  background: rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 html.dark .scope-label,
 [data-theme="dark"] .scope-label {
-  color: #94a3b8 !important;
+  color: rgba(255, 255, 255, 0.65) !important;
 }
 
 html.dark .scope-value,
@@ -2230,20 +2231,21 @@ html.dark .scope-value,
 
 html.dark .popover-action-btn,
 [data-theme="dark"] .popover-action-btn {
-  background: #1e293b !important;
-  border-color: #334155 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: #f8fafc !important;
 }
 
 html.dark .popover-action-btn:hover,
 [data-theme="dark"] .popover-action-btn:hover {
-  background: #334155 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 html.dark .popover-action-btn.subtle,
 [data-theme="dark"] .popover-action-btn.subtle {
-  background: transparent !important;
-  color: #cbd5e1 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 html.dark .persona-item-btn,
@@ -2253,12 +2255,12 @@ html.dark .persona-item-btn,
 
 html.dark .persona-item-btn:hover,
 [data-theme="dark"] .persona-item-btn:hover {
-  background: #1e293b !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 html.dark .persona-item-btn.selected,
 [data-theme="dark"] .persona-item-btn.selected {
-  background: #1e293b !important;
+  background: rgba(2, 132, 199, 0.25) !important;
   color: #38bdf8 !important;
 }
 
