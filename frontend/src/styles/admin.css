@@ -1742,6 +1742,62 @@ button:disabled {
   margin-bottom: 24px;
 }
 
+/* Staff Access & Clearances Hero Stage (Royal Midnight Indigo Theme) */
+.adm-staff-hero-stage {
+  background: linear-gradient(135deg, #1e1338 0%, #2b1754 50%, #431d78 100%);
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  box-shadow: 0 12px 36px rgba(43, 23, 84, 0.2);
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.adm-staff-primary-btn {
+  background: #7c3aed !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35) !important;
+}
+
+.adm-staff-primary-btn:hover:not(:disabled) {
+  background: #6d28d9 !important;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45) !important;
+}
+
+.adm-staff-metric-cell {
+  background: rgba(30, 19, 56, 0.5) !important;
+  border-color: rgba(167, 139, 250, 0.18) !important;
+}
+
+.adm-staff-metric-cell:hover {
+  border-color: rgba(167, 139, 250, 0.35) !important;
+}
+
+/* Client Companies & Enclaves Hero Stage (Deep Emerald Obsidian Theme) */
+.adm-clients-hero-stage {
+  background: linear-gradient(135deg, #02261d 0%, #064032 50%, #0a5c48 100%);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  box-shadow: 0 12px 36px rgba(6, 64, 50, 0.2);
+  margin-top: 36px;
+  margin-bottom: 24px;
+}
+
+.adm-clients-primary-btn {
+  background: #059669 !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+}
+
+.adm-clients-primary-btn:hover:not(:disabled) {
+  background: #047857 !important;
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.45) !important;
+}
+
+.adm-clients-metric-cell {
+  background: rgba(2, 38, 29, 0.5) !important;
+  border-color: rgba(52, 211, 153, 0.18) !important;
+}
+
+.adm-clients-metric-cell:hover {
+  border-color: rgba(52, 211, 153, 0.35) !important;
+}
+
 /* Vault Main Panel Box */
 .adm-vault-panel {
   margin-top: 0 !important;

@@ -8,7 +8,12 @@ import {
   UserX,
   UserCheck,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Shield,
+  Layers,
+  Sparkles,
+  ShieldAlert,
+  X
 } from 'lucide-react';
 import { TablePagination, TablePaginationCompact, usePagination } from '../../components/TablePagination';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
@@ -94,47 +99,106 @@ export default function PeopleAccess({
   } = usePagination(filteredCompanies, 4);
 
   return (
-    <div className="adm-people-access-page" style={{ marginTop: '20px' }}>
-      {/* 1. Staff Access & Role Management Panel */}
-      <div className="adm-panel">
-        <div className="adm-panel__head" style={{ flexWrap: 'wrap', gap: '14px' }}>
-          <div>
-            <h2>Staff Access & Role Management</h2>
-            <span className="adm-mono">Configure roles, clearance levels, and assigned tenant scope</span>
+    <div className="adm-people-access-page" style={{ marginTop: '10px' }}>
+      {/* 1. Staff Access & Role Management Hero Stage (Royal Indigo / Violet Cockpit) */}
+      <section className="trainee-hero-stage adm-staff-hero-stage">
+        <div className="trainee-hero-content">
+          <div className="trainee-hero-badge" style={{ background: 'rgba(167, 139, 250, 0.15)', borderColor: 'rgba(167, 139, 250, 0.3)', color: '#ede9fe' }}>
+            <Shield size={13} style={{ color: '#c4b5fd' }} />
+            <span>ROLE-BASED ATTRIBUTE AUTHORITY &bull; CP-ABE ENCLAVE</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+
+          <h2 className="trainee-hero-headline">Staff Access &amp; Clearances</h2>
+          <p className="trainee-hero-sub">
+            Configure administrative roles, multi-level cryptographic clearances, and assigned tenant access scopes.
+          </p>
+
+          <div className="trainee-hero-actions">
             <button
               type="button"
+              className="trainee-hero-primary-btn adm-staff-primary-btn"
               onClick={onOpenCreateUserModal}
-              style={{
-                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                color: '#ffffff',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
-                transition: 'all 0.15s ease'
-              }}
+              title="Provision a new staff account with cryptographic keys"
             >
-              <UserPlus size={15} />
-              <span>Provision New Account</span>
+              <UserPlus size={14} />
+              <span>Provision Staff Account</span>
             </button>
-            <div className="adm-search">
+          </div>
+        </div>
+
+        {/* 4-Cell Bento Telemetry Grid for Staff */}
+        <div className="trainee-hero-metrics-panel">
+          <div className="hero-metric-cell adm-staff-metric-cell">
+            <span className="metric-tag">TOTAL PERSONNEL</span>
+            <div className="metric-num">
+              {staffList.length}
+              <span className="metric-unit">USERS</span>
+            </div>
+            <span className="metric-sub-label">Authorized directory</span>
+          </div>
+
+          <div className="hero-metric-cell adm-staff-metric-cell">
+            <span className="metric-tag">CLEARANCE LEVEL 3</span>
+            <div className="metric-num" style={{ color: '#c4b5fd' }}>
+              {staffList.filter(s => s.level >= 3).length}
+              <span className="metric-unit" style={{ color: '#e9d5ff' }}>EXEC</span>
+            </div>
+            <span className="metric-sub-label">Full cryptographic scope</span>
+          </div>
+
+          <div className="hero-metric-cell adm-staff-metric-cell">
+            <span className="metric-tag">ACTIVE STATUS</span>
+            <div className="metric-num" style={{ color: '#34d399' }}>
+              {staffList.filter(s => s.is_active !== false).length}
+              <span className="metric-unit" style={{ color: '#6ee7b7' }}>LIVE</span>
+            </div>
+            <span className="metric-sub-label">Verified session keys</span>
+          </div>
+
+          <div className="hero-metric-cell adm-staff-metric-cell">
+            <span className="metric-tag">DEACTIVATED (REVOKED)</span>
+            <div className="metric-num" style={{ color: staffList.filter(s => s.is_active === false).length > 0 ? '#f87171' : '#94a3b8' }}>
+              {staffList.filter(s => s.is_active === false).length}
+              <span className="metric-unit" style={{ color: '#fca5a5' }}>REVOKED</span>
+            </div>
+            <span className="metric-sub-label">U-07 instant revocation</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 1. Staff Access & Role Management Panel */}
+      <div className="adm-panel adm-vault-panel">
+        <div className="adm-panel__head adm-vault-controls">
+          <div className="adm-vault-search-wrap">
+            <div className="adm-search adm-vault-search">
               <Search size={15} />
               <input 
                 type="text" 
-                placeholder="Search staff members..." 
+                placeholder="Search staff members by name, email, or role..." 
                 value={staffSearch}
                 onChange={(e) => setStaffSearch(e.target.value)}
               />
+              {staffSearch && (
+                <button 
+                  type="button" 
+                  onClick={() => setStaffSearch('')} 
+                  className="adm-vault-clear-search"
+                >
+                  <X size={13} />
+                </button>
+              )}
             </div>
           </div>
+
+          <div className="adm-vault-actions-group">
+            <TablePaginationCompact
+              currentPage={staffPage}
+              totalItems={totalStaff}
+              pageSize={4}
+              onPageChange={setStaffPage}
+            />
+          </div>
+
           {actionToast && (
             <div style={{
               display: 'flex',
@@ -142,7 +206,7 @@ export default function PeopleAccess({
               gap: '8px',
               padding: '10px 16px',
               borderRadius: '10px',
-              marginTop: '12px',
+              width: '100%',
               fontSize: '12.5px',
               fontWeight: 600,
               background: actionToast.type === 'success' ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),
@@ -309,55 +373,104 @@ export default function PeopleAccess({
         />
       </div>
 
-      {/* 2. Client Companies & Multi-Tenant Registry Panel */}
-      <div className="adm-panel" style={{ marginTop: '32px' }}>
-        <div className="adm-panel__head" style={{ flexWrap: 'wrap', gap: '14px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-              <Building2 size={20} color="#7c3aed" />
-              <h2 style={{ margin: 0 }}>Client Companies & Multi-Tenant Registry</h2>
-            </div>
-            <span className="adm-mono">Institutional corporate clients with versioned CP-ABE access tokens (CLIENT&lt;CODE&gt;V1)</span>
+      {/* 2. Client Companies & Multi-Tenant Registry Hero Stage (Emerald Forest / Deep Spruce Cockpit) */}
+      <section className="trainee-hero-stage adm-clients-hero-stage" style={{ marginTop: '36px' }}>
+        <div className="trainee-hero-content">
+          <div className="trainee-hero-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#d1fae5' }}>
+            <Building2 size={13} style={{ color: '#34d399' }} />
+            <span>CRYPTOGRAPHIC ENCLAVES &bull; MULTI-TENANT ISOLATION</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+
+          <h2 className="trainee-hero-headline">Client Companies &amp; Tenants</h2>
+          <p className="trainee-hero-sub">
+            Institutional corporate client boundaries secured with strict PostgreSQL Row-Level Security (RLS) and CP-ABE versioned policy tokens.
+          </p>
+
+          <div className="trainee-hero-actions">
+            <button
+              type="button"
+              className="trainee-hero-primary-btn adm-clients-primary-btn"
+              onClick={onOpenCreateCompanyModal}
+              title="Register a new institutional client enclave"
+            >
+              <Building2 size={14} />
+              <span>Register Client Company</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4-Cell Bento Telemetry Grid for Clients */}
+        <div className="trainee-hero-metrics-panel">
+          <div className="hero-metric-cell adm-clients-metric-cell">
+            <span className="metric-tag">REGISTERED TENANTS</span>
+            <div className="metric-num">
+              {companiesList.length}
+              <span className="metric-unit">ORGS</span>
+            </div>
+            <span className="metric-sub-label">Enclave client entities</span>
+          </div>
+
+          <div className="hero-metric-cell adm-clients-metric-cell">
+            <span className="metric-tag">ROW-LEVEL SECURITY</span>
+            <div className="metric-num" style={{ color: '#34d399' }}>
+              100<span className="metric-unit" style={{ color: '#6ee7b7' }}>%</span>
+            </div>
+            <span className="metric-sub-label">Strict isolation active</span>
+          </div>
+
+          <div className="hero-metric-cell adm-clients-metric-cell">
+            <span className="metric-tag">ACTIVE SECTORS</span>
+            <div className="metric-num" style={{ color: '#38bdf8' }}>
+              {new Set(companiesList.map(c => c.industry).filter(Boolean)).size}
+              <span className="metric-unit" style={{ color: '#7dd3fc' }}>DOMAINS</span>
+            </div>
+            <span className="metric-sub-label">Industry distribution</span>
+          </div>
+
+          <div className="hero-metric-cell adm-clients-metric-cell">
+            <span className="metric-tag">ACCOUNT MANAGERS</span>
+            <div className="metric-num" style={{ color: '#a78bfa' }}>
+              {new Set(companiesList.map(c => c.am_name).filter(Boolean)).size || 1}
+              <span className="metric-unit" style={{ color: '#c4b5fd' }}>LEADS</span>
+            </div>
+            <span className="metric-sub-label">Assigned supervisors</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Client Companies & Multi-Tenant Registry Panel */}
+      <div className="adm-panel adm-vault-panel">
+        <div className="adm-panel__head adm-vault-controls">
+          <div className="adm-vault-search-wrap">
+            <div className="adm-search adm-vault-search">
+              <Search size={15} />
+              <input 
+                type="text" 
+                placeholder="Filter client companies by code, name, or industry sector..." 
+                value={companySearch}
+                onChange={(e) => setCompanySearch(e.target.value)}
+              />
+              {companySearch && (
+                <button 
+                  type="button" 
+                  onClick={() => setCompanySearch('')} 
+                  className="adm-vault-clear-search"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="adm-vault-actions-group">
             <TablePaginationCompact
               currentPage={companyPage}
               totalItems={totalCompanies}
               pageSize={4}
               onPageChange={setCompanyPage}
             />
-            <button
-              type="button"
-              onClick={onOpenCreateCompanyModal}
-              style={{
-                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                color: '#ffffff',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(124, 58, 237, 0.28)',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Building2 size={15} />
-              <span>Register New Client Company</span>
-            </button>
-            <div className="adm-search">
-              <Search size={15} />
-              <input 
-                type="text" 
-                placeholder="Filter client companies or sector..." 
-                value={companySearch}
-                onChange={(e) => setCompanySearch(e.target.value)}
-              />
-            </div>
           </div>
+
           {actionToast && (
             <div style={{
               display: 'flex',
@@ -365,7 +478,7 @@ export default function PeopleAccess({
               gap: '8px',
               padding: '10px 16px',
               borderRadius: '10px',
-              marginTop: '12px',
+              width: '100%',
               fontSize: '12.5px',
               fontWeight: 600,
               background: actionToast.type === 'success' ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),

@@ -522,38 +522,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       {(() => {
         switch (activeSubView) {
           case 'records_vault':
-            return null;
           case 'attribute_authority':
-            return (
-              <PageHeader
-                title="People and Access"
-                subtitle="Manage enterprise staff clearances, tenant assignments, and client company registries."
-                badge="ACCESS CONTROL"
-                badgeType="default"
-                actions={
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      type="button"
-                      className="adm-btn adm-btn--primary"
-                      onClick={() => setIsAddUserModalOpen(true)}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <UserPlus size={14} />
-                      <span>Provision User</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="adm-btn adm-btn--secondary"
-                      onClick={() => setIsAddCompanyModalOpen(true)}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                    >
-                      <Building2 size={14} />
-                      <span>Register Client</span>
-                    </button>
-                  </div>
-                }
-              />
-            );
+            return null;
           case 'anomalies':
             return (
               <PageHeader
