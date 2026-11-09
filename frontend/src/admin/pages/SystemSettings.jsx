@@ -15,11 +15,14 @@ import {
   AlertCircle,
   ShieldAlert
 } from 'lucide-react';
-import { batchUpdateAnomalyRules, fetchAnomalyRules } from '../../services/api';
+import { batchUpdateAnomalyRules, batchApproveAnomalyRules, fetchAnomalyRules } from '../../services/api';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 
-export default function SystemSettings({ settings, liveRules = [], token, onRuleUpdated, onTuneRules }) {
+export default function SystemSettings({ settings, liveRules = [], token, currentUser: propCurrentUser, onRuleUpdated, onTuneRules }) {
   const { isDark } = useTheme();
+  const auth = useAuth();
+  const currentUser = propCurrentUser || auth?.currentUser || null;
 
   const currentSettings = settings || {
     accessControl: {
@@ -74,6 +77,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
   const rAfter = currentRules.find(r => r.rule_code === 'S1_AFTER_HOURS');
   const rFailed = currentRules.find(r => r.rule_code === 'R2_FAILED_LOGINS_ACCOUNT');
   const rBurst = currentRules.find(r => r.rule_code === 'R3_REPORT_BURSTS');
+  const rHighAccess = currentRules.find(r => r.rule_code === 'R3_HIGH_RECORD_ACCESS');
 
   const startHour = rAfter?.parameters?.start_hour !== undefined ? Number(rAfter.parameters.start_hour) : 9;
   const endHour = rAfter?.parameters?.end_hour !== undefined ? Number(rAfter.parameters.end_hour) : 18;
@@ -91,8 +95,23 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
   const isAfterReviewed = rAfter?.client_reviewed ?? true;
   const isFailedReviewed = rFailed?.client_reviewed ?? true;
   const isBurstReviewed = rBurst?.client_reviewed ?? true;
-  const allReviewed = isAfterReviewed && isFailedReviewed && isBurstReviewed;
-  const maxVersion = Math.max(rAfter?.version_no || 1, rFailed?.version_no || 1, rBurst?.version_no || 1);
+  const isHighAccessReviewed = rHighAccess?.client_reviewed ?? true;
+  const allReviewed = isAfterReviewed && isFailedReviewed && isBurstReviewed && isHighAccessReviewed;
+  const maxVersion = Math.max(
+    rAfter?.version_no || 1, 
+    rFailed?.version_no || 1, 
+    rBurst?.version_no || 1,
+    rHighAccess?.version_no || 1
+  );
+
+  // Check if current user is the editor of any unreviewed rule (U-16, OI-08)
+  const isEditorOfPending = currentRules.some(
+    r => r.client_reviewed === false && r.last_edited_by_user_id && currentUser?.id && r.last_edited_by_user_id === currentUser.id
+  );
+
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [approveReason, setApproveReason] = useState('Crossworks peer review completed and certified.');
+  const [isApproving, setIsApproving] = useState(false);
 
   // Dynamic visual timeline bar positioning
   const leftPercent = Math.max(0, Math.min(100, (startHour / 24) * 100));
@@ -271,6 +290,32 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
       setModalError(err.message || 'Failed to update threshold parameters on server.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleApproveRules = async (e) => {
+    e?.preventDefault();
+    setIsApproving(true);
+    setModalError(null);
+    try {
+      const approvedRules = await batchApproveAnomalyRules(approveReason, token);
+      setCurrentRules(prev => {
+        const next = [...prev];
+        approvedRules.forEach(appr => {
+          const idx = next.findIndex(r => r.rule_code === appr.rule_code);
+          if (idx >= 0) next[idx] = appr;
+          else next.push(appr);
+        });
+        return next;
+      });
+      approvedRules.forEach(r => onRuleUpdated?.(r));
+      setSaveSuccess('Pending anomaly rules successfully peer-approved and are now actively enforced in detection engine.');
+      setIsApproveModalOpen(false);
+      setTimeout(() => setSaveSuccess(null), 5000);
+    } catch (err) {
+      setModalError(err.message || 'Failed to approve anomaly rules.');
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -456,6 +501,109 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
               </div>
             </div>
           </div>
+
+          {/* Side-by-side comparison box (A3, OI-08) */}
+          {!allReviewed && (
+            <div className="adm-comparison-box">
+              <div className="adm-comparison-header">
+                <div className="adm-flex-center adm-gap-8">
+                  <AlertTriangle size={16} color="#d97706" />
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: isDark ? '#fbbf24' : '#b45309' }}>
+                    Threshold Staging Comparison (OI-08 Baseline Preservation)
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>
+                  Staged changes inactive until peer approval
+                </span>
+              </div>
+
+              <div className="adm-comparison-grid">
+                {/* Column 1: In Effect */}
+                <div className={`adm-comparison-col ${isDark ? 'dark' : ''}`}>
+                  <div className="adm-comparison-title" style={{ color: '#059669' }}>
+                    <CheckCircle2 size={14} />
+                    <span>In Effect (Crossworks Baseline)</span>
+                  </div>
+                  <div className="adm-comparison-list">
+                    <div className="adm-comparison-item">
+                      <span>Operating Hours:</span>
+                      <strong>09:00 – 18:00 (Asia/Manila)</strong>
+                    </div>
+                    <div className="adm-comparison-item">
+                      <span>Failed Logins:</span>
+                      <strong>5 attempts in 10 mins</strong>
+                    </div>
+                    <div className="adm-comparison-item">
+                      <span>Burst Reports:</span>
+                      <strong>5 reports in 60 mins</strong>
+                    </div>
+                    <div className="adm-comparison-item">
+                      <span>High Record Access:</span>
+                      <strong>AM 25 &bull; Trainer 25 &bull; Fin 50 &bull; Adm 50 &bull; Trainee 15</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column 2: Pending (Not In Effect) */}
+                <div className={`adm-comparison-col ${isDark ? 'dark' : ''}`}>
+                  <div className="adm-comparison-title" style={{ color: '#d97706' }}>
+                    <Clock size={14} />
+                    <span>Pending (v{maxVersion}, Not In Effect)</span>
+                  </div>
+                  <div className="adm-comparison-list">
+                    <div className="adm-comparison-item">
+                      <span>Operating Hours:</span>
+                      <strong style={{ color: '#d97706' }}>
+                        {String(startHour).padStart(2, '0')}:00 – {String(endHour).padStart(2, '0')}:00 ({tz})
+                      </strong>
+                    </div>
+                    <div className="adm-comparison-item">
+                      <span>Failed Logins:</span>
+                      <strong style={{ color: '#d97706' }}>{failedThreshold} attempts in {failedMinutes} mins</strong>
+                    </div>
+                    <div className="adm-comparison-item">
+                      <span>Burst Reports:</span>
+                      <strong style={{ color: '#d97706' }}>{burstThreshold} reports in {burstMinutes} mins</strong>
+                    </div>
+                    <div className="adm-comparison-item">
+                      <span>High Record Access:</span>
+                      <strong style={{ color: '#d97706' }}>
+                        AM {rHighAccess?.parameters?.thresholds?.account_manager ?? 25} &bull; 
+                        Trainer {rHighAccess?.parameters?.thresholds?.trainer ?? 25} &bull; 
+                        Fin {rHighAccess?.parameters?.thresholds?.finance ?? 50} &bull; 
+                        Adm {rHighAccess?.parameters?.thresholds?.admin ?? 50} &bull; 
+                        Trainee {rHighAccess?.parameters?.thresholds?.trainee ?? 15}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Approval Bar */}
+              <div className="adm-approval-bar">
+                {isEditorOfPending ? (
+                  <div className="adm-approval-locked">
+                    <Lock size={16} />
+                    <span>Awaiting Peer Administrator Review (Self-approval locked per U-16/OI-08)</span>
+                  </div>
+                ) : (
+                  <div className="adm-flex-between adm-w-full" style={{ gap: '12px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#f1f5f9' : '#1e293b' }}>
+                      Ready for independent administrator review:
+                    </span>
+                    <button
+                      type="button"
+                      className="adm-btn-approve"
+                      onClick={() => setIsApproveModalOpen(true)}
+                    >
+                      <CheckCircle2 size={14} />
+                      <span>Approve Changes</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -949,6 +1097,136 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                 >
                   <Save size={15} />
                   <span>{isSaving ? 'Saving Parameters...' : 'Save Parameters'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          PEER APPROVAL MODAL (INDEPENDENT REVIEW, OI-08)
+          ===================================================================== */}
+      {isApproveModalOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isApproving) setIsApproveModalOpen(false);
+          }}
+        >
+          <div 
+            style={{
+              background: isDark ? '#111827' : '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 20px 45px rgba(0,0,0,0.3)',
+              border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: isDark ? '#0f172a' : '#f8fafc'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: 'rgba(5, 150, 105, 0.15)',
+                  color: '#059669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <CheckCircle2 size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    Approve Anomaly Threshold Changes
+                  </h3>
+                  <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                    Crossworks Independent Review & Certification (OI-08)
+                  </span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setIsApproveModalOpen(false)}
+                disabled={isApproving}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: isDark ? '#94a3b8' : '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleApproveRules} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <p style={{ margin: 0, fontSize: '13px', color: isDark ? '#e2e8f0' : '#334155', lineHeight: 1.5 }}>
+                As an independent administrator, by approving these staged thresholds you confirm they meet operational security guidelines. Upon approval, these values will immediately become active in the detection engine.
+              </p>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', marginBottom: '6px' }}>
+                  CROSSWORKS PEER REVIEW JUSTIFICATION
+                </label>
+                <textarea
+                  className="adm-reason-textarea"
+                  rows={3}
+                  value={approveReason}
+                  onChange={(e) => setApproveReason(e.target.value)}
+                  placeholder="Enter reason for peer approval..."
+                  style={{
+                    background: isDark ? '#1e293b' : '#f8fafc',
+                    color: isDark ? '#f8fafc' : '#0f172a',
+                    border: isDark ? '1px solid #334155' : '1px solid #cbd5e1'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsApproveModalOpen(false)}
+                  disabled={isApproving}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                    background: 'transparent',
+                    color: isDark ? '#94a3b8' : '#64748b',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isApproving}
+                  className="adm-btn-approve"
+                >
+                  {isApproving ? 'Approving...' : 'Confirm & Activate Thresholds'}
                 </button>
               </div>
             </form>

@@ -119,5 +119,87 @@ describe('SystemSettings Anomaly Thresholds Tuning', () => {
 
     batchSpy.mockRestore();
   });
+
+  it('displays side-by-side comparison when pending changes exist, locks self-approval for editor, and permits peer approval for other admin', async () => {
+    const PENDING_RULES = [
+      {
+        rule_code: 'S1_AFTER_HOURS',
+        parameters: { start_hour: 8, end_hour: 19, tz: 'Asia/Manila', days: ['MON', 'TUE', 'WED', 'THU', 'FRI'] },
+        version_no: 2,
+        client_reviewed: false,
+        last_edited_by_user_id: 'admin-user-1'
+      },
+      {
+        rule_code: 'R2_FAILED_LOGINS_ACCOUNT',
+        parameters: { threshold: 3, window_minutes: 10 },
+        version_no: 2,
+        client_reviewed: false,
+        last_edited_by_user_id: 'admin-user-1'
+      },
+      {
+        rule_code: 'R3_REPORT_BURSTS',
+        parameters: { threshold: 8, window_minutes: 60 },
+        version_no: 2,
+        client_reviewed: false,
+        last_edited_by_user_id: 'admin-user-1'
+      }
+    ];
+
+    // Case 1: Current user is the editor ('admin-user-1')
+    const { unmount } = render(
+      <ThemeProvider>
+        <SystemSettings 
+          liveRules={PENDING_RULES} 
+          token="test-token" 
+          currentUser={{ id: 'admin-user-1', email: 'editor_admin@test.ph', role: 'admin' }} 
+        />
+      </ThemeProvider>
+    );
+
+    // Shows pending badge and staging comparison
+    expect(screen.getByText(/Pending Review \(v2\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Threshold Staging Comparison/i)).toBeInTheDocument();
+    expect(screen.getByText(/In Effect \(Crossworks Baseline\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Pending \(v2, Not In Effect\)/i)).toBeInTheDocument();
+
+    // Editor should see self-approval locked notice and NO approve button
+    expect(screen.getByText(/Awaiting Peer Administrator Review \(Self-approval locked per U-16\/OI-08\)/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Approve Changes/i })).not.toBeInTheDocument();
+
+    unmount();
+
+    // Case 2: Current user is a peer admin ('admin-user-2')
+    const approveSpy = vi.spyOn(api, 'batchApproveAnomalyRules').mockResolvedValueOnce([
+      { ...PENDING_RULES[0], client_reviewed: true },
+      { ...PENDING_RULES[1], client_reviewed: true },
+      { ...PENDING_RULES[2], client_reviewed: true }
+    ]);
+
+    render(
+      <ThemeProvider>
+        <SystemSettings 
+          liveRules={PENDING_RULES} 
+          token="test-token" 
+          currentUser={{ id: 'admin-user-2', email: 'peer_admin@test.ph', role: 'admin' }} 
+        />
+      </ThemeProvider>
+    );
+
+    // Peer admin sees Approve button
+    const approveBtn = screen.getByRole('button', { name: /Approve Changes/i });
+    expect(approveBtn).toBeInTheDocument();
+    fireEvent.click(approveBtn);
+
+    // Modal opens with certification prompt
+    expect(screen.getByText(/Approve Anomaly Threshold Changes/i)).toBeInTheDocument();
+    const confirmBtn = screen.getByRole('button', { name: /Confirm & Activate Thresholds/i });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(approveSpy).toHaveBeenCalledTimes(1);
+    });
+
+    approveSpy.mockRestore();
+  });
 });
 

@@ -3,16 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine, Base, init_db_rls
 from app.api.api import api_router
-from sqlalchemy import text
 
 # Create database tables automatically
 Base.metadata.create_all(bind=engine)
-try:
-    with engine.connect() as conn:
-        conn.execute(text("ALTER TABLE users ADD COLUMN job_title VARCHAR(200)"))
-        conn.commit()
-except Exception:
-    pass
 init_db_rls(engine)
 
 

@@ -712,6 +712,38 @@ export async function batchUpdateAnomalyRules(batchData, token) {
   return data;
 }
 
+export async function approveAnomalyRule(ruleCode, reason, token) {
+  const res = await fetch(`${API_BASE}/anomalies/rules/${encodeURIComponent(ruleCode)}/approve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify({ reason: reason || 'Peer review approval confirmed' })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Failed to approve rule (${res.status})`);
+  }
+  return data;
+}
+
+export async function batchApproveAnomalyRules(reason, token) {
+  const res = await fetch(`${API_BASE}/anomalies/rules-batch/approve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify({ reason: reason || 'Peer review approval confirmed for pending threshold changes' })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Failed to batch approve rules (${res.status})`);
+  }
+  return data;
+}
+
 export async function runRetentionJob(token) {
   const res = await fetch(`${API_BASE}/anomalies/retention/run`, {
     method: 'POST',

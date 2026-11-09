@@ -759,7 +759,6 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
               alignItems: 'center',
               gap: '7px',
               whiteSpace: 'nowrap',
-              border: 'none',
               cursor: 'pointer',
               background: activeTab === 'queue' ? 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)' : (isDark ? '#1e293b' : '#f1f5f9'),
               color: activeTab === 'queue' ? '#ffffff' : (isDark ? '#94a3b8' : '#475569'),

@@ -23,6 +23,8 @@ Alerts are recorded for Administrator review only (no automatic lock-out, immuta
 
 import hmac
 import hashlib
+import logging
+import time
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Tuple, Dict, Any
 from sqlalchemy.orm import Session
@@ -30,6 +32,7 @@ from sqlalchemy import func, and_, or_
 from app.core.config import settings
 from app.models.entities import AccessLog, AnomalyAlert, User, TrainingRecord, AnomalyRule
 
+logger = logging.getLogger(__name__)
 
 # Role-based thresholds for distinct record-detail views within 15 minutes (Table 13, R3-a)
 R3_A_THRESHOLDS = {
@@ -43,25 +46,73 @@ R3_A_THRESHOLDS = {
 # Chapter III Section 3.7.3: Severity scale has Low, Medium, and High (High is the maximum; no CRITICAL).
 SEVERITY_LEVELS = ["LOW", "MEDIUM", "HIGH"]
 
+# In-memory timed cache for reviewed anomaly rules
+_RULES_CACHE: Optional[Dict[str, Dict[str, Any]]] = None
+_RULES_CACHE_TIME: float = 0.0
+RULES_CACHE_TTL_SEC: float = 10.0
+
+
+def clear_rule_cache() -> None:
+    """Clears the cached anomaly detection rules so changes take effect immediately."""
+    global _RULES_CACHE, _RULES_CACHE_TIME
+    _RULES_CACHE = None
+    _RULES_CACHE_TIME = 0.0
+
+
+def load_reviewed_rules(db: Optional[Session]) -> Dict[str, Dict[str, Any]]:
+    """Loads all reviewed anomaly detection rules into an in-memory dictionary.
+    Per Chapter III baseline specification, only rules marked client_reviewed=True
+    are enforced in active detection. Unreviewed/pending threshold edits are ignored
+    until formally approved by an independent administrator (OI-08).
+    """
+    global _RULES_CACHE, _RULES_CACHE_TIME
+    now_mono = time.monotonic()
+    if _RULES_CACHE is not None and (now_mono - _RULES_CACHE_TIME) < RULES_CACHE_TTL_SEC:
+        return _RULES_CACHE
+
+    if db is None:
+        return {}
+
+    try:
+        rules = db.query(AnomalyRule).all()
+        reviewed_map = {}
+        for r in rules:
+            if r.client_reviewed and r.parameters:
+                reviewed_map[r.rule_code] = dict(r.parameters)
+        _RULES_CACHE = reviewed_map
+        _RULES_CACHE_TIME = now_mono
+        return reviewed_map
+    except Exception as exc:
+        logger.warning("Could not read rule parameters from database: %s; rolling back and using defaults", exc, exc_info=True)
+        try:
+            db.rollback()
+        except Exception:
+            pass
+        return {}
+
+
+def safe_int(val: Any, default: int, param_name: str = "") -> int:
+    """Safely converts parameter value to integer, logging a warning and falling back to default on failure."""
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        logger.warning("Invalid integer parameter '%s' with value '%r'; using default %d", param_name, val, default)
+        return default
+
 
 def get_rule_parameters(db: Optional[Session], rule_code: str, default_params: Dict[str, Any]) -> Dict[str, Any]:
-    """Retrieves active parameters for an anomaly rule from the database, falling back to defaults."""
-    if db is None:
-        return default_params
-    try:
-        rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == rule_code).first()
-        if rule and rule.parameters:
-            merged = dict(default_params)
-            merged.update(rule.parameters)
-            return merged
-    except Exception:
-        pass
+    """Retrieves reviewed active parameters for an anomaly rule from cache/DB, falling back to Table 13 defaults."""
+    rules_map = load_reviewed_rules(db)
+    if rule_code in rules_map:
+        merged = dict(default_params)
+        merged.update(rules_map[rule_code])
+        return merged
     return default_params
 
 
 def is_after_hours(dt: Optional[datetime] = None, db: Optional[Session] = None) -> bool:
     """Checks if a given UTC datetime falls outside Philippine operating hours (Table 13: S1 After-hours indicator).
-    Reads active S1 parameters from AnomalyRule if available, otherwise defaults to Mon-Fri 09:00 - 18:00 UTC+8.
+    Reads active S1 parameters from reviewed AnomalyRule if available, otherwise defaults to Mon-Fri 09:00 - 18:00 UTC+8.
     """
     if dt is None:
         dt = datetime.now(timezone.utc)
@@ -83,8 +134,8 @@ def is_after_hours(dt: Optional[datetime] = None, db: Optional[Session] = None) 
     if current_day not in allowed_days:
         return True
 
-    start_h = int(s1_params.get("start_hour", 9))
-    end_h = int(s1_params.get("end_hour", 18))
+    start_h = safe_int(s1_params.get("start_hour"), 9, "S1.start_hour")
+    end_h = safe_int(s1_params.get("end_hour"), 18, "S1.end_hour")
     if pht.hour < start_h or pht.hour >= end_h:
         return True
         
@@ -188,8 +239,8 @@ class AccessAnomalyDetector:
         """Rule R1: Flags requests denied because record is outside user scope (R1-a and R1-b)."""
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         r1b_params = get_rule_parameters(db, "R1_REPEATED_OUT_OF_SCOPE", {"threshold": 3, "window_minutes": 15})
-        threshold_repeated = int(r1b_params.get("threshold", 3))
-        window_minutes = int(r1b_params.get("window_minutes", 15))
+        threshold_repeated = safe_int(r1b_params.get("threshold"), 3, "R1_REPEATED.threshold")
+        window_minutes = safe_int(r1b_params.get("window_minutes"), 15, "R1_REPEATED.window_minutes")
         window_recent = now - timedelta(minutes=window_minutes)
 
         # Count out-of-scope denials in the configured window for this user
@@ -234,8 +285,8 @@ class AccessAnomalyDetector:
     ) -> Optional[AnomalyAlert]:
         """Rule R2: failures/account (R2-a) or failures across distinct targeted usernames for IP (R2-b). No lock-out."""
         r2a_params = get_rule_parameters(db, "R2_FAILED_LOGINS_ACCOUNT", {"threshold": 5, "window_minutes": 10})
-        threshold_account = int(r2a_params.get("threshold", 5))
-        window_account = int(r2a_params.get("window_minutes", 10))
+        threshold_account = safe_int(r2a_params.get("threshold"), 5, "R2_ACCOUNT.threshold")
+        window_account = safe_int(r2a_params.get("window_minutes"), 10, "R2_ACCOUNT.window_minutes")
 
         r2b_params = get_rule_parameters(
             db,
@@ -246,9 +297,9 @@ class AccessAnomalyDetector:
                 "window_minutes": 10
             }
         )
-        threshold_ip = int(r2b_params.get("threshold", 10))
-        threshold_distinct = int(r2b_params.get("distinct_usernames_threshold", 2))
-        window_ip = int(r2b_params.get("window_minutes", 10))
+        threshold_ip = safe_int(r2b_params.get("threshold"), 10, "R2_IP.threshold")
+        threshold_distinct = safe_int(r2b_params.get("distinct_usernames_threshold"), 2, "R2_IP.distinct_usernames_threshold")
+        window_ip = safe_int(r2b_params.get("window_minutes"), 10, "R2_IP.window_minutes")
 
         max_window = max(window_account, window_ip)
         now = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -329,8 +380,8 @@ class AccessAnomalyDetector:
         """Rule R3-a: Distinct record-detail views in configured window by role threshold."""
         r3a_params = get_rule_parameters(db, "R3_HIGH_RECORD_ACCESS", {"thresholds": R3_A_THRESHOLDS, "window_minutes": 15})
         role_thresholds = r3a_params.get("thresholds") or R3_A_THRESHOLDS
-        threshold = int(role_thresholds.get(user.role, R3_A_THRESHOLDS.get(user.role, 25)))
-        window_minutes = int(r3a_params.get("window_minutes", 15))
+        threshold = safe_int(role_thresholds.get(user.role, 25), 25, f"R3_A.{user.role}.threshold")
+        window_minutes = safe_int(r3a_params.get("window_minutes"), 15, "R3_A.window_minutes")
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         window_start = now - timedelta(minutes=window_minutes)
@@ -361,8 +412,8 @@ class AccessAnomalyDetector:
     def check_report_bursts(self, user: User, db: Session) -> Optional[AnomalyAlert]:
         """Rule R3-b: Report generation bursts in configured window."""
         r3b_params = get_rule_parameters(db, "R3_REPORT_BURSTS", {"threshold": 5, "window_minutes": 60})
-        threshold = int(r3b_params.get("threshold", 5))
-        window_minutes = int(r3b_params.get("window_minutes", 60))
+        threshold = safe_int(r3b_params.get("threshold"), 5, "R3_BURST.threshold")
+        window_minutes = safe_int(r3b_params.get("window_minutes"), 60, "R3_BURST.window_minutes")
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         window_start = now - timedelta(minutes=window_minutes)
@@ -403,8 +454,8 @@ class AccessAnomalyDetector:
     def record_edit_event(self, user: User, record_id: str, fields_changed: List[str], db: Session) -> AnomalyAlert:
         """Rule R4-b: Edit of client data -> Low alert daily digest; R4-c: Distinct edits in configured window -> Medium alert."""
         r4c_params = get_rule_parameters(db, "R4_BULK_EDIT", {"threshold": 10, "window_minutes": 15})
-        threshold_bulk = int(r4c_params.get("threshold", 10))
-        window_minutes = int(r4c_params.get("window_minutes", 15))
+        threshold_bulk = safe_int(r4c_params.get("threshold"), 10, "R4_BULK.threshold")
+        window_minutes = safe_int(r4c_params.get("window_minutes"), 15, "R4_BULK.window_minutes")
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
         window_start = now - timedelta(minutes=window_minutes)

@@ -64,7 +64,7 @@ def setup_test_database():
     with engine.connect() as conn:
         for stmt in [
             "ALTER TABLE users ADD COLUMN force_password_change BOOLEAN DEFAULT 0",
-            "ALTER TABLE users ADD COLUMN job_title VARCHAR(200)",
+            "ALTER TABLE anomaly_rules ADD COLUMN last_edited_by_user_id VARCHAR(36)",
             "ALTER TABLE training_records ADD COLUMN deleted_at DATETIME",
             "ALTER TABLE training_records ADD COLUMN deleted_by VARCHAR(36)",
             "ALTER TABLE anomaly_alerts ADD COLUMN severity_base VARCHAR(20) DEFAULT 'MEDIUM'",

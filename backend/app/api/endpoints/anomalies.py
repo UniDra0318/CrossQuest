@@ -5,14 +5,15 @@ import csv
 import io
 import json
 from app.services.pdf_generator import pdf_generator
-from app.anomaly.detector import anomaly_detector
+from app.anomaly.detector import anomaly_detector, clear_rule_cache
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from app.core.database import get_db
 from app.models.entities import AnomalyAlert, AccessLog, User
 from app.schemas.schemas import (
     AnomalyAlertResponse, AnomalyAlertReviewRequest, AccessLogResponse,
-    RetentionJobRequest, RetentionJobResponse, RetentionWarningItem
+    RetentionJobRequest, RetentionJobResponse, RetentionWarningItem,
+    RuleApproveRequest
 )
 from app.services.retention_service import run_retention_purge, get_retention_warnings
 from app.api.deps import get_current_admin_user
@@ -478,6 +479,7 @@ def batch_update_anomaly_rules(
                     parameters=item.parameters or {},
                     version_no=1,
                     client_reviewed=False,
+                    last_edited_by_user_id=admin_user.id,
                     description=item.rule_code.replace('_', ' ').title()
                 )
                 db.add(rule)
@@ -486,6 +488,7 @@ def batch_update_anomaly_rules(
                 old_v = rule.version_no
                 rule.parameters = item.parameters
                 rule.version_no += 1
+                rule.last_edited_by_user_id = admin_user.id
                 # When parameters are changed, re-approval by Crossworks is required (A3)
                 rule.client_reviewed = False
 
@@ -503,6 +506,7 @@ def batch_update_anomaly_rules(
                     "old_version": old_v,
                     "new_version": rule.version_no,
                     "client_reviewed": False,
+                    "last_edited_by_user_id": admin_user.id,
                     "reason": clean_reason
                 }
             )
@@ -510,6 +514,7 @@ def batch_update_anomaly_rules(
             updated_rules.append(rule)
 
         db.commit()
+        clear_rule_cache()
         for r in updated_rules:
             db.refresh(r)
         return updated_rules
@@ -549,6 +554,7 @@ def update_anomaly_rule(
             parameters=update_in.parameters or {},
             version_no=1,
             client_reviewed=update_in.client_reviewed if update_in.client_reviewed is not None else False,
+            last_edited_by_user_id=admin_user.id,
             description=update_in.description
         )
         db.add(rule)
@@ -558,6 +564,7 @@ def update_anomaly_rule(
         if update_in.parameters is not None:
             rule.parameters = update_in.parameters
             rule.version_no += 1
+            rule.last_edited_by_user_id = admin_user.id
             # A3 & OI-08: Any parameter edit ALWAYS resets client_reviewed to False (Pending Review).
             # An administrator tuning a rule cannot self-approve in the same edit call.
             rule.client_reviewed = False
@@ -581,34 +588,48 @@ def update_anomaly_rule(
             "old_version": old_v,
             "new_version": rule.version_no,
             "client_reviewed": rule.client_reviewed,
+            "last_edited_by_user_id": admin_user.id,
             "reason": clean_reason
         }
     )
     db.add(log)
     db.commit()
+    clear_rule_cache()
     db.refresh(rule)
     return rule
 
 
+@router.post("/rules/{rule_code}/approve", response_model=AnomalyRuleResponse)
 @router.post("/rules/{rule_code}/review", response_model=AnomalyRuleResponse)
 def approve_rule_review(
     rule_code: str,
+    approve_in: Optional[RuleApproveRequest] = None,
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_current_admin_user)
 ):
-    """Separate Crossworks Review step (A3, OI-08).
-    Approves and freezes an anomaly detection rule version after independent review.
+    """Separate Crossworks Review & Approval step (A3, OI-08).
+    Approves and freezes an anomaly detection rule version after independent peer review.
+    Refuses self-approval from the same administrator who last modified the rule (403 Forbidden).
     """
     rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == rule_code).first()
     if not rule:
         raise HTTPException(status_code=404, detail="Anomaly rule not found.")
+
+    # Independent peer administrator check: the administrator who edited this rule cannot approve it (U-16, OI-08)
+    if rule.last_edited_by_user_id and rule.last_edited_by_user_id == admin_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Conflict of interest: An administrator cannot approve their own rule threshold edits. Independent peer administrator review is required (U-16, OI-08)."
+        )
+
+    clean_reason = (approve_in.reason if approve_in and approve_in.reason else "Independent Crossworks review approval confirmed (OI-08)").strip()
 
     rule.client_reviewed = True
 
     log = AccessLog(
         actor_user_id=admin_user.id,
         actor_role=admin_user.role,
-        event_type="RULE_REVIEWED",
+        event_type="RULE_APPROVED",
         resource_type="ANOMALY_RULE",
         resource_id=rule.id,
         outcome="SUCCESS",
@@ -616,13 +637,63 @@ def approve_rule_review(
             "rule_code": rule_code,
             "version": rule.version_no,
             "client_reviewed": True,
-            "reviewer_id": admin_user.id
+            "reviewer_id": admin_user.id,
+            "reason": clean_reason
         }
     )
     db.add(log)
     db.commit()
+    clear_rule_cache()
     db.refresh(rule)
     return rule
+
+
+@router.post("/rules-batch/approve", response_model=List[AnomalyRuleResponse])
+def batch_approve_rules(
+    approve_in: Optional[RuleApproveRequest] = None,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Atomically approves all pending anomaly detection rules after peer review (A3, OI-08).
+    Refuses approval if the current administrator was the last editor of any pending rule (403 Forbidden).
+    """
+    pending_rules = db.query(AnomalyRule).filter(AnomalyRule.client_reviewed == False).all()
+    if not pending_rules:
+        return db.query(AnomalyRule).all()
+
+    # Verify no conflict of interest for any pending rule
+    for r in pending_rules:
+        if r.last_edited_by_user_id and r.last_edited_by_user_id == admin_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Conflict of interest: Administrator {admin_user.email} edited rule '{r.rule_code}' and cannot self-approve. Peer administrator review required (U-16, OI-08)."
+            )
+
+    clean_reason = (approve_in.reason if approve_in and approve_in.reason else "Independent Crossworks review approval confirmed (OI-08)").strip()
+    for r in pending_rules:
+        r.client_reviewed = True
+        log = AccessLog(
+            actor_user_id=admin_user.id,
+            actor_role=admin_user.role,
+            event_type="RULE_APPROVED",
+            resource_type="ANOMALY_RULE",
+            resource_id=r.id,
+            outcome="SUCCESS",
+            details={
+                "rule_code": r.rule_code,
+                "version": r.version_no,
+                "client_reviewed": True,
+                "reviewer_id": admin_user.id,
+                "reason": clean_reason
+            }
+        )
+        db.add(log)
+
+    db.commit()
+    clear_rule_cache()
+    for r in pending_rules:
+        db.refresh(r)
+    return db.query(AnomalyRule).all()
 
 
 # --- 12-Month Audit & Anomaly Retention Endpoints (OI-20) ---

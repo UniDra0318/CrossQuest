@@ -528,6 +528,7 @@ class AnomalyRule(Base):
     parameters = Column(JSON, default=dict)
     version_no = Column(Integer, default=1)
     client_reviewed = Column(Boolean, default=False)
+    last_edited_by_user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     description = Column(Text, nullable=True)
 
 

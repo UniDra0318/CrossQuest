@@ -389,9 +389,14 @@ class AnomalyRuleResponse(BaseModel):
     parameters: Dict[str, Any]
     version_no: int
     client_reviewed: bool
+    last_edited_by_user_id: Optional[str] = None
     description: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RuleApproveRequest(BaseModel):
+    reason: Optional[str] = None
 
 
 class AnomalyRuleUpdate(BaseModel):

@@ -498,9 +498,10 @@ def test_tc_ano_19_performance_measure_m4(monotonic_timer, db_session: Session, 
 # TC-ANO-20..21: Rule Modification & Below-Threshold Tests
 # =========================================================================
 
-def test_tc_ano_20_rule_modification_and_approval(client: TestClient, admin_user: User):
-    """TC-ANO-20: Admin modifies rule parameters and tracks client_reviewed approval status."""
+def test_tc_ano_20_rule_modification_and_approval(client: TestClient, admin_user: User, second_admin_user: User):
+    """TC-ANO-20: Admin modifies rule parameters and tracks client_reviewed approval status with peer approval."""
     admin_token = create_access_token(subject=admin_user.id)
+    admin2_token = create_access_token(subject=second_admin_user.id)
 
     # 1. Fetch rules
     r_list = client.get("/api/v1/anomalies/rules", headers={"Authorization": f"Bearer {admin_token}"})
@@ -523,11 +524,20 @@ def test_tc_ano_20_rule_modification_and_approval(client: TestClient, admin_user
     assert data["version_no"] >= 2
     # Tuning parameters automatically resets client_reviewed to False (Pending Review, A3, OI-08)
     assert data["client_reviewed"] is False
+    assert data["last_edited_by_user_id"] == admin_user.id
 
     # 3. Independent Crossworks Review Step
-    r_review = client.post(
+    # Self-approval locked (HTTP 403)
+    r_self = client.post(
         "/api/v1/anomalies/rules/R3_HIGH_RECORD_ACCESS/review",
         headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert r_self.status_code == 403
+
+    # Peer admin approval succeeds (HTTP 200)
+    r_review = client.post(
+        "/api/v1/anomalies/rules/R3_HIGH_RECORD_ACCESS/review",
+        headers={"Authorization": f"Bearer {admin2_token}"}
     )
     assert r_review.status_code == 200
     assert r_review.json()["client_reviewed"] is True
@@ -1054,10 +1064,11 @@ def test_tc_ano_28_executive_anomaly_report_and_exports(client: TestClient, admi
 
 
 def test_tc_ano_29_detector_evaluates_with_active_tuned_thresholds(
-    client: TestClient, admin_user: User, test_user: User, db_session: Session
+    client: TestClient, admin_user: User, second_admin_user: User, test_user: User, db_session: Session
 ):
-    """TC-ANO-29: Settings threshold tuning updates AnomalyRule and detector actively enforces new threshold."""
+    """TC-ANO-29: Settings threshold tuning updates AnomalyRule, unreviewed changes stay inactive, and peer approval activates them."""
     admin_token = create_access_token(subject=admin_user.id)
+    admin2_token = create_access_token(subject=second_admin_user.id)
     now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     # 1. Update R2-a threshold from default 5 to 3
@@ -1070,6 +1081,9 @@ def test_tc_ano_29_detector_evaluates_with_active_tuned_thresholds(
         headers={"Authorization": f"Bearer {admin_token}"}
     )
     assert tune_res.status_code == 200
+    rule_data = tune_res.json()
+    assert rule_data["client_reviewed"] is False
+    assert rule_data["last_edited_by_user_id"] == admin_user.id
 
     # 2. Add exactly 3 failed login attempts
     db_session.query(AccessLog).delete()
@@ -1087,9 +1101,50 @@ def test_tc_ano_29_detector_evaluates_with_active_tuned_thresholds(
         ))
     db_session.commit()
 
-    # 3. Detector must trigger alert at 3 (whereas old hardcoded threshold of 5 would have ignored this)
-    alert = anomaly_detector.check_failed_logins(test_user.email, "192.168.1.77", db_session)
-    assert alert is not None
-    assert alert.rule_code == "R2_FAILED_LOGINS_ACCOUNT"
-    assert alert.metadata_info["failures"] == 3
-    assert alert.metadata_info["threshold"] == 3
+    # 3. Before peer review, detector must NOT trigger alert at 3 (baseline threshold 5 is preserved)
+    alert_before = anomaly_detector.check_failed_logins(test_user.email, "192.168.1.77", db_session)
+    assert alert_before is None, "Unreviewed rule change must NOT trigger active alerts"
+
+    # 4. Self-approval is rejected (HTTP 403)
+    self_approve = client.post(
+        "/api/v1/anomalies/rules/R2_FAILED_LOGINS_ACCOUNT/approve",
+        json={"reason": "Self approving my own rule"},
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert self_approve.status_code == 403
+
+    # 5. Peer admin approves the rule
+    peer_approve = client.post(
+        "/api/v1/anomalies/rules/R2_FAILED_LOGINS_ACCOUNT/approve",
+        json={"reason": "Verified threshold reduction aligns with security audit policy"},
+        headers={"Authorization": f"Bearer {admin2_token}"}
+    )
+    assert peer_approve.status_code == 200
+    assert peer_approve.json()["client_reviewed"] is True
+
+    # 6. Detector must trigger alert at 3 now that peer review is completed
+    alert_after = anomaly_detector.check_failed_logins(test_user.email, "192.168.1.77", db_session)
+    assert alert_after is not None
+    assert alert_after.rule_code == "R2_FAILED_LOGINS_ACCOUNT"
+    assert alert_after.metadata_info["failures"] == 3
+    assert alert_after.metadata_info["threshold"] == 3
+
+
+def test_tc_ano_30_detector_db_error_handling_and_rollback(test_user: User, db_session: Session, caplog):
+    """TC-ANO-30: Detector handles database query errors gracefully with warning logging, rollback, and default fallback."""
+    from unittest.mock import MagicMock
+    from app.anomaly.detector import load_reviewed_rules, clear_rule_cache
+
+    clear_rule_cache()
+
+    # Create a broken DB session that raises on query
+    failing_db = MagicMock()
+    failing_db.query.side_effect = RuntimeError("Simulated connection timeout during rule read")
+
+    rules = load_reviewed_rules(failing_db)
+    # Must rollback on exception
+    failing_db.rollback.assert_called_once()
+    # Must safely return empty dict so detector falls back to Table 13 defaults
+    assert rules == {}
+    # Warning must be logged
+    assert "Could not read rule parameters from database" in caplog.text

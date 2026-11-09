@@ -159,16 +159,12 @@ export async function decryptRecord(id) {
 
 /** GET /api/v1/reports/company/:scope -> Real executive company report */
 export async function getReport(scope) {
-  try {
-    const res = await authFetch(`${API_BASE}/reports/company/${encodeURIComponent(scope)}`);
-    if (res.ok) {
-      return await res.json();
-    }
-    const errData = await res.json().catch(() => ({}));
-    throw Object.assign(new Error(errData.detail || 'Not in your authorized scope.'), { status: res.status });
-  } catch (err) {
-    throw err;
+  const res = await authFetch(`${API_BASE}/reports/company/${encodeURIComponent(scope)}`);
+  if (res.ok) {
+    return await res.json();
   }
+  const errData = await res.json().catch(() => ({}));
+  throw Object.assign(new Error(errData.detail || 'Not in your authorized scope.'), { status: res.status });
 }
 
 /** "Export PDF Summary" */
