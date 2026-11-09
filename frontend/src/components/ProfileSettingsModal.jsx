@@ -209,7 +209,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
           {[
             { id: 'appearance', label: 'Appearance & Themes', icon: Palette },
             { id: 'profile', label: 'Profile Details', icon: User },
-            { id: 'security', label: 'Security & Clearance', icon: Shield },
+            { id: 'security', label: 'Security & Access', icon: Shield },
             { id: 'notifications', label: 'Alerts & Audio', icon: Bell }
           ].map(tab => {
             const Icon = tab.icon;
@@ -715,7 +715,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Lock size={20} color="#6366f1" />
                     <div>
-                      <span style={{ fontWeight: '800', fontSize: '14px', display: 'block' }}>CP-ABE Clearance Token</span>
+                      <span style={{ fontWeight: '800', fontSize: '14px', display: 'block' }}>Cryptographic Access Token</span>
                       <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>Attribute-Based Encryption policy token active in session memory</span>
                     </div>
                   </div>
@@ -743,7 +743,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
               {/* Password Reset Request Trigger (FR-26) */}
               <div style={{ padding: '16px', borderRadius: '16px', background: isDark ? '#1e293b' : '#f8fafc', border: isDark ? '1px solid #334155' : '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <span style={{ fontWeight: '700', fontSize: '13.5px', display: 'block' }}>Password Reset Request (FR-26)</span>
+                  <span style={{ fontWeight: '700', fontSize: '13.5px', display: 'block' }}>Password Reset Request</span>
                   <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
                     Triggers a time-bounded, single-use password reset link to your registered corporate email.
                   </span>

@@ -20,28 +20,9 @@ import {
 } from 'lucide-react';
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import LoadingSkeleton from '../components/LoadingSkeleton';
-import SpinCube from '../components/SpinCube';
 import PageHeader from '../components/PageHeader';
 import '../styles/admin.css';
 import '../staff/staff.css';
-
-const FINANCE_CUBE_FACES = [
-  { label: 'LEDGER', bg: '#0369a1' },
-  { label: 'AUDIT', bg: '#0f766e' },
-  { label: 'FR-22', bg: '#312e81' },
-  { label: 'RECON', bg: '#0284c7' },
-  { label: 'SHA-256', bg: '#047857' },
-  { label: 'CP-ABE', bg: '#4338ca' }
-];
-
-const COMPANY_CUBE_FACES = [
-  { label: 'ACCESS', bg: '#1e3a8a' },
-  { label: 'TENANT', bg: '#1d4ed8' },
-  { label: 'CP-ABE', bg: '#4338ca' },
-  { label: 'ROSTER', bg: '#2563eb' },
-  { label: 'POLICY', bg: '#0f766e' },
-  { label: 'VERIFIED', bg: '#047857' }
-];
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { fetchRecords } from '../services/api';

@@ -10,6 +10,26 @@ export default function Roster({ onNavigateTab }) {
   const [scopeFilter, setScopeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  // U-12: Team Building Breakout Groups
+  const [teamAssignments, setTeamAssignments] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cq_trainer_team_assignments');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleAssignTeam = (traineeId, teamName) => {
+    setTeamAssignments(prev => {
+      const next = { ...prev, [traineeId]: teamName };
+      try {
+        localStorage.setItem('cq_trainer_team_assignments', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const filtered = roster.filter((t) => {
     const matchesSearch =
       t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -127,9 +147,31 @@ export default function Roster({ onNavigateTab }) {
                   <span className="adm-org">{t.scope}</span>
                 </div>
 
-                {/* 3. Cohort */}
+                {/* 3. Cohort & Team Building Group */}
                 <div>
                   <span className="adm-mono"><strong>{t.cohort}</strong></span>
+                  <div style={{ marginTop: '4px' }}>
+                    <select
+                      value={teamAssignments[t.id] || t.team || 'Team Alpha'}
+                      onChange={(e) => handleAssignTeam(t.id, e.target.value)}
+                      style={{
+                        fontSize: '10.5px',
+                        padding: '2px 6px',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(139, 92, 246, 0.4)',
+                        background: 'transparent',
+                        color: '#8b5cf6',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                      title="Assign team-building breakout group (U-12)"
+                    >
+                      <option value="Team Alpha">🚩 Team Alpha</option>
+                      <option value="Team Bravo">🛡️ Team Bravo</option>
+                      <option value="Team Charlie">⚡ Team Charlie</option>
+                      <option value="Team Delta">🎯 Team Delta</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* 4. Score & Tier */}

@@ -1218,3 +1218,17 @@ export async function reissueCertificate(certId, data, token) {
   return res.json();
 }
 
+/** Trainer / Admin closes a quiz session to unlock per-question review (SEC-26, U-12) */
+export async function closeQuizApi(quizId, token) {
+  const res = await authFetch(
+    `${API_BASE}/gamification/quizzes/${quizId}/close`,
+    { method: 'POST' },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to close quiz session');
+  }
+  return res.json();
+}
+

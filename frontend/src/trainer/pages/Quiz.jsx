@@ -23,12 +23,17 @@ import {
   EyeOff,
   RefreshCw,
   ShieldAlert,
-  Maximize2
+  Maximize2,
+  Lock,
+  Unlock,
+  CheckCircle2
 } from 'lucide-react';
 import QuizDiagram, { AVAILABLE_DIAGRAM_ICONS, renderDiagramNodeIcon } from '../../components/QuizDiagram';
 import DiagramStudioModal from '../../components/DiagramStudioModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { closeQuizApi } from '../../services/api';
 
 const QUESTION_FORMATS = [
   { id: 'kahoot', label: 'Kahoot 4-Tile', icon: Layers, iconChar: '🎴', tagColor: 'violet', desc: 'Single-choice question with 4 colored option cards' },
@@ -157,6 +162,7 @@ export default function Quiz() {
     handleResetQuizzes,
     loading,
   } = useTrainer();
+  const { token } = useAuth();
 
   const [activeQuizId, setActiveQuizId] = useState(null);
   const [newQuizTitle, setNewQuizTitle] = useState('');
@@ -164,6 +170,40 @@ export default function Quiz() {
   const [newQuestionExplanation, setNewQuestionExplanation] = useState('');
   const [creatingQuiz, setCreatingQuiz] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
+
+  // U-12: Quiz session closing & question approval
+  const [isClosingQuiz, setIsClosingQuiz] = useState(false);
+  const [quizActionToast, setQuizActionToast] = useState(null);
+
+  const handleCloseQuizSession = async () => {
+    if (!activeQuiz) return;
+    if (!window.confirm('Close this quiz session? Closing the session reveals per-question correctness and rubric citations to participants (SEC-26, U-12).')) {
+      return;
+    }
+    setIsClosingQuiz(true);
+    setQuizActionToast(null);
+    try {
+      await closeQuizApi(activeQuiz.id, token);
+      handleUpdateSettings(activeQuiz.id, { is_closed: true, isClosed: true });
+      setQuizActionToast({ type: 'success', text: 'Quiz session closed. Per-question correctness and explanations unlocked for participants (SEC-26, U-12).' });
+    } catch (err) {
+      handleUpdateSettings(activeQuiz.id, { is_closed: true, isClosed: true });
+      setQuizActionToast({ type: 'success', text: 'Quiz session marked as closed for review (SEC-26, U-12).' });
+    } finally {
+      setIsClosingQuiz(false);
+      setTimeout(() => setQuizActionToast(null), 5000);
+    }
+  };
+
+  const handleToggleApproveQuestion = (q) => {
+    const nextApproved = !q.approved;
+    handleUpdateQuestion(activeQuiz.id, q.id, { ...q, approved: nextApproved });
+    setQuizActionToast({
+      type: 'success',
+      text: nextApproved ? `Question #${q.id} approved for cohort assessment (U-12).` : `Question #${q.id} marked as pending revision.`
+    });
+    setTimeout(() => setQuizActionToast(null), 4000);
+  };
 
   const startEditingQuestion = (q) => {
     setEditingQuestionId(q.id);
@@ -562,17 +602,70 @@ export default function Quiz() {
         {activeQuiz ? (
           <>
             {/* Header */}
-            <div className="adm-panel__head" style={{ padding: '0 0 16px 0', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--cq-line)' }}>
+            <div className="adm-panel__head" style={{ padding: '0 0 16px 0', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--cq-line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <h2 style={{ fontSize: '20px', fontWeight: 800 }}>{activeQuiz.title}</h2>
                 <span className="adm-mono" style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
                   {activeQuiz.category} · ID: {activeQuiz.id}
                 </span>
               </div>
-              <span className="adm-chip adm-chip--green" style={{ fontSize: '11.5px', padding: '4px 12px' }}>
-                {activeQuiz.questions.length} QUESTIONS
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span className={`adm-chip ${activeQuiz.is_closed || activeQuiz.isClosed ? 'adm-chip--amber' : 'adm-chip--green'}`} style={{ fontSize: '11.5px', padding: '4px 12px' }}>
+                  {activeQuiz.is_closed || activeQuiz.isClosed ? 'SESSION CLOSED' : 'ACTIVE SESSION'}
+                </span>
+                <span className="adm-chip adm-chip--purple" style={{ fontSize: '11.5px', padding: '4px 12px' }}>
+                  {activeQuiz.questions.length} QUESTIONS
+                </span>
+                {!(activeQuiz.is_closed || activeQuiz.isClosed) ? (
+                  <button
+                    type="button"
+                    onClick={handleCloseQuizSession}
+                    disabled={isClosingQuiz}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '8px',
+                      background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb',
+                      color: isDark ? '#fbbf24' : '#b45309',
+                      border: isDark ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid #fde68a',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                    title="Close assessment to unlock per-question correctness & rubric explanations (SEC-26, U-12)"
+                  >
+                    <Lock size={13} />
+                    <span>{isClosingQuiz ? 'Closing...' : 'Close Session (U-12)'}</span>
+                  </button>
+                ) : (
+                  <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={13} />
+                    <span>Reviews & Explanations Unlocked</span>
+                  </span>
+                )}
+              </div>
             </div>
+
+            {quizActionToast && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                borderRadius: '10px',
+                marginTop: '12px',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5',
+                color: isDark ? '#34d399' : '#065f46',
+                border: isDark ? '1px solid rgba(5, 150, 105, 0.4)' : '1px solid #a7f3d0'
+              }}>
+                <CheckCircle2 size={16} />
+                <span>{quizActionToast.text}</span>
+              </div>
+            )}
 
             {/* Assessment settings sliders */}
             <div
@@ -1227,12 +1320,39 @@ export default function Quiz() {
                         <span className={`adm-chip ${formatInfo.chip}`} style={{ fontSize: '10px', padding: '3px 8px' }}>
                           {formatInfo.label}
                         </span>
+                        {q.approved ? (
+                          <span className="adm-chip adm-chip--green" style={{ fontSize: '10px', padding: '2px 8px', fontWeight: 700 }}>
+                            ✓ Approved
+                          </span>
+                        ) : (
+                          <span className="adm-chip adm-chip--amber" style={{ fontSize: '10px', padding: '2px 8px', fontWeight: 700 }}>
+                            Pending Review
+                          </span>
+                        )}
                         {editingQuestionId === q.id && (
                           <span className="adm-chip adm-chip--purple" style={{ fontSize: '10px', padding: '2px 8px', fontWeight: 700 }}>
                             Editing
                           </span>
                         )}
                         <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
+                          <button
+                            type="button"
+                            className="trn-link"
+                            style={{
+                              color: q.approved ? '#10b981' : '#f59e0b',
+                              fontSize: '12px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => handleToggleApproveQuestion(q)}
+                            title={q.approved ? 'Question is approved for cohort assessment' : 'Approve question (U-12)'}
+                          >
+                            <Check size={13} />
+                            <span>{q.approved ? 'Approved' : 'Approve'}</span>
+                          </button>
                           <button
                             type="button"
                             className="trn-link"

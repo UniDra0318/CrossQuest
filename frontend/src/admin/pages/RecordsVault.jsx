@@ -9,12 +9,21 @@ import {
   RotateCcw,
   Award,
   X,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import { TablePagination, TablePaginationCompact, usePagination } from '../../components/TablePagination';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { exportAuditLogs, exportVaultRecords } from '../../api/admin';
-import { updateTrainingRecord, deleteTrainingRecord, restoreTrainingRecord, reissueCertificate } from '../../services/api';
+import { 
+  updateTrainingRecord, 
+  deleteTrainingRecord, 
+  restoreTrainingRecord, 
+  reissueCertificate,
+  createEncryptedRecordApi,
+  fetchTrainees,
+  fetchCompanies
+} from '../../services/api';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function RecordsVault({ records = [], token, onRefreshRecords }) {
@@ -25,6 +34,27 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
   const [exportingAuditLogs, setExportingAuditLogs] = useState(false);
   const [exportingVaultRecords, setExportingVaultRecords] = useState(false);
   const [vaultToast, setVaultToast] = useState(null);
+
+  // B5: Add Record Modal State
+  const [isAddRecordOpen, setIsAddRecordOpen] = useState(false);
+  const [addTraineeId, setAddTraineeId] = useState('');
+  const [addCompanyId, setAddCompanyId] = useState('');
+  const [addCourseName, setAddCourseName] = useState('Cloud Infrastructure Security & Zero-Trust Defense');
+  const [addStatus, setAddStatus] = useState('In progress');
+  const [addScore, setAddScore] = useState('');
+  const [addNotes, setAddNotes] = useState('');
+  const [addLoading, setAddLoading] = useState(false);
+  const [addError, setAddError] = useState(null);
+  const [traineeList, setTraineeList] = useState([]);
+  const [companyList, setCompanyList] = useState([]);
+
+  // Load dropdown datasets
+  useEffect(() => {
+    if (token) {
+      fetchTrainees(token).then(tr => { if (tr && tr.length > 0) setTraineeList(tr); }).catch(() => {});
+      fetchCompanies(token).then(cp => { if (cp && cp.length > 0) setCompanyList(cp); }).catch(() => {});
+    }
+  }, [token]);
 
   // Sync with prop updates
   useEffect(() => {
@@ -207,6 +237,44 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
     }
   };
 
+  const handleCreateRecord = async (e) => {
+    e.preventDefault();
+    if (!addTraineeId || !addCompanyId || !addCourseName.trim()) {
+      setAddError('Please select a trainee, client company, and enter a course program name.');
+      return;
+    }
+
+    setAddLoading(true);
+    setAddError(null);
+    try {
+      const res = await createEncryptedRecordApi({
+        trainee_id: addTraineeId,
+        company_at_completion_id: addCompanyId,
+        course_name: addCourseName.trim(),
+        status: addStatus,
+        score: addScore !== '' ? parseFloat(addScore) : null,
+        assessment_notes: addNotes.trim() || undefined
+      }, token);
+
+      if (!res.ok) {
+        throw new Error(res.data?.detail || 'Failed to create training record');
+      }
+
+      setVaultToast({ type: 'success', text: `Training record created successfully for course "${addCourseName.trim()}".` });
+      setIsAddRecordOpen(false);
+      setAddTraineeId('');
+      setAddCompanyId('');
+      setAddScore('');
+      setAddNotes('');
+      onRefreshRecords?.();
+    } catch (err) {
+      setAddError(err.message || 'Error creating record.');
+    } finally {
+      setAddLoading(false);
+      setTimeout(() => setVaultToast(null), 4000);
+    }
+  };
+
   return (
     <div className="adm-panel" style={{ marginTop: '24px' }}>
       <div className="adm-panel__head">
@@ -258,6 +326,16 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
           >
             <FileText size={14} className={exportingVaultRecords ? 'spin-animation' : ''} />
             <span>{exportingVaultRecords ? 'Exporting Vault...' : 'Export Vault Records (CSV)'}</span>
+          </button>
+          <button 
+            type="button" 
+            className="adm-btn adm-btn--primary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', color: '#ffffff', border: 'none', cursor: 'pointer' }}
+            onClick={() => { setIsAddRecordOpen(true); setAddError(null); }}
+            title="Create and encrypt a new training record (B5)"
+          >
+            <Plus size={14} />
+            <span>Add Master Record</span>
           </button>
         </div>
         {vaultToast && (
@@ -567,6 +645,149 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
                   style={{ padding: '8px 20px', borderRadius: '8px', background: '#ff7a1a', color: '#ffffff', fontWeight: 700, fontSize: '13px', border: 'none', cursor: 'pointer' }}
                 >
                   {reissueLoading ? 'Reissuing...' : 'Confirm Reissue'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          B5: ADD NEW MASTER RECORD MODAL
+          ===================================================================== */}
+      {isAddRecordOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '20px', width: '100%', maxWidth: '560px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4)', overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>Create Master Training Record</h3>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>Encrypts credentials with Native CP-ABE access policy (B5)</span>
+              </div>
+              <button type="button" onClick={() => setIsAddRecordOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateRecord} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {addError && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', background: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2', color: isDark ? '#f87171' : '#b91c1c', fontSize: '12.5px', fontWeight: 600 }}>
+                  <AlertCircle size={15} />
+                  <span>{addError}</span>
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: isDark ? '#cbd5e1' : '#334155' }}>
+                  SELECT TRAINEE PARTICIPANT *
+                </label>
+                <select
+                  value={addTraineeId}
+                  onChange={(e) => setAddTraineeId(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
+                >
+                  <option value="">-- Choose Trainee --</option>
+                  {traineeList.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.first_name} {t.last_name} ({t.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: isDark ? '#cbd5e1' : '#334155' }}>
+                  CLIENT COMPANY SPONSOR *
+                </label>
+                <select
+                  value={addCompanyId}
+                  onChange={(e) => setAddCompanyId(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
+                >
+                  <option value="">-- Choose Company --</option>
+                  {companyList.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: isDark ? '#cbd5e1' : '#334155' }}>
+                  COURSE PROGRAM NAME *
+                </label>
+                <input
+                  type="text"
+                  value={addCourseName}
+                  onChange={(e) => setAddCourseName(e.target.value)}
+                  required
+                  placeholder="e.g. Cloud Security Architecture & DevSecOps"
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: isDark ? '#cbd5e1' : '#334155' }}>
+                    INITIAL STATUS
+                  </label>
+                  <select
+                    value={addStatus}
+                    onChange={(e) => setAddStatus(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
+                  >
+                    <option value="In progress">In progress</option>
+                    <option value="Enrolled">Enrolled</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Not completed">Not completed</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: isDark ? '#cbd5e1' : '#334155' }}>
+                    SCORE (0–100%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={addScore}
+                    onChange={(e) => setAddScore(e.target.value)}
+                    placeholder="e.g. 88.0"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: isDark ? '#cbd5e1' : '#334155' }}>
+                  CONFIDENTIAL ASSESSMENT NOTES
+                </label>
+                <textarea
+                  rows={2}
+                  value={addNotes}
+                  onChange={(e) => setAddNotes(e.target.value)}
+                  placeholder="Encrypted payload notes only decryptable by authorized attribute holders..."
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsAddRecordOpen(false)}
+                  style={{ padding: '8px 16px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: 'transparent', color: isDark ? '#cbd5e1' : '#475569', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={addLoading}
+                  style={{ padding: '8px 20px', borderRadius: '8px', background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', color: '#ffffff', fontWeight: 700, fontSize: '13px', border: 'none', cursor: 'pointer' }}
+                >
+                  {addLoading ? 'Encrypting & Saving...' : 'Create & Encrypt Record'}
                 </button>
               </div>
             </form>

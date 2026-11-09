@@ -199,7 +199,7 @@ export const FALLBACK_DISCREPANCIES = {
       issue_type: "PRE_CUTOFF_DATE",
       field_name: "training_date",
       resolution: "EXCLUDE_PRE_CUTOFF",
-      resolution_reason: "Training completion date (June 6, 2026) is prior to mandatory August 1, 2026 baseline cutoff per FR-22.",
+      resolution_reason: "Training completion date (June 6, 2026) is prior to mandatory August 1, 2026 baseline cutoff.",
       resolved_at: "2026-11-01T08:32:00Z"
     }
   ]
@@ -439,7 +439,7 @@ export default function FinanceReconciliationDesk() {
         <div style={{ maxWidth: '820px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
             <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#c4b5fd' : '#7c3aed', background: isDark ? 'rgba(124, 58, 237, 0.2)' : '#f5f3ff', padding: '3px 10px', borderRadius: '12px', border: isDark ? '1px solid rgba(124, 58, 237, 0.35)' : '1px solid #ddd6fe' }}>
-              FR-22 / DAT-01 / DAT-08 COMPLIANT
+              AUDIT & COMPLIANCE VERIFIED
             </span>
             <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#6ee7b7' : '#059669', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', padding: '3px 10px', borderRadius: '12px', border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0' }}>
               IN-MEMORY BILLING STRIP
@@ -929,7 +929,7 @@ export default function FinanceReconciliationDesk() {
                           onClick={() => {
                             setResolvingId(d.id);
                             setResolutionAction(d.issue_type === 'PRE_CUTOFF_DATE' ? 'EXCLUDE' : d.issue_type === 'COMPANY_NAME_VARIANT' ? 'STANDARDIZE_NAME' : 'MERGE_DUPLICATE');
-                            setResolutionReason(d.issue_type === 'PRE_CUTOFF_DATE' ? 'Pre-cutoff training prior to Aug 1, 2026 baseline excluded per FR-22.' : '');
+                            setResolutionReason(d.issue_type === 'PRE_CUTOFF_DATE' ? 'Pre-cutoff training prior to Aug 1, 2026 baseline excluded.' : '');
                           }}
                         >
                           Resolve
@@ -968,7 +968,7 @@ export default function FinanceReconciliationDesk() {
               Resolve Discrepancy Quarantine Row
             </h3>
             <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.5 }}>
-              Specify the resolution action and a mandatory audit reason conforming to Chapter III Section 3.5.4.
+              Specify the resolution action and a mandatory audit reason for data reconciliation.
             </p>
 
             <form onSubmit={handleResolveSubmit}>
