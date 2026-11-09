@@ -15,7 +15,9 @@
 .flex-align { display: flex; align-items: center; }
 .flex-between { display: flex; align-items: center; justify-content: space-between; }
 .gap-8 { gap: 8px; }
+.gap-10 { gap: 10px; }
 .gap-12 { gap: 12px; }
+.gap-14 { gap: 14px; }
 .gap-16 { gap: 16px; }
 .mb-8 { margin-bottom: 8px; }
 .mb-16 { margin-bottom: 16px; }
@@ -11518,11 +11520,36 @@ html.dark .gamified-topbar,
 }
 
 .res-rank-badge {
-  font-family: var(--font-fun);
+  font-family: var(--font-body);
   font-size: 13px;
-  font-weight: 800;
-  min-width: 44px;
-  text-align: center;
+  font-weight: 700;
+  min-width: 58px;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.res-rank-badge.rank-1 {
+  color: #fbbf24;
+}
+
+.res-rank-badge.rank-2 {
+  color: #cbd5e1;
+}
+
+.res-rank-badge.rank-3 {
+  color: #fb923c;
+}
+
+.res-rank-badge.rank-4,
+.res-rank-badge.rank-5,
+.res-rank-badge.rank-6,
+.res-rank-badge.rank-7 {
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 .res-avatar-pill {
