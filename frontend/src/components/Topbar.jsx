@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Flame, 
-  PanelLeftClose, 
+import {
+  Flame,
+  PanelLeftClose,
   PanelLeftOpen
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -15,10 +15,10 @@ import logoStackedWhite from '../assets/crossquest-logo-stacked-white.svg';
  * Topbar - global header bar rendered by MainAppShell for all authenticated roles.
  * Includes sidebar collapse/expand toggle, contextual view breadcrumb, and live streak indicator.
  */
-export default function Topbar({ 
-  streakDays, 
-  isSidebarCollapsed = false, 
-  onToggleSidebar 
+export default function Topbar({
+  streakDays,
+  isSidebarCollapsed = false,
+  onToggleSidebar
 }) {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -41,21 +41,6 @@ export default function Topbar({
             </button>
           )}
 
-          {isSidebarCollapsed && (
-            <div 
-              className="topbar-brand-logo-collapsed"
-              onClick={() => navigate(ROLE_HOME[currentUser?.role || 'trainee'] || '/home')}
-              title="Go to Dashboard Home"
-              style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-            >
-              <img 
-                src={isDark ? logoStackedWhite : logoStacked} 
-                alt="CrossQuest Logo" 
-                className="topbar-logo-img" 
-              />
-            </div>
-          )}
-
           <div className="topbar-context" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '12px', fontWeight: '800', color: isDark ? '#f8fafc' : '#0f172a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {currentUser?.title || (currentUser?.role ? currentUser.role.replace(/_/g, ' ').toUpperCase() : 'CROSSQUEST')}
@@ -75,7 +60,7 @@ export default function Topbar({
         <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {/* Streak Pill - Trainees only */}
           {currentUser?.role === 'trainee' && (
-            <div 
+            <div
               className="gamified-stat-pill streak-pill"
               style={{
                 background: isDark ? 'rgba(234, 88, 12, 0.16)' : '#fff7ed',
@@ -86,17 +71,17 @@ export default function Topbar({
                 gap: '6px'
               }}
             >
-              <Flame 
-                size={16} 
-                className="stat-flame-icon" 
-                style={{ 
+              <Flame
+                size={16}
+                className="stat-flame-icon"
+                style={{
                   color: isDark ? '#fb923c' : '#ea580c',
                   filter: isDark ? 'drop-shadow(0 0 6px rgba(249, 115, 22, 0.6))' : 'drop-shadow(0 0 4px rgba(234, 88, 12, 0.4))'
-                }} 
+                }}
               />
-              <span 
-                className="stat-num streak-num" 
-                style={{ 
+              <span
+                className="stat-num streak-num"
+                style={{
                   color: isDark ? '#fb923c' : '#ea580c',
                   fontWeight: 800,
                   fontSize: '14px',
@@ -107,9 +92,9 @@ export default function Topbar({
                   ? Number(streakDays)
                   : (Number.isFinite(Number(currentUser?.streak)) ? Number(currentUser.streak) : 7)}
               </span>
-              <span 
-                className="stat-label streak-label" 
-                style={{ 
+              <span
+                className="stat-label streak-label"
+                style={{
                   color: isDark ? '#fdba74' : '#9a3412',
                   fontWeight: 700,
                   fontSize: '11px',

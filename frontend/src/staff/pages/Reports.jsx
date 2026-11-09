@@ -455,8 +455,8 @@ export default function Reports() {
       {errorDetails && errorDetails.type === 'OUT_OF_SCOPE' && (
         <div 
           style={{
-            background: isDark ? 'linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(159, 18, 57, 0.25) 100%)' : 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
-            border: isDark ? '2px solid rgba(244, 63, 94, 0.4)' : '2px solid #f43f5e',
+            background: 'linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)',
+            border: '2px solid #f43f5e',
             borderRadius: '20px',
             padding: '24px 28px',
             boxShadow: '0 8px 24px rgba(244, 63, 94, 0.12)'
@@ -468,17 +468,17 @@ export default function Reports() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: isDark ? '#fda4af' : '#9f1239' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#9f1239' }}>
                   403 FORBIDDEN — OUT-OF-SCOPE BOUNDARY RESTRICTION (SEC-10)
                 </h3>
-                <span style={{ background: isDark ? 'rgba(225, 29, 72, 0.3)' : '#fecdd3', color: isDark ? '#fecdd3' : '#be123c', padding: '3px 10px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 700, fontFamily: 'monospace' }}>
+                <span style={{ background: '#fecdd3', color: '#be123c', padding: '3px 10px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 700, fontFamily: 'monospace' }}>
                   AUDIT LOGGED: OUT_OF_SCOPE
                 </span>
               </div>
-              <p style={{ margin: '10px 0 14px 0', fontSize: '14px', color: isDark ? '#fecdd3' : '#4c0519', lineHeight: 1.5 }}>
+              <p style={{ margin: '10px 0 14px 0', fontSize: '14px', color: '#4c0519', lineHeight: 1.5 }}>
                 {errorDetails.message}
               </p>
-              <div style={{ background: isDark ? '#111827' : '#ffffff', borderRadius: '12px', padding: '12px 16px', border: isDark ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid #fecdd3', fontSize: '12.5px', color: isDark ? '#fecdd3' : '#881337', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ background: '#ffffff', borderRadius: '12px', padding: '12px 16px', border: '1px solid #fecdd3', fontSize: '12.5px', color: '#881337', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div><strong>Enforcement Rule:</strong> Chapter III Section 3.8.4 & Table 17 (OI-04) — Account Managers are strictly scoped to assigned client accounts.</div>
                 <div><strong>Security Action:</strong> This unauthorized access attempt was automatically recorded in the Master Security Audit Log (<code>access_logs</code>) with your User ID and IP address for Administrative Review.</div>
               </div>

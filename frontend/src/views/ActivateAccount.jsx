@@ -13,14 +13,11 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { confirmPasswordResetApi } from '../services/api';
-import { useTheme } from '../contexts/ThemeContext';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
-import logoStackedWhite from '../assets/crossquest-logo-stacked-white.svg';
 
 export default function ActivateAccount() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isDark } = useTheme?.() || { isDark: false };
   
   const tokenFromUrl = searchParams.get('token') || '';
   const [manualToken, setManualToken] = useState(tokenFromUrl);
@@ -82,7 +79,7 @@ export default function ActivateAccount() {
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <img 
-            src={isDark ? logoStackedWhite : logoStacked} 
+            src={logoStacked} 
             alt="CrossQuest Logo" 
             style={{ height: '42px', margin: '0 auto 14px', cursor: 'pointer' }} 
             onClick={() => navigate('/')}
@@ -100,12 +97,12 @@ export default function ActivateAccount() {
         {isSuccess ? (
           /* SUCCESS STATE */
           <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', color: isDark ? '#34d399' : '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <CheckCircle2 size={36} />
             </div>
 
-            <div style={{ background: isDark ? '#0f172a' : '#f8fafc', borderRadius: '14px', padding: '16px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', width: '100%', textAlign: 'left', fontSize: '12.5px', color: isDark ? '#cbd5e1' : '#334155', lineHeight: 1.6 }}>
-              <div style={{ fontWeight: 700, color: isDark ? '#34d399' : '#047857', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '16px', border: '1px solid #e2e8f0', width: '100%', textAlign: 'left', fontSize: '12.5px', color: '#334155', lineHeight: 1.6 }}>
+              <div style={{ fontWeight: 700, color: '#047857', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ShieldCheck size={16} /> Ready for Production Access
               </div>
               Your single-use activation token has been redeemed. You can now access your role-based dashboard, view assigned tenant records, or begin your learning quests.
@@ -157,9 +154,7 @@ export default function ActivateAccount() {
                       width: '100%',
                       padding: '10px 14px 10px 38px',
                       borderRadius: '10px',
-                      border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
-                      background: isDark ? '#1e293b' : '#ffffff',
-                      color: isDark ? '#f8fafc' : '#0f172a',
+                      border: '1.5px solid #cbd5e1',
                       fontSize: '13px',
                       fontFamily: 'monospace',
                       boxSizing: 'border-box'
@@ -171,7 +166,7 @@ export default function ActivateAccount() {
 
             {/* New Password */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
                 CREATE PASSWORD:
               </label>
               <div style={{ position: 'relative' }}>
@@ -186,9 +181,7 @@ export default function ActivateAccount() {
                     width: '100%',
                     padding: '10px 38px 10px 38px',
                     borderRadius: '10px',
-                    border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
-                    background: isDark ? '#1e293b' : '#ffffff',
-                    color: isDark ? '#f8fafc' : '#0f172a',
+                    border: '1.5px solid #cbd5e1',
                     fontSize: '13.5px',
                     boxSizing: 'border-box'
                   }}
@@ -205,7 +198,7 @@ export default function ActivateAccount() {
 
             {/* Confirm Password */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
                 CONFIRM PASSWORD:
               </label>
               <div style={{ position: 'relative' }}>
@@ -220,9 +213,7 @@ export default function ActivateAccount() {
                     width: '100%',
                     padding: '10px 14px 10px 38px',
                     borderRadius: '10px',
-                    border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
-                    background: isDark ? '#1e293b' : '#ffffff',
-                    color: isDark ? '#f8fafc' : '#0f172a',
+                    border: '1.5px solid #cbd5e1',
                     fontSize: '13.5px',
                     boxSizing: 'border-box'
                   }}
@@ -231,7 +222,7 @@ export default function ActivateAccount() {
             </div>
 
             {/* Password Requirements Checklist */}
-            <div style={{ background: isDark ? '#0f172a' : '#f8fafc', borderRadius: '12px', padding: '12px 14px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '12px 14px', border: '1px solid #e2e8f0', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: hasMinLength ? '#059669' : '#94a3b8' }}>
                 <CheckCircle2 size={14} />
                 <span>At least 8 characters long</span>

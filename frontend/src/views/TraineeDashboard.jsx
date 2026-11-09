@@ -20,12 +20,15 @@ import {
   PlusCircle,
   FileCheck,
   Building2,
-  Lock
+  Lock,
+  Trophy,
+  Star,
+  Zap,
+  Target
 } from 'lucide-react';
 import { getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import { 
   fetchTraineeGamification, 
   submitQuizScore, 
@@ -44,6 +47,7 @@ import BitMascot from '../components/BitMascot/BitMascot';
 import PageHeader from '../components/PageHeader';
 import { TableEmptyBlock } from '../components/TableEmptyState';
 import '../styles/admin.css';
+import '../styles/dashboard.css';
 import IsoCube from '../components/IsoCube';
 import BadgeCoin from '../components/BadgeCoin';
 import Podium from '../components/Podium';
@@ -52,7 +56,6 @@ import { badges as designBadges, leaderboard as designLeaderboard } from '../dat
 
 export default function TraineeDashboard({ activeSubView, setActiveView, onStreakLoad, onQuizActiveChange }) {
   const { currentUser, token } = useAuth();
-  const { isDark } = useTheme?.() || { isDark: false };
   const [points, setPoints] = useState(() => currentUser?.points ?? 12877);
   const [leaderboard, setLeaderboard] = useState([]);
   const [level, setLevel] = useState(() => currentUser?.level ?? 4);
@@ -665,10 +668,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           case 'trainee_badges':
             return (
               <PageHeader
-                title="Badges & Leaderboard"
-                subtitle="Earned achievement coins, streaks, and corporate peer rankings."
+                title="Achievements & Recognition"
+                subtitle="Track your verified skills, streaks, and organizational standing."
                 badge={`LEVEL ${level ?? 1}`}
-                badgeType="warning"
+                badgeType="neutral"
               />
             );
           case 'trainee_quest':
@@ -748,7 +751,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <button
                   type="button"
-                  className="btn-tactile btn-tactile-purple btn-flex-center"
+                  className="trainee-triad-btn trainee-triad-btn--secondary"
                   onClick={() => featuredCourse && handleStartQuizById(featuredCourse.id)}
                   disabled={!featuredCourse || !isOnline}
                 >
@@ -778,8 +781,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 </p>
 
                 {/* Expiration Notice Box */}
-                <div style={{ padding: '12px 14px', borderRadius: '10px', background: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? (isDark ? 'rgba(234, 88, 12, 0.16)' : '#fff7ed') : (isDark ? '#0f172a' : '#f8fafc'), border: isDark ? '1px solid #1f2937' : `1px solid ${expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#fed7aa' : '#e2e8f0'}`, marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 700, color: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? (isDark ? '#fb923c' : '#c2410c') : (isDark ? '#cbd5e1' : '#334155') }}>
+                <div style={{ padding: '12px 14px', borderRadius: '10px', background: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#fff7ed' : '#f8fafc', border: `1px solid ${expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#fed7aa' : '#e2e8f0'}`, marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 700, color: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#c2410c' : '#334155' }}>
                     <Clock size={15} />
                     <span>
                       {expiringCredential?.daysUntilExpiry !== null && expiringCredential?.daysUntilExpiry !== undefined
@@ -787,16 +790,16 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                         : 'Renewal Window: 32 days remaining'}
                     </span>
                   </div>
-                  <div style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '4px' }}>
-                    Expires: <strong style={{ color: isDark ? '#f8fafc' : 'inherit' }}>{expiringCredential?.expiresOn || 'December 15, 2026'}</strong> (Maintenance sweep active)
+                  <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '4px' }}>
+                    Expires: <strong>{expiringCredential?.expiresOn || 'December 15, 2026'}</strong> (Maintenance sweep active)
                   </div>
                 </div>
               </div>
 
-              <div style={{ paddingTop: '12px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <button
                   type="button"
-                  className="btn-tactile btn-tactile-cyan btn-flex-center"
+                  className="trainee-triad-btn trainee-triad-btn--secondary"
                   onClick={() => setActiveView && setActiveView('trainee_certs')}
                 >
                   <FileCheck size={14} />
@@ -809,10 +812,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             <div className="card section-card trainee-triad-card">
               <div>
                 <div className="card-header-flex">
-                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: isDark ? '#38bdf8' : '#0891b2', background: isDark ? 'rgba(8, 145, 178, 0.2)' : '#cffafe', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#0891b2', background: '#cffafe', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
                     3. Next Quiz
                   </span>
-                  <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <FileQuestion size={14} className="text-cyan" /> Ready to Take
                   </span>
                 </div>
@@ -826,22 +829,22 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
                 {/* Quiz Meta Details */}
                 <div className="card-badges-flex">
-                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: isDark ? '#1e293b' : '#f1f5f9', color: isDark ? '#cbd5e1' : '#475569', fontWeight: 600 }}>
+                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
                     {nextQuizItem?.questions?.length || 4} Questions
                   </span>
-                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: isDark ? '#1e293b' : '#f1f5f9', color: isDark ? '#cbd5e1' : '#475569', fontWeight: 600 }}>
+                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
                     {nextQuizItem?.timePerQuestion || 30}s / Question
                   </span>
-                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: isDark ? '#1e293b' : '#f1f5f9', color: isDark ? '#cbd5e1' : '#475569', fontWeight: 600 }}>
+                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
                     Official Evaluation
                   </span>
                 </div>
               </div>
 
-              <div style={{ paddingTop: '12px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <button
                   type="button"
-                  className="btn-tactile btn-tactile-purple btn-flex-center"
+                  className="trainee-triad-btn trainee-triad-btn--primary"
                   onClick={() => handleStartQuizById(nextQuizItem?.id || 'quiz_cloud_sec')}
                   disabled={!isOnline}
                 >
@@ -1043,42 +1046,64 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {/* 3. EARNED BADGES SUB-VIEW */}
       {currentTab === 'trainee_badges' && (
         <>
-        <div className="card section-card p-24" style={{ borderRadius: '16px' }}>
-          <div className="card-header-bar mb-16" style={{ padding: '0 0 16px' }}>
+        <div className="modern-achievements-container">
+          <div className="modern-achievements-header">
             <div>
-              <h3 className="card-title" style={{ fontSize: '20px', fontWeight: '800', marginBottom: '4px' }}>
-                Badge Showcase &amp; Achievements
+              <h3 className="modern-achievements-title">
+                Verified Credentials &amp; Achievements
               </h3>
-              <p className="card-subtitle text-xs">
-                Unlock shiny 3D collectible badges by proving your knowledge across security frameworks and policy access controls.
+              <p className="modern-achievements-sub">
+                Official competencies awarded for policy proficiency, knowledge challenges, and training consistency.
               </p>
+            </div>
+            <div className="modern-achievements-count-badge">
+              <Award size={15} style={{ color: '#f0605d' }} />
+              <span>{earnedBadges.length} Badges Earned</span>
             </div>
           </div>
 
           {earnedBadges.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8' }}>
-              <Award size={48} style={{ margin: '0 auto 16px', opacity: 0.4 }} />
-              <h4 style={{ fontWeight: '700', marginBottom: '8px', color: '#64748b' }}>No badges earned yet</h4>
-              <p style={{ fontSize: '14px' }}>Complete a quest to unlock your first badge!</p>
+              <Award size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+              <h4 style={{ fontWeight: '600', marginBottom: '6px', color: '#64748b', fontSize: '15px' }}>No achievements recorded yet</h4>
+              <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>Complete your first course module or compliance assessment to earn credentials.</p>
             </div>
           ) : (
-            <div className="badges-full-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px', marginTop: '16px' }}>
+            <div className="modern-badges-grid">
               {earnedBadges.map((badge) => {
                 const tierName = badge.tier || (badge.id === 'seven-day-streak' ? 'Legendary' : badge.id === 'security-champion' ? 'Master' : 'Adept');
                 const tierClass = tierName.toLowerCase();
+                const iconType = badge.icon || (badge.id === 'seven-day-streak' ? 'flame' : badge.id === 'security-champion' ? 'shield' : badge.id === 'security-decoder' ? 'zap' : 'star');
+
+                const renderBadgeIcon = () => {
+                  switch (iconType) {
+                    case 'flame': return <Flame size={20} />;
+                    case 'shield': return <Shield size={20} />;
+                    case 'zap': return <Zap size={20} />;
+                    case 'award': return <Award size={20} />;
+                    case 'target': return <Target size={20} />;
+                    case 'star': default: return <Star size={20} />;
+                  }
+                };
+
                 return (
-                  <div key={badge.id} className="badge-detail-card card-gamified" style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', borderRadius: '14px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                    <div style={{ marginBottom: '16px', transform: 'scale(1.1)' }}>
-                      <BadgeCoin badge={badge} />
-                    </div>
-                    <h4 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '6px' }}>{badge.title || badge.name}</h4>
-                    <p className="badge-desc" style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px', flex: 1, lineHeight: '1.4' }}>{badge.description || badge.desc}</p>
-                    <div className="badge-footer flex-between" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px' }}>
-                      <span className={`tier-chip tier-${tierClass}`} style={{ fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '999px', background: tierClass === 'legendary' ? '#fef3c7' : tierClass === 'master' ? '#dbeafe' : '#e0e7ff', color: tierClass === 'legendary' ? '#b45309' : tierClass === 'master' ? '#1d4ed8' : '#4338ca' }}>
-                        {tierName.toUpperCase()}
+                  <div key={badge.id} className="modern-badge-card">
+                    <div className="modern-badge-top">
+                      <div className={`modern-badge-icon-box tier-${tierClass}`}>
+                        {renderBadgeIcon()}
+                      </div>
+                      <span className={`modern-badge-tier-tag tier-${tierClass}`}>
+                        {tierName}
                       </span>
-                      <span className="badge-check flex-align gap-4 text-emerald" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '700', color: '#059669' }}>
-                        <Check size={14} /> Unlocked
+                    </div>
+                    <h4 className="modern-badge-name">{badge.title || badge.name}</h4>
+                    <p className="modern-badge-desc">{badge.description || badge.desc}</p>
+                    <div className="modern-badge-status-row">
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <Check size={14} strokeWidth={2.5} /> Verified
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500 }}>
+                        Active
                       </span>
                     </div>
                   </div>
@@ -1089,37 +1114,41 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         </div>
 
         {/* Corporate Leaderboard & Weekly Streak Tracker */}
-        <div className="template-right-widgets" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginTop: '20px' }}>
+        <div className="modern-leaderboard-grid">
           {/* This Week Streak Tracker */}
-          <div className="template-this-week-card">
-            <div className="this-week-header flex-between">
-              <h4>This week streak</h4>
-              <span className="this-week-counter">
-                {`${Math.min(streakDays ?? currentUser?.streak ?? 1, 7)} / 7 DAYS`}
+          <div className="modern-panel-card">
+            <div className="modern-panel-head">
+              <h4 className="modern-panel-title">Training Consistency</h4>
+              <span className="modern-streak-pill-counter">
+                {`${Math.min(streakDays ?? currentUser?.streak ?? 1, 7)} / 7 Days Active`}
               </span>
             </div>
-            <div className="this-week-days-row">
-              {['M','T','W','T','F','S','S'].map((day, idx) => {
+            <div className="modern-streak-week-row">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => {
                 const activeCount = Math.min(streakDays ?? currentUser?.streak ?? 1, 7);
                 const isActive = idx < activeCount;
                 return (
-                  <div key={idx} className="this-week-day-item">
-                    <div className={`day-flame-circle ${isActive ? 'active' : ''}`}>
-                      <Flame size={14} fill={isActive ? '#ea580c' : 'none'} className="text-orange" />
+                  <div key={idx} className="modern-streak-day">
+                    <div className={`modern-streak-icon-dot ${isActive ? 'active' : ''}`}>
+                      <Flame size={16} fill={isActive ? 'currentColor' : 'none'} />
                     </div>
-                    <span className="day-label">{day}</span>
+                    <span className="modern-streak-day-label">{day}</span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Corporate Leaderboard Podium Card */}
-          <div className="template-leaderboard-card">
-            <div className="leaderboard-card-header flex-between" style={{ marginBottom: '12px' }}>
-              <div className="leaderboard-card-title">Corporate Leaderboard</div>
-              {/* Opt-out toggle */}
-              <label className="leaderboard-optout-toggle" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}>
+          {/* Corporate Standings Leaderboard */}
+          <div className="modern-panel-card">
+            <div className="modern-panel-head">
+              <div>
+                <h4 className="modern-panel-title">Organization Standings</h4>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  {currentUser?.organization || 'Crossworks Enterprise'}
+                </span>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={leaderboardOptOut}
@@ -1129,29 +1158,46 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 Hide my rank
               </label>
             </div>
-            
-            {/* 3D Podium Graphic */}
-            <div style={{ marginBottom: '20px' }}>
-              <Podium top={designLeaderboard.top} small={true} />
-            </div>
 
-            {/* Bottom User Pill */}
-            {!leaderboardOptOut && (
-              <div className="leaderboard-user-pill">
-                <div className="user-pill-left flex-align gap-8">
-                  <div className="leaderboard-avatar-circle">
-                    {currentUser?.initials || 'JD'}
-                  </div>
-                  <span className="leaderboard-user-name">
-                    You - {currentUser?.name || 'Juan Dela Cruz'}
-                  </span>
-                </div>
-                <span className="leaderboard-rank-badge">RANK [#1]</span>
+            {leaderboardOptOut ? (
+              <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '24px 0' }}>
+                Your ranking is currently hidden from peer views.
               </div>
-            )}
-            {leaderboardOptOut && (
-              <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '8px 0' }}>
-                Your rank is hidden from the leaderboard.
+            ) : (
+              <div className="modern-leaderboard-list">
+                {[
+                  { rank: 1, name: 'Andrea Aguilar', initials: 'AA', points: 14250, isYou: true },
+                  { rank: 2, name: 'Carlos Mendoza', initials: 'CM', points: 13800, isYou: false },
+                  { rank: 3, name: 'Elena Ramos', initials: 'ER', points: 12920, isYou: false }
+                ].map((row) => (
+                  <div key={row.rank} className={`modern-leaderboard-item ${row.isYou ? 'is-user' : ''}`}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className={`modern-rank-badge-num rank-${row.rank <= 3 ? row.rank : 'other'}`}>
+                        {row.rank}
+                      </span>
+                      <div style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        background: row.isYou ? '#f0605d' : '#e2e8f0',
+                        color: row.isYou ? '#ffffff' : '#334155',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '11px',
+                        fontWeight: 700
+                      }}>
+                        {row.initials}
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: row.isYou ? 700 : 500, color: '#0f172a' }}>
+                        {row.name} {row.isYou && <span style={{ fontSize: '11px', color: '#f0605d', fontWeight: 600 }}>(You)</span>}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#64748b' }}>
+                      {row.points.toLocaleString()} pts
+                    </span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -1187,10 +1233,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                     style={{
                       padding: '8px 12px',
                       borderRadius: '8px',
-                      border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                      border: '1px solid #cbd5e1',
                       fontSize: '13px',
-                      background: isDark ? '#1e293b' : 'var(--cq-card-bg, #ffffff)',
-                      color: isDark ? '#f8fafc' : 'var(--cq-text-primary, #0f172a)'
+                      background: 'var(--cq-card-bg, #ffffff)'
                     }}
                   >
                     <option value="ALL">All Companies ({trainingsList.length})</option>
@@ -1297,11 +1342,11 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           {certNotifications.length > 0 && (
             <div
               style={{
-                background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb',
-                border: isDark ? '1.5px solid rgba(245, 158, 11, 0.4)' : '1.5px solid #f59e0b',
+                background: '#fffbeb',
+                border: '1.5px solid #f59e0b',
                 borderRadius: '12px',
                 padding: '16px 20px',
-                color: isDark ? '#fbbf24' : '#92400e',
+                color: '#92400e',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -1310,12 +1355,12 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <AlertTriangle size={24} color={isDark ? '#fbbf24' : '#d97706'} />
+                <AlertTriangle size={24} color="#d97706" />
                 <div>
-                  <strong style={{ fontSize: '14px', color: isDark ? '#fef3c7' : '#78350f' }}>
+                  <strong style={{ fontSize: '14px', color: '#78350f' }}>
                     {certNotifications[0].title}
                   </strong>
-                  <div style={{ fontSize: '13px', marginTop: '2px', color: isDark ? '#fde68a' : '#92400e' }}>
+                  <div style={{ fontSize: '13px', marginTop: '2px', color: '#92400e' }}>
                     {certNotifications[0].message}
                   </div>
                 </div>

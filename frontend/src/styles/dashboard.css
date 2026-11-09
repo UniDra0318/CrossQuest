@@ -614,11 +614,14 @@
   margin-bottom: 14px;
 }
 .btn-flex-center {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  white-space: nowrap;
 }
 .card-badges-flex {
   display: flex;
@@ -634,4 +637,359 @@
   justify-content: space-between;
   border: 1px solid #e2e8f0;
   background: var(--cq-card-bg, #ffffff);
+}
+.trainee-triad-btn {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: var(--font-fun);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+.trainee-triad-btn--primary {
+  background: #f0605d;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(240, 96, 93, 0.3);
+}
+.trainee-triad-btn--primary:hover:not(:disabled) {
+  background: #e04f4c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(240, 96, 93, 0.4);
+}
+.trainee-triad-btn--primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(240, 96, 93, 0.3);
+}
+.trainee-triad-btn--secondary {
+  background: #f8fafc;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+}
+.trainee-triad-btn--secondary:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+.trainee-triad-btn--secondary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.trainee-triad-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   MODERN ACHIEVEMENTS & LEADERBOARD SYSTEM (CLEAN ENTERPRISE)
+   ========================================================================== */
+
+.modern-achievements-container {
+  background: var(--cq-card-bg, #ffffff);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.modern-achievements-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modern-achievements-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.modern-achievements-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.modern-achievements-count-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modern-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.modern-badge-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.modern-badge-card:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+.modern-badge-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modern-badge-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+
+.modern-badge-icon-box.tier-legendary {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #d97706;
+}
+
+.modern-badge-icon-box.tier-master {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.modern-badge-icon-box.tier-adept {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #7c3aed;
+}
+
+.modern-badge-icon-box.tier-default {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #16a34a;
+}
+
+.modern-badge-tier-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.modern-badge-tier-tag.tier-legendary {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+.modern-badge-tier-tag.tier-master {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+}
+
+.modern-badge-tier-tag.tier-adept {
+  background: #faf5ff;
+  color: #6d28d9;
+  border: 1px solid #ede9fe;
+}
+
+.modern-badge-tier-tag.tier-default {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
+}
+
+.modern-badge-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
+.modern-badge-desc {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0 0 16px;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.modern-badge-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #f8fafc;
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.modern-leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.modern-panel-card {
+  background: var(--cq-card-bg, #ffffff);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.modern-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modern-panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.modern-streak-pill-counter {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #ea580c;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.modern-streak-week-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.modern-streak-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.modern-streak-icon-dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: all 0.15s ease;
+}
+
+.modern-streak-icon-dot.active {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #ea580c;
+}
+
+.modern-streak-day-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.modern-leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modern-leaderboard-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  transition: background-color 0.15s ease;
+}
+
+.modern-leaderboard-item.is-user {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.modern-rank-badge-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.modern-rank-badge-num.rank-1 {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.modern-rank-badge-num.rank-2 {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.modern-rank-badge-num.rank-3 {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.modern-rank-badge-num.rank-other {
+  background: transparent;
+  color: #94a3b8;
 }

@@ -257,10 +257,11 @@ export default function PeopleAccess({
                           })()}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <div style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
                         <button 
                           type="button" 
                           className="adm-btn adm-btn--light"
+                          style={{ padding: '7px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
                           onClick={() => startEditStaff && startEditStaff(user)}
                           title={`Edit roles and clearances for ${user.name}`}
                         >
@@ -271,6 +272,9 @@ export default function PeopleAccess({
                           type="button"
                           className="adm-btn adm-btn--light"
                           style={{
+                            padding: '7px 12px',
+                            fontSize: '12px',
+                            whiteSpace: 'nowrap',
                             color: user.is_active !== false ? '#ef4444' : '#059669',
                             borderColor: user.is_active !== false ? (isDark ? 'rgba(239, 68, 68, 0.4)' : '#fca5a5') : (isDark ? 'rgba(5, 150, 105, 0.4)' : '#a7f3d0')
                           }}

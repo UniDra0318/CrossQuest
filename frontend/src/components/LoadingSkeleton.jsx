@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
 
 /**
  * Reusable animated shimmer skeleton placeholder for loading states.
@@ -8,12 +7,8 @@ import { useTheme } from '../contexts/ThemeContext';
  * @param {string} height - custom height for row or block
  */
 export default function LoadingSkeleton({ rows = 3, type = 'rows', height }) {
-  const { isDark } = useTheme?.() || { isDark: false };
-
   const shimmerStyle = {
-    background: isDark
-      ? 'linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%)'
-      : 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
+    background: 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
     backgroundSize: '200% 100%',
     animation: 'shimmerSweep 1.5s infinite',
     borderRadius: '8px'
@@ -22,9 +17,9 @@ export default function LoadingSkeleton({ rows = 3, type = 'rows', height }) {
   if (type === 'card') {
     return (
       <div style={{
-        background: isDark ? '#111827' : '#ffffff',
+        background: '#ffffff',
         borderRadius: '14px',
-        border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0',
+        border: '1px solid #e2e8f0',
         padding: '24px',
         display: 'flex',
         flexDirection: 'column',
@@ -40,9 +35,9 @@ export default function LoadingSkeleton({ rows = 3, type = 'rows', height }) {
   if (type === 'table') {
     return (
       <div style={{
-        background: isDark ? '#111827' : '#ffffff',
+        background: '#ffffff',
         borderRadius: '12px',
-        border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0',
+        border: '1px solid #e2e8f0',
         padding: '20px',
         display: 'flex',
         flexDirection: 'column',
