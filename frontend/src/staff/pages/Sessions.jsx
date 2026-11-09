@@ -313,7 +313,7 @@ export default function Sessions() {
           <div className="hero-metric-cell am-session-metric-cell">
             <span className="metric-tag">TOTAL COHORTS</span>
             <div className="metric-num">
-              {filteredSessions.length}
+              {clientFilteredSessions.length}
               <span className="metric-unit">SESS</span>
             </div>
             <span className="metric-sub-label">Filtered scope count</span>
