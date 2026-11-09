@@ -522,26 +522,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       {(() => {
         switch (activeSubView) {
           case 'records_vault':
-            return (
-              <PageHeader
-                title="Training Records"
-                subtitle="Encrypted multi-tenant training records with attribute-based access control."
-                badge="CRYPTOGRAPHIC VAULT"
-                badgeType="info"
-                actions={
-                  <button
-                    type="button"
-                    className="adm-btn adm-btn--primary"
-                    onClick={handleExportVaultRecords}
-                    disabled={exportingVaultRecords}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                  >
-                    <Download size={14} />
-                    <span>{exportingVaultRecords ? 'Exporting...' : 'Export Records CSV'}</span>
-                  </button>
-                }
-              />
-            );
+            return null;
           case 'attribute_authority':
             return (
               <PageHeader
