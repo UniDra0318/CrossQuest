@@ -463,27 +463,34 @@ export default function Sessions() {
       </div>
 
       {/* 3-Column Kanban Sessions Board */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'stretch' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '22px', alignItems: 'stretch' }}>
 
         {/* Column 1: Needs Attendance */}
         <div
+          className="am-kanban-column"
           style={{
-            background: isDark ? '#0b1120' : '#f8fafc',
-            borderRadius: '20px',
-            padding: '18px',
-            border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
+            background: isDark ? 'linear-gradient(180deg, #131b2e 0%, #0d1322 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+            borderRadius: '24px',
+            padding: '22px',
+            border: isDark ? '1px solid rgba(245, 158, 11, 0.25)' : '1px solid rgba(245, 158, 11, 0.3)',
+            boxShadow: isDark ? '0 12px 30px rgba(0,0,0,0.4)' : '0 10px 30px rgba(245, 158, 11, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03)',
             minHeight: '520px',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%'
+            height: '100%',
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b' }} />
-              <h3 style={{ margin: 0, fontSize: '14.5px', fontWeight: 800 }}>Needs Attendance</h3>
+          {/* Top Column Glow Bar */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)' }} />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', paddingBottom: '14px', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 10px #f59e0b' }} />
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>Needs Attendance</h3>
             </div>
-            <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: isDark ? '#1e293b' : '#e2e8f0', color: isDark ? '#cbd5e1' : '#475569' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)', padding: '3px 10px', borderRadius: '999px', background: isDark ? 'rgba(245, 158, 11, 0.2)' : '#fef3c7', color: isDark ? '#fbbf24' : '#b45309', border: isDark ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid #fde68a' }}>
               {columnNeedsAttendance.length}
             </span>
           </div>
@@ -497,31 +504,33 @@ export default function Sessions() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '36px 20px',
+                  padding: '40px 24px',
                   textAlign: 'center',
-                  background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
-                  borderRadius: '16px',
-                  border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
+                  background: isDark ? 'rgba(15, 23, 42, 0.5)' : '#ffffff',
+                  borderRadius: '18px',
+                  border: isDark ? '1px dashed rgba(245, 158, 11, 0.3)' : '1px dashed rgba(245, 158, 11, 0.4)',
+                  boxShadow: isDark ? 'none' : '0 2px 8px rgba(15, 23, 42, 0.02)'
                 }}
               >
                 <div
                   style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '14px',
-                    background: isDark ? '#1e293b' : '#fef3c7',
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '16px',
+                    background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fef3c7',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginBottom: '12px'
+                    marginBottom: '14px',
+                    border: isDark ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #fde68a'
                   }}
                 >
-                  <ClipboardList size={22} color={isDark ? '#f59e0b' : '#d97706'} />
+                  <ClipboardList size={26} color={isDark ? '#fbbf24' : '#d97706'} />
                 </div>
-                <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>
+                <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 800, color: isDark ? '#f1f5f9' : '#0f172a' }}>
                   All Rosters Logged
                 </h4>
-                <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
+                <p style={{ margin: 0, fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
                   No sessions currently require initial attendance tracking or roster submission.
                 </p>
               </div>
@@ -617,23 +626,30 @@ export default function Sessions() {
 
         {/* Column 2: Awaiting Trainer Sign-Off */}
         <div
+          className="am-kanban-column"
           style={{
-            background: isDark ? '#0b1120' : '#f8fafc',
-            borderRadius: '20px',
-            padding: '18px',
-            border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
+            background: isDark ? 'linear-gradient(180deg, #131b2e 0%, #0d1322 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+            borderRadius: '24px',
+            padding: '22px',
+            border: isDark ? '1px solid rgba(2, 132, 199, 0.25)' : '1px solid rgba(2, 132, 199, 0.3)',
+            boxShadow: isDark ? '0 12px 30px rgba(0,0,0,0.4)' : '0 10px 30px rgba(2, 132, 199, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03)',
             minHeight: '520px',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%'
+            height: '100%',
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#0284c7' }} />
-              <h3 style={{ margin: 0, fontSize: '14.5px', fontWeight: 800 }}>Awaiting Trainer Sign-Off</h3>
+          {/* Top Column Glow Bar */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #0284c7 0%, #38bdf8 100%)' }} />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', paddingBottom: '14px', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#0284c7', boxShadow: '0 0 10px #0284c7' }} />
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>Awaiting Trainer Sign-Off</h3>
             </div>
-            <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: isDark ? '#1e293b' : '#e2e8f0', color: isDark ? '#cbd5e1' : '#475569' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)', padding: '3px 10px', borderRadius: '999px', background: isDark ? 'rgba(2, 132, 199, 0.2)' : '#e0f2fe', color: isDark ? '#38bdf8' : '#0284c7', border: isDark ? '1px solid rgba(2, 132, 199, 0.35)' : '1px solid #bae6fd' }}>
               {columnAwaitingSignOff.length}
             </span>
           </div>
@@ -647,31 +663,33 @@ export default function Sessions() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '36px 20px',
+                  padding: '40px 24px',
                   textAlign: 'center',
-                  background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
-                  borderRadius: '16px',
-                  border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
+                  background: isDark ? 'rgba(15, 23, 42, 0.5)' : '#ffffff',
+                  borderRadius: '18px',
+                  border: isDark ? '1px dashed rgba(2, 132, 199, 0.3)' : '1px dashed rgba(2, 132, 199, 0.4)',
+                  boxShadow: isDark ? 'none' : '0 2px 8px rgba(15, 23, 42, 0.02)'
                 }}
               >
                 <div
                   style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '14px',
-                    background: isDark ? '#1e293b' : '#e0f2fe',
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '16px',
+                    background: isDark ? 'rgba(2, 132, 199, 0.15)' : '#e0f2fe',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginBottom: '12px'
+                    marginBottom: '14px',
+                    border: isDark ? '1px solid rgba(2, 132, 199, 0.3)' : '1px solid #bae6fd'
                   }}
                 >
-                  <Clock size={22} color={isDark ? '#38bdf8' : '#0284c7'} />
+                  <Clock size={26} color={isDark ? '#38bdf8' : '#0284c7'} />
                 </div>
-                <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>
+                <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 800, color: isDark ? '#f1f5f9' : '#0f172a' }}>
                   No Pending Sign-Offs
                 </h4>
-                <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
+                <p style={{ margin: 0, fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
                   Active cohorts are either awaiting attendance input or have already been certified.
                 </p>
               </div>
@@ -767,23 +785,30 @@ export default function Sessions() {
 
         {/* Column 3: Completed */}
         <div
+          className="am-kanban-column"
           style={{
-            background: isDark ? '#0b1120' : '#f8fafc',
-            borderRadius: '20px',
-            padding: '18px',
-            border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0',
+            background: isDark ? 'linear-gradient(180deg, #131b2e 0%, #0d1322 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+            borderRadius: '24px',
+            padding: '22px',
+            border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(16, 185, 129, 0.3)',
+            boxShadow: isDark ? '0 12px 30px rgba(0,0,0,0.4)' : '0 10px 30px rgba(16, 185, 129, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03)',
             minHeight: '520px',
             display: 'flex',
             flexDirection: 'column',
-            height: '100%'
+            height: '100%',
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#059669' }} />
-              <h3 style={{ margin: 0, fontSize: '14.5px', fontWeight: 800 }}>Completed</h3>
+          {/* Top Column Glow Bar */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)' }} />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', paddingBottom: '14px', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>Completed</h3>
             </div>
-            <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: isDark ? '#1e293b' : '#e2e8f0', color: isDark ? '#cbd5e1' : '#475569' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)', padding: '3px 10px', borderRadius: '999px', background: isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5', color: isDark ? '#34d399' : '#059669', border: isDark ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid #a7f3d0' }}>
               {columnCompleted.length}
             </span>
           </div>
@@ -797,31 +822,33 @@ export default function Sessions() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '36px 20px',
+                  padding: '40px 24px',
                   textAlign: 'center',
-                  background: isDark ? 'rgba(17, 24, 39, 0.4)' : '#ffffff',
-                  borderRadius: '16px',
-                  border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1'
+                  background: isDark ? 'rgba(15, 23, 42, 0.5)' : '#ffffff',
+                  borderRadius: '18px',
+                  border: isDark ? '1px dashed rgba(16, 185, 129, 0.3)' : '1px dashed rgba(16, 185, 129, 0.4)',
+                  boxShadow: isDark ? 'none' : '0 2px 8px rgba(15, 23, 42, 0.02)'
                 }}
               >
                 <div
                   style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '14px',
-                    background: isDark ? '#1e293b' : '#ecfdf5',
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '16px',
+                    background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginBottom: '12px'
+                    marginBottom: '14px',
+                    border: isDark ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #a7f3d0'
                   }}
                 >
-                  <Award size={22} color={isDark ? '#34d399' : '#059669'} />
+                  <Award size={26} color={isDark ? '#34d399' : '#059669'} />
                 </div>
-                <h4 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a' }}>
+                <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 800, color: isDark ? '#f1f5f9' : '#0f172a' }}>
                   No Completed Cohorts
                 </h4>
-                <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
+                <p style={{ margin: 0, fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '240px', lineHeight: 1.5 }}>
                   Completed training sessions will appear here once trainer evaluation and certificate issuance are finalized.
                 </p>
               </div>
