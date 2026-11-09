@@ -427,22 +427,23 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* Editorial Guidance Strip */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px',
-          padding: '12px 20px',
-          background: isDark ? 'rgba(2, 132, 199, 0.08)' : '#f0f9ff',
-          border: isDark ? '1px solid rgba(2, 132, 199, 0.2)' : '1px solid #bae6fd',
-          borderRadius: '16px',
-          fontSize: '12.5px',
-          color: isDark ? '#94a3b8' : '#334155'
-        }}
-      >
+        {/* Editorial Guidance Strip */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            padding: '14px 20px',
+            marginBottom: '28px',
+            background: isDark ? 'rgba(2, 132, 199, 0.08)' : '#f0f9ff',
+            border: isDark ? '1px solid rgba(2, 132, 199, 0.2)' : '1px solid #bae6fd',
+            borderRadius: '16px',
+            fontSize: '12.5px',
+            color: isDark ? '#94a3b8' : '#334155'
+          }}
+        >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Info size={16} color="#0284c7" />
           <span>
