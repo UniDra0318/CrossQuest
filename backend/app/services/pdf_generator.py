@@ -47,7 +47,7 @@ class PDFGenerator:
         issue_date: datetime,
         expiry_date: Optional[datetime] = None,
         company_name: str = "Crossworks Training & Consulting Corp.",
-        trainer_name: str = "Prof. Roel Traballo",
+        trainer_name: str = "Authorized Lead Trainer",
         reissue_count: int = 0
     ) -> bytes:
         """Generates an official landscape Certificate of Completion PDF (ReportLab, AAAYYYYMMDD-01 serial)."""
@@ -568,9 +568,9 @@ class PDFGenerator:
         elements.append(Spacer(1, 14))
 
         # 6. Signatory Sign-off Block (OI-10)
-        prepared_by_name = report_data.get("prepared_by_name") or report_data.get("finance_officer_name") or "Finance Officer"
+        prepared_by_name = report_data.get("prepared_by_name") or report_data.get("finance_officer_name") or "Authorized Finance Officer"
         prepared_by_title = report_data.get("prepared_by_title") or "Finance Officer — Legacy Reconciliation Authority"
-        verified_by_name = report_data.get("verified_by_name") or report_data.get("admin_name") or "Joselito 'Joey' Mallari Jr."
+        verified_by_name = report_data.get("verified_by_name") or report_data.get("admin_name") or "Authorized Primary Administrator"
         verified_by_title = report_data.get("verified_by_title") or "Principal Consultant & Primary Administrator"
 
         sig_data = [
@@ -679,9 +679,9 @@ class PDFGenerator:
 
         # 2. Executive Metadata Box
         generated_at = report_data.get("generated_at", datetime.now().strftime("%B %d, %Y %H:%M PHT"))
-        primary_admin_name = report_data.get("primary_admin_name") or "Joselito 'Joey' Mallari Jr."
+        primary_admin_name = report_data.get("primary_admin_name") or "Authorized Primary Administrator"
         primary_admin_title = report_data.get("primary_admin_title") or "Principal Consultant & Primary Administrator"
-        co_admin_name = report_data.get("co_admin_name") or "Prof. Roel Traballo"
+        co_admin_name = report_data.get("co_admin_name") or "Authorized Co-Administrator"
         co_admin_title = report_data.get("co_admin_title") or "Co-Administrator (Peer Review Authority)"
         generated_by = report_data.get("generated_by") or f"{primary_admin_name} ({primary_admin_title})"
         

@@ -399,6 +399,16 @@ class AnomalyRuleUpdate(BaseModel):
     reason: Optional[str] = None
 
 
+class AnomalyRuleBatchItem(BaseModel):
+    rule_code: str
+    parameters: Dict[str, Any]
+
+
+class AnomalyRuleBatchRequest(BaseModel):
+    rules: List[AnomalyRuleBatchItem]
+    reason: str
+
+
 class RetentionJobRequest(BaseModel):
     retention_days: Optional[int] = 365
     warning_days: Optional[int] = 30

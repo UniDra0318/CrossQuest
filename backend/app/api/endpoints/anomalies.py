@@ -81,10 +81,10 @@ def get_executive_anomaly_report(
 
     # Resolve co-administrator from database for dual-admin peer review sign-off
     co_admin = db.query(User).filter(User.role == "admin", User.id != admin_user.id).first()
-    co_admin_name = co_admin.full_name if co_admin else "Prof. Roel Traballo"
-    co_admin_title = "Co-Administrator (Peer Review Authority)"
+    co_admin_name = co_admin.full_name if (co_admin and co_admin.full_name) else "Authorized Co-Administrator"
+    co_admin_title = (getattr(co_admin, "title", None) if co_admin else None) or "Co-Administrator (Peer Review Authority)"
 
-    primary_title = "Principal Consultant & Primary Administrator" if ("Joey" in (admin_user.full_name or "") or admin_user.email == "joey.mallari@xworks.ph") else (getattr(admin_user, "title", None) or "Lead System Administrator")
+    primary_title = getattr(admin_user, "title", None) or "Principal Consultant & Primary Administrator"
 
     return {
         "generated_at": datetime.now().strftime("%B %d, %Y %H:%M PHT"),
@@ -339,7 +339,46 @@ def delete_alert_forbidden():
 
 # --- Rule Parameter & Approval Management (TC-ANO-20) ---
 from app.models.entities import AnomalyRule
-from app.schemas.schemas import AnomalyRuleResponse, AnomalyRuleUpdate
+from app.schemas.schemas import AnomalyRuleResponse, AnomalyRuleUpdate, AnomalyRuleBatchRequest
+
+
+def validate_rule_parameters(rule_code: str, params: Optional[dict]):
+    """Server-side validation for threshold parameters per Chapter 3 Table 13 (OI-08, A5)."""
+    if not params:
+        return
+    # S1_AFTER_HOURS limits
+    if rule_code == "S1_AFTER_HOURS" or ("start_hour" in params and "end_hour" in params):
+        start_h = params.get("start_hour")
+        end_h = params.get("end_hour")
+        if start_h is not None and end_h is not None:
+            try:
+                start_h = int(start_h)
+                end_h = int(end_h)
+            except (ValueError, TypeError):
+                raise HTTPException(status_code=422, detail="Hours must be valid integers.")
+            if not (0 <= start_h <= 23 and 0 <= end_h <= 23 and start_h < end_h):
+                raise HTTPException(
+                    status_code=422, 
+                    detail="Start hour and end hour must be between 0 and 23 with start_hour strictly less than end_hour."
+                )
+
+    # Window minutes limits
+    if "window_minutes" in params:
+        try:
+            wm = int(params["window_minutes"])
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=422, detail="Window minutes must be a valid integer.")
+        if not (1 <= wm <= 10080):
+            raise HTTPException(status_code=422, detail="Window minutes must be between 1 and 10080 (up to 7 days).")
+
+    # Threshold limits
+    if "threshold" in params:
+        try:
+            th = int(params["threshold"])
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=422, detail="Threshold must be a valid integer.")
+        if not (1 <= th <= 10000):
+            raise HTTPException(status_code=422, detail="Threshold must be between 1 and 10000.")
 
 
 DEFAULT_RULES = [
@@ -379,6 +418,83 @@ def get_anomaly_rules(
     return rules
 
 
+@router.put("/rules-batch", response_model=List[AnomalyRuleResponse])
+def batch_update_anomaly_rules(
+    batch_in: AnomalyRuleBatchRequest,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Administrator atomically updates multiple anomaly detection rule parameters (A6, OI-08).
+    All updates succeed together or fail completely with atomic rollback.
+    """
+    if not batch_in.reason or not batch_in.reason.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Mandatory audit reason is required when modifying anomaly rule thresholds (OI-08, A2)."
+        )
+
+    clean_reason = batch_in.reason.strip()
+    if not batch_in.rules:
+        raise HTTPException(status_code=422, detail="At least one rule update must be provided.")
+
+    # 1. Validate all rules upfront before modifying database (A5)
+    for item in batch_in.rules:
+        validate_rule_parameters(item.rule_code, item.parameters)
+
+    updated_rules = []
+    try:
+        for item in batch_in.rules:
+            rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == item.rule_code).first()
+            old_params = {}
+            old_v = 0
+            if not rule:
+                rule = AnomalyRule(
+                    rule_code=item.rule_code,
+                    parameters=item.parameters or {},
+                    version_no=1,
+                    client_reviewed=False,
+                    description=item.rule_code.replace('_', ' ').title()
+                )
+                db.add(rule)
+            else:
+                old_params = dict(rule.parameters or {})
+                old_v = rule.version_no
+                rule.parameters = item.parameters
+                rule.version_no += 1
+                # When parameters are changed, re-approval by Crossworks is required (A3)
+                rule.client_reviewed = False
+
+            log = AccessLog(
+                actor_user_id=admin_user.id,
+                actor_role=admin_user.role,
+                event_type="RULE_MODIFIED",
+                resource_type="ANOMALY_RULE",
+                resource_id=rule.id,
+                outcome="SUCCESS",
+                details={
+                    "rule_code": item.rule_code,
+                    "old_parameters": old_params,
+                    "new_parameters": rule.parameters,
+                    "old_version": old_v,
+                    "new_version": rule.version_no,
+                    "client_reviewed": False,
+                    "reason": clean_reason
+                }
+            )
+            db.add(log)
+            updated_rules.append(rule)
+
+        db.commit()
+        for r in updated_rules:
+            db.refresh(r)
+        return updated_rules
+    except Exception as err:
+        db.rollback()
+        if isinstance(err, HTTPException):
+            raise err
+        raise HTTPException(status_code=500, detail=f"Failed to batch update rules: {str(err)}")
+
+
 @router.put("/rules/{rule_code}", response_model=AnomalyRuleResponse)
 def update_anomaly_rule(
     rule_code: str,
@@ -387,6 +503,17 @@ def update_anomaly_rule(
     admin_user: User = Depends(get_current_admin_user)
 ):
     """Administrator updates rule thresholds/parameters and manages review approval (TC-ANO-20, OI-08)."""
+    # Reject blank reasons with 422 (A2)
+    clean_reason = (update_in.reason or update_in.description or "").strip()
+    if not clean_reason:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Mandatory audit reason is required when modifying anomaly rule thresholds (OI-08, A2)."
+        )
+
+    # Validate parameters server-side (A5)
+    validate_rule_parameters(rule_code, update_in.parameters)
+
     rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == rule_code).first()
     old_params = {}
     old_v = 0
@@ -406,6 +533,9 @@ def update_anomaly_rule(
         if update_in.parameters is not None:
             rule.parameters = update_in.parameters
             rule.version_no += 1
+            if update_in.client_reviewed is None:
+                # Revert to unapproved state awaiting Crossworks review when tuned (A3)
+                rule.client_reviewed = False
         if update_in.client_reviewed is not None:
             rule.client_reviewed = update_in.client_reviewed
         if update_in.description is not None:
@@ -426,7 +556,7 @@ def update_anomaly_rule(
             "old_version": old_v,
             "new_version": rule.version_no,
             "client_reviewed": rule.client_reviewed,
-            "reason": update_in.reason or update_in.description or "Threshold tuning updated by Administrator (OI-08)"
+            "reason": clean_reason
         }
     )
     db.add(log)

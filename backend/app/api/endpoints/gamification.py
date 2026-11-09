@@ -197,21 +197,21 @@ def list_quizzes(
         if "project" in low_title or "agile" in low_title or "pme" in low_title or "pmp" in low_title:
             category = "Project Management"
             header_color = "#1368ce"
-            if not instructor_name: instructor_name = "Lead Trainer Joey Ramos"
+            if not instructor_name: instructor_name = "Lead Course Trainer"
         elif "connect" in low_title or "communication" in low_title or "executive" in low_title or "leadership" in low_title:
             category = "Executive Leadership"
             header_color = "#059669"
-            if not instructor_name: instructor_name = "Lead Trainer Billy Fernandez"
+            if not instructor_name: instructor_name = "Lead Course Trainer"
         elif "coach" in low_title or "supervis" in low_title or "upskilling" in low_title or "sup" in low_title:
             category = "Supervisory Mastery"
             header_color = "#dc2626"
-            if not instructor_name: instructor_name = "Lead Trainer Jobert Cruz"
+            if not instructor_name: instructor_name = "Lead Course Trainer"
         elif "risk" in low_title or "continuity" in low_title or "bcm" in low_title or "iso" in low_title or "crm" in low_title:
             category = "Risk & Governance"
             header_color = "#7c3aed"
-            if not instructor_name: instructor_name = "Lead Trainer Owen Castillo"
+            if not instructor_name: instructor_name = "Lead Course Trainer"
         else:
-            if not instructor_name: instructor_name = "Lead Trainer Joey Ramos"
+            if not instructor_name: instructor_name = "Lead Course Trainer"
 
         results.append(QuizListItem(
             id=q.id,

@@ -31,13 +31,18 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
-    """Adds OWASP-recommended security headers (SEC-01..05, ZAP baseline compliance)."""
+    """Adds OWASP-recommended security headers (SEC-01..05, ZAP baseline compliance, TC-PWA-02..04)."""
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    
+    # TC-PWA-02..04 / U-11 & CL-15: Zero offline storage for sensitive API data & quiz answers
+    if request.url.path.startswith(settings.API_V1_STR):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
     return response
 
 @app.on_event("startup")

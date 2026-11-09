@@ -630,8 +630,8 @@ def download_reconciliation_pdf(
     finance_name = (loaded_user.full_name if loaded_user else None) or current_user.full_name or "Finance Officer"
     
     admin_reviewer = db.query(User).filter(User.role == "admin").order_by(User.created_at.asc()).first()
-    admin_name = admin_reviewer.full_name if admin_reviewer else "Joselito 'Joey' Mallari Jr."
-    admin_title = "Principal Consultant & Primary Administrator" if "Joey" in admin_name else "Lead System Administrator"
+    admin_name = (admin_reviewer.full_name if admin_reviewer else None) or "Authorized Primary Administrator"
+    admin_title = (getattr(admin_reviewer, "title", None) if admin_reviewer else None) or "Principal Consultant & Primary Administrator"
 
     enriched_data = dict(report_data)
     enriched_data["prepared_by_name"] = finance_name

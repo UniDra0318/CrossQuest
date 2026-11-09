@@ -11,9 +11,10 @@ import {
   CheckCircle2,
   Clock,
   Calendar,
-  Save
+  Save,
+  AlertCircle
 } from 'lucide-react';
-import { updateAnomalyRule } from '../../services/api';
+import { batchUpdateAnomalyRules, fetchAnomalyRules } from '../../services/api';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SystemSettings({ settings, liveRules = [], token, onRuleUpdated, onTuneRules }) {
@@ -26,7 +27,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
       keyAuthority: 'Decentralized Multi-Authority (DMA-ABE)'
     },
     anomaly: {
-      window: { start: '09:00', end: '18:00', tz: 'UTC+8', days: ['MON', 'TUE', 'WED', 'THU', 'FRI'] },
+      window: { start: '09:00', end: '18:00', tz: 'Asia/Manila', days: ['MON', 'TUE', 'WED', 'THU', 'FRI'] },
       failedAttempts: { count: 5, minutes: 10 },
       burstVolume: { records: 5, minutes: 60 }
     }
@@ -36,11 +37,12 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
   const [isTuneModalOpen, setIsTuneModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(null);
+  const [modalError, setModalError] = useState(null);
 
   // Modal form states
   const [modalStartHour, setModalStartHour] = useState(9);
   const [modalEndHour, setModalEndHour] = useState(18);
-  const [modalTz, setModalTz] = useState('UTC+8');
+  const [modalTz, setModalTz] = useState('Asia/Manila');
   const [modalDays, setModalDays] = useState(['MON', 'TUE', 'WED', 'THU', 'FRI']);
   const [modalFailedCount, setModalFailedCount] = useState(5);
   const [modalFailedMinutes, setModalFailedMinutes] = useState(10);
@@ -48,21 +50,27 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
   const [modalBurstMinutes, setModalBurstMinutes] = useState(60);
   const [modalReason, setModalReason] = useState('');
 
-  // Sync when liveRules prop updates
+  // Sync when liveRules prop updates or fetch if empty
   useEffect(() => {
     if (liveRules && liveRules.length > 0) {
       setCurrentRules(liveRules);
+    } else if (token) {
+      fetchAnomalyRules(token)
+        .then(rules => {
+          if (rules && rules.length > 0) setCurrentRules(rules);
+        })
+        .catch(() => {});
     }
-  }, [liveRules]);
+  }, [liveRules, token]);
 
-  // Find live rule objects
+  // Find live rule objects (A4: match exact codes only, no cross-rule fallback)
   const rAfter = currentRules.find(r => r.rule_code === 'S1_AFTER_HOURS');
-  const rFailed = currentRules.find(r => r.rule_code === 'R2_FAILED_LOGINS_ACCOUNT') || currentRules.find(r => r.rule_code?.includes('FAILED_LOGINS'));
-  const rBurst = currentRules.find(r => r.rule_code === 'R3_REPORT_BURSTS') || currentRules.find(r => r.rule_code === 'R4_BULK_EDIT') || currentRules.find(r => r.rule_code?.includes('BURST'));
+  const rFailed = currentRules.find(r => r.rule_code === 'R2_FAILED_LOGINS_ACCOUNT');
+  const rBurst = currentRules.find(r => r.rule_code === 'R3_REPORT_BURSTS');
 
   const startHour = rAfter?.parameters?.start_hour !== undefined ? Number(rAfter.parameters.start_hour) : 9;
   const endHour = rAfter?.parameters?.end_hour !== undefined ? Number(rAfter.parameters.end_hour) : 18;
-  const tz = rAfter?.parameters?.tz || 'UTC+8';
+  const tz = rAfter?.parameters?.tz || 'Asia/Manila';
   const activeDays = rAfter?.parameters?.days || ['MON', 'TUE', 'WED', 'THU', 'FRI'];
 
   const failedThreshold = rFailed?.parameters?.threshold ?? currentSettings.anomaly.failedAttempts.count;
@@ -71,11 +79,18 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
   const burstThreshold = rBurst?.parameters?.threshold ?? currentSettings.anomaly.burstVolume.records;
   const burstMinutes = rBurst?.parameters?.window_minutes ?? currentSettings.anomaly.burstVolume.minutes;
 
+  // Approval status model (A3: Check whether tuned thresholds are reviewed or pending)
+  const isAfterReviewed = rAfter?.client_reviewed ?? true;
+  const isFailedReviewed = rFailed?.client_reviewed ?? true;
+  const isBurstReviewed = rBurst?.client_reviewed ?? true;
+  const allReviewed = isAfterReviewed && isFailedReviewed && isBurstReviewed;
+  const maxVersion = Math.max(rAfter?.version_no || 1, rFailed?.version_no || 1, rBurst?.version_no || 1);
+
   // Dynamic visual timeline bar positioning
   const leftPercent = Math.max(0, Math.min(100, (startHour / 24) * 100));
   const widthPercent = Math.max(0, Math.min(100 - leftPercent, ((endHour - startHour) / 24) * 100));
 
-  // Open modal and pre-fill current active values
+  // Open modal and pre-fill current active values (A2: audit reason starts EMPTY)
   const handleOpenModal = () => {
     setModalStartHour(startHour);
     setModalEndHour(endHour);
@@ -85,7 +100,8 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
     setModalFailedMinutes(failedMinutes);
     setModalBurstCount(burstThreshold);
     setModalBurstMinutes(burstMinutes);
-    setModalReason('Operational anomaly threshold adjustment by Administrator.');
+    setModalReason(''); // A2: Must start empty
+    setModalError(null);
     setIsTuneModalOpen(true);
   };
 
@@ -101,94 +117,104 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
 
   const handleSaveThresholds = async (e) => {
     e.preventDefault();
-    if (modalStartHour < 0 || modalStartHour > 23 || modalEndHour < 0 || modalEndHour > 23) {
-      alert('Hours must be between 0 and 23.');
+    setModalError(null);
+
+    // Validation A2: Mandatory audit reason must not be blank
+    if (!modalReason || !modalReason.trim()) {
+      setModalError('Mandatory audit reason is required when modifying anomaly detection thresholds (OI-08).');
       return;
     }
-    if (modalStartHour >= modalEndHour) {
-      alert('Start hour must be strictly before end hour.');
+
+    // Validation A5: Boundary checks
+    const parsedStart = parseInt(modalStartHour, 10);
+    const parsedEnd = parseInt(modalEndHour, 10);
+    if (isNaN(parsedStart) || parsedStart < 0 || parsedStart > 23 || isNaN(parsedEnd) || parsedEnd < 0 || parsedEnd > 23) {
+      setModalError('Start hour and end hour must be valid integers between 0 and 23.');
+      return;
+    }
+    if (parsedStart >= parsedEnd) {
+      setModalError('Start hour must be strictly before end hour.');
+      return;
+    }
+
+    const parsedFailedCount = parseInt(modalFailedCount, 10);
+    const parsedFailedMinutes = parseInt(modalFailedMinutes, 10);
+    if (isNaN(parsedFailedCount) || parsedFailedCount < 1 || parsedFailedCount > 1000) {
+      setModalError('Failed login attempts threshold must be between 1 and 1,000.');
+      return;
+    }
+    if (isNaN(parsedFailedMinutes) || parsedFailedMinutes < 1 || parsedFailedMinutes > 1440) {
+      setModalError('Failed login evaluation window must be between 1 and 1,440 minutes.');
+      return;
+    }
+
+    const parsedBurstCount = parseInt(modalBurstCount, 10);
+    const parsedBurstMinutes = parseInt(modalBurstMinutes, 10);
+    if (isNaN(parsedBurstCount) || parsedBurstCount < 1 || parsedBurstCount > 1000) {
+      setModalError('Burst volume threshold must be between 1 and 1,000 operations.');
+      return;
+    }
+    if (isNaN(parsedBurstMinutes) || parsedBurstMinutes < 1 || parsedBurstMinutes > 1440) {
+      setModalError('Burst evaluation window must be between 1 and 1,440 minutes.');
       return;
     }
 
     setIsSaving(true);
-    const auditReason = modalReason.trim() || 'Anomaly detection threshold adjusted by Administrator.';
+    const cleanReason = modalReason.trim();
 
     try {
-      // 1. Update S1_AFTER_HOURS
-      let updatedAfter;
-      try {
-        updatedAfter = await updateAnomalyRule('S1_AFTER_HOURS', {
-          parameters: { start_hour: modalStartHour, end_hour: modalEndHour, tz: modalTz, days: modalDays },
-          reason: auditReason
-        }, token);
-      } catch (err) {
-        console.warn('Backend update for S1_AFTER_HOURS failed, applying local update:', err);
-        updatedAfter = {
-          rule_code: 'S1_AFTER_HOURS',
-          parameters: { start_hour: modalStartHour, end_hour: modalEndHour, tz: modalTz, days: modalDays },
-          version_no: (rAfter?.version_no || 1) + 1,
-          updated_at: new Date().toISOString()
-        };
-      }
+      // A6: Atomic Batch Update - all 3 rules committed together
+      const updatedRules = await batchUpdateAnomalyRules({
+        rules: [
+          {
+            rule_code: 'S1_AFTER_HOURS',
+            parameters: { 
+              start_hour: parsedStart, 
+              end_hour: parsedEnd, 
+              tz: modalTz.trim() || 'Asia/Manila', 
+              days: modalDays 
+            }
+          },
+          {
+            rule_code: 'R2_FAILED_LOGINS_ACCOUNT',
+            parameters: { 
+              ...(rFailed?.parameters || {}), 
+              threshold: parsedFailedCount, 
+              window_minutes: parsedFailedMinutes 
+            }
+          },
+          {
+            rule_code: 'R3_REPORT_BURSTS',
+            parameters: { 
+              ...(rBurst?.parameters || {}), 
+              threshold: parsedBurstCount, 
+              window_minutes: parsedBurstMinutes 
+            }
+          }
+        ],
+        reason: cleanReason
+      }, token);
 
-      // 2. Update R2_FAILED_LOGINS_ACCOUNT
-      let updatedFailed;
-      try {
-        updatedFailed = await updateAnomalyRule('R2_FAILED_LOGINS_ACCOUNT', {
-          parameters: { ...(rFailed?.parameters || {}), threshold: Number(modalFailedCount), window_minutes: Number(modalFailedMinutes) },
-          reason: auditReason
-        }, token);
-      } catch (err) {
-        console.warn('Backend update for R2_FAILED_LOGINS_ACCOUNT failed, applying local update:', err);
-        updatedFailed = {
-          rule_code: 'R2_FAILED_LOGINS_ACCOUNT',
-          parameters: { ...(rFailed?.parameters || {}), threshold: Number(modalFailedCount), window_minutes: Number(modalFailedMinutes) },
-          version_no: (rFailed?.version_no || 1) + 1,
-          updated_at: new Date().toISOString()
-        };
-      }
-
-      // 3. Update R3_REPORT_BURSTS
-      let updatedBurst;
-      try {
-        updatedBurst = await updateAnomalyRule('R3_REPORT_BURSTS', {
-          parameters: { ...(rBurst?.parameters || {}), threshold: Number(modalBurstCount), window_minutes: Number(modalBurstMinutes) },
-          reason: auditReason
-        }, token);
-      } catch (err) {
-        console.warn('Backend update for R3_REPORT_BURSTS failed, applying local update:', err);
-        updatedBurst = {
-          rule_code: 'R3_REPORT_BURSTS',
-          parameters: { ...(rBurst?.parameters || {}), threshold: Number(modalBurstCount), window_minutes: Number(modalBurstMinutes) },
-          version_no: (rBurst?.version_no || 1) + 1,
-          updated_at: new Date().toISOString()
-        };
-      }
-
-      // Update local state directly so tab re-renders immediately
+      // On successful atomic commit: update local state with genuine DB response
       setCurrentRules(prev => {
         const next = [...prev];
-        const replaceOrAdd = (item) => {
-          const idx = next.findIndex(r => r.rule_code === item.rule_code);
-          if (idx >= 0) next[idx] = item;
-          else next.push(item);
-        };
-        replaceOrAdd(updatedAfter);
-        replaceOrAdd(updatedFailed);
-        replaceOrAdd(updatedBurst);
+        updatedRules.forEach(updated => {
+          const idx = next.findIndex(r => r.rule_code === updated.rule_code);
+          if (idx >= 0) next[idx] = updated;
+          else next.push(updated);
+        });
         return next;
       });
 
-      // Notify parent AdminDashboard so all tabs stay synced
-      onRuleUpdated?.(updatedAfter);
-      onRuleUpdated?.(updatedFailed);
-      onRuleUpdated?.(updatedBurst);
+      // Propagate to parent dashboard
+      updatedRules.forEach(r => onRuleUpdated?.(r));
 
-      setSaveSuccess(`Anomaly thresholds updated successfully (Operating hours: ${String(modalStartHour).padStart(2, '0')}:00 – ${String(modalEndHour).padStart(2, '0')}:00 ${modalTz}).`);
+      setSaveSuccess(`Anomaly thresholds updated (Operating hours: ${String(parsedStart).padStart(2, '0')}:00 – ${String(parsedEnd).padStart(2, '0')}:00 ${modalTz.trim() || 'Asia/Manila'}). Status: Pending Crossworks Review.`);
       setIsTuneModalOpen(false);
       setTimeout(() => setSaveSuccess(null), 5000);
     } catch (err) {
-      alert(err.message || 'Failed to update thresholds.');
+      // A1: On failure, display error and keep old values untouched (NO local fallback)
+      setModalError(err.message || 'Failed to update threshold parameters on server.');
     } finally {
       setIsSaving(false);
     }
@@ -260,14 +286,39 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
 
         {/* Card 2: Anomaly Detection Thresholds */}
         <div className="adm-card">
-          <div className="adm-ptitle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div className="adm-ptitle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <span style={{ background: '#ff7a1a' }}>
                 <Sliders size={22} />
               </span>
               <div>
-                <h2>Anomaly Detection Thresholds</h2>
-                <p>Live active rule parameters (Table 13)</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <h2 style={{ margin: 0 }}>Anomaly Detection Thresholds</h2>
+                  {/* Approval Status Badge (A3) */}
+                  <span 
+                    style={{
+                      fontSize: '10.5px',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: allReviewed 
+                        ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') 
+                        : (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fffbeb'),
+                      color: allReviewed 
+                        ? (isDark ? '#34d399' : '#059669') 
+                        : (isDark ? '#fbbf24' : '#b45309'),
+                      border: allReviewed 
+                        ? (isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0') 
+                        : (isDark ? '1px solid rgba(217, 119, 6, 0.35)' : '1px solid #fde68a')
+                    }}
+                  >
+                    {allReviewed ? '✓ Crossworks Approved' : `⏳ Pending Review (v${maxVersion})`}
+                  </span>
+                </div>
+                <p style={{ margin: '2px 0 0' }}>Live active rule parameters (Table 13)</p>
               </div>
             </div>
             <button
@@ -338,16 +389,16 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
             </div>
           </div>
 
-          {/* Threshold 2: Burst Volume */}
+          {/* Threshold 2: Burst Volume (A4: R3_REPORT_BURSTS only) */}
           <div className="adm-field adm-field--thr">
             <div className="adm-thr__icon" style={{ background: '#ff7a1a' }}>
               <Layers size={20} />
             </div>
             <div>
-              <span className="adm-label">BURST VOLUME THRESHOLD (R3_BURST / R4_BULK)</span>
+              <span className="adm-label">BURST VOLUME THRESHOLD (R3_REPORT_BURSTS)</span>
               <div className="adm-thr__val">
                 <b>{burstThreshold}</b>
-                <span>record operations within {burstMinutes} minutes</span>
+                <span>reports generated within {burstMinutes} minutes</span>
               </div>
             </div>
           </div>
@@ -417,7 +468,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                     Tune Anomaly Detection Thresholds
                   </h3>
                   <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                    Live active parameters for S1 After-Hours, R2 Failed Logins, and R3 Burst
+                    Operational parameters for S1 After-Hours, R2 Failed Logins, and R3 Report Bursts
                   </span>
                 </div>
               </div>
@@ -431,8 +482,28 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
               </button>
             </div>
 
+            {/* Inline Error Banner (A7: No alert() popups) */}
+            {modalError && (
+              <div style={{
+                margin: '16px 24px 0',
+                padding: '12px 16px',
+                background: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fef2f2',
+                border: isDark ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid #fecaca',
+                borderRadius: '12px',
+                color: isDark ? '#fca5a5' : '#b91c1c',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                <span>{modalError}</span>
+              </div>
+            )}
+
             {/* Modal Form */}
-            <form onSubmit={handleSaveThresholds} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <form onSubmit={handleSaveThresholds} noValidate style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
               {/* Section 1: Business Hours Window (S1_AFTER_HOURS) */}
               <div style={{
                 background: isDark ? '#1e293b' : '#f8fafc',
@@ -460,7 +531,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                       min="0"
                       max="23"
                       value={modalStartHour}
-                      onChange={(e) => setModalStartHour(parseInt(e.target.value, 10) || 0)}
+                      onChange={(e) => setModalStartHour(e.target.value)}
                       required
                       style={{
                         width: '100%',
@@ -483,7 +554,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                       min="0"
                       max="23"
                       value={modalEndHour}
-                      onChange={(e) => setModalEndHour(parseInt(e.target.value, 10) || 0)}
+                      onChange={(e) => setModalEndHour(e.target.value)}
                       required
                       style={{
                         width: '100%',
@@ -577,8 +648,9 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                       <input
                         type="number"
                         min="1"
+                        max="1000"
                         value={modalFailedCount}
-                        onChange={(e) => setModalFailedCount(parseInt(e.target.value, 10) || 1)}
+                        onChange={(e) => setModalFailedCount(e.target.value)}
                         style={{
                           width: '100%',
                           padding: '6px 8px',
@@ -596,8 +668,9 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                       <input
                         type="number"
                         min="1"
+                        max="1440"
                         value={modalFailedMinutes}
-                        onChange={(e) => setModalFailedMinutes(parseInt(e.target.value, 10) || 1)}
+                        onChange={(e) => setModalFailedMinutes(e.target.value)}
                         style={{
                           width: '100%',
                           padding: '6px 8px',
@@ -613,7 +686,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                   </div>
                 </div>
 
-                {/* R3_BURST */}
+                {/* R3_REPORT_BURSTS (A4) */}
                 <div style={{
                   background: isDark ? '#1e293b' : '#f8fafc',
                   border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
@@ -626,17 +699,18 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Layers size={15} color="#ff7a1a" />
                     <strong style={{ fontSize: '12px', color: isDark ? '#f8fafc' : '#0f172a' }}>
-                      Burst Volume Limit (R3)
+                      Report Bursts Limit (R3)
                     </strong>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>Operations:</label>
+                      <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>Reports:</label>
                       <input
                         type="number"
                         min="1"
+                        max="1000"
                         value={modalBurstCount}
-                        onChange={(e) => setModalBurstCount(parseInt(e.target.value, 10) || 1)}
+                        onChange={(e) => setModalBurstCount(e.target.value)}
                         style={{
                           width: '100%',
                           padding: '6px 8px',
@@ -654,8 +728,9 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                       <input
                         type="number"
                         min="1"
+                        max="1440"
                         value={modalBurstMinutes}
-                        onChange={(e) => setModalBurstMinutes(parseInt(e.target.value, 10) || 1)}
+                        onChange={(e) => setModalBurstMinutes(e.target.value)}
                         style={{
                           width: '100%',
                           padding: '6px 8px',
@@ -672,16 +747,19 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                 </div>
               </div>
 
-              {/* Section 3: Mandatory Audit Reason */}
+              {/* Section 3: Mandatory Audit Reason (A2: Required, empty by default) */}
               <div>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '4px' }}>
-                  Mandatory Audit Reason (OI-08):
+                  Mandatory Audit Reason (OI-08): <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <textarea
                   rows="2"
                   value={modalReason}
-                  onChange={(e) => setModalReason(e.target.value)}
-                  placeholder="Justification for threshold modification..."
+                  onChange={(e) => {
+                    setModalReason(e.target.value);
+                    if (modalError) setModalError(null);
+                  }}
+                  placeholder="Enter specific business justification for this threshold change..."
                   required
                   style={{
                     width: '100%',
@@ -695,6 +773,9 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                     boxSizing: 'border-box'
                   }}
                 />
+                <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                  Changes will create a new rule version and require Crossworks review approval.
+                </span>
               </div>
 
               {/* Modal Actions */}

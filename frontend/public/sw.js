@@ -32,6 +32,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
+  const url = new URL(event.request.url);
+
+  // TC-PWA-02 to TC-PWA-04, U-11, CL-15: Never cache API responses, sensitive data, or quiz content
+  if (url.pathname.startsWith('/api/') || url.pathname.includes('/quiz')) {
+    return;
+  }
+
   // Navigation requests: Network-First so app updates never get stuck on stale white screen
   if (event.request.mode === 'navigate') {
     event.respondWith(

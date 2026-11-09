@@ -686,6 +686,22 @@ export async function updateAnomalyRule(ruleCode, ruleData, token) {
   return data;
 }
 
+export async function batchUpdateAnomalyRules(batchData, token) {
+  const res = await fetch(`${API_BASE}/anomalies/rules-batch`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify(batchData)
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Failed to batch update rules (${res.status})`);
+  }
+  return data;
+}
+
 export async function runRetentionJob(token) {
   const res = await fetch(`${API_BASE}/anomalies/retention/run`, {
     method: 'POST',

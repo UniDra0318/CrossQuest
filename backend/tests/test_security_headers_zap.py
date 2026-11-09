@@ -24,3 +24,11 @@ def test_tc_sec_01_to_05_owasp_security_headers(client: TestClient):
     assert "max-age=" in headers.get("strict-transport-security", "")
     # TC-SEC-05: Referrer policy
     assert headers.get("referrer-policy") == "strict-origin-when-cross-origin"
+
+
+def test_tc_pwa_02_to_04_sensitive_cache_control(client: TestClient):
+    """TC-PWA-02..04 (B3, U-11, CL-15): Sensitive API endpoints must enforce Cache-Control: no-store."""
+    resp = client.get("/api/v1/gamification/leaderboard")
+    # Even if unauthenticated or error or success, security headers middleware must enforce no-store
+    assert "no-store" in resp.headers.get("cache-control", "")
+    assert "no-cache" in resp.headers.get("cache-control", "")

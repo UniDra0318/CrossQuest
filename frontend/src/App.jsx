@@ -14,7 +14,7 @@ import TraineeDashboard from './views/TraineeDashboard';
 import LandingView from './views/LandingView';
 import CryptoSandboxLab from './views/CryptoSandboxLab';
 import InstallPwaModal from './components/InstallPwaModal';
-import LiveQuizPopUpModal from './components/LiveQuizPopUpModal';
+// B2: LiveQuizPopUpModal unmounted per Chapter 1 scope (future work, zero localStorage quiz sync)
 import ErrorBoundary from './components/ErrorBoundary';
 import { ROUTES, ROLE_HOME } from './routes/routeConfig';
 import './App.css';
@@ -206,7 +206,7 @@ function MainAppShell({ page }) {
         </nav>
       )}
 
-      <LiveQuizPopUpModal />
+      {/* B2: LiveQuizPopUpModal unmounted to prevent unauthorized background localStorage quiz sync */}
       <InstallPwaModal />
     </div>
   );
