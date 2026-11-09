@@ -103,17 +103,10 @@ def list_trainers(
             detail="Forbidden: Only staff with session planning authority can list trainers."
         )
     trainers = db.query(User).filter(User.role == "trainer", User.is_active == True).all()
-    title_map = {
-        "jordan": "Lead Trainer: Agile PME & Leadership",
-        "billy": "Senior Cloud Trainer: CONNECT & Infra",
-        "jobert": "Enterprise Data Trainer: Coaching",
-        "owen": "Security Trainer: Business Continuity"
-    }
     results = []
     for t in trainers:
-        first_token = (t.full_name or "").split()[0].lower()
-        title_val = title_map.get(first_token, "Certified Lead Instructor")
         resp = UserResponse.model_validate(t)
+        title_val = t.job_title or "Certified Instructor"
         resp.attributes = {"title": title_val}
         results.append(resp)
     return results

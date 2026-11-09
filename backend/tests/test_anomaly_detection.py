@@ -82,9 +82,24 @@ def second_admin_user(db_session: Session) -> User:
 
 @pytest.fixture(autouse=True)
 def clean_anomaly_state(db_session: Session, test_user: User):
-    """Isolate each test by clearing prior logs and alerts for test_user."""
-    db_session.query(AccessLog).filter(AccessLog.actor_user_id == test_user.id).delete()
-    db_session.query(AnomalyAlert).filter(AnomalyAlert.subject_user_id == test_user.id).delete()
+    """Isolate each test by clearing prior logs, alerts, and resetting rules to Table 13 baseline."""
+    from app.api.endpoints.anomalies import DEFAULT_RULES
+    db_session.query(AccessLog).delete()
+    db_session.query(AnomalyAlert).delete()
+    for r_data in DEFAULT_RULES:
+        r = db_session.query(AnomalyRule).filter(AnomalyRule.rule_code == r_data["rule_code"]).first()
+        if r:
+            r.parameters = dict(r_data["parameters"])
+            r.version_no = 1
+            r.client_reviewed = True
+        else:
+            db_session.add(AnomalyRule(
+                rule_code=r_data["rule_code"],
+                parameters=dict(r_data["parameters"]),
+                version_no=1,
+                client_reviewed=True,
+                description=r_data["description"]
+            ))
     db_session.commit()
     yield
 
@@ -1036,3 +1051,45 @@ def test_tc_ano_28_executive_anomaly_report_and_exports(client: TestClient, admi
     assert res_csv.status_code == 200
     assert "text/csv" in res_csv.headers["content-type"]
     assert "Alert ID" in res_csv.text
+
+
+def test_tc_ano_29_detector_evaluates_with_active_tuned_thresholds(
+    client: TestClient, admin_user: User, test_user: User, db_session: Session
+):
+    """TC-ANO-29: Settings threshold tuning updates AnomalyRule and detector actively enforces new threshold."""
+    admin_token = create_access_token(subject=admin_user.id)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # 1. Update R2-a threshold from default 5 to 3
+    tune_res = client.put(
+        "/api/v1/anomalies/rules/R2_FAILED_LOGINS_ACCOUNT",
+        json={
+            "parameters": {"threshold": 3, "window_minutes": 10},
+            "reason": "Tune failed logins to stricter threshold of 3 for heightened audit (OI-08)"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert tune_res.status_code == 200
+
+    # 2. Add exactly 3 failed login attempts
+    db_session.query(AccessLog).delete()
+    for i in range(3):
+        db_session.add(AccessLog(
+            actor_user_id=test_user.id,
+            actor_role=test_user.role,
+            event_type="AUTH_FAILURE",
+            resource_type="AUTH",
+            outcome="FAILED",
+            reason_code="INVALID_CREDENTIALS",
+            source_ip="192.168.1.77",
+            details={"username": test_user.email},
+            occurred_at=now - timedelta(minutes=i)
+        ))
+    db_session.commit()
+
+    # 3. Detector must trigger alert at 3 (whereas old hardcoded threshold of 5 would have ignored this)
+    alert = anomaly_detector.check_failed_logins(test_user.email, "192.168.1.77", db_session)
+    assert alert is not None
+    assert alert.rule_code == "R2_FAILED_LOGINS_ACCOUNT"
+    assert alert.metadata_info["failures"] == 3
+    assert alert.metadata_info["threshold"] == 3

@@ -186,6 +186,7 @@ def seed_database():
             email="david.lim@crossworks.ph",
             username="trainer_david",
             full_name="David Lim",
+            job_title="Lead Trainer: Agile PME & Leadership",
             hashed_password=default_pwd,
             role="trainer",
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA"]
@@ -194,6 +195,7 @@ def seed_database():
             email="maria.hernandez@crossworks.ph",
             username="trainer_maria",
             full_name="Maria Hernandez",
+            job_title="Senior Cloud Trainer: CONNECT & Infra",
             hashed_password=default_pwd,
             role="trainer",
             assigned_client_accounts=["RETAIL_GAMMA", "BANK_DELTA"]
@@ -202,6 +204,7 @@ def seed_database():
             email="alex.santos@crossworks.ph",
             username="trainer_alex",
             full_name="Engr. Alex Santos",
+            job_title="Enterprise Data Trainer: Coaching",
             hashed_password=default_pwd,
             role="trainer",
             assigned_client_accounts=["TELCO_EPSILON"]

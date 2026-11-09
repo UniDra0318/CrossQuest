@@ -156,6 +156,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
             email=email,
             username=uname,
             full_name=fname,
+            job_title=title,
             hashed_password=default_pwd,
             role="trainer",
             clearance_level=2,

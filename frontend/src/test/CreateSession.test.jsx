@@ -97,4 +97,28 @@ describe('Create Session Flow for Account Managers (B12)', () => {
       expect(screen.getByText(/Venue is required/i)).toBeInTheDocument();
     });
   });
+
+  it('displays error banner with retry option when loading sessions fails', async () => {
+    const staffApi = await import('../api/staff');
+    staffApi.getTrainingSessions.mockRejectedValueOnce(new Error('Network gateway timeout (504)'));
+
+    render(<Sessions />);
+
+    expect(await screen.findByText(/Server Connection Error:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Network gateway timeout \(504\)/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument();
+  });
+
+  it('displays trainer lookup failure feedback when fetching trainers fails', async () => {
+    const apiModule = await import('../services/api');
+    vi.spyOn(apiModule, 'fetchTrainers').mockRejectedValueOnce(new Error('Trainer service unavailable (503)'));
+
+    render(<Sessions />);
+
+    const newBtn = await screen.findByRole('button', { name: /New Training Session/i });
+    fireEvent.click(newBtn);
+
+    expect(await screen.findByText(/Trainer lookup unavailable: Trainer service unavailable \(503\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/-- Trainer lookup failed \(Trainer service unavailable \(503\)\) --/i)).toBeInTheDocument();
+  });
 });

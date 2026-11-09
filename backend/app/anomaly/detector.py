@@ -28,7 +28,7 @@ from typing import List, Optional, Tuple, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_
 from app.core.config import settings
-from app.models.entities import AccessLog, AnomalyAlert, User, TrainingRecord
+from app.models.entities import AccessLog, AnomalyAlert, User, TrainingRecord, AnomalyRule
 
 
 # Role-based thresholds for distinct record-detail views within 15 minutes (Table 13, R3-a)
@@ -44,9 +44,24 @@ R3_A_THRESHOLDS = {
 SEVERITY_LEVELS = ["LOW", "MEDIUM", "HIGH"]
 
 
-def is_after_hours(dt: Optional[datetime] = None) -> bool:
-    """Checks if a given UTC datetime falls outside Philippine business hours (Mon-Fri 09:00 - 18:00 UTC+8).
-    Chapter III Section 3.7.3 & Table 13: S1 After-hours indicator.
+def get_rule_parameters(db: Optional[Session], rule_code: str, default_params: Dict[str, Any]) -> Dict[str, Any]:
+    """Retrieves active parameters for an anomaly rule from the database, falling back to defaults."""
+    if db is None:
+        return default_params
+    try:
+        rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == rule_code).first()
+        if rule and rule.parameters:
+            merged = dict(default_params)
+            merged.update(rule.parameters)
+            return merged
+    except Exception:
+        pass
+    return default_params
+
+
+def is_after_hours(dt: Optional[datetime] = None, db: Optional[Session] = None) -> bool:
+    """Checks if a given UTC datetime falls outside Philippine operating hours (Table 13: S1 After-hours indicator).
+    Reads active S1 parameters from AnomalyRule if available, otherwise defaults to Mon-Fri 09:00 - 18:00 UTC+8.
     """
     if dt is None:
         dt = datetime.now(timezone.utc)
@@ -56,12 +71,21 @@ def is_after_hours(dt: Optional[datetime] = None) -> bool:
     # Convert UTC to Philippine Time (UTC+8)
     pht = dt.astimezone(timezone(timedelta(hours=8)))
     
-    # Check weekend (5=Saturday, 6=Sunday)
-    if pht.weekday() >= 5:
+    s1_params = get_rule_parameters(
+        db,
+        "S1_AFTER_HOURS",
+        {"start_hour": 9, "end_hour": 18, "days": ["MON", "TUE", "WED", "THU", "FRI"]}
+    )
+
+    day_names = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+    current_day = day_names[pht.weekday()]
+    allowed_days = s1_params.get("days") or ["MON", "TUE", "WED", "THU", "FRI"]
+    if current_day not in allowed_days:
         return True
-    
-    # Check operating hours 09:00 to 18:00
-    if pht.hour < 9 or pht.hour >= 18:
+
+    start_h = int(s1_params.get("start_hour", 9))
+    end_h = int(s1_params.get("end_hour", 18))
+    if pht.hour < start_h or pht.hour >= end_h:
         return True
         
     return False
@@ -99,7 +123,7 @@ class AccessAnomalyDetector:
         now = event_time or datetime.now(timezone.utc).replace(tzinfo=None)
         
         # Evaluate S1 after-hours indicator (Table 13, Section 3.7.3)
-        after_hours = is_after_hours(now)
+        after_hours = is_after_hours(now, db=db)
         final_sev = base_severity
         tags = []
         if after_hours:
@@ -163,29 +187,32 @@ class AccessAnomalyDetector:
     ) -> AnomalyAlert:
         """Rule R1: Flags requests denied because record is outside user scope (R1-a and R1-b)."""
         now = datetime.now(timezone.utc).replace(tzinfo=None)
-        window_15m = now - timedelta(minutes=15)
+        r1b_params = get_rule_parameters(db, "R1_REPEATED_OUT_OF_SCOPE", {"threshold": 3, "window_minutes": 15})
+        threshold_repeated = int(r1b_params.get("threshold", 3))
+        window_minutes = int(r1b_params.get("window_minutes", 15))
+        window_recent = now - timedelta(minutes=window_minutes)
 
-        # Count out-of-scope denials in the last 15 minutes for this user
+        # Count out-of-scope denials in the configured window for this user
         recent_denials = (
             db.query(func.count(AccessLog.id))
             .filter(
                 AccessLog.actor_user_id == user.id,
                 AccessLog.outcome == "DENIED",
                 AccessLog.reason_code.in_(["OUT_OF_SCOPE", "FAILED_POLICY"]),
-                AccessLog.occurred_at >= window_15m
+                AccessLog.occurred_at >= window_recent
             )
             .scalar() or 0
         )
 
-        # R1-b: Repeated attempts (3 in 15 min -> Medium alert)
-        if recent_denials >= 3:
+        # R1-b: Repeated attempts (threshold in configured window -> Medium alert)
+        if recent_denials >= threshold_repeated:
             return self._create_or_update_alert(
                 db=db,
                 rule_code="R1_REPEATED_OUT_OF_SCOPE",
                 base_severity="MEDIUM",
-                description=f"User {user.email} triggered {recent_denials} repeated out-of-scope access attempts within 15 minutes.",
+                description=f"User {user.email} triggered {recent_denials} repeated out-of-scope access attempts within {window_minutes} minutes.",
                 subject_user_id=user.id,
-                metadata_info={"recent_denials": recent_denials, "last_target": target_resource, "target_company": company_code}
+                metadata_info={"recent_denials": recent_denials, "last_target": target_resource, "target_company": company_code, "threshold": threshold_repeated}
             )
 
         # R1-a: Single attempt -> Low alert (aggregated daily)
@@ -205,57 +232,75 @@ class AccessAnomalyDetector:
         source_ip: str,
         db: Session
     ) -> Optional[AnomalyAlert]:
-        """Rule R2: 5 failures/account (R2-a) or >=10 failures across >=2 distinct targeted usernames for IP (R2-b) in 10 minutes. No lock-out."""
+        """Rule R2: failures/account (R2-a) or failures across distinct targeted usernames for IP (R2-b). No lock-out."""
+        r2a_params = get_rule_parameters(db, "R2_FAILED_LOGINS_ACCOUNT", {"threshold": 5, "window_minutes": 10})
+        threshold_account = int(r2a_params.get("threshold", 5))
+        window_account = int(r2a_params.get("window_minutes", 10))
+
+        r2b_params = get_rule_parameters(
+            db,
+            "R2_FAILED_LOGINS_IP",
+            {
+                "threshold": getattr(settings, "ANOMALY_R2_B_IP_THRESHOLD", 10),
+                "distinct_usernames_threshold": getattr(settings, "ANOMALY_R2_B_DISTINCT_USERS_THRESHOLD", 2),
+                "window_minutes": 10
+            }
+        )
+        threshold_ip = int(r2b_params.get("threshold", 10))
+        threshold_distinct = int(r2b_params.get("distinct_usernames_threshold", 2))
+        window_ip = int(r2b_params.get("window_minutes", 10))
+
+        max_window = max(window_account, window_ip)
         now = datetime.now(timezone.utc).replace(tzinfo=None)
-        window_10m = now - timedelta(minutes=10)
+        window_start = now - timedelta(minutes=max_window)
 
         # Compute keyed-HMAC username for privacy-preserving match
         uname_normalized = username.lower().strip() if username else ""
         username_hmac = hmac.new(settings.SECRET_KEY.encode(), uname_normalized.encode(), hashlib.sha256).hexdigest()
 
-        # Query recent AUTH_FAILURE logs within the 10-minute sliding window
+        # Query recent AUTH_FAILURE logs within the maximum evaluation window
         recent_failures = (
             db.query(AccessLog)
             .filter(
                 AccessLog.event_type == "AUTH_FAILURE",
-                AccessLog.occurred_at >= window_10m
+                AccessLog.occurred_at >= window_start
             )
             .all()
         )
 
-        # R2-a: Failed logins for targeted account (threshold = 5)
+        # R2-a: Failed logins for targeted account
         account_failures = 0
+        window_acct_start = now - timedelta(minutes=window_account)
         for log in recent_failures:
-            det = log.details or {}
-            log_uname = det.get("username")
-            log_hmac = det.get("username_hmac")
-            if (log_uname and log_uname.lower().strip() == uname_normalized) or (log_hmac and log_hmac == username_hmac):
-                account_failures += 1
+            if log.occurred_at >= window_acct_start:
+                det = log.details or {}
+                log_uname = det.get("username")
+                log_hmac = det.get("username_hmac")
+                if (log_uname and log_uname.lower().strip() == uname_normalized) or (log_hmac and log_hmac == username_hmac):
+                    account_failures += 1
 
-        if account_failures >= 5:
+        if account_failures >= threshold_account:
             user = db.query(User).filter(or_(User.email == username, User.username == username)).first()
             return self._create_or_update_alert(
                 db=db,
                 rule_code="R2_FAILED_LOGINS_ACCOUNT",
                 base_severity="MEDIUM",
-                description=f"Repeated failed logins detected: {account_failures} failed login attempts for account '{username}' in 10 minutes.",
+                description=f"Repeated failed logins detected: {account_failures} failed login attempts for account '{username}' in {window_account} minutes (threshold: {threshold_account}).",
                 subject_user_id=user.id if user else None,
-                metadata_info={"username": username, "failures": account_failures, "window_minutes": 10}
+                metadata_info={"username": username, "failures": account_failures, "window_minutes": window_account, "threshold": threshold_account}
             )
 
-        # R2-b: Failed logins from single source IP (dual threshold: >=10 failures AND >=2 distinct targeted usernames)
+        # R2-b: Failed logins from single source IP (dual threshold: failures AND distinct targeted usernames)
         ip_failures = 0
         distinct_targeted_users = set()
+        window_ip_start = now - timedelta(minutes=window_ip)
         for log in recent_failures:
-            if log.source_ip == source_ip:
+            if log.occurred_at >= window_ip_start and log.source_ip == source_ip:
                 ip_failures += 1
                 det = log.details or {}
                 identifier = det.get("username_hmac") or det.get("username")
                 if identifier:
                     distinct_targeted_users.add(identifier)
-
-        threshold_ip = getattr(settings, "ANOMALY_R2_B_IP_THRESHOLD", 10)
-        threshold_distinct = getattr(settings, "ANOMALY_R2_B_DISTINCT_USERS_THRESHOLD", 2)
 
         if ip_failures >= threshold_ip and len(distinct_targeted_users) >= threshold_distinct:
             return self._create_or_update_alert(
@@ -264,14 +309,16 @@ class AccessAnomalyDetector:
                 base_severity="MEDIUM",
                 description=(
                     f"Multiple failed logins from source IP {source_ip}: "
-                    f"{ip_failures} failures across {len(distinct_targeted_users)} distinct targeted accounts in 10 minutes."
+                    f"{ip_failures} failures across {len(distinct_targeted_users)} distinct targeted accounts in {window_ip} minutes."
                 ),
                 subject_user_id=None,
                 metadata_info={
                     "source_ip": source_ip,
                     "failures": ip_failures,
                     "distinct_targeted_usernames": len(distinct_targeted_users),
-                    "window_minutes": 10
+                    "window_minutes": window_ip,
+                    "threshold_ip": threshold_ip,
+                    "threshold_distinct": threshold_distinct
                 }
             )
 
@@ -279,11 +326,14 @@ class AccessAnomalyDetector:
 
     # --- Rule R3: High Record Access & Report Bursts ---
     def check_high_record_access(self, user: User, db: Session) -> Optional[AnomalyAlert]:
-        """Rule R3-a: Distinct record-detail views in 15 minutes by role threshold."""
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
-        window_15m = now - timedelta(minutes=15)
+        """Rule R3-a: Distinct record-detail views in configured window by role threshold."""
+        r3a_params = get_rule_parameters(db, "R3_HIGH_RECORD_ACCESS", {"thresholds": R3_A_THRESHOLDS, "window_minutes": 15})
+        role_thresholds = r3a_params.get("thresholds") or R3_A_THRESHOLDS
+        threshold = int(role_thresholds.get(user.role, R3_A_THRESHOLDS.get(user.role, 25)))
+        window_minutes = int(r3a_params.get("window_minutes", 15))
 
-        threshold = R3_A_THRESHOLDS.get(user.role, 25)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        window_start = now - timedelta(minutes=window_minutes)
 
         distinct_views = (
             db.query(func.count(func.distinct(AccessLog.resource_id)))
@@ -291,7 +341,7 @@ class AccessAnomalyDetector:
                 AccessLog.actor_user_id == user.id,
                 AccessLog.event_type == "ACCESS_ALLOWED",
                 AccessLog.resource_type == "RECORD",
-                AccessLog.occurred_at >= window_15m
+                AccessLog.occurred_at >= window_start
             )
             .scalar() or 0
         )
@@ -302,35 +352,39 @@ class AccessAnomalyDetector:
                 db=db,
                 rule_code="R3_HIGH_RECORD_ACCESS",
                 base_severity=base_sev,
-                description=f"High record access volume: User {user.email} viewed {distinct_views} distinct records in 15 minutes (threshold: {threshold}).",
+                description=f"High record access volume: User {user.email} viewed {distinct_views} distinct records in {window_minutes} minutes (threshold: {threshold}).",
                 subject_user_id=user.id,
-                metadata_info={"distinct_records_viewed": distinct_views, "threshold": threshold, "role": user.role}
+                metadata_info={"distinct_records_viewed": distinct_views, "threshold": threshold, "role": user.role, "window_minutes": window_minutes}
             )
         return None
 
     def check_report_bursts(self, user: User, db: Session) -> Optional[AnomalyAlert]:
-        """Rule R3-b: 5 reports generated in 60 minutes."""
+        """Rule R3-b: Report generation bursts in configured window."""
+        r3b_params = get_rule_parameters(db, "R3_REPORT_BURSTS", {"threshold": 5, "window_minutes": 60})
+        threshold = int(r3b_params.get("threshold", 5))
+        window_minutes = int(r3b_params.get("window_minutes", 60))
+
         now = datetime.now(timezone.utc).replace(tzinfo=None)
-        window_60m = now - timedelta(minutes=60)
+        window_start = now - timedelta(minutes=window_minutes)
 
         report_count = (
             db.query(func.count(AccessLog.id))
             .filter(
                 AccessLog.actor_user_id == user.id,
                 AccessLog.event_type == "REPORT_GENERATED",
-                AccessLog.occurred_at >= window_60m
+                AccessLog.occurred_at >= window_start
             )
             .scalar() or 0
         )
 
-        if report_count >= 5:
+        if report_count >= threshold:
             return self._create_or_update_alert(
                 db=db,
                 rule_code="R3_REPORT_BURSTS",
                 base_severity="MEDIUM",
-                description=f"Report burst detected: User {user.email} generated {report_count} reports in 60 minutes.",
+                description=f"Report burst detected: User {user.email} generated {report_count} reports in {window_minutes} minutes (threshold: {threshold}).",
                 subject_user_id=user.id,
-                metadata_info={"report_count": report_count, "window_minutes": 60}
+                metadata_info={"report_count": report_count, "window_minutes": window_minutes, "threshold": threshold}
             )
         return None
 
@@ -347,28 +401,32 @@ class AccessAnomalyDetector:
         )
 
     def record_edit_event(self, user: User, record_id: str, fields_changed: List[str], db: Session) -> AnomalyAlert:
-        """Rule R4-b: Edit of client data -> Low alert daily digest; R4-c: 10 edits in 15 min -> Medium alert."""
+        """Rule R4-b: Edit of client data -> Low alert daily digest; R4-c: Distinct edits in configured window -> Medium alert."""
+        r4c_params = get_rule_parameters(db, "R4_BULK_EDIT", {"threshold": 10, "window_minutes": 15})
+        threshold_bulk = int(r4c_params.get("threshold", 10))
+        window_minutes = int(r4c_params.get("window_minutes", 15))
+
         now = datetime.now(timezone.utc).replace(tzinfo=None)
-        window_15m = now - timedelta(minutes=15)
+        window_start = now - timedelta(minutes=window_minutes)
 
         recent_edits = (
             db.query(func.count(func.distinct(AccessLog.resource_id)))
             .filter(
                 AccessLog.actor_user_id == user.id,
                 AccessLog.event_type == "RECORD_EDIT",
-                AccessLog.occurred_at >= window_15m
+                AccessLog.occurred_at >= window_start
             )
             .scalar() or 0
         )
 
-        if recent_edits >= 10:
+        if recent_edits >= threshold_bulk:
             return self._create_or_update_alert(
                 db=db,
                 rule_code="R4_BULK_EDIT",
                 base_severity="MEDIUM",
-                description=f"Bulk edit detected: User {user.email} edited {recent_edits} distinct records in 15 minutes.",
+                description=f"Bulk edit detected: User {user.email} edited {recent_edits} distinct records in {window_minutes} minutes (threshold: {threshold_bulk}).",
                 subject_user_id=user.id,
-                metadata_info={"distinct_records_edited": recent_edits, "last_record": record_id}
+                metadata_info={"distinct_records_edited": recent_edits, "last_record": record_id, "threshold": threshold_bulk, "window_minutes": window_minutes}
             )
 
         return self._create_or_update_alert(

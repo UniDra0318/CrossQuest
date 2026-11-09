@@ -815,19 +815,11 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                         Table 13: Role-Based High Record Access Limits (15-min window)
                       </strong>
                     </div>
-                    <span style={{
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      color: '#6a2bd9',
-                      background: 'rgba(106, 43, 217, 0.1)',
-                      border: '1px solid rgba(106, 43, 217, 0.25)',
-                      padding: '2px 8px',
-                      borderRadius: '12px'
-                    }}>
+                    <span className="table13-badge">
                       🔒 Table 13 Crossworks Certified Standard (Read-Only)
                     </span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
+                  <div className="table13-role-grid">
                     <div>
                       <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
                         Account Mgr:
@@ -837,17 +829,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                         value={modalAmAccessThreshold}
                         readOnly
                         tabIndex={-1}
-                        style={{
-                          width: '100%',
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                          background: isDark ? '#1e293b' : '#f1f5f9',
-                          color: isDark ? '#94a3b8' : '#64748b',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'not-allowed'
-                        }}
+                        className="table13-role-input"
                       />
                     </div>
                     <div>
@@ -859,17 +841,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                         value={modalTrainerAccessThreshold}
                         readOnly
                         tabIndex={-1}
-                        style={{
-                          width: '100%',
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                          background: isDark ? '#1e293b' : '#f1f5f9',
-                          color: isDark ? '#94a3b8' : '#64748b',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'not-allowed'
-                        }}
+                        className="table13-role-input"
                       />
                     </div>
                     <div>
@@ -881,17 +853,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                         value={modalFinanceAccessThreshold}
                         readOnly
                         tabIndex={-1}
-                        style={{
-                          width: '100%',
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                          background: isDark ? '#1e293b' : '#f1f5f9',
-                          color: isDark ? '#94a3b8' : '#64748b',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'not-allowed'
-                        }}
+                        className="table13-role-input"
                       />
                     </div>
                     <div>
@@ -903,17 +865,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                         value={modalAdminAccessThreshold}
                         readOnly
                         tabIndex={-1}
-                        style={{
-                          width: '100%',
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                          background: isDark ? '#1e293b' : '#f1f5f9',
-                          color: isDark ? '#94a3b8' : '#64748b',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'not-allowed'
-                        }}
+                        className="table13-role-input"
                       />
                     </div>
                     <div>
@@ -925,17 +877,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                         value={modalTraineeAccessThreshold}
                         readOnly
                         tabIndex={-1}
-                        style={{
-                          width: '100%',
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
-                          background: isDark ? '#1e293b' : '#f1f5f9',
-                          color: isDark ? '#94a3b8' : '#64748b',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'not-allowed'
-                        }}
+                        className="table13-role-input"
                       />
                     </div>
                   </div>

@@ -6,6 +6,7 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   Plus,
   Search,
   X,
@@ -78,6 +79,8 @@ export default function Sessions() {
   const [sessions, setSessions] = useState([]);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [trainersError, setTrainersError] = useState(null);
 
   // New Session Modal
   const [showNewModal, setShowNewModal] = useState(false);
@@ -103,11 +106,18 @@ export default function Sessions() {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
+    setTrainersError(null);
     try {
       const [sessList, recList, trainersRes] = await Promise.all([
-        getTrainingSessions(),
-        getStaffRecords(),
-        fetchTrainers(token).catch(() => [])
+        getTrainingSessions().catch(err => {
+          throw new Error(`Failed to load sessions: ${err.message || 'Server error'}`);
+        }),
+        getStaffRecords().catch(() => []),
+        fetchTrainers(token).catch(err => {
+          setTrainersError(err.message || 'Could not retrieve trainer list from server.');
+          return [];
+        })
       ]);
 
       if (trainersRes && trainersRes.length > 0) {
@@ -130,7 +140,8 @@ export default function Sessions() {
         setRecords(recList);
       }
     } catch (e) {
-      console.warn('Error loading AM sessions:', e);
+      console.error('Error loading AM sessions:', e);
+      setLoadError(e.message || 'Failed to communicate with training sessions server.');
     } finally {
       setLoading(false);
     }
@@ -358,6 +369,19 @@ export default function Sessions() {
           <span>New Training Session</span>
         </button>
       </div>
+
+      {/* Server Loading Error Banner */}
+      {loadError && (
+        <div className="session-error-banner">
+          <div className="session-error-banner__content">
+            <AlertTriangle size={18} />
+            <span><strong>Server Connection Error:</strong> {loadError}</span>
+          </div>
+          <button type="button" onClick={loadData} className="session-error-retry-btn">
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Editorial Guidance Strip */}
       <div
@@ -907,11 +931,22 @@ export default function Sessions() {
                     onChange={(e) => setNewSession({ ...newSession, trainer_name: e.target.value })}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
                   >
-                    <option value="">{availableTrainers.length === 0 ? '-- No Trainers Available (Server Unreachable) --' : '-- Select Assigned Trainer --'}</option>
+                    <option value="">
+                      {trainersError 
+                        ? `-- Trainer lookup failed (${trainersError}) --` 
+                        : availableTrainers.length === 0 
+                          ? '-- No Trainers Available (Server Unreachable) --' 
+                          : '-- Select Assigned Trainer --'}
+                    </option>
                     {availableTrainers.map(t => (
                       <option key={t.id} value={t.name}>{t.name} ({t.title})</option>
                     ))}
                   </select>
+                  {trainersError && (
+                    <span className="form-field-error-text">
+                      ⚠️ Trainer lookup unavailable: {trainersError}
+                    </span>
+                  )}
                 </div>
               </div>
 

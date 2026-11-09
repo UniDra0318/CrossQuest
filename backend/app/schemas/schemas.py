@@ -42,6 +42,7 @@ class UserBase(BaseModel):
     email: EmailStr
     full_name: str
     role: str # admin, account_manager, finance, trainer, trainee
+    job_title: Optional[str] = None
     assigned_client_accounts: List[str] = []
     clearance_level: Optional[int] = None
 
