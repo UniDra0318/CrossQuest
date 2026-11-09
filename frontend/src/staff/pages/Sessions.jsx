@@ -37,7 +37,7 @@ const DEFAULT_COURSES = [
 ];
 
 const DEFAULT_TRAINERS = [
-  { id: 'trainer-joey', name: 'Joey Ramos', title: 'Lead Technical Trainer' },
+  { id: 'trainer-jordan', name: 'Jordan Ramos', title: 'Lead Technical Trainer' },
   { id: 'trainer-billy', name: 'Billy Fernandez', title: 'Senior Cloud Trainer' },
   { id: 'trainer-jobert', name: 'Jobert Cruz', title: 'Enterprise Data Trainer' },
   { id: 'trainer-owen', name: 'Owen Castillo', title: 'Security & App Dev Trainer' }
@@ -130,7 +130,7 @@ export default function Sessions() {
             delivery_mode: 'Online',
             trainer_signed_off: false,
             needs_attendance: true,
-            trainers: ['Joey Ramos']
+            trainers: ['Jordan Ramos']
           },
           {
             id: 'sess-02',

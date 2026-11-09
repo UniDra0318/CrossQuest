@@ -53,7 +53,6 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
 
   // 14 personas list
   const allPersonas = Object.entries(DEMO_USERS)
-    .filter(([key]) => key !== 'crossworks_staff' && key !== 'company_staff')
     .map(([key, u]) => ({ key, ...u }));
 
   const companies = [

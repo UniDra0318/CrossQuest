@@ -976,6 +976,22 @@ def create_session_team(
                 detail="Trainer is not assigned to this training session."
             )
 
+    existing_team = db.query(Team).filter(
+        Team.session_id == session_id,
+        Team.team_name == payload.team_name.strip()
+    ).first()
+    if existing_team:
+        return TeamResponse(
+            id=existing_team.id,
+            session_id=existing_team.session_id,
+            team_name=existing_team.team_name,
+            created_by_user_id=existing_team.created_by_user_id,
+            created_at=existing_team.created_at,
+            members_count=len(existing_team.members) if existing_team.members else 0,
+            total_points=0,
+            members=[]
+        )
+
     team = Team(
         session_id=session_id,
         team_name=payload.team_name.strip(),
@@ -1070,13 +1086,31 @@ def add_team_member(
     if not trainee:
         raise HTTPException(status_code=404, detail="Trainee not found.")
 
-    # Check duplicate
+    # Check duplicate in this team
     existing = db.query(TeamMember).filter(
         TeamMember.team_id == team_id,
         TeamMember.trainee_id == payload.trainee_id
     ).first()
     if existing:
-        raise HTTPException(status_code=400, detail="Trainee is already a member of this team.")
+        gam = trainee.gamification
+        return TeamMemberResponse(
+            id=existing.id,
+            team_id=existing.team_id,
+            trainee_id=existing.trainee_id,
+            trainee_name=f"{trainee.first_name} {trainee.last_name}",
+            trainee_code=trainee.trainee_code,
+            display_name=trainee.display_name or f"{trainee.first_name} {trainee.last_name}",
+            points=gam.points if gam else 0
+        )
+
+    # Automatically remove from any other team in this session (GAM-03)
+    session_teams = db.query(Team.id).filter(Team.session_id == team.session_id).all()
+    session_team_ids = [t[0] for t in session_teams]
+    if session_team_ids:
+        db.query(TeamMember).filter(
+            TeamMember.team_id.in_(session_team_ids),
+            TeamMember.trainee_id == payload.trainee_id
+        ).delete(synchronize_session=False)
 
     new_member = TeamMember(
         team_id=team_id,

@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 db = SessionLocal()
 
 # 1. Ensure admin_mercer exists and has correct password & role
-u = db.query(User).filter((User.email == 'julian.mercer@xworks.ph') | (User.email == 'joey.mallari@xworks.ph')).first()
+u = db.query(User).filter(User.email == 'julian.mercer@xworks.ph').first()
 if not u:
     u = User(
         email='julian.mercer@xworks.ph',

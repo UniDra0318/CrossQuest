@@ -1,15 +1,15 @@
 // CrossQuest Enterprise Learning Quiz Database
-// Aligned with real Crossworks pilot training programs and lead instructors:
-// 1. act-1: Agile PME & Project Management Challenge (Lead Trainer Joey Ramos)
-// 2. act-2: Executive Communication & CONNECT Simulation (Lead Trainer Billy Fernandez)
-// 3. act-3: Supervisory Mastery & High-Impact Coaching (Lead Trainer Jobert Cruz)
-// 4. act-4: Business Continuity & ISO 31000 Risk Management (Lead Trainer Owen Castillo)
+// Aligned with Crossworks pilot training programs:
+// 1. act-1: Agile PME & Project Management Challenge
+// 2. act-2: Executive Communication & CONNECT Simulation
+// 3. act-3: Supervisory Mastery & High-Impact Coaching
+// 4. act-4: Business Continuity & ISO 31000 Risk Management
 
 export const QUIZ_DATABASE = {
   'act-1': {
     id: 'act-1',
     title: 'Agile PME & Project Management Challenge',
-    instructor: 'Lead Trainer Joey Ramos',
+    instructor: 'Instructor not assigned',
     category: 'Project Management',
     headerColor: '#1368ce',
     timePerQuestion: 45,
@@ -127,7 +127,7 @@ export const QUIZ_DATABASE = {
   'act-2': {
     id: 'act-2',
     title: 'Executive Communication & CONNECT Simulation',
-    instructor: 'Lead Trainer Billy Fernandez',
+    instructor: 'Instructor not assigned',
     category: 'Executive Leadership',
     headerColor: '#059669',
     timePerQuestion: 45,
@@ -245,7 +245,7 @@ export const QUIZ_DATABASE = {
   'act-3': {
     id: 'act-3',
     title: 'Supervisory Mastery & High-Impact Coaching',
-    instructor: 'Lead Trainer Jobert Cruz',
+    instructor: 'Instructor not assigned',
     category: 'Supervisory Mastery',
     headerColor: '#dc2626',
     timePerQuestion: 45,
@@ -363,7 +363,7 @@ export const QUIZ_DATABASE = {
   'act-4': {
     id: 'act-4',
     title: 'Business Continuity & ISO 31000 Risk Management',
-    instructor: 'Lead Trainer Owen Castillo',
+    instructor: 'Instructor not assigned',
     category: 'Risk & Governance',
     headerColor: '#7c3aed',
     timePerQuestion: 45,

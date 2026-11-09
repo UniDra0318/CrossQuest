@@ -5,20 +5,10 @@ import { TablePagination, usePagination } from '../../components/TablePagination
 import { useTrainer } from '../TrainerContext';
 
 export default function Roster({ onNavigateTab }) {
-  const { roster, setSelectedTraineeId, exportRosterCsv, loading } = useTrainer();
+  const { roster, setSelectedTraineeId, exportRosterCsv, handleAssignTeam, loading } = useTrainer();
   const [search, setSearch] = useState('');
   const [scopeFilter, setScopeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-
-  // U-12: Team Building Breakout Groups (In-memory session state; no participant data written to device localStorage per SEC-26 & CL-15)
-  const [teamAssignments, setTeamAssignments] = useState({});
-
-  const handleAssignTeam = (traineeId, teamName) => {
-    setTeamAssignments(prev => ({
-      ...prev,
-      [traineeId]: teamName
-    }));
-  };
 
   const filtered = roster.filter((t) => {
     const matchesSearch =
@@ -142,7 +132,7 @@ export default function Roster({ onNavigateTab }) {
                   <span className="adm-mono"><strong>{t.cohort}</strong></span>
                   <div style={{ marginTop: '4px' }}>
                     <select
-                      value={teamAssignments[t.id] || t.team || 'Team Alpha'}
+                      value={t.team || ''}
                       onChange={(e) => handleAssignTeam(t.id, e.target.value)}
                       style={{
                         fontSize: '10.5px',
@@ -150,12 +140,13 @@ export default function Roster({ onNavigateTab }) {
                         borderRadius: '6px',
                         border: '1px solid rgba(139, 92, 246, 0.4)',
                         background: 'transparent',
-                        color: '#8b5cf6',
+                        color: t.team ? '#8b5cf6' : '#94a3b8',
                         fontWeight: 700,
                         cursor: 'pointer'
                       }}
                       title="Assign team-building breakout group (U-12)"
                     >
+                      <option value="">Select Team</option>
                       <option value="Team Alpha">🚩 Team Alpha</option>
                       <option value="Team Bravo">🛡️ Team Bravo</option>
                       <option value="Team Charlie">⚡ Team Charlie</option>

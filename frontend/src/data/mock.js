@@ -13,7 +13,7 @@ export const quests = [
   {
     id: 'act-1',
     title: 'Agile PME & Project Management Challenge',
-    instructor: 'Lead Trainer Joey Ramos',
+    instructor: 'Instructor not assigned',
     questionsCount: '5 QUESTIONS',
     track: 'infosec',
     category: 'Project Management',

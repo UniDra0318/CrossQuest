@@ -12,7 +12,7 @@ export const INITIAL_STAFF_PROFILES = [
     id: "0cfa35a8-71da-46fe-a29d-51dc263ddcf9",
     email: "marcus.reyes@crossworks.ph",
     name: "Marcus Reyes",
-    role: "crossworks_staff",
+    role: "account_manager",
     clearance_level: 2,
     assigned_companies: ["CORP_ALPHA"],
     avatar: "💼"
@@ -30,7 +30,7 @@ export const INITIAL_STAFF_PROFILES = [
     id: "eefe3f5f-0d0b-4232-9e0f-5284726c5115",
     email: "patricia.hr@alpha-corp.ph",
     name: "Patricia Santos",
-    role: "company_staff",
+    role: "finance",
     clearance_level: 1,
     assigned_companies: ["CORP_ALPHA"],
     avatar: "🏢"

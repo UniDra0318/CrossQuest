@@ -270,7 +270,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
                 username=f"{s_email.split('@')[1].split('.')[0]}_staff",
                 full_name=s_name,
                 hashed_password=default_pwd,
-                role="company_staff",
+                role="finance",
                 clearance_level=2,
                 assigned_client_accounts=[target_co.code]
             )

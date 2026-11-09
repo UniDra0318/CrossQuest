@@ -184,9 +184,8 @@ export default function Quiz() {
       await approveQuizApi(activeQuiz.id, token);
       handleUpdateSettings(activeQuiz.id, { is_approved: true, isApproved: true });
       setQuizActionToast({ type: 'success', text: `Assessment "${activeQuiz.title}" approved for student deployment (GAM-01, U-12).` });
-    } catch {
-      handleUpdateSettings(activeQuiz.id, { is_approved: true, isApproved: true });
-      setQuizActionToast({ type: 'success', text: `Assessment "${activeQuiz.title}" marked as approved for cohort deployment (U-12).` });
+    } catch (err) {
+      setQuizActionToast({ type: 'error', text: err.message || 'Failed to approve assessment. Only assigned Trainers or Administrators may approve quizzes.' });
     } finally {
       setIsApprovingQuiz(false);
       setTimeout(() => setQuizActionToast(null), 5000);
@@ -205,8 +204,7 @@ export default function Quiz() {
       handleUpdateSettings(activeQuiz.id, { is_closed: true, isClosed: true });
       setQuizActionToast({ type: 'success', text: 'Quiz session closed. Per-question correctness and explanations unlocked for participants (SEC-26, U-12).' });
     } catch (err) {
-      handleUpdateSettings(activeQuiz.id, { is_closed: true, isClosed: true });
-      setQuizActionToast({ type: 'success', text: 'Quiz session marked as closed for review (SEC-26, U-12).' });
+      setQuizActionToast({ type: 'error', text: err.message || 'Failed to close quiz session.' });
     } finally {
       setIsClosingQuiz(false);
       setTimeout(() => setQuizActionToast(null), 5000);

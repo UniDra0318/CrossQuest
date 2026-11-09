@@ -17,7 +17,13 @@ import {
   PASS_MARK,
   tierFor,
 } from '../api/trainer';
-import { fetchTrainerSessions, submitTrainerSignOff } from '../services/api';
+import {
+  fetchTrainerSessions,
+  submitTrainerSignOff,
+  fetchSessionTeams,
+  createSessionTeam,
+  assignTraineeToTeam
+} from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const TrainerContext = createContext(null);
@@ -241,6 +247,36 @@ export function TrainerProvider({ children }) {
         });
         r = derivedRoster;
       }
+
+      // Enrich roster with server-persisted breakout teams (GAM-03, U-12)
+      if (activeSessions && activeSessions.length > 0) {
+        try {
+          const teamsResults = await Promise.allSettled(
+            activeSessions.map(sess => sess.id ? fetchSessionTeams(sess.id, token) : Promise.resolve([]))
+          );
+          const memberTeamMap = {};
+          teamsResults.forEach(res => {
+            if (res.status === 'fulfilled' && Array.isArray(res.value)) {
+              res.value.forEach(team => {
+                (team.members || []).forEach(m => {
+                  if (m.trainee_id) {
+                    memberTeamMap[m.trainee_id] = team.team_name;
+                  }
+                });
+              });
+            }
+          });
+          if (Object.keys(memberTeamMap).length > 0) {
+            r = r.map(item => ({
+              ...item,
+              team: memberTeamMap[item.traineeId] || memberTeamMap[item.id] || item.team || null
+            }));
+          }
+        } catch (teamErr) {
+          console.warn("Could not load session teams:", teamErr);
+        }
+      }
+
       setRoster(r);
       setQuizzes(q);
 
@@ -387,6 +423,31 @@ export function TrainerProvider({ children }) {
     setQuizzes(updated);
   };
 
+  const handleAssignTeam = async (traineeId, teamName) => {
+    // 1. Immediately update in-memory state
+    setRoster(prev => prev.map(t => (t.id === traineeId || t.traineeId === traineeId) ? { ...t, team: teamName } : t));
+
+    // 2. Persist to backend GAM-03 endpoints
+    try {
+      const traineeItem = roster.find(t => t.id === traineeId || t.traineeId === traineeId);
+      const sessionId = traineeItem?.sessionId || selectedSessionId || (sessions[0]?.id);
+      const actualTraineeId = traineeItem?.traineeId || traineeId;
+
+      if (sessionId && actualTraineeId && teamName) {
+        let currentTeams = await fetchSessionTeams(sessionId, token).catch(() => []);
+        let targetTeam = currentTeams.find(tm => tm.team_name === teamName);
+        if (!targetTeam) {
+          targetTeam = await createSessionTeam(sessionId, teamName, token).catch(() => null);
+        }
+        if (targetTeam?.id) {
+          await assignTraineeToTeam(targetTeam.id, actualTraineeId, token).catch(() => null);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not sync team assignment to server:", err);
+    }
+  };
+
   const exportRosterCsv = () => {
     const rows = [
       ['ID', 'Name', 'Organization Scope', 'Cohort', 'Score', 'Tier', 'State'],
@@ -424,6 +485,7 @@ export function TrainerProvider({ children }) {
         handleUpdateSettings,
         handleResetQuizzes,
         exportRosterCsv,
+        handleAssignTeam,
         RUBRIC,
         PASS_MARK,
         tierFor,

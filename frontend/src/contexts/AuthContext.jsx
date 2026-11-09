@@ -59,7 +59,7 @@ export const DEMO_USERS = {
     assigned_client_accounts: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
     initials: "QS"
   },
-  am_joey: {
+  am_jordan: {
     id: "2cc2fae0-d941-4d81-9e55-04e822726a6a",
     email: "jordan.sales@crossworks.ph",
     name: "Jordan Ramos (Sales)",
@@ -70,6 +70,7 @@ export const DEMO_USERS = {
     assigned_client_accounts: ["AYALA_LAND_INC_2", "BIBSP_2"],
     initials: "JR"
   },
+
   am_cez: {
     id: "e9c51def-d5a4-40ec-b61e-e3461921b8fe",
     email: "cez@crossworks.ph",
@@ -366,10 +367,7 @@ export const DEMO_USERS = {
 
 export function normalizeRole(role) {
   if (!role) return 'trainee';
-  const r = String(role).toLowerCase().trim();
-  if (r === 'crossworks_staff') return 'account_manager';
-  if (r === 'company_staff') return 'finance';
-  return r;
+  return String(role).toLowerCase().trim();
 }
 
 const AuthContext = createContext();

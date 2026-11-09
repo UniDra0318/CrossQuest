@@ -68,7 +68,7 @@ def second_admin_user(db_session: Session) -> User:
         admin2 = User(
             email="anomaly_admin2@test.ph",
             username="anomaly_admin2",
-            full_name="Prof. Roel Traballo",
+            full_name="Dr. Roland Vance",
             hashed_password=get_password_hash("AdminPass222!"),
             role="admin",
             is_superuser=True,
@@ -506,7 +506,16 @@ def test_tc_ano_20_rule_modification_and_approval(client: TestClient, admin_user
     data = r_update.json()
     assert data["parameters"]["thresholds"]["account_manager"] == 30
     assert data["version_no"] >= 2
-    assert data["client_reviewed"] is True
+    # Tuning parameters automatically resets client_reviewed to False (Pending Review, A3, OI-08)
+    assert data["client_reviewed"] is False
+
+    # 3. Independent Crossworks Review Step
+    r_review = client.post(
+        "/api/v1/anomalies/rules/R3_HIGH_RECORD_ACCESS/review",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert r_review.status_code == 200
+    assert r_review.json()["client_reviewed"] is True
 
 
 def test_tc_ano_21_below_threshold_no_alert(db_session: Session, test_user: User):
@@ -637,7 +646,7 @@ def test_tc_ano_23_peer_review_blocks_subject_administrator(
     # 2. Peer Administrator reviews successfully -> 200 OK
     res_peer_review = client.put(
         f"/api/v1/anomalies/alerts/{alert.id}/review",
-        json={"status": "UNDER_REVIEW", "review_note": "Peer review initiated by Prof. Traballo"},
+        json={"status": "UNDER_REVIEW", "review_note": "Peer review initiated by Dr. Vance"},
         headers={"Authorization": f"Bearer {token_peer_admin}"}
     )
     assert res_peer_review.status_code == 200

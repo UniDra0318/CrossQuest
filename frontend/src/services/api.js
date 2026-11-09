@@ -1246,3 +1246,66 @@ export async function approveQuizApi(quizId, token) {
   return res.json();
 }
 
+/** Lists all gamified breakout teams for a training session (GAM-03) */
+export async function fetchSessionTeams(sessionId, token) {
+  const res = await authFetch(
+    `${API_BASE}/gamification/sessions/${sessionId}/teams`,
+    { method: 'GET' },
+    token
+  );
+  if (!res.ok) {
+    return [];
+  }
+  return res.json();
+}
+
+/** Creates a breakout team within a session (GAM-03) */
+export async function createSessionTeam(sessionId, teamName, token) {
+  const res = await authFetch(
+    `${API_BASE}/gamification/sessions/${sessionId}/teams`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ team_name: teamName })
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to create team');
+  }
+  return res.json();
+}
+
+/** Adds or updates a trainee's gamified breakout team assignment (GAM-03) */
+export async function assignTraineeToTeam(teamId, traineeId, token) {
+  const res = await authFetch(
+    `${API_BASE}/gamification/teams/${teamId}/members`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trainee_id: traineeId })
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to assign trainee to team');
+  }
+  return res.json();
+}
+
+/** Removes a trainee from a breakout team (GAM-03) */
+export async function removeTraineeFromTeam(teamId, traineeId, token) {
+  const res = await authFetch(
+    `${API_BASE}/gamification/teams/${teamId}/members/${traineeId}`,
+    { method: 'DELETE' },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to remove trainee from team');
+  }
+  return res.json();
+}
+

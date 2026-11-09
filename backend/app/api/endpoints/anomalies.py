@@ -558,8 +558,9 @@ def update_anomaly_rule(
         if update_in.parameters is not None:
             rule.parameters = update_in.parameters
             rule.version_no += 1
-            # If not explicitly certified in a separate review/approval call, tuning resets client_reviewed to False (A3)
-            rule.client_reviewed = False if update_in.client_reviewed is None else update_in.client_reviewed
+            # A3 & OI-08: Any parameter edit ALWAYS resets client_reviewed to False (Pending Review).
+            # An administrator tuning a rule cannot self-approve in the same edit call.
+            rule.client_reviewed = False
         elif update_in.client_reviewed is not None:
             rule.client_reviewed = update_in.client_reviewed
         if update_in.description is not None:

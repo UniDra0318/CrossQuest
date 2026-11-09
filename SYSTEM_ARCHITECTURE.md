@@ -156,7 +156,7 @@ CrossQuest adheres to strict Principle of Least Privilege (PoLP) and Separation 
 
 ---
 
-#### 2.1.2 Account Manager (`account_manager` / `crossworks_staff`)
+#### 2.1.2 Account Manager (`account_manager`)
 * **Primary Responsibility:** Enterprise client relationship management, corporate client cohort stewardship, attendance tracking, and executive client report delivery.
 * **Core Functions & Capabilities:**
   1. **Multi-Tenant Client Scoping & Isolation:**
@@ -201,7 +201,7 @@ CrossQuest adheres to strict Principle of Least Privilege (PoLP) and Separation 
 
 ---
 
-#### 2.1.4 Finance Staff (`finance` / `company_staff`)
+#### 2.1.4 Finance Staff (`finance`)
 * **Primary Responsibility:** Financial audit integrity, pilot workbook ingestion and billing strip, discrepancy quarantine reconciliation, and non-destructive record maintenance.
 * **Core Functions & Capabilities:**
   1. **Pilot Excel Ingestion Pipeline (openpyxl):**

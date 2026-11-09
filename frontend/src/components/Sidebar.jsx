@@ -422,7 +422,7 @@ export default function Sidebar({
                         <Zap size={15} color="#ea580c" />
                         <span>DEV ROLE SWITCHER</span>
                       </span>
-                      <span className="dev-count-pill">{Object.keys(DEMO_USERS).filter(k => k !== 'crossworks_staff' && k !== 'company_staff').length} PERSONAS</span>
+                      <span className="dev-count-pill">{Object.keys(DEMO_USERS).length} PERSONAS</span>
                     </button>
 
                     <button
@@ -437,7 +437,6 @@ export default function Sidebar({
                     {showRoleSwitcher && (
                       <div className="popover-personas-list">
                         {Object.entries(DEMO_USERS)
-                          .filter(([key]) => key !== 'crossworks_staff' && key !== 'company_staff')
                           .map(([key, u]) => {
                             const PersonaIcon = getRoleIcon(u.role);
                             const isSelected = u.email === currentUser?.email;

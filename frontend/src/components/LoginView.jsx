@@ -95,12 +95,12 @@ export default function LoginView() {
   };
 
   const roleList = [
-    { key: 'admin', title: 'Principal Consultant & Admin', name: 'Joselito "Joey" Mallari Jr.', org: 'Crossworks Leadership', icon: Shield, badgeClass: 'admin' },
+    { key: 'admin', title: 'Principal Consultant & Admin', name: 'Dr. Julian Mercer', org: 'Crossworks Leadership', icon: Shield, badgeClass: 'admin' },
     { key: 'admin_general', title: 'Operations Administrator', name: 'Crossworks Administration', org: 'Crossworks Operations', icon: Shield, badgeClass: 'admin' },
     { key: 'account_manager', title: 'Account Manager (Vertiv & Red Oak)', name: 'Sharon De Vera', org: 'VHL_2 • ROP_3', icon: Key, badgeClass: 'staff' },
     { key: 'am_brian', title: 'Account Manager (IPRoyal & Amihan)', name: 'Brian Mendoza', org: 'IPROY_SERVI_2 • AMIHAN_SOLUTI_2', icon: Key, badgeClass: 'staff' },
     { key: 'finance', title: 'Finance & Operations Specialist', name: 'Elena Vance', org: 'Crossworks Operations & Billing', icon: Building2, badgeClass: 'finance' },
-    { key: 'trainer', title: 'Lead Trainer (Cybersecurity & GenAI)', name: 'Joey Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
+    { key: 'trainer', title: 'Lead Trainer (Cybersecurity & GenAI)', name: 'Jordan Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
     { key: 'trainer_billy', title: 'Senior Trainer (Cloud & Infra)', name: 'Billy Fernandez', org: 'Crossworks Senior Trainer', icon: GraduationCap, badgeClass: 'trainer' },
     { key: 'trainee', title: 'Trainee (Vertiv Holdings)', name: 'Andrea Aguilar', org: 'VHL_2 • TRN-8000', icon: Award, badgeClass: 'trainee' },
     { key: 'trainee_ricardo', title: 'Trainee (IPRoyal Services)', name: 'Ricardo Ocampo', org: 'IPROY_SERVI_2 • TRN-8001', icon: Award, badgeClass: 'trainee' },

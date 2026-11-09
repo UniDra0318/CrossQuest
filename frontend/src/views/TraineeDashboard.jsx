@@ -355,7 +355,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         const status = quizScoreStatus[q.id] || quizScoreStatus[`act-${idx + 1}`] || {};
         const qCount = q.questions_count || 5;
         const trackFallback = idx === 0 ? TRACKS.infosec : idx === 1 ? TRACKS.access : idx === 2 ? TRACKS.privacy : TRACKS.database;
-        const defaultTrainer = idx === 0 ? 'Lead Trainer Joey Ramos' : idx === 1 ? 'Lead Trainer Billy Fernandez' : idx === 2 ? 'Lead Trainer Jobert Cruz' : 'Lead Trainer Owen Castillo';
+        const defaultTrainer = 'Instructor not assigned';
         const defaultCat = idx === 0 ? 'Project Management' : idx === 1 ? 'Executive Leadership' : idx === 2 ? 'Supervisory Mastery' : 'Risk & Governance';
         const defaultCubeLabel = idx === 0 ? 'AGILE' : idx === 1 ? 'LEAD' : idx === 2 ? 'COACH' : 'RISK';
         const isDone = status.completed || q.completed;
@@ -383,7 +383,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {
         id: 'act-1',
         title: 'Agile PME & Project Management Challenge',
-        instructor: 'Lead Trainer Joey Ramos',
+        instructor: 'Instructor not assigned',
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.infosec.color,
         category: 'Project Management',
@@ -397,7 +397,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {
         id: 'act-2',
         title: 'Executive Communication & CONNECT Simulation',
-        instructor: 'Lead Trainer Billy Fernandez',
+        instructor: 'Instructor not assigned',
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.access.color,
         category: 'Executive Leadership',
@@ -411,7 +411,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {
         id: 'act-3',
         title: 'Supervisory Mastery & High-Impact Coaching',
-        instructor: 'Lead Trainer Jobert Cruz',
+        instructor: 'Instructor not assigned',
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.privacy.color,
         category: 'Supervisory Mastery',
@@ -425,7 +425,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {
         id: 'act-4',
         title: 'Business Continuity & ISO 31000 Risk Management',
-        instructor: 'Lead Trainer Owen Castillo',
+        instructor: 'Instructor not assigned',
         questionsCount: '5 QUESTIONS',
         headerColor: TRACKS.database.color,
         category: 'Risk & Governance',

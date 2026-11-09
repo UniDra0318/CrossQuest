@@ -67,7 +67,7 @@ def _get_role_idle_timeout(role: str) -> int:
     """Returns role-based idle timeout in seconds (SEC-07)."""
     if role in ("admin", "finance"):
         return settings.IDLE_TIMEOUT_ADMIN_FINANCE  # 15 minutes (900s)
-    elif role in ("account_manager", "trainer", "crossworks_staff"):
+    elif role in ("account_manager", "trainer"):
         return settings.IDLE_TIMEOUT_STAFF_TRAINER  # 30 minutes (1800s)
     return settings.IDLE_TIMEOUT_TRAINEE            # 60 minutes (3600s)
 

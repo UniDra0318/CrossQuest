@@ -5,11 +5,11 @@
 export const PASS_MARK = 75;
 
 export const me = {
-  name: 'Joey Ramos',
+  name: 'Jordan Ramos',
   initials: 'JR',
   role: 'Lead Training Instructor',
   badge: 'LEAD TRAINER',
-  email: 'joey.trainer@crossworks.ph',
+  email: 'jordan.trainer@crossworks.ph',
   org: 'Crossworks Training & Consulting',
 };
 
