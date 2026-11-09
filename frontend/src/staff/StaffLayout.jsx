@@ -29,14 +29,7 @@ export default function StaffLayout({ activeTab, children }) {
           />
         );
       case 'portfolios':
-        return (
-          <PageHeader
-            title="Clients"
-            subtitle="Assigned enterprise client accounts and workforce training contracts."
-            badge="PORTFOLIO"
-            badgeType="info"
-          />
-        );
+        return null;
       case 'reports':
         return (
           <PageHeader

@@ -1,6 +1,20 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Lock, ArrowRight, ShieldCheck, Users, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { 
+  Building2, 
+  Lock, 
+  ArrowRight, 
+  ShieldCheck, 
+  Users, 
+  FileText, 
+  ChevronLeft, 
+  ChevronRight,
+  ShieldAlert,
+  Layers,
+  KeyRound,
+  ExternalLink,
+  Briefcase
+} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStaff } from '../StaffContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -28,6 +42,14 @@ export default function Portfolios() {
       return 0;
     });
   }, [portfolios, assignedScopes]);
+
+  const activePortfoliosCount = useMemo(() => {
+    return portfolios.filter(p => assignedScopes.includes(p.scope)).length;
+  }, [portfolios, assignedScopes]);
+
+  const totalActiveTrainees = useMemo(() => {
+    return portfolios.reduce((acc, p) => acc + (p.trainees || 0), 0);
+  }, [portfolios]);
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -61,103 +83,143 @@ export default function Portfolios() {
   };
 
   return (
-    <div>
-      <div 
-        className="adm-panel__head" 
-        style={{ 
-          background: isDark ? '#111827' : '#fff', 
-          borderRadius: '24px', 
-          padding: '22px 28px', 
-          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-          boxShadow: isDark ? '0 4px 18px rgba(0,0,0,0.3)' : '0 4px 18px rgba(0,0,0,0.03)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}
-      >
-        <div>
-          <h2 style={{ color: isDark ? '#f8fafc' : '#0f172a', margin: '0 0 4px', fontSize: '18px' }}>
-            Assigned Enterprise Portfolios
-          </h2>
-          <span className="adm-mono" style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: '12.5px' }}>
-            Multi-tenant client accounts and authorized training agreements ({portfolios.length} Total)
-          </span>
+    <div className="am-portfolios-enclave">
+      {/* Account Manager Hero Stage (Electric Ultramarine / Deep Cobalt Cockpit) */}
+      <section className="trainee-hero-stage am-clients-hero-stage">
+        <div className="trainee-hero-content">
+          <div className="trainee-hero-badge" style={{ background: 'rgba(56, 189, 248, 0.14)', borderColor: 'rgba(56, 189, 248, 0.3)', color: '#e0f2fe' }}>
+            <Briefcase size={13} style={{ color: '#38bdf8' }} />
+            <span>ENTERPRISE ACCOUNTS &bull; CLIENT PORTFOLIO DESK</span>
+          </div>
+
+          <h2 className="trainee-hero-headline">Assigned Enterprise Portfolios</h2>
+          <p className="trainee-hero-sub">
+            Institutional client accounts, cryptographic contract scopes, and workforce training enrollments under your active management.
+          </p>
+
+          <div className="trainee-hero-actions">
+            <span 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '999px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.22)',
+                color: '#ffffff',
+                fontFamily: 'var(--font-mono, monospace)',
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '0.04em'
+              }}
+            >
+              <KeyRound size={13} style={{ color: '#38bdf8' }} />
+              AUTHORIZED SCOPES: {assignedScopes.join(', ')}
+            </span>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <span className="adm-pill adm-pill--blue" style={{ margin: 0 }}>
-            AUTHORIZED SCOPES: {assignedScopes.join(', ')}
-          </span>
+        {/* 4-Cell Bento Telemetry Grid for Portfolios */}
+        <div className="trainee-hero-metrics-panel">
+          <div className="hero-metric-cell am-portfolio-metric-cell">
+            <span className="metric-tag">TOTAL CLIENTS</span>
+            <div className="metric-num">
+              {portfolios.length}
+              <span className="metric-unit">ORGS</span>
+            </div>
+            <span className="metric-sub-label">Global directory registry</span>
+          </div>
+
+          <div className="hero-metric-cell am-portfolio-metric-cell">
+            <span className="metric-tag">ASSIGNED PORTFOLIOS</span>
+            <div className="metric-num" style={{ color: '#34d399' }}>
+              {activePortfoliosCount}
+              <span className="metric-unit" style={{ color: '#6ee7b7' }}>ACTIVE</span>
+            </div>
+            <span className="metric-sub-label">Authorized security clearance</span>
+          </div>
+
+          <div className="hero-metric-cell am-portfolio-metric-cell">
+            <span className="metric-tag">ENROLLED TRAINEES</span>
+            <div className="metric-num" style={{ color: '#38bdf8' }}>
+              {totalActiveTrainees}
+              <span className="metric-unit" style={{ color: '#7dd3fc' }}>LEARNERS</span>
+            </div>
+            <span className="metric-sub-label">Across client workforce</span>
+          </div>
+
+          <div className="hero-metric-cell am-portfolio-metric-cell">
+            <span className="metric-tag">CP-ABE POLICIES</span>
+            <div className="metric-num" style={{ color: '#c084fc' }}>
+              100<span className="metric-unit" style={{ color: '#e9d5ff' }}>%</span>
+            </div>
+            <span className="metric-sub-label">Cryptographically isolated</span>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Side-Scrolling Carousel with Floating Side Arrows */}
-      <div style={{ position: 'relative', marginTop: '24px' }}>
-        {/* Left Side Scroll Arrow */}
-        {canScrollLeft && (
-          <button
-            type="button"
-            onClick={() => handleScroll('left')}
-            title="Scroll Left"
-            aria-label="Scroll Left"
-            style={{
-              position: 'absolute',
-              left: '-16px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 20,
-              width: '42px',
-              height: '42px',
-              borderRadius: '50%',
-              border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
-              background: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              color: isDark ? '#f8fafc' : '#0f172a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <ChevronLeft size={22} />
-          </button>
-        )}
+      {/* Main Glassmorphic Container for Carousel & Cards */}
+      <div className="adm-panel adm-vault-panel" style={{ padding: '24px 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+              Client Directory &amp; Access Clearance
+            </h3>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: isDark ? '#94a3b8' : '#64748b' }}>
+              Scroll horizontally to inspect assigned enterprise accounts, training agreements, and CP-ABE encryption policies.
+            </p>
+          </div>
 
-        {/* Right Side Scroll Arrow */}
-        {canScrollRight && (
-          <button
-            type="button"
-            onClick={() => handleScroll('right')}
-            title="Scroll Right"
-            aria-label="Scroll Right"
-            style={{
-              position: 'absolute',
-              right: '-16px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 20,
-              width: '42px',
-              height: '42px',
-              borderRadius: '50%',
-              border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
-              background: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              color: isDark ? '#f8fafc' : '#0f172a',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <ChevronRight size={22} />
-          </button>
-        )}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => handleScroll('left')}
+              disabled={!canScrollLeft}
+              title="Scroll Left"
+              aria-label="Scroll Left"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#0f172a',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: canScrollLeft ? 'pointer' : 'not-allowed',
+                opacity: canScrollLeft ? 1 : 0.4,
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScroll('right')}
+              disabled={!canScrollRight}
+              title="Scroll Right"
+              aria-label="Scroll Right"
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f8fafc' : '#0f172a',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: canScrollRight ? 'pointer' : 'not-allowed',
+                opacity: canScrollRight ? 1 : 0.4,
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
 
         {/* Side-Scrolling Horizontal Container */}
         <div 
@@ -166,13 +228,11 @@ export default function Portfolios() {
           style={{ 
             display: 'flex', 
             flexWrap: 'nowrap', 
-            gap: '24px', 
+            gap: '22px', 
             overflowX: 'auto', 
             overflowY: 'hidden',
-            paddingBottom: '20px',
+            paddingBottom: '16px',
             paddingTop: '6px',
-            paddingLeft: '4px',
-            paddingRight: '4px',
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'thin'
@@ -181,115 +241,237 @@ export default function Portfolios() {
           {sortedPortfolios.map((p) => {
             const isMine = assignedScopes.includes(p.scope);
 
-          return (
-            <div 
-              key={p.scope} 
-              className={`stf-card ${isMine ? 'stf-card--mine' : ''}`}
-              style={{
-                flex: '0 0 350px',
-                minWidth: '350px',
-                maxWidth: '350px',
-                flexShrink: 0,
-                scrollSnapAlign: 'start',
-                background: isMine 
-                  ? (isDark ? '#111827' : '#ffffff')
-                  : (isDark ? 'rgba(15, 23, 42, 0.65)' : '#fbfafe'),
-                border: isMine 
-                  ? '2px solid var(--cq-purple, #7c3aed)' 
-                  : (isDark ? '1px dashed #334155' : '1px dashed rgba(23, 16, 43, 0.25)'),
-                borderRadius: '24px',
-                boxShadow: isMine 
-                  ? (isDark ? '0 12px 30px rgba(124, 58, 237, 0.25)' : '0 18px 36px rgba(106, 43, 217, 0.18)')
-                  : 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '24px'
-              }}
-            >
-              <div>
-                <div className="stf-card__top">
-                  <span className={`adm-chip ${isMine ? 'adm-chip--green' : 'adm-chip--red'}`}>
-                    {p.scope}
-                  </span>
-                  {isMine ? (
-                    <span className="stf-active">
-                      <span className="adm-live" /> ACTIVE PORTFOLIO
+            return (
+              <div 
+                key={p.scope} 
+                className={`stf-card am-portfolio-card ${isMine ? 'am-portfolio-card--active' : 'am-portfolio-card--locked'}`}
+                style={{
+                  flex: '0 0 360px',
+                  minWidth: '360px',
+                  maxWidth: '360px',
+                  flexShrink: 0,
+                  scrollSnapAlign: 'start',
+                  borderRadius: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  padding: '24px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+              >
+                {/* Decorative Top Ambient Accent Line */}
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '3px',
+                    background: isMine 
+                      ? 'linear-gradient(90deg, #0284c7 0%, #38bdf8 50%, #34d399 100%)' 
+                      : (isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(203, 213, 225, 0.8)')
+                  }} 
+                />
+
+                <div>
+                  <div className="stf-card__top" style={{ alignItems: 'center' }}>
+                    <span 
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontFamily: 'var(--font-mono, monospace)',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        letterSpacing: '0.06em',
+                        background: isMine ? (isDark ? 'rgba(2, 132, 199, 0.25)' : '#e0f2fe') : (isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2'),
+                        color: isMine ? (isDark ? '#38bdf8' : '#0369a1') : (isDark ? '#f87171' : '#b91c1c'),
+                        border: isMine ? (isDark ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid #bae6fd') : (isDark ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid #fecaca')
+                      }}
+                    >
+                      <Building2 size={12} />
+                      {p.scope}
                     </span>
-                  ) : (
-                    <span className="adm-mono" style={{ color: '#94a3b8' }}>
-                      RESTRICTED
-                    </span>
-                  )}
-                </div>
 
-                <h2>{p.name}</h2>
-                <div className="adm-mono" style={{ color: 'var(--cq-ink-soft)' }}>
-                  {p.industry}
-                </div>
+                    {isMine ? (
+                      <span 
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontFamily: 'var(--font-mono, monospace)',
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          letterSpacing: '0.06em',
+                          color: '#10b981'
+                        }}
+                      >
+                        <span className="adm-live" style={{ width: '7px', height: '7px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }} />
+                        AUTHORIZED SCOPE
+                      </span>
+                    ) : (
+                      <span 
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                          fontFamily: 'var(--font-mono, monospace)',
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          letterSpacing: '0.06em',
+                          color: isDark ? '#94a3b8' : '#64748b'
+                        }}
+                      >
+                        <Lock size={11} />
+                        RESTRICTED
+                      </span>
+                    )}
+                  </div>
 
-                <dl className="stf-stats">
-                  <div>
-                    <dt>Account Agreement</dt>
-                    <dd style={{ color: isMine ? '#087a54' : 'inherit' }}>{p.status}</dd>
+                  <h3 style={{ margin: '18px 0 4px', fontSize: '18px', fontWeight: 800, lineHeight: 1.3, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    {p.name}
+                  </h3>
+                  <div style={{ fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500, marginBottom: '18px' }}>
+                    {p.industry}
                   </div>
-                  <div>
-                    <dt>Enrolled Trainees</dt>
-                    <dd className="stf-mono">{p.trainees} active</dd>
-                  </div>
-                  <div>
-                    <dt>CP-ABE Policy</dt>
-                    <dd><code style={{ fontSize: '11px' }}>COMPANY:{p.scope}</code></dd>
-                  </div>
-                  <div>
-                    <dt>Access Authorization</dt>
-                    <dd>
-                      {isMine ? (
-                        <span className="adm-chip adm-chip--green">GRANTED</span>
-                      ) : (
-                        <span className="adm-chip adm-chip--red">LOCKED</span>
-                      )}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
 
-              {isMine ? (
-                <div style={{ display: 'flex', gap: '8px', marginTop: '18px' }}>
-                  <button
-                    type="button"
-                    className="adm-btn adm-btn-solid adm-chip--solid stf-cta"
-                    style={{ flex: 1, margin: 0 }}
-                    onClick={() => navigate('/am/records?client=' + p.scope)}
-                  >
-                    <span>Records</span>
-                    <ArrowRight size={14} />
-                  </button>
-                  <button
-                    type="button"
-                    className="adm-btn adm-btn--light stf-cta"
-                    style={{ 
-                      flex: 1, 
-                      margin: 0, 
-                      background: isDark ? '#1e293b' : '#f8fafc', 
-                      border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
-                      color: isDark ? '#f8fafc' : '#334155'
+                  {/* High-End Stats Telemetry Box */}
+                  <div 
+                    style={{
+                      background: isMine 
+                        ? (isDark ? 'rgba(2, 132, 199, 0.08)' : 'rgba(240, 249, 255, 0.75)')
+                        : (isDark ? 'rgba(15, 23, 42, 0.4)' : '#f8fafc'),
+                      border: isMine 
+                        ? (isDark ? '1px solid rgba(56, 189, 248, 0.18)' : '1px solid rgba(186, 230, 253, 0.8)')
+                        : (isDark ? '1px solid #1e293b' : '1px solid #e2e8f0'),
+                      borderRadius: '14px',
+                      padding: '12px 14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
                     }}
-                    onClick={() => navigate('/am/reports?client=' + p.scope)}
                   >
-                    <FileText size={14} />
-                    <span>Audit Report</span>
-                  </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Account Agreement</span>
+                      <span style={{ fontWeight: 700, color: isMine ? '#10b981' : (isDark ? '#cbd5e1' : '#334155') }}>
+                        {p.status || 'Active Agreement'}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Enrolled Trainees</span>
+                      <span style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 800, color: isMine ? (isDark ? '#38bdf8' : '#0284c7') : (isDark ? '#cbd5e1' : '#334155') }}>
+                        {p.trainees} active
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>CP-ABE Policy</span>
+                      <code style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: isDark ? '#0f172a' : '#ffffff', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1' }}>
+                        COMPANY:{p.scope}
+                      </code>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Access Authorization</span>
+                      <span 
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          fontFamily: 'var(--font-mono, monospace)',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          letterSpacing: '0.06em',
+                          background: isMine ? (isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5') : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),
+                          color: isMine ? '#10b981' : '#ef4444'
+                        }}
+                      >
+                        {isMine ? 'GRANTED' : 'LOCKED'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div className="stf-cta stf-cta--locked" style={{ marginTop: '18px' }}>
-                  <Lock size={14} />
-                  <span>Scope Restricted (Requires Admin Authorization)</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+
+                {/* Card Actions */}
+                {isMine ? (
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
+                    <button
+                      type="button"
+                      className="am-card-primary-action"
+                      style={{
+                        flex: 1,
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onClick={() => navigate('/am/records?client=' + p.scope)}
+                    >
+                      <span>Vault Records</span>
+                      <ArrowRight size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      style={{ 
+                        flex: 1, 
+                        padding: '10px 14px',
+                        borderRadius: '10px',
+                        background: isDark ? '#1e293b' : '#ffffff', 
+                        border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                        color: isDark ? '#f8fafc' : '#334155',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onClick={() => navigate('/am/reports?client=' + p.scope)}
+                    >
+                      <FileText size={13} />
+                      <span>Audit Trail</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div 
+                    style={{ 
+                      marginTop: '20px',
+                      padding: '11px 14px',
+                      borderRadius: '10px',
+                      border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1',
+                      background: isDark ? 'rgba(15, 23, 42, 0.5)' : '#f8fafc',
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      fontSize: '11.5px',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Lock size={13} />
+                    <span>Requires Admin Scope Grant</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
