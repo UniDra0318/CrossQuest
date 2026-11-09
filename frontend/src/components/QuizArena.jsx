@@ -1091,7 +1091,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                       </div>
                     </div>
 
-                    <div className="results-leaderboard-table" style={{ gap: '5px' }}>
+                    <div className="results-leaderboard-table">
                       {liveLeaderboardData.map((p) => (
                         <div 
                           key={p.rank} 

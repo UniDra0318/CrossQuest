@@ -3731,12 +3731,22 @@ html.dark .podium-tile .podium-lbl,
   letter-spacing: 0.06em !important;
 }
 
+html.dark .results-leaderboard-table,
+[data-theme="dark"] .results-leaderboard-table,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .results-leaderboard-table {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
 html.dark .res-leaderboard-row,
 [data-theme="dark"] .res-leaderboard-row,
 .quiz-fullscreen-wrapper:not(.theme-standard-light) .res-leaderboard-row {
   background: rgba(15, 23, 42, 0.45) !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: 12px !important;
+  padding: 11px 16px !important;
+  margin: 0 !important;
   transition: all 0.2s ease !important;
 }
 
