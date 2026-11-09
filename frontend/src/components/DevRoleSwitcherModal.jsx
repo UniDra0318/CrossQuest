@@ -32,10 +32,8 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
   const getRoleIcon = (role) => {
     switch(role) {
       case 'admin': return Shield;
-      case 'account_manager':
-      case 'crossworks_staff': return Key;
-      case 'finance':
-      case 'company_staff': return Building2;
+      case 'account_manager': return Key;
+      case 'finance': return Building2;
       case 'trainer': return GraduationCap;
       case 'trainee': return Award;
       default: return User;
@@ -45,12 +43,10 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
   const getRoleBadgeColor = (role) => {
     switch(role) {
       case 'admin': return { bg: '#fee2e2', text: '#b91c1c', border: '#fca5a5' };
-      case 'account_manager':
-      case 'crossworks_staff': return { bg: '#fef3c7', text: '#b45309', border: '#fcd34d' };
+      case 'account_manager': return { bg: '#fef3c7', text: '#b45309', border: '#fcd34d' };
       case 'trainer': return { bg: '#e0e7ff', text: '#4338ca', border: '#a5b4fc' };
       case 'trainee': return { bg: '#dcfce7', text: '#15803d', border: '#86efac' };
-      case 'finance':
-      case 'company_staff': return { bg: '#f3e8ff', text: '#7e22ce', border: '#d8b4fe' };
+      case 'finance': return { bg: '#f3e8ff', text: '#7e22ce', border: '#d8b4fe' };
       default: return { bg: '#f1f5f9', text: '#475569', border: '#cbd5e1' };
     }
   };

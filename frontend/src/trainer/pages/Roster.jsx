@@ -10,24 +10,14 @@ export default function Roster({ onNavigateTab }) {
   const [scopeFilter, setScopeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  // U-12: Team Building Breakout Groups
-  const [teamAssignments, setTeamAssignments] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cq_trainer_team_assignments');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  // U-12: Team Building Breakout Groups (In-memory session state; no participant data written to device localStorage per SEC-26 & CL-15)
+  const [teamAssignments, setTeamAssignments] = useState({});
 
   const handleAssignTeam = (traineeId, teamName) => {
-    setTeamAssignments(prev => {
-      const next = { ...prev, [traineeId]: teamName };
-      try {
-        localStorage.setItem('cq_trainer_team_assignments', JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+    setTeamAssignments(prev => ({
+      ...prev,
+      [traineeId]: teamName
+    }));
   };
 
   const filtered = roster.filter((t) => {

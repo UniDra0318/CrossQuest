@@ -6,12 +6,12 @@ from datetime import datetime, timezone
 
 db = SessionLocal()
 
-# 1. Ensure joey.mallari exists and has correct password & role
-u = db.query(User).filter(User.email == 'joey.mallari@xworks.ph').first()
+# 1. Ensure admin_mercer exists and has correct password & role
+u = db.query(User).filter((User.email == 'julian.mercer@xworks.ph') | (User.email == 'joey.mallari@xworks.ph')).first()
 if not u:
     u = User(
-        email='joey.mallari@xworks.ph',
-        username='joey_mallari',
+        email='julian.mercer@xworks.ph',
+        username='admin_mercer',
         full_name="Dr. Julian Mercer",
         hashed_password=get_password_hash('password123'),
         role='admin',
@@ -21,13 +21,15 @@ if not u:
         mfa_enabled=False
     )
     db.add(u)
-    print("Created joey.mallari in DB")
+    print("Created admin_mercer in DB")
 else:
+    u.email = 'julian.mercer@xworks.ph'
+    u.username = 'admin_mercer'
     u.full_name = "Dr. Julian Mercer"
     u.hashed_password = get_password_hash('password123')
     u.is_active = True
     u.mfa_enabled = False
-    print("Updated joey.mallari in DB")
+    print("Updated admin_mercer in DB")
 
 # 2. Ensure admin@crossworks.ph also has password123
 a = db.query(User).filter(User.email == 'admin@crossworks.ph').first()

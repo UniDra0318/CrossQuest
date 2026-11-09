@@ -109,10 +109,8 @@ export default function Sidebar({
   const getRoleIcon = (role) => {
     switch(role) {
       case 'admin': return Shield;
-      case 'account_manager':
-      case 'crossworks_staff': return Key;
-      case 'finance':
-      case 'company_staff': return Building2;
+      case 'account_manager': return Users;
+      case 'finance': return Building2;
       case 'trainer': return GraduationCap;
       case 'trainee': return Award;
       default: return Users;

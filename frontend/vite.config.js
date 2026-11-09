@@ -4,6 +4,24 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('react-dom') || id.includes('/react/') || id.includes('react-router')) return 'vendor-react';
+            if (id.includes('chart.js') || id.includes('react-chartjs-2')) return 'vendor-charts';
+            return 'vendor-core';
+          }
+          if (id.includes('AdminPeerReviewAnomalyDesk')) return 'chunk-anomaly-desk';
+          if (id.includes('QuizArena')) return 'chunk-quiz-arena';
+          if (id.includes('FinanceReconciliationDesk')) return 'chunk-finance-desk';
+        }
+      }
+    }
+  },
   test: {
     globals: true,
     environment: 'jsdom',

@@ -1,11 +1,43 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import AdminPeerReviewAnomalyDesk, { DEFAULT_ANOMALY_RULES } from '../components/AdminPeerReviewAnomalyDesk';
+import AdminPeerReviewAnomalyDesk from '../components/AdminPeerReviewAnomalyDesk';
 import { AuthProvider } from '../contexts/AuthContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 
 describe('AdminPeerReviewAnomalyDesk baseline & tab functionality', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    global.fetch = vi.fn().mockImplementation((url) => {
+      if (String(url).includes('/anomalies/rules')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve([])
+        });
+      }
+      if (String(url).includes('/anomalies/alerts')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve([])
+        });
+      }
+      if (String(url).includes('/audit/logs')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve([])
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({})
+      });
+    });
+  });
+
   it('renders all 10 baseline anomaly detection rules without empty state', () => {
     render(
       <AuthProvider>

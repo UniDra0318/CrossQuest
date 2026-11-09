@@ -132,8 +132,8 @@ def seed_database():
         )
         u_admin2 = User(
             email="admin2@crossworks.ph",
-            username="admin_roel",
-            full_name="Prof. Roel Traballo",
+            username="admin_compliance",
+            full_name="Dr. Roland Vance",
             hashed_password=default_pwd,
             role="admin",
             clearance_level=3,

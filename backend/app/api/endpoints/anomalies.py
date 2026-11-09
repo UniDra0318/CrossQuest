@@ -380,6 +380,31 @@ def validate_rule_parameters(rule_code: str, params: Optional[dict]):
         if not (1 <= th <= 10000):
             raise HTTPException(status_code=422, detail="Threshold must be between 1 and 10000.")
 
+    # Table 13 R3_HIGH_RECORD_ACCESS role-based thresholds (OI-08, A5)
+    if "thresholds" in params and isinstance(params["thresholds"], dict):
+        for role_name, r_thresh in params["thresholds"].items():
+            try:
+                r_val = int(r_thresh)
+            except (ValueError, TypeError):
+                raise HTTPException(status_code=422, detail=f"Role threshold for '{role_name}' must be an integer.")
+            if not (1 <= r_val <= 1000):
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Role threshold for '{role_name}' must be between 1 and 1000 records (Table 13)."
+                )
+
+    # Table 13 R2_FAILED_LOGINS_IP distinct usernames threshold (A5)
+    if "distinct_usernames_threshold" in params:
+        try:
+            dut = int(params["distinct_usernames_threshold"])
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=422, detail="Distinct usernames threshold must be an integer.")
+        if not (1 <= dut <= 100):
+            raise HTTPException(
+                status_code=422,
+                detail="Distinct usernames threshold must be between 1 and 100 distinct accounts."
+            )
+
 
 DEFAULT_RULES = [
     {"rule_code": "R1_OUT_OF_SCOPE", "parameters": {"threshold": 1, "window_minutes": 1440, "severity": "LOW"}, "description": "Single out-of-scope attempt aggregated daily"},
@@ -533,10 +558,9 @@ def update_anomaly_rule(
         if update_in.parameters is not None:
             rule.parameters = update_in.parameters
             rule.version_no += 1
-            if update_in.client_reviewed is None:
-                # Revert to unapproved state awaiting Crossworks review when tuned (A3)
-                rule.client_reviewed = False
-        if update_in.client_reviewed is not None:
+            # If not explicitly certified in a separate review/approval call, tuning resets client_reviewed to False (A3)
+            rule.client_reviewed = False if update_in.client_reviewed is None else update_in.client_reviewed
+        elif update_in.client_reviewed is not None:
             rule.client_reviewed = update_in.client_reviewed
         if update_in.description is not None:
             rule.description = update_in.description
@@ -557,6 +581,41 @@ def update_anomaly_rule(
             "new_version": rule.version_no,
             "client_reviewed": rule.client_reviewed,
             "reason": clean_reason
+        }
+    )
+    db.add(log)
+    db.commit()
+    db.refresh(rule)
+    return rule
+
+
+@router.post("/rules/{rule_code}/review", response_model=AnomalyRuleResponse)
+def approve_rule_review(
+    rule_code: str,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    """Separate Crossworks Review step (A3, OI-08).
+    Approves and freezes an anomaly detection rule version after independent review.
+    """
+    rule = db.query(AnomalyRule).filter(AnomalyRule.rule_code == rule_code).first()
+    if not rule:
+        raise HTTPException(status_code=404, detail="Anomaly rule not found.")
+
+    rule.client_reviewed = True
+
+    log = AccessLog(
+        actor_user_id=admin_user.id,
+        actor_role=admin_user.role,
+        event_type="RULE_REVIEWED",
+        resource_type="ANOMALY_RULE",
+        resource_id=rule.id,
+        outcome="SUCCESS",
+        details={
+            "rule_code": rule_code,
+            "version": rule.version_no,
+            "client_reviewed": True,
+            "reviewer_id": admin_user.id
         }
     )
     db.add(log)

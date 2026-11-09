@@ -96,8 +96,8 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
     # 2. System Administrators
     print("\n[1/7] Provisioning Administrator Accounts...")
     u_admin1 = User(
-        email="joey.mallari@xworks.ph",
-        username="joey_mallari",
+        email="julian.mercer@xworks.ph",
+        username="admin_mercer",
         full_name="Dr. Julian Mercer",
         hashed_password=default_pwd,
         role="admin",
@@ -124,7 +124,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
         ("sharon@crossworks.ph", "am_sharon", "Sharon De Vera", "Senior Corporate Account Manager"),
         ("brian@crossworks.ph", "am_brian", "Brian Mendoza", "Enterprise Solutions Manager"),
         ("quel@crossworks.ph", "am_quel", "Raquel 'Quel' Santos", "Strategic Partnerships Manager"),
-        ("joey.sales@crossworks.ph", "am_joey", "Jordan Ramos (Sales)", "Commercial Accounts Executive"),
+        ("jordan.sales@crossworks.ph", "am_jordan", "Jordan Ramos (Sales)", "Commercial Accounts Executive"),
         ("cez@crossworks.ph", "am_cez", "Cezanne 'Cez' Garcia", "Client Success Manager")
     ]
     am_users = {}
@@ -145,7 +145,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
     # 4. Lead Trainers (from Sheet 2)
     print("\n[3/7] Provisioning Real Lead Trainers...")
     trainer_data = [
-        ("joey.trainer@crossworks.ph", "trainer_joey", "Jordan Ramos", "Lead Trainer: Agile PME & Leadership"),
+        ("jordan.trainer@crossworks.ph", "trainer_jordan", "Jordan Ramos", "Lead Trainer: Agile PME & Leadership"),
         ("billy@crossworks.ph", "trainer_billy", "Billy Fernandez", "Lead Trainer: CONNECT & Executive Comm"),
         ("jobert@crossworks.ph", "trainer_jobert", "Jobert Cruz", "Lead Trainer: High-Impact Coaching"),
         ("owen@crossworks.ph", "trainer_owen", "Owen Castillo", "Lead Trainer: Business Continuity (BCM)")
@@ -322,7 +322,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
 
             s_date = dt if isinstance(dt, datetime) else datetime(2026, 8, 15)
             e_date = s_date + timedelta(days=2)
-            assigned_tr = trainer_users.get("joey")
+            assigned_tr = trainer_users.get("jordan")
             # match trainer
             if "billy" in prog_name.lower():
                 assigned_tr = trainer_users.get("billy")
@@ -492,7 +492,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
             title=q_spec["title"],
             version_no=1,
             is_closed=False,
-            created_by_user_id=trainer_users.get("joey", u_admin1).id,
+            created_by_user_id=trainer_users.get("jordan", u_admin1).id,
             is_approved=True,
             approved_by_user_id=u_admin1.id,
             approved_at=now_dt

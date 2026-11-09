@@ -364,10 +364,6 @@ export const DEMO_USERS = {
   }
 };
 
-DEMO_USERS.crossworks_staff = DEMO_USERS.account_manager;
-DEMO_USERS.company_staff = DEMO_USERS.finance;
-DEMO_USERS.staff_vertiv = DEMO_USERS.finance;
-
 export function normalizeRole(role) {
   if (!role) return 'trainee';
   const r = String(role).toLowerCase().trim();

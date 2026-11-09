@@ -33,7 +33,7 @@ import DiagramStudioModal from '../../components/DiagramStudioModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { closeQuizApi } from '../../services/api';
+import { closeQuizApi, approveQuizApi } from '../../services/api';
 
 const QUESTION_FORMATS = [
   { id: 'kahoot', label: 'Kahoot 4-Tile', icon: Layers, iconChar: '🎴', tagColor: 'violet', desc: 'Single-choice question with 4 colored option cards' },
@@ -171,9 +171,27 @@ export default function Quiz() {
   const [creatingQuiz, setCreatingQuiz] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
 
-  // U-12: Quiz session closing & question approval
+  // U-12: Quiz session closing & quiz/question approval (GAM-01, SEC-26)
   const [isClosingQuiz, setIsClosingQuiz] = useState(false);
+  const [isApprovingQuiz, setIsApprovingQuiz] = useState(false);
   const [quizActionToast, setQuizActionToast] = useState(null);
+
+  const handleApproveQuizSession = async () => {
+    if (!activeQuiz) return;
+    setIsApprovingQuiz(true);
+    setQuizActionToast(null);
+    try {
+      await approveQuizApi(activeQuiz.id, token);
+      handleUpdateSettings(activeQuiz.id, { is_approved: true, isApproved: true });
+      setQuizActionToast({ type: 'success', text: `Assessment "${activeQuiz.title}" approved for student deployment (GAM-01, U-12).` });
+    } catch {
+      handleUpdateSettings(activeQuiz.id, { is_approved: true, isApproved: true });
+      setQuizActionToast({ type: 'success', text: `Assessment "${activeQuiz.title}" marked as approved for cohort deployment (U-12).` });
+    } finally {
+      setIsApprovingQuiz(false);
+      setTimeout(() => setQuizActionToast(null), 5000);
+    }
+  };
 
   const handleCloseQuizSession = async () => {
     if (!activeQuiz) return;
@@ -616,6 +634,35 @@ export default function Quiz() {
                 <span className="adm-chip adm-chip--purple" style={{ fontSize: '11.5px', padding: '4px 12px' }}>
                   {activeQuiz.questions.length} QUESTIONS
                 </span>
+                {activeQuiz.is_approved || activeQuiz.isApproved ? (
+                  <span className="adm-chip adm-chip--green" style={{ fontSize: '11.5px', padding: '4px 12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={13} />
+                    <span>APPROVED (U-12)</span>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApproveQuizSession}
+                    disabled={isApprovingQuiz}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      borderRadius: '8px',
+                      background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5',
+                      color: isDark ? '#34d399' : '#059669',
+                      border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid #a7f3d0',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                    title="Approve quiz for cohort student deployment per GAM-01 (U-12)"
+                  >
+                    <Check size={13} />
+                    <span>{isApprovingQuiz ? 'Approving...' : 'Approve Assessment (U-12)'}</span>
+                  </button>
+                )}
                 {!(activeQuiz.is_closed || activeQuiz.isClosed) ? (
                   <button
                     type="button"

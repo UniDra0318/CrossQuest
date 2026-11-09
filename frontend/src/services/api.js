@@ -1232,3 +1232,17 @@ export async function closeQuizApi(quizId, token) {
   return res.json();
 }
 
+/** Trainer / Admin approves a quiz for student deployment (GAM-01, SEC-26, U-12) */
+export async function approveQuizApi(quizId, token) {
+  const res = await authFetch(
+    `${API_BASE}/gamification/quizzes/${quizId}/approve`,
+    { method: 'POST' },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to approve quiz');
+  }
+  return res.json();
+}
+
