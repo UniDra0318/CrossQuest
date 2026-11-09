@@ -53,6 +53,24 @@ engine = create_engine(
     pool_pre_ping=True
 )
 
+# Admin engine used for schema setup, migrations, and DDL operations
+admin_db_url = settings.ADMIN_DATABASE_URL or db_url
+if admin_db_url.startswith("postgresql://"):
+    admin_db_url = admin_db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+admin_connect_args = {}
+if "postgresql" in admin_db_url:
+    if "sslmode" not in admin_db_url and "sslmode" not in admin_connect_args:
+        admin_connect_args["sslmode"] = settings.DB_SSL_MODE
+    if settings.DB_SSL_CERT_PATH and "sslrootcert" not in admin_connect_args:
+        admin_connect_args["sslrootcert"] = settings.DB_SSL_CERT_PATH
+
+admin_engine = create_engine(
+    admin_db_url,
+    connect_args=admin_connect_args,
+    pool_pre_ping=True
+) if settings.ADMIN_DATABASE_URL else engine
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Re-inject transaction-local session settings on every transaction begin (SEC-08, TC-RLS-07)
@@ -86,15 +104,16 @@ import os
 
 Base = declarative_base()
 
-def init_db_rls(target_engine):
+def init_db_rls(target_engine=None):
     """Applies PostgreSQL Row-Level Security policies and context functions (SEC-08, Table 19)."""
-    if target_engine.dialect.name == "postgresql":
+    eng = target_engine or admin_engine
+    if eng.dialect.name == "postgresql":
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         migration_path = os.path.join(base_dir, "migrations", "001_enable_rls.sql")
         if os.path.exists(migration_path):
             with open(migration_path, "r", encoding="utf-8") as f:
                 sql_content = f.read()
-            with target_engine.connect() as conn:
+            with eng.connect() as conn:
                 raw_conn = conn.connection
                 cursor = raw_conn.cursor()
                 cursor.execute(sql_content)

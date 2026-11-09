@@ -513,8 +513,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   return (
     <div className="adm-main admin-dashboard">
       {usingFallback && (
-        <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', color: '#92400e', padding: '10px 16px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <AlertTriangle size={16} color="#d97706" />
+        <div style={{ background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb', border: isDark ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #fef3c7', color: isDark ? '#fbbf24' : '#92400e', padding: '10px 16px', borderRadius: '10px', marginBottom: '16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AlertTriangle size={16} color={isDark ? '#fbbf24' : '#d97706'} />
           <span>Notice: Displaying cached baseline data. Live telemetry synchronization in progress or server offline.</span>
         </div>
       )}
@@ -706,28 +706,28 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         >
           <div 
             style={{
-              background: '#ffffff',
+              background: isDark ? '#111827' : '#ffffff',
               borderRadius: '24px',
               maxWidth: '540px',
               width: '100%',
               boxShadow: '0 20px 45px rgba(0,0,0,0.2)',
-              border: '1px solid #e2e8f0',
+              border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column'
             }}
           >
             {/* Modal Header */}
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
+            <div style={{ padding: '24px 28px', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isDark ? '#0f172a' : '#f8fafc' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: isDark ? 'rgba(2, 132, 199, 0.2)' : '#e0f2fe', color: isDark ? '#38bdf8' : '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Building2 size={18} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                     {createdCompanyResult ? 'Company Registered' : 'Register New Client Company'}
                   </h3>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
                     Enterprise Multi-Tenant Onboarding & CP-ABE Token Activation
                   </span>
                 </div>
@@ -735,7 +735,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               <button 
                 type="button" 
                 onClick={handleCloseCompanyModal}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                style={{ background: 'none', border: 'none', color: isDark ? '#64748b' : '#94a3b8', cursor: 'pointer', padding: '4px' }}
               >
                 <X size={20} />
               </button>
@@ -746,36 +746,36 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               {createdCompanyResult ? (
                 /* SUCCESS VIEW */
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#ecfdf5', borderRadius: '16px', border: '1px solid #a7f3d0' }}>
-                    <CheckCircle2 size={24} color="#059669" style={{ flexShrink: 0 }} />
-                    <div style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5', borderRadius: '16px', border: isDark ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #a7f3d0' }}>
+                    <CheckCircle2 size={24} color={isDark ? '#34d399' : '#059669'} style={{ flexShrink: 0 }} />
+                    <div style={{ fontSize: '13px', color: isDark ? '#34d399' : '#065f46', lineHeight: 1.5 }}>
                       <strong>Enterprise Client Company successfully registered!</strong>
                       <div>The company code is active and Row-Level Security isolation is enforced.</div>
                     </div>
                   </div>
 
-                  <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '16px', border: '1px solid #e2e8f0', fontSize: '12.5px' }}>
+                  <div style={{ background: isDark ? '#0f172a' : '#f8fafc', borderRadius: '14px', padding: '16px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', fontSize: '12.5px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>Company Name:</span>
-                      <strong style={{ color: '#1e293b' }}>{createdCompanyResult.name}</strong>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>Company Name:</span>
+                      <strong style={{ color: isDark ? '#f8fafc' : '#1e293b' }}>{createdCompanyResult.name}</strong>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>Tenant Code:</span>
-                      <code style={{ color: '#0284c7', fontFamily: 'monospace', fontWeight: 800 }}>{createdCompanyResult.code}</code>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>Tenant Code:</span>
+                      <code style={{ color: isDark ? '#38bdf8' : '#0284c7', fontFamily: 'monospace', fontWeight: 800 }}>{createdCompanyResult.code}</code>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>CP-ABE Token:</span>
-                      <span style={{ color: '#7c3aed', fontFamily: 'monospace', fontWeight: 800 }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>CP-ABE Token:</span>
+                      <span style={{ color: isDark ? '#a78bfa' : '#7c3aed', fontFamily: 'monospace', fontWeight: 800 }}>
                         {createdCompanyResult.attribute_token}
                       </span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '8px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>Assigned AM:</span>
-                      <span style={{ color: '#1e293b', fontWeight: 700 }}>{createdCompanyResult.assigned_am}</span>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>Assigned AM:</span>
+                      <span style={{ color: isDark ? '#f8fafc' : '#1e293b', fontWeight: 700 }}>{createdCompanyResult.assigned_am}</span>
                     </div>
                   </div>
 
-                  <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: 1.5 }}>
+                  <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.5 }}>
                     Training records for this tenant will now be encrypted with <code>{createdCompanyResult.attribute_token}</code>. The assigned Account Manager can immediately generate scoped compliance reports.
                   </p>
 
@@ -786,7 +786,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                       style={{
                         padding: '10px 22px',
                         borderRadius: '10px',
-                        background: '#1e293b',
+                        background: isDark ? '#334155' : '#1e293b',
                         color: '#ffffff',
                         border: 'none',
                         fontWeight: 700,
@@ -802,7 +802,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 /* FORM VIEW */
                 <form onSubmit={handleCreateCompanySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       COMPANY FULL LEGAL NAME:
                     </label>
                     <input 
@@ -819,7 +819,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
+                        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                        background: isDark ? '#0f172a' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#0f172a',
                         fontSize: '13.5px',
                         boxSizing: 'border-box'
                       }}
@@ -827,9 +829,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       <span>COMPANY TENANT CODE:</span>
-                      <span style={{ color: '#0284c7', fontSize: '11px', fontFamily: 'monospace' }}>Bound to CP-ABE</span>
+                      <span style={{ color: isDark ? '#38bdf8' : '#0284c7', fontSize: '11px', fontFamily: 'monospace' }}>Bound to CP-ABE</span>
                     </label>
                     <input 
                       type="text" 
@@ -841,7 +843,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
+                        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                        background: isDark ? '#0f172a' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#0f172a',
                         fontSize: '13.5px',
                         fontFamily: 'monospace',
                         fontWeight: 700,
@@ -851,7 +855,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       INDUSTRY SECTOR:
                     </label>
                     <input 
@@ -864,7 +868,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
+                        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                        background: isDark ? '#0f172a' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#0f172a',
                         fontSize: '13.5px',
                         boxSizing: 'border-box'
                       }}
@@ -872,7 +878,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       PRIMARY ASSIGNED ACCOUNT MANAGER:
                     </label>
                     <select
@@ -882,11 +888,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
+                        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
                         fontSize: '13.5px',
-                        background: '#ffffff',
+                        background: isDark ? '#0f172a' : '#ffffff',
                         fontWeight: 600,
-                        color: '#1e293b',
+                        color: isDark ? '#f8fafc' : '#1e293b',
                         boxSizing: 'border-box'
                       }}
                     >
@@ -898,12 +904,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   </div>
 
                   {createCompanyError && (
-                    <div style={{ padding: '10px 14px', background: '#fff1f2', borderRadius: '10px', border: '1px solid #fecdd3', color: '#be123c', fontSize: '12.5px' }}>
+                    <div style={{ padding: '10px 14px', background: isDark ? 'rgba(244, 63, 94, 0.15)' : '#fff1f2', borderRadius: '10px', border: isDark ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid #fecdd3', color: isDark ? '#fb7185' : '#be123c', fontSize: '12.5px' }}>
                       {createCompanyError}
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '8px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', paddingTop: '16px' }}>
                     <button
                       type="button"
                       onClick={handleCloseCompanyModal}
@@ -911,9 +917,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                       style={{
                         padding: '10px 18px',
                         borderRadius: '10px',
-                        background: '#f1f5f9',
-                        color: '#475569',
-                        border: 'none',
+                        background: isDark ? '#1e293b' : '#f1f5f9',
+                        color: isDark ? '#cbd5e1' : '#475569',
+                        border: isDark ? '1px solid #334155' : 'none',
                         fontWeight: 700,
                         fontSize: '13px',
                         cursor: 'pointer'
@@ -1201,12 +1207,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         >
           <div 
             style={{
-              background: '#ffffff',
+              background: isDark ? '#111827' : '#ffffff',
               borderRadius: '24px',
               maxWidth: '560px',
               width: '100%',
               boxShadow: '0 20px 45px rgba(0,0,0,0.2)',
-              border: '1px solid #e2e8f0',
+              border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
@@ -1214,16 +1220,16 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             }}
           >
             {/* Modal Header */}
-            <div style={{ padding: '24px 28px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc' }}>
+            <div style={{ padding: '24px 28px', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isDark ? '#0f172a' : '#f8fafc' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: '#f5f3ff', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: isDark ? 'rgba(124, 58, 237, 0.2)' : '#f5f3ff', color: isDark ? '#a78bfa' : '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <UserPlus size={18} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
                     {createdUserResult ? 'Account Provisioned' : 'Provision Enterprise User'}
                   </h3>
-                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                  <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
                     Institutional Account Setup & CP-ABE Key Issuance (FR-02)
                   </span>
                 </div>
@@ -1231,7 +1237,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               <button 
                 type="button" 
                 onClick={handleCloseCreateModal}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+                style={{ background: 'none', border: 'none', color: isDark ? '#64748b' : '#94a3b8', cursor: 'pointer', padding: '4px' }}
               >
                 <X size={20} />
               </button>
@@ -1242,33 +1248,33 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               {createdUserResult ? (
                 /* SUCCESS VIEW */
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: '#ecfdf5', borderRadius: '16px', border: '1px solid #a7f3d0' }}>
-                    <CheckCircle2 size={24} color="#059669" style={{ flexShrink: 0 }} />
-                    <div style={{ fontSize: '13px', color: '#065f46', lineHeight: 1.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5', borderRadius: '16px', border: isDark ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #a7f3d0' }}>
+                    <CheckCircle2 size={24} color={isDark ? '#34d399' : '#059669'} style={{ flexShrink: 0 }} />
+                    <div style={{ fontSize: '13px', color: isDark ? '#34d399' : '#065f46', lineHeight: 1.5 }}>
                       <strong>User account successfully registered!</strong>
                       <div>Initial CP-ABE cryptographic keys were generated and bound.</div>
                     </div>
                   </div>
 
                   {/* Account Summary Card */}
-                  <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '16px', border: '1px solid #e2e8f0', fontSize: '12.5px' }}>
+                  <div style={{ background: isDark ? '#0f172a' : '#f8fafc', borderRadius: '14px', padding: '16px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', fontSize: '12.5px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', marginBottom: '6px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>Full Name:</span>
-                      <strong style={{ color: '#1e293b' }}>{createdUserResult.user.full_name}</strong>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>Full Name:</span>
+                      <strong style={{ color: isDark ? '#f8fafc' : '#1e293b' }}>{createdUserResult.user.full_name}</strong>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', marginBottom: '6px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>Email Address:</span>
-                      <code style={{ color: '#1e293b', fontFamily: 'monospace' }}>{createdUserResult.user.email}</code>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>Email Address:</span>
+                      <code style={{ color: isDark ? '#f8fafc' : '#1e293b', fontFamily: 'monospace' }}>{createdUserResult.user.email}</code>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px', marginBottom: '6px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>Assigned Role:</span>
-                      <span style={{ fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>Assigned Role:</span>
+                      <span style={{ fontWeight: 700, color: isDark ? '#a78bfa' : '#7c3aed', textTransform: 'uppercase' }}>
                         {createdUserResult.user.role.replace(/_/g, ' ')}
                       </span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px' }}>
-                      <span style={{ color: '#64748b', fontWeight: 600 }}>Tenant Scope:</span>
-                      <span style={{ color: '#0284c7', fontWeight: 700 }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 600 }}>Tenant Scope:</span>
+                      <span style={{ color: isDark ? '#38bdf8' : '#0284c7', fontWeight: 700 }}>
                         {(createdUserResult.user.assigned_client_accounts || []).join(', ') || 'Enterprise Universal'}
                       </span>
                     </div>
@@ -1276,7 +1282,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
                   {/* Copyable Activation Link */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       SINGLE-USE ACTIVATION LINK (VALID FOR 24 HOURS):
                     </label>
                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -1288,11 +1294,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                           flex: 1,
                           padding: '10px 12px',
                           borderRadius: '10px',
-                          border: '1.5px solid #cbd5e1',
-                          background: '#f1f5f9',
+                          border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                          background: isDark ? '#1e293b' : '#f1f5f9',
                           fontFamily: 'monospace',
                           fontSize: '12px',
-                          color: '#334155'
+                          color: isDark ? '#cbd5e1' : '#334155'
                         }}
                       />
                       <button
@@ -1317,7 +1323,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         <span>{copiedActivationLink ? 'Copied!' : 'Copy Link'}</span>
                       </button>
                     </div>
-                    <p style={{ margin: '8px 0 0 0', fontSize: '11.5px', color: '#64748b', lineHeight: 1.4 }}>
+                    <p style={{ margin: '8px 0 0 0', fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.4 }}>
                       An automated setup invitation email was sent to <code>{createdUserResult.user.email}</code>. You may also provide this link directly to the employee.
                     </p>
                   </div>
@@ -1329,7 +1335,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                       style={{
                         padding: '10px 22px',
                         borderRadius: '10px',
-                        background: '#1e293b',
+                        background: isDark ? '#334155' : '#1e293b',
                         color: '#ffffff',
                         border: 'none',
                         fontWeight: 700,
@@ -1346,7 +1352,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                 <form onSubmit={handleCreateUserSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* Full Name */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       FULL NAME:
                     </label>
                     <input 
@@ -1359,7 +1365,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
+                        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                        background: isDark ? '#0f172a' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#0f172a',
                         fontSize: '13.5px',
                         boxSizing: 'border-box'
                       }}
@@ -1368,7 +1376,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
                   {/* Corporate Email */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       CORPORATE EMAIL ADDRESS:
                     </label>
                     <input 
@@ -1381,7 +1389,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
+                        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
+                        background: isDark ? '#0f172a' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#0f172a',
                         fontSize: '13.5px',
                         boxSizing: 'border-box'
                       }}
@@ -1390,7 +1400,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
                   {/* System Role */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       ASSIGNED ROLE:
                     </label>
                     <select
@@ -1407,11 +1417,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '10px 14px',
                         borderRadius: '10px',
-                        border: '1.5px solid #cbd5e1',
+                        border: isDark ? '1.5px solid #334155' : '1.5px solid #cbd5e1',
                         fontSize: '13.5px',
-                        background: '#ffffff',
+                        background: isDark ? '#0f172a' : '#ffffff',
                         fontWeight: 600,
-                        color: '#1e293b',
+                        color: isDark ? '#f8fafc' : '#1e293b',
                         boxSizing: 'border-box'
                       }}
                     >
@@ -1438,9 +1448,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
                   {/* Optional Initial Password */}
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '6px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
                       <span>TEMPORARY INITIAL PASSWORD (OPTIONAL):</span>
-                      <span style={{ color: '#94a3b8', fontSize: '11px' }}>Leave blank to auto-generate</span>
+                      <span style={{ color: isDark ? '#94a3b8' : '#94a3b8', fontSize: '11px' }}>Leave blank to auto-generate</span>
                     </label>
                     <input 
                       type="text" 
@@ -1451,7 +1461,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                         width: '100%',
                         padding: '9px 12px',
                         borderRadius: '10px',
-                        border: '1px solid #cbd5e1',
+                        border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                        background: isDark ? '#0f172a' : '#ffffff',
+                        color: isDark ? '#f8fafc' : '#0f172a',
                         fontSize: '12.5px',
                         fontFamily: 'monospace',
                         boxSizing: 'border-box'
@@ -1461,13 +1473,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
 
                   {/* Error Notification */}
                   {createUserError && (
-                    <div style={{ padding: '10px 14px', background: '#fff1f2', borderRadius: '10px', border: '1px solid #fecdd3', color: '#be123c', fontSize: '12.5px' }}>
+                    <div style={{ padding: '10px 14px', background: isDark ? 'rgba(244, 63, 94, 0.15)' : '#fff1f2', borderRadius: '10px', border: isDark ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid #fecdd3', color: isDark ? '#fb7185' : '#be123c', fontSize: '12.5px' }}>
                       {createUserError}
                     </div>
                   )}
 
                   {/* Modal Footer Actions */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', borderTop: '1px solid #f1f5f9', paddingTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', paddingTop: '16px' }}>
                     <button
                       type="button"
                       onClick={handleCloseCreateModal}
@@ -1475,9 +1487,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                       style={{
                         padding: '10px 18px',
                         borderRadius: '10px',
-                        background: '#f1f5f9',
-                        color: '#475569',
-                        border: 'none',
+                        background: isDark ? '#1e293b' : '#f1f5f9',
+                        color: isDark ? '#cbd5e1' : '#475569',
+                        border: isDark ? '1px solid #334155' : 'none',
                         fontWeight: 700,
                         fontSize: '13px',
                         cursor: 'pointer'

@@ -44,6 +44,7 @@ class Settings(BaseSettings):
         "DATABASE_URL",
         "sqlite:///./crossquest_dev.db" if os.getenv("USE_DEMO_DB", "").lower() in ("true", "1") else "sqlite:///./crossquest_pilot.db"
     )
+    ADMIN_DATABASE_URL: Optional[str] = os.getenv("ADMIN_DATABASE_URL", None)
 
     # CP-ABE Configuration
     CPABE_MASTER_PUBLIC_KEY_PATH: Optional[str] = "keys/mpk.key"

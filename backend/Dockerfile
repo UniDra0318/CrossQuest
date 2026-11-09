@@ -32,7 +32,8 @@ RUN git clone https://github.com/JHUISI/charm.git && \
     ./configure.sh && \
     make && \
     make install && \
-    rm -rf /tmp/charm
+    rm -rf /tmp/charm && \
+    printf 'Metadata-Version: 2.1\nName: charm-crypto\nVersion: 0.63\n' > /usr/local/lib/python3.11/site-packages/charm_crypto_framework-0.63-py3.11-linux-x86_64.egg/EGG-INFO/PKG-INFO
 
 WORKDIR /app
 

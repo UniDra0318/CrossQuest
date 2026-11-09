@@ -55,7 +55,7 @@ export default function Sidebar({
   onToggleCollapse 
 }) {
   const { currentUser, token, loginRole, logout, DEMO_USERS } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isDark } = useTheme();
   const navigate = useNavigate();
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -66,7 +66,6 @@ export default function Sidebar({
   const [optOut, setOptOut] = useState(Boolean(currentUser?.leaderboard_opt_out));
   const [optOutLoading, setOptOutLoading] = useState(false);
 
-  const isDark = theme === 'dark';
   const userRole = currentUser?.role || 'trainee';
 
   const [importCompleted, setImportCompleted] = useState(() => {
@@ -150,7 +149,7 @@ export default function Sidebar({
               title="Go to Dashboard Home"
             >
               <img 
-                src={isDark ? logoStacked : logoStackedWhite} 
+                src={logoStackedWhite} 
                 alt="CrossQuest Logo" 
                 className="sidebar-brand-img" 
               />
