@@ -276,39 +276,94 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
   };
 
   return (
-    <div className="adm-vault-enclave" style={{ marginTop: '20px' }}>
-      {/* Vault Header Bar with Summary Metrics */}
-      <div className="adm-vault-hero-bar">
-        <div className="adm-vault-hero-bar__left">
-          <div className="adm-vault-hero-bar__tag">
-            <span className="adm-vault-hero-bar__dot" />
-            <span>IMMUTABLE CRYPTOGRAPHIC REGISTRY</span>
+    <div className="adm-vault-enclave" style={{ marginTop: '10px' }}>
+      {/* Mission Command Hero Stage (Cyan/Navy cockpit stage matching Trainee Home Hero) */}
+      <section className="trainee-hero-stage adm-vault-hero-stage">
+        <div className="trainee-hero-content">
+          <div className="trainee-hero-badge">
+            <ShieldCheck size={13} className="hero-badge-icon" />
+            <span>CRYPTOGRAPHIC ENCLAVE &bull; VAULT REGISTRY</span>
           </div>
-          <h2 className="adm-vault-hero-bar__title">Master Record Vault</h2>
-          <p className="adm-vault-hero-bar__sub">
+
+          <h2 className="trainee-hero-headline">Master Record Vault</h2>
+          <p className="trainee-hero-sub">
             Global store of multi-tenant cryptographic certificates and training evaluations secured with Charm CP-ABE.
           </p>
+
+          <div className="trainee-hero-actions">
+            <button
+              type="button"
+              className="trainee-hero-primary-btn"
+              onClick={() => { setIsAddRecordOpen(true); setAddError(null); }}
+              title="Create and encrypt a new training record (B5)"
+            >
+              <Plus size={14} />
+              <span>Add Master Record</span>
+            </button>
+
+            <button
+              type="button"
+              className="trainee-hero-secondary-btn"
+              onClick={handleExportVaultRecords}
+              disabled={exportingVaultRecords}
+              title="Download CSV training records vault"
+            >
+              <FileText size={13} className={exportingVaultRecords ? 'spin-animation' : ''} />
+              <span>{exportingVaultRecords ? 'Exporting...' : 'Export Vault CSV'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="trainee-hero-secondary-btn"
+              onClick={handleExportAuditLogs}
+              disabled={exportingAuditLogs}
+              title="Download CSV access & security audit log"
+            >
+              <Download size={13} className={exportingAuditLogs ? 'spin-animation' : ''} />
+              <span>{exportingAuditLogs ? 'Exporting...' : 'Export Audit Trail'}</span>
+            </button>
+          </div>
         </div>
 
-        <div className="adm-vault-hero-bar__metrics">
-          <div className="adm-vault-metric-tile">
-            <span className="adm-vault-metric-tile__label">TOTAL RECORDS</span>
-            <span className="adm-vault-metric-tile__num">{localRecords.length}</span>
+        {/* 4-Cell Bento Telemetry Grid */}
+        <div className="trainee-hero-metrics-panel">
+          <div className="hero-metric-cell">
+            <span className="metric-tag">TOTAL RECORDS</span>
+            <div className="metric-num">
+              {localRecords.length}
+              <span className="metric-unit">RECS</span>
+            </div>
+            <span className="metric-sub-label">Verified ledger count</span>
           </div>
-          <div className="adm-vault-metric-tile">
-            <span className="adm-vault-metric-tile__label">CERTIFIED</span>
-            <span className="adm-vault-metric-tile__num text-emerald">
+
+          <div className="hero-metric-cell">
+            <span className="metric-tag">COMPLETED CERTIFIED</span>
+            <div className="metric-num" style={{ color: '#34d399' }}>
               {localRecords.filter(r => r.status?.toUpperCase() === 'COMPLETED').length}
-            </span>
+              <span className="metric-unit" style={{ color: '#6ee7b7' }}>DONE</span>
+            </div>
+            <span className="metric-sub-label">CP-ABE certs issued</span>
           </div>
-          <div className="adm-vault-metric-tile">
-            <span className="adm-vault-metric-tile__label">ACTIVE ENCLAVES</span>
-            <span className="adm-vault-metric-tile__num text-indigo">
+
+          <div className="hero-metric-cell">
+            <span className="metric-tag">IN-PROGRESS MODULES</span>
+            <div className="metric-num" style={{ color: '#fbbf24' }}>
+              {localRecords.filter(r => r.status?.toUpperCase() === 'IN_PROGRESS').length}
+              <span className="metric-unit" style={{ color: '#fde68a' }}>ACTIVE</span>
+            </div>
+            <span className="metric-sub-label">Awaiting completion</span>
+          </div>
+
+          <div className="hero-metric-cell">
+            <span className="metric-tag">TENANT ENCLAVES</span>
+            <div className="metric-num" style={{ color: '#38bdf8' }}>
               {new Set(localRecords.map(r => r.org)).size}
-            </span>
+              <span className="metric-unit" style={{ color: '#7dd3fc' }}>ORGS</span>
+            </div>
+            <span className="metric-sub-label">Cross-tenant boundaries</span>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Main Vault Panel Container */}
       <div className="adm-panel adm-vault-panel">
@@ -350,40 +405,6 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
               pageSize={4}
               onPageChange={setRecordPage}
             />
-
-            <div className="adm-vault-btn-cluster">
-              <button 
-                type="button" 
-                className="adm-vault-export-btn"
-                onClick={handleExportAuditLogs}
-                disabled={exportingAuditLogs}
-                title="Download CSV access & security audit log"
-              >
-                <Download size={13} className={exportingAuditLogs ? 'spin-animation' : ''} />
-                <span>{exportingAuditLogs ? 'Exporting...' : 'Export Audit Logs (CSV)'}</span>
-              </button>
-
-              <button 
-                type="button" 
-                className="adm-vault-export-btn"
-                onClick={handleExportVaultRecords}
-                disabled={exportingVaultRecords}
-                title="Download CSV training records vault"
-              >
-                <FileText size={13} className={exportingVaultRecords ? 'spin-animation' : ''} />
-                <span>{exportingVaultRecords ? 'Exporting...' : 'Export Vault (CSV)'}</span>
-              </button>
-
-              <button 
-                type="button" 
-                className="adm-vault-primary-btn"
-                onClick={() => { setIsAddRecordOpen(true); setAddError(null); }}
-                title="Create and encrypt a new training record (B5)"
-              >
-                <Plus size={14} />
-                <span>Add Master Record</span>
-              </button>
-            </div>
           </div>
 
           {vaultToast && (

@@ -1736,101 +1736,10 @@ button:disabled {
    MASTER RECORD VAULT ENHANCED CONTAINER & HIGH-END DATA GRID
    ========================================================================== */
 
-/* Vault Hero Bar */
-.adm-vault-hero-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 22px 28px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(14, 165, 233, 0.04) 100%), #ffffff;
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.adm-vault-hero-bar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #7c3aed 0%, #0284c7 50%, #10b981 100%);
-}
-
-.adm-vault-hero-bar__left {
-  flex: 1 1 450px;
-  min-width: 0;
-}
-
-.adm-vault-hero-bar__tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(124, 58, 237, 0.08);
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  font: 700 9.5px var(--font-mono);
-  letter-spacing: 0.12em;
-  color: #6d28d9;
-  margin-bottom: 8px;
-}
-
-.adm-vault-hero-bar__dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #7c3aed;
-  box-shadow: 0 0 6px #7c3aed;
-}
-
-.adm-vault-hero-bar__title {
-  font: 800 clamp(20px, 2.2vw, 25px)/1.2 var(--font-display);
-  letter-spacing: -0.02em;
-  color: #0f172a;
-  margin: 0 0 4px;
-}
-
-.adm-vault-hero-bar__sub {
-  font-size: 13px;
-  line-height: 1.5;
-  color: #64748b;
-  margin: 0;
-  max-width: 620px;
-}
-
-.adm-vault-hero-bar__metrics {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: #ffffff;
-  padding: 10px 18px;
-  border-radius: 14px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-}
-
-.adm-vault-metric-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.adm-vault-metric-tile__label {
-  font: 700 9px var(--font-mono);
-  letter-spacing: 0.1em;
-  color: #94a3b8;
-}
-
-.adm-vault-metric-tile__num {
-  font: 800 17px/1 var(--font-display);
-  color: #0f172a;
+/* Vault Hero Bar & Stage */
+.adm-vault-hero-stage {
+  margin-top: 4px;
+  margin-bottom: 24px;
 }
 
 /* Vault Main Panel Box */
