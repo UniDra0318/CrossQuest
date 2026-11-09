@@ -91,4 +91,49 @@ describe('Trainer Sign-Off Validation', () => {
 
     expect(signOffButton).not.toBeDisabled();
   });
+
+  it('opens confirmation modal with exact attendee and certificate issuance counts', async () => {
+    const handleSignOffSessionMock = vi.fn().mockResolvedValue({
+      certificates_issued: 1,
+      participants_updated: 2
+    });
+
+    vi.spyOn(TrainerContext, 'useTrainer').mockReturnValue({
+      sessions: [mockSession],
+      selectedSessionId: 'SESS-2026-01',
+      setSelectedSessionId: vi.fn(),
+      handleSignOffSession: handleSignOffSessionMock,
+      roster: [],
+      selectedTraineeId: null,
+      setSelectedTraineeId: vi.fn(),
+      submitEvaluation: vi.fn(),
+      RUBRIC: ['Meets attendance requirement', 'Demonstrates baseline competency'],
+      PASS_MARK: 75,
+      tierFor: () => 'Passing Baseline',
+      loading: false
+    });
+
+    render(<Grade />);
+
+    // Mark 1 Completed, 1 Not completed
+    const completedButtons = screen.getAllByRole('button', { name: /✔ Completed/i });
+    const notCompletedButtons = screen.getAllByRole('button', { name: /✖ Not completed/i });
+    fireEvent.click(completedButtons[0]);
+    fireEvent.click(notCompletedButtons[1]);
+
+    const signOffButton = screen.getByRole('button', {
+      name: /Execute Session Sign-Off/i
+    });
+    fireEvent.click(signOffButton);
+
+    // Modal should be open and state the counts
+    expect(screen.getByText(/Confirm Session Sign-Off/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 Completed, 1 Not completed, 1 certificates will be issued/i)).toBeInTheDocument();
+
+    // Confirm button in modal
+    const confirmBtn = screen.getByRole('button', { name: /Confirm & Sign Off/i });
+    fireEvent.click(confirmBtn);
+
+    expect(handleSignOffSessionMock).toHaveBeenCalledTimes(1);
+  });
 });

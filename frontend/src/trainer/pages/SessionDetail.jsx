@@ -21,17 +21,68 @@ export default function SessionDetail({ sessionId: propSessionId }) {
   const { cohorts } = useTrainer();
   const { isDark } = useTheme();
 
-  const sessionId = propSessionId || params.id || 'COHORT-2026-08';
-  const cohort = cohorts.find(c => c.id === sessionId) || cohorts[0] || {
-    id: sessionId,
-    course: 'Agile PME & Project Management Challenge',
-    org: 'San Miguel Conglomerate Holdings',
-    schedule: '2026-11-01 to 2026-11-03',
-    enrolled: 8,
-    status: 'In Training'
-  };
+  const sessionId = propSessionId || params.id;
+  const cohort = cohorts?.find(c => c.id === sessionId);
 
   const [activeTab, setActiveTab] = useState('participants'); // 'participants' | 'signoff'
+
+  if (!sessionId || !cohort) {
+    return (
+      <div 
+        style={{
+          background: isDark ? '#111827' : '#ffffff',
+          borderRadius: '24px',
+          padding: '48px 24px',
+          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px'
+        }}
+      >
+        <div style={{
+          width: '56px',
+          height: '56px',
+          borderRadius: '16px',
+          background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+          color: '#ef4444',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Calendar size={28} />
+        </div>
+        <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+          Session Not Found
+        </h2>
+        <p style={{ margin: 0, fontSize: '13px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '420px', lineHeight: 1.5 }}>
+          The requested training session ({sessionId || 'unspecified'}) could not be found among your assigned cohorts.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/trainer')}
+          style={{
+            marginTop: '8px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 20px',
+            borderRadius: '12px',
+            background: 'var(--cq-crimson, #d12a43)',
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: '13px',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          <ArrowLeft size={16} />
+          <span>Back to Sessions</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

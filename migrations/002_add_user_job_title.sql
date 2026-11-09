@@ -3,3 +3,4 @@
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS job_title VARCHAR(200);
 ALTER TABLE anomaly_rules ADD COLUMN IF NOT EXISTS last_edited_by_user_id VARCHAR(36);
+

@@ -378,65 +378,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       });
     }
 
-    // Aligned fallback with real pilot programs and real trainers
-    return [
-      {
-        id: 'act-1',
-        title: 'Agile PME & Project Management Challenge',
-        instructor: 'Instructor not assigned',
-        questionsCount: '5 QUESTIONS',
-        headerColor: TRACKS.infosec.color,
-        category: 'Project Management',
-        categoryLabel: 'AGILE',
-        track: TRACKS.infosec,
-        progressSegments: quizScoreStatus['act-1']?.segments || (quizScoreStatus['act-1']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
-        completed: quizScoreStatus['act-1']?.completed,
-        score: quizScoreStatus['act-1']?.score,
-        accuracy: quizScoreStatus['act-1']?.completed ? `${quizScoreStatus['act-1'].score}% accuracy` : 'Assigned - Due in 3d'
-      },
-      {
-        id: 'act-2',
-        title: 'Executive Communication & CONNECT Simulation',
-        instructor: 'Instructor not assigned',
-        questionsCount: '5 QUESTIONS',
-        headerColor: TRACKS.access.color,
-        category: 'Executive Leadership',
-        categoryLabel: 'LEAD',
-        track: TRACKS.access,
-        progressSegments: quizScoreStatus['act-2']?.segments || (quizScoreStatus['act-2']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
-        completed: quizScoreStatus['act-2']?.completed,
-        score: quizScoreStatus['act-2']?.score,
-        accuracy: quizScoreStatus['act-2']?.completed ? `${quizScoreStatus['act-2'].score}% accuracy` : 'Assigned - Due in 3d'
-      },
-      {
-        id: 'act-3',
-        title: 'Supervisory Mastery & High-Impact Coaching',
-        instructor: 'Instructor not assigned',
-        questionsCount: '5 QUESTIONS',
-        headerColor: TRACKS.privacy.color,
-        category: 'Supervisory Mastery',
-        categoryLabel: 'COACH',
-        track: TRACKS.privacy,
-        progressSegments: quizScoreStatus['act-3']?.segments || (quizScoreStatus['act-3']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
-        completed: quizScoreStatus['act-3']?.completed,
-        score: quizScoreStatus['act-3']?.score,
-        accuracy: quizScoreStatus['act-3']?.completed ? `${quizScoreStatus['act-3'].score}% accuracy` : 'Assigned - Due in 3d'
-      },
-      {
-        id: 'act-4',
-        title: 'Business Continuity & ISO 31000 Risk Management',
-        instructor: 'Instructor not assigned',
-        questionsCount: '5 QUESTIONS',
-        headerColor: TRACKS.database.color,
-        category: 'Risk & Governance',
-        categoryLabel: 'RISK',
-        track: TRACKS.database,
-        progressSegments: quizScoreStatus['act-4']?.segments || (quizScoreStatus['act-4']?.completed ? [true, true, true, true, true] : [false, false, false, false, false]),
-        completed: quizScoreStatus['act-4']?.completed,
-        score: quizScoreStatus['act-4']?.score,
-        accuracy: quizScoreStatus['act-4']?.completed ? `${quizScoreStatus['act-4'].score}% accuracy` : 'Assigned - Due in 3d'
-      }
-    ];
+    // Zero fabricated quiz activities when database has none
+    return [];
   }, [realQuizzes, quizScoreStatus]);
 
 // Earned badges state synchronized with database
@@ -774,22 +717,22 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 </div>
 
                 <h3 style={{ fontSize: '17px', fontWeight: 800, marginBottom: '6px', color: 'var(--cq-text-primary, #0f172a)' }}>
-                  {featuredCourse?.title || 'Agile Project Management & Scrum Framework'}
+                  {featuredCourse?.title || 'No active course enrollment'}
                 </h3>
                 <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
-                  Instructor: <strong>{featuredCourse?.instructor || 'Instructor not assigned'}</strong> &bull; Track: {featuredCourse?.category || 'Project Delivery'}
+                  Instructor: <strong>{featuredCourse?.instructor || 'Instructor not assigned'}</strong> &bull; Track: {featuredCourse?.category || 'General'}
                 </p>
 
                 {/* Course Progress Bar */}
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>
                     <span>Module Progress</span>
-                    <span style={{ color: '#4f46e5' }}>{featuredCourse?.completed ? '100% Completed' : `${featuredCourse?.progressSegments?.filter(Boolean).length || 2} of ${featuredCourse?.progressSegments?.length || 4} Modules`}</span>
+                    <span style={{ color: '#4f46e5' }}>{featuredCourse?.completed ? '100% Completed' : (featuredCourse ? `${featuredCourse?.progressSegments?.filter(Boolean).length || 0} of ${featuredCourse?.progressSegments?.length || 0} Modules` : 'No modules active')}</span>
                   </div>
                   <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
                     <div 
                       style={{ 
-                        width: `${featuredCourse?.completed ? 100 : Math.round(((featuredCourse?.progressSegments?.filter(Boolean).length || 2) / (featuredCourse?.progressSegments?.length || 4)) * 100)}%`, 
+                        width: `${featuredCourse?.completed ? 100 : (featuredCourse ? Math.round(((featuredCourse?.progressSegments?.filter(Boolean).length || 0) / (featuredCourse?.progressSegments?.length || 1)) * 100) : 0)}%`, 
                         height: '100%', 
                         background: 'linear-gradient(90deg, #6366f1, #4f46e5)',
                         borderRadius: '999px',
@@ -804,8 +747,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 <button
                   type="button"
                   className="btn-tactile btn-tactile-purple btn-flex-center"
-                  onClick={() => handleStartQuizById(featuredCourse?.id || 'quiz_agile_1')}
-                  disabled={!isOnline}
+                  onClick={() => featuredCourse && handleStartQuizById(featuredCourse.id)}
+                  disabled={!featuredCourse || !isOnline}
                 >
                   <Play size={14} fill="currentColor" />
                   <span>{featuredCourse?.completed ? 'Replay Course Module' : 'Continue Course'}</span>

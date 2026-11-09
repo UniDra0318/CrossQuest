@@ -11,7 +11,7 @@ import './trainer.css';
  * - Removes "Instant Pop-Up Quiz" from header (out of pilot scope)
  * - Navigation handled by persistent sidebar
  */
-export default function TrainerLayout({ activeTab, onTabChange, children }) {
+export default function TrainerLayout({ activeTab, children }) {
   const renderHeader = () => {
     switch (activeTab) {
       case 'session_detail':

@@ -107,7 +107,11 @@ function MainAppShell({ page }) {
   };
 
   const matchedRoute = ROUTES.find(r => r.page === page && r.roles.includes(currentUser?.role));
-  const activeTitle = matchedRoute?.label || (page === 'crypto_lab' ? 'Cryptographic Lab' : 'Home');
+  const activeTitle = matchedRoute?.title || matchedRoute?.label || (page === 'crypto_lab' ? 'Cryptographic Sandbox Lab' : 'CrossQuest');
+
+  useEffect(() => {
+    document.title = `${activeTitle} | CrossQuest`;
+  }, [activeTitle]);
 
   return (
     <div className={`enterprise-layout ${isQuizActive ? 'quiz-mode-active' : ''}`}>
@@ -125,7 +129,6 @@ function MainAppShell({ page }) {
       <div className={`enterprise-viewport ${isQuizActive ? 'viewport-quiz-active' : ''}`}>
         {!isQuizActive && (
           <Topbar 
-            activeViewTitle={activeTitle} 
             streakDays={liveStreakDays} 
             isSidebarCollapsed={sidebarCollapsed}
             onToggleSidebar={handleToggleSidebar}
@@ -263,8 +266,22 @@ function AppRoutes() {
       <Route path="/finance/reconciliation" element={<Navigate to="/finance/import" replace />} />
       <Route path="/trainings" element={<Navigate to="/home/trainings" replace />} />
       <Route path="/courses" element={<Navigate to="/home" replace />} />
-      <Route path="/quizzes" element={<Navigate to="/home/quizzes" replace />} />
-      <Route path="/quiz" element={<Navigate to="/home/quizzes" replace />} />
+      <Route 
+        path="/quizzes" 
+        element={
+          currentRole === 'trainer'
+            ? <Navigate to="/trainer/quizzes" replace />
+            : <Navigate to="/home/quizzes" replace />
+        } 
+      />
+      <Route 
+        path="/quiz" 
+        element={
+          currentRole === 'trainer'
+            ? <Navigate to="/trainer/quizzes" replace />
+            : <Navigate to="/home/quizzes" replace />
+        } 
+      />
       <Route path="/badges" element={<Navigate to="/home/badges" replace />} />
       <Route path="/certifications" element={<Navigate to="/home/certificates" replace />} />
       <Route path="/certificates" element={<Navigate to="/home/certificates" replace />} />

@@ -121,4 +121,34 @@ describe('Create Session Flow for Account Managers (B12)', () => {
     expect(await screen.findByText(/Trainer lookup unavailable: Trainer service unavailable \(503\)/i)).toBeInTheDocument();
     expect(screen.getByText(/-- Trainer lookup failed \(Trainer service unavailable \(503\)\) --/i)).toBeInTheDocument();
   });
+
+  it('shows error in modal and keeps modal open when createTrainingSession fails on server', async () => {
+    const apiModule = await import('../services/api');
+    vi.spyOn(apiModule, 'fetchTrainers').mockResolvedValueOnce([
+      { id: 't-1', name: 'Jordan Ramos', title: 'Certified Lead Trainer' }
+    ]);
+    const staffApi = await import('../api/staff');
+    staffApi.createTrainingSession.mockRejectedValueOnce(new Error('Database duplicate session code constraint violation (409)'));
+
+    render(<Sessions />);
+
+    const newBtn = await screen.findByRole('button', { name: /New Training Session/i });
+    fireEvent.click(newBtn);
+
+    const venueInput = screen.getByPlaceholderText(/e\.g\. Online \(Zoom\)/i);
+    fireEvent.change(venueInput, { target: { value: 'Crossworks Manila HQ' } });
+
+    // Select trainer
+    const selects = screen.getAllByRole('combobox');
+    // First select is Course, second is Assigned Instructor
+    fireEvent.change(selects[1], { target: { value: 'Jordan Ramos' } });
+
+    // Submit session creation form
+    const form = venueInput.closest('form');
+    fireEvent.submit(form);
+
+    // Modal must NOT close and must display the error message
+    expect(await screen.findByText(/Database duplicate session code constraint violation \(409\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Schedule New Training Session/i)).toBeInTheDocument();
+  });
 });

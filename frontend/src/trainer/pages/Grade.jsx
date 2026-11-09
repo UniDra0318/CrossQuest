@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Users, CheckCircle2 } from 'lucide-react';
+import { Users, CheckCircle2, CheckSquare, X } from 'lucide-react';
 import { TableEmptyRow } from '../../components/TableEmptyState';
 import { TablePagination, usePagination } from '../../components/TablePagination';
 import { useTrainer } from '../TrainerContext';
@@ -58,15 +58,16 @@ export default function Grade() {
 
   // Individual evaluation trainee
   const currentTrainee = roster.find((r) => r.id === selectedTraineeId) || roster[0];
-  const [score, setScore] = useState(currentTrainee?.score ?? 85);
+  const [score, setScore] = useState(currentTrainee?.score ?? '');
   const [rubric, setRubric] = useState([0, 1, 2, 3]);
   const [remarks, setRemarks] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [indivNotification, setIndivNotification] = useState(null);
+  const [showSignOffConfirmModal, setShowSignOffConfirmModal] = useState(false);
 
   useEffect(() => {
     if (currentTrainee) {
-      setScore(currentTrainee.score ?? 85);
+      setScore(currentTrainee.score ?? '');
       setRemarks('');
       setIndivNotification(null);
     }
@@ -108,8 +109,8 @@ export default function Grade() {
   const decidedCount = completedCount + notCompletedCount;
   const allDecided = totalAttendees > 0 && decidedCount === totalAttendees;
 
-  // Submit session-level sign-off
-  const onExecuteSignOff = async (e) => {
+  // Open sign-off confirmation dialog with explicit attendee counts
+  const onExecuteSignOff = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!currentSession) return;
     if (currentSession.is_future_dated) {
@@ -121,11 +122,12 @@ export default function Grade() {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Mark ${completedCount} Completed, ${notCompletedCount} Not completed? Certificates will be issued for ${completedCount}.`
-    );
-    if (!confirmed) return;
+    setShowSignOffConfirmModal(true);
+  };
 
+  // Execute session-level sign-off
+  const confirmAndSignOff = async () => {
+    setShowSignOffConfirmModal(false);
     setSigningOff(true);
     setSignOffError(null);
     setSignOffResult(null);
@@ -376,7 +378,7 @@ export default function Grade() {
               <tbody>
                 {currentSession?.records && currentSession.records.length > 0 ? (
                   pagedRecords.map((rec) => {
-                    const comp = completions[rec.record_id] || { status: rec.status, score: rec.score ?? 85 };
+                    const comp = completions[rec.record_id] || { status: rec.status, score: rec.score ?? '' };
                     const isSessionDone = currentSession.trainer_signed_off;
                     const isFuture = currentSession.is_future_dated;
 
@@ -773,6 +775,139 @@ export default function Grade() {
           </div>
         </div>
       </div>
+
+      {/* Session Sign-Off Confirmation Modal */}
+      {showSignOffConfirmModal && currentSession && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: isDark ? '#111827' : '#ffffff',
+            borderRadius: '24px',
+            maxWidth: '520px',
+            width: '100%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+            border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: isDark ? '#0f172a' : '#f8fafc'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  background: 'rgba(209, 42, 67, 0.12)',
+                  color: 'var(--cq-crimson, #d12a43)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <CheckSquare size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    Confirm Session Sign-Off
+                  </h3>
+                  <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                    {currentSession.session_code} &bull; {currentSession.course_name}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSignOffConfirmModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{
+                padding: '16px',
+                borderRadius: '14px',
+                background: isDark ? 'rgba(16, 185, 129, 0.1)' : '#ecfdf5',
+                border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid #a7f3d0'
+              }}>
+                <div style={{ fontSize: '14px', fontWeight: 800, color: isDark ? '#34d399' : '#065f46', marginBottom: '6px' }}>
+                  Participant Decision Summary
+                </div>
+                <div style={{ fontSize: '13.5px', fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                  {completedCount} Completed, {notCompletedCount} Not completed, {completedCount} certificates will be issued
+                </div>
+              </div>
+
+              <p style={{ margin: 0, fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.5 }}>
+                Signing off this session permanently certifies trainee completions, locks the attendance roster against further edits, and generates verifiable credentials on the audit ledger.
+              </p>
+            </div>
+
+            <div style={{
+              padding: '16px 24px',
+              borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '10px',
+              background: isDark ? '#0f172a' : '#f8fafc'
+            }}>
+              <button
+                type="button"
+                onClick={() => setShowSignOffConfirmModal(false)}
+                style={{
+                  padding: '9px 18px',
+                  borderRadius: '10px',
+                  border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
+                  background: 'transparent',
+                  color: isDark ? '#cbd5e1' : '#475569',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmAndSignOff}
+                style={{
+                  padding: '9px 20px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'var(--cq-crimson, #d12a43)',
+                  color: '#ffffff',
+                  fontWeight: 800,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 14px rgba(209, 42, 67, 0.3)'
+                }}
+              >
+                <CheckSquare size={15} />
+                <span>Confirm & Sign Off</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

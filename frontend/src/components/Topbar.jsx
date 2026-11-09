@@ -16,7 +16,6 @@ import logoStackedWhite from '../assets/crossquest-logo-stacked-white.svg';
  * Includes sidebar collapse/expand toggle, contextual view breadcrumb, and live streak indicator.
  */
 export default function Topbar({ 
-  activeViewTitle, 
   streakDays, 
   isSidebarCollapsed = false, 
   onToggleSidebar 

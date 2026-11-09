@@ -370,10 +370,10 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
             );
             return {
               id: r.id || `rec-${100 + idx}`,
-              trainee: r.trainee_name || `Learner ${idx + 1}`,
-              email: r.trainee_email || `learner${idx + 1}@${compCode.toLowerCase().replace(/_/g, '-')}.ph`,
-              org: r.company_name || (compCode === 'CORP_ALPHA' ? 'San Miguel Conglomerate Holdings' : compCode),
-              course: r.course_name || 'Enterprise Security Training',
+              trainee: r.trainee_name || '',
+              email: r.trainee_email || '',
+              org: r.company_name || compCode || '',
+              course: r.course_name || '',
               policy: r.encryption_policy || `(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:${compCode})`,
               status: (r.status || 'COMPLETED').toUpperCase()
             };

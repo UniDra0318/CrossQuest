@@ -11,7 +11,7 @@ import './staff.css';
  * - Removes 3D cube and floating tags
  * - Navigation handled by persistent sidebar
  */
-export default function StaffLayout({ activeTab, onTabChange, children }) {
+export default function StaffLayout({ activeTab, children }) {
   const { currentUser } = useAuth();
 
   const assignedScope = currentUser?.assigned_client_accounts?.join(', ') || 

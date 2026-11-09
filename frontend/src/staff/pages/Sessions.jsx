@@ -218,17 +218,7 @@ export default function Sessions() {
         venue: venue
       };
 
-      const created = await createTrainingSession(payload).catch(err => {
-        console.warn('Backend session creation fallback:', err);
-        return {
-          id: `sess-${Date.now()}`,
-          ...payload,
-          client_code: newSession.client_code,
-          trainer_signed_off: false,
-          needs_attendance: true,
-          trainers: [newSession.trainer_name]
-        };
-      });
+      const created = await createTrainingSession(payload);
 
       const enriched = {
         ...created,
@@ -240,7 +230,7 @@ export default function Sessions() {
       setSessions(prev => [enriched, ...prev]);
       setShowNewModal(false);
     } catch (err) {
-      setFormError(err.message || 'Failed to create session');
+      setFormError(err.message || 'Failed to create training session on server.');
     } finally {
       setCreating(false);
     }
@@ -248,30 +238,18 @@ export default function Sessions() {
 
   const handleOpenDetail = (sess) => {
     setActiveSession(sess);
-    // Find participants in this session
-    const sessRecords = records.filter(r => r.session_id === sess.id || r.course === sess.course_name);
+    // Find participants in this session strictly by session_id (no course_name fallback)
+    const sessRecords = records.filter(r => r.session_id === sess.id);
     const initialEdits = {};
-    if (sessRecords.length > 0) {
-      sessRecords.forEach(r => {
-        initialEdits[r.id] = {
-          attendance_status: r.attendance_status || 'Present',
-          status: r.status === 'Completed' ? 'In progress' : (r.status || 'Enrolled'),
-          score: r.score != null ? r.score : ''
-        };
-      });
-    } else {
-      // Baseline roster for presentation
-      const sampleIds = [`rec-${sess.id}-1`, `rec-${sess.id}-2`, `rec-${sess.id}-3`];
-      sampleIds.forEach((id, idx) => {
-        initialEdits[id] = {
-          trainee: idx === 0 ? 'Andrea Aguilar' : idx === 1 ? 'Ricardo Ocampo' : 'Bea Macaraeg',
-          email: idx === 0 ? 'andrea@client.com' : idx === 1 ? 'ricardo@client.com' : 'bea@client.com',
-          attendance_status: 'Present',
-          status: 'In progress',
-          score: ''
-        };
-      });
-    }
+    sessRecords.forEach(r => {
+      initialEdits[r.id] = {
+        trainee: r.trainee || r.trainee_name || r.name,
+        email: r.trainee_email || r.email,
+        attendance_status: r.attendance_status || 'Present',
+        status: r.status === 'Completed' ? 'In progress' : (r.status || 'Enrolled'),
+        score: r.score != null ? r.score : ''
+      };
+    });
     setAttendanceEdits(initialEdits);
   };
 
@@ -1078,114 +1056,126 @@ export default function Sessions() {
                 </span>
               </div>
 
-              <div style={{ border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
-                  <thead style={{ background: isDark ? '#0f172a' : '#f8fafc', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
-                    <tr>
-                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>PARTICIPANT</th>
-                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          ATTENDANCE <Pencil size={11} color="#0284c7" />
-                        </span>
-                      </th>
-                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          AM STATUS <Pencil size={11} color="#0284c7" />
-                        </span>
-                      </th>
-                      <th style={{ padding: '10px 14px', fontWeight: 700 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          SCORE (OPTIONAL) <Pencil size={11} color="#0284c7" />
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(attendanceEdits).map(([recId, row]) => (
-                      <tr key={recId} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '10px 14px' }}>
-                          <div style={{ fontWeight: 700 }}>{row.trainee || recId}</div>
-                          {row.email && <div style={{ fontSize: '11px', color: '#64748b' }}>{row.email}</div>}
-                        </td>
+              {Object.keys(attendanceEdits).length === 0 ? (
+                <div style={{ padding: '48px 24px', textAlign: 'center', color: isDark ? '#94a3b8' : '#64748b' }}>
+                  <Users size={40} style={{ margin: '0 auto 12px', opacity: 0.35 }} />
+                  <h4 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                    No Enrolled Participants
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '13px' }}>
+                    This training session currently has no enrolled participant records in the database.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', borderRadius: '14px', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
+                    <thead style={{ background: isDark ? '#0f172a' : '#f8fafc', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0' }}>
+                      <tr>
+                        <th style={{ padding: '10px 14px', fontWeight: 700 }}>PARTICIPANT</th>
+                        <th style={{ padding: '10px 14px', fontWeight: 700 }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            ATTENDANCE <Pencil size={11} color="#0284c7" />
+                          </span>
+                        </th>
+                        <th style={{ padding: '10px 14px', fontWeight: 700 }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            AM STATUS <Pencil size={11} color="#0284c7" />
+                          </span>
+                        </th>
+                        <th style={{ padding: '10px 14px', fontWeight: 700 }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            SCORE (OPTIONAL) <Pencil size={11} color="#0284c7" />
+                          </span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(attendanceEdits).map(([recId, row]) => (
+                        <tr key={recId} style={{ borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '10px 14px' }}>
+                            <div style={{ fontWeight: 700 }}>{row.trainee || recId}</div>
+                            {row.email && <div style={{ fontSize: '11px', color: '#64748b' }}>{row.email}</div>}
+                          </td>
 
-                        <td style={{ padding: '10px 14px' }}>
-                          <select
-                            value={row.attendance_status}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setAttendanceEdits(prev => ({
-                                ...prev,
-                                [recId]: { ...prev[recId], attendance_status: val }
-                              }));
-                            }}
-                            style={{ padding: '6px 10px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12px' }}
-                          >
-                            <option value="Present">Present</option>
-                            <option value="Absent">Absent</option>
-                            <option value="Excused">Excused</option>
-                          </select>
-                        </td>
-
-                        <td style={{ padding: '10px 14px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <td style={{ padding: '10px 14px' }}>
                             <select
-                              value={row.status}
+                              value={row.attendance_status}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setAttendanceEdits(prev => ({
                                   ...prev,
-                                  [recId]: { ...prev[recId], status: val }
+                                  [recId]: { ...prev[recId], attendance_status: val }
                                 }));
                               }}
                               style={{ padding: '6px 10px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12px' }}
                             >
-                              <option value="Enrolled">Enrolled</option>
-                              <option value="In progress">In progress</option>
-                              <option value="Not completed">Not completed</option>
+                              <option value="Present">Present</option>
+                              <option value="Absent">Absent</option>
+                              <option value="Excused">Excused</option>
                             </select>
+                          </td>
 
-                            <span
-                              title="Completed status requires Trainer Sign-Off verification and cannot be assigned by Account Manager"
-                              style={{
-                                padding: '4px 8px',
-                                borderRadius: '6px',
-                                background: isDark ? '#1e293b' : '#f1f5f9',
-                                color: isDark ? '#64748b' : '#94a3b8',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                cursor: 'not-allowed',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px'
+                          <td style={{ padding: '10px 14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <select
+                                value={row.status}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setAttendanceEdits(prev => ({
+                                    ...prev,
+                                    [recId]: { ...prev[recId], status: val }
+                                  }));
+                                }}
+                                style={{ padding: '6px 10px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12px' }}
+                              >
+                                <option value="Enrolled">Enrolled</option>
+                                <option value="In progress">In progress</option>
+                                <option value="Not completed">Not completed</option>
+                              </select>
+
+                              <span
+                                title="Completed status requires Trainer Sign-Off verification and cannot be assigned by Account Manager"
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  background: isDark ? '#1e293b' : '#f1f5f9',
+                                  color: isDark ? '#64748b' : '#94a3b8',
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  cursor: 'not-allowed',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px'
+                                }}
+                              >
+                                🔒 Completed
+                              </span>
+                            </div>
+                          </td>
+
+                          <td style={{ padding: '10px 14px' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              placeholder="Optional"
+                              value={row.score}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setAttendanceEdits(prev => ({
+                                  ...prev,
+                                  [recId]: { ...prev[recId], score: val }
+                                }));
                               }}
-                            >
-                              🔒 Completed
-                            </span>
-                          </div>
-                        </td>
-
-                        <td style={{ padding: '10px 14px' }}>
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            placeholder="Optional"
-                            value={row.score}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setAttendanceEdits(prev => ({
-                                ...prev,
-                                [recId]: { ...prev[recId], score: val }
-                              }));
-                            }}
-                            style={{ width: '80px', padding: '6px 8px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12px' }}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                              style={{ width: '80px', padding: '6px 8px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12px' }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             {/* Footer */}
@@ -1204,8 +1194,17 @@ export default function Sessions() {
                 <button
                   type="button"
                   onClick={handleSaveAttendance}
-                  disabled={savingAttendance}
-                  style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', background: '#0284c7', color: '#ffffff', fontWeight: 700, fontSize: '12.5px', cursor: 'pointer' }}
+                  disabled={savingAttendance || Object.keys(attendanceEdits).length === 0}
+                  style={{ 
+                    padding: '8px 18px', 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    background: Object.keys(attendanceEdits).length === 0 ? '#94a3b8' : '#0284c7', 
+                    color: '#ffffff', 
+                    fontWeight: 700, 
+                    fontSize: '12.5px', 
+                    cursor: (savingAttendance || Object.keys(attendanceEdits).length === 0) ? 'not-allowed' : 'pointer' 
+                  }}
                 >
                   {savingAttendance ? 'Saving...' : 'Submit Attendance & Ready for Sign-Off'}
                 </button>
