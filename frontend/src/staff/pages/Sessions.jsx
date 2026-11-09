@@ -281,72 +281,138 @@ export default function Sessions() {
   };
 
   return (
-    <div className="am-sessions-page" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="am-sessions-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Account Manager Sessions Cockpit Hero Stage (Sunset Amber / Deep Bronze) */}
+      <section className="trainee-hero-stage am-sessions-hero-stage">
+        <div className="trainee-hero-content">
+          <div className="trainee-hero-badge" style={{ background: 'rgba(251, 146, 60, 0.15)', borderColor: 'rgba(251, 146, 60, 0.3)', color: '#ffedd5' }}>
+            <Calendar size={13} style={{ color: '#fb923c' }} />
+            <span>OPERATIONS DISPATCH &bull; COHORT SCHEDULING &amp; ATTENDANCE</span>
+          </div>
 
-      {/* Client Switcher & Actions Strip */}
-      <div
-        style={{
-          background: isDark ? '#111827' : '#ffffff',
-          borderRadius: '20px',
-          padding: '16px 24px',
-          border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Building2 size={18} color="#0284c7" />
-          <span style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#94a3b8' : '#64748b' }}>
-            CLIENT SCOPE:
-          </span>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <h2 className="trainee-hero-headline">Training Sessions &amp; Cohorts</h2>
+          <p className="trainee-hero-sub">
+            Coordinate enterprise cohort scheduling, manage participant attendance rosters, and dispatch completed evaluations to trainers for certification.
+          </p>
+
+          <div className="trainee-hero-actions">
             <button
               type="button"
-              className={`adm-chip ${selectedClient === 'ALL' ? 'adm-chip--solid' : ''}`}
-              onClick={() => setSelectedClient('ALL')}
-              style={{ cursor: 'pointer' }}
+              className="trainee-hero-primary-btn am-sessions-primary-btn"
+              onClick={handleOpenNewModal}
+              title="Schedule a new enterprise training session"
             >
-              All Clients ({assignedClients.length})
+              <Plus size={15} />
+              <span>New Training Session</span>
             </button>
-            {assignedClients.map((client) => (
-              <button
-                key={client}
-                type="button"
-                className={`adm-chip ${selectedClient === client ? 'adm-chip--solid' : ''}`}
-                onClick={() => setSelectedClient(client)}
-                style={{ cursor: 'pointer', fontFamily: 'monospace' }}
-              >
-                {client}
-              </button>
-            ))}
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenNewModal}
+        {/* 4-Cell Bento Telemetry Grid for Sessions */}
+        <div className="trainee-hero-metrics-panel">
+          <div className="hero-metric-cell am-session-metric-cell">
+            <span className="metric-tag">TOTAL COHORTS</span>
+            <div className="metric-num">
+              {filteredSessions.length}
+              <span className="metric-unit">SESS</span>
+            </div>
+            <span className="metric-sub-label">Filtered scope count</span>
+          </div>
+
+          <div className="hero-metric-cell am-session-metric-cell">
+            <span className="metric-tag">NEEDS ATTENDANCE</span>
+            <div className="metric-num" style={{ color: '#fbbf24' }}>
+              {columnNeedsAttendance.length}
+              <span className="metric-unit" style={{ color: '#fde68a' }}>ROSTER</span>
+            </div>
+            <span className="metric-sub-label">Awaiting attendance input</span>
+          </div>
+
+          <div className="hero-metric-cell am-session-metric-cell">
+            <span className="metric-tag">AWAITING SIGN-OFF</span>
+            <div className="metric-num" style={{ color: '#38bdf8' }}>
+              {columnAwaitingSignOff.length}
+              <span className="metric-unit" style={{ color: '#7dd3fc' }}>REVIEW</span>
+            </div>
+            <span className="metric-sub-label">With certified trainer</span>
+          </div>
+
+          <div className="hero-metric-cell am-session-metric-cell">
+            <span className="metric-tag">COMPLETED COHORTS</span>
+            <div className="metric-num" style={{ color: '#34d399' }}>
+              {columnCompleted.length}
+              <span className="metric-unit" style={{ color: '#6ee7b7' }}>DONE</span>
+            </div>
+            <span className="metric-sub-label">Certificates issued</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Glassmorphic Container for Controls & Kanban Board */}
+      <div className="adm-panel adm-vault-panel" style={{ padding: '24px 28px' }}>
+        {/* Client Switcher & Actions Strip */}
+        <div
           style={{
-            padding: '10px 18px',
-            borderRadius: '12px',
-            background: '#ff7a1a',
-            color: '#ffffff',
-            border: 'none',
-            fontWeight: 800,
-            fontSize: '13px',
-            cursor: 'pointer',
-            display: 'inline-flex',
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 4px 14px rgba(255, 122, 26, 0.25)'
+            flexWrap: 'wrap',
+            gap: '16px',
+            marginBottom: '20px',
+            paddingBottom: '20px',
+            borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9'
           }}
         >
-          <Plus size={16} />
-          <span>New Training Session</span>
-        </button>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <Building2 size={18} color="#ea580c" />
+            <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.04em', color: isDark ? '#cbd5e1' : '#334155' }}>
+              CLIENT SCOPE:
+            </span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className={`adm-chip ${selectedClient === 'ALL' ? 'adm-chip--solid' : ''}`}
+                onClick={() => setSelectedClient('ALL')}
+                style={{ 
+                  cursor: 'pointer',
+                  borderRadius: '10px',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  padding: '6px 14px',
+                  background: selectedClient === 'ALL' ? '#ea580c' : (isDark ? '#1e293b' : '#f1f5f9'),
+                  color: selectedClient === 'ALL' ? '#ffffff' : (isDark ? '#cbd5e1' : '#475569'),
+                  border: selectedClient === 'ALL' ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0')
+                }}
+              >
+                All Clients ({assignedClients.length})
+              </button>
+              {assignedClients.map((client) => {
+                const isSelected = selectedClient === client;
+                return (
+                  <button
+                    key={client}
+                    type="button"
+                    onClick={() => setSelectedClient(client)}
+                    style={{ 
+                      cursor: 'pointer', 
+                      fontFamily: 'var(--font-mono, monospace)',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      fontSize: '11.5px',
+                      padding: '6px 14px',
+                      background: isSelected ? '#ea580c' : (isDark ? '#1e293b' : '#f1f5f9'),
+                      color: isSelected ? '#ffffff' : (isDark ? '#cbd5e1' : '#475569'),
+                      border: isSelected ? 'none' : (isDark ? '1px solid #334155' : '1px solid #e2e8f0'),
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {client}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
       {/* Server Loading Error Banner */}
       {loadError && (
@@ -848,6 +914,7 @@ export default function Sessions() {
           </div>
         </div>
 
+      </div>
       </div>
 
       {/* New Session Modal */}

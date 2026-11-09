@@ -20,14 +20,6 @@ export default function StaffLayout({ activeTab, children }) {
   const renderHeader = () => {
     switch (activeTab) {
       case 'sessions':
-        return (
-          <PageHeader
-            title="Sessions"
-            subtitle="Training cohort scheduling, participant attendance tracking, and trainer hand-off. Click any active session to edit."
-            badge={assignedScope ? `CLIENTS: ${assignedScope}` : 'ACTIVE SESSIONS'}
-            badgeType="success"
-          />
-        );
       case 'portfolios':
         return null;
       case 'reports':

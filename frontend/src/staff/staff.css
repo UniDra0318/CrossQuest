@@ -48,6 +48,38 @@
 
 /* portfolio cards */
 /* ==========================================================================
+   AM SESSIONS & COHORTS - HIGH-END COCKPIT
+   ========================================================================== */
+
+.am-sessions-hero-stage {
+  background: linear-gradient(135deg, #2b1102 0%, #4a2004 50%, #7c2d12 100%) !important;
+  border: 1px solid rgba(251, 146, 60, 0.25) !important;
+  box-shadow: 0 12px 36px rgba(74, 32, 4, 0.25) !important;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.am-sessions-primary-btn {
+  background: #ea580c !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35) !important;
+}
+
+.am-sessions-primary-btn:hover:not(:disabled) {
+  background: #c2410c !important;
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.45) !important;
+}
+
+.am-session-metric-cell {
+  background: rgba(43, 17, 2, 0.55) !important;
+  border-color: rgba(251, 146, 60, 0.18) !important;
+}
+
+.am-session-metric-cell:hover {
+  border-color: rgba(251, 146, 60, 0.38) !important;
+}
+
+/* ==========================================================================
    AM CLIENT PORTFOLIOS - HIGH-END COCKPIT & CARDS
    ========================================================================== */
 
