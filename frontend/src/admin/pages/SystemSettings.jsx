@@ -12,7 +12,8 @@ import {
   Clock,
   Calendar,
   Save,
-  AlertCircle
+  AlertCircle,
+  ShieldAlert
 } from 'lucide-react';
 import { batchUpdateAnomalyRules, fetchAnomalyRules } from '../../services/api';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -48,6 +49,10 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
   const [modalFailedMinutes, setModalFailedMinutes] = useState(10);
   const [modalBurstCount, setModalBurstCount] = useState(5);
   const [modalBurstMinutes, setModalBurstMinutes] = useState(60);
+  // Table 13 Role-Based Record Access Thresholds (OI-08, Table 13)
+  const [modalAmAccessThreshold, setModalAmAccessThreshold] = useState(20);
+  const [modalFinanceAccessThreshold, setModalFinanceAccessThreshold] = useState(30);
+  const [modalAdminAccessThreshold, setModalAdminAccessThreshold] = useState(50);
   const [modalReason, setModalReason] = useState('');
 
   // Sync when liveRules prop updates or fetch if empty
@@ -93,6 +98,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
 
   // Open modal and pre-fill current active values (A2: audit reason starts EMPTY)
   const handleOpenModal = () => {
+    const rHighAccess = currentRules.find(r => r.rule_code === 'R3_HIGH_RECORD_ACCESS');
     setModalStartHour(startHour);
     setModalEndHour(endHour);
     setModalTz(tz);
@@ -101,6 +107,9 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
     setModalFailedMinutes(failedMinutes);
     setModalBurstCount(burstThreshold);
     setModalBurstMinutes(burstMinutes);
+    setModalAmAccessThreshold(rHighAccess?.parameters?.thresholds?.account_manager || 20);
+    setModalFinanceAccessThreshold(rHighAccess?.parameters?.thresholds?.finance || 30);
+    setModalAdminAccessThreshold(rHighAccess?.parameters?.thresholds?.admin || 50);
     setModalReason(''); // A2: Must start empty
     setModalError(null);
     setIsTuneModalOpen(true);
@@ -160,11 +169,28 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
       return;
     }
 
+    // Table 13 Role Bounds Validation (1 to 1,000)
+    const parsedAm = parseInt(modalAmAccessThreshold, 10);
+    const parsedFin = parseInt(modalFinanceAccessThreshold, 10);
+    const parsedAdm = parseInt(modalAdminAccessThreshold, 10);
+    if (isNaN(parsedAm) || parsedAm < 1 || parsedAm > 1000) {
+      setModalError('Account Manager record access threshold must be between 1 and 1,000 (Table 13).');
+      return;
+    }
+    if (isNaN(parsedFin) || parsedFin < 1 || parsedFin > 1000) {
+      setModalError('Finance record access threshold must be between 1 and 1,000 (Table 13).');
+      return;
+    }
+    if (isNaN(parsedAdm) || parsedAdm < 1 || parsedAdm > 1000) {
+      setModalError('Administrator record access threshold must be between 1 and 1,000 (Table 13).');
+      return;
+    }
+
     setIsSaving(true);
     const cleanReason = modalReason.trim();
 
     try {
-      // A6: Atomic Batch Update - all 3 rules committed together
+      // A6: Atomic Batch Update - all 4 rules committed together
       const updatedRules = await batchUpdateAnomalyRules({
         rules: [
           {
@@ -190,6 +216,17 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
               ...(rBurst?.parameters || {}), 
               threshold: parsedBurstCount, 
               window_minutes: parsedBurstMinutes 
+            }
+          },
+          {
+            rule_code: 'R3_HIGH_RECORD_ACCESS',
+            parameters: {
+              thresholds: {
+                account_manager: parsedAm,
+                finance: parsedFin,
+                admin: parsedAdm
+              },
+              window_minutes: parsedBurstMinutes
             }
           }
         ],
@@ -256,7 +293,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
               <p>Cryptographic parameters & master authority specs</p>
             </div>
           </div>
-          <div className="adm-field" style={{ marginBottom: '16px' }}>
+          <div className="adm-field adm-field--mb">
             <div className="adm-field__icon">
               <Shield size={20} />
             </div>
@@ -265,7 +302,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
               <div className="adm-field__val">{currentSettings.accessControl.cryptoScheme}</div>
             </div>
           </div>
-          <div className="adm-field" style={{ marginBottom: '16px' }}>
+          <div className="adm-field adm-field--mb">
             <div className="adm-field__icon">
               <Server size={20} />
             </div>
@@ -287,13 +324,13 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
 
         {/* Card 2: Anomaly Detection Thresholds */}
         <div className="adm-card">
-          <div className="adm-ptitle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div className="adm-ptitle adm-flex-between adm-w-full" style={{ flexWrap: 'wrap', gap: '8px' }}>
+            <div className="adm-flex-center adm-gap-14">
               <span style={{ background: '#ff7a1a' }}>
                 <Sliders size={22} />
               </span>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div className="adm-flex-center adm-gap-8" style={{ flexWrap: 'wrap' }}>
                   <h2 style={{ margin: 0 }}>Anomaly Detection Thresholds</h2>
                   {/* Approval Status Badge (A3) */}
                   <span 
@@ -347,8 +384,8 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
           </div>
 
           {/* Operating Window */}
-          <div className="adm-field adm-field--window" style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="adm-field adm-field--window adm-field--mb">
+            <div className="adm-flex-between">
               <span className="adm-label">STANDARD BUSINESS WINDOW</span>
               <strong style={{ fontSize: '13px', color: '#ff7a1a' }}>
                 {String(startHour).padStart(2, '0')}:00 – {String(endHour).padStart(2, '0')}:00 ({tz})
@@ -377,7 +414,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
           </div>
 
           {/* Threshold 1: Failed Attempts */}
-          <div className="adm-field adm-field--thr" style={{ marginBottom: '16px' }}>
+          <div className="adm-field adm-field--thr adm-field--mb">
             <div className="adm-thr__icon" style={{ background: '#d12a43' }}>
               <AlertTriangle size={20} />
             </div>
@@ -746,6 +783,90 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                     </div>
                   </div>
                 </div>
+
+                {/* Section 2b: Role-Based Record Access Thresholds (Table 13, R3_HIGH_RECORD_ACCESS) */}
+                <div style={{
+                  gridColumn: '1 / -1',
+                  background: isDark ? 'rgba(30, 41, 59, 0.4)' : '#f8fafc',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: isDark ? '1px solid #334155' : '1px solid #e2e8f0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <ShieldAlert size={15} color="#8b5cf6" />
+                    <strong style={{ fontSize: '12px', color: isDark ? '#f8fafc' : '#0f172a' }}>
+                      Table 13: Role-Based High Record Access Limits (records/window)
+                    </strong>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
+                        Account Manager:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={modalAmAccessThreshold}
+                        onChange={(e) => setModalAmAccessThreshold(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '6px 8px',
+                          borderRadius: '6px',
+                          border: isDark ? '1px solid #475569' : '1px solid #cbd5e1',
+                          background: isDark ? '#0f172a' : '#ffffff',
+                          color: isDark ? '#f8fafc' : '#0f172a',
+                          fontSize: '12.5px',
+                          fontWeight: 700
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
+                        Finance Staff:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={modalFinanceAccessThreshold}
+                        onChange={(e) => setModalFinanceAccessThreshold(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '6px 8px',
+                          borderRadius: '6px',
+                          border: isDark ? '1px solid #475569' : '1px solid #cbd5e1',
+                          background: isDark ? '#0f172a' : '#ffffff',
+                          color: isDark ? '#f8fafc' : '#0f172a',
+                          fontSize: '12.5px',
+                          fontWeight: 700
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
+                        Administrator:
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={modalAdminAccessThreshold}
+                        onChange={(e) => setModalAdminAccessThreshold(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '6px 8px',
+                          borderRadius: '6px',
+                          border: isDark ? '1px solid #475569' : '1px solid #cbd5e1',
+                          background: isDark ? '#0f172a' : '#ffffff',
+                          color: isDark ? '#f8fafc' : '#0f172a',
+                          fontSize: '12.5px',
+                          fontWeight: 700
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Section 3: Mandatory Audit Reason (A2: Required, empty by default) */}
@@ -762,16 +883,11 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                   }}
                   placeholder="Enter specific business justification for this threshold change..."
                   required
+                  className="adm-reason-textarea"
                   style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
                     border: isDark ? '1px solid #475569' : '1px solid #cbd5e1',
                     background: isDark ? '#0f172a' : '#ffffff',
-                    color: isDark ? '#f8fafc' : '#0f172a',
-                    fontSize: '12px',
-                    resize: 'none',
-                    boxSizing: 'border-box'
+                    color: isDark ? '#f8fafc' : '#0f172a'
                   }}
                 />
                 <span style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>

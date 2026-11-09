@@ -508,12 +508,12 @@ def edit_training_record(
                 detail="A training record cannot become Completed without official Trainer session sign-off."
             )
 
-    # Admin & Finance Mandatory Reason Check
+    # Mandatory Reason Check for Record Corrections (U-05, FR-08)
     if current_user.role in ("admin", "finance"):
         if not update_in.reason or not update_in.reason.strip():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="A mandatory explanation reason must be provided for Admin or Finance record modifications."
+                detail="A mandatory explanation reason must be provided for record modifications (U-05)."
             )
 
     # Save previous version to version history before modifying (DD-06, Section 3.5.2, p. 33)

@@ -762,9 +762,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           <div className="trainee-home-triad-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '28px' }}>
             
             {/* PILLAR 1: CURRENT COURSE */}
-            <div className="card section-card" style={{ borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid #e2e8f0', background: 'var(--cq-card-bg, #ffffff)' }}>
+            <div className="card section-card trainee-triad-card">
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div className="card-header-flex">
                   <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#6366f1', background: '#e0e7ff', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
                     1. Current Course
                   </span>
@@ -777,7 +777,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   {featuredCourse?.title || 'Agile Project Management & Scrum Framework'}
                 </h3>
                 <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
-                  Instructor: <strong>{featuredCourse?.instructor || 'Jordan Ramos (Trainer)'}</strong> &bull; Track: {featuredCourse?.category || 'Project Delivery'}
+                  Instructor: <strong>{featuredCourse?.instructor || 'Instructor not assigned'}</strong> &bull; Track: {featuredCourse?.category || 'Project Delivery'}
                 </p>
 
                 {/* Course Progress Bar */}
@@ -803,10 +803,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <button
                   type="button"
-                  className="btn-tactile btn-tactile-purple w-full"
+                  className="btn-tactile btn-tactile-purple btn-flex-center"
                   onClick={() => handleStartQuizById(featuredCourse?.id || 'quiz_agile_1')}
                   disabled={!isOnline}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
                 >
                   <Play size={14} fill="currentColor" />
                   <span>{featuredCourse?.completed ? 'Replay Course Module' : 'Continue Course'}</span>
@@ -815,9 +814,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             </div>
 
             {/* PILLAR 2: EXPIRING CREDENTIAL */}
-            <div className="card section-card" style={{ borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid #e2e8f0', background: 'var(--cq-card-bg, #ffffff)' }}>
+            <div className="card section-card trainee-triad-card">
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div className="card-header-flex">
                   <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: expiringCredential ? '#ea580c' : '#059669', background: expiringCredential ? '#ffedd5' : '#d1fae5', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
                     2. Expiring Credential
                   </span>
@@ -852,9 +851,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <button
                   type="button"
-                  className="btn-tactile btn-tactile-cyan w-full"
+                  className="btn-tactile btn-tactile-cyan btn-flex-center"
                   onClick={() => setActiveView && setActiveView('trainee_certs')}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
                 >
                   <FileCheck size={14} />
                   <span>Review &amp; Renew Credential</span>
@@ -863,9 +861,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             </div>
 
             {/* PILLAR 3: NEXT QUIZ ASSESSMENT */}
-            <div className="card section-card" style={{ borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid #e2e8f0', background: 'var(--cq-card-bg, #ffffff)' }}>
+            <div className="card section-card trainee-triad-card">
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div className="card-header-flex">
                   <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#0891b2', background: '#cffafe', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
                     3. Next Quiz
                   </span>
@@ -882,7 +880,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 </p>
 
                 {/* Quiz Meta Details */}
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                <div className="card-badges-flex">
                   <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
                     {nextQuizItem?.questions?.length || 4} Questions
                   </span>
@@ -898,10 +896,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                 <button
                   type="button"
-                  className="btn-tactile btn-tactile-purple w-full"
+                  className="btn-tactile btn-tactile-purple btn-flex-center"
                   onClick={() => handleStartQuizById(nextQuizItem?.id || 'quiz_cloud_sec')}
                   disabled={!isOnline}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
                 >
                   <Play size={14} fill="currentColor" />
                   <span>Start Assessment Arena</span>

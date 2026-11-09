@@ -309,6 +309,16 @@ export async function fetchStaffUsers(token) {
   return null;
 }
 
+export async function fetchTrainers(token) {
+  try {
+    const res = await authFetch(`${API_BASE}/users/trainers`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for trainers:", err);
+  }
+  return [];
+}
+
 export async function updateStaffAttributes(userId, attrs, token) {
   try {
     const res = await fetch(`${API_BASE}/users/${userId}/attributes`, {

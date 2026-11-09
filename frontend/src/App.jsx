@@ -228,9 +228,6 @@ function AppRoutes() {
 
       {/* Single Route Table generation with RoleGuard */}
       {ROUTES.map((route) => {
-        if (route.page === 'crypto_lab' && !import.meta.env.DEV) {
-          return null;
-        }
         return (
           <Route 
             key={route.path}

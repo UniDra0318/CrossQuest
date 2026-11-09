@@ -9,6 +9,28 @@ export default function Roster({ onNavigateTab }) {
   const [search, setSearch] = useState('');
   const [scopeFilter, setScopeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [savingTraineeId, setSavingTraineeId] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const onTeamChange = async (traineeId, newTeamName) => {
+    setSavingTraineeId(traineeId);
+    setToast(null);
+    try {
+      await handleAssignTeam(traineeId, newTeamName);
+      setToast({
+        type: 'success',
+        text: newTeamName ? `Breakout group updated to "${newTeamName}" (persisted to server).` : 'Team assignment cleared.'
+      });
+    } catch (err) {
+      setToast({
+        type: 'error',
+        text: err.message || 'Failed to update team on server. Previous team restored.'
+      });
+    } finally {
+      setSavingTraineeId(null);
+      setTimeout(() => setToast(null), 5000);
+    }
+  };
 
   const filtered = roster.filter((t) => {
     const matchesSearch =
@@ -48,6 +70,33 @@ export default function Roster({ onNavigateTab }) {
 
   return (
     <>
+      {/* Toast Notification Banner (U-12 Error and Success Feedback) */}
+      {toast && (
+        <div style={{
+          padding: '10px 16px',
+          marginBottom: '12px',
+          borderRadius: '8px',
+          fontSize: '12.5px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
+          color: toast.type === 'error' ? '#ef4444' : '#22c55e',
+          border: toast.type === 'error' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(34, 197, 94, 0.3)',
+          transition: 'all 0.2s ease'
+        }}>
+          <span>{toast.type === 'error' ? '⚠️ ' : '✅ '}{toast.text}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Search and Filters Bar */}
       <div className="stf-bar">
         <div className="stf-search">
@@ -133,7 +182,8 @@ export default function Roster({ onNavigateTab }) {
                   <div style={{ marginTop: '4px' }}>
                     <select
                       value={t.team || ''}
-                      onChange={(e) => handleAssignTeam(t.id, e.target.value)}
+                      disabled={savingTraineeId === t.id}
+                      onChange={(e) => onTeamChange(t.id, e.target.value)}
                       style={{
                         fontSize: '10.5px',
                         padding: '2px 6px',
@@ -142,11 +192,12 @@ export default function Roster({ onNavigateTab }) {
                         background: 'transparent',
                         color: t.team ? '#8b5cf6' : '#94a3b8',
                         fontWeight: 700,
-                        cursor: 'pointer'
+                        cursor: savingTraineeId === t.id ? 'wait' : 'pointer',
+                        opacity: savingTraineeId === t.id ? 0.6 : 1
                       }}
                       title="Assign team-building breakout group (U-12)"
                     >
-                      <option value="">Select Team</option>
+                      <option value="">{savingTraineeId === t.id ? 'Syncing...' : 'Select Team'}</option>
                       <option value="Team Alpha">🚩 Team Alpha</option>
                       <option value="Team Bravo">🛡️ Team Bravo</option>
                       <option value="Team Charlie">⚡ Team Charlie</option>

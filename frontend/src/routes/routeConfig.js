@@ -56,6 +56,7 @@ export const ROUTES = [
   { path: '/home/quizzes',      roles: ['trainee'], label: 'Quizzes',              page: 'trainee_quiz',      icon: GraduationCap },
   { path: '/home/badges',       roles: ['trainee'], label: 'Badges & Leaderboard', page: 'trainee_badges',    icon: Sparkles },
 
-  // Dev & Crypto Lab (Admin only)
+  // Cryptographic Lab (Admin Only - thesis defense & verification)
   { path: '/demo/crypto-lab',   roles: ['admin'], label: null, page: 'crypto_lab' },
+  { path: '/admin/crypto-lab',  roles: ['admin'], label: null, page: 'crypto_lab' },
 ];

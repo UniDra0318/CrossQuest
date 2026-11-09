@@ -424,28 +424,42 @@ export function TrainerProvider({ children }) {
   };
 
   const handleAssignTeam = async (traineeId, teamName) => {
-    // 1. Immediately update in-memory state
-    setRoster(prev => prev.map(t => (t.id === traineeId || t.traineeId === traineeId) ? { ...t, team: teamName } : t));
+    // 1. Validate trainee and session identity (no fallbacks to unassociated sessions)
+    const traineeItem = roster.find(t => t.id === traineeId || t.traineeId === traineeId);
+    if (!traineeItem) {
+      throw new Error("Trainee could not be found in active cohort roster.");
+    }
+    const sessionId = traineeItem.sessionId;
+    if (!sessionId) {
+      throw new Error(`Trainee "${traineeItem.name}" is not associated with an active training session.`);
+    }
+    const actualTraineeId = traineeItem.traineeId || traineeId;
 
-    // 2. Persist to backend GAM-03 endpoints
-    try {
-      const traineeItem = roster.find(t => t.id === traineeId || t.traineeId === traineeId);
-      const sessionId = traineeItem?.sessionId || selectedSessionId || (sessions[0]?.id);
-      const actualTraineeId = traineeItem?.traineeId || traineeId;
-
-      if (sessionId && actualTraineeId && teamName) {
-        let currentTeams = await fetchSessionTeams(sessionId, token).catch(() => []);
-        let targetTeam = currentTeams.find(tm => tm.team_name === teamName);
-        if (!targetTeam) {
-          targetTeam = await createSessionTeam(sessionId, teamName, token).catch(() => null);
-        }
-        if (targetTeam?.id) {
-          await assignTraineeToTeam(targetTeam.id, actualTraineeId, token).catch(() => null);
+    // 2. Await server persistence via GAM-03 endpoints
+    if (teamName) {
+      const currentTeams = await fetchSessionTeams(sessionId, token);
+      let targetTeam = (currentTeams || []).find(tm => tm.team_name.toLowerCase() === teamName.toLowerCase());
+      if (!targetTeam) {
+        targetTeam = await createSessionTeam(sessionId, teamName, token);
+      }
+      if (!targetTeam || !targetTeam.id) {
+        throw new Error(`Failed to initialize breakout team "${teamName}" on server.`);
+      }
+      await assignTraineeToTeam(targetTeam.id, actualTraineeId, token);
+    } else {
+      // Remove from team if cleared
+      const currentTeams = await fetchSessionTeams(sessionId, token);
+      for (const tm of (currentTeams || [])) {
+        const mem = (tm.members || []).find(m => m.trainee_id === actualTraineeId);
+        if (mem) {
+          await removeTraineeFromTeam(tm.id, actualTraineeId, token);
         }
       }
-    } catch (err) {
-      console.warn("Could not sync team assignment to server:", err);
     }
+
+    // 3. Only update local state AFTER server confirms success (no fake-save)
+    setRoster(prev => prev.map(t => (t.id === traineeId || t.traineeId === traineeId) ? { ...t, team: teamName || null } : t));
+    return { success: true, teamName };
   };
 
   const exportRosterCsv = () => {

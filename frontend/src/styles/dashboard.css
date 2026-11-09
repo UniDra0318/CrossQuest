@@ -605,3 +605,33 @@
     padding-bottom: 80px !important;
   }
 }
+
+/* Reusable Dashboard Triad Pillar Classes */
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.btn-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.card-badges-flex {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.trainee-triad-card {
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #e2e8f0;
+  background: var(--cq-card-bg, #ffffff);
+}

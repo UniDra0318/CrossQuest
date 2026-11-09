@@ -89,6 +89,26 @@ def get_system_overview(
     )
 
 
+@router.get("/trainers", response_model=List[UserResponse])
+def list_trainers(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Lists certified training instructors for session assignment (FR-01, FR-02).
+    Permitted for Administrators, Account Managers, and Trainers.
+    """
+    if current_user.role not in ("admin", "account_manager", "trainer"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: Only staff with session planning authority can list trainers."
+        )
+    trainers = db.query(User).filter(User.role == "trainer", User.is_active == True).all()
+    for t in trainers:
+        if not t.clearance_level:
+            t.clearance_level = 1
+    return trainers
+
+
 @router.get("/", response_model=List[UserResponse])
 def list_users(
     db: Session = Depends(get_db),

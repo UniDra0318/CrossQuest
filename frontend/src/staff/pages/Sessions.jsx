@@ -27,6 +27,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getTrainingSessions, createTrainingSession, updateParticipantAttendance, getStaffRecords } from '../../api/staff';
+import { fetchTrainers } from '../../services/api';
 
 const DEFAULT_COURSES = [
   'Agile PME & Project Management Challenge',
@@ -34,13 +35,6 @@ const DEFAULT_COURSES = [
   'Supervisory Mastery & High-Impact Coaching',
   'Business Continuity & ISO 31000 Risk Management',
   'Cybersecurity Fundamentals & CP-ABE Access Control'
-];
-
-const DEFAULT_TRAINERS = [
-  { id: 'trainer-jordan', name: 'Jordan Ramos', title: 'Lead Technical Trainer' },
-  { id: 'trainer-billy', name: 'Billy Fernandez', title: 'Senior Cloud Trainer' },
-  { id: 'trainer-jobert', name: 'Jobert Cruz', title: 'Enterprise Data Trainer' },
-  { id: 'trainer-owen', name: 'Owen Castillo', title: 'Security & App Dev Trainer' }
 ];
 
 const formatSessionDate = (dateStr) => {
@@ -89,6 +83,7 @@ export default function Sessions() {
   const [showNewModal, setShowNewModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState(null);
+  const [availableTrainers, setAvailableTrainers] = useState([]);
   const [newSession, setNewSession] = useState({
     course_name: DEFAULT_COURSES[0],
     session_code: '',
@@ -97,7 +92,7 @@ export default function Sessions() {
     delivery_mode: 'Online',
     venue: 'Online (Virtual Meeting)',
     client_code: assignedClients[0] || 'CORP_ALPHA',
-    trainer_name: DEFAULT_TRAINERS[0].name,
+    trainer_name: '',
     participants_input: ''
   });
 
@@ -109,10 +104,19 @@ export default function Sessions() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [sessList, recList] = await Promise.all([
+      const [sessList, recList, trainersRes] = await Promise.all([
         getTrainingSessions(),
-        getStaffRecords()
+        getStaffRecords(),
+        fetchTrainers(token).catch(() => [])
       ]);
+
+      if (trainersRes && trainersRes.length > 0) {
+        setAvailableTrainers(trainersRes.map(t => ({
+          id: t.id,
+          name: t.full_name || t.name,
+          title: t.attributes?.title || 'Certified Instructor'
+        })));
+      }
 
       if (sessList && sessList.length > 0) {
         setSessions(sessList);
@@ -130,7 +134,7 @@ export default function Sessions() {
             delivery_mode: 'Online',
             trainer_signed_off: false,
             needs_attendance: true,
-            trainers: ['Jordan Ramos']
+            trainers: []
           },
           {
             id: 'sess-02',
@@ -143,7 +147,7 @@ export default function Sessions() {
             delivery_mode: 'F2F',
             trainer_signed_off: false,
             needs_attendance: false,
-            trainers: ['Billy Fernandez']
+            trainers: []
           },
           {
             id: 'sess-03',
@@ -211,7 +215,7 @@ export default function Sessions() {
       delivery_mode: 'Online',
       venue: 'Online (Virtual Meeting)',
       client_code: assignedClients[0] || 'CORP_ALPHA',
-      trainer_name: DEFAULT_TRAINERS[0].name,
+      trainer_name: availableTrainers[0]?.name || '',
       participants_input: ''
     });
     setShowNewModal(true);
@@ -938,7 +942,10 @@ export default function Sessions() {
                     onChange={(e) => setNewSession({ ...newSession, trainer_name: e.target.value })}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
                   >
-                    {DEFAULT_TRAINERS.map(t => <option key={t.id} value={t.name}>{t.name} ({t.title})</option>)}
+                    <option value="">-- Select Assigned Trainer --</option>
+                    {availableTrainers.map(t => (
+                      <option key={t.id} value={t.name}>{t.name} ({t.title})</option>
+                    ))}
                   </select>
                 </div>
               </div>
