@@ -1346,6 +1346,160 @@ html.dark .adm-level i.on,
 }
 
 /* ==========================================================================
+   MASTER RECORD VAULT CONTAINER & DATA GRID DARK MODE OVERRIDES
+   ========================================================================== */
+
+/* Vault Hero Bar */
+html.dark .adm-vault-hero-bar,
+[data-theme="dark"] .adm-vault-hero-bar {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%), #0b1120 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .adm-vault-hero-bar__title,
+[data-theme="dark"] .adm-vault-hero-bar__title {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-vault-hero-bar__sub,
+[data-theme="dark"] .adm-vault-hero-bar__sub {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-vault-hero-bar__metrics,
+[data-theme="dark"] .adm-vault-hero-bar__metrics {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .adm-vault-metric-tile__label,
+[data-theme="dark"] .adm-vault-metric-tile__label {
+  color: #64748b !important;
+}
+
+html.dark .adm-vault-metric-tile__num,
+[data-theme="dark"] .adm-vault-metric-tile__num {
+  color: #f8fafc !important;
+}
+
+/* Vault Main Panel */
+html.dark .adm-vault-panel,
+[data-theme="dark"] .adm-vault-panel {
+  background: #0b1120 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .adm-vault-controls,
+[data-theme="dark"] .adm-vault-controls {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .adm-vault-search,
+[data-theme="dark"] .adm-vault-search {
+  background: #0f172a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .adm-vault-search input,
+[data-theme="dark"] .adm-vault-search input {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-vault-filter-toggle,
+[data-theme="dark"] .adm-vault-filter-toggle {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .adm-vault-export-btn,
+[data-theme="dark"] .adm-vault-export-btn {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .adm-vault-export-btn:hover:not(:disabled),
+[data-theme="dark"] .adm-vault-export-btn:hover:not(:disabled) {
+  background: #334155 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Vault Table Grid Header & Rows */
+html.dark .adm-vault-grid-header,
+[data-theme="dark"] .adm-vault-grid-header {
+  background: #090e1a !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-vault-row,
+[data-theme="dark"] .adm-vault-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: transparent !important;
+}
+
+html.dark .adm-vault-row:hover,
+[data-theme="dark"] .adm-vault-row:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+html.dark .adm-vault-row.is-deleted,
+[data-theme="dark"] .adm-vault-row.is-deleted {
+  background: rgba(239, 68, 68, 0.06) !important;
+}
+
+html.dark .adm-vault-cell-recid code,
+[data-theme="dark"] .adm-vault-cell-recid code {
+  color: #c4b5fd !important;
+}
+
+html.dark .adm-vault-person-text strong,
+[data-theme="dark"] .adm-vault-person-text strong {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-vault-person-text .adm-mono,
+[data-theme="dark"] .adm-vault-person-text .adm-mono {
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-vault-cell-course span,
+[data-theme="dark"] .adm-vault-cell-course span {
+  color: #f8fafc !important;
+}
+
+html.dark .adm-vault-policy-badge,
+[data-theme="dark"] .adm-vault-policy-badge {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #93c5fd !important;
+}
+
+html.dark .adm-vault-row-action-btn,
+[data-theme="dark"] .adm-vault-row-action-btn {
+  background: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .adm-vault-row-action-btn:hover,
+[data-theme="dark"] .adm-vault-row-action-btn:hover {
+  background: #334155 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+html.dark .adm-vault-pagination-wrap,
+[data-theme="dark"] .adm-vault-pagination-wrap {
+  background: #0b1120 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ==========================================================================
    Crossworks Staff Portal Dark Mode (.stf-*)
    ========================================================================== */
 

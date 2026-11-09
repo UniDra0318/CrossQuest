@@ -1731,3 +1731,475 @@ button:disabled {
   font-weight: 600;
   color: #b45309;
 }
+
+/* ==========================================================================
+   MASTER RECORD VAULT ENHANCED CONTAINER & HIGH-END DATA GRID
+   ========================================================================== */
+
+/* Vault Hero Bar */
+.adm-vault-hero-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 28px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(14, 165, 233, 0.04) 100%), #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.adm-vault-hero-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #7c3aed 0%, #0284c7 50%, #10b981 100%);
+}
+
+.adm-vault-hero-bar__left {
+  flex: 1 1 450px;
+  min-width: 0;
+}
+
+.adm-vault-hero-bar__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  font: 700 9.5px var(--font-mono);
+  letter-spacing: 0.12em;
+  color: #6d28d9;
+  margin-bottom: 8px;
+}
+
+.adm-vault-hero-bar__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 6px #7c3aed;
+}
+
+.adm-vault-hero-bar__title {
+  font: 800 clamp(20px, 2.2vw, 25px)/1.2 var(--font-display);
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  margin: 0 0 4px;
+}
+
+.adm-vault-hero-bar__sub {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 0;
+  max-width: 620px;
+}
+
+.adm-vault-hero-bar__metrics {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.adm-vault-metric-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.adm-vault-metric-tile__label {
+  font: 700 9px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+}
+
+.adm-vault-metric-tile__num {
+  font: 800 17px/1 var(--font-display);
+  color: #0f172a;
+}
+
+/* Vault Main Panel Box */
+.adm-vault-panel {
+  margin-top: 0 !important;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+}
+
+.adm-vault-controls {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.adm-vault-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 420px;
+  flex-wrap: wrap;
+}
+
+.adm-vault-search {
+  max-width: 380px;
+  flex: 1;
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 10px;
+  padding: 0 14px;
+}
+
+.adm-vault-search input {
+  padding: 10px 0;
+  font-size: 13px;
+}
+
+.adm-vault-clear-search {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  display: inline-flex;
+  padding: 2px;
+}
+
+.adm-vault-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  background: #f1f5f9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  transition: all 0.15s ease;
+}
+
+.adm-vault-filter-toggle:hover {
+  background: #e2e8f0;
+}
+
+.adm-vault-filter-toggle input {
+  cursor: pointer;
+  accent-color: #7c3aed;
+}
+
+.adm-vault-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adm-vault-btn-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adm-vault-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  color: #334155;
+  font: 700 12px var(--font-body);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.15s ease;
+}
+
+.adm-vault-export-btn:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.adm-vault-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  color: #ffffff;
+  border: none;
+  font: 700 12px var(--font-body);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  transition: all 0.15s ease;
+}
+
+.adm-vault-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.35);
+}
+
+.adm-vault-toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.adm-vault-toast--success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.adm-vault-toast--error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* Vault Table Rows and Cells */
+.adm-vault-table {
+  margin-top: 0 !important;
+}
+
+.adm-vault-grid-header {
+  grid-template-columns: 110px 1.1fr 1.1fr 1.1fr 1.3fr 110px 130px;
+  background: #f8fafc;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+  padding: 12px 24px;
+  font: 700 10.5px var(--font-mono);
+  letter-spacing: 0.1em;
+  color: #64748b;
+}
+
+.adm-vault-row {
+  grid-template-columns: 110px 1.1fr 1.1fr 1.1fr 1.3fr 110px 130px;
+  padding: 14px 24px;
+  border-top: 1px solid rgba(241, 245, 249, 0.95);
+  transition: background-color 0.12s ease;
+}
+
+.adm-vault-row:hover {
+  background-color: rgba(248, 250, 252, 0.75);
+}
+
+.adm-vault-row.is-deleted {
+  opacity: 0.6;
+  background: rgba(254, 242, 242, 0.5);
+}
+
+.adm-vault-cell-recid {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.adm-vault-rec-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.adm-vault-cell-recid code {
+  font: 700 11.5px var(--font-mono);
+  color: #4b1ca3;
+}
+
+.adm-vault-cell-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-vault-avatar {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 9px !important;
+  font-size: 11.5px !important;
+  box-shadow: 0 2px 5px rgba(124, 58, 237, 0.2) !important;
+}
+
+.adm-vault-person-text strong {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.adm-vault-person-text .adm-mono {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.adm-vault-org-tag {
+  background: rgba(99, 102, 241, 0.08) !important;
+  color: #4f46e5 !important;
+  border: 1px solid rgba(99, 102, 241, 0.18) !important;
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  font: 700 9.5px var(--font-mono) !important;
+  letter-spacing: 0.06em !important;
+}
+
+.adm-vault-cell-course span {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #1e293b;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.adm-vault-policy-badge {
+  background: #f1f5f9 !important;
+  border: 1px solid rgba(203, 213, 225, 0.8) !important;
+  color: #0369a1 !important;
+  border-radius: 6px !important;
+  padding: 5px 8px !important;
+  font: 500 10.5px/1.4 var(--font-mono) !important;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-vault-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 10px var(--font-mono);
+  letter-spacing: 0.06em;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+.adm-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.adm-status-dot--green {
+  background: #10b981;
+  box-shadow: 0 0 5px #10b981;
+}
+
+.adm-status-dot--amber {
+  background: #f59e0b;
+  box-shadow: 0 0 5px #f59e0b;
+}
+
+.adm-vault-cell-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.adm-vault-action-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.adm-vault-row-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.adm-vault-row-action-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.adm-vault-row-action-btn--cert {
+  color: #f97316;
+}
+
+.adm-vault-row-action-btn--cert:hover {
+  color: #ea580c;
+  background: rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.adm-vault-row-action-btn--delete {
+  color: #f43f5e;
+}
+
+.adm-vault-row-action-btn--delete:hover {
+  color: #e11d48;
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+.adm-vault-restore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #047857;
+  font: 700 11px var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.adm-vault-restore-btn:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.adm-vault-pagination-wrap {
+  padding: 14px 24px;
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+  background: #ffffff;
+}

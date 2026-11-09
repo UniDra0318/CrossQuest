@@ -276,211 +276,264 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
   };
 
   return (
-    <div className="adm-panel" style={{ marginTop: '24px' }}>
-      <div className="adm-panel__head">
-        <div>
-          <h2>Master Record Vault</h2>
-          <span className="adm-mono">Global store of multi-tenant cryptographic certificates & training records</span>
+    <div className="adm-vault-enclave" style={{ marginTop: '20px' }}>
+      {/* Vault Header Bar with Summary Metrics */}
+      <div className="adm-vault-hero-bar">
+        <div className="adm-vault-hero-bar__left">
+          <div className="adm-vault-hero-bar__tag">
+            <span className="adm-vault-hero-bar__dot" />
+            <span>IMMUTABLE CRYPTOGRAPHIC REGISTRY</span>
+          </div>
+          <h2 className="adm-vault-hero-bar__title">Master Record Vault</h2>
+          <p className="adm-vault-hero-bar__sub">
+            Global store of multi-tenant cryptographic certificates and training evaluations secured with Charm CP-ABE.
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <TablePaginationCompact
+
+        <div className="adm-vault-hero-bar__metrics">
+          <div className="adm-vault-metric-tile">
+            <span className="adm-vault-metric-tile__label">TOTAL RECORDS</span>
+            <span className="adm-vault-metric-tile__num">{localRecords.length}</span>
+          </div>
+          <div className="adm-vault-metric-tile">
+            <span className="adm-vault-metric-tile__label">CERTIFIED</span>
+            <span className="adm-vault-metric-tile__num text-emerald">
+              {localRecords.filter(r => r.status?.toUpperCase() === 'COMPLETED').length}
+            </span>
+          </div>
+          <div className="adm-vault-metric-tile">
+            <span className="adm-vault-metric-tile__label">ACTIVE ENCLAVES</span>
+            <span className="adm-vault-metric-tile__num text-indigo">
+              {new Set(localRecords.map(r => r.org)).size}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Vault Panel Container */}
+      <div className="adm-panel adm-vault-panel">
+        <div className="adm-panel__head adm-vault-controls">
+          <div className="adm-vault-search-wrap">
+            <div className="adm-search adm-vault-search">
+              <Search size={15} />
+              <input 
+                type="text" 
+                placeholder="Search by trainee, course, record ID, or organization..." 
+                value={recordSearch}
+                onChange={(e) => setRecordSearch(e.target.value)}
+              />
+              {recordSearch && (
+                <button 
+                  type="button" 
+                  onClick={() => setRecordSearch('')} 
+                  className="adm-vault-clear-search"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            <label className="adm-vault-filter-toggle">
+              <input 
+                type="checkbox"
+                checked={showDeleted}
+                onChange={(e) => setShowDeleted(e.target.checked)}
+              />
+              <span>Show Soft-Deleted (U-07)</span>
+            </label>
+          </div>
+
+          <div className="adm-vault-actions-group">
+            <TablePaginationCompact
+              currentPage={recordPage}
+              totalItems={totalRecords}
+              pageSize={4}
+              onPageChange={setRecordPage}
+            />
+
+            <div className="adm-vault-btn-cluster">
+              <button 
+                type="button" 
+                className="adm-vault-export-btn"
+                onClick={handleExportAuditLogs}
+                disabled={exportingAuditLogs}
+                title="Download CSV access & security audit log"
+              >
+                <Download size={13} className={exportingAuditLogs ? 'spin-animation' : ''} />
+                <span>{exportingAuditLogs ? 'Exporting...' : 'Export Audit Logs (CSV)'}</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="adm-vault-export-btn"
+                onClick={handleExportVaultRecords}
+                disabled={exportingVaultRecords}
+                title="Download CSV training records vault"
+              >
+                <FileText size={13} className={exportingVaultRecords ? 'spin-animation' : ''} />
+                <span>{exportingVaultRecords ? 'Exporting...' : 'Export Vault (CSV)'}</span>
+              </button>
+
+              <button 
+                type="button" 
+                className="adm-vault-primary-btn"
+                onClick={() => { setIsAddRecordOpen(true); setAddError(null); }}
+                title="Create and encrypt a new training record (B5)"
+              >
+                <Plus size={14} />
+                <span>Add Master Record</span>
+              </button>
+            </div>
+          </div>
+
+          {vaultToast && (
+            <div className={`adm-vault-toast ${vaultToast.type === 'success' ? 'adm-vault-toast--success' : 'adm-vault-toast--error'}`}>
+              <CheckCircle2 size={14} />
+              <span>{vaultToast.text}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
+          <div className="adm-table adm-vault-table">
+            <div className="adm-grid adm-th adm-vault-grid-header">
+              <div>RECORD ID</div>
+              <div>TRAINEE</div>
+              <div>CLIENT ORGANIZATION</div>
+              <div>COURSE PROGRAM</div>
+              <div>ACCESS CONTROL POLICY</div>
+              <div style={{ textAlign: 'center' }}>STATUS</div>
+              <div style={{ textAlign: 'right' }}>ACTIONS</div>
+            </div>
+
+            {filteredRecords && filteredRecords.length > 0 ? (
+              pagedRecords.map((r) => {
+                const isDeleted = Boolean(r.deleted_at);
+                const isCompleted = r.status?.toUpperCase() === 'COMPLETED';
+                return (
+                  <div 
+                    key={r.id} 
+                    className={`adm-row adm-grid adm-vault-row ${isDeleted ? 'is-deleted' : ''}`}
+                  >
+                    <div className="adm-vault-cell-recid">
+                      <span className="adm-vault-rec-icon">
+                        <FileText size={13} />
+                      </span>
+                      <code>{r.id}</code>
+                    </div>
+
+                    <div className="adm-person adm-vault-cell-person">
+                      <div 
+                        className="adm-av adm-av--sq adm-vault-avatar" 
+                        style={{ 
+                          background: isDeleted 
+                            ? '#64748b' 
+                            : 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', 
+                          color: '#fff' 
+                        }}
+                      >
+                        {(r.trainee || 'U').slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="adm-vault-person-text">
+                        <strong>{r.trainee}</strong>
+                        <span className="adm-mono">{r.email}</span>
+                      </div>
+                    </div>
+
+                    <div className="adm-vault-cell-org">
+                      <span className="adm-org adm-vault-org-tag" title={r.org}>
+                        {r.org}
+                      </span>
+                    </div>
+
+                    <div className="adm-course adm-vault-cell-course">
+                      <span title={r.course}>{r.course}</span>
+                    </div>
+
+                    <div className="adm-vault-cell-policy">
+                      <code className="adm-policy adm-vault-policy-badge" title={r.policy}>
+                        {r.policy}
+                      </code>
+                    </div>
+
+                    <div className="adm-vault-cell-status" style={{ textAlign: 'center' }}>
+                      {isDeleted ? (
+                        <span className="adm-chip adm-chip--red adm-vault-status-chip">
+                          DELETED
+                        </span>
+                      ) : (
+                        <span className={`adm-chip ${isCompleted ? 'adm-chip--green' : 'adm-chip--amber'} adm-vault-status-chip`}>
+                          <span className={`adm-status-dot ${isCompleted ? 'adm-status-dot--green' : 'adm-status-dot--amber'}`} />
+                          {r.status}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="adm-vault-cell-actions">
+                      {!isDeleted ? (
+                        <div className="adm-vault-action-cluster">
+                          <button
+                            type="button"
+                            className="adm-vault-row-action-btn"
+                            onClick={() => handleOpenEdit(r)}
+                            title="Correct/Update Record with mandatory reason (U-05)"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                          {isCompleted && (
+                            <button
+                              type="button"
+                              className="adm-vault-row-action-btn adm-vault-row-action-btn--cert"
+                              onClick={() => handleOpenReissue(r)}
+                              title="Reissue Official Certificate"
+                            >
+                              <Award size={13} />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="adm-vault-row-action-btn adm-vault-row-action-btn--delete"
+                            onClick={() => handleDeleteRecord(r)}
+                            title="Soft-Delete Record (U-07)"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="adm-vault-restore-btn"
+                          onClick={() => handleRestoreRecord(r)}
+                          title="Restore Soft-Deleted Record (U-07)"
+                        >
+                          <RotateCcw size={12} />
+                          <span>Restore</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <TableEmptyBlock
+                icon={FileText}
+                title="No Master Training Records Found"
+                subtitle="No records match your current filter, company selection, or search query."
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="adm-vault-pagination-wrap">
+          <TablePagination
             currentPage={recordPage}
             totalItems={totalRecords}
             pageSize={4}
             onPageChange={setRecordPage}
+            itemName="master records"
           />
-          <div className="adm-search">
-            <Search size={15} />
-            <input 
-              type="text" 
-              placeholder="Filter records or courses..." 
-              value={recordSearch}
-              onChange={(e) => setRecordSearch(e.target.value)}
-            />
-          </div>
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: isDark ? '#cbd5e1' : '#475569', cursor: 'pointer', background: isDark ? '#1e293b' : '#f1f5f9', padding: '6px 12px', borderRadius: '8px' }}>
-            <input 
-              type="checkbox"
-              checked={showDeleted}
-              onChange={(e) => setShowDeleted(e.target.checked)}
-              style={{ cursor: 'pointer' }}
-            />
-            <span>Show Deleted (U-07)</span>
-          </label>
-          <button 
-            type="button" 
-            className="adm-btn adm-btn--light"
-            onClick={handleExportAuditLogs}
-            disabled={exportingAuditLogs}
-            title="Download CSV access & security audit log"
-          >
-            <Download size={14} className={exportingAuditLogs ? 'spin-animation' : ''} />
-            <span>{exportingAuditLogs ? 'Exporting Audit...' : 'Export Master Audit Logs (CSV)'}</span>
-          </button>
-          <button 
-            type="button" 
-            className="adm-btn adm-btn--light"
-            onClick={handleExportVaultRecords}
-            disabled={exportingVaultRecords}
-            title="Download CSV training records vault"
-          >
-            <FileText size={14} className={exportingVaultRecords ? 'spin-animation' : ''} />
-            <span>{exportingVaultRecords ? 'Exporting Vault...' : 'Export Vault Records (CSV)'}</span>
-          </button>
-          <button 
-            type="button" 
-            className="adm-btn adm-btn--primary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', color: '#ffffff', border: 'none', cursor: 'pointer' }}
-            onClick={() => { setIsAddRecordOpen(true); setAddError(null); }}
-            title="Create and encrypt a new training record (B5)"
-          >
-            <Plus size={14} />
-            <span>Add Master Record</span>
-          </button>
-        </div>
-        {vaultToast && (
-          <div style={{
-            padding: '8px 14px',
-            borderRadius: '8px',
-            fontSize: '12.5px',
-            fontWeight: 600,
-            marginTop: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: vaultToast.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            color: vaultToast.type === 'success' ? '#34d399' : '#f87171',
-            border: vaultToast.type === 'success' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)'
-          }}>
-            <CheckCircle2 size={14} />
-            <span>{vaultToast.text}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
-        <div className="adm-table">
-          <div className="adm-grid adm-th" style={{ gridTemplateColumns: '100px 1.1fr 1.1fr 1.1fr 1.3fr 100px 140px' }}>
-            <div>RECORD ID</div>
-            <div>TRAINEE</div>
-            <div>CLIENT ORGANIZATION</div>
-            <div>COURSE PROGRAM</div>
-            <div>ACCESS CONTROL POLICY</div>
-            <div style={{ textAlign: 'center' }}>STATUS</div>
-            <div style={{ textAlign: 'right' }}>ACTIONS</div>
-          </div>
-          {filteredRecords && filteredRecords.length > 0 ? (
-            pagedRecords.map((r) => {
-              const isDeleted = Boolean(r.deleted_at);
-              return (
-                <div 
-                  key={r.id} 
-                  className="adm-row adm-grid" 
-                  style={{ 
-                    gridTemplateColumns: '100px 1.1fr 1.1fr 1.1fr 1.3fr 100px 140px',
-                    opacity: isDeleted ? 0.65 : 1,
-                    background: isDeleted ? (isDark ? 'rgba(239, 68, 68, 0.05)' : '#fef2f2') : undefined
-                  }}
-                >
-                  <div className="adm-recid">
-                    <FileText size={13} />
-                    <span>{r.id}</span>
-                  </div>
-                  <div className="adm-person">
-                    <div className="adm-av adm-av--sq" style={{ background: isDeleted ? '#64748b' : '#6a2bd9', color: '#fff' }}>
-                      {(r.trainee || 'U').slice(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <strong>{r.trainee}</strong>
-                      <span className="adm-mono">{r.email}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="adm-org">{r.org}</span>
-                  </div>
-                  <div className="adm-course">
-                    {r.course}
-                  </div>
-                  <div>
-                    <code className="adm-policy">{r.policy}</code>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    {isDeleted ? (
-                      <span className="adm-chip" style={{ background: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2', color: isDark ? '#f87171' : '#b91c1c', border: isDark ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid #fca5a5' }}>
-                        DELETED
-                      </span>
-                    ) : (
-                      <span className={`adm-chip ${r.status?.toUpperCase() === 'COMPLETED' ? 'adm-chip--green' : 'adm-chip--amber'}`}>
-                        {r.status}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    {!isDeleted ? (
-                      <>
-                        <button
-                          type="button"
-                          className="adm-btn adm-btn--light"
-                          style={{ padding: '6px 8px' }}
-                          onClick={() => handleOpenEdit(r)}
-                          title="Correct/Update Record with mandatory reason (U-05)"
-                        >
-                          <Edit2 size={13} />
-                        </button>
-                        {(r.status?.toUpperCase() === 'COMPLETED') && (
-                          <button
-                            type="button"
-                            className="adm-btn adm-btn--light"
-                            style={{ padding: '6px 8px', color: '#ff7a1a' }}
-                            onClick={() => handleOpenReissue(r)}
-                            title="Reissue Official Certificate"
-                          >
-                            <Award size={13} />
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          className="adm-btn adm-btn--light"
-                          style={{ padding: '6px 8px', color: '#ef4444' }}
-                          onClick={() => handleDeleteRecord(r)}
-                          title="Soft-Delete Record (U-07)"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className="adm-btn adm-btn--light"
-                        style={{ padding: '6px 10px', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 700 }}
-                        onClick={() => handleRestoreRecord(r)}
-                        title="Restore Soft-Deleted Record (U-07)"
-                      >
-                        <RotateCcw size={12} />
-                        <span>Restore</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <TableEmptyBlock
-              icon={FileText}
-              title="No Master Training Records Found"
-              subtitle="No records match your current filter, company selection, or search query."
-            />
-          )}
         </div>
       </div>
-
-      <TablePagination
-        currentPage={recordPage}
-        totalItems={totalRecords}
-        pageSize={4}
-        onPageChange={setRecordPage}
-        itemName="master records"
-      />
 
       {/* =====================================================================
           U-05: CORRECT / EDIT RECORD MODAL
