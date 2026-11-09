@@ -1100,3 +1100,121 @@ export async function verifyMfaLoginApi(challengeToken, code) {
   return res.json();
 }
 
+/** U-06: Reassign Trainee Company Affiliation */
+export async function changeTraineeCompany(traineeId, data, token) {
+  const res = await authFetch(
+    `${API_BASE}/trainees/${traineeId}/change-company`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to update trainee company affiliation');
+  }
+  return res.json();
+}
+
+/** U-05: Correct/Update Training Record with mandatory reason */
+export async function updateTrainingRecord(recordId, updateData, token) {
+  const res = await authFetch(
+    `${API_BASE}/records/${recordId}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData)
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to update training record');
+  }
+  return res.json();
+}
+
+/** U-07: Soft-delete training record (Admin only) */
+export async function deleteTrainingRecord(recordId, token) {
+  const res = await authFetch(
+    `${API_BASE}/records/${recordId}`,
+    {
+      method: 'DELETE'
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to delete training record');
+  }
+  return res.json();
+}
+
+/** U-07: Restore soft-deleted training record (Admin only) */
+export async function restoreTrainingRecord(recordId, token) {
+  const res = await authFetch(
+    `${API_BASE}/records/${recordId}/restore`,
+    {
+      method: 'POST'
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to restore training record');
+  }
+  return res.json();
+}
+
+/** U-07: Disable staff account */
+export async function disableUser(userId, token) {
+  const res = await authFetch(
+    `${API_BASE}/users/${userId}/disable`,
+    {
+      method: 'PUT'
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to disable user account');
+  }
+  return res.json();
+}
+
+/** U-07: Re-enable staff account */
+export async function reenableUser(userId, token) {
+  const res = await authFetch(
+    `${API_BASE}/users/${userId}/re-enable`,
+    {
+      method: 'PUT'
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to re-enable user account');
+  }
+  return res.json();
+}
+
+/** Admin Certificate Reissue with mandatory reason */
+export async function reissueCertificate(certId, data, token) {
+  const res = await authFetch(
+    `${API_BASE}/certifications/${certId}/reissue`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    },
+    token
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Failed to reissue certificate');
+  }
+  return res.json();
+}
+

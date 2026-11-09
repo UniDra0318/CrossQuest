@@ -93,6 +93,8 @@ export async function getStaffRecords() {
 
         return {
           id: r.id,
+          trainee_id: r.trainee_id,
+          company_id: r.company_at_completion_id,
           trainee: r.trainee_name || 'Juan Dela Cruz',
           email: r.trainee_email || `trainee@${scope.toLowerCase().replace(/_/g, '-')}.ph`,
           org: r.company_name || scope,

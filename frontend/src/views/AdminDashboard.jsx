@@ -639,6 +639,11 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           onOpenCreateUserModal={() => setIsCreateUserOpen(true)}
           onOpenCreateCompanyModal={() => setIsCreateCompanyOpen(true)}
           startEditStaff={startEditStaff}
+          token={token}
+          onRefreshStaff={async () => {
+            const s = await fetchStaffUsers(token);
+            if (s) setStaffList(s);
+          }}
         />
       )}
 
@@ -655,6 +660,10 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         <RecordsVault
           records={records}
           token={token}
+          onRefreshRecords={async () => {
+            const dbRecs = await fetchRecords(token);
+            if (dbRecs) setRecords(dbRecs);
+          }}
         />
       )}
 

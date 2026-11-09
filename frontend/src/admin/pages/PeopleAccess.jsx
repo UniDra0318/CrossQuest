@@ -4,22 +4,57 @@ import {
   UserPlus, 
   Search, 
   Edit2, 
-  Building2 
+  Building2,
+  UserX,
+  UserCheck,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { TablePagination, TablePaginationCompact, usePagination } from '../../components/TablePagination';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { useTheme } from '../../contexts/ThemeContext';
+import { disableUser, reenableUser } from '../../services/api';
 
 export default function PeopleAccess({
   staffList = [],
   companiesList = [],
   onOpenCreateUserModal,
   onOpenCreateCompanyModal,
-  startEditStaff
+  startEditStaff,
+  token,
+  onRefreshStaff
 }) {
   const { isDark } = useTheme();
   const [staffSearch, setStaffSearch] = useState('');
   const [companySearch, setCompanySearch] = useState('');
+  const [actionToast, setActionToast] = useState(null);
+  const [processingUserId, setProcessingUserId] = useState(null);
+
+  const handleToggleUserStatus = async (user) => {
+    const isActive = user.is_active !== false;
+    const actionLabel = isActive ? 'disable' : 're-enable';
+    if (!window.confirm(`Are you sure you want to ${actionLabel} account for ${user.name || user.email}?`)) {
+      return;
+    }
+
+    setProcessingUserId(user.id);
+    setActionToast(null);
+    try {
+      if (isActive) {
+        await disableUser(user.id, token);
+        setActionToast({ type: 'success', text: `Account for ${user.name || user.email} disabled (FR-02, U-07). All active sessions revoked.` });
+      } else {
+        await reenableUser(user.id, token);
+        setActionToast({ type: 'success', text: `Account for ${user.name || user.email} re-enabled and CP-ABE cryptographic keys re-issued (FR-02, U-07).` });
+      }
+      onRefreshStaff?.();
+    } catch (err) {
+      setActionToast({ type: 'error', text: err.message || `Failed to ${actionLabel} account.` });
+    } finally {
+      setProcessingUserId(null);
+      setTimeout(() => setActionToast(null), 5000);
+    }
+  };
 
   // Filtered staff
   const filteredStaff = useMemo(() => {
@@ -100,6 +135,24 @@ export default function PeopleAccess({
               />
             </div>
           </div>
+          {actionToast && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              borderRadius: '10px',
+              marginTop: '12px',
+              fontSize: '12.5px',
+              fontWeight: 600,
+              background: actionToast.type === 'success' ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),
+              color: actionToast.type === 'success' ? (isDark ? '#34d399' : '#065f46') : (isDark ? '#f87171' : '#b91c1c'),
+              border: actionToast.type === 'success' ? (isDark ? '1px solid rgba(5, 150, 105, 0.4)' : '1px solid #a7f3d0') : (isDark ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid #fca5a5')
+            }}>
+              {actionToast.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+              <span>{actionToast.text}</span>
+            </div>
+          )}
         </div>
 
         <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
@@ -204,7 +257,7 @@ export default function PeopleAccess({
                           })()}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
                         <button 
                           type="button" 
                           className="adm-btn adm-btn--light"
@@ -213,6 +266,20 @@ export default function PeopleAccess({
                         >
                           <Edit2 size={13} />
                           <span>Edit Roles</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn--light"
+                          style={{
+                            color: user.is_active !== false ? '#ef4444' : '#059669',
+                            borderColor: user.is_active !== false ? (isDark ? 'rgba(239, 68, 68, 0.4)' : '#fca5a5') : (isDark ? 'rgba(5, 150, 105, 0.4)' : '#a7f3d0')
+                          }}
+                          disabled={processingUserId === user.id}
+                          onClick={() => handleToggleUserStatus(user)}
+                          title={user.is_active !== false ? 'Disable account (FR-02, U-07)' : 'Re-enable account (FR-02, U-07)'}
+                        >
+                          {user.is_active !== false ? <UserX size={13} /> : <UserCheck size={13} />}
+                          <span>{user.is_active !== false ? 'Disable' : 'Re-enable'}</span>
                         </button>
                       </div>
                     </div>
@@ -287,6 +354,24 @@ export default function PeopleAccess({
               />
             </div>
           </div>
+          {actionToast && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              borderRadius: '10px',
+              marginTop: '12px',
+              fontSize: '12.5px',
+              fontWeight: 600,
+              background: actionToast.type === 'success' ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),
+              color: actionToast.type === 'success' ? (isDark ? '#34d399' : '#065f46') : (isDark ? '#f87171' : '#b91c1c'),
+              border: actionToast.type === 'success' ? (isDark ? '1px solid rgba(5, 150, 105, 0.4)' : '1px solid #a7f3d0') : (isDark ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid #fca5a5')
+            }}>
+              {actionToast.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+              <span>{actionToast.text}</span>
+            </div>
+          )}
         </div>
 
         <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>

@@ -635,6 +635,53 @@ def delete_training_record(
     return {"message": f"Record {record_id} successfully deleted (soft-delete).", "status": "DELETED"}
 
 
+@router.post("/{record_id}/restore")
+def restore_training_record(
+    record_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Restores a soft-deleted training record (U-07, DD-06).
+    
+    Permissions (Table 17):
+    - Admin: ONLY.
+    """
+    if current_user.role != "admin" and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Restoration of training records is strictly reserved for Administrators"
+        )
+
+    record = db.query(TrainingRecord).filter(TrainingRecord.id == record_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Training record not found")
+    if record.deleted_at is None:
+        raise HTTPException(status_code=400, detail="Training record is not deleted")
+
+    record.deleted_at = None
+    record.deleted_by = None
+    db.commit()
+    db.refresh(record)
+
+    # Log to audit log
+    log = AccessLog(
+        actor_user_id=current_user.id,
+        actor_role=current_user.role,
+        event_type="RECORD_RESTORE",
+        resource_type="RECORD",
+        resource_id=record.id,
+        company_id=record.company_at_completion_id,
+        outcome="SUCCESS",
+        source_ip=_get_client_ip(request),
+        details={"action": "RESTORE", "course_name": record.course_name}
+    )
+    db.add(log)
+    db.commit()
+
+    return {"message": f"Record {record_id} successfully restored.", "status": "RESTORED"}
+
+
 
 @router.post("/sessions/{session_id}/sign-off", response_model=TrainerSignOffResponse)
 def sign_off_training_session(

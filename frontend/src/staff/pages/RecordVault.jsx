@@ -13,14 +13,38 @@ import {
   History,
   Award,
   Calendar,
-  ExternalLink
+  ExternalLink,
+  ArrowRightLeft,
+  AlertCircle
 } from 'lucide-react';
 import { useStaff } from '../StaffContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { changeTraineeCompany, fetchCompanies } from '../../services/api';
 
 export default function RecordVault() {
-  const { me, records, loading } = useStaff();
+  const { me, records, portfolios, loading } = useStaff();
+  const { token } = useAuth();
   const { isDark } = useTheme();
+
+  // U-06: Trainee Company Change States
+  const [showTransferForm, setShowTransferForm] = useState(false);
+  const [targetCompanyId, setTargetCompanyId] = useState('');
+  const [transferReason, setTransferReason] = useState('');
+  const [transferDate, setTransferDate] = useState(new Date().toISOString().slice(0, 10));
+  const [transferLoading, setTransferLoading] = useState(false);
+  const [transferError, setTransferError] = useState(null);
+  const [transferSuccess, setTransferSuccess] = useState(null);
+  const [companyList, setCompanyList] = useState([]);
+
+  // Load companies for reassignment
+  React.useEffect(() => {
+    if (token) {
+      fetchCompanies(token).then(comps => {
+        if (comps && comps.length > 0) setCompanyList(comps);
+      }).catch(() => {});
+    }
+  }, [token]);
 
   // URL query parameter for client filter (e.g. from Portfolios)
   const queryClient = useMemo(() => {
@@ -88,6 +112,41 @@ export default function RecordVault() {
   const traineeCrossClientRecords = useMemo(() => {
     return traineeAllRecords.filter(r => !userScopes.includes(r.scope) && !r.authorized);
   }, [traineeAllRecords, userScopes]);
+
+  const handleReassignCompany = async (e) => {
+    e.preventDefault();
+    setTransferError(null);
+    setTransferSuccess(null);
+
+    if (!targetCompanyId) {
+      setTransferError('Please select a target client company.');
+      return;
+    }
+    if (!transferReason || !transferReason.trim()) {
+      setTransferError('A mandatory explanation reason must be provided (U-06).');
+      return;
+    }
+
+    setTransferLoading(true);
+    try {
+      const traineeId = selectedTrainee.trainee_id || selectedTrainee.id;
+      await changeTraineeCompany(traineeId, {
+        new_company_id: targetCompanyId,
+        effective_date: transferDate ? new Date(transferDate).toISOString() : new Date().toISOString(),
+        reason: transferReason.trim()
+      }, token);
+
+      const newComp = companyList.find(c => c.id === targetCompanyId);
+      const newCompName = newComp ? newComp.name : 'new company';
+      setTransferSuccess(`Successfully transferred ${selectedTrainee.trainee} to ${newCompName}. Historical training records preserved.`);
+      setSelectedTrainee(prev => ({ ...prev, org: newCompName, scope: newComp?.code || prev.scope }));
+      setTransferReason('');
+    } catch (err) {
+      setTransferError(err.message || 'Failed to reassign trainee company.');
+    } finally {
+      setTransferLoading(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -261,7 +320,7 @@ export default function RecordVault() {
             </div>
 
             {/* Modal Navigation Tabs */}
-            <div style={{ display: 'flex', gap: '12px', padding: '14px 24px', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9' }}>
+            <div style={{ display: 'flex', gap: '12px', padding: '14px 24px', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 className={`adm-chip ${profileTab === 'current' ? 'adm-chip--solid' : ''}`}
@@ -279,11 +338,127 @@ export default function RecordVault() {
                 <History size={13} />
                 <span>Training History across Employers ({traineeCrossClientRecords.length})</span>
               </button>
+              <button
+                type="button"
+                className={`adm-chip ${profileTab === 'transfer' ? 'adm-chip--solid' : ''}`}
+                onClick={() => setProfileTab('transfer')}
+                style={{ 
+                  cursor: 'pointer', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: '6px',
+                  background: profileTab === 'transfer' ? '#7c3aed' : undefined,
+                  color: profileTab === 'transfer' ? '#ffffff' : undefined
+                }}
+              >
+                <ArrowRightLeft size={13} />
+                <span>Reassign Company (U-06)</span>
+              </button>
             </div>
 
             {/* Modal Content */}
             <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
-              {profileTab === 'current' ? (
+              {profileTab === 'transfer' ? (
+                <form onSubmit={handleReassignCompany} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ fontSize: '13px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                    Reassign trainee employer affiliation while preserving completed cryptographic training history (FR-15, U-06).
+                  </div>
+
+                  {transferSuccess && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', borderRadius: '10px', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', color: isDark ? '#34d399' : '#065f46', border: isDark ? '1px solid rgba(5, 150, 105, 0.4)' : '1px solid #a7f3d0', fontSize: '13px', fontWeight: 600 }}>
+                      <CheckCircle2 size={16} />
+                      <span>{transferSuccess}</span>
+                    </div>
+                  )}
+
+                  {transferError && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', borderRadius: '10px', background: isDark ? 'rgba(225, 29, 72, 0.2)' : '#fff1f2', color: isDark ? '#fda4af' : '#be123c', border: isDark ? '1px solid rgba(225, 29, 72, 0.4)' : '1px solid #fecdd3', fontSize: '13px', fontWeight: 600 }}>
+                      <AlertCircle size={16} />
+                      <span>{transferError}</span>
+                    </div>
+                  )}
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#334155', marginBottom: '6px' }}>
+                      CURRENT EMPLOYER AFFILIATION
+                    </label>
+                    <input 
+                      type="text" 
+                      value={selectedTrainee.org || 'Unassigned'} 
+                      disabled 
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#0f172a' : '#f1f5f9', color: isDark ? '#94a3b8' : '#64748b', fontSize: '13px', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#334155', marginBottom: '6px' }}>
+                      NEW CLIENT COMPANY SPONSOR *
+                    </label>
+                    <select
+                      value={targetCompanyId}
+                      onChange={(e) => setTargetCompanyId(e.target.value)}
+                      required
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                    >
+                      <option value="">-- Select Target Organization --</option>
+                      {companyList.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#334155', marginBottom: '6px' }}>
+                      EFFECTIVE TRANSFER DATE
+                    </label>
+                    <input 
+                      type="date" 
+                      value={transferDate}
+                      onChange={(e) => setTransferDate(e.target.value)}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: isDark ? '#cbd5e1' : '#334155', marginBottom: '6px' }}>
+                      MANDATORY AUDIT REASON *
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={transferReason}
+                      onChange={(e) => setTransferReason(e.target.value)}
+                      placeholder="Specify formal reason for employee transfer (e.g. Lateral transfer to Vertiv operations per HR notification)..."
+                      required
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px', boxSizing: 'border-box', resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={transferLoading}
+                    style={{
+                      padding: '12px 20px',
+                      borderRadius: '10px',
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(124, 58, 237, 0.3)'
+                    }}
+                  >
+                    <ArrowRightLeft size={16} />
+                    <span>{transferLoading ? 'Processing Transfer...' : 'Confirm Employer Reassignment'}</span>
+                  </button>
+                </form>
+              ) : profileTab === 'current' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {traineeCurrentRecords.map(r => (
                     <div key={r.id} style={{ padding: '14px', borderRadius: '12px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', background: isDark ? '#1e293b' : '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
