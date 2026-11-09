@@ -386,7 +386,28 @@ def test_gamification_quiz_approval_and_teams(client: TestClient, feature_fixtur
     team_id = team_resp.json()["id"]
     assert team_resp.json()["team_name"] == "Cyber Phoenix"
 
-    # 5. Add trainee to team
+    # 5. Adding unenrolled trainee must fail with HTTP 400 (U-12)
+    mem_fail = client.post(
+        f"/api/v1/gamification/teams/{team_id}/members",
+        headers=admin_hdr,
+        json={"trainee_id": trainee.id}
+    )
+    assert mem_fail.status_code == 400
+    assert "not enrolled" in mem_fail.json()["detail"]
+
+    # 5b. Enroll trainee into session and add to team -> SUCCESS
+    rec = TrainingRecord(
+        trainee_id=trainee.id,
+        session_id=session_id,
+        company_at_completion_id=feature_fixture["comp_a"].id,
+        course_name="Red Team Operations",
+        status="In progress",
+        encryption_policy="ROLEADMIN",
+        payload_ciphertext="dummy_ciphertext"
+    )
+    db_session.add(rec)
+    db_session.commit()
+
     mem_resp = client.post(
         f"/api/v1/gamification/teams/{team_id}/members",
         headers=admin_hdr,

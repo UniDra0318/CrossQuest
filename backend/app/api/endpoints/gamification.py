@@ -1086,23 +1086,18 @@ def add_team_member(
     if not trainee:
         raise HTTPException(status_code=404, detail="Trainee not found.")
 
-    # Verify participant is enrolled in this training session (U-12)
+    # Verify participant is strictly enrolled in this training session (U-12)
     if team.session_id:
-        session_has_records = db.query(TrainingRecord).filter(
+        is_participant = db.query(TrainingRecord).filter(
             TrainingRecord.session_id == team.session_id,
+            TrainingRecord.trainee_id == payload.trainee_id,
             TrainingRecord.deleted_at == None
-        ).count() > 0
-        if session_has_records:
-            is_participant = db.query(TrainingRecord).filter(
-                TrainingRecord.session_id == team.session_id,
-                TrainingRecord.trainee_id == payload.trainee_id,
-                TrainingRecord.deleted_at == None
-            ).first()
-            if not is_participant:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Trainee '{trainee.first_name} {trainee.last_name}' is not enrolled in this training session (U-12)."
-                )
+        ).first()
+        if not is_participant:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Trainee '{trainee.first_name} {trainee.last_name}' is not enrolled in this training session (U-12)."
+            )
 
     # Check duplicate in this team
     existing = db.query(TeamMember).filter(

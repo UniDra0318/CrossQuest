@@ -280,6 +280,31 @@ export default function CryptoSandboxLab() {
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '26px', paddingBottom: '60px' }}>
       
+      {/* DEMO & EVALUATION NOTICE BANNER */}
+      <div style={{
+        background: 'rgba(124, 58, 237, 0.12)',
+        border: '1.5px solid #7c3aed',
+        borderRadius: '14px',
+        padding: '12px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ background: '#7c3aed', color: '#fff', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 900, letterSpacing: '0.05em' }}>
+            DEMO &amp; EVALUATION TOOL
+          </span>
+          <span style={{ fontSize: '12.5px', color: '#c4b5fd', fontWeight: 600 }}>
+            Restricted Diagnostic Route (<code style={{ color: '#ffffff' }}>/demo/crypto-lab</code>) &bull; Authenticated Administrator Access Only &bull; Chapter 3 / DD-02 DMA-CP-ABE
+          </span>
+        </div>
+        <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 700 }}>
+          🔒 Protected by RoleGuard (admin)
+        </span>
+      </div>
+
       {/* 1. DEFENSE HERO HEADER */}
       <div 
         style={{ 

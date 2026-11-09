@@ -49,10 +49,12 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
   const [modalFailedMinutes, setModalFailedMinutes] = useState(10);
   const [modalBurstCount, setModalBurstCount] = useState(5);
   const [modalBurstMinutes, setModalBurstMinutes] = useState(60);
-  // Table 13 Role-Based Record Access Thresholds (OI-08, Table 13)
-  const [modalAmAccessThreshold, setModalAmAccessThreshold] = useState(20);
-  const [modalFinanceAccessThreshold, setModalFinanceAccessThreshold] = useState(30);
+  // Table 13 Role-Based Record Access Thresholds (OI-08, Table 13: AM 25, Trainer 25, Finance 50, Admin 50, Trainee 15)
+  const [modalAmAccessThreshold, setModalAmAccessThreshold] = useState(25);
+  const [modalTrainerAccessThreshold, setModalTrainerAccessThreshold] = useState(25);
+  const [modalFinanceAccessThreshold, setModalFinanceAccessThreshold] = useState(50);
   const [modalAdminAccessThreshold, setModalAdminAccessThreshold] = useState(50);
+  const [modalTraineeAccessThreshold, setModalTraineeAccessThreshold] = useState(15);
   const [modalReason, setModalReason] = useState('');
 
   // Sync when liveRules prop updates or fetch if empty
@@ -107,9 +109,11 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
     setModalFailedMinutes(failedMinutes);
     setModalBurstCount(burstThreshold);
     setModalBurstMinutes(burstMinutes);
-    setModalAmAccessThreshold(rHighAccess?.parameters?.thresholds?.account_manager || 20);
-    setModalFinanceAccessThreshold(rHighAccess?.parameters?.thresholds?.finance || 30);
-    setModalAdminAccessThreshold(rHighAccess?.parameters?.thresholds?.admin || 50);
+    setModalAmAccessThreshold(rHighAccess?.parameters?.thresholds?.account_manager ?? 25);
+    setModalTrainerAccessThreshold(rHighAccess?.parameters?.thresholds?.trainer ?? 25);
+    setModalFinanceAccessThreshold(rHighAccess?.parameters?.thresholds?.finance ?? 50);
+    setModalAdminAccessThreshold(rHighAccess?.parameters?.thresholds?.admin ?? 50);
+    setModalTraineeAccessThreshold(rHighAccess?.parameters?.thresholds?.trainee ?? 15);
     setModalReason(''); // A2: Must start empty
     setModalError(null);
     setIsTuneModalOpen(true);
@@ -171,10 +175,16 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
 
     // Table 13 Role Bounds Validation (1 to 1,000)
     const parsedAm = parseInt(modalAmAccessThreshold, 10);
+    const parsedTrainer = parseInt(modalTrainerAccessThreshold, 10);
     const parsedFin = parseInt(modalFinanceAccessThreshold, 10);
     const parsedAdm = parseInt(modalAdminAccessThreshold, 10);
+    const parsedTrainee = parseInt(modalTraineeAccessThreshold, 10);
     if (isNaN(parsedAm) || parsedAm < 1 || parsedAm > 1000) {
       setModalError('Account Manager record access threshold must be between 1 and 1,000 (Table 13).');
+      return;
+    }
+    if (isNaN(parsedTrainer) || parsedTrainer < 1 || parsedTrainer > 1000) {
+      setModalError('Trainer record access threshold must be between 1 and 1,000 (Table 13).');
       return;
     }
     if (isNaN(parsedFin) || parsedFin < 1 || parsedFin > 1000) {
@@ -183,6 +193,10 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
     }
     if (isNaN(parsedAdm) || parsedAdm < 1 || parsedAdm > 1000) {
       setModalError('Administrator record access threshold must be between 1 and 1,000 (Table 13).');
+      return;
+    }
+    if (isNaN(parsedTrainee) || parsedTrainee < 1 || parsedTrainee > 1000) {
+      setModalError('Trainee record access threshold must be between 1 and 1,000 (Table 13).');
       return;
     }
 
@@ -223,10 +237,12 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
             parameters: {
               thresholds: {
                 account_manager: parsedAm,
+                trainer: parsedTrainer,
                 finance: parsedFin,
-                admin: parsedAdm
+                admin: parsedAdm,
+                trainee: parsedTrainee
               },
-              window_minutes: parsedBurstMinutes
+              window_minutes: 15
             }
           }
         ],
@@ -792,54 +808,89 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                   borderRadius: '10px',
                   border: isDark ? '1px solid #334155' : '1px solid #e2e8f0'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                    <ShieldAlert size={15} color="#8b5cf6" />
-                    <strong style={{ fontSize: '12px', color: isDark ? '#f8fafc' : '#0f172a' }}>
-                      Table 13: Role-Based High Record Access Limits (records/window)
-                    </strong>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ShieldAlert size={15} color="#8b5cf6" />
+                      <strong style={{ fontSize: '12px', color: isDark ? '#f8fafc' : '#0f172a' }}>
+                        Table 13: Role-Based High Record Access Limits (15-min window)
+                      </strong>
+                    </div>
+                    <span style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      color: '#6a2bd9',
+                      background: 'rgba(106, 43, 217, 0.1)',
+                      border: '1px solid rgba(106, 43, 217, 0.25)',
+                      padding: '2px 8px',
+                      borderRadius: '12px'
+                    }}>
+                      🔒 Table 13 Crossworks Certified Standard (Read-Only)
+                    </span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
-                        Account Manager:
+                        Account Mgr:
                       </label>
                       <input
                         type="number"
-                        min="1"
-                        max="1000"
                         value={modalAmAccessThreshold}
-                        onChange={(e) => setModalAmAccessThreshold(e.target.value)}
+                        readOnly
+                        tabIndex={-1}
                         style={{
                           width: '100%',
                           padding: '6px 8px',
                           borderRadius: '6px',
-                          border: isDark ? '1px solid #475569' : '1px solid #cbd5e1',
-                          background: isDark ? '#0f172a' : '#ffffff',
-                          color: isDark ? '#f8fafc' : '#0f172a',
-                          fontSize: '12.5px',
-                          fontWeight: 700
+                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                          background: isDark ? '#1e293b' : '#f1f5f9',
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          cursor: 'not-allowed'
                         }}
                       />
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
-                        Finance Staff:
+                        Trainer:
                       </label>
                       <input
                         type="number"
-                        min="1"
-                        max="1000"
-                        value={modalFinanceAccessThreshold}
-                        onChange={(e) => setModalFinanceAccessThreshold(e.target.value)}
+                        value={modalTrainerAccessThreshold}
+                        readOnly
+                        tabIndex={-1}
                         style={{
                           width: '100%',
                           padding: '6px 8px',
                           borderRadius: '6px',
-                          border: isDark ? '1px solid #475569' : '1px solid #cbd5e1',
-                          background: isDark ? '#0f172a' : '#ffffff',
-                          color: isDark ? '#f8fafc' : '#0f172a',
-                          fontSize: '12.5px',
-                          fontWeight: 700
+                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                          background: isDark ? '#1e293b' : '#f1f5f9',
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          cursor: 'not-allowed'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
+                        Finance:
+                      </label>
+                      <input
+                        type="number"
+                        value={modalFinanceAccessThreshold}
+                        readOnly
+                        tabIndex={-1}
+                        style={{
+                          width: '100%',
+                          padding: '6px 8px',
+                          borderRadius: '6px',
+                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                          background: isDark ? '#1e293b' : '#f1f5f9',
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          cursor: 'not-allowed'
                         }}
                       />
                     </div>
@@ -849,19 +900,41 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                       </label>
                       <input
                         type="number"
-                        min="1"
-                        max="1000"
                         value={modalAdminAccessThreshold}
-                        onChange={(e) => setModalAdminAccessThreshold(e.target.value)}
+                        readOnly
+                        tabIndex={-1}
                         style={{
                           width: '100%',
                           padding: '6px 8px',
                           borderRadius: '6px',
-                          border: isDark ? '1px solid #475569' : '1px solid #cbd5e1',
-                          background: isDark ? '#0f172a' : '#ffffff',
-                          color: isDark ? '#f8fafc' : '#0f172a',
-                          fontSize: '12.5px',
-                          fontWeight: 700
+                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                          background: isDark ? '#1e293b' : '#f1f5f9',
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          cursor: 'not-allowed'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '10.5px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '2px' }}>
+                        Trainee:
+                      </label>
+                      <input
+                        type="number"
+                        value={modalTraineeAccessThreshold}
+                        readOnly
+                        tabIndex={-1}
+                        style={{
+                          width: '100%',
+                          padding: '6px 8px',
+                          borderRadius: '6px',
+                          border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                          background: isDark ? '#1e293b' : '#f1f5f9',
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          cursor: 'not-allowed'
                         }}
                       />
                     </div>

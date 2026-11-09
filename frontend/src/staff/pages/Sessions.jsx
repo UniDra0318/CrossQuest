@@ -116,55 +116,14 @@ export default function Sessions() {
           name: t.full_name || t.name,
           title: t.attributes?.title || 'Certified Instructor'
         })));
+      } else {
+        setAvailableTrainers([]);
       }
 
-      if (sessList && sessList.length > 0) {
+      if (sessList && Array.isArray(sessList)) {
         setSessions(sessList);
       } else {
-        // Built-in baseline training cohorts mapped to assigned clients
-        const baseline = [
-          {
-            id: 'sess-01',
-            session_code: 'SES-2026-AGILE-01',
-            course_name: 'Agile PME & Project Management Challenge',
-            client_code: assignedClients[0] || 'CORP_ALPHA',
-            start_date: '2026-11-01',
-            end_date: '2026-11-03',
-            venue: 'Online (Microsoft Teams)',
-            delivery_mode: 'Online',
-            trainer_signed_off: false,
-            needs_attendance: true,
-            trainers: []
-          },
-          {
-            id: 'sess-02',
-            session_code: 'SES-2026-RISK-02',
-            course_name: 'Business Continuity & ISO 31000 Risk Management',
-            client_code: assignedClients[1] || assignedClients[0] || 'CORP_ALPHA',
-            start_date: '2026-10-20',
-            end_date: '2026-10-22',
-            venue: 'Crossworks Main Learning Hub, Makati',
-            delivery_mode: 'F2F',
-            trainer_signed_off: false,
-            needs_attendance: false,
-            trainers: []
-          },
-          {
-            id: 'sess-03',
-            session_code: 'SES-2026-EXEC-03',
-            course_name: 'Executive Communication & CONNECT Simulation',
-            client_code: assignedClients[0] || 'CORP_ALPHA',
-            start_date: '2026-10-10',
-            end_date: '2026-10-12',
-            venue: 'Online (Zoom Meeting)',
-            delivery_mode: 'Online',
-            trainer_signed_off: true,
-            trainer_sign_off_at: '2026-10-13T10:00:00Z',
-            needs_attendance: false,
-            trainers: ['Jobert Cruz']
-          }
-        ];
-        setSessions(baseline);
+        setSessions([]);
       }
 
       if (recList && recList.length > 0) {
@@ -228,6 +187,11 @@ export default function Sessions() {
     const venue = newSession.venue.trim();
     if (!venue) {
       setFormError('Venue is required. For online delivery, use "Online" or specify virtual platform.');
+      return;
+    }
+
+    if (!newSession.trainer_name || !newSession.trainer_name.trim()) {
+      setFormError('An assigned trainer is required to schedule a training session. Please select an instructor.');
       return;
     }
 
@@ -938,11 +902,12 @@ export default function Sessions() {
                     ASSIGNED TRAINER
                   </label>
                   <select
+                    required
                     value={newSession.trainer_name}
                     onChange={(e) => setNewSession({ ...newSession, trainer_name: e.target.value })}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
                   >
-                    <option value="">-- Select Assigned Trainer --</option>
+                    <option value="">{availableTrainers.length === 0 ? '-- No Trainers Available (Server Unreachable) --' : '-- Select Assigned Trainer --'}</option>
                     {availableTrainers.map(t => (
                       <option key={t.id} value={t.name}>{t.name} ({t.title})</option>
                     ))}
