@@ -402,6 +402,18 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     }
     loadAdminData();
   }, [token]);
+
+  // Always refresh rules when visiting Settings tab
+  useEffect(() => {
+    if (activeSubView === 'system_settings' && token) {
+      fetchAnomalyRules(token)
+        .then(rules => {
+          if (rules && rules.length > 0) setLiveRules(rules);
+        })
+        .catch(console.warn);
+    }
+  }, [activeSubView, token]);
+
   // Start inline editing staff
   const startEditStaff = (user) => {
     setEditingStaffUser(user);
@@ -631,7 +643,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
       )}
 
       {activeSubView === 'anomalies' && (
-        <Alerts onRuleUpdated={() => {}} />
+        <Alerts onRuleUpdated={(updated) => {
+          setLiveRules(prev => {
+            const exists = prev.some(r => r.rule_code === updated.rule_code);
+            return exists ? prev.map(r => r.rule_code === updated.rule_code ? updated : r) : [...prev, updated];
+          });
+        }} />
       )}
 
       {activeSubView === 'records_vault' && (
@@ -645,6 +662,13 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         <SystemSettings
           settings={settings}
           liveRules={liveRules}
+          token={token}
+          onRuleUpdated={(updated) => {
+            setLiveRules(prev => {
+              const exists = prev.some(r => r.rule_code === updated.rule_code);
+              return exists ? prev.map(r => r.rule_code === updated.rule_code ? updated : r) : [...prev, updated];
+            });
+          }}
           onTuneRules={() => setActiveView && setActiveView('anomalies')}
         />
       )}
