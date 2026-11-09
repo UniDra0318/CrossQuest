@@ -70,7 +70,8 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
 
   const startHour = rAfter?.parameters?.start_hour !== undefined ? Number(rAfter.parameters.start_hour) : 9;
   const endHour = rAfter?.parameters?.end_hour !== undefined ? Number(rAfter.parameters.end_hour) : 18;
-  const tz = rAfter?.parameters?.tz || 'Asia/Manila';
+  const rawTz = rAfter?.parameters?.tz || 'Asia/Manila';
+  const tz = rawTz === 'UTC+8' ? 'Asia/Manila' : rawTz;
   const activeDays = rAfter?.parameters?.days || ['MON', 'TUE', 'WED', 'THU', 'FRI'];
 
   const failedThreshold = rFailed?.parameters?.threshold ?? currentSettings.anomaly.failedAttempts.count;
@@ -381,7 +382,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
               <AlertTriangle size={20} />
             </div>
             <div>
-              <span className="adm-label">CONSECUTIVE FAILED ATTEMPTS TRIGGER (R2_FAILED_LOGINS)</span>
+              <span className="adm-label">CONSECUTIVE FAILED ATTEMPTS TRIGGER</span>
               <div className="adm-thr__val">
                 <b>{failedThreshold}</b>
                 <span>failed requests within {failedMinutes} minutes</span>
@@ -395,7 +396,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
               <Layers size={20} />
             </div>
             <div>
-              <span className="adm-label">BURST VOLUME THRESHOLD (R3_REPORT_BURSTS)</span>
+              <span className="adm-label">BURST REPORT GENERATION THRESHOLD</span>
               <div className="adm-thr__val">
                 <b>{burstThreshold}</b>
                 <span>reports generated within {burstMinutes} minutes</span>
@@ -468,7 +469,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                     Tune Anomaly Detection Thresholds
                   </h3>
                   <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                    Operational parameters for S1 After-Hours, R2 Failed Logins, and R3 Report Bursts
+                    Operational parameters for After-Hours Access, Failed Sign-Ins, and Report Generation Bursts
                   </span>
                 </div>
               </div>
@@ -699,7 +700,7 @@ export default function SystemSettings({ settings, liveRules = [], token, onRule
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Layers size={15} color="#ff7a1a" />
                     <strong style={{ fontSize: '12px', color: isDark ? '#f8fafc' : '#0f172a' }}>
-                      Report Bursts Limit (R3)
+                      Report Generation Bursts Limit
                     </strong>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>

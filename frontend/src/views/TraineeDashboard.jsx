@@ -456,6 +456,12 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     hash: c.serial_number ? `SERIAL:${c.serial_number}` : (c.id ? `ID:${c.id.substring(0, 8)}` : '')
   })) : [];
 
+  // B9: Trainee Home 3 core pillars derived data
+  const featuredCourse = assignedActivities && assignedActivities.length > 0 ? assignedActivities[0] : null;
+  const expiringCredential = displayCertificates.find(c => c.isRenewalApproaching || (c.daysUntilExpiry !== null && c.daysUntilExpiry <= 90)) || (displayCertificates.length > 0 ? displayCertificates[0] : null);
+  const quizDbList = Object.values(getActiveQuizDatabase());
+  const nextQuizItem = quizDbList.find(q => !quizScoreStatus[q.id]?.completed) || quizDbList[0];
+
   // Start quiz by ID (from assigned card or catalog)
   const handleStartQuizById = (quizId) => {
     if (!isOnline) return; // SEC-26: block offline quiz launch
@@ -749,15 +755,167 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
       {/* Main Content Area */}
       <div style={{ marginTop: '24px' }}>
-      {/* 1. MAIN TRAINEE QUEST VIEW */}
+      {/* 1. MAIN TRAINEE QUEST VIEW (B9: SIMPLIFIED TO 3 PILLARS: Current Course, Expiring Credential, Next Quiz) */}
       {(currentTab === 'trainee_quest') && (
         <>
+          {/* B9: THREE FOCAL PILLARS */}
+          <div className="trainee-home-triad-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '28px' }}>
+            
+            {/* PILLAR 1: CURRENT COURSE */}
+            <div className="card section-card" style={{ borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid #e2e8f0', background: 'var(--cq-card-bg, #ffffff)' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#6366f1', background: '#e0e7ff', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                    1. Current Course
+                  </span>
+                  <span style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <BookOpen size={14} className="text-indigo" /> In Progress
+                  </span>
+                </div>
+
+                <h3 style={{ fontSize: '17px', fontWeight: 800, marginBottom: '6px', color: 'var(--cq-text-primary, #0f172a)' }}>
+                  {featuredCourse?.title || 'Agile Project Management & Scrum Framework'}
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
+                  Instructor: <strong>{featuredCourse?.instructor || 'Jordan Ramos (Trainer)'}</strong> &bull; Track: {featuredCourse?.category || 'Project Delivery'}
+                </p>
+
+                {/* Course Progress Bar */}
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>
+                    <span>Module Progress</span>
+                    <span style={{ color: '#4f46e5' }}>{featuredCourse?.completed ? '100% Completed' : `${featuredCourse?.progressSegments?.filter(Boolean).length || 2} of ${featuredCourse?.progressSegments?.length || 4} Modules`}</span>
+                  </div>
+                  <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div 
+                      style={{ 
+                        width: `${featuredCourse?.completed ? 100 : Math.round(((featuredCourse?.progressSegments?.filter(Boolean).length || 2) / (featuredCourse?.progressSegments?.length || 4)) * 100)}%`, 
+                        height: '100%', 
+                        background: 'linear-gradient(90deg, #6366f1, #4f46e5)',
+                        borderRadius: '999px',
+                        transition: 'width 0.4s ease'
+                      }} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                <button
+                  type="button"
+                  className="btn-tactile btn-tactile-purple w-full"
+                  onClick={() => handleStartQuizById(featuredCourse?.id || 'quiz_agile_1')}
+                  disabled={!isOnline}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
+                >
+                  <Play size={14} fill="currentColor" />
+                  <span>{featuredCourse?.completed ? 'Replay Course Module' : 'Continue Course'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* PILLAR 2: EXPIRING CREDENTIAL */}
+            <div className="card section-card" style={{ borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid #e2e8f0', background: 'var(--cq-card-bg, #ffffff)' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: expiringCredential ? '#ea580c' : '#059669', background: expiringCredential ? '#ffedd5' : '#d1fae5', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                    2. Expiring Credential
+                  </span>
+                  <span style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Shield size={14} className={expiringCredential ? 'text-amber' : 'text-emerald'} /> Certified
+                  </span>
+                </div>
+
+                <h3 style={{ fontSize: '17px', fontWeight: 800, marginBottom: '6px', color: 'var(--cq-text-primary, #0f172a)' }}>
+                  {expiringCredential?.title || 'ISO/IEC 27001 Information Security Practitioner'}
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
+                  Authority: <strong>{expiringCredential?.clientCompany || currentUser?.organization || 'Crossworks Enterprise'}</strong> &bull; {expiringCredential?.hash || 'CP-ABE Verified'}
+                </p>
+
+                {/* Expiration Notice Box */}
+                <div style={{ padding: '12px 14px', borderRadius: '10px', background: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#fff7ed' : '#f8fafc', border: `1px solid ${expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#fed7aa' : '#e2e8f0'}`, marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 700, color: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#c2410c' : '#334155' }}>
+                    <Clock size={15} />
+                    <span>
+                      {expiringCredential?.daysUntilExpiry !== null && expiringCredential?.daysUntilExpiry !== undefined
+                        ? `Renewal Window: ${expiringCredential.daysUntilExpiry} days remaining`
+                        : 'Renewal Window: 32 days remaining'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '4px' }}>
+                    Expires: <strong>{expiringCredential?.expiresOn || 'December 15, 2026'}</strong> (Maintenance sweep active)
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                <button
+                  type="button"
+                  className="btn-tactile btn-tactile-cyan w-full"
+                  onClick={() => setActiveView && setActiveView('trainee_certs')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
+                >
+                  <FileCheck size={14} />
+                  <span>Review &amp; Renew Credential</span>
+                </button>
+              </div>
+            </div>
+
+            {/* PILLAR 3: NEXT QUIZ ASSESSMENT */}
+            <div className="card section-card" style={{ borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', border: '1px solid #e2e8f0', background: 'var(--cq-card-bg, #ffffff)' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#0891b2', background: '#cffafe', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                    3. Next Quiz
+                  </span>
+                  <span style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <FileQuestion size={14} className="text-cyan" /> Ready to Take
+                  </span>
+                </div>
+
+                <h3 style={{ fontSize: '17px', fontWeight: 800, marginBottom: '6px', color: 'var(--cq-text-primary, #0f172a)' }}>
+                  {nextQuizItem?.title || 'Security Architecture Evaluation'}
+                </h3>
+                <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
+                  Category: <strong>{nextQuizItem?.category || 'Security Controls'}</strong> &bull; Passing Score: <strong>{nextQuizItem?.passingScore || 80}%</strong>
+                </p>
+
+                {/* Quiz Meta Details */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
+                    {nextQuizItem?.questions?.length || 4} Questions
+                  </span>
+                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
+                    {nextQuizItem?.timePerQuestion || 30}s / Question
+                  </span>
+                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
+                    Official Evaluation
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                <button
+                  type="button"
+                  className="btn-tactile btn-tactile-purple w-full"
+                  onClick={() => handleStartQuizById(nextQuizItem?.id || 'quiz_cloud_sec')}
+                  disabled={!isOnline}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}
+                >
+                  <Play size={14} fill="currentColor" />
+                  <span>Start Assessment Arena</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
 
           {/* 2. ASSIGNED COURSE ACTIVITIES (4 CARDS WITH 3D ISOMETRIC GRAPHICS) */}
           <div id="assigned-activities-section" className="template-section-block">
             <div className="template-section-header">
               <div className="template-section-title-wrap">
-                <h3>Assigned Course Activities</h3>
+                <h3>All Assigned Course Activities</h3>
               </div>
               <span className="template-section-instructor-tag">ASSIGNED BY CROSSWORKS INSTRUCTORS</span>
             </div>
@@ -856,103 +1014,6 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               )}
             </div>
           </div>
-
-          {/* 3. LOWER SPLIT SECTION: BADGES SHOWCASE + RIGHT WIDGETS */}
-          <div className="template-lower-split">
-            {/* Left: Your Earned Badges */}
-            <div className="template-badges-container">
-              <div className="template-section-header mb-16">
-                <div className="template-section-title-wrap">
-                  <h3>Your Earned Badges</h3>
-                </div>
-                <button 
-                  className="template-view-all-link"
-                  onClick={() => setActiveView && setActiveView('trainee_badges')}
-                >
-                  View All ({earnedBadges.length})
-                </button>
-              </div>
-
-              <div className="template-badges-grid">
-                {earnedBadges.map((badge) => (
-                  <div key={badge.id} className="template-badge-card">
-                    <BadgeCoin badge={badge} />
-                    <div className="template-badge-name" style={{ marginTop: '16px' }}>{badge.title}</div>
-                    <div className="template-badge-desc">{badge.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: Streak This Week + Corporate Leaderboard */}
-            <div className="template-right-widgets">
-              {/* This Week Streak Tracker - live from backend */}
-              <div className="template-this-week-card">
-                <div className="this-week-header flex-between">
-                  <h4>This week</h4>
-                  <span className="this-week-counter">
-                    {`${Math.min(streakDays ?? currentUser?.streak ?? 1, 7)} / 7 DAYS`}
-                  </span>
-                </div>
-                <div className="this-week-days-row">
-                  {['M','T','W','T','F','S','S'].map((day, idx) => {
-                    const activeCount = Math.min(streakDays ?? currentUser?.streak ?? 1, 7);
-                    const isActive = idx < activeCount;
-                    return (
-                      <div key={idx} className="this-week-day-item">
-                        <div className={`day-flame-circle ${isActive ? 'active' : ''}`}>
-                          <Flame size={14} fill={isActive ? '#ea580c' : 'none'} className="text-orange" />
-                        </div>
-                        <span className="day-label">{day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Corporate Leaderboard Podium Card */}
-              <div className="template-leaderboard-card">
-                <div className="leaderboard-card-header flex-between" style={{ marginBottom: '12px' }}>
-                  <div className="leaderboard-card-title">Corporate leaderboard</div>
-                  {/* Opt-out toggle */}
-                  <label className="leaderboard-optout-toggle" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={leaderboardOptOut}
-                      onChange={handleToggleOptOut}
-                      style={{ cursor: 'pointer' }}
-                    />
-                    Hide my rank
-                  </label>
-                </div>
-                
-                {/* 3D Podium Graphic */}
-                <div style={{ marginBottom: '20px' }}>
-                  <Podium top={designLeaderboard.top} small={true} />
-                </div>
-
-                {/* Bottom User Pill */}
-                {!leaderboardOptOut && (
-                  <div className="leaderboard-user-pill">
-                    <div className="user-pill-left flex-align gap-8">
-                      <div className="leaderboard-avatar-circle">
-                        {currentUser?.initials || 'JD'}
-                      </div>
-                      <span className="leaderboard-user-name">
-                        You - {currentUser?.name || 'Juan Dela Cruz'}
-                      </span>
-                    </div>
-                    <span className="leaderboard-rank-badge">RANK [#1]</span>
-                  </div>
-                )}
-                {leaderboardOptOut && (
-                  <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '8px 0' }}>
-                    Your rank is hidden from the leaderboard.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </>
       )}
 
@@ -1039,6 +1100,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
       {/* 3. EARNED BADGES SUB-VIEW */}
       {currentTab === 'trainee_badges' && (
+        <>
         <div className="card section-card p-24" style={{ borderRadius: '16px' }}>
           <div className="card-header-bar mb-16" style={{ padding: '0 0 16px' }}>
             <div>
@@ -1083,6 +1145,76 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             </div>
           )}
         </div>
+
+        {/* Corporate Leaderboard & Weekly Streak Tracker */}
+        <div className="template-right-widgets" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginTop: '20px' }}>
+          {/* This Week Streak Tracker */}
+          <div className="template-this-week-card">
+            <div className="this-week-header flex-between">
+              <h4>This week streak</h4>
+              <span className="this-week-counter">
+                {`${Math.min(streakDays ?? currentUser?.streak ?? 1, 7)} / 7 DAYS`}
+              </span>
+            </div>
+            <div className="this-week-days-row">
+              {['M','T','W','T','F','S','S'].map((day, idx) => {
+                const activeCount = Math.min(streakDays ?? currentUser?.streak ?? 1, 7);
+                const isActive = idx < activeCount;
+                return (
+                  <div key={idx} className="this-week-day-item">
+                    <div className={`day-flame-circle ${isActive ? 'active' : ''}`}>
+                      <Flame size={14} fill={isActive ? '#ea580c' : 'none'} className="text-orange" />
+                    </div>
+                    <span className="day-label">{day}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Corporate Leaderboard Podium Card */}
+          <div className="template-leaderboard-card">
+            <div className="leaderboard-card-header flex-between" style={{ marginBottom: '12px' }}>
+              <div className="leaderboard-card-title">Corporate Leaderboard</div>
+              {/* Opt-out toggle */}
+              <label className="leaderboard-optout-toggle" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#64748b', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={leaderboardOptOut}
+                  onChange={handleToggleOptOut}
+                  style={{ cursor: 'pointer' }}
+                />
+                Hide my rank
+              </label>
+            </div>
+            
+            {/* 3D Podium Graphic */}
+            <div style={{ marginBottom: '20px' }}>
+              <Podium top={designLeaderboard.top} small={true} />
+            </div>
+
+            {/* Bottom User Pill */}
+            {!leaderboardOptOut && (
+              <div className="leaderboard-user-pill">
+                <div className="user-pill-left flex-align gap-8">
+                  <div className="leaderboard-avatar-circle">
+                    {currentUser?.initials || 'JD'}
+                  </div>
+                  <span className="leaderboard-user-name">
+                    You - {currentUser?.name || 'Juan Dela Cruz'}
+                  </span>
+                </div>
+                <span className="leaderboard-rank-badge">RANK [#1]</span>
+              </div>
+            )}
+            {leaderboardOptOut && (
+              <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '8px 0' }}>
+                Your rank is hidden from the leaderboard.
+              </div>
+            )}
+          </div>
+        </div>
+        </>
       )}
 
       {/* 4. MY TRAININGS SUB-VIEW (U-10: Cross-company training history) */}

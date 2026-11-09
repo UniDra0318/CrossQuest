@@ -98,8 +98,7 @@ export default function Sidebar({
   const formatRoleLabel = (role) => {
     switch (role) {
       case 'admin': return 'Administrator';
-      case 'account_manager':
-      case 'crossworks_staff': return 'Account Manager';
+      case 'account_manager': return 'Account Manager';
       case 'finance': return 'Finance & Operations';
       case 'trainer': return 'Lead Trainer';
       case 'trainee': return 'Trainee';

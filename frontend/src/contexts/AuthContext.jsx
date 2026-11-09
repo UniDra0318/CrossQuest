@@ -4,9 +4,9 @@ export const DEMO_USERS = {
   // --- ADMINISTRATORS ---
   admin: {
     id: "016868d1-5238-49a4-9b3f-1cd205dbdc44",
-    email: "joey.mallari@xworks.ph",
-    name: "Joselito 'Joey' Mallari Jr.",
-    title: "Principal Consultant & Primary Administrator",
+    email: "admin@crossworks.ph",
+    name: "Dr. Julian Mercer",
+    title: "Principal Security Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["ALL"],
@@ -61,8 +61,8 @@ export const DEMO_USERS = {
   },
   am_joey: {
     id: "2cc2fae0-d941-4d81-9e55-04e822726a6a",
-    email: "joey.sales@crossworks.ph",
-    name: "Joey Ramos (Sales)",
+    email: "jordan.sales@crossworks.ph",
+    name: "Jordan Ramos (Sales)",
     title: "Account Manager (Ayala Land & Boehringer)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
@@ -85,8 +85,8 @@ export const DEMO_USERS = {
   // --- TRAINERS ---
   trainer: {
     id: "76be0c39-21c3-46ae-ba5d-0cb2dd203bfe",
-    email: "joey.trainer@crossworks.ph",
-    name: "Joey Ramos (Trainer)",
+    email: "trainer.lead@crossworks.ph",
+    name: "Jordan Ramos (Trainer)",
     title: "Lead Technical Trainer (Cybersecurity & GenAI)",
     role: "trainer",
     organization: "Crossworks Training & Consulting",
@@ -386,10 +386,10 @@ export function AuthProvider({ children }) {
         const parsed = JSON.parse(saved);
         // Find matching persona in DEMO_USERS to upgrade any stale cached object
         const matchingDemo = Object.values(DEMO_USERS).find(
-          u => u.id === parsed.id || u.email === parsed.email
+          u => u.id === parsed.id || u.email === parsed.email || u.role === parsed.role
         );
         if (matchingDemo) {
-          const upgraded = { ...matchingDemo, ...parsed };
+          const upgraded = { ...matchingDemo, ...parsed, name: matchingDemo.name, title: matchingDemo.title, initials: matchingDemo.initials };
           upgraded.role = normalizeRole(upgraded.role);
           // Ensure streak, points, level, and quiz_progress from DEMO_USERS if missing or stale
           if (upgraded.points === undefined || upgraded.quiz_progress === undefined) {

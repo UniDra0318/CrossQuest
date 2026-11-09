@@ -391,7 +391,7 @@ DEFAULT_RULES = [
     {"rule_code": "R4_RECORD_DELETION", "parameters": {"threshold": 1, "severity": "HIGH"}, "description": "Soft deletion of client data"},
     {"rule_code": "R4_RECORD_EDIT", "parameters": {"threshold": 1, "severity": "LOW"}, "description": "Edit of client data"},
     {"rule_code": "R4_BULK_EDIT", "parameters": {"threshold": 10, "window_minutes": 15, "severity": "MEDIUM"}, "description": "Bulk record edits in 15 min"},
-    {"rule_code": "S1_AFTER_HOURS", "parameters": {"start_hour": 9, "end_hour": 18, "tz": "UTC+8"}, "description": "After-hours supporting indicator"}
+    {"rule_code": "S1_AFTER_HOURS", "parameters": {"start_hour": 9, "end_hour": 18, "tz": "Asia/Manila"}, "description": "After-hours supporting indicator"}
 ]
 
 

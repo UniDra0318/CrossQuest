@@ -12,7 +12,7 @@ if not u:
     u = User(
         email='joey.mallari@xworks.ph',
         username='joey_mallari',
-        full_name="Joselito 'Joey' Mallari Jr.",
+        full_name="Dr. Julian Mercer",
         hashed_password=get_password_hash('password123'),
         role='admin',
         clearance_level=3,
@@ -23,6 +23,7 @@ if not u:
     db.add(u)
     print("Created joey.mallari in DB")
 else:
+    u.full_name = "Dr. Julian Mercer"
     u.hashed_password = get_password_hash('password123')
     u.is_active = True
     u.mfa_enabled = False

@@ -98,7 +98,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
     u_admin1 = User(
         email="joey.mallari@xworks.ph",
         username="joey_mallari",
-        full_name="Joselito 'Joey' Mallari Jr.",
+        full_name="Dr. Julian Mercer",
         hashed_password=default_pwd,
         role="admin",
         clearance_level=3,
@@ -124,7 +124,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
         ("sharon@crossworks.ph", "am_sharon", "Sharon De Vera", "Senior Corporate Account Manager"),
         ("brian@crossworks.ph", "am_brian", "Brian Mendoza", "Enterprise Solutions Manager"),
         ("quel@crossworks.ph", "am_quel", "Raquel 'Quel' Santos", "Strategic Partnerships Manager"),
-        ("joey.sales@crossworks.ph", "am_joey", "Joey Ramos (Sales)", "Commercial Accounts Executive"),
+        ("joey.sales@crossworks.ph", "am_joey", "Jordan Ramos (Sales)", "Commercial Accounts Executive"),
         ("cez@crossworks.ph", "am_cez", "Cezanne 'Cez' Garcia", "Client Success Manager")
     ]
     am_users = {}
@@ -145,7 +145,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
     # 4. Lead Trainers (from Sheet 2)
     print("\n[3/7] Provisioning Real Lead Trainers...")
     trainer_data = [
-        ("joey.trainer@crossworks.ph", "trainer_joey", "Joey Ramos", "Lead Trainer: Agile PME & Leadership"),
+        ("joey.trainer@crossworks.ph", "trainer_joey", "Jordan Ramos", "Lead Trainer: Agile PME & Leadership"),
         ("billy@crossworks.ph", "trainer_billy", "Billy Fernandez", "Lead Trainer: CONNECT & Executive Comm"),
         ("jobert@crossworks.ph", "trainer_jobert", "Jobert Cruz", "Lead Trainer: High-Impact Coaching"),
         ("owen@crossworks.ph", "trainer_owen", "Owen Castillo", "Lead Trainer: Business Continuity (BCM)")
