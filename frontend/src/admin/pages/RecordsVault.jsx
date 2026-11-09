@@ -10,7 +10,8 @@ import {
   Award,
   X,
   AlertCircle,
-  Plus
+  Plus,
+  ShieldCheck
 } from 'lucide-react';
 import { TablePagination, TablePaginationCompact, usePagination } from '../../components/TablePagination';
 import { TableEmptyBlock } from '../../components/TableEmptyState';
