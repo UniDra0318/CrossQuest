@@ -3010,6 +3010,499 @@ html.dark .quick-icon-btn.theme-mode-switch:hover,
   border-color: rgba(56, 189, 248, 0.35) !important;
 }
 
+/* ==========================================================================
+   TRAINEE DASHBOARD & MODERN COMPONENTS DARK MODE
+   ========================================================================== */
+
+/* Triad Pillars in Dark Mode */
+html.dark .trainee-pillar-card,
+[data-theme="dark"] .trainee-pillar-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .trainee-pillar-card:hover,
+[data-theme="dark"] .trainee-pillar-card:hover {
+  border-color: #374151 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .pillar-heading,
+[data-theme="dark"] .pillar-heading {
+  color: #f8fafc !important;
+}
+
+html.dark .pillar-meta-row,
+[data-theme="dark"] .pillar-meta-row {
+  color: #94a3b8 !important;
+}
+
+html.dark .pillar-meta-row strong,
+[data-theme="dark"] .pillar-meta-row strong {
+  color: #cbd5e1 !important;
+}
+
+html.dark .pillar-progress-labels,
+[data-theme="dark"] .pillar-progress-labels {
+  color: #cbd5e1 !important;
+}
+
+html.dark .pillar-meter-track,
+[data-theme="dark"] .pillar-meter-track {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+html.dark .callout-neutral,
+[data-theme="dark"] .callout-neutral {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+html.dark .callout-neutral .pillar-callout-header,
+[data-theme="dark"] .callout-neutral .pillar-callout-header {
+  color: #cbd5e1 !important;
+}
+
+html.dark .pillar-callout-sub,
+[data-theme="dark"] .pillar-callout-sub {
+  color: #94a3b8 !important;
+}
+
+html.dark .callout-warning,
+[data-theme="dark"] .callout-warning {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+html.dark .pillar-chip,
+[data-theme="dark"] .pillar-chip {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .pillar-chip.chip-highlight,
+[data-theme="dark"] .pillar-chip.chip-highlight {
+  background: rgba(37, 99, 235, 0.15) !important;
+  border-color: rgba(59, 130, 246, 0.35) !important;
+  color: #60a5fa !important;
+}
+
+html.dark .pillar-footer,
+[data-theme="dark"] .pillar-footer {
+  border-top-color: #1f2937 !important;
+}
+
+html.dark .pillar-btn-primary,
+[data-theme="dark"] .pillar-btn-primary {
+  background: #f0605d !important;
+  color: #ffffff !important;
+  border-color: #f0605d !important;
+}
+
+html.dark .pillar-btn-primary:hover:not(:disabled),
+[data-theme="dark"] .pillar-btn-primary:hover:not(:disabled) {
+  background: #e04f4c !important;
+  border-color: #e04f4c !important;
+}
+
+html.dark .pillar-btn-secondary,
+[data-theme="dark"] .pillar-btn-secondary {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+html.dark .pillar-btn-secondary:hover:not(:disabled),
+[data-theme="dark"] .pillar-btn-secondary:hover:not(:disabled) {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+/* Assigned Course Activities Block in Dark Mode */
+html.dark .modern-section-shell,
+[data-theme="dark"] .modern-section-shell {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .modern-section-head,
+[data-theme="dark"] .modern-section-head {
+  border-bottom-color: #1f2937 !important;
+}
+
+html.dark .modern-section-title,
+[data-theme="dark"] .modern-section-title {
+  color: #f8fafc !important;
+}
+
+html.dark .modern-section-desc,
+[data-theme="dark"] .modern-section-desc {
+  color: #94a3b8 !important;
+}
+
+html.dark .modern-section-badge,
+[data-theme="dark"] .modern-section-badge {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .modern-activity-card,
+[data-theme="dark"] .modern-activity-card {
+  background: #161f30 !important;
+  border-color: #1f2937 !important;
+}
+
+html.dark .modern-activity-card:hover,
+[data-theme="dark"] .modern-activity-card:hover {
+  border-color: #374151 !important;
+}
+
+html.dark .activity-card-title,
+[data-theme="dark"] .activity-card-title {
+  color: #f8fafc !important;
+}
+
+html.dark .activity-card-instructor,
+[data-theme="dark"] .activity-card-instructor {
+  color: #94a3b8 !important;
+}
+
+html.dark .activity-question-count,
+[data-theme="dark"] .activity-question-count {
+  color: #94a3b8 !important;
+}
+
+html.dark .activity-dots-label,
+[data-theme="dark"] .activity-dots-label {
+  color: #64748b !important;
+}
+
+html.dark .step-pending,
+[data-theme="dark"] .step-pending {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .activity-card-footer,
+[data-theme="dark"] .activity-card-footer {
+  border-top-color: #1f2937 !important;
+}
+
+html.dark .btn-secondary-sm,
+[data-theme="dark"] .btn-secondary-sm {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .btn-secondary-sm:hover:not(:disabled),
+[data-theme="dark"] .btn-secondary-sm:hover:not(:disabled) {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+
+/* Quizzes Catalog Bottom Actions Bar in Dark Mode */
+html.dark .catalog-card-actions,
+[data-theme="dark"] .catalog-card-actions {
+  background: #0f172a !important;
+  border-top-color: #1e293b !important;
+}
+
+/* Modern Achievements & Standings in Dark Mode */
+html.dark .modern-achievements-container,
+[data-theme="dark"] .modern-achievements-container,
+html.dark .modern-panel-card,
+[data-theme="dark"] .modern-panel-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+html.dark .modern-achievements-header,
+[data-theme="dark"] .modern-achievements-header {
+  border-bottom-color: #1f2937 !important;
+}
+
+html.dark .modern-achievements-title,
+html.dark .modern-panel-title,
+[data-theme="dark"] .modern-achievements-title,
+[data-theme="dark"] .modern-panel-title {
+  color: #f8fafc !important;
+}
+
+html.dark .modern-achievements-sub,
+[data-theme="dark"] .modern-achievements-sub {
+  color: #94a3b8 !important;
+}
+
+html.dark .modern-achievements-count-badge,
+[data-theme="dark"] .modern-achievements-count-badge {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .modern-badge-card,
+[data-theme="dark"] .modern-badge-card {
+  background: #161f30 !important;
+  border-color: #1f2937 !important;
+}
+
+html.dark .modern-badge-card:hover,
+[data-theme="dark"] .modern-badge-card:hover {
+  border-color: #374151 !important;
+}
+
+html.dark .modern-badge-name,
+[data-theme="dark"] .modern-badge-name {
+  color: #f8fafc !important;
+}
+
+html.dark .modern-badge-desc,
+[data-theme="dark"] .modern-badge-desc {
+  color: #94a3b8 !important;
+}
+
+html.dark .modern-badge-status-row,
+[data-theme="dark"] .modern-badge-status-row {
+  border-top-color: #1f2937 !important;
+}
+
+html.dark .modern-streak-icon-dot,
+[data-theme="dark"] .modern-streak-icon-dot {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+}
+
+html.dark .modern-streak-icon-dot.active,
+[data-theme="dark"] .modern-streak-icon-dot.active {
+  background: rgba(249, 115, 22, 0.2) !important;
+  border-color: rgba(249, 115, 22, 0.5) !important;
+  color: #fb923c !important;
+}
+
+html.dark .modern-streak-day-label,
+[data-theme="dark"] .modern-streak-day-label {
+  color: #94a3b8 !important;
+}
+
+html.dark .modern-leaderboard-item,
+[data-theme="dark"] .modern-leaderboard-item {
+  background: #161f30 !important;
+  border-color: #1f2937 !important;
+}
+
+html.dark .modern-leaderboard-item.is-user,
+[data-theme="dark"] .modern-leaderboard-item.is-user {
+  background: #1e293b !important;
+  border-color: #374151 !important;
+}
+
+html.dark .modern-leaderboard-item span,
+[data-theme="dark"] .modern-leaderboard-item span {
+  color: #f8fafc !important;
+}
+
+/* Rank number badges inside leaderboard in dark mode */
+html.dark .modern-rank-badge-num.rank-1,
+[data-theme="dark"] .modern-rank-badge-num.rank-1 {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+}
+
+html.dark .modern-rank-badge-num.rank-2,
+[data-theme="dark"] .modern-rank-badge-num.rank-2 {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+html.dark .modern-rank-badge-num.rank-3,
+[data-theme="dark"] .modern-rank-badge-num.rank-3 {
+  background: #ffedd5 !important;
+  color: #9a3412 !important;
+}
+
+html.dark .modern-rank-badge-num.rank-other,
+[data-theme="dark"] .modern-rank-badge-num.rank-other {
+  background: transparent !important;
+  color: #94a3b8 !important;
+}
+
+/* ==========================================================================
+   QUIZ ARENA FULL THEME LEGIBILITY FIXES (ALL THEMES & DARK MODE)
+   ========================================================================== */
+
+/* 1. Sequence Ordering Interactive Items in Dark Mode & Atmosphere Themes */
+html.dark .sequence-item-row,
+[data-theme="dark"] .sequence-item-row,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .sequence-item-row {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .sequence-item-row:hover,
+[data-theme="dark"] .sequence-item-row:hover,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .sequence-item-row:hover {
+  background: #273549 !important;
+  border-color: #475569 !important;
+}
+
+html.dark .seq-step-text,
+[data-theme="dark"] .seq-step-text,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .seq-step-text {
+  color: #f8fafc !important;
+}
+
+html.dark .seq-step-badge,
+[data-theme="dark"] .seq-step-badge,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .seq-step-badge {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+}
+
+html.dark .seq-arrow-btn,
+[data-theme="dark"] .seq-arrow-btn,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .seq-arrow-btn {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .seq-arrow-btn:hover:not(:disabled),
+[data-theme="dark"] .seq-arrow-btn:hover:not(:disabled),
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .seq-arrow-btn:hover:not(:disabled) {
+  background: #6366f1 !important;
+  border-color: #6366f1 !important;
+  color: #ffffff !important;
+}
+
+html.dark .sequence-instructions,
+[data-theme="dark"] .sequence-instructions,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .sequence-instructions {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+/* 2. Matching Interactive Question in Dark Mode & Atmosphere Themes */
+html.dark .matching-instructions-bar,
+[data-theme="dark"] .matching-instructions-bar,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .matching-instructions-bar {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .instruct-text,
+[data-theme="dark"] .instruct-text,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .instruct-text {
+  color: #cbd5e1 !important;
+}
+
+html.dark .matching-btn-clear,
+[data-theme="dark"] .matching-btn-clear,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .matching-btn-clear {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+html.dark .matching-item-card,
+[data-theme="dark"] .matching-item-card,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .matching-item-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .matching-item-card:hover,
+[data-theme="dark"] .matching-item-card:hover,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .matching-item-card:hover {
+  background: #273549 !important;
+  border-color: #475569 !important;
+}
+
+html.dark .item-main-text,
+[data-theme="dark"] .item-main-text,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .item-main-text {
+  color: #f8fafc !important;
+}
+
+html.dark .item-index-badge,
+[data-theme="dark"] .item-index-badge,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .item-index-badge {
+  background: #0f172a !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .item-index-badge.badge-letter,
+[data-theme="dark"] .item-index-badge.badge-letter,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .item-index-badge.badge-letter {
+  background: #1e1b4b !important;
+  color: #a5b4fc !important;
+}
+
+html.dark .anchor-pin,
+[data-theme="dark"] .anchor-pin,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .anchor-pin {
+  background: #0f172a !important;
+  border-color: #64748b !important;
+}
+
+/* 3. Identification Question in Dark Mode & Atmosphere Themes */
+html.dark .identification-card-panel,
+[data-theme="dark"] .identification-card-panel,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .identification-card-panel {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .ident-helper-bar,
+[data-theme="dark"] .ident-helper-bar,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .ident-helper-bar {
+  color: #94a3b8 !important;
+}
+
+html.dark .identification-input,
+[data-theme="dark"] .identification-input,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .identification-input {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* 4. Feedback & Solution Box in Dark Mode & Atmosphere Themes */
+html.dark .feedback-explanation,
+[data-theme="dark"] .feedback-explanation,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .feedback-explanation {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark .feedback-solution-box,
+[data-theme="dark"] .feedback-solution-box,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .feedback-solution-box {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #6ee7b7 !important;
+}
+
+html.dark .feedback-solution-text,
+[data-theme="dark"] .feedback-solution-text,
+.quiz-fullscreen-wrapper:not(.theme-standard-light) .feedback-solution-text {
+  color: #a7f3d0 !important;
+}
+
+
+
 
 
 

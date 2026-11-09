@@ -24,7 +24,9 @@ import {
   Trophy,
   Star,
   Zap,
-  Target
+  Target,
+  Compass,
+  ArrowUpRight
 } from 'lucide-react';
 import { getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
@@ -702,153 +704,225 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       })()}
 
       {/* Main Content Area */}
-      <div style={{ marginTop: '24px' }}>
-      {/* 1. MAIN TRAINEE QUEST VIEW (B9: SIMPLIFIED TO 3 PILLARS: Current Course, Expiring Credential, Next Quiz) */}
+      <div style={{ marginTop: '20px' }}>
+      {/* 1. MAIN TRAINEE QUEST VIEW (Enterprise SaaS Layout) */}
       {(currentTab === 'trainee_quest') && (
         <>
-          {/* B9: THREE FOCAL PILLARS */}
-          <div className="trainee-home-triad-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '28px' }}>
+          {/* FOCAL HERO STAGE (Bolder Editorial Anchor) */}
+          <div className="trainee-hero-stage">
+            <div className="trainee-hero-content">
+              <div className="trainee-hero-badge">
+                <Compass size={13} className="hero-badge-icon" />
+                <span>MISSION COMMAND &bull; ACTIVE CYCLE</span>
+              </div>
+              <h2 className="trainee-hero-headline">
+                Advance Your Security Clearance &amp; Mastery
+              </h2>
+              <p className="trainee-hero-sub">
+                Track your real-time compliance posture, complete interactive modules verified under CP-ABE data protection, and build organizational standing.
+              </p>
+
+              <div className="trainee-hero-actions">
+                <button
+                  type="button"
+                  className="trainee-hero-primary-btn"
+                  onClick={() => featuredCourse ? handleStartQuizById(featuredCourse.id) : handleStartQuizById('act-1')}
+                  disabled={!isOnline}
+                >
+                  <Play size={14} fill="currentColor" />
+                  <span>Resume Current Mission</span>
+                  <ArrowRight size={14} className="hero-btn-arrow" />
+                </button>
+                <button
+                  type="button"
+                  className="trainee-hero-secondary-btn"
+                  onClick={() => setActiveView && setActiveView('trainee_quiz')}
+                >
+                  <span>Browse Assessments</span>
+                  <ArrowUpRight size={14} />
+                </button>
+              </div>
+            </div>
+
+            <div className="trainee-hero-metrics-panel">
+              <div className="hero-metric-cell">
+                <span className="metric-tag">ACCURACY &bull; SCORE</span>
+                <span className="metric-num">94.8<span className="metric-unit">%</span></span>
+                <span className="metric-sub-label">Exceeds 80% passing floor</span>
+              </div>
+              <div className="hero-metric-cell">
+                <span className="metric-tag">ACTIVE STREAK</span>
+                <span className="metric-num text-orange"><Flame size={20} style={{ display: 'inline', marginRight: 4 }} />{streakDays ?? 1}<span className="metric-unit">DAYS</span></span>
+                <span className="metric-sub-label">Weekly goal 7/7 on track</span>
+              </div>
+              <div className="hero-metric-cell">
+                <span className="metric-tag">VERIFIED CREDENTIALS</span>
+                <span className="metric-num text-emerald">{displayCertificates.length || 1}<span className="metric-unit">ACTIVE</span></span>
+                <span className="metric-sub-label">Zero pending revocations</span>
+              </div>
+              <div className="hero-metric-cell">
+                <span className="metric-tag">REPUTATION SCORE</span>
+                <span className="metric-num">{(points ?? 0).toLocaleString()}<span className="metric-unit">PTS</span></span>
+                <span className="metric-sub-label">Rank #1 in company roster</span>
+              </div>
+            </div>
+          </div>
+
+          {/* THREE FOCAL PILLARS */}
+          <div className="trainee-home-triad-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
             
             {/* PILLAR 1: CURRENT COURSE */}
-            <div className="card section-card trainee-triad-card">
-              <div>
-                <div className="card-header-flex">
-                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#6366f1', background: '#e0e7ff', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
-                    1. Current Course
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <BookOpen size={14} className="text-indigo" /> In Progress
+            <div className="trainee-pillar-card">
+              <div className="pillar-top-row">
+                <span className="pillar-kicker-pill kicker-indigo">
+                  Current Course
+                </span>
+                <span className="pillar-status-chip">
+                  <BookOpen size={13} style={{ color: '#4f46e5' }} /> In Progress
+                </span>
+              </div>
+
+              <h3 className="pillar-heading">
+                {featuredCourse?.title || 'No active course enrollment'}
+              </h3>
+              
+              <div className="pillar-meta-row">
+                <span className="pillar-meta-item">
+                  Instructor: <strong>{featuredCourse?.instructor || 'Instructor not assigned'}</strong>
+                </span>
+                <span className="pillar-meta-item">
+                  Track: <strong>{featuredCourse?.category || 'General'}</strong>
+                </span>
+              </div>
+
+              {/* Progress Container */}
+              <div className="pillar-progress-section">
+                <div className="pillar-progress-labels">
+                  <span className="pillar-progress-title">Module Progress</span>
+                  <span className="pillar-progress-pct">
+                    {featuredCourse?.completed ? '100% Completed' : (featuredCourse ? `${featuredCourse?.progressSegments?.filter(Boolean).length || 0} of ${featuredCourse?.progressSegments?.length || 0} Modules` : 'No modules active')}
                   </span>
                 </div>
-
-                <h3 style={{ fontSize: '17px', fontWeight: 800, marginBottom: '6px', color: 'var(--cq-text-primary, #0f172a)' }}>
-                  {featuredCourse?.title || 'No active course enrollment'}
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
-                  Instructor: <strong>{featuredCourse?.instructor || 'Instructor not assigned'}</strong> &bull; Track: {featuredCourse?.category || 'General'}
-                </p>
-
-                {/* Course Progress Bar */}
-                <div style={{ marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>
-                    <span>Module Progress</span>
-                    <span style={{ color: '#4f46e5' }}>{featuredCourse?.completed ? '100% Completed' : (featuredCourse ? `${featuredCourse?.progressSegments?.filter(Boolean).length || 0} of ${featuredCourse?.progressSegments?.length || 0} Modules` : 'No modules active')}</span>
-                  </div>
-                  <div style={{ width: '100%', height: '8px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div 
-                      style={{ 
-                        width: `${featuredCourse?.completed ? 100 : (featuredCourse ? Math.round(((featuredCourse?.progressSegments?.filter(Boolean).length || 0) / (featuredCourse?.progressSegments?.length || 1)) * 100) : 0)}%`, 
-                        height: '100%', 
-                        background: 'linear-gradient(90deg, #6366f1, #4f46e5)',
-                        borderRadius: '999px',
-                        transition: 'width 0.4s ease'
-                      }} 
-                    />
-                  </div>
+                <div className="pillar-meter-track">
+                  <div 
+                    className="pillar-meter-fill"
+                    style={{ 
+                      width: '100%',
+                      transform: `scaleX(${Math.max(0, Math.min(1, (featuredCourse?.completed ? 1 : (featuredCourse ? ((featuredCourse?.progressSegments?.filter(Boolean).length || 0) / (featuredCourse?.progressSegments?.length || 1)) : 0))))})`
+                    }} 
+                  />
                 </div>
               </div>
 
-              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+              <div className="pillar-footer">
                 <button
                   type="button"
-                  className="trainee-triad-btn trainee-triad-btn--secondary"
+                  className="trainee-pillar-btn pillar-btn-secondary"
                   onClick={() => featuredCourse && handleStartQuizById(featuredCourse.id)}
                   disabled={!featuredCourse || !isOnline}
                 >
-                  <Play size={14} fill="currentColor" />
-                  <span>{featuredCourse?.completed ? 'Replay Course Module' : 'Continue Course'}</span>
+                  <Play size={13} fill="currentColor" />
+                  <span>{featuredCourse?.completed ? 'Review Course Material' : 'Continue Course'}</span>
                 </button>
               </div>
             </div>
 
             {/* PILLAR 2: EXPIRING CREDENTIAL */}
-            <div className="card section-card trainee-triad-card">
-              <div>
-                <div className="card-header-flex">
-                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: expiringCredential ? '#ea580c' : '#059669', background: expiringCredential ? '#ffedd5' : '#d1fae5', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
-                    2. Expiring Credential
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Shield size={14} className={expiringCredential ? 'text-amber' : 'text-emerald'} /> Certified
+            <div className="trainee-pillar-card">
+              <div className="pillar-top-row">
+                <span className={`pillar-kicker-pill ${expiringCredential ? 'kicker-amber' : 'kicker-emerald'}`}>
+                  Expiring Credential
+                </span>
+                <span className="pillar-status-chip">
+                  <Shield size={13} style={{ color: expiringCredential ? '#d97706' : '#059669' }} /> Certified
+                </span>
+              </div>
+
+              <h3 className="pillar-heading">
+                {expiringCredential?.title || 'ISO/IEC 27001 Information Security Practitioner'}
+              </h3>
+
+              <div className="pillar-meta-row">
+                <span className="pillar-meta-item">
+                  Authority: <strong>{expiringCredential?.clientCompany || currentUser?.organization || 'Crossworks Enterprise'}</strong>
+                </span>
+                <span className="pillar-meta-item">
+                  Integrity: <strong>{expiringCredential?.hash || 'CP-ABE Verified'}</strong>
+                </span>
+              </div>
+
+              {/* Expiration Notice Box */}
+              <div className={`pillar-callout-box ${expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? 'callout-warning' : 'callout-neutral'}`}>
+                <div className="pillar-callout-header">
+                  <Clock size={14} />
+                  <span>
+                    {expiringCredential?.daysUntilExpiry !== null && expiringCredential?.daysUntilExpiry !== undefined
+                      ? `Renewal Window: ${expiringCredential.daysUntilExpiry} days remaining`
+                      : 'Renewal Window: 32 days remaining'}
                   </span>
                 </div>
-
-                <h3 style={{ fontSize: '17px', fontWeight: 800, marginBottom: '6px', color: 'var(--cq-text-primary, #0f172a)' }}>
-                  {expiringCredential?.title || 'ISO/IEC 27001 Information Security Practitioner'}
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
-                  Authority: <strong>{expiringCredential?.clientCompany || currentUser?.organization || 'Crossworks Enterprise'}</strong> &bull; {expiringCredential?.hash || 'CP-ABE Verified'}
-                </p>
-
-                {/* Expiration Notice Box */}
-                <div style={{ padding: '12px 14px', borderRadius: '10px', background: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#fff7ed' : '#f8fafc', border: `1px solid ${expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#fed7aa' : '#e2e8f0'}`, marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', fontWeight: 700, color: expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? '#c2410c' : '#334155' }}>
-                    <Clock size={15} />
-                    <span>
-                      {expiringCredential?.daysUntilExpiry !== null && expiringCredential?.daysUntilExpiry !== undefined
-                        ? `Renewal Window: ${expiringCredential.daysUntilExpiry} days remaining`
-                        : 'Renewal Window: 32 days remaining'}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '4px' }}>
-                    Expires: <strong>{expiringCredential?.expiresOn || 'December 15, 2026'}</strong> (Maintenance sweep active)
-                  </div>
+                <div className="pillar-callout-sub">
+                  Expires: <strong>{expiringCredential?.expiresOn || 'December 15, 2026'}</strong> &bull; Policy sweep active
                 </div>
               </div>
 
-              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+              <div className="pillar-footer">
                 <button
                   type="button"
-                  className="trainee-triad-btn trainee-triad-btn--secondary"
+                  className="trainee-pillar-btn pillar-btn-secondary"
                   onClick={() => setActiveView && setActiveView('trainee_certs')}
                 >
-                  <FileCheck size={14} />
+                  <FileCheck size={13} />
                   <span>Review &amp; Renew Credential</span>
                 </button>
               </div>
             </div>
 
-            {/* PILLAR 3: NEXT QUIZ ASSESSMENT */}
-            <div className="card section-card trainee-triad-card">
-              <div>
-                <div className="card-header-flex">
-                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em', color: '#0891b2', background: '#cffafe', padding: '4px 10px', borderRadius: '999px', textTransform: 'uppercase' }}>
-                    3. Next Quiz
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <FileQuestion size={14} className="text-cyan" /> Ready to Take
-                  </span>
-                </div>
-
-                <h3 style={{ fontSize: '17px', fontWeight: 800, marginBottom: '6px', color: 'var(--cq-text-primary, #0f172a)' }}>
-                  {nextQuizItem?.title || 'Security Architecture Evaluation'}
-                </h3>
-                <p style={{ fontSize: '13px', color: 'var(--cq-text-muted, #64748b)', marginBottom: '16px', lineHeight: 1.4 }}>
-                  Category: <strong>{nextQuizItem?.category || 'Security Controls'}</strong> &bull; Passing Score: <strong>{nextQuizItem?.passingScore || 80}%</strong>
-                </p>
-
-                {/* Quiz Meta Details */}
-                <div className="card-badges-flex">
-                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
-                    {nextQuizItem?.questions?.length || 4} Questions
-                  </span>
-                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
-                    {nextQuizItem?.timePerQuestion || 30}s / Question
-                  </span>
-                  <span style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
-                    Official Evaluation
-                  </span>
-                </div>
+            {/* PILLAR 3: NEXT ASSESSMENT */}
+            <div className="trainee-pillar-card">
+              <div className="pillar-top-row">
+                <span className="pillar-kicker-pill kicker-cyan">
+                  Next Quiz
+                </span>
+                <span className="pillar-status-chip">
+                  <FileQuestion size={13} style={{ color: '#0891b2' }} /> Ready to Take
+                </span>
               </div>
 
-              <div style={{ paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+              <h3 className="pillar-heading">
+                {nextQuizItem?.title || 'Security Architecture Evaluation'}
+              </h3>
+
+              <div className="pillar-meta-row">
+                <span className="pillar-meta-item">
+                  Category: <strong>{nextQuizItem?.category || 'Security Controls'}</strong>
+                </span>
+                <span className="pillar-meta-item">
+                  Passing Score: <strong>{nextQuizItem?.passingScore || 80}%</strong>
+                </span>
+              </div>
+
+              {/* Quiz Meta Chips */}
+              <div className="pillar-chips-wrap">
+                <span className="pillar-chip">
+                  {nextQuizItem?.questions?.length || 4} Questions
+                </span>
+                <span className="pillar-chip">
+                  {nextQuizItem?.timePerQuestion || 30}s / Question
+                </span>
+                <span className="pillar-chip chip-highlight">
+                  Official Evaluation
+                </span>
+              </div>
+
+              <div className="pillar-footer">
                 <button
                   type="button"
-                  className="trainee-triad-btn trainee-triad-btn--primary"
+                  className="trainee-pillar-btn pillar-btn-primary"
                   onClick={() => handleStartQuizById(nextQuizItem?.id || 'quiz_cloud_sec')}
                   disabled={!isOnline}
                 >
-                  <Play size={14} fill="currentColor" />
+                  <Play size={13} fill="currentColor" />
                   <span>Start Assessment Arena</span>
                 </button>
               </div>
@@ -856,105 +930,97 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
           </div>
 
-          {/* 2. ASSIGNED COURSE ACTIVITIES (4 CARDS WITH 3D ISOMETRIC GRAPHICS) */}
-          <div id="assigned-activities-section" className="template-section-block">
-            <div className="template-section-header">
-              <div className="template-section-title-wrap">
-                <h3>All Assigned Course Activities</h3>
+          {/* 2. ASSIGNED COURSE ACTIVITIES (Clean Linear/SaaS Component Table/Grid) */}
+          <div className="modern-section-shell">
+            <div className="modern-section-head">
+              <div>
+                <h3 className="modern-section-title">Assigned Course Activities</h3>
+                <p className="modern-section-desc">Course modules and evaluations assigned to your active enterprise curriculum.</p>
               </div>
-              <span className="template-section-instructor-tag">ASSIGNED BY CROSSWORKS INSTRUCTORS</span>
+              <span className="modern-section-badge">
+                ASSIGNED BY CROSSWORKS INSTRUCTORS
+              </span>
             </div>
 
-            <div className="template-activities-grid">
+            <div className="modern-activities-grid">
               {assignedActivities && assignedActivities.length > 0 ? (
                 assignedActivities.map((act) => {
-                return (
-                  <div key={act.id} className="template-activity-card">
-                    {/* Top Colored Banner with 3D Graphic */}
-                    <div className="activity-card-banner" style={{ backgroundColor: act.headerColor }}>
-                      <div className="activity-banner-left">
-                        <span className="activity-q-pill">{act.questionsCount}</span>
-                        <h4 className="activity-category-title">{act.category}</h4>
-                      </div>
-                      <div className="activity-banner-icon-slot">
-                        <IsoCube 
-                          size={46} 
-                          color={act.track.color} 
-                          top={act.track.top} 
-                          right={act.track.right} 
-                          label={act.categoryLabel || act.track.face.label} 
-                        />
-                      </div>
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="activity-card-body">
-                      <h4 className="activity-title">{act.title}</h4>
-                      <p className="activity-instructor">{act.instructor}</p>
-
-                      {/* Segmented Progress Indicator (Numbered Question Cells) */}
-                      <div className="activity-cells-bar">
-                        {act.progressSegments.map((isFilled, idx) => (
-                          <div 
-                            key={idx} 
-                            className={`activity-segment-cell ${isFilled ? 'cell-filled' : 'cell-empty'}`}
-                            style={{ 
-                              borderColor: isFilled ? act.headerColor : undefined,
-                              backgroundColor: isFilled ? `${act.headerColor}22` : undefined,
-                              color: isFilled ? act.headerColor : undefined
-                            }}
-                            title={`Question ${idx + 1}: ${isFilled ? 'Completed' : 'Pending'}`}
-                          >
-                            <span className="cell-num">{idx + 1}</span>
-                            {isFilled && <Check size={11} strokeWidth={3} className="cell-chk" />}
-                          </div>
-                        ))}
+                  return (
+                    <div key={act.id} className="modern-activity-card">
+                      <div className="activity-card-top-bar">
+                        <span className="activity-track-pill" style={{ color: act.track.color, background: `${act.track.color}14`, borderColor: `${act.track.color}30` }}>
+                          {act.category}
+                        </span>
+                        <span className="activity-question-count">
+                          {act.questionsCount} items
+                        </span>
                       </div>
 
-                      {/* Card Footer Actions */}
+                      <h4 className="activity-card-title">{act.title}</h4>
+                      <div className="activity-card-instructor">
+                        Instructor: <strong>{act.instructor}</strong>
+                      </div>
+
+                      {/* Clean Question Step Dots */}
+                      <div className="activity-dots-container">
+                        <div className="activity-dots-label">Module Progress:</div>
+                        <div className="activity-dots-row">
+                          {act.progressSegments.map((isFilled, idx) => (
+                            <div 
+                              key={idx} 
+                              className={`activity-step-dot ${isFilled ? 'step-completed' : 'step-pending'}`}
+                              title={`Question ${idx + 1}: ${isFilled ? 'Completed' : 'Pending'}`}
+                            >
+                              {isFilled ? <Check size={10} strokeWidth={3} /> : idx + 1}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                       <div className="activity-card-footer">
                         {act.completed ? (
                           <>
-                            <span className="activity-accuracy-pill">
+                            <span className="activity-status-badge status-success">
                               <Check size={12} strokeWidth={3} />
                               <span>{act.score}% accuracy</span>
                             </span>
                             <button
-                              className="activity-btn-replay"
+                              type="button"
+                              className="activity-action-btn btn-secondary-sm"
                               onClick={() => handleStartQuizById(act.id)}
                               disabled={!isOnline}
                               title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
                             >
                               <span>Replay</span>
-                              <ArrowRight size={13} />
+                              <ArrowRight size={12} />
                             </button>
                           </>
                         ) : (
                           <>
-                            <span className="activity-pending-pill">
-                              <span>Assigned - Due in 3d</span>
+                            <span className="activity-status-badge status-pending">
+                              <span>Assigned &bull; Due in 3d</span>
                             </span>
                             <button
-                              className="activity-btn-play"
+                              type="button"
+                              className="activity-action-btn btn-primary-sm"
                               onClick={() => handleStartQuizById(act.id)}
                               disabled={!isOnline}
                               title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
                             >
-                              <span>Play Quest</span>
-                              <Play size={12} fill="currentColor" />
+                              <span>Start</span>
+                              <Play size={11} fill="currentColor" />
                             </button>
                           </>
                         )}
                       </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })
               ) : (
                 <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8', gridColumn: '1 / -1' }}>
-                  <BookOpen size={48} style={{ margin: '0 auto 16px', opacity: 0.4 }} />
-                  <h4 style={{ fontWeight: '700', marginBottom: '8px', color: '#64748b' }}>No course activities assigned yet</h4>
-                  <p style={{ fontSize: '14px' }}>You are all caught up! New instructor module assignments will appear here.</p>
+                  <BookOpen size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                  <h4 style={{ fontWeight: '600', marginBottom: '6px', color: '#64748b', fontSize: '15px' }}>No course activities assigned yet</h4>
+                  <p style={{ fontSize: '13px', margin: 0 }}>You are all caught up! New instructor module assignments will appear here.</p>
                 </div>
               )}
             </div>
