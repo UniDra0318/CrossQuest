@@ -228,11 +228,11 @@ export default function Portfolios() {
           style={{ 
             display: 'flex', 
             flexWrap: 'nowrap', 
-            gap: '22px', 
+            gap: '24px', 
             overflowX: 'auto', 
             overflowY: 'hidden',
-            paddingBottom: '16px',
-            paddingTop: '6px',
+            paddingBottom: '20px',
+            paddingTop: '8px',
             scrollSnapType: 'x mandatory',
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'thin'
@@ -246,56 +246,82 @@ export default function Portfolios() {
                 key={p.scope} 
                 className={`stf-card am-portfolio-card ${isMine ? 'am-portfolio-card--active' : 'am-portfolio-card--locked'}`}
                 style={{
-                  flex: '0 0 360px',
-                  minWidth: '360px',
-                  maxWidth: '360px',
+                  flex: '0 0 380px',
+                  minWidth: '380px',
+                  maxWidth: '380px',
                   flexShrink: 0,
                   scrollSnapAlign: 'start',
-                  borderRadius: '20px',
+                  borderRadius: '24px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  padding: '24px',
+                  padding: '28px',
                   position: 'relative',
                   overflow: 'hidden',
-                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                  background: isMine 
+                    ? (isDark ? 'linear-gradient(145deg, #131b2e 0%, #0f172a 100%)' : 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)')
+                    : (isDark ? 'linear-gradient(145deg, rgba(15, 23, 42, 0.7) 0%, rgba(10, 15, 30, 0.9) 100%)' : 'linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%)'),
+                  border: isMine 
+                    ? (isDark ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid rgba(14, 165, 233, 0.3)')
+                    : (isDark ? '1px dashed rgba(148, 163, 184, 0.25)' : '1px dashed rgba(148, 163, 184, 0.45)'),
+                  boxShadow: isMine 
+                    ? (isDark ? '0 16px 36px -4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.15)' : '0 20px 40px -8px rgba(14, 165, 233, 0.15), 0 4px 14px -2px rgba(15, 23, 42, 0.05)')
+                    : (isDark ? 'none' : '0 4px 14px rgba(15, 23, 42, 0.03)'),
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
               >
-                {/* Decorative Top Ambient Accent Line */}
+                {/* Decorative Top Glowing Accent Line */}
                 <div 
                   style={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: '3px',
+                    height: '4px',
                     background: isMine 
                       ? 'linear-gradient(90deg, #0284c7 0%, #38bdf8 50%, #34d399 100%)' 
-                      : (isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(203, 213, 225, 0.8)')
+                      : (isDark ? 'linear-gradient(90deg, rgba(239, 68, 68, 0.3) 0%, rgba(148, 163, 184, 0.2) 100%)' : 'linear-gradient(90deg, #fca5a5 0%, #cbd5e1 100%)')
                   }} 
                 />
 
                 <div>
+                  {/* Card Header: Icon Badge & Status */}
                   <div className="stf-card__top" style={{ alignItems: 'center' }}>
-                    <span 
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '4px 10px',
-                        borderRadius: '8px',
-                        fontFamily: 'var(--font-mono, monospace)',
-                        fontSize: '11px',
-                        fontWeight: 800,
-                        letterSpacing: '0.06em',
-                        background: isMine ? (isDark ? 'rgba(2, 132, 199, 0.25)' : '#e0f2fe') : (isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2'),
-                        color: isMine ? (isDark ? '#38bdf8' : '#0369a1') : (isDark ? '#f87171' : '#b91c1c'),
-                        border: isMine ? (isDark ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid #bae6fd') : (isDark ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid #fecaca')
-                      }}
-                    >
-                      <Building2 size={12} />
-                      {p.scope}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div 
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: isMine 
+                            ? (isDark ? 'rgba(56, 189, 248, 0.2)' : '#e0f2fe')
+                            : (isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2'),
+                          color: isMine 
+                            ? (isDark ? '#38bdf8' : '#0284c7')
+                            : (isDark ? '#f87171' : '#dc2626')
+                        }}
+                      >
+                        <Building2 size={16} />
+                      </div>
+                      <span 
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '8px',
+                          fontFamily: 'var(--font-mono, monospace)',
+                          fontSize: '11.5px',
+                          fontWeight: 800,
+                          letterSpacing: '0.06em',
+                          background: isMine ? (isDark ? 'rgba(2, 132, 199, 0.2)' : '#f0f9ff') : (isDark ? 'rgba(239, 68, 68, 0.12)' : '#fef2f2'),
+                          color: isMine ? (isDark ? '#38bdf8' : '#0369a1') : (isDark ? '#f87171' : '#b91c1c'),
+                          border: isMine ? (isDark ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid #bae6fd') : (isDark ? '1px solid rgba(239, 68, 68, 0.25)' : '1px solid #fecaca')
+                        }}
+                      >
+                        {p.scope}
+                      </span>
+                    </div>
 
                     {isMine ? (
                       <span 
@@ -305,13 +331,17 @@ export default function Portfolios() {
                           gap: '6px',
                           fontFamily: 'var(--font-mono, monospace)',
                           fontSize: '10.5px',
-                          fontWeight: 700,
+                          fontWeight: 800,
                           letterSpacing: '0.06em',
-                          color: '#10b981'
+                          padding: '4px 10px',
+                          borderRadius: '999px',
+                          background: isDark ? 'rgba(16, 185, 129, 0.18)' : '#ecfdf5',
+                          color: isDark ? '#34d399' : '#059669',
+                          border: isDark ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid #a7f3d0'
                         }}
                       >
-                        <span className="adm-live" style={{ width: '7px', height: '7px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }} />
-                        AUTHORIZED SCOPE
+                        <span className="adm-live" style={{ width: '6px', height: '6px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981' }} />
+                        AUTHORIZED
                       </span>
                     ) : (
                       <span 
@@ -320,77 +350,85 @@ export default function Portfolios() {
                           alignItems: 'center',
                           gap: '5px',
                           fontFamily: 'var(--font-mono, monospace)',
-                          fontSize: '10.5px',
+                          fontSize: '10px',
                           fontWeight: 700,
                           letterSpacing: '0.06em',
-                          color: isDark ? '#94a3b8' : '#64748b'
+                          padding: '4px 10px',
+                          borderRadius: '999px',
+                          background: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fee2e2',
+                          color: isDark ? '#fca5a5' : '#b91c1c',
+                          border: isDark ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid #fecaca'
                         }}
                       >
-                        <Lock size={11} />
+                        <Lock size={10} />
                         RESTRICTED
                       </span>
                     )}
                   </div>
 
-                  <h3 style={{ margin: '18px 0 4px', fontSize: '18px', fontWeight: 800, lineHeight: 1.3, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                  {/* Title & Industry */}
+                  <h3 style={{ margin: '20px 0 6px', fontSize: '18px', fontWeight: 800, lineHeight: 1.3, letterSpacing: '-0.01em', color: isDark ? '#f8fafc' : '#0f172a' }}>
                     {p.name}
                   </h3>
-                  <div style={{ fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500, marginBottom: '18px' }}>
+                  <div style={{ fontSize: '12.5px', color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500, marginBottom: '22px' }}>
                     {p.industry}
                   </div>
 
-                  {/* High-End Stats Telemetry Box */}
+                  {/* High-End Cockpit Spec Panel */}
                   <div 
                     style={{
                       background: isMine 
-                        ? (isDark ? 'rgba(2, 132, 199, 0.08)' : 'rgba(240, 249, 255, 0.75)')
-                        : (isDark ? 'rgba(15, 23, 42, 0.4)' : '#f8fafc'),
+                        ? (isDark ? 'rgba(2, 132, 199, 0.08)' : 'rgba(240, 249, 255, 0.85)')
+                        : (isDark ? 'rgba(15, 23, 42, 0.6)' : '#ffffff'),
                       border: isMine 
-                        ? (isDark ? '1px solid rgba(56, 189, 248, 0.18)' : '1px solid rgba(186, 230, 253, 0.8)')
+                        ? (isDark ? '1px solid rgba(56, 189, 248, 0.22)' : '1px solid rgba(186, 230, 253, 0.9)')
                         : (isDark ? '1px solid #1e293b' : '1px solid #e2e8f0'),
-                      borderRadius: '14px',
-                      padding: '12px 14px',
+                      borderRadius: '16px',
+                      padding: '16px 18px',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '10px'
+                      gap: '12px',
+                      boxShadow: isDark ? 'inset 0 1px 1px rgba(255, 255, 255, 0.04)' : '0 2px 8px rgba(15, 23, 42, 0.02)'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Account Agreement</span>
-                      <span style={{ fontWeight: 700, color: isMine ? '#10b981' : (isDark ? '#cbd5e1' : '#334155') }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500 }}>Account Agreement</span>
+                      <span style={{ fontWeight: 700, color: isMine ? (isDark ? '#34d399' : '#059669') : (isDark ? '#cbd5e1' : '#334155'), display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isMine ? '#10b981' : '#94a3b8' }} />
                         {p.status || 'Active Agreement'}
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Enrolled Trainees</span>
-                      <span style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 800, color: isMine ? (isDark ? '#38bdf8' : '#0284c7') : (isDark ? '#cbd5e1' : '#334155') }}>
-                        {p.trainees} active
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500 }}>Enrolled Trainees</span>
+                      <span style={{ fontFamily: 'var(--font-mono, monospace)', fontWeight: 800, fontSize: '13px', color: isMine ? (isDark ? '#38bdf8' : '#0284c7') : (isDark ? '#cbd5e1' : '#334155') }}>
+                        {p.trainees} <span style={{ fontSize: '11px', fontWeight: 600, color: isDark ? '#94a3b8' : '#64748b' }}>active</span>
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>CP-ABE Policy</span>
-                      <code style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', background: isDark ? '#0f172a' : '#ffffff', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500 }}>CP-ABE Policy</span>
+                      <code style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: isDark ? '#0b1120' : '#f1f5f9', border: isDark ? '1px solid #1e293b' : '1px solid #e2e8f0', color: isDark ? '#cbd5e1' : '#334155' }}>
                         COMPANY:{p.scope}
                       </code>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                      <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Access Authorization</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px', paddingTop: '4px', borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid #f1f5f9' }}>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500 }}>Access Clearance</span>
                       <span 
                         style={{
-                          fontSize: '10px',
+                          fontSize: '10.5px',
                           fontWeight: 800,
                           fontFamily: 'var(--font-mono, monospace)',
-                          padding: '3px 8px',
+                          padding: '3px 9px',
                           borderRadius: '6px',
                           letterSpacing: '0.06em',
                           background: isMine ? (isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5') : (isDark ? 'rgba(239, 68, 68, 0.2)' : '#fee2e2'),
-                          color: isMine ? '#10b981' : '#ef4444'
+                          color: isMine ? (isDark ? '#34d399' : '#059669') : (isDark ? '#f87171' : '#b91c1c'),
+                          border: isMine ? (isDark ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid #a7f3d0') : (isDark ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid #fca5a5')
                         }}
                       >
-                        {isMine ? 'GRANTED' : 'LOCKED'}
+                        {isMine ? 'GRANTED' : 'RESTRICTED'}
                       </span>
                     </div>
                   </div>
@@ -398,14 +436,14 @@ export default function Portfolios() {
 
                 {/* Card Actions */}
                 {isMine ? (
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '22px' }}>
                     <button
                       type="button"
                       className="am-card-primary-action"
                       style={{
                         flex: 1,
-                        padding: '10px 14px',
-                        borderRadius: '10px',
+                        padding: '11px 16px',
+                        borderRadius: '12px',
                         background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
                         color: '#ffffff',
                         border: 'none',
@@ -416,7 +454,7 @@ export default function Portfolios() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '6px',
-                        boxShadow: '0 4px 12px rgba(2, 132, 199, 0.3)',
+                        boxShadow: '0 4px 14px rgba(2, 132, 199, 0.35)',
                         transition: 'all 0.15s ease'
                       }}
                       onClick={() => navigate('/am/records?client=' + p.scope)}
@@ -428,8 +466,8 @@ export default function Portfolios() {
                       type="button"
                       style={{ 
                         flex: 1, 
-                        padding: '10px 14px',
-                        borderRadius: '10px',
+                        padding: '11px 16px',
+                        borderRadius: '12px',
                         background: isDark ? '#1e293b' : '#ffffff', 
                         border: isDark ? '1px solid #334155' : '1px solid #cbd5e1',
                         color: isDark ? '#f8fafc' : '#334155',
@@ -440,6 +478,7 @@ export default function Portfolios() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '6px',
+                        boxShadow: isDark ? 'none' : '0 2px 6px rgba(15, 23, 42, 0.04)',
                         transition: 'all 0.15s ease'
                       }}
                       onClick={() => navigate('/am/reports?client=' + p.scope)}
@@ -451,21 +490,22 @@ export default function Portfolios() {
                 ) : (
                   <div 
                     style={{ 
-                      marginTop: '20px',
-                      padding: '11px 14px',
-                      borderRadius: '10px',
+                      marginTop: '22px',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
                       border: isDark ? '1px dashed #334155' : '1px dashed #cbd5e1',
-                      background: isDark ? 'rgba(15, 23, 42, 0.5)' : '#f8fafc',
+                      background: isDark ? 'rgba(15, 23, 42, 0.6)' : '#ffffff',
                       color: isDark ? '#94a3b8' : '#64748b',
-                      fontSize: '11.5px',
+                      fontSize: '12px',
                       fontWeight: 600,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '8px'
+                      gap: '8px',
+                      boxShadow: isDark ? 'none' : '0 1px 3px rgba(15, 23, 42, 0.03)'
                     }}
                   >
-                    <Lock size={13} />
+                    <Lock size={13} style={{ color: isDark ? '#f87171' : '#ef4444' }} />
                     <span>Requires Admin Scope Grant</span>
                   </div>
                 )}
