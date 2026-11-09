@@ -1218,6 +1218,23 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                       <span style={{ fontSize: '12px', color: themeStyles.textMuted, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <Clock size={12} /> {alert.created_at ? new Date(alert.created_at).toLocaleString() : 'Recent'}
                       </span>
+                      {!isClosed && (
+                        <span style={{ 
+                          background: isDark ? 'rgba(56, 189, 248, 0.15)' : '#e0f2fe',
+                          color: isDark ? '#38bdf8' : '#0369a1',
+                          border: isDark ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid #bae6fd',
+                          padding: '3px 8px',
+                          borderRadius: '8px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <Clock size={11} />
+                          <span>Review SLA: Due in {severity === 'HIGH' ? 3 : 5} working days (U-16)</span>
+                        </span>
+                      )}
                       {(alert.tags || []).map(tag => (
                         <span key={tag} style={{ 
                           background: themeStyles.chipBg, 
