@@ -10,3 +10,4 @@ for egg_info in glob.glob("/usr/local/lib/python*/site-packages/*.egg/EGG-INFO")
                 f.write("Metadata-Version: 2.1\nName: charm-crypto\nVersion: 0.62\n")
         except Exception:
             pass
+

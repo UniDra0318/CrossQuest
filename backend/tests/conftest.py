@@ -24,6 +24,7 @@ from app.models.entities import (
 @pytest.fixture(autouse=True)
 def _disable_privileged_mfa_enforcement(monkeypatch):
     monkeypatch.setattr(settings, "ENFORCE_PRIVILEGED_MFA", False)
+    monkeypatch.setattr(settings, "ALLOW_DEV_MFA_BYPASS", False)
 
 
 @pytest.fixture(scope="session")

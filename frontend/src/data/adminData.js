@@ -55,10 +55,15 @@ export const anomalies = [
 const AM = (c) => `(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:${c})`;
 // status: COMPLETED | IN_PROGRESS
 export const records = [
-  { id: 'rec-101', trainee: 'Juan Dela Cruz', email: 'juan.delacruz@alpha-corp.ph', org: 'SAN MIGUEL CONGLOMERATE HOLDINGS', course: 'Information Security Management & Governance', policy: AM('CORP_ALPHA'), status: 'COMPLETED' },
-  { id: 'rec-102', trainee: 'Maria Clara', email: 'maria.clara@maya-fintech.ph', org: 'MAYA FINTECH DIGITAL INNOVATIONS', course: 'Privacy Information Management & GDPR', policy: AM('FINTECH_BETA'), status: 'COMPLETED' },
-  { id: 'rec-103', trainee: 'Gabriel Ramos', email: 'g.ramos@ayala-retail.ph', org: 'AYALA RETAIL OMNICHANNEL CORP', course: 'Corporate Threat Modeling & Incident Handling', policy: AM('RETAIL_GAMMA'), status: 'IN_PROGRESS' },
-  { id: 'rec-104', trainee: 'Beatrice Tan', email: 'beatrice.tan@alpha-corp.ph', org: 'SAN MIGUEL CONGLOMERATE HOLDINGS', course: 'DevSecOps Pipeline Security & CI/CD Guardrails', policy: AM('CORP_ALPHA'), status: 'COMPLETED' },
+  { id: 'rec-pilot-001', trainee: 'Andrea Aguilar', email: 'andrea.aguilar@vertiv.com', org: 'Vertiv (Singapore) Holdings PTE LTD-ROHQ', course: 'Supervisory Upskilling Program for Excellent', policy: AM('VHL_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-002', trainee: 'Ricardo Ocampo', email: 'ricardo.ocampo@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-003', trainee: 'Bea Macaraeg', email: 'bea.macaraeg@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-004', trainee: 'Adrian Natividad', email: 'adrian.natividad@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-005', trainee: 'Karen Concepcion', email: 'karen.concepcion@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-010', trainee: 'Jerome Enriquez', email: 'jenriquez@redoakproperties.com.ph', org: 'Red Oak Properties Inc.', course: 'Supervisory Upskilling Program for Excellent', policy: AM('ROP_3'), status: 'COMPLETED' },
+  { id: 'rec-pilot-032', trainee: 'Rowena Cabrera', email: 'rowena.cabrera@ewageas.com', org: 'East West Ageas Life Insurance', course: 'Business Strategy Simulation', policy: AM('EWALIC_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-049', trainee: 'Joshua Javier', email: 'jjavier@islalpg.com', org: 'Isla LPG Corporation', course: 'Negotiating for Results', policy: AM('ISLA_LPG_CORPOR'), status: 'IN_PROGRESS' },
+  { id: 'rec-pilot-088', trainee: 'Vincent Santos', email: 'santos.vincent@ayalaland.com.ph', org: 'Ayala Land Inc.', course: 'PMP Review (Saturdays)', policy: AM('AYALA_LAND_INC_2'), status: 'COMPLETED' },
 ];
 
 export const settings = {
