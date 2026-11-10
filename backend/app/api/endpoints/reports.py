@@ -134,10 +134,24 @@ def generate_client_report(
 
     records = query.order_by(TrainingRecord.completion_date.desc().nullslast()).all()
 
-    total_records = len(records)
-    completed_count = sum(1 for r, _ in records if r.status == "Completed")
+    # Pre-extract trainee details into plain dicts before commit to prevent lazy reload under cleared RLS context
+    trainee_list = [
+        {
+            "record_id": r.id,
+            "trainee_code": t.trainee_code,
+            "trainee_name": f"{t.first_name} {t.last_name}",
+            "course_name": r.course_name,
+            "training_date": r.completion_date.strftime("%Y-%m-%d") if r.completion_date else "In progress",
+            "status": r.status,
+            "score": r.score
+        }
+        for r, t in records
+    ]
+
+    total_records = len(trainee_list)
+    completed_count = sum(1 for item in trainee_list if item["status"] == "Completed")
     avg_score = (
-        sum((r.score or 0) for r, _ in records if r.score is not None) / max(1, total_records)
+        sum((item["score"] or 0) for item in trainee_list if item["score"] is not None) / max(1, total_records)
     )
 
     # Log report generation (SEC-12, Table 19)
@@ -172,18 +186,7 @@ def generate_client_report(
             "average_score": round(avg_score, 2),
             "compliance_rate": f"{round((completed_count / max(1, total_records)) * 100, 1)}%"
         },
-        "trainees": [
-            {
-                "record_id": r.id,
-                "trainee_code": t.trainee_code,
-                "trainee_name": f"{t.first_name} {t.last_name}",
-                "course_name": r.course_name,
-                "training_date": r.completion_date.strftime("%Y-%m-%d") if r.completion_date else "In progress",
-                "status": r.status,
-                "score": r.score
-            }
-            for r, t in records
-        ]
+        "trainees": trainee_list
     }
 
 
