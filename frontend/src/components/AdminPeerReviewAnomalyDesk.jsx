@@ -34,6 +34,7 @@ import {
   fetchAccessLogs, 
   fetchAnomalyRules, 
   updateAnomalyRule, 
+  approveAnomalyRule, 
   runRetentionJob, 
   fetchRetentionWarnings,
   fetchExecutiveAnomalyReport,
@@ -290,6 +291,7 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
 
   // Rules state
   const [rules, setRules] = useState(DEFAULT_ANOMALY_RULES);
+  const [approvingRuleCode, setApprovingRuleCode] = useState(null);
   const [loadingRules, setLoadingRules] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
   const [ruleParams, setRuleParams] = useState({});
@@ -610,6 +612,26 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
       alert(err.message || 'Failed to update rule parameters.');
     } finally {
       setSubmittingRule(false);
+    }
+  };
+
+  // Peer approval of a pending rule edit (U-16, OI-08). The backend refuses the last editor.
+  const handleApproveRule = async (rule) => {
+    setApprovingRuleCode(rule.rule_code);
+    try {
+      const updated = await approveAnomalyRule(
+        rule.rule_code,
+        `Peer review approval of ${rule.rule_code} v${rule.version_no} (OI-08)`,
+        token
+      );
+      setRules(prev => prev.map(r => r.rule_code === updated.rule_code ? updated : r));
+      onRuleUpdated?.(updated);
+      setActionSuccessToast(`Rule ${updated.rule_code} v${updated.version_no} approved and now enforced.`);
+      loadLogs();
+    } catch (err) {
+      alert(err.message || 'Failed to approve rule.');
+    } finally {
+      setApprovingRuleCode(null);
     }
   };
 
@@ -1582,6 +1604,32 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                       </span>
                     </td>
                     <td style={{ padding: '14px 20px', textAlign: 'right' }}>
+                      {!rule.client_reviewed && (
+                        rule.last_edited_by_user_id && rule.last_edited_by_user_id === currentUser?.id ? (
+                          <span style={{ marginRight: '10px', fontSize: '11px', fontWeight: 700, color: themeStyles.textMuted }}>
+                            Awaiting peer review
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleApproveRule(rule)}
+                            disabled={approvingRuleCode === rule.rule_code}
+                            style={{
+                              marginRight: '8px',
+                              padding: '6px 14px',
+                              borderRadius: '8px',
+                              background: '#059669',
+                              border: 'none',
+                              color: '#ffffff',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {approvingRuleCode === rule.rule_code ? 'Approving...' : 'Approve'}
+                          </button>
+                        )
+                      )}
                       <button
                         type="button"
                         onClick={() => openEditRuleModal(rule)}

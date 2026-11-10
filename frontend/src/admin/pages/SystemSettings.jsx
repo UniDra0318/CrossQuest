@@ -96,7 +96,8 @@ export default function SystemSettings({ settings, liveRules = [], token, curren
   const isFailedReviewed = rFailed?.client_reviewed ?? true;
   const isBurstReviewed = rBurst?.client_reviewed ?? true;
   const isHighAccessReviewed = rHighAccess?.client_reviewed ?? true;
-  const allReviewed = isAfterReviewed && isFailedReviewed && isBurstReviewed && isHighAccessReviewed;
+  // Any pending rule (not only the four shown above) must keep the approval bar visible (U-16, OI-08)
+  const allReviewed = !currentRules.some(r => r.client_reviewed === false);
   const maxVersion = Math.max(
     rAfter?.version_no || 1, 
     rFailed?.version_no || 1, 
