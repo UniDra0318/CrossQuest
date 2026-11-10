@@ -1,15 +1,16 @@
 import secrets
 import hashlib
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
-from sqlalchemy import case
+from sqlalchemy import case, desc
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
 from app.models.entities import (
     User, Trainee, AccessLog, UserSession, PasswordResetToken, UserAbeKey, GamificationProgress,
-    ClientCompany, TrainingRecord, AnomalyAlert
+    ClientCompany, TrainingRecord, AnomalyAlert, AccountManagerAssignment, UserKeyAttribute
 )
 from app.schemas.schemas import (
     UserResponse, UserAttributeUpdate, UserCreateAdmin, UserActivationResponse, PasswordChangeRequest,
@@ -19,6 +20,8 @@ from app.api.deps import get_current_user, get_current_admin_user
 from app.crypto.cpabe_engine import cpabe_engine
 from app.crypto.attribute_manager import attribute_manager
 from app.services.email_service import email_service
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -243,15 +246,12 @@ def create_user_by_admin(
             gp = GamificationProgress(trainee_id=t.id)
             db.add(gp)
 
-    # Issue initial CP-ABE key for user
-    try:
-        attribute_manager.issue_or_rekey_user(
-            db=db,
-            user=user,
-            admin_user_id=admin_user.id
-        )
-    except Exception:
-        pass
+    # Issue initial CP-ABE key for user (FR-02, SEC-05, fail-closed)
+    attribute_manager.issue_or_rekey_user(
+        db=db,
+        user=user,
+        admin_user_id=admin_user.id
+    )
 
     # Deliver setup invitation email from crossquest@xworks.ph (Phase 1)
     email_service.send_account_setup_email(user.email, user.full_name, raw_token)
@@ -464,7 +464,13 @@ def update_user_attributes(
     admin_user: User = Depends(get_current_admin_user)
 ):
     """Admin endpoint to issue, modify, or revoke staff attributes for CP-ABE (FR-02, FR-03, SEC-05, SEC-06).
-    Note: Clearance levels are omitted per SEC-11.
+    Performs Tier 1 revocation in a single atomic transaction:
+    1. Closes old account_manager_assignments rows (sets valid_to) and opens new ones.
+    2. Re-keys user via issue_or_rekey_user (commit=False).
+    3. Revokes all active user sessions immediately.
+    4. Records ATTRIBUTE_CHANGE in audit logs.
+    5. Commits all changes in a single database commit.
+    6. Automatically triggers Tier 2 version bump and background re-encryption for any removed client tenants.
     """
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -472,6 +478,7 @@ def update_user_attributes(
 
     old_role = user.role
     old_accounts = list(user.assigned_client_accounts or [])
+    now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
 
     if attrs.role is not None:
         valid_roles = ("admin", "account_manager", "finance", "trainer", "trainee")
@@ -488,10 +495,46 @@ def update_user_attributes(
     if attrs.clearance_level is not None:
         user.clearance_level = attrs.clearance_level
 
-    db.commit()
-    db.refresh(user)
+    new_accounts = list(user.assigned_client_accounts or [])
+    removed_accounts = [c for c in old_accounts if c not in new_accounts]
 
-    # Log attribute change to audit log (SEC-12, Table 19: ATTRIBUTE_CHANGE)
+    # 1. Update Account Manager assignments in the same transaction (FR-03, Table 15)
+    # Close previous active assignments
+    db.query(AccountManagerAssignment).filter(
+        AccountManagerAssignment.user_id == user.id,
+        AccountManagerAssignment.valid_to == None
+    ).update({"valid_to": now_utc}, synchronize_session=False)
+
+    # Open new assignment rows for current companies if user is account_manager
+    if user.role == "account_manager" and user.assigned_client_accounts:
+        assigned_comps = db.query(ClientCompany).filter(
+            ClientCompany.code.in_(user.assigned_client_accounts)
+        ).all()
+        for comp in assigned_comps:
+            new_assign = AccountManagerAssignment(
+                user_id=user.id,
+                company_id=comp.id,
+                valid_from=now_utc,
+                valid_to=None,
+                assigned_by=admin_user.id
+            )
+            db.add(new_assign)
+
+    # 2. Call issue_or_rekey_user in this transaction without separate commits (commit=False)
+    attribute_manager.issue_or_rekey_user(
+        db=db,
+        user=user,
+        admin_user_id=admin_user.id,
+        commit=False
+    )
+
+    # 3. Revoke all active sessions immediately (TC-ATT-03, TC-ATT-10, U-07)
+    db.query(UserSession).filter(
+        UserSession.user_id == user.id,
+        UserSession.is_revoked == False
+    ).update({"is_revoked": True}, synchronize_session=False)
+
+    # 4. Log attribute change to audit log (SEC-12, Table 19: ATTRIBUTE_CHANGE)
     log = AccessLog(
         actor_user_id=admin_user.id,
         actor_role=admin_user.role,
@@ -503,11 +546,58 @@ def update_user_attributes(
             "old_role": old_role,
             "new_role": user.role,
             "old_assigned_companies": old_accounts,
-            "new_assigned_companies": user.assigned_client_accounts
+            "new_assigned_companies": user.assigned_client_accounts,
+            "removed_companies": removed_accounts
         }
     )
     db.add(log)
+
+    # 5. Commit all Tier 1 changes in a single atomic commit
     db.commit()
+    db.refresh(user)
+
+    # 6. Tier 2 Automatic Trigger (DD-05, OI-16, Section 3.6.4, 3.6.5)
+    # When a tenant is removed, bump attribute version, re-key remaining authorized users, and run re-encryption job
+    if removed_accounts:
+        for comp_code in removed_accounts:
+            try:
+                old_attr, new_attr = attribute_manager.bump_attribute_version(
+                    db=db,
+                    attribute_type="CLIENT",
+                    ref_code=comp_code,
+                    admin_user_id=admin_user.id
+                )
+                # Re-key remaining authorized users who retain access to this tenant
+                other_users = (
+                    db.query(User)
+                    .filter(
+                        User.id != user.id,
+                        User.is_active == True,
+                        User.role.in_(["admin", "finance", "account_manager"])
+                    )
+                    .all()
+                )
+                for other in other_users:
+                    if other.role in ("admin", "finance") or (
+                        other.assigned_client_accounts and comp_code in other.assigned_client_accounts
+                    ):
+                        attribute_manager.issue_or_rekey_user(
+                            db=db,
+                            user=other,
+                            client_versions={comp_code: new_attr.version},
+                            admin_user_id=admin_user.id
+                        )
+
+                # Run background re-encryption job from old_attr.version to new_attr.version
+                attribute_manager.reencrypt_records_job(
+                    db=db,
+                    company_code=comp_code,
+                    old_version=old_attr.version,
+                    new_version=new_attr.version,
+                    admin_user_id=admin_user.id
+                )
+            except Exception as e:
+                logger.error(f"Error during automatic Tier 2 revocation for company {comp_code}: {e}")
 
     return user
 
@@ -518,7 +608,11 @@ def get_user_cpabe_key(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Fetches/generates the CP-ABE private key corresponding to user's active attributes (Section 3.6.4)."""
+    """Fetches metadata for user's active CP-ABE cryptographic key (Section 3.6.4, DD-09).
+    
+    Security Guarantee: Server-side enclave key store never exports raw private key material
+    via the API. Keys remain encrypted under KMS envelope at rest and in memory during decryption.
+    """
     if current_user.id != user_id and current_user.role != "admin" and not current_user.is_superuser:
         raise HTTPException(status_code=403, detail="Not authorized to access keys for this user")
 
@@ -526,15 +620,26 @@ def get_user_cpabe_key(
     if not target_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    trainee_obj = db.query(Trainee).filter(Trainee.user_id == target_user.id).first()
-    trainee_code = trainee_obj.trainee_code if trainee_obj else None
-
-    # Build attribute set: alphanumeric tokens only, no clearance levels (DD-01, DD-04, SEC-11)
-    attributes = cpabe_engine.build_user_attributes(
-        role=target_user.role,
-        assigned_companies=target_user.assigned_client_accounts,
-        trainee_code=trainee_code
+    active_key = (
+        db.query(UserAbeKey)
+        .filter(UserAbeKey.user_id == target_user.id, UserAbeKey.status == "active")
+        .order_by(desc(UserAbeKey.issued_at))
+        .first()
     )
 
-    key_info = cpabe_engine.generate_user_private_key(attributes)
-    return key_info
+    attributes_list = []
+    if active_key:
+        junction = db.query(UserKeyAttribute).filter(UserKeyAttribute.key_id == active_key.id).all()
+        attributes_list = [j.token for j in junction]
+
+    return {
+        "key_id": active_key.id if active_key else None,
+        "user_id": target_user.id,
+        "user_email": target_user.email,
+        "status": active_key.status if active_key else "none",
+        "issued_at": active_key.issued_at.isoformat() if active_key and active_key.issued_at else None,
+        "kms_key_arn": active_key.kms_key_arn if active_key else "local-kms-envelope",
+        "attributes": attributes_list,
+        "algorithm": "CP-ABE-BSW07-AES256GCM",
+        "key_storage": "server_enclave"
+    }

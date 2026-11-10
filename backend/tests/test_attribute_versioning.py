@@ -37,6 +37,19 @@ def version_test_data(db_session: Session):
         db.commit()
         db.refresh(comp)
 
+    # Ensure AbeAttribute for CORP_VER_ALPHA is initialized to V1 for test repeatability
+    ref = sanitize_token("CORP_VER_ALPHA")
+    db.query(AbeAttribute).filter_by(attribute_type="CLIENT", ref_code=ref).delete()
+    attr = AbeAttribute(
+        attribute_type="CLIENT",
+        ref_code=ref,
+        version=1,
+        token=f"CLIENT{ref}V1",
+        status="active"
+    )
+    db.add(attr)
+    db.commit()
+
     # User 1: Account Manager A (to be revoked later)
     u_revoked = db.query(User).filter_by(email="am_revoked@test.ph").first()
     if not u_revoked:
@@ -260,6 +273,13 @@ def test_tc_att_08_reencrypt_records_job(db_session: Session, version_test_data)
     comp = version_test_data["comp"]
     trainee = version_test_data["trainee"]
 
+    # Clean up prior test records for this company
+    existing_recs = db_session.query(TrainingRecord).filter_by(company_at_completion_id=comp.id).all()
+    for er in existing_recs:
+        db_session.query(TrainingRecordVersion).filter_by(record_id=er.id).delete()
+    db_session.query(TrainingRecord).filter_by(company_at_completion_id=comp.id).delete()
+    db_session.commit()
+
     # Seed record encrypted under V1
     policy_v1 = cpabe_engine.build_record_policy(
         company_code=comp.code,
@@ -437,15 +457,36 @@ def test_tc_att_18_tier2_batching_policy_chunking(db_session: Session, version_t
     comp = version_test_data["comp"]
     trainee = version_test_data["trainee"]
 
-    # Seed 12 training records for this company under version 1
+    # Clean up prior test records for this company
+    existing_recs = db_session.query(TrainingRecord).filter_by(company_at_completion_id=comp.id).all()
+    for er in existing_recs:
+        db_session.query(TrainingRecordVersion).filter_by(record_id=er.id).delete()
+    db_session.query(TrainingRecord).filter_by(company_at_completion_id=comp.id).delete()
+    db_session.commit()
+
+    # Seed 12 valid encrypted training records under version 1
+    policy_v1 = cpabe_engine.build_record_policy(
+        company_code=comp.code,
+        trainee_code=trainee.trainee_code,
+        client_version=1
+    )
     for i in range(12):
+        enc_v1 = cpabe_engine.encrypt_record(
+            plaintext_data={"score": 88.0 + i, "module": f"Mod {i}"},
+            policy_str=policy_v1,
+            record_id=f"rec-{trainee.trainee_code}",
+            version=1
+        )
         rec = TrainingRecord(
             trainee_id=trainee.id,
             company_at_completion_id=comp.id,
             course_name=f"Secure Architecture Module {i}",
             policy_version=1,
-            encryption_policy=f"CLIENT{comp.code}V1",
-            payload_ciphertext="dummy_payload",
+            encryption_policy=policy_v1,
+            abe_ciphertext=enc_v1.get("abe_ciphertext"),
+            payload_ciphertext=enc_v1.get("payload_ciphertext"),
+            nonce=enc_v1.get("nonce"),
+            is_encrypted=True,
             score=88.0 + i
         )
         db_session.add(rec)

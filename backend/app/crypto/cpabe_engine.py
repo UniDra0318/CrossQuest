@@ -374,7 +374,9 @@ class CPABEEngine:
         trainee_code: Optional[str] = None,
         client_version: int = 1,
         training_version: int = 1,
-        role_version: int = 1
+        role_version: int = 1,
+        client_versions: Optional[Dict[str, int]] = None,
+        session_versions: Optional[Dict[str, int]] = None
     ) -> List[str]:
         """Constructs attribute set for a user based on role and assignments (Section 3.6.4, DD-04, DD-05)."""
         attrs = []
@@ -387,11 +389,15 @@ class CPABEEngine:
         elif role_clean in ("ACCOUNTMANAGER", "ROLEACCTMGR", "ROLEACCTMGRV1", "ACCTMGR"):
             attrs.extend([f"ROLEACCTMGRV{role_version}", "ROLEACCTMGR"])
             for comp in (assigned_companies or []):
-                attrs.append(f"CLIENT{sanitize_token(comp)}V{client_version}")
+                clean_c = sanitize_token(comp)
+                ver = (client_versions or {}).get(comp, (client_versions or {}).get(clean_c, client_version))
+                attrs.append(f"CLIENT{clean_c}V{ver}")
         elif role_clean in ("TRAINER", "ROLETRAINER", "ROLETRAINERV1"):
             attrs.extend([f"ROLETRAINERV{role_version}", "ROLETRAINER"])
             for sess in (assigned_sessions or []):
-                attrs.append(f"TRAINING{sanitize_token(sess)}V{training_version}")
+                clean_s = sanitize_token(sess)
+                s_ver = (session_versions or {}).get(sess, (session_versions or {}).get(clean_s, training_version))
+                attrs.append(f"TRAINING{clean_s}V{s_ver}")
         elif role_clean in ("TRAINEE", "ROLETRAINEE", "ROLETRAINEEV1"):
             attrs.extend([f"ROLETRAINEEV{role_version}", "ROLETRAINEE"])
             if trainee_code:

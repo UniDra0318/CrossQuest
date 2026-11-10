@@ -22,7 +22,8 @@ from cryptography.hazmat.primitives import hashes
 from app.core.config import settings
 from app.models.entities import (
     AbeAttribute, UserAbeKey, UserKeyAttribute, User, TrainingRecord,
-    TrainingRecordVersion, AccessLog, ClientCompany, Trainee, ReencryptionJob
+    TrainingRecordVersion, AccessLog, ClientCompany, Trainee, ReencryptionJob,
+    TrainerAssignment, TrainingSession
 )
 from app.crypto.cpabe_engine import cpabe_engine, sanitize_token
 
@@ -287,7 +288,8 @@ class AttributeManager:
         db: Session,
         user: User,
         client_versions: Optional[Dict[str, int]] = None,
-        admin_user_id: Optional[str] = None
+        admin_user_id: Optional[str] = None,
+        commit: bool = True
     ) -> UserAbeKey:
         """Generates, envelope-encrypts, and stores a new CP-ABE key for a user with current attributes."""
         # Retire any active previous key for this user
@@ -301,13 +303,58 @@ class AttributeManager:
         trainee = db.query(Trainee).filter(Trainee.user_id == user.id).first()
         t_code = trainee.trainee_code if trainee else None
 
-        # Build user attributes
-        c_ver = (client_versions or {}).get(user.assigned_client_accounts[0], 1) if user.assigned_client_accounts else 1
+        # Build user attributes for ALL assigned companies with active versions
+        resolved_client_versions: Dict[str, int] = dict(client_versions or {})
+        for comp_code in (user.assigned_client_accounts or []):
+            clean_c = sanitize_token(comp_code)
+            if comp_code not in resolved_client_versions and clean_c not in resolved_client_versions:
+                attr = (
+                    db.query(AbeAttribute)
+                    .filter(
+                        AbeAttribute.attribute_type == "CLIENT",
+                        AbeAttribute.ref_code == clean_c,
+                        AbeAttribute.status == "active"
+                    )
+                    .order_by(desc(AbeAttribute.version))
+                    .first()
+                )
+                resolved_client_versions[comp_code] = attr.version if attr else 1
+
+        # Look up trainer assigned sessions if role is trainer
+        assigned_sessions: List[str] = []
+        resolved_session_versions: Dict[str, int] = {}
+        if user.role.lower() == "trainer":
+            active_assignments = (
+                db.query(TrainingSession.session_code)
+                .join(TrainerAssignment, TrainerAssignment.session_id == TrainingSession.id)
+                .filter(
+                    TrainerAssignment.user_id == user.id,
+                    TrainerAssignment.valid_to == None
+                )
+                .all()
+            )
+            assigned_sessions = [s[0] for s in active_assignments if s[0]]
+            for sess_code in assigned_sessions:
+                clean_s = sanitize_token(sess_code)
+                attr = (
+                    db.query(AbeAttribute)
+                    .filter(
+                        AbeAttribute.attribute_type == "TRAINING",
+                        AbeAttribute.ref_code == clean_s,
+                        AbeAttribute.status == "active"
+                    )
+                    .order_by(desc(AbeAttribute.version))
+                    .first()
+                )
+                resolved_session_versions[sess_code] = attr.version if attr else 1
+
         attrs = cpabe_engine.build_user_attributes(
             role=user.role,
             assigned_companies=user.assigned_client_accounts,
+            assigned_sessions=assigned_sessions,
             trainee_code=t_code,
-            client_version=c_ver
+            client_versions=resolved_client_versions,
+            session_versions=resolved_session_versions
         )
 
         # Generate CP-ABE key
@@ -328,8 +375,7 @@ class AttributeManager:
             issued_at=now_utc
         )
         db.add(key_record)
-        db.commit()
-        db.refresh(key_record)
+        db.flush()
 
         # Bind attributes in junction table
         for attr_str in attrs:
@@ -346,8 +392,13 @@ class AttributeManager:
             details={"attributes": attrs, "user_email": user.email}
         )
         db.add(log)
-        db.commit()
-        db.refresh(key_record)
+
+        if commit:
+            db.commit()
+            db.refresh(key_record)
+        else:
+            db.flush()
+
         return key_record
 
     # -------------------------------------------------------------------------
@@ -364,19 +415,30 @@ class AttributeManager:
     ) -> Dict[str, Any]:
         """Background worker that re-encrypts historical records to new policy version in defined batches (OI-16).
         
-        1. Queries records matching company and old_version.
-        2. Creates a ReencryptionJob tracking entity.
-        3. Processes records in batches of batch_size (default 50 records per chunk).
-        4. Decrypts record using system authority / admin key.
-        5. Snapshots current state into TrainingRecordVersion.
-        6. Re-encrypts under updated policy (with CLIENT<comp>V<new_version>).
-        7. Updates TrainingRecord and logs progress.
+        Resumable from the first unprocessed record (TC-ATT-13 / Section 3.6.7).
+        Skips records that fail decryption without corrupting data, marking job PARTIAL or FAILED.
         """
         clean_code = sanitize_token(company_code)
         comp = db.query(ClientCompany).filter(ClientCompany.code == company_code).first()
         if not comp:
             return {"status": "FAILED", "error": "Company not found", "records_processed": 0}
 
+        # Check for an existing uncompleted/failed job to resume rather than start fresh
+        job = (
+            db.query(ReencryptionJob)
+            .filter(
+                ReencryptionJob.company_code == company_code,
+                ReencryptionJob.old_version == old_version,
+                ReencryptionJob.new_version == new_version,
+                ReencryptionJob.status.in_(["IN_PROGRESS", "FAILED", "PARTIAL"])
+            )
+            .order_by(desc(ReencryptionJob.created_at))
+            .first()
+        )
+
+        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+
+        # Query all records still requiring re-encryption (policy_version == old_version)
         records = (
             db.query(TrainingRecord)
             .filter(
@@ -387,96 +449,123 @@ class AttributeManager:
             .all()
         )
 
-        total_count = len(records)
-        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+        total_unprocessed = len(records)
 
-        job = ReencryptionJob(
-            company_code=company_code,
-            old_version=old_version,
-            new_version=new_version,
-            batch_size=batch_size,
-            total_records=total_count,
-            processed_records=0,
-            status="IN_PROGRESS",
-            initiated_by_user_id=admin_user_id,
-            created_at=now_utc
-        )
-        db.add(job)
+        if job:
+            job.status = "IN_PROGRESS"
+            job.error_message = None
+            if job.total_records is None or job.total_records == 0:
+                job.total_records = (job.processed_records or 0) + total_unprocessed
+        else:
+            job = ReencryptionJob(
+                company_code=company_code,
+                old_version=old_version,
+                new_version=new_version,
+                batch_size=batch_size,
+                total_records=total_unprocessed,
+                processed_records=0,
+                status="IN_PROGRESS",
+                initiated_by_user_id=admin_user_id,
+                created_at=now_utc
+            )
+            db.add(job)
+
         db.commit()
         db.refresh(job)
 
-        admin_key = cpabe_engine.generate_user_private_key(["ROLEADMIN", "ROLEADMINV1"])
-        processed_count = 0
+        # Admin key with authority to decrypt all versioned records
+        admin_key = cpabe_engine.generate_user_private_key(["ROLEADMIN", "ROLEADMINV1", "ROLEFINANCE", "ROLEFINANCEV1"])
+        processed_this_run = 0
+        failed_records = 0
 
-        # Process records in chunks of batch_size (defined batching policy per OI-16)
-        if records:
-            for i in range(0, total_count, batch_size):
-                chunk = records[i:i + batch_size]
-                for rec in chunk:
-                    # Reconstruct cipher package
-                    cipher_pkg = {
-                        "policy": rec.encryption_policy,
-                        "policy_version": rec.policy_version,
-                        "abe_ciphertext": rec.abe_ciphertext,
-                        "payload_ciphertext": rec.payload_ciphertext,
-                        "nonce": rec.nonce,
-                        "engine": "charm-bsw07" if cpabe_engine.charm_available else "simulation"
-                    }
+        try:
+            if records:
+                for i in range(0, total_unprocessed, batch_size):
+                    chunk = records[i:i + batch_size]
+                    chunk_processed = 0
+                    for rec in chunk:
+                        cipher_pkg = {
+                            "policy": rec.encryption_policy,
+                            "policy_version": rec.policy_version,
+                            "abe_ciphertext": rec.abe_ciphertext,
+                            "payload_ciphertext": rec.payload_ciphertext,
+                            "nonce": rec.nonce,
+                            "engine": "charm-bsw07" if cpabe_engine.charm_available else "simulation"
+                        }
 
-                    # Decrypt existing payload
-                    trainee = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()
-                    trainee_code = trainee.trainee_code if trainee else "default"
-                    decrypted = cpabe_engine.decrypt_record(
-                        cipher_pkg,
-                        admin_key,
-                        record_id=f"rec-{trainee_code}",
-                        version=rec.policy_version
-                    )
+                        trainee = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()
+                        trainee_code = trainee.trainee_code if trainee else "default"
+                        decrypted = cpabe_engine.decrypt_record(
+                            cipher_pkg,
+                            admin_key,
+                            record_id=f"rec-{trainee_code}",
+                            version=rec.policy_version
+                        )
 
-                    if decrypted is None:
-                        decrypted = {"score": rec.score, "reencrypted": True}
+                        # Skip corrupted/un-decryptable record without overwriting with dummy data
+                        if decrypted is None:
+                            logger.warning(f"Record {rec.id} failed decryption during re-encryption job {job.id}. Skipping record.")
+                            failed_records += 1
+                            continue
 
-                    # 1. Snapshot previous version into TrainingRecordVersion (DD-06)
-                    snapshot = TrainingRecordVersion(
-                        record_id=rec.id,
-                        version_no=rec.policy_version,
-                        abe_ciphertext=rec.abe_ciphertext,
-                        payload_ciphertext=rec.payload_ciphertext,
-                        policy_tokens=rec.encryption_policy,
-                        edited_by_user_id=admin_user_id,
-                        edited_at=datetime.now(timezone.utc).replace(tzinfo=None)
-                    )
-                    db.add(snapshot)
+                        # 1. Snapshot previous version into TrainingRecordVersion (DD-06)
+                        snapshot = TrainingRecordVersion(
+                            record_id=rec.id,
+                            version_no=rec.policy_version,
+                            abe_ciphertext=rec.abe_ciphertext,
+                            payload_ciphertext=rec.payload_ciphertext,
+                            policy_tokens=rec.encryption_policy,
+                            edited_by_user_id=admin_user_id,
+                            edited_at=datetime.now(timezone.utc).replace(tzinfo=None)
+                        )
+                        db.add(snapshot)
 
-                    # 2. Re-encrypt with new client version token
-                    new_policy = cpabe_engine.build_record_policy(
-                        company_code=company_code,
-                        session_code=rec.session.session_code if rec.session else None,
-                        trainee_code=trainee_code,
-                        client_version=new_version
-                    )
+                        # 2. Re-encrypt with new client version token
+                        new_policy = cpabe_engine.build_record_policy(
+                            company_code=company_code,
+                            session_code=rec.session.session_code if rec.session else None,
+                            trainee_code=trainee_code,
+                            client_version=new_version
+                        )
 
-                    re_encrypted = cpabe_engine.encrypt_record(
-                        plaintext_data=decrypted,
-                        policy_str=new_policy,
-                        record_id=f"rec-{trainee_code}",
-                        version=new_version
-                    )
+                        re_encrypted = cpabe_engine.encrypt_record(
+                            plaintext_data=decrypted,
+                            policy_str=new_policy,
+                            record_id=f"rec-{trainee_code}",
+                            version=new_version
+                        )
 
-                    rec.encryption_policy = new_policy
-                    rec.policy_version = new_version
-                    rec.abe_ciphertext = re_encrypted.get("abe_ciphertext")
-                    rec.payload_ciphertext = re_encrypted.get("payload_ciphertext")
-                    rec.nonce = re_encrypted.get("nonce")
-                    processed_count += 1
+                        rec.encryption_policy = new_policy
+                        rec.policy_version = new_version
+                        rec.abe_ciphertext = re_encrypted.get("abe_ciphertext")
+                        rec.payload_ciphertext = re_encrypted.get("payload_ciphertext")
+                        rec.nonce = re_encrypted.get("nonce")
+                        chunk_processed += 1
+                        processed_this_run += 1
 
-                # Update job progress after chunk
-                job.processed_records = processed_count
-                db.commit()
+                    # Commit progress per batch so job can resume from last completed batch
+                    job.processed_records = (job.processed_records or 0) + chunk_processed
+                    db.commit()
 
-        job.status = "COMPLETED"
-        job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
-        db.commit()
+            # Set status based on outcomes
+            if failed_records > 0 and (job.processed_records or 0) > 0:
+                job.status = "PARTIAL"
+                job.error_message = f"{failed_records} records failed decryption and were skipped."
+            elif failed_records > 0 and (job.processed_records or 0) == 0:
+                job.status = "FAILED"
+                job.error_message = f"All {failed_records} records failed decryption."
+            else:
+                job.status = "COMPLETED"
+
+            job.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+            db.commit()
+
+        except Exception as e:
+            logger.error(f"Re-encryption job {job.id} encountered an error: {e}")
+            job.status = "FAILED"
+            job.error_message = str(e)
+            db.commit()
+            raise
 
         # Audit log
         log = AccessLog(
@@ -485,15 +574,17 @@ class AttributeManager:
             event_type="RE_ENCRYPT_JOB",
             resource_type="RECORD_BATCH",
             resource_id=job.id,
-            outcome="SUCCESS",
+            outcome="SUCCESS" if job.status in ("COMPLETED", "PARTIAL") else "FAILED",
             details={
                 "job_id": job.id,
                 "company_code": company_code,
                 "old_version": old_version,
                 "new_version": new_version,
                 "batch_size": batch_size,
-                "records_processed": processed_count,
-                "total_records": total_count
+                "records_processed": job.processed_records,
+                "records_failed": failed_records,
+                "total_records": job.total_records,
+                "status": job.status
             }
         )
         db.add(log)
@@ -501,13 +592,14 @@ class AttributeManager:
 
         return {
             "job_id": job.id,
-            "status": "COMPLETED",
+            "status": job.status,
             "company_code": company_code,
             "old_version": old_version,
             "new_version": new_version,
             "batch_size": batch_size,
-            "records_processed": processed_count,
-            "total_records": total_count
+            "records_processed": job.processed_records,
+            "records_failed": failed_records,
+            "total_records": job.total_records
         }
 
 

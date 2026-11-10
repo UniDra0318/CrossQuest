@@ -4,12 +4,13 @@ import io
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, desc
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.entities import (
     TrainingRecord, TrainingRecordVersion, Trainee, ClientCompany, User, AccessLog,
-    AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate, GamificationProgress, Course
+    AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate, GamificationProgress, Course,
+    UserAbeKey
 )
 from app.schemas.schemas import (
     TrainingRecordCreate, TrainingRecordUpdate, TrainingRecordResponse, DecryptedRecordResponse,
@@ -18,7 +19,8 @@ from app.schemas.schemas import (
 )
 from app.api.endpoints.certifications import generate_cert_serial
 from app.api.deps import get_current_user
-from app.crypto.cpabe_engine import cpabe_engine
+from app.crypto.cpabe_engine import cpabe_engine, sanitize_token
+from app.crypto.attribute_manager import attribute_manager
 from app.anomaly.detector import anomaly_detector
 
 router = APIRouter()
@@ -364,33 +366,49 @@ def decrypt_training_record(
     # 2. Check Rule R3-a: High record access
     anomaly_detector.check_high_record_access(current_user, db)
 
-    # 3. Build User CP-ABE attributes based on current assignments
     trainee_obj = db.query(Trainee).filter(Trainee.id == record.trainee_id).first()
     trainee_code = trainee_obj.trainee_code if trainee_obj else ""
 
-    user_trainee = db.query(Trainee).filter(Trainee.user_id == current_user.id).first()
-    my_trainee_code = user_trainee.trainee_code if user_trainee else None
+    # Option B (Chapter III Section 3.2.1): Shared trainee cross-company viewing
+    # Account Manager for Company A is permitted to decrypt Company B's record for a shared trainee.
+    # Since the stored key only contains Company A's tokens, a scoped evaluation key is minted for Option B viewing.
+    if is_shared_trainee_view:
+        effective_companies = list(current_user.assigned_client_accounts or [])
+        if company_code and company_code not in effective_companies:
+            effective_companies.append(company_code)
+        opt_b_attrs = cpabe_engine.build_user_attributes(
+            role=current_user.role,
+            assigned_companies=effective_companies,
+            client_versions={company_code: record.policy_version}
+        )
+        user_key_info = cpabe_engine.generate_user_private_key(opt_b_attrs)
+    else:
+        # 3. Load active CP-ABE user key from secure server-side enclave store (Figure 11, Section 3.6.4, DD-09)
+        active_key = (
+            db.query(UserAbeKey)
+            .filter(UserAbeKey.user_id == current_user.id, UserAbeKey.status == "active")
+            .order_by(desc(UserAbeKey.issued_at))
+            .first()
+        )
 
-    trainer_sessions = []
-    if current_user.role == "trainer":
-        assignments = db.query(TrainerAssignment).filter(TrainerAssignment.user_id == current_user.id).all()
-        session_ids = [a.session_id for a in assignments]
-        if session_ids:
-            sessions = db.query(TrainingSession).filter(TrainingSession.id.in_(session_ids)).all()
-            trainer_sessions = [s.session_code for s in sessions]
+        # If no key exists yet for user, issue one using attribute_manager
+        if not active_key:
+            active_key = attribute_manager.issue_or_rekey_user(db=db, user=current_user)
 
-    effective_assigned_companies = list(current_user.assigned_client_accounts or [])
-    if is_shared_trainee_view and company_code and company_code not in effective_assigned_companies:
-        effective_assigned_companies.append(company_code)
+        # Unwrap key material from KMS envelope
+        unwrapped_str = attribute_manager.envelope_decrypt_key(
+            active_key.wrapped_dek,
+            active_key.nonce,
+            active_key.key_ciphertext,
+            active_key.kms_key_arn
+        )
+        if not unwrapped_str:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Cryptographic key enclave failure: Unable to unwrap user private key."
+            )
 
-    user_attrs = cpabe_engine.build_user_attributes(
-        role=current_user.role,
-        assigned_companies=effective_assigned_companies,
-        assigned_sessions=trainer_sessions,
-        trainee_code=my_trainee_code
-    )
-
-    user_key_info = cpabe_engine.generate_user_private_key(user_attrs)
+        user_key_info = json.loads(unwrapped_str)
 
     cipher_package = {
         "policy": record.encryption_policy,
