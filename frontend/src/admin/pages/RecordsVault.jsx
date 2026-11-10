@@ -418,7 +418,7 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
 
         <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
           <div className="adm-table adm-vault-table">
-            <div className="adm-grid adm-th adm-vault-grid-header">
+            <div className="adm-th adm-vault-grid-header">
               <div>RECORD ID</div>
               <div>TRAINEE</div>
               <div>CLIENT ORGANIZATION</div>
@@ -435,7 +435,7 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
                 return (
                   <div 
                     key={r.id} 
-                    className={`adm-row adm-grid adm-vault-row ${isDeleted ? 'is-deleted' : ''}`}
+                    className={`adm-row adm-vault-row ${isDeleted ? 'is-deleted' : ''}`}
                   >
                     <div className="adm-vault-cell-recid">
                       <span className="adm-vault-rec-icon">
