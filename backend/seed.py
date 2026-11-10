@@ -537,7 +537,7 @@ def seed_database():
                 "trainee_name": f"{trainee.first_name} {trainee.last_name}",
                 "company": company.name
             }
-            enc = cpabe_engine.encrypt_record(payload, pol, record_id=rec_id, version=1)
+            enc = cpabe_engine.encrypt_record(payload, pol, record_id=f"rec-{trainee.trainee_code}", version=1)
             return TrainingRecord(
                 id=rec_id,
                 trainee_id=trainee.id,

@@ -543,7 +543,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
             "session_code": target_sess.session_code,
             "completion_date": str(target_sess.end_date.date() if hasattr(target_sess.end_date, 'date') else target_sess.end_date)
         }
-        enc = cpabe_engine.encrypt_record(payload, pol, record_id=rec_id, version=1)
+        enc = cpabe_engine.encrypt_record(payload, pol, record_id=f"rec-{trainee.trainee_code}", version=1)
 
         tr_rec = TrainingRecord(
             id=rec_id,
