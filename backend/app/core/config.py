@@ -91,7 +91,7 @@ class Settings(BaseSettings):
     DB_SSL_CERT_PATH: Optional[str] = None
 
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
 
 settings = Settings()
