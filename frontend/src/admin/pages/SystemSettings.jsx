@@ -320,7 +320,73 @@ export default function SystemSettings({ settings, liveRules = [], token, curren
   };
 
   return (
-    <div style={{ marginTop: '24px' }}>
+    <div className="adm-settings-enclave" style={{ marginTop: '10px' }}>
+      {/* Settings Executive Cockpit Hero Stage */}
+      <section className="trainee-hero-stage adm-settings-hero-stage">
+        <div className="trainee-hero-content">
+          <div className="trainee-hero-badge" style={{ background: 'rgba(167, 139, 250, 0.15)', borderColor: 'rgba(167, 139, 250, 0.3)', color: '#ede9fe' }}>
+            <Key size={13} style={{ color: '#c4b5fd' }} />
+            <span>PLATFORM ENGINE PARAMETERS &bull; ACTIVE CONFIGURATION</span>
+          </div>
+
+          <h2 className="trainee-hero-headline">Security Engine Settings</h2>
+          <p className="trainee-hero-sub">
+            Cryptographic access parameters, dual-threshold rate limiting, and automated operational boundary tuning.
+          </p>
+
+          <div className="trainee-hero-actions">
+            <button
+              type="button"
+              onClick={handleOpenModal}
+              className="trainee-hero-primary-btn adm-settings-primary-btn"
+              title="Tune live operational thresholds"
+            >
+              <Sliders size={14} />
+              <span>Tune Anomaly Thresholds</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4-Cell Bento Telemetry Grid */}
+        <div className="trainee-hero-metrics-panel">
+          <div className="hero-metric-cell adm-settings-metric-cell">
+            <span className="metric-tag">CRYPTOGRAPHIC SCHEME</span>
+            <div className="metric-num" style={{ fontSize: '15px', color: '#c4b5fd' }}>
+              AES-256
+              <span className="metric-unit" style={{ color: '#e9d5ff' }}>RSA</span>
+            </div>
+            <span className="metric-sub-label">Symmetric &amp; Asymmetric</span>
+          </div>
+
+          <div className="hero-metric-cell adm-settings-metric-cell">
+            <span className="metric-tag">OPERATIONAL WINDOW</span>
+            <div className="metric-num" style={{ fontSize: '15px', color: '#ff7a1a' }}>
+              {String(startHour).padStart(2, '0')}:00–{String(endHour).padStart(2, '0')}:00
+              <span className="metric-unit" style={{ color: '#fed7aa' }}>PHT</span>
+            </div>
+            <span className="metric-sub-label">{tz}</span>
+          </div>
+
+          <div className="hero-metric-cell adm-settings-metric-cell">
+            <span className="metric-tag">FAIL LIMIT TRIGGER</span>
+            <div className="metric-num" style={{ color: '#f87171' }}>
+              {failedThreshold}
+              <span className="metric-unit" style={{ color: '#fca5a5' }}>REQ / {failedMinutes}M</span>
+            </div>
+            <span className="metric-sub-label">Consecutive failures</span>
+          </div>
+
+          <div className="hero-metric-cell adm-settings-metric-cell">
+            <span className="metric-tag">APPROVAL STATUS</span>
+            <div className="metric-num" style={{ fontSize: '15px', color: allReviewed ? '#34d399' : '#fbbf24' }}>
+              {allReviewed ? 'APPROVED' : 'PENDING'}
+              <span className="metric-unit" style={{ color: allReviewed ? '#6ee7b7' : '#fde68a' }}>{allReviewed ? 'VERIFIED' : `v${maxVersion}`}</span>
+            </div>
+            <span className="metric-sub-label">{allReviewed ? 'Crossworks Baseline' : 'Requires Sign-Off'}</span>
+          </div>
+        </div>
+      </section>
+
       {/* Toast Alert */}
       {saveSuccess && (
         <div style={{
@@ -342,9 +408,9 @@ export default function SystemSettings({ settings, liveRules = [], token, curren
         </div>
       )}
 
-      <div className="adm-cols">
+      <div className="adm-cols adm-settings-grid">
         {/* Card 1: Access Control Engine */}
-        <div className="adm-card">
+        <div className="adm-card adm-settings-card">
           <div className="adm-ptitle">
             <span style={{ background: '#6a2bd9' }}>
               <Key size={22} />
@@ -384,7 +450,7 @@ export default function SystemSettings({ settings, liveRules = [], token, curren
         </div>
 
         {/* Card 2: Anomaly Detection Thresholds */}
-        <div className="adm-card">
+        <div className="adm-card adm-settings-card">
           <div className="adm-ptitle adm-flex-between adm-w-full" style={{ flexWrap: 'wrap', gap: '8px' }}>
             <div className="adm-flex-center adm-gap-14">
               <span style={{ background: '#ff7a1a' }}>

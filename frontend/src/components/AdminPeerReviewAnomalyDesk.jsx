@@ -916,77 +916,83 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
           ======================================================================= */}
       {activeTab === 'queue' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Radar Telemetry Banner */}
-          <div className="adm-pad" style={{ background: '#120726', padding: '28px 24px', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.08)', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <span className="adm-pill adm-pill--green" style={{ marginBottom: '8px' }}>
-                  <span className="adm-live" /> REAL-TIME RADAR TELEMETRY ACTIVE
-                </span>
-                <h2 style={{ margin: '6px 0 4px 0', color: '#ffffff', fontSize: '20px', fontWeight: 800 }}>
-                  Peer-Review Incident Resolution Workbench (FR-21, OI-30)
-                </h2>
-                <p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.7)', fontSize: '13px' }}>
-                  Strict multi-administrator conflict-of-interest enforcement. Peer sign-off required for all security disposals.
-                </p>
+          {/* Crimson Cockpit Hero Stage matching RecordsVault & PeopleAccess */}
+          <section className="trainee-hero-stage adm-alerts-hero-stage">
+            <div className="trainee-hero-content">
+              <div className="trainee-hero-badge" style={{ background: 'rgba(244, 63, 94, 0.15)', borderColor: 'rgba(244, 63, 94, 0.3)', color: '#ffe4e6' }}>
+                <ShieldAlert size={13} style={{ color: '#fb7185' }} />
+                <span>INCIDENT RESOLUTION WORKBENCH &bull; FR-21, OI-30</span>
               </div>
 
-              {/* Quick stats & Export action in banner */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <h2 className="trainee-hero-headline">Security Incidents &amp; Peer Review</h2>
+              <p className="trainee-hero-sub">
+                Strict multi-administrator conflict-of-interest enforcement with dual-signature disposal &amp; CP-ABE anomaly auditing.
+              </p>
+
+              <div className="trainee-hero-actions">
                 <button
                   type="button"
                   onClick={handleDownloadPdf}
                   disabled={downloadingPdf}
-                  style={{
-                    background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '12px',
-                    padding: '10px 18px',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '12.5px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 14px rgba(225, 29, 72, 0.35)'
-                  }}
+                  className="trainee-hero-primary-btn adm-alerts-primary-btn"
+                  title="Download Official Security Anomaly Audit Report (PDF)"
                 >
-                  <Download size={15} />
+                  <Download size={14} className={downloadingPdf ? 'spin-animation' : ''} />
                   <span>{downloadingPdf ? 'Generating PDF...' : 'Download Anomaly Report (PDF)'}</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={handleDownloadCsv}
                   disabled={downloadingCsv}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '12px',
-                    padding: '10px 16px',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '12.5px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
+                  className="trainee-hero-secondary-btn"
+                  title="Export complete anomaly incident ledger (CSV)"
                 >
-                  <FileText size={15} />
+                  <FileText size={14} className={downloadingCsv ? 'spin-animation' : ''} />
                   <span>{downloadingCsv ? 'Exporting...' : 'Export Ledger (CSV)'}</span>
                 </button>
-                <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '10px 18px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
-                  <div style={{ color: '#fda4af', fontSize: '20px', fontWeight: 800 }}>{unreviewedCount}</div>
-                  <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Pending Review</div>
-                </div>
-                <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '14px', padding: '10px 18px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
-                  <div style={{ color: '#86efac', fontSize: '20px', fontWeight: 800 }}>{alerts.filter(a => a.status === 'CLOSED').length}</div>
-                  <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Closed & Signed</div>
-                </div>
               </div>
             </div>
-          </div>
+
+            {/* 4-Cell Bento Telemetry Grid */}
+            <div className="trainee-hero-metrics-panel">
+              <div className="hero-metric-cell adm-alerts-metric-cell">
+                <span className="metric-tag">PENDING REVIEW</span>
+                <div className="metric-num" style={{ color: unreviewedCount > 0 ? '#fda4af' : '#f8fafc' }}>
+                  {unreviewedCount}
+                  <span className="metric-unit" style={{ color: '#fecdd3' }}>ALERTS</span>
+                </div>
+                <span className="metric-sub-label">Awaiting peer sign-off</span>
+              </div>
+
+              <div className="hero-metric-cell adm-alerts-metric-cell">
+                <span className="metric-tag">CLOSED &amp; SIGNED</span>
+                <div className="metric-num" style={{ color: '#34d399' }}>
+                  {alerts.filter(a => a.status === 'CLOSED').length}
+                  <span className="metric-unit" style={{ color: '#6ee7b7' }}>DONE</span>
+                </div>
+                <span className="metric-sub-label">Dual-admin signed</span>
+              </div>
+
+              <div className="hero-metric-cell adm-alerts-metric-cell">
+                <span className="metric-tag">HIGH SEVERITY</span>
+                <div className="metric-num" style={{ color: '#f87171' }}>
+                  {alerts.filter(a => (a.severity_final || a.severity) === 'HIGH').length}
+                  <span className="metric-unit" style={{ color: '#fca5a5' }}>HIGH</span>
+                </div>
+                <span className="metric-sub-label">Critical priority triage</span>
+              </div>
+
+              <div className="hero-metric-cell adm-alerts-metric-cell">
+                <span className="metric-tag">TOTAL INCIDENTS</span>
+                <div className="metric-num" style={{ color: '#38bdf8' }}>
+                  {alerts.length}
+                  <span className="metric-unit" style={{ color: '#7dd3fc' }}>LOGS</span>
+                </div>
+                <span className="metric-sub-label">Radar detection feed</span>
+              </div>
+            </div>
+          </section>
 
           {/* Controls & Filter Bar */}
           <div 
