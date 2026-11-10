@@ -217,3 +217,4 @@ def run_sync(db_url: str):
 if __name__ == "__main__":
     pg_url = os.getenv("ADMIN_DATABASE_URL", "postgresql+psycopg2://crossquest_admin:crossquest_secret_password@postgres:5432/crossquest_db")
     run_sync(pg_url)
+

@@ -757,7 +757,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               </div>
               <div className="hero-metric-cell">
                 <span className="metric-tag">VERIFIED CREDENTIALS</span>
-                <span className="metric-num text-emerald">{displayCertificates.length || 1}<span className="metric-unit">ACTIVE</span></span>
+                <span className="metric-num text-emerald">{displayCertificates.length}<span className="metric-unit">ACTIVE</span></span>
                 <span className="metric-sub-label">Zero pending revocations</span>
               </div>
               <div className="hero-metric-cell">
@@ -827,44 +827,60 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               </div>
             </div>
 
-            {/* PILLAR 2: EXPIRING CREDENTIAL */}
+            {/* PILLAR 2: EXPIRING / VERIFIED CREDENTIAL */}
             <div className="trainee-pillar-card">
               <div className="pillar-top-row">
-                <span className={`pillar-kicker-pill ${expiringCredential ? 'kicker-amber' : 'kicker-emerald'}`}>
-                  Expiring Credential
+                <span className={`pillar-kicker-pill ${expiringCredential ? (expiringCredential.isRenewalApproaching ? 'kicker-amber' : 'kicker-emerald') : 'kicker-indigo'}`}>
+                  {expiringCredential ? (expiringCredential.isRenewalApproaching ? 'Expiring Credential' : 'Verified Credential') : 'Active Credential'}
                 </span>
                 <span className="pillar-status-chip">
-                  <Shield size={13} style={{ color: expiringCredential ? '#d97706' : '#059669' }} /> Certified
+                  <Shield size={13} style={{ color: expiringCredential ? '#059669' : '#64748b' }} /> {expiringCredential ? 'Certified' : 'Ready'}
                 </span>
               </div>
 
               <h3 className="pillar-heading">
-                {expiringCredential?.title || 'ISO/IEC 27001 Information Security Practitioner'}
+                {expiringCredential ? expiringCredential.title : 'No active certifications on file'}
               </h3>
 
               <div className="pillar-meta-row">
                 <span className="pillar-meta-item">
-                  Authority: <strong>{expiringCredential?.clientCompany || currentUser?.organization || 'Crossworks Enterprise'}</strong>
+                  Authority: <strong>{expiringCredential ? (expiringCredential.clientCompany || currentUser?.organization || 'Crossworks Enterprise') : (currentUser?.organization || 'Crossworks Enterprise')}</strong>
                 </span>
                 <span className="pillar-meta-item">
-                  Integrity: <strong>{expiringCredential?.hash || 'CP-ABE Verified'}</strong>
+                  Integrity: <strong>{expiringCredential ? expiringCredential.hash : 'CP-ABE Cryptography Ready'}</strong>
                 </span>
               </div>
 
               {/* Expiration Notice Box */}
-              <div className={`pillar-callout-box ${expiringCredential?.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? 'callout-warning' : 'callout-neutral'}`}>
-                <div className="pillar-callout-header">
-                  <Clock size={14} />
-                  <span>
-                    {expiringCredential?.daysUntilExpiry !== null && expiringCredential?.daysUntilExpiry !== undefined
-                      ? `Renewal Window: ${expiringCredential.daysUntilExpiry} days remaining`
-                      : 'Renewal Window: 32 days remaining'}
-                  </span>
+              {expiringCredential ? (
+                <div className={`pillar-callout-box ${expiringCredential.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? 'callout-warning' : 'callout-neutral'}`}>
+                  <div className="pillar-callout-header">
+                    <Clock size={14} />
+                    <span>
+                      {expiringCredential.daysUntilExpiry !== null && expiringCredential.daysUntilExpiry !== undefined
+                        ? `Renewal Window: ${expiringCredential.daysUntilExpiry} days remaining`
+                        : 'Accreditation Status: Active & Valid'}
+                    </span>
+                  </div>
+                  <div className="pillar-callout-sub">
+                    {expiringCredential.expiresOn ? (
+                      <>Expires: <strong>{expiringCredential.expiresOn}</strong> &bull; Policy sweep active</>
+                    ) : (
+                      <>Issued: <strong>{expiringCredential.issuedOn || 'Verified'}</strong> &bull; CP-ABE Protected</>
+                    )}
+                  </div>
                 </div>
-                <div className="pillar-callout-sub">
-                  Expires: <strong>{expiringCredential?.expiresOn || 'December 15, 2026'}</strong> &bull; Policy sweep active
+              ) : (
+                <div className="pillar-callout-box callout-neutral">
+                  <div className="pillar-callout-header">
+                    <Clock size={14} />
+                    <span>No pending renewals</span>
+                  </div>
+                  <div className="pillar-callout-sub">
+                    Complete curriculum assessments or submit an external credential to earn verified certification.
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="pillar-footer">
                 <button
@@ -873,7 +889,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   onClick={() => setActiveView && setActiveView('trainee_certs')}
                 >
                   <FileCheck size={13} />
-                  <span>Review &amp; Renew Credential</span>
+                  <span>{expiringCredential ? 'Review & Renew Credential' : 'View Credentials Portal'}</span>
                 </button>
               </div>
             </div>
@@ -1231,11 +1247,21 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               </div>
             ) : (
               <div className="modern-leaderboard-list">
-                {[
-                  { rank: 1, name: 'Andrea Aguilar', initials: 'AA', points: 14250, isYou: true },
-                  { rank: 2, name: 'Carlos Mendoza', initials: 'CM', points: 13800, isYou: false },
-                  { rank: 3, name: 'Elena Ramos', initials: 'ER', points: 12920, isYou: false }
-                ].map((row) => (
+                {((leaderboard && leaderboard.length > 0)
+                  ? leaderboard.map((item, idx) => ({
+                      rank: item.rank || idx + 1,
+                      name: item.display_name,
+                      initials: (item.display_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+                      points: item.points || 0,
+                      isYou: item.display_name === currentUser?.name || item.display_name?.includes(currentUser?.name)
+                    }))
+                  : [
+                      { rank: 1, name: currentUser?.name || 'Andrea Aguilar', initials: currentUser?.initials || 'AA', points: points || 3055, isYou: true },
+                      { rank: 2, name: 'Ricardo Ocampo', initials: 'RO', points: 2850, isYou: false },
+                      { rank: 3, name: 'Bea Macaraeg', initials: 'BM', points: 2620, isYou: false },
+                      { rank: 4, name: 'Adrian Natividad', initials: 'AN', points: 2190, isYou: false }
+                    ]
+                ).map((row) => (
                   <div key={row.rank} className={`modern-leaderboard-item ${row.isYou ? 'is-user' : ''}`}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span className={`modern-rank-badge-num rank-${row.rank <= 3 ? row.rank : 'other'}`}>

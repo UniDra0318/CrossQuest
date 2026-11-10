@@ -489,9 +489,9 @@ export function AuthProvider({ children }) {
             role: normalizeRole(profile.role),
             name: profile.full_name,
             initials: profile.full_name.split(' ').map(n => n[0]).join(''),
-            organization: profile.role === 'trainee' 
-              ? 'San Miguel Conglomerate' 
-              : 'Crossworks Training & Consulting',
+            organization: profile.company_name || (profile.role === 'trainee' 
+              ? 'Vertiv Holdings Ltd' 
+              : 'Crossworks Training & Consulting'),
             assigned_companies: profile.assigned_client_accounts || ['CORP_ALPHA'],
             streak: Number.isFinite(Number(profile.streak)) ? Number(profile.streak) : 7
           };
@@ -538,9 +538,9 @@ export function AuthProvider({ children }) {
           role: normalizeRole(profile.role),
           name: profile.full_name,
           initials: profile.full_name.split(' ').map(n => n[0]).join(''),
-          organization: profile.role === 'trainee' 
-            ? 'San Miguel Conglomerate' 
-            : 'Crossworks Training & Consulting',
+          organization: profile.company_name || (profile.role === 'trainee' 
+            ? 'Vertiv Holdings Ltd' 
+            : 'Crossworks Training & Consulting'),
           assigned_companies: profile.assigned_client_accounts || ['CORP_ALPHA'],
           streak: Number.isFinite(Number(profile.streak)) ? Number(profile.streak) : 7
         };

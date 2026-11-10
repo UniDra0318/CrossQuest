@@ -27,27 +27,43 @@ export const overview = {
 export const clients = ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA'];
 
 export const staff = [
-  { id: 'u-1', name: 'Dr. Sarah Jenkins', initials: 'SJ', email: 'admin@crossworks.ph', role: 'ADMIN', level: 3, clients: ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA'], tone: 'purple' },
-  { id: 'u-2', name: 'Marcus Reyes', initials: 'MR', email: 'marcus.reyes@crossworks.ph', role: 'CROSSWORKS STAFF', level: 2, clients: ['CORP_ALPHA'], tone: 'orange' },
-  { id: 'u-3', name: 'David Lim', initials: 'DL', email: 'david.lim@crossworks.ph', role: 'TRAINER', level: 1, clients: ['CORP_ALPHA', 'FINTECH_BETA'], tone: 'green' },
-  { id: 'u-4', name: 'Patricia Santos', initials: 'PS', email: 'patricia.hr@alpha-corp.ph', role: 'COMPANY STAFF', level: 1, clients: ['CORP_ALPHA'], tone: 'blue' },
-  { id: 'u-5', name: 'Juan Dela Cruz', initials: 'JD', email: 'juan.delacruz@alpha-corp.ph', role: 'TRAINEE', level: 1, clients: ['CORP_ALPHA'], tone: 'amber' },
+  { id: 'u-1', name: "Joselito 'Joey' Mallari Jr.", initials: 'JM', email: 'joey.mallari@xworks.ph', role: 'ADMIN', level: 3, clients: ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA', 'BANK_DELTA', 'TELCO_EPSILON'], tone: 'purple' },
+  { id: 'u-2', name: 'Len Mallari', initials: 'LM', email: 'len.mallari@xworks.ph', role: 'ADMIN', level: 3, clients: ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA', 'BANK_DELTA', 'TELCO_EPSILON'], tone: 'purple' },
+  { id: 'u-3', name: 'Erika Bana', initials: 'EB', email: 'erika.bana@crossworks.ph', role: 'ACCOUNT MANAGER', level: 2, clients: ['CORP_ALPHA', 'BANK_DELTA'], tone: 'orange' },
+  { id: 'u-4', name: 'Sharon De Vera', initials: 'SD', email: 'sharon.devera@crossworks.ph', role: 'ACCOUNT MANAGER', level: 2, clients: ['FINTECH_BETA', 'RETAIL_GAMMA'], tone: 'orange' },
+  { id: 'u-5', name: 'Brian Mendoza', initials: 'BM', email: 'brian.mendoza@crossworks.ph', role: 'ACCOUNT MANAGER', level: 2, clients: ['TELCO_EPSILON'], tone: 'orange' },
+  { id: 'u-6', name: 'Elena Santos', initials: 'ES', email: 'elena.santos@crossworks.ph', role: 'FINANCE', level: 2, clients: ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA', 'BANK_DELTA', 'TELCO_EPSILON'], tone: 'orange' },
+  { id: 'u-7', name: 'Jordan Ramos', initials: 'JR', email: 'jordan.ramos@crossworks.ph', role: 'TRAINER', level: 1, clients: ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA', 'BANK_DELTA', 'TELCO_EPSILON'], tone: 'green' },
+  { id: 'u-trn-1', name: 'Andrea Aguilar', initials: 'AA', email: 'andrea.aguilar@vertiv.com', role: 'TRAINEE', level: 1, clients: ['VHL_2'], tone: 'blue' },
+  { id: 'u-trn-2', name: 'Ricardo Ocampo', initials: 'RO', email: 'ricardo.ocampo@iproyal.com', role: 'TRAINEE', level: 1, clients: ['IPROY_SERVI_2'], tone: 'blue' },
+  { id: 'u-trn-3', name: 'Bea Macaraeg', initials: 'BM', email: 'bea.macaraeg@iproyal.com', role: 'TRAINEE', level: 1, clients: ['IPROY_SERVI_2'], tone: 'blue' },
+  { id: 'u-trn-4', name: 'Rafael Dizon', initials: 'RD', email: 'rafael.dizon@amihansolutions.com', role: 'TRAINEE', level: 1, clients: ['AMIHAN_SOLUTI_2'], tone: 'blue' },
+  { id: 'u-trn-5', name: 'Rowena Cabrera', initials: 'RC', email: 'rowena.cabrera@ewageas.com', role: 'TRAINEE', level: 1, clients: ['EWALIC_2'], tone: 'blue' },
+  { id: 'u-trn-6', name: 'Joshua Javier', initials: 'JJ', email: 'jjavier@islalpg.com', role: 'TRAINEE', level: 1, clients: ['ISLA_LPG_CORPOR'], tone: 'blue' },
+  { id: 'u-trn-7', name: 'Arvin Natividad', initials: 'AN', email: 'arvin.natividad@urc.com.ph', role: 'TRAINEE', level: 1, clients: ['UNIVER_ROBINA_CORPOR_3'], tone: 'blue' },
+  { id: 'u-trn-8', name: 'Camille Morales', initials: 'CM', email: 'camille.morales@boehringer-ingelheim.com', role: 'TRAINEE', level: 1, clients: ['BIBSP_2'], tone: 'blue' },
+  { id: 'u-trn-9', name: 'Vincent Santos', initials: 'VS', email: 'santos.vincent@ayalaland.com.ph', role: 'TRAINEE', level: 1, clients: ['AYALA_LAND_INC_2'], tone: 'blue' }
 ];
 
 // type: OUT_OF_SCOPE | OFF_HOURS | FAILED_ATTEMPTS ; status: UNREVIEWED | RESOLVED
 export const anomalies = [
-  { id: 'an-1', type: 'OUT_OF_SCOPE', name: 'Marcus Reyes', email: 'marcus.am@crossworks.ph', message: "Account Manager (Alpha) attempted to decrypt training records belonging to 'FINTECH_BETA'.", at: '2026-10-03 14:18:22', status: 'UNREVIEWED' },
-  { id: 'an-2', type: 'OFF_HOURS', name: 'David Lim', email: 'david.trainer@crossworks.ph', message: 'Decryption request dispatched outside authorized operating window (23:44 UTC).', at: '2026-10-02 23:44:11', status: 'UNREVIEWED' },
-  { id: 'an-3', type: 'FAILED_ATTEMPTS', name: 'Elena Santos', email: 'elena.am@crossworks.ph', message: '3 consecutive access authorization rejections detected within 4 minutes.', at: '2026-10-01 19:12:05', status: 'RESOLVED' },
+  { id: 'an-1', type: 'OUT_OF_SCOPE', name: 'Erika Bana', email: 'erika.bana@crossworks.ph', message: "Account Manager attempted to decrypt training records belonging to 'FINTECH_BETA'.", at: '2026-10-03 14:18:22', status: 'UNREVIEWED' },
+  { id: 'an-2', type: 'OFF_HOURS', name: 'Jordan Ramos', email: 'jordan.ramos@crossworks.ph', message: 'Decryption request dispatched outside authorized operating window (23:44 UTC).', at: '2026-10-02 23:44:11', status: 'UNREVIEWED' },
+  { id: 'an-3', type: 'FAILED_ATTEMPTS', name: 'Elena Santos', email: 'elena.santos@crossworks.ph', message: '3 consecutive access authorization rejections detected within 4 minutes.', at: '2026-10-01 19:12:05', status: 'RESOLVED' },
 ];
 
 const AM = (c) => `(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:${c})`;
 // status: COMPLETED | IN_PROGRESS
 export const records = [
-  { id: 'rec-101', trainee: 'Juan Dela Cruz', email: 'juan.delacruz@alpha-corp.ph', org: 'SAN MIGUEL CONGLOMERATE HOLDINGS', course: 'Information Security Management & Governance', policy: AM('CORP_ALPHA'), status: 'COMPLETED' },
-  { id: 'rec-102', trainee: 'Maria Clara', email: 'maria.clara@maya-fintech.ph', org: 'MAYA FINTECH DIGITAL INNOVATIONS', course: 'Privacy Information Management & GDPR', policy: AM('FINTECH_BETA'), status: 'COMPLETED' },
-  { id: 'rec-103', trainee: 'Gabriel Ramos', email: 'g.ramos@ayala-retail.ph', org: 'AYALA RETAIL OMNICHANNEL CORP', course: 'Corporate Threat Modeling & Incident Handling', policy: AM('RETAIL_GAMMA'), status: 'IN_PROGRESS' },
-  { id: 'rec-104', trainee: 'Beatrice Tan', email: 'beatrice.tan@alpha-corp.ph', org: 'SAN MIGUEL CONGLOMERATE HOLDINGS', course: 'DevSecOps Pipeline Security & CI/CD Guardrails', policy: AM('CORP_ALPHA'), status: 'COMPLETED' },
+  { id: 'rec-pilot-001', trainee: 'Andrea Aguilar', email: 'andrea.aguilar@vertiv.com', org: 'Vertiv (Singapore) Holdings PTE LTD-ROHQ', course: 'Supervisory Upskilling Program for Excellent', policy: AM('VHL_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-002', trainee: 'Ricardo Ocampo', email: 'ricardo.ocampo@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-003', trainee: 'Bea Macaraeg', email: 'bea.macaraeg@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-004', trainee: 'Adrian Natividad', email: 'adrian.natividad@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-005', trainee: 'Karen Concepcion', email: 'karen.concepcion@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-010', trainee: 'Jerome Enriquez', email: 'jenriquez@redoakproperties.com.ph', org: 'Red Oak Properties Inc.', course: 'Supervisory Upskilling Program for Excellent', policy: AM('ROP_3'), status: 'COMPLETED' },
+  { id: 'rec-pilot-032', trainee: 'Rowena Cabrera', email: 'rowena.cabrera@ewageas.com', org: 'East West Ageas Life Insurance', course: 'Business Strategy Simulation', policy: AM('EWALIC_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-049', trainee: 'Joshua Javier', email: 'jjavier@islalpg.com', org: 'Isla LPG Corporation', course: 'Negotiating for Results', policy: AM('ISLA_LPG_CORPOR'), status: 'IN_PROGRESS' },
+  { id: 'rec-pilot-088', trainee: 'Vincent Santos', email: 'santos.vincent@ayalaland.com.ph', org: 'Ayala Land Inc.', course: 'PMP Review (Saturdays)', policy: AM('AYALA_LAND_INC_2'), status: 'COMPLETED' },
 ];
 
 export const settings = {

@@ -62,19 +62,34 @@ def get_current_user(
             )
 
     # Determine trainee_id if user is a trainee (DD-01, Section 3.6.6)
-    trainee_obj = db.query(Trainee).filter(Trainee.user_id == user.id).first()
-    trainee_id = trainee_obj.id if trainee_obj else None
+    trainee_id = None
+    if user.role == "trainee":
+        from app.core.database import admin_engine
+        try:
+            with admin_engine.connect() as aconn:
+                from sqlalchemy import text
+                row = aconn.execute(
+                    text("SELECT id FROM trainees WHERE user_id = :uid OR email = :email LIMIT 1"),
+                    {"uid": str(user.id), "email": user.email}
+                ).fetchone()
+                if row:
+                    trainee_id = row[0]
+        except Exception:
+            pass
+        if not trainee_id:
+            trainee_obj = db.query(Trainee).filter((Trainee.user_id == user.id) | (Trainee.email == user.email)).first()
+            trainee_id = trainee_obj.id if trainee_obj else None
 
     # Generate and inject HMAC-signed context for PostgreSQL RLS (SEC-08, SEC-24, OI-14)
     signed_ctx = sign_context(user_id=user.id, role=user.role, trainee_id=trainee_id)
     request_context_var.set(signed_ctx)
     if db.bind and db.bind.dialect.name == "postgresql":
         from sqlalchemy import text
-        db.execute(text("SELECT set_config('crossquest.current_user_id', :uid, true)"), {"uid": signed_ctx["user_id"]})
-        db.execute(text("SELECT set_config('crossquest.current_role', :role, true)"), {"role": signed_ctx["role"]})
-        db.execute(text("SELECT set_config('crossquest.current_trainee_id', :tid, true)"), {"tid": signed_ctx["trainee_id"]})
-        db.execute(text("SELECT set_config('crossquest.context_expiry', :exp, true)"), {"exp": str(signed_ctx["expiry"])})
-        db.execute(text("SELECT set_config('crossquest.context_signature', :sig, true)"), {"sig": signed_ctx["signature"]})
+        db.execute(text("SELECT set_config('crossquest.current_user_id', :uid, false)"), {"uid": signed_ctx["user_id"]})
+        db.execute(text("SELECT set_config('crossquest.current_role', :role, false)"), {"role": signed_ctx["role"]})
+        db.execute(text("SELECT set_config('crossquest.current_trainee_id', :tid, false)"), {"tid": signed_ctx["trainee_id"]})
+        db.execute(text("SELECT set_config('crossquest.context_expiry', :exp, false)"), {"exp": str(signed_ctx["expiry"])})
+        db.execute(text("SELECT set_config('crossquest.context_signature', :sig, false)"), {"sig": signed_ctx["signature"]})
 
     return user
 

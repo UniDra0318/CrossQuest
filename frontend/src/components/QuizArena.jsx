@@ -822,8 +822,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const maxStreak = Math.max(1, streakCalc.max);
     const avgSpeedSec = Math.max(2.8, Number(((quiz.timePerQuestion || 45) * 0.42 - (pointsTotal % 4) * 0.25).toFixed(1)));
     const xpEarned = Math.round(pointsTotal * 0.45);
-    const traineeName = currentUser?.name || 'Juan Dela Cruz';
-    const traineeInitials = currentUser?.initials || 'JD';
+    const traineeName = currentUser?.name || 'Andrea Aguilar';
+    const traineeInitials = currentUser?.initials || 'AA';
     const streakDays = currentUser?.streak || 7;
 
     const tierTitle = 
@@ -832,21 +832,49 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       finalScorePct >= 70 ? '🎯 QUALIFIED PRACTITIONER' :
       '📚 TRAINING CANDIDATE';
 
-    const liveLeaderboardData = [
-      { rank: 1, name: 'Dr. Sarah Jenkins', role: 'Lead Cryptographer', score: 2450, accuracy: '100%', speed: '3.1s', isUser: false, avatar: 'SJ', badge: '🥇 1st' },
-      { rank: 2, name: `${traineeName} (You)`, role: 'Cohort Participant', score: Math.max(pointsTotal, 1850), accuracy: `${finalScorePct}%`, speed: `${avgSpeedSec}s`, isUser: true, avatar: traineeInitials, badge: '🥈 2nd' },
-      { rank: 3, name: 'Marcus Vance', role: 'Security Analyst', score: 1890, accuracy: '88%', speed: '4.2s', isUser: false, avatar: 'MV', badge: '🥉 3rd' },
-      { rank: 4, name: 'Elena Rostova', role: 'Compliance Officer', score: 1640, accuracy: '75%', speed: '5.0s', isUser: false, avatar: 'ER', badge: '#4' },
-      { rank: 5, name: 'David Lim', role: 'Audit Specialist', score: 1510, accuracy: '75%', speed: '5.8s', isUser: false, avatar: 'DL', badge: '#5' },
-      { rank: 6, name: 'Maya Patel', role: 'Systems Architect', score: 1420, accuracy: '70%', speed: '6.1s', isUser: false, avatar: 'MP', badge: '#6' },
-      { rank: 7, name: 'Chris Chen', role: 'Cloud Engineer', score: 1380, accuracy: '65%', speed: '6.5s', isUser: false, avatar: 'CC', badge: '#7' },
+    const basePeers = [
+      { name: 'Ricardo Ocampo', role: 'IPRoyal Services FZE LLC', score: 2850, accuracy: '95%', speed: '3.4s', avatar: 'RO' },
+      { name: 'Bea Macaraeg', role: 'IPRoyal Services FZE LLC', score: 2620, accuracy: '92%', speed: '3.8s', avatar: 'BM' },
+      { name: 'Adrian Natividad', role: 'IPRoyal Services FZE LLC', score: 2190, accuracy: '88%', speed: '4.2s', avatar: 'AN' },
+      { name: 'Rowena Cabrera', role: 'East West Ageas Life Insurance', score: 1840, accuracy: '82%', speed: '4.9s', avatar: 'RC' },
+      { name: 'Jerome Enriquez', role: 'Red Oak Properties Inc.', score: 1650, accuracy: '78%', speed: '5.3s', avatar: 'JE' },
+      { name: 'Karen Concepcion', role: 'IPRoyal Services FZE LLC', score: 1480, accuracy: '75%', speed: '5.7s', avatar: 'KC' },
+      { name: 'Joshua Javier', role: 'Isla LPG Corporation', score: 1380, accuracy: '70%', speed: '6.2s', avatar: 'JJ' },
     ];
 
+    const userCandidate = {
+      name: `${traineeName} (You)`,
+      role: currentUser?.organization || 'Vertiv Holdings Ltd',
+      score: pointsTotal,
+      accuracy: `${finalScorePct}%`,
+      speed: `${avgSpeedSec}s`,
+      isUser: true,
+      avatar: traineeInitials
+    };
+
+    const sortedCandidates = [...basePeers, userCandidate].sort((a, b) => b.score - a.score);
+
+    const liveLeaderboardData = sortedCandidates.slice(0, 8).map((c, index) => {
+      const rank = index + 1;
+      const badge = rank === 1 ? '🥇 1st' : rank === 2 ? '🥈 2nd' : rank === 3 ? '🥉 3rd' : `#${rank}`;
+      return {
+        ...c,
+        rank,
+        badge
+      };
+    });
+
+    const userRank = liveLeaderboardData.findIndex(c => c.isUser) + 1 || 1;
+    const topMvp = liveLeaderboardData[0] || userCandidate;
+    const fastestSpeed = Math.min(avgSpeedSec, 3.4).toFixed(1);
+    const medianPts = Math.round(sortedCandidates.reduce((acc, c) => acc + c.score, 0) / sortedCandidates.length);
+
+    const userOrg = currentUser?.organization || 'Vertiv Holdings Ltd';
     const teamStandingsData = [
-      { rank: 1, teamName: 'Squad Alpha (Agile & PME Operations)', score: 15185 + pointsTotal, accuracy: '94%', members: 6, isUserTeam: true, icon: '⚡', trend: '+280 Today' },
-      { rank: 2, teamName: 'Squad Bravo (Architecture & Zero-Trust)', score: 12890, accuracy: '86%', members: 5, isUserTeam: false, icon: '🛡️', trend: '+190 Today' },
-      { rank: 3, teamName: 'Squad Delta (Business Continuity & ISO 31000)', score: 11420, accuracy: '82%', members: 6, isUserTeam: false, icon: '🔥', trend: '+140 Today' },
-      { rank: 4, teamName: 'Squad Echo (DevOps & Cloud Resilience)', score: 10240, accuracy: '79%', members: 4, isUserTeam: false, icon: '🚀', trend: '+110 Today' },
+      { rank: 1, teamName: `${userOrg} (Cohort Pilot Operations)`, score: 15185 + pointsTotal, accuracy: '94%', members: 6, isUserTeam: true, icon: '⚡', trend: '+280 Today' },
+      { rank: 2, teamName: 'IPRoyal Services FZE LLC (Technical Excellence)', score: 14890, accuracy: '91%', members: 8, isUserTeam: false, icon: '🛡️', trend: '+190 Today' },
+      { rank: 3, teamName: 'East West Ageas Life (Business Strategy & Risk)', score: 12420, accuracy: '85%', members: 6, isUserTeam: false, icon: '🔥', trend: '+140 Today' },
+      { rank: 4, teamName: 'Red Oak Properties (Enterprise Operations)', score: 11240, accuracy: '82%', members: 5, isUserTeam: false, icon: '🚀', trend: '+110 Today' },
     ];
 
     return (
@@ -1078,15 +1106,15 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                         <span className="podium-lbl">Candidates</span>
                       </div>
                       <div className="podium-tile">
-                        <span className="podium-val text-gold">1,620</span>
+                        <span className="podium-val text-gold">{medianPts.toLocaleString()}</span>
                         <span className="podium-lbl">Median PTS</span>
                       </div>
                       <div className="podium-tile">
-                        <span className="podium-val text-cyan">3.1s</span>
+                        <span className="podium-val text-cyan">{fastestSpeed}s</span>
                         <span className="podium-lbl">Fastest / Q</span>
                       </div>
                       <div className="podium-tile">
-                        <span className="podium-val text-emerald">Top 7%</span>
+                        <span className="podium-val text-emerald">{userRank === 1 ? "Top 1%" : `Top ${Math.round((userRank / 28) * 100)}%`}</span>
                         <span className="podium-lbl">Your Tier</span>
                       </div>
                     </div>
@@ -1135,7 +1163,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
                     <div className="leaderboard-footer-callout flex-between" style={{ marginTop: '2px', paddingTop: '4px' }}>
                       <span className="text-secondary text-xs">
-                        🏆 Cohort Placement: <strong>Top 7%</strong> of 28 participants.
+                        🏆 Cohort Placement: <strong>{userRank === 1 ? "1st Place (Top 1%)" : `Rank #${userRank}`}</strong> of 28 participants.
                       </span>
                       <span className="rank-up-badge flex-align gap-4">
                         <TrendingUp size={12} />
@@ -1154,7 +1182,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                         <div>
                           <h4 className="callout-title" style={{ fontSize: '14.5px', fontWeight: 800 }}>High-Impact Squad Contribution!</h4>
                           <p className="callout-sub" style={{ fontSize: '12.5px', margin: '2px 0 0' }}>
-                            Your assessment credited <strong>+{pointsTotal} PTS</strong> to <strong>Squad Alpha</strong>, leading at #1!
+                            Your assessment credited <strong>+{pointsTotal} PTS</strong> to <strong>{userOrg}</strong>, leading at #1!
                           </p>
                         </div>
                       </div>
@@ -1201,7 +1229,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
 
                     {/* Squad MVP Ribbon */}
                     <div className="squad-mvp-ribbon">
-                      <span>👑 Weekly Squad MVP: <strong>Dr. Sarah Jenkins</strong> (+3,450 Squad PTS)</span>
+                      <span>👑 Weekly Squad MVP: <strong>{topMvp.name.replace(" (You)", "")}</strong> (+{topMvp.score.toLocaleString()} Squad PTS)</span>
                       <span className="badge-gamified badge-gold text-xs" style={{ fontSize: '11.5px' }}>1.25x Team Synergy</span>
                     </div>
                   </div>

@@ -76,6 +76,7 @@ class UserResponse(UserBase):
     mfa_enabled: Optional[bool] = False
     created_at: Optional[datetime] = None
     streak: Optional[int] = None
+    company_name: Optional[str] = None
     attributes: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)

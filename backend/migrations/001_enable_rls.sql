@@ -227,6 +227,7 @@ DROP POLICY IF EXISTS quiz_select ON quizzes;
 CREATE POLICY quiz_select ON quizzes FOR SELECT TO PUBLIC
 USING (
     app_ctx_get('current_role') = 'ADMIN'
+    OR session_id IS NULL
     OR (session_id IS NOT NULL AND (
         (app_ctx_get('current_role') = 'TRAINER' AND app_has_session(session_id))
         OR (app_ctx_get('current_role') = 'TRAINEE' AND EXISTS (
@@ -251,6 +252,13 @@ USING (
           AND q.session_id IS NOT NULL
           AND app_has_session(q.session_id)
     ))
+);
+
+DROP POLICY IF EXISTS attempt_insert ON quiz_attempts;
+CREATE POLICY attempt_insert ON quiz_attempts FOR INSERT TO PUBLIC
+WITH CHECK (
+    app_ctx_get('current_role') = 'ADMIN'
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
 );
 
 -- 9. Append-Only Access Log Policy (TC-RLS-08)
@@ -492,6 +500,24 @@ USING (
           AND tr.current_company_id IS NOT NULL
           AND app_has_company(tr.current_company_id)
     ))
+);
+
+DROP POLICY IF EXISTS gam_insert ON gamification_progress;
+CREATE POLICY gam_insert ON gamification_progress FOR INSERT TO PUBLIC
+WITH CHECK (
+    app_ctx_get('current_role') = 'ADMIN'
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
+);
+
+DROP POLICY IF EXISTS gam_update ON gamification_progress;
+CREATE POLICY gam_update ON gamification_progress FOR UPDATE TO PUBLIC
+USING (
+    app_ctx_get('current_role') = 'ADMIN'
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
+)
+WITH CHECK (
+    app_ctx_get('current_role') = 'ADMIN'
+    OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
 );
 
 -- Assign crossquest_admin ownership across all extended tables

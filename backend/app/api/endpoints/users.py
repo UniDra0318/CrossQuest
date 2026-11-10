@@ -39,6 +39,11 @@ def read_current_user(
             (Trainee.user_id == current_user.id) | (Trainee.email == current_user.email)
         ).first()
         streak = (trainee.current_streak if trainee else 7) or 7
+        company_name = None
+        if trainee and trainee.current_company_id:
+            cc = db.query(ClientCompany).filter(ClientCompany.id == trainee.current_company_id).first()
+            if cc:
+                company_name = cc.name
         return {
             "id": current_user.id,
             "email": current_user.email,
@@ -49,7 +54,8 @@ def read_current_user(
             "force_password_change": current_user.force_password_change,
             "mfa_enabled": current_user.mfa_enabled,
             "created_at": current_user.created_at,
-            "streak": streak
+            "streak": streak,
+            "company_name": company_name
         }
     return current_user
 
