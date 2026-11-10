@@ -523,16 +523,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         switch (activeSubView) {
           case 'records_vault':
           case 'attribute_authority':
-            return null;
           case 'anomalies':
-            return (
-              <PageHeader
-                title="Security Alerts"
-                subtitle="Peer-reviewed anomaly detection, dual-threshold rate limiting, and incident triage."
-                badge={unreviewedCount > 0 ? `${unreviewedCount} UNREVIEWED` : 'ALL CLEAR'}
-                badgeType={unreviewedCount > 0 ? 'warning' : 'success'}
-              />
-            );
+            return null;
           case 'system_settings':
             return (
               <PageHeader

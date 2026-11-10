@@ -1742,6 +1742,36 @@ button:disabled {
   margin-bottom: 24px;
 }
 
+/* Security Alerts & Peer Review Hero Stage (Crimson Rose / Obsidian Cockpit) */
+.adm-alerts-hero-stage {
+  background: linear-gradient(135deg, #2b0b14 0%, #3f101e 50%, #581629 100%);
+  border: 1px solid rgba(244, 63, 94, 0.22);
+  box-shadow: 0 12px 36px rgba(63, 16, 30, 0.25);
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.adm-alerts-primary-btn {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35) !important;
+}
+
+.adm-alerts-primary-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.45) !important;
+}
+
+.adm-alerts-metric-cell {
+  background: rgba(43, 11, 20, 0.55) !important;
+  border-color: rgba(244, 63, 94, 0.18) !important;
+}
+
+.adm-alerts-metric-cell:hover {
+  border-color: rgba(244, 63, 94, 0.35) !important;
+}
+
 /* Staff Access & Clearances Hero Stage (Royal Midnight Indigo Theme) */
 .adm-staff-hero-stage {
   background: linear-gradient(135deg, #1e1338 0%, #2b1754 50%, #431d78 100%);
