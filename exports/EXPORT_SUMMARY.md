@@ -1,14 +1,14 @@
 # CrossQuest Pilot Database Export Package
 
-**Export Timestamp (UTC):** 2026-11-10 00:58:32 UTC
+**Export Timestamp (UTC):** 2026-11-10 09:02:18 UTC
 
 **Source Database:** `crossquest_pilot.db` (4,124,672 bytes / ~3.93 MB)
 
-**SQL Dump:** `crossquest_pilot_dump.sql` (1,124,426 bytes / ~1098.1 KB)
+**SQL Dump:** `crossquest_pilot_dump.sql` (1,244,290 bytes / ~1215.1 KB)
 
 **Total Tables:** 33
 
-**Total Records:** 3,166
+**Total Records:** 3,432
 
 ## Formats Provided
 
@@ -27,10 +27,10 @@
 | `alert_events` | 0 | Supporting granular alert trigger events |
 | `anomaly_alerts` | 6 | Security incident alerts with audit dispositions |
 | `anomaly_rules` | 10 | Crossworks-approved anomaly detection rules (R1-R4, S1) |
-| `certificates` | 7 | Issued verifiable certificates with serial IDs |
-| `certification_types` | 1 | Certification types and validity period policies |
+| `certificates` | 287 | Issued verifiable certificates with serial IDs |
+| `certification_types` | 9 | Certification types and validity period policies |
 | `client_companies` | 143 | Registered enterprise client organizations |
-| `courses` | 62 | Zero-trust cybersecurity & professional development courses |
+| `courses` | 81 | Zero-trust cybersecurity & professional development courses |
 | `gamification_progress` | 4 | XP, badges, points, and milestone achievements |
 | `import_batches` | 6 | Data import history & reconciliation batches |
 | `import_discrepancies` | 11 | Audit discrepancy tracking & resolution logs |
@@ -49,8 +49,8 @@
 | `trainer_assignments` | 79 | Lead instructor course & session assignments |
 | `training_record_versions` | 574 | Cryptographic audit trail with CP-ABE policy ciphertexts & version history |
 | `training_records` | 554 | Trainee completion & attendance records with encrypted payloads |
-| `training_sessions` | 190 | Live training cohorts & schedule deliveries |
+| `training_sessions` | 209 | Live training cohorts & schedule deliveries |
 | `user_abe_keys` | 9 | Issued user CP-ABE private cryptographic keys |
 | `user_key_attributes` | 534 | Cryptographic attribute token mapping per user key |
 | `user_sessions` | 42 | Active authenticated sessions & sliding idle timeouts |
-| `users` | 229 | System accounts across 5 roles (Admin, AM, Finance, Trainer, Trainee) with MFA & security states |
+| `users` | 169 | System accounts across 5 roles (Admin, AM, Finance, Trainer, Trainee) with MFA & security states |

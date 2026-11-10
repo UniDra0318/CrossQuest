@@ -17,11 +17,16 @@ from datetime import datetime, timezone
 def export_pilot_database():
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     src_db = os.path.join(base_dir, 'crossquest_pilot.db')
-    
+    if not os.path.exists(src_db):
+        src_db = '/exports/crossquest_pilot.db'
+    if not os.path.exists(src_db):
+        src_db = os.path.join(base_dir, 'backend', 'crossquest_pilot.db')
     if not os.path.exists(src_db):
         raise FileNotFoundError(f"Source database not found at {src_db}")
-        
+    
     export_dir = os.path.join(base_dir, 'exports')
+    if not os.path.exists(export_dir):
+        export_dir = '/exports'
     json_dir = os.path.join(export_dir, 'json')
     csv_dir = os.path.join(export_dir, 'csv')
     os.makedirs(export_dir, exist_ok=True)
@@ -30,7 +35,8 @@ def export_pilot_database():
     
     # 1. Copy SQLite .db
     dest_db = os.path.join(export_dir, 'crossquest_pilot.db')
-    shutil.copy2(src_db, dest_db)
+    if os.path.abspath(src_db) != os.path.abspath(dest_db):
+        shutil.copy2(src_db, dest_db)
     db_size = os.path.getsize(dest_db)
     
     # 2. SQL Schema + Data Dump (.sql)

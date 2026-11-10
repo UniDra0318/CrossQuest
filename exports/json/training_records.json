@@ -3278,7 +3278,7 @@
   {
     "id": "64fb1ad7-9022-487a-a9ef-3eed9eb75258",
     "trainee_id": "45997d28-0b52-4b61-83d4-55029fea6733",
-    "session_id": null,
+    "session_id": "f1d1d1dd-676d-4467-9bc5-082da08f9eaa",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Risk Management",
     "status": "Completed",
@@ -3299,7 +3299,7 @@
   {
     "id": "0d1c3234-3d5f-417e-b7bf-46d46f9f14ff",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -3362,7 +3362,7 @@
   {
     "id": "39ee80a8-a81f-4802-a134-4aaeac19085f",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -3383,7 +3383,7 @@
   {
     "id": "2cd97de8-9bfc-44e9-b945-1c3cc3c847bd",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -3446,7 +3446,7 @@
   {
     "id": "5d34194c-1e0c-429a-b0f4-cb4312063fe9",
     "trainee_id": "550eda09-8643-4e22-9727-7ef99946ee93",
-    "session_id": null,
+    "session_id": "9d9e5650-415e-4505-8c2b-96098b36f329",
     "company_at_completion_id": "058746c7-6a5a-4033-b314-82cdf3fd3c69",
     "course_name": "Course Alpha 1",
     "status": "Completed",
@@ -3467,7 +3467,7 @@
   {
     "id": "fcb58ef5-16a4-408f-be7d-a91c9f70bc4e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -3488,7 +3488,7 @@
   {
     "id": "12e5aa9b-3a2e-4cb2-902c-894d4f1dfbc3",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -3509,7 +3509,7 @@
   {
     "id": "f739308e-6f5d-4bc7-b11e-33465a7e1bdf",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -3530,7 +3530,7 @@
   {
     "id": "2c76b782-712b-46c8-8b10-98885f6dada2",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -3551,7 +3551,7 @@
   {
     "id": "58319900-b796-49bb-b91d-c57d751d4084",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -3572,7 +3572,7 @@
   {
     "id": "355406cd-8bc3-4769-a078-1422d1f918b1",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -3593,7 +3593,7 @@
   {
     "id": "c2a1fc8a-48ae-47a0-b396-4f5b8ba117b1",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -3614,7 +3614,7 @@
   {
     "id": "46c201cd-36d7-40c9-85a7-f3e9ec60717b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -3635,7 +3635,7 @@
   {
     "id": "f05f12db-dd27-464e-bc3e-287950e8a091",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -3656,7 +3656,7 @@
   {
     "id": "c9231565-482c-4b43-a5d4-10eead0b5ae0",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -3677,7 +3677,7 @@
   {
     "id": "caaea914-8c07-4c1d-b2e7-ca2d54023745",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -3698,7 +3698,7 @@
   {
     "id": "a144f5ce-fbdd-4e96-9a20-5bf35ee997d4",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -3719,7 +3719,7 @@
   {
     "id": "a2e4351e-2140-4ce8-a802-7e5a257caea9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -3740,7 +3740,7 @@
   {
     "id": "35e95433-f7d3-4faa-b85c-75f68b12e01a",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -3761,7 +3761,7 @@
   {
     "id": "c188f22b-b7e0-4afe-84fd-14ee10bb5f06",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -3782,7 +3782,7 @@
   {
     "id": "90648b32-dc3e-4864-9615-f5c3c30f5c96",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -3803,7 +3803,7 @@
   {
     "id": "27eb6ab3-9180-4058-8151-9eafb08a8490",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -3950,7 +3950,7 @@
   {
     "id": "48e75219-23c7-4446-81c0-dae1ebcaf45f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -3971,7 +3971,7 @@
   {
     "id": "3c05987d-655f-4a4f-b5d9-27191887096b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -3992,7 +3992,7 @@
   {
     "id": "3802dcc0-de8c-4cb9-8a05-c591db1fc57f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -4013,7 +4013,7 @@
   {
     "id": "45aaf5d8-db86-469d-aba4-027c493d9c17",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -4034,7 +4034,7 @@
   {
     "id": "ab104bf5-c05d-4b71-bf65-e12bad062bfd",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -4055,7 +4055,7 @@
   {
     "id": "00e8b103-b8cc-4b9e-ab81-7f372b43749e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -4076,7 +4076,7 @@
   {
     "id": "5546ff3d-8e73-45ce-a649-8765de97f125",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -4097,7 +4097,7 @@
   {
     "id": "a19d014b-e26e-4d5d-b178-67926e404d56",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -4118,7 +4118,7 @@
   {
     "id": "c3722bfd-b991-437d-8c50-a97b080a4e0a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -4139,7 +4139,7 @@
   {
     "id": "ca8af4cd-b4e7-4715-a046-0e37ef578220",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -4160,7 +4160,7 @@
   {
     "id": "fb05fcc2-b3c4-49f2-97c9-706ad20f0ddd",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -4181,7 +4181,7 @@
   {
     "id": "e0bad778-e18c-4de9-90c2-89ae3c105dc6",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -4202,7 +4202,7 @@
   {
     "id": "8b75b7db-8eb1-43c9-a7de-b4745e017545",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -4223,7 +4223,7 @@
   {
     "id": "642ba867-c91d-42fa-a0a7-24083a72c04e",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -4244,7 +4244,7 @@
   {
     "id": "18d63754-8234-4127-bf15-4e654c8929e7",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -4265,7 +4265,7 @@
   {
     "id": "ad377aa5-c217-4203-890f-58e925768ad2",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -4286,7 +4286,7 @@
   {
     "id": "2ddb97f6-01ca-4bc8-8ae5-a22c993767b2",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -4349,7 +4349,7 @@
   {
     "id": "194bb966-7b78-4cf4-b134-5d2a1e8b28e5",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -4370,7 +4370,7 @@
   {
     "id": "05b6441c-a3dd-48ee-858b-3790800502ff",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -4391,7 +4391,7 @@
   {
     "id": "66d2cfc7-31c8-4e5d-88eb-017868c7deef",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -4412,7 +4412,7 @@
   {
     "id": "60568832-5023-418a-896e-8b7cca2fc1b5",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -4433,7 +4433,7 @@
   {
     "id": "faafc1cc-b59d-4267-8d4e-a48d3c69a688",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -4454,7 +4454,7 @@
   {
     "id": "db18f172-ee61-47cb-ae73-8f7c770654a0",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -4475,7 +4475,7 @@
   {
     "id": "3ac63af8-1276-4a36-8001-20f3720f3f7e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -4496,7 +4496,7 @@
   {
     "id": "0d851cc7-69e3-40c2-bd3f-61c589aaebbc",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -4517,7 +4517,7 @@
   {
     "id": "98e1899c-496b-4094-aa0b-9731d128b193",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -4538,7 +4538,7 @@
   {
     "id": "370a6954-d9e6-4246-9b65-41b2e6da8e19",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -4559,7 +4559,7 @@
   {
     "id": "7e0430d2-7817-4c06-9ab7-861e6708b0f7",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -4580,7 +4580,7 @@
   {
     "id": "71bf8bbf-267b-4b8d-afbe-5b95cb7f6e2a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -4601,7 +4601,7 @@
   {
     "id": "e90b7ac4-5cec-43d8-bb9f-9ff6e7d7a2a0",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -4622,7 +4622,7 @@
   {
     "id": "39c245c8-dd90-43d7-89b5-670c62ccc8c6",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -4643,7 +4643,7 @@
   {
     "id": "1f3eb038-2051-4c3d-aad8-21916cc0b2ef",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -4664,7 +4664,7 @@
   {
     "id": "9bf95b60-43cd-4422-bcd5-3723f12cfa9f",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -4685,7 +4685,7 @@
   {
     "id": "ce7e2114-8160-490c-9cad-2243bbf6c7cf",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -4748,7 +4748,7 @@
   {
     "id": "675b8e47-502e-42b6-b5e9-fb02b576c57f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -4769,7 +4769,7 @@
   {
     "id": "b33f4d66-0bd6-47d7-9f47-df58d9f2c951",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -4790,7 +4790,7 @@
   {
     "id": "5fb855af-8051-4816-bd9e-69977fd1dbed",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -4811,7 +4811,7 @@
   {
     "id": "ada7721e-e9fd-41c0-8ac0-18e398d9945a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -4832,7 +4832,7 @@
   {
     "id": "e2da2e2a-1e35-4bb8-8a59-96206a5b8767",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -4853,7 +4853,7 @@
   {
     "id": "ef17c126-d1e4-42e6-82d9-4123fab91046",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -4874,7 +4874,7 @@
   {
     "id": "e2554e8a-a622-4796-9a09-e57cc2da3568",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -4895,7 +4895,7 @@
   {
     "id": "2196ae7d-15ce-4f05-b584-f76cb786a97b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -4916,7 +4916,7 @@
   {
     "id": "ccbc13a9-e4fd-4c62-8ff0-7dabcc4bc333",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -4937,7 +4937,7 @@
   {
     "id": "5f855fe0-898c-4d49-9dac-23861c58818a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -4958,7 +4958,7 @@
   {
     "id": "910a86bf-6fdb-49e4-8e6e-d623f60fc455",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -4979,7 +4979,7 @@
   {
     "id": "82221a21-d04e-40b8-8da8-0d6c53a01042",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -5000,7 +5000,7 @@
   {
     "id": "24752781-f798-4766-8710-c4145b1e7d5a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -5021,7 +5021,7 @@
   {
     "id": "588fff9a-9cf3-414a-8efe-530611a05cf3",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -5042,7 +5042,7 @@
   {
     "id": "38f6fa11-f5c4-4b7a-b62a-74873e246b24",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -5063,7 +5063,7 @@
   {
     "id": "b2aa5178-0733-4210-98a9-e6d5ef48c381",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -5084,7 +5084,7 @@
   {
     "id": "f4bf3df9-374b-4871-8455-5865e9bcb64b",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -5147,7 +5147,7 @@
   {
     "id": "4c8fd5fd-f201-465f-9a7b-09806a41592b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -5168,7 +5168,7 @@
   {
     "id": "494785c7-156e-4de1-90e3-e5521770b8cf",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -5189,7 +5189,7 @@
   {
     "id": "5fbb1d34-07ea-40f0-af16-9d0b96b4417b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -5210,7 +5210,7 @@
   {
     "id": "6d96e352-aed7-498f-bbad-0804882f545c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -5231,7 +5231,7 @@
   {
     "id": "477b53bc-ec97-42e6-a5e9-283e15adb96b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -5252,7 +5252,7 @@
   {
     "id": "1c6f6385-595f-40af-8739-2a4680efc317",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -5273,7 +5273,7 @@
   {
     "id": "e9d9644f-410e-45a1-aa24-9a1d665b7508",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -5294,7 +5294,7 @@
   {
     "id": "1386af29-f595-4165-a085-6c742af29aff",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -5315,7 +5315,7 @@
   {
     "id": "e9232158-73d6-4ff2-9bc3-00c394408a81",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -5336,7 +5336,7 @@
   {
     "id": "d57c96e0-0c53-4729-8898-7b0e089c3a5e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -5357,7 +5357,7 @@
   {
     "id": "c6d13b77-981f-419f-a954-fe02af102722",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -5378,7 +5378,7 @@
   {
     "id": "c732e36c-7555-40bf-8465-cd80b5b4c1fa",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -5399,7 +5399,7 @@
   {
     "id": "2c4af223-0903-408f-9c5b-758f4b88da2a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -5420,7 +5420,7 @@
   {
     "id": "18f09320-dc2d-4d25-a14a-e96cbc2fbf1b",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -5441,7 +5441,7 @@
   {
     "id": "ff7205d6-9a8f-4d0a-9354-df89e5d0a85d",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -5462,7 +5462,7 @@
   {
     "id": "4389b9a9-744f-4c5b-9a8f-bdffdc3c42d2",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -5483,7 +5483,7 @@
   {
     "id": "f508f371-ef43-47a6-9971-3f735f87a87b",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -5546,7 +5546,7 @@
   {
     "id": "1cb4f6ba-09ab-4638-af03-4af7e7b192a2",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -5567,7 +5567,7 @@
   {
     "id": "95314740-68f9-4e2f-bbcb-74af74677d90",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -5588,7 +5588,7 @@
   {
     "id": "af591c75-6915-4260-a32e-fa4e9aadd940",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -5609,7 +5609,7 @@
   {
     "id": "b2548ed4-d286-44f7-9c32-14dffd79dbde",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -5630,7 +5630,7 @@
   {
     "id": "071deec1-6b2b-4921-bf58-19ef51822c3b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -5651,7 +5651,7 @@
   {
     "id": "6a825e38-b55d-45e6-8068-544bd293c564",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -5672,7 +5672,7 @@
   {
     "id": "693f395f-7aa0-44cd-9c18-9b6b9c21e52f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -5693,7 +5693,7 @@
   {
     "id": "20dff4c3-c713-41c3-ae76-e54e4b6ab8aa",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -5714,7 +5714,7 @@
   {
     "id": "4b56384f-7dc7-4050-afd4-a4fb9cd921fc",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -5735,7 +5735,7 @@
   {
     "id": "3dd749f0-2f18-4077-8ec7-4e0f8895a154",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -5756,7 +5756,7 @@
   {
     "id": "5f900227-eb25-47ce-a670-d80bff4a93f0",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -5777,7 +5777,7 @@
   {
     "id": "68f1d4b0-b3a4-42ba-8520-d73ab7799671",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -5798,7 +5798,7 @@
   {
     "id": "ed71ba80-0c59-47ca-819f-bab2b0458447",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -5819,7 +5819,7 @@
   {
     "id": "84a200ec-510c-4c42-989f-6acfc5055d58",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -5840,7 +5840,7 @@
   {
     "id": "1a2f0a6d-76cc-4a85-bd89-bf5df7e602ad",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -5861,7 +5861,7 @@
   {
     "id": "e6e5d461-1a1c-4e57-92db-76e351d0c1dd",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -5882,7 +5882,7 @@
   {
     "id": "1493ead6-bffe-4769-8b9c-2e84d04c9615",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -5987,7 +5987,7 @@
   {
     "id": "f77732c2-b9eb-46ae-b7e4-2821b044a4a7",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -6008,7 +6008,7 @@
   {
     "id": "a6137f3f-e18e-47af-9fad-67120b340322",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -6029,7 +6029,7 @@
   {
     "id": "59644b33-0212-4b3e-8336-baa4e45bf7fc",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -6050,7 +6050,7 @@
   {
     "id": "5f2d5c73-bc89-431c-9493-9965af9a6c17",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -6071,7 +6071,7 @@
   {
     "id": "ef06c11e-ff7a-4264-8b6a-8d403419e6e2",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -6092,7 +6092,7 @@
   {
     "id": "ecac5b0b-4d0e-4b08-a169-d3170a02ed46",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -6113,7 +6113,7 @@
   {
     "id": "d232ad03-810b-4ea3-aab0-9db88ba0aa08",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -6134,7 +6134,7 @@
   {
     "id": "ab1fdd63-7dab-4a8c-9c2a-64cd21a01eb3",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -6155,7 +6155,7 @@
   {
     "id": "73aa86a9-7436-4601-a142-2b8914e35577",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -6176,7 +6176,7 @@
   {
     "id": "73cb9143-8d60-4e49-a6d5-c9107376a140",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -6197,7 +6197,7 @@
   {
     "id": "51951c79-69de-4702-b31d-abb5c203565e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -6218,7 +6218,7 @@
   {
     "id": "5482d98c-36e1-4a6b-a92e-623bf6bf4838",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -6239,7 +6239,7 @@
   {
     "id": "c5c779d2-e5b8-4f76-ac47-4617ded76446",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -6260,7 +6260,7 @@
   {
     "id": "fe582c74-c9ad-4974-8b72-f34985dd2f62",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -6281,7 +6281,7 @@
   {
     "id": "40e51305-77c2-4616-9030-b90c4085dbed",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -6302,7 +6302,7 @@
   {
     "id": "ed4df440-1a9e-4d40-b24f-37b0560785d8",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -6323,7 +6323,7 @@
   {
     "id": "89b02c54-c501-4d43-85a3-d62d77dc3cec",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -6407,7 +6407,7 @@
   {
     "id": "297f3321-bfef-4969-ab9b-ead0a8cb386e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -6428,7 +6428,7 @@
   {
     "id": "a8f0876e-8ac5-41b7-b638-ff3174c69a1e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -6449,7 +6449,7 @@
   {
     "id": "0bb66f0f-b1e0-47c9-8831-ee3c8f97b0c4",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -6470,7 +6470,7 @@
   {
     "id": "bf475639-27fc-4bec-b4c8-7a338638e764",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -6491,7 +6491,7 @@
   {
     "id": "26b6540d-e70a-4424-86de-1b4fcdf8c699",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -6512,7 +6512,7 @@
   {
     "id": "b29ead08-6c07-4a88-b8cd-dcbbd366d5d7",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -6533,7 +6533,7 @@
   {
     "id": "95f7530f-79b6-4eaa-88c5-371a286ac068",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -6554,7 +6554,7 @@
   {
     "id": "e41579ea-90de-4d56-910c-81bf8bcb98c2",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -6575,7 +6575,7 @@
   {
     "id": "12a88659-2799-419e-bddc-664b0f7b43ea",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -6596,7 +6596,7 @@
   {
     "id": "62a53ff4-c6b4-4e14-9bb2-ae7bf72535ab",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -6617,7 +6617,7 @@
   {
     "id": "5b200feb-363a-4703-a519-43649e71b0ae",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -6638,7 +6638,7 @@
   {
     "id": "182720a2-0e87-4d8e-9074-0282dc97fd8d",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -6659,7 +6659,7 @@
   {
     "id": "9214c654-3697-4787-b777-c52583fa386c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -6701,7 +6701,7 @@
   {
     "id": "ea9ed480-768f-4b65-870e-6931d0fec4c5",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -6722,7 +6722,7 @@
   {
     "id": "8ff2a91d-821c-48fb-b007-af68c357dfc4",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -6743,7 +6743,7 @@
   {
     "id": "b88e6c98-7680-4b17-8cd5-67ccbff31f12",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -6764,7 +6764,7 @@
   {
     "id": "ac7a42e5-2b2e-496c-aa3c-ee5725aa817c",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -6890,7 +6890,7 @@
   {
     "id": "8f3966b0-438a-4336-b0da-2a2f0ad62e36",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -6911,7 +6911,7 @@
   {
     "id": "f424bb38-c688-4bd7-80d8-8fcfca9a28a1",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -6932,7 +6932,7 @@
   {
     "id": "7b136e75-d360-455f-b978-7ec90c2a2ac9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -6953,7 +6953,7 @@
   {
     "id": "c39a398b-9525-4dfe-9451-49518a0578a7",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -6974,7 +6974,7 @@
   {
     "id": "8b3d6ad3-7075-4d26-aeab-7247191b60b9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -6995,7 +6995,7 @@
   {
     "id": "2822462b-5170-4d5b-9a31-73a456a9b76c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -7016,7 +7016,7 @@
   {
     "id": "326b6781-bf37-4be4-89e8-5fe1117cd7a1",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -7037,7 +7037,7 @@
   {
     "id": "5926e682-bf73-47dc-801e-ef5c481c5413",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -7058,7 +7058,7 @@
   {
     "id": "dd4bd102-58db-4481-8045-fcb0d623d6bf",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -7079,7 +7079,7 @@
   {
     "id": "5ea549fc-aea9-4b60-92cb-6b05a4667818",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -7100,7 +7100,7 @@
   {
     "id": "f3ed068c-b9f1-41a4-816c-1d80eeb21b81",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -7121,7 +7121,7 @@
   {
     "id": "2a76e16a-046e-419c-a3fb-72ffd10c2d6a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -7142,7 +7142,7 @@
   {
     "id": "942488ac-4479-445d-8a6e-cdad009b2891",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -7184,7 +7184,7 @@
   {
     "id": "29d67d9b-81fe-4da5-857a-80f5a6ae7f63",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -7205,7 +7205,7 @@
   {
     "id": "fd45669f-a9a4-410e-9c79-bdc2f1ee1094",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -7226,7 +7226,7 @@
   {
     "id": "2d668151-042f-4d90-b634-3e99a67e55b3",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -7247,7 +7247,7 @@
   {
     "id": "f14cff3f-d0ee-4999-b04e-8e21876b4244",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -7310,7 +7310,7 @@
   {
     "id": "ba743b42-6700-443a-a380-c23d737db470",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -7331,7 +7331,7 @@
   {
     "id": "46903b53-ce0b-4b30-9218-bf0dfd71fea9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -7352,7 +7352,7 @@
   {
     "id": "1ecb61eb-79f0-4c18-8628-995e1e8b949c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -7373,7 +7373,7 @@
   {
     "id": "00260f70-e6ef-432d-b674-a94282f9b688",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -7394,7 +7394,7 @@
   {
     "id": "417db59e-cbfa-4f40-bd1b-b9ebd0531607",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -7415,7 +7415,7 @@
   {
     "id": "e6b99913-a63e-428e-8adc-121e9b8319f7",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -7436,7 +7436,7 @@
   {
     "id": "6bf00c3e-0c89-420d-91d2-f7f60faf5847",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -7457,7 +7457,7 @@
   {
     "id": "21f9ec4b-57ea-478c-b25f-9c1c22c6e73d",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -7478,7 +7478,7 @@
   {
     "id": "6d967604-425e-4707-a7b7-31982bf38fe0",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -7499,7 +7499,7 @@
   {
     "id": "c7d00ed0-24f4-4c94-8760-1c78bdf2c4a1",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -7520,7 +7520,7 @@
   {
     "id": "24c17dc7-d841-4c42-a4d9-4e20d5ec47aa",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -7541,7 +7541,7 @@
   {
     "id": "9b2ddf67-d5b2-4f04-ad4e-e79521f98845",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -7562,7 +7562,7 @@
   {
     "id": "0e0a57e2-b44c-4967-9ae4-cceb70a63d35",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -7604,7 +7604,7 @@
   {
     "id": "5b8cce6e-914a-4ea0-994e-a2e32c05e516",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -7625,7 +7625,7 @@
   {
     "id": "1056d211-5be1-4298-8ecd-1bc115628bc5",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -7646,7 +7646,7 @@
   {
     "id": "2d84b537-6aad-47c2-8ca7-ce05ddd10766",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -7667,7 +7667,7 @@
   {
     "id": "d349e1a3-4b5f-4ef1-8ea2-85b0b4fbed5c",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -7730,7 +7730,7 @@
   {
     "id": "7a1d8405-a215-4bc7-a9c6-92d7591b7f39",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -7751,7 +7751,7 @@
   {
     "id": "873291f8-7db0-48b0-85ce-f233fe1c6638",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -7772,7 +7772,7 @@
   {
     "id": "39ca7b1a-efe1-4c20-b92c-954154e8eaad",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -7793,7 +7793,7 @@
   {
     "id": "b73d4241-9ec2-4a4e-9984-6fcd1f3c39fc",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -7814,7 +7814,7 @@
   {
     "id": "215f390d-2b13-47e5-9eee-bed1dbb97332",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -7835,7 +7835,7 @@
   {
     "id": "484f80d2-0da5-4f0c-926e-20e3ac0a1f2c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -7856,7 +7856,7 @@
   {
     "id": "8320edde-2929-4eb8-b56d-77fa33c515df",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -7877,7 +7877,7 @@
   {
     "id": "d43f3038-5bf7-4882-a126-b2aeaf36c916",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -7898,7 +7898,7 @@
   {
     "id": "9a56b6f7-9208-42fd-ba46-683a70126f43",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -7919,7 +7919,7 @@
   {
     "id": "fe99c29f-ea84-45e1-a185-9faa8ebe7c10",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -7940,7 +7940,7 @@
   {
     "id": "8494ce8f-cde6-4cc1-892c-234efc2d43cb",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -7961,7 +7961,7 @@
   {
     "id": "a5550f14-868e-4e70-956e-3dd07ffaa900",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -7982,7 +7982,7 @@
   {
     "id": "3c20960d-4104-4a54-ad80-340671e9e63f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -8024,7 +8024,7 @@
   {
     "id": "b15e47aa-534a-4d94-986c-d109798e66aa",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -8045,7 +8045,7 @@
   {
     "id": "368d2424-6768-4701-9950-99bf1068066c",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -8066,7 +8066,7 @@
   {
     "id": "ed008c6b-80b3-431d-9ec5-badae99f453c",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -8087,7 +8087,7 @@
   {
     "id": "7b7c15ae-1453-43db-a3d5-63bd25b65f15",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -8150,7 +8150,7 @@
   {
     "id": "67f7d6f4-8fc2-4b7e-b560-45a77165cc67",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -8171,7 +8171,7 @@
   {
     "id": "c480fa91-a2ed-4524-9540-2718c2997861",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -8192,7 +8192,7 @@
   {
     "id": "1903308d-837e-4020-b22f-2f84e6690e70",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -8213,7 +8213,7 @@
   {
     "id": "8718820b-4447-4cae-9f05-396bfd25cb3e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -8234,7 +8234,7 @@
   {
     "id": "1b397497-6695-4f8d-a43a-f89bac1d483a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -8255,7 +8255,7 @@
   {
     "id": "05306160-7d49-4f51-a483-e49d8c027c64",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -8276,7 +8276,7 @@
   {
     "id": "576b2c73-ee82-4533-8eab-9b3a8db59d40",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -8297,7 +8297,7 @@
   {
     "id": "15281438-00bc-4c80-8bbd-5a22c242e4e0",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -8318,7 +8318,7 @@
   {
     "id": "96086212-8d6c-4f0b-adee-3369e1e4f47f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -8339,7 +8339,7 @@
   {
     "id": "c1c1fd45-2322-4503-86e5-b5d0f09a2d79",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -8360,7 +8360,7 @@
   {
     "id": "929a4f56-da5e-4562-9994-654a90ca6244",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -8381,7 +8381,7 @@
   {
     "id": "da11b943-3d2a-403b-ac45-8ba80576160b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -8402,7 +8402,7 @@
   {
     "id": "b86ad8d7-b2db-403d-86a9-128857c88d08",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -8444,7 +8444,7 @@
   {
     "id": "a58008a2-3a3e-445f-96b6-ba8e98ac087d",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -8465,7 +8465,7 @@
   {
     "id": "fa1d2afd-2efa-4811-beac-2001ce51923a",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -8486,7 +8486,7 @@
   {
     "id": "6588dced-391e-4be2-9be7-081d2f71faea",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -8507,7 +8507,7 @@
   {
     "id": "536814b5-96e1-471f-96f5-7f9ae7801ca5",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -8570,7 +8570,7 @@
   {
     "id": "6b7332ad-1d07-47b2-b3ae-0c4bac7f9eaa",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -8591,7 +8591,7 @@
   {
     "id": "0f046d5f-ca77-4f73-9c86-491498bd2f21",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -8612,7 +8612,7 @@
   {
     "id": "e2059343-bf19-477b-a5d9-332de5e9de20",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -8633,7 +8633,7 @@
   {
     "id": "8570a3c0-4f09-4e2d-880b-e12014a48882",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -8654,7 +8654,7 @@
   {
     "id": "286e4b12-c05b-45c9-b20c-5ef890aa4623",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -8675,7 +8675,7 @@
   {
     "id": "82957a45-d353-408c-8fcc-0c660b8dbb2c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -8696,7 +8696,7 @@
   {
     "id": "7c409fdb-d4c4-4653-a128-d17ed706f415",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -8717,7 +8717,7 @@
   {
     "id": "c84031ad-52ef-444b-80e0-70dfb38bfa66",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -8738,7 +8738,7 @@
   {
     "id": "c948174c-ffd5-41cb-b787-c28b035d4194",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -8759,7 +8759,7 @@
   {
     "id": "9a7cb123-e8a2-4816-bfd8-1282429bed3d",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -8780,7 +8780,7 @@
   {
     "id": "5d827c1a-42e4-4d5c-8892-85abe24c264a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -8801,7 +8801,7 @@
   {
     "id": "872ba3ac-cf0c-4958-bee3-8c799dea4f78",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -8822,7 +8822,7 @@
   {
     "id": "e9ec4777-3846-4a74-8ea9-f954fd1a5685",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -8864,7 +8864,7 @@
   {
     "id": "c1417896-2e40-459a-944f-742f90362749",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -8885,7 +8885,7 @@
   {
     "id": "87b921f0-25ea-4c7d-a9f4-280c9d24ff07",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -8906,7 +8906,7 @@
   {
     "id": "7ad12512-551e-4630-a8e8-d33162981d59",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -8927,7 +8927,7 @@
   {
     "id": "a765bd1a-0264-40a9-8908-08c62c4e06d6",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -8990,7 +8990,7 @@
   {
     "id": "d382e237-1b37-4145-bb5a-6e7f98971116",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -9011,7 +9011,7 @@
   {
     "id": "3a850770-1ecc-405d-bc1c-22317b8da63c",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -9032,7 +9032,7 @@
   {
     "id": "d44a1387-f8a4-4eee-9cec-8e2c3ad0f237",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -9053,7 +9053,7 @@
   {
     "id": "c4dbbdf3-5555-4564-a4ba-7e3c93919581",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -9074,7 +9074,7 @@
   {
     "id": "61ce1468-c575-4204-8520-b3b3f1ba115f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -9095,7 +9095,7 @@
   {
     "id": "0df8f795-21e2-4179-8b45-c717b313eca1",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -9116,7 +9116,7 @@
   {
     "id": "9c3b5337-1d4a-4421-be84-c64f583a38e2",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -9137,7 +9137,7 @@
   {
     "id": "cee316de-3cb2-4e89-8d03-36954dc0a278",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -9158,7 +9158,7 @@
   {
     "id": "6bdb772d-553b-4541-b48e-475a65345dc7",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -9179,7 +9179,7 @@
   {
     "id": "e4b71be1-c4a3-4fc6-8574-05ddd59f2462",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -9200,7 +9200,7 @@
   {
     "id": "fa1bfae8-7066-455f-97d4-33324c14f46d",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -9221,7 +9221,7 @@
   {
     "id": "bff7e28f-b470-41c4-a344-ed68957a363e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -9242,7 +9242,7 @@
   {
     "id": "70b80fa6-81ac-41a9-8da8-ea35cad5e373",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -9263,7 +9263,7 @@
   {
     "id": "b5031423-e77f-4752-9552-1d8c11080843",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -9284,7 +9284,7 @@
   {
     "id": "99accd54-8453-41a9-8e1f-f3ea2d04444c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -9305,7 +9305,7 @@
   {
     "id": "d6e7870c-4a73-47ad-a8b5-28f1578762f9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -9347,7 +9347,7 @@
   {
     "id": "23b6c8e0-e3a4-43e7-bae3-534d30bd3919",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -9368,7 +9368,7 @@
   {
     "id": "def408c8-88dd-4cfe-a7bd-5fd380df3749",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -9389,7 +9389,7 @@
   {
     "id": "a15b13a1-99a5-448e-b4ae-7d77eddac072",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -9410,7 +9410,7 @@
   {
     "id": "705d6990-3f20-4b3c-aa7b-5fcd77285c49",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -9515,7 +9515,7 @@
   {
     "id": "31bd2766-8d02-4770-91c5-d2b8bf4b21d9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -9536,7 +9536,7 @@
   {
     "id": "7d396d05-fac9-4620-9981-71e7c792dbde",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -9557,7 +9557,7 @@
   {
     "id": "98ba6c23-62d7-4e1a-abba-ee4da7571a2f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -9578,7 +9578,7 @@
   {
     "id": "d1c42fe2-0842-4b11-9505-fcd3120e08ae",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -9599,7 +9599,7 @@
   {
     "id": "61854cea-141d-41db-80db-f3853425fd81",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -9620,7 +9620,7 @@
   {
     "id": "4312891e-1651-4b51-a4c5-080a62b02478",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -9641,7 +9641,7 @@
   {
     "id": "5c6116ef-a239-4122-aa27-233bc3d13862",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -9662,7 +9662,7 @@
   {
     "id": "53128a9d-e5ae-4bc8-b2ff-92b11d240b09",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -9683,7 +9683,7 @@
   {
     "id": "7862a38b-0842-4429-95d2-2f57bb9bbbd4",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -9704,7 +9704,7 @@
   {
     "id": "841a8af1-2c59-4f30-b9bd-e97a587c92ab",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -9725,7 +9725,7 @@
   {
     "id": "6b7701d1-9474-4c4b-8022-42762526d75f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -9746,7 +9746,7 @@
   {
     "id": "ea7e068b-696d-4500-889e-0127d638352b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -9767,7 +9767,7 @@
   {
     "id": "462cb579-569e-4c47-9d8e-eff26ab13168",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -9809,7 +9809,7 @@
   {
     "id": "4c7f5a51-41b4-43c8-88ad-8dac03801bc0",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -9830,7 +9830,7 @@
   {
     "id": "e054d148-aab7-4edb-b156-7081529a714a",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -9851,7 +9851,7 @@
   {
     "id": "9eb57568-788d-49a2-842e-5e0b0c5237f1",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -9872,7 +9872,7 @@
   {
     "id": "bf3e0f4d-2385-48fc-ad38-b8b44ef25e48",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -9935,7 +9935,7 @@
   {
     "id": "d6f9cae6-a1fe-4c6e-bf3d-b350277f1743",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -9956,7 +9956,7 @@
   {
     "id": "e694ac6a-cf1b-457d-8f43-e4bf5a18397b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -9977,7 +9977,7 @@
   {
     "id": "aedaafe5-7073-4e9c-ba68-c4fbd93dbe6c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -9998,7 +9998,7 @@
   {
     "id": "59f2b581-2abf-46b4-9e39-040888499957",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -10019,7 +10019,7 @@
   {
     "id": "5f21d51a-f855-4d9a-9886-c6ce93d2561e",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -10040,7 +10040,7 @@
   {
     "id": "97ac8804-2887-4c30-8f6d-1d3af132f6cf",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -10061,7 +10061,7 @@
   {
     "id": "69fc8809-421e-4a0d-bec6-574edbf455be",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -10082,7 +10082,7 @@
   {
     "id": "8714f22e-72f0-44de-98a2-9c125d48f4c2",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -10103,7 +10103,7 @@
   {
     "id": "c8173708-b54a-4078-8267-65449ba3cf20",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -10124,7 +10124,7 @@
   {
     "id": "ee1f9908-47b2-45ce-8874-af64aed7f94c",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -10145,7 +10145,7 @@
   {
     "id": "a601d0d6-94a9-4b6e-b044-9845816c93d3",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -10166,7 +10166,7 @@
   {
     "id": "2e76e502-79a2-4833-8f9f-3a346cc10cbe",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -10187,7 +10187,7 @@
   {
     "id": "d840f878-f98e-4043-8d36-55a2b74f76c0",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -10229,7 +10229,7 @@
   {
     "id": "313251f9-6365-498d-88d1-61b1a1c89364",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -10250,7 +10250,7 @@
   {
     "id": "fed415c9-de9f-497a-a9b2-9d2fa9892db2",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -10271,7 +10271,7 @@
   {
     "id": "d0a26748-1bae-48c6-9b6e-cbd898651933",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -10292,7 +10292,7 @@
   {
     "id": "558df3d2-467f-4531-b7e9-4cd107bb2fd3",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -10355,7 +10355,7 @@
   {
     "id": "754fd2ee-88bd-4628-8420-e6da70707fec",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -10376,7 +10376,7 @@
   {
     "id": "725f8e76-084d-4704-b2d8-acdb21508d2d",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -10397,7 +10397,7 @@
   {
     "id": "06cbc861-cc25-41c0-a05e-628de044ceff",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -10418,7 +10418,7 @@
   {
     "id": "46bc101f-ef62-4345-abc2-acba9dae2b45",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -10439,7 +10439,7 @@
   {
     "id": "ac1e1538-4ee2-4d04-9a03-571726b10b68",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -10460,7 +10460,7 @@
   {
     "id": "e27196fe-0696-4cb6-aea3-74553050fe50",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -10481,7 +10481,7 @@
   {
     "id": "797de59c-7fee-4b96-97f5-ceb366b0747d",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -10502,7 +10502,7 @@
   {
     "id": "94267969-7666-4745-a641-e27377f16e9b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -10523,7 +10523,7 @@
   {
     "id": "c98f89ff-6a31-40c7-9c1f-a856cbb9e3d2",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -10544,7 +10544,7 @@
   {
     "id": "6643ed97-7a4c-4ce1-ad1e-9b577b5619e8",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -10565,7 +10565,7 @@
   {
     "id": "aadfbd05-1c42-4ce1-bb7a-a52942f8d224",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -10586,7 +10586,7 @@
   {
     "id": "5d9a49c5-005b-4afd-842c-059b620f6ae4",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -10607,7 +10607,7 @@
   {
     "id": "4bc78d49-f82f-4687-8b1e-417b1da5b725",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -10628,7 +10628,7 @@
   {
     "id": "e15336b0-9c3b-4449-bff8-17bcfdaffa69",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -10670,7 +10670,7 @@
   {
     "id": "23355481-b7a8-46ff-93c5-264a64c5b3ec",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -10691,7 +10691,7 @@
   {
     "id": "3ad9ad34-6685-4957-9324-58442654db32",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -10712,7 +10712,7 @@
   {
     "id": "af66b211-d532-4776-887b-cc71024f64e5",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -10733,7 +10733,7 @@
   {
     "id": "586d4195-2915-455b-82bb-5470ce3f877f",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -10796,7 +10796,7 @@
   {
     "id": "08da1786-95bf-40b7-9f9f-b1996c176875",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -10817,7 +10817,7 @@
   {
     "id": "b616504c-eddd-4d94-8e0c-30fc2c5a9faf",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -10838,7 +10838,7 @@
   {
     "id": "a6017785-cb3f-47db-8bc7-4d78d7f929f3",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -10859,7 +10859,7 @@
   {
     "id": "eabce459-9964-4553-a56a-0fc4e14af397",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -10880,7 +10880,7 @@
   {
     "id": "a7808b7c-27b1-4502-886a-cc97e55b12e5",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -10901,7 +10901,7 @@
   {
     "id": "ddfcf7e3-92b4-423d-a44d-e36b72d0b1f8",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -10922,7 +10922,7 @@
   {
     "id": "b66eba5b-8df0-44a1-918f-61e37af0855f",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -10943,7 +10943,7 @@
   {
     "id": "835a651e-732c-4ff3-9cd0-5f31eb6549f9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -10964,7 +10964,7 @@
   {
     "id": "1d448a52-305c-4964-b691-a9bedbcebe15",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -10985,7 +10985,7 @@
   {
     "id": "b3eaf4ee-91d3-4920-bba6-c62e1ea79060",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -11006,7 +11006,7 @@
   {
     "id": "8a79243f-e6ae-407f-9f38-855f116d77ec",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -11027,7 +11027,7 @@
   {
     "id": "9fcc55ea-5819-48d1-b1fe-c116f43ddc59",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -11048,7 +11048,7 @@
   {
     "id": "d7125068-0a0b-4726-8732-71aaf7c4624a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -11090,7 +11090,7 @@
   {
     "id": "d9f70ac3-4380-45f0-a04f-e293e26d8db4",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -11111,7 +11111,7 @@
   {
     "id": "136f3d12-183a-4362-af95-556f75324fba",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -11132,7 +11132,7 @@
   {
     "id": "212b96bb-6bac-446c-907d-614fba7ccdac",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -11153,7 +11153,7 @@
   {
     "id": "d5380768-e6e9-4fa6-b4b8-c8856d7f298b",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",
@@ -11216,7 +11216,7 @@
   {
     "id": "82d5f5c7-7dd7-4b75-b252-8956e6b9cb1a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "be64d115-2503-41e8-8b24-813e7b16e0d3",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Security V1",
     "status": "Completed",
@@ -11237,7 +11237,7 @@
   {
     "id": "b26a7ade-0868-4d10-b826-b70cb87d2c82",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "edfd9cd1-b114-4b92-87ff-56a4e13e86e8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 0",
     "status": "In progress",
@@ -11258,7 +11258,7 @@
   {
     "id": "fd71f1e0-3c33-4937-8d76-93307095a62b",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "9f8f7b15-4efb-440a-b51c-dc318be4bb54",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 1",
     "status": "In progress",
@@ -11279,7 +11279,7 @@
   {
     "id": "1056bc34-f30e-4097-95bd-35072fa7a108",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "d9f9e213-aa84-437a-abb8-d389564f89fb",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 2",
     "status": "In progress",
@@ -11300,7 +11300,7 @@
   {
     "id": "e196c6f4-9aea-4324-89b9-0c8184a91c73",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "aa484b91-fb77-412c-a8aa-457ea84da6ab",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 3",
     "status": "In progress",
@@ -11321,7 +11321,7 @@
   {
     "id": "06b41582-ac48-43f4-a860-570396156ec9",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "c83adeb7-8d2e-44ea-bacb-94f1c6762aa8",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 4",
     "status": "In progress",
@@ -11342,7 +11342,7 @@
   {
     "id": "699cc5af-f228-4754-a2e4-30b464d138b6",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "b7d9981a-2747-4892-9579-a680e042a0cf",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 5",
     "status": "In progress",
@@ -11363,7 +11363,7 @@
   {
     "id": "a9ccd0d3-10dc-4667-a8b9-1ce2cba7dac5",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "6d49467e-40b1-44c1-96ec-460cad0c7079",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 6",
     "status": "In progress",
@@ -11384,7 +11384,7 @@
   {
     "id": "c84b5484-245c-474b-ae43-1e292fe0be1a",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "8fc5099b-2cce-4587-9af5-ea23e9d7843e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 7",
     "status": "In progress",
@@ -11405,7 +11405,7 @@
   {
     "id": "fdb41701-1ab3-4f3f-9d70-8d2fd0e0c178",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "5065a6f9-26bd-4db3-b85a-1de39ce4e30e",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 8",
     "status": "In progress",
@@ -11426,7 +11426,7 @@
   {
     "id": "aa477221-79a2-4e2b-83af-afb5ac489f88",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "940cc5d3-a136-4605-8439-56460314f59d",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 9",
     "status": "In progress",
@@ -11447,7 +11447,7 @@
   {
     "id": "fc5a6826-959d-420b-aa17-ffddd5637f34",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "3e7333fb-50c0-46e6-b8cc-9393997b9444",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 10",
     "status": "In progress",
@@ -11468,7 +11468,7 @@
   {
     "id": "ff608507-1ee6-4275-824b-5a00f3df6696",
     "trainee_id": "8abae376-694b-406c-a9ad-385d3971b9bc",
-    "session_id": null,
+    "session_id": "7cff4aab-868e-4d06-a4dc-cf97bdb40fb0",
     "company_at_completion_id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
     "course_name": "Secure Architecture Module 11",
     "status": "In progress",
@@ -11510,7 +11510,7 @@
   {
     "id": "41768b18-2dc9-4835-a130-1f09b233c428",
     "trainee_id": "ff6a1cb6-f8cd-4863-9dc4-dd0a88639a31",
-    "session_id": null,
+    "session_id": "1344cddb-b3a3-4839-8af6-b2b2d345f4f9",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Cybersecurity Fundamentals",
     "status": "Completed",
@@ -11531,7 +11531,7 @@
   {
     "id": "df460de8-7376-41b8-bf23-bd8342be0c4f",
     "trainee_id": "1575211d-f6e1-4779-956c-04aedf80e0c0",
-    "session_id": null,
+    "session_id": "65ce9c54-bd80-4ac9-bf83-86e61ae93b44",
     "company_at_completion_id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
     "course_name": "Project Management Professional",
     "status": "Completed",
@@ -11552,7 +11552,7 @@
   {
     "id": "29995f85-5dc4-45ff-8ebc-74f9ce3ffb05",
     "trainee_id": "3985b027-10f2-4faa-900c-1d8c6ca07cf5",
-    "session_id": null,
+    "session_id": "fa7583a3-65de-4a9c-bb73-0ac66aea0bb5",
     "company_at_completion_id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
     "course_name": "Risk Management ISO 31000",
     "status": "Completed",
@@ -11573,7 +11573,7 @@
   {
     "id": "70c9638f-e4e3-49df-a323-42a2452c234d",
     "trainee_id": "2f66baea-75fa-4059-be6c-84c82659fc56",
-    "session_id": null,
+    "session_id": "4c488e4d-9800-48b8-bbd4-a47de671e094",
     "company_at_completion_id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
     "course_name": "Beta Cloud Security Program",
     "status": "Completed",

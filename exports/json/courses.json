@@ -494,5 +494,157 @@
     "description": null,
     "acronym_3": "PMP",
     "created_at": "2026-11-10 00:58:09.050997"
+  },
+  {
+    "id": "ebd47570-7b27-475d-bddb-2e49bc65f2b2",
+    "course_code": "CRS-RM-73EA",
+    "name": "Risk Management",
+    "description": "Professional curriculum: Risk Management",
+    "acronym_3": "RM",
+    "created_at": null
+  },
+  {
+    "id": "a271e867-0cd4-43fc-a986-e914ae5e4d07",
+    "course_code": "CRS-BCSP-D125",
+    "name": "Beta Cloud Security Program",
+    "description": "Professional curriculum: Beta Cloud Security Program",
+    "acronym_3": "BCS",
+    "created_at": null
+  },
+  {
+    "id": "c8e3ab49-a717-4ac8-99c9-995928ebcfcd",
+    "course_code": "CRS-CA1-F755",
+    "name": "Course Alpha 1",
+    "description": "Professional curriculum: Course Alpha 1",
+    "acronym_3": "CA1",
+    "created_at": null
+  },
+  {
+    "id": "fb5ac4f3-c9d7-42d4-adc4-c893e8d780cc",
+    "course_code": "CRS-SV-176A",
+    "name": "Security V1",
+    "description": "Professional curriculum: Security V1",
+    "acronym_3": "SV",
+    "created_at": null
+  },
+  {
+    "id": "1337dc11-fd99-4d36-ad8b-2cba6ce1e140",
+    "course_code": "CRS-SAM0-EB5F",
+    "name": "Secure Architecture Module 0",
+    "description": "Professional curriculum: Secure Architecture Module 0",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "7a2ca073-a4f4-40ae-b551-b6c986caec75",
+    "course_code": "CRS-SAM1-7E70",
+    "name": "Secure Architecture Module 1",
+    "description": "Professional curriculum: Secure Architecture Module 1",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "3e9103bb-294b-42c7-aa82-5cb97a2ea879",
+    "course_code": "CRS-SAM2-E832",
+    "name": "Secure Architecture Module 2",
+    "description": "Professional curriculum: Secure Architecture Module 2",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "a8e1ae9f-a8fd-45db-9b8b-889c3219f833",
+    "course_code": "CRS-SAM3-7F33",
+    "name": "Secure Architecture Module 3",
+    "description": "Professional curriculum: Secure Architecture Module 3",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "03147902-71cf-4448-84a1-92c3684e3ee3",
+    "course_code": "CRS-SAM4-8B33",
+    "name": "Secure Architecture Module 4",
+    "description": "Professional curriculum: Secure Architecture Module 4",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "e50ed1a7-a32d-40b4-a5bf-f3b1a001809c",
+    "course_code": "CRS-SAM5-C490",
+    "name": "Secure Architecture Module 5",
+    "description": "Professional curriculum: Secure Architecture Module 5",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "1d2d7630-0f7b-459f-9fd0-46667705d18f",
+    "course_code": "CRS-SAM6-701C",
+    "name": "Secure Architecture Module 6",
+    "description": "Professional curriculum: Secure Architecture Module 6",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "020c94de-2676-42e8-926f-58942f6c9173",
+    "course_code": "CRS-SAM7-982C",
+    "name": "Secure Architecture Module 7",
+    "description": "Professional curriculum: Secure Architecture Module 7",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "ff53e636-0da5-4750-9010-64be87b3aa3c",
+    "course_code": "CRS-SAM8-0253",
+    "name": "Secure Architecture Module 8",
+    "description": "Professional curriculum: Secure Architecture Module 8",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "eb96ad9d-dcd8-4685-b666-e6109df55104",
+    "course_code": "CRS-SAM9-8D96",
+    "name": "Secure Architecture Module 9",
+    "description": "Professional curriculum: Secure Architecture Module 9",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "2c6b3bae-4a86-4a82-a9d5-e3171d9414cf",
+    "course_code": "CRS-SAM1-1DE1",
+    "name": "Secure Architecture Module 10",
+    "description": "Professional curriculum: Secure Architecture Module 10",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "cc823cc8-9731-4dd0-b828-07a26b8d7305",
+    "course_code": "CRS-SAM1-3B88",
+    "name": "Secure Architecture Module 11",
+    "description": "Professional curriculum: Secure Architecture Module 11",
+    "acronym_3": "SAM",
+    "created_at": null
+  },
+  {
+    "id": "79eb8b33-943a-43dd-a3da-f77a9a4b0944",
+    "course_code": "CRS-CF-B3FC",
+    "name": "Cybersecurity Fundamentals",
+    "description": "Professional curriculum: Cybersecurity Fundamentals",
+    "acronym_3": "CF",
+    "created_at": null
+  },
+  {
+    "id": "a1f7f5da-10e1-4f67-a5a9-8fe1746a161f",
+    "course_code": "CRS-PMP-C482",
+    "name": "Project Management Professional",
+    "description": "Professional curriculum: Project Management Professional",
+    "acronym_3": "PMP",
+    "created_at": null
+  },
+  {
+    "id": "0b589456-55b0-4e75-bbdd-f678a47f9ded",
+    "course_code": "CRS-RMI3-C869",
+    "name": "Risk Management ISO 31000",
+    "description": "Professional curriculum: Risk Management ISO 31000",
+    "acronym_3": "RMI",
+    "created_at": null
   }
 ]

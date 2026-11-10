@@ -4,5 +4,53 @@
     "name": "Project Management Professional (PMP)",
     "validity_months": 36,
     "validity_basis": "standard"
+  },
+  {
+    "code": "ISO_31000",
+    "name": "ISO 31000 Certified Risk Manager",
+    "validity_months": 36,
+    "validity_basis": "ISO standard 3-year recertification"
+  },
+  {
+    "code": "CAPM",
+    "name": "Certified Associate in Project Management (CAPM)",
+    "validity_months": 36,
+    "validity_basis": "PMI 3-year renewal cycle"
+  },
+  {
+    "code": "PMI_ACP",
+    "name": "PMI Agile Certified Practitioner (PMI-ACP)",
+    "validity_months": 36,
+    "validity_basis": "PMI 3-year renewal cycle"
+  },
+  {
+    "code": "CPMAI",
+    "name": "Certified Prompt Engineering & AI Practitioner (CPMAI)",
+    "validity_months": 36,
+    "validity_basis": "Crossworks client-stated 3-year validity"
+  },
+  {
+    "code": "CISSP",
+    "name": "Certified Information Systems Security Professional",
+    "validity_months": 36,
+    "validity_basis": "ISC2 3-year CPE cycle"
+  },
+  {
+    "code": "AWS_SEC",
+    "name": "AWS Certified Security Specialist",
+    "validity_months": 36,
+    "validity_basis": "AWS 3-year recertification"
+  },
+  {
+    "code": "SUP",
+    "name": "Supervisory Upskilling Program for Excellence",
+    "validity_months": 36,
+    "validity_basis": "Crossworks Corporate Leadership Accreditation"
+  },
+  {
+    "code": "GEN_CERT",
+    "name": "Crossworks Professional Training Certificate",
+    "validity_months": 36,
+    "validity_basis": "Crossworks 3-year standard accreditation"
   }
 ]

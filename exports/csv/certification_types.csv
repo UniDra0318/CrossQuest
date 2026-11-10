@@ -1,2 +1,10 @@
 code,name,validity_months,validity_basis
 PMP,Project Management Professional (PMP),36,standard
+ISO_31000,ISO 31000 Certified Risk Manager,36,ISO standard 3-year recertification
+CAPM,Certified Associate in Project Management (CAPM),36,PMI 3-year renewal cycle
+PMI_ACP,PMI Agile Certified Practitioner (PMI-ACP),36,PMI 3-year renewal cycle
+CPMAI,Certified Prompt Engineering & AI Practitioner (CPMAI),36,Crossworks client-stated 3-year validity
+CISSP,Certified Information Systems Security Professional,36,ISC2 3-year CPE cycle
+AWS_SEC,AWS Certified Security Specialist,36,AWS 3-year recertification
+SUP,Supervisory Upskilling Program for Excellence,36,Crossworks Corporate Leadership Accreditation
+GEN_CERT,Crossworks Professional Training Certificate,36,Crossworks 3-year standard accreditation

@@ -1,46 +1,46 @@
 # CrossQuest CP-ABE Cryptographic Verification & Evidence Report
 
-- **Generated At (UTC):** `2026-11-09T23:41:12.652633+00:00`
-- **Operating System:** `Windows 10 (AMD64)`
-- **Python Version:** `3.13.3`
+- **Generated At (UTC):** `2026-11-10T08:06:06.006021+00:00`
+- **Operating System:** `Linux 6.18.54.1-microsoft-standard-WSL2 (x86_64)`
+- **Python Version:** `3.11.18`
 - **Pairing Curve:** `SS512 (512-bit Type-1 symmetric bilinear group)`
-- **Engine Implemented:** `Authenticated Simulation Engine`
-- **Charm Native Library Available:** `NO (Running in Windows development fallback)`
+- **Engine Implemented:** `Charm-Crypto BSW07 (Native Pairing Library)`
+- **Charm Native Library Available:** `YES (Native Pairing Active)`
 - **Symmetric AEAD Cipher:** `AES-256-GCM with HKDF-SHA256 key derivation & AAD integrity binding`
 
 ## 1. Master Key Authority Setup (TC-CRY-01)
 - Status: **PASS**
 - Curve Parameter: `SS512`
-- Master Setup Execution Latency: `0.001 ms`
+- Master Setup Execution Latency: `15.641 ms`
 
 ## 2. Issued User Private Keys
 | Persona | Role | Attributes Encoded | Keygen Latency | Status |
 |---|---|---|---|---|
-| Dr. Joey Mallari (Administrator) | `admin` | `ROLEADMINV1` | `0.082 ms` | **ISSUED** |
-| Elena Santos (Finance) | `finance` | `ROLEFINANCEV1` | `0.008 ms` | **ISSUED** |
-| Marcus Reyes (AM - San Miguel Assigned) | `account_manager` | `ROLEACCTMGRV1, CLIENTCORPALPHAV1` | `0.006 ms` | **ISSUED** |
-| Andrea Salazar (AM - Competitor Assigned) | `account_manager` | `ROLEACCTMGRV1, CLIENTFINTECHBETAV1` | `0.004 ms` | **ISSUED** |
-| Jordan Ramos (Lead Trainer) | `trainer` | `ROLETRAINERV1, TRAININGSESS01V1` | `0.004 ms` | **ISSUED** |
-| Juan Dela Cruz (Trainee Record Owner) | `trainee` | `TRAINEETRN9021V1` | `0.003 ms` | **ISSUED** |
-| Maria Clara (Unrelated Trainee) | `trainee` | `TRAINEETRN8001V1` | `0.002 ms` | **ISSUED** |
-| Unauthorized Intruder / External Actor | `attacker` | `ANONYMOUSACTOR` | `0.003 ms` | **ISSUED** |
+| Dr. Joey Mallari (Administrator) | `admin` | `ROLEADMINV1` | `7.245 ms` | **ISSUED** |
+| Elena Santos (Finance) | `finance` | `ROLEFINANCEV1` | `6.620 ms` | **ISSUED** |
+| Marcus Reyes (AM - San Miguel Assigned) | `account_manager` | `ROLEACCTMGRV1, CLIENTCORPALPHAV1` | `10.961 ms` | **ISSUED** |
+| Andrea Salazar (AM - Competitor Assigned) | `account_manager` | `ROLEACCTMGRV1, CLIENTFINTECHBETAV1` | `10.291 ms` | **ISSUED** |
+| Jordan Ramos (Lead Trainer) | `trainer` | `ROLETRAINERV1, TRAININGSESS01V1` | `10.623 ms` | **ISSUED** |
+| Juan Dela Cruz (Trainee Record Owner) | `trainee` | `TRAINEETRN9021V1` | `6.210 ms` | **ISSUED** |
+| Maria Clara (Unrelated Trainee) | `trainee` | `TRAINEETRN8001V1` | `6.776 ms` | **ISSUED** |
+| Unauthorized Intruder / External Actor | `attacker` | `ANONYMOUSACTOR` | `6.743 ms` | **ISSUED** |
 
 ## 3. Cryptographic Hybrid Encryption (SEC-04, DD-02)
 - **Record ID:** `REC-PILOT-9021`
 - **Access Policy String:** `ROLEADMINV1 or ROLEFINANCEV1 or (ROLEACCTMGRV1 and CLIENTCORPALPHAV1) or (ROLETRAINERV1 and TRAININGSESS01V1) or TRAINEETRN9021V1`
 - **Authenticated Associated Data (AAD):** `REC-PILOT-9021:1:ROLEADMINV1 or ROLEFINANCEV1 or (ROLEACCTMGRV1 and CLIENTCORPALPHAV1) or (ROLETRAINERV1 and TRAININGSESS01V1) or TRAINEETRN9021V1`
-- **Encryption Time:** `1.623 ms`
-- **Nonce (12-byte IV):** `lBnX09kFnJEYV30s`
-- **Payload Ciphertext (AES-256-GCM):** `PpYh5Xdug8Y40ZmdxMussouwzxklNY5nYRnNnuRh/9YyeeOaTV44QOJgqtnlFJoA...`
+- **Encryption Time:** `39.298 ms`
+- **Nonce (12-byte IV):** `o0Zr6gt/GIiCPB2E`
+- **Payload Ciphertext (AES-256-GCM):** `drQEIf7/D9Nd7lDvhlDitygMA1lLHCx1LCpdJmCWdsF87JQCowDkKc+b3wWRLDOP...`
 
 ## 4. Authorized Decryption Test Results (TC-CRY-02)
 | Authorized Persona | Clause Satisfied | Decryption Latency | GCM Integrity Tag | Plaintext Verified |
 |---|---|---|---|---|
-| Dr. Joey Mallari (Administrator) | `ROLEADMINV1` | `0.062 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
-| Elena Santos (Finance) | `ROLEFINANCEV1` | `0.037 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
-| Marcus Reyes (AM - San Miguel Assigned) | `ROLEACCTMGRV1` | `0.252 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
-| Jordan Ramos (Lead Trainer) | `ROLETRAINERV1` | `0.101 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
-| Juan Dela Cruz (Trainee Record Owner) | `TRAINEETRN9021V1` | `0.081 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
+| Dr. Joey Mallari (Administrator) | `ROLEADMINV1` | `9.822 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
+| Elena Santos (Finance) | `ROLEFINANCEV1` | `6.472 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
+| Marcus Reyes (AM - San Miguel Assigned) | `ROLEACCTMGRV1` | `9.384 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
+| Jordan Ramos (Lead Trainer) | `ROLETRAINERV1` | `7.531 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
+| Juan Dela Cruz (Trainee Record Owner) | `TRAINEETRN9021V1` | `7.838 ms` | **VERIFIED (Valid MAC)** | **PASS (96.5%)** |
 
 ## 5. Unauthorized Decryption Denials (TC-CRY-03)
 | Unauthorized Persona | Reason for Denial | Policy Evaluation | Plaintext Leakage | Security Result |
