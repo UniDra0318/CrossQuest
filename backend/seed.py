@@ -116,11 +116,12 @@ def seed_database():
             hashlib.sha256(b"RECO-4444").hexdigest(),
         ]
 
-        # Admins
+        # 1. Administrators (Exactly 2 accounts per Chapter III Table 3 & OI-29: Joey Mallari & Len Mallari)
         u_admin1 = User(
-            email="admin@crossworks.ph",
-            username="admin_sarah",
-            full_name="Dr. Sarah Jenkins",
+            email="joey.mallari@xworks.ph",
+            username="joey_mallari",
+            full_name="Joselito 'Joey' Mallari Jr.",
+            job_title="Principal Consultant & Lead Administrator",
             hashed_password=default_pwd,
             role="admin",
             clearance_level=3,
@@ -131,83 +132,76 @@ def seed_database():
             mfa_recovery_codes=admin_recovery_codes
         )
         u_admin2 = User(
-            email="admin2@crossworks.ph",
-            username="admin_compliance",
-            full_name="Dr. Roland Vance",
+            email="len.mallari@xworks.ph",
+            username="len_mallari",
+            full_name="Len Mallari",
+            job_title="Compliance Administrator & Peer Reviewer",
             hashed_password=default_pwd,
             role="admin",
             clearance_level=3,
             assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
-            is_superuser=True
+            is_superuser=True,
+            mfa_enabled=True,
+            mfa_secret="JBSWY3DPEHPK3PXP",
+            mfa_recovery_codes=admin_recovery_codes
         )
 
-        # Account Managers
+        # 2. Account Managers (Exactly 3 accounts per Chapter III Table 3 & OI-29: Erika Bana, Sharon De Vera, Brian Mendoza)
         u_am1 = User(
-            email="marcus.reyes@crossworks.ph",
-            username="am_marcus",
-            full_name="Marcus Reyes",
+            email="erika.bana@crossworks.ph",
+            username="am_erika",
+            full_name="Erika Bana",
+            job_title="Account Manager: Enterprise Conglomerates",
             hashed_password=default_pwd,
             role="account_manager",
             clearance_level=2,
             assigned_client_accounts=["CORP_ALPHA", "BANK_DELTA"]
         )
         u_am2 = User(
-            email="andrea.salazar@crossworks.ph",
-            username="am_andrea",
-            full_name="Andrea Salazar",
+            email="sharon.devera@crossworks.ph",
+            username="am_sharon",
+            full_name="Sharon De Vera",
+            job_title="Account Manager: Strategic Portfolios",
             hashed_password=default_pwd,
             role="account_manager",
             clearance_level=2,
             assigned_client_accounts=["FINTECH_BETA", "RETAIL_GAMMA"]
         )
+        u_am3 = User(
+            email="brian.mendoza@crossworks.ph",
+            username="am_brian",
+            full_name="Brian Mendoza",
+            job_title="Account Manager: Tech & Telecom",
+            hashed_password=default_pwd,
+            role="account_manager",
+            clearance_level=2,
+            assigned_client_accounts=["TELCO_EPSILON"]
+        )
 
-        # Finance & Compliance
+        # 3. Finance (Exactly 1 account per Chapter III Table 3: Elena Santos)
         u_fin1 = User(
             email="elena.santos@crossworks.ph",
             username="fin_elena",
             full_name="Elena Santos",
+            job_title="Finance & Billing Specialist",
             hashed_password=default_pwd,
             role="finance",
             clearance_level=2,
-            assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"]
-        )
-        u_fin2 = User(
-            email="victor.cruz@crossworks.ph",
-            username="fin_victor",
-            full_name="Victor Cruz",
-            hashed_password=default_pwd,
-            role="finance",
-            clearance_level=2,
-            assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA"]
+            assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"],
+            mfa_enabled=True,
+            mfa_secret="JBSWY3DPEHPK3PXP",
+            mfa_recovery_codes=admin_recovery_codes
         )
 
-        # Trainers
+        # 4. Lead Trainer (Exactly 1 account per Chapter III Table 3: Jordan Ramos)
         u_trainer1 = User(
-            email="david.lim@crossworks.ph",
-            username="trainer_david",
-            full_name="David Lim",
-            job_title="Lead Trainer: Agile PME & Leadership",
+            email="jordan.ramos@crossworks.ph",
+            username="trainer_jordan",
+            full_name="Jordan Ramos",
+            job_title="Lead Technical Instructor: Zero-Trust & Cloud",
             hashed_password=default_pwd,
             role="trainer",
-            assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA"]
-        )
-        u_trainer2 = User(
-            email="maria.hernandez@crossworks.ph",
-            username="trainer_maria",
-            full_name="Maria Hernandez",
-            job_title="Senior Cloud Trainer: CONNECT & Infra",
-            hashed_password=default_pwd,
-            role="trainer",
-            assigned_client_accounts=["RETAIL_GAMMA", "BANK_DELTA"]
-        )
-        u_trainer3 = User(
-            email="alex.santos@crossworks.ph",
-            username="trainer_alex",
-            full_name="Engr. Alex Santos",
-            job_title="Enterprise Data Trainer: Coaching",
-            hashed_password=default_pwd,
-            role="trainer",
-            assigned_client_accounts=["TELCO_EPSILON"]
+            assigned_client_accounts=["CORP_ALPHA", "FINTECH_BETA", "RETAIL_GAMMA", "BANK_DELTA", "TELCO_EPSILON"]
         )
 
         # Trainees (Login Accounts)
@@ -261,8 +255,8 @@ def seed_database():
         )
 
         all_users = [
-            u_admin1, u_admin2, u_am1, u_am2, u_fin1, u_fin2,
-            u_trainer1, u_trainer2, u_trainer3,
+            u_admin1, u_admin2, u_am1, u_am2, u_am3, u_fin1,
+            u_trainer1,
             u_trn_juan, u_trn_beatrice, u_trn_maria, u_trn_liam, u_trn_gabriel, u_trn_chloe
         ]
         db.add_all(all_users)
@@ -270,12 +264,13 @@ def seed_database():
         for u in all_users:
             db.refresh(u)
 
-        # Account Manager Assignments
+        # Account Manager Assignments (Table 3, OI-29)
         am_assign1 = AccountManagerAssignment(user_id=u_am1.id, company_id=c_alpha.id, assigned_by=u_admin1.id)
         am_assign2 = AccountManagerAssignment(user_id=u_am1.id, company_id=c_delta.id, assigned_by=u_admin1.id)
         am_assign3 = AccountManagerAssignment(user_id=u_am2.id, company_id=c_beta.id, assigned_by=u_admin1.id)
         am_assign4 = AccountManagerAssignment(user_id=u_am2.id, company_id=c_gamma.id, assigned_by=u_admin1.id)
-        db.add_all([am_assign1, am_assign2, am_assign3, am_assign4])
+        am_assign5 = AccountManagerAssignment(user_id=u_am3.id, company_id=c_epsilon.id, assigned_by=u_admin1.id)
+        db.add_all([am_assign1, am_assign2, am_assign3, am_assign4, am_assign5])
         db.commit()
 
         # 3. Seed Certification Types (FR-18: 36 months validity)
@@ -483,7 +478,7 @@ def seed_database():
             delivery_type="Dedicated",
             trainer_signed_off=True,
             trainer_sign_off_at=datetime(2026, 9, 20, 18, 0),
-            trainer_sign_off_user_id=u_trainer2.id,
+            trainer_sign_off_user_id=u_trainer1.id,
             trainer_sign_off_notes="Maya FinTech cohort successfully certified on Agile Governance."
         )
         sess3 = TrainingSession(
@@ -495,7 +490,7 @@ def seed_database():
             delivery_type="Dedicated",
             trainer_signed_off=True,
             trainer_sign_off_at=datetime(2026, 10, 15, 17, 0),
-            trainer_sign_off_user_id=u_trainer3.id,
+            trainer_sign_off_user_id=u_trainer1.id,
             trainer_sign_off_notes="Ayala Retail cohort demonstrated robust multi-tenant defense."
         )
         sess4 = TrainingSession(
@@ -520,13 +515,13 @@ def seed_database():
         for s in all_sessions:
             db.refresh(s)
 
-        # Trainer Assignments
+        # Trainer Assignments (Jordan Ramos as designated Lead Trainer)
         trainer_assigns = [
             TrainerAssignment(user_id=u_trainer1.id, session_id=sess1.id, valid_from=datetime(2026, 8, 1)),
-            TrainerAssignment(user_id=u_trainer2.id, session_id=sess2.id, valid_from=datetime(2026, 8, 15)),
-            TrainerAssignment(user_id=u_trainer3.id, session_id=sess3.id, valid_from=datetime(2026, 9, 20)),
+            TrainerAssignment(user_id=u_trainer1.id, session_id=sess2.id, valid_from=datetime(2026, 8, 15)),
+            TrainerAssignment(user_id=u_trainer1.id, session_id=sess3.id, valid_from=datetime(2026, 9, 20)),
             TrainerAssignment(user_id=u_trainer1.id, session_id=sess4.id, valid_from=datetime(2026, 10, 20)),
-            TrainerAssignment(user_id=u_trainer2.id, session_id=sess5.id, valid_from=datetime(2026, 11, 15))
+            TrainerAssignment(user_id=u_trainer1.id, session_id=sess5.id, valid_from=datetime(2026, 11, 15))
         ]
         db.add_all(trainer_assigns)
         db.commit()
@@ -803,7 +798,7 @@ def seed_database():
             title="Multi-Tenant Cryptographic Isolation Challenge",
             version_no=1,
             is_closed=False,
-            created_by_user_id=u_trainer3.id
+            created_by_user_id=u_trainer1.id
         )
         db.add_all([quiz1, quiz2, quiz3])
         db.commit()
@@ -885,8 +880,8 @@ def seed_database():
 
         # 12. Teams
         team1 = Team(session_id=sess1.id, team_name="Security Guardians", created_by_user_id=u_trainer1.id)
-        team2 = Team(session_id=sess2.id, team_name="FinTech Defiance", created_by_user_id=u_trainer2.id)
-        team3 = Team(session_id=sess3.id, team_name="Cloud Sentinels", created_by_user_id=u_trainer3.id)
+        team2 = Team(session_id=sess2.id, team_name="FinTech Defiance", created_by_user_id=u_trainer1.id)
+        team3 = Team(session_id=sess3.id, team_name="Cloud Sentinels", created_by_user_id=u_trainer1.id)
         db.add_all([team1, team2, team3])
         db.commit()
         for tm in [team1, team2, team3]:
@@ -1029,13 +1024,13 @@ def seed_database():
                 metadata_info={"window_minutes": 45, "report_burst_count": 6}
             ),
             AnomalyAlert(
-                subject_user_id=u_trainer2.id,
+                subject_user_id=u_trainer1.id,
                 rule_code="R4_RECORD_EDIT",
                 severity_base="LOW",
                 severity_final="MEDIUM",
                 after_hours_tag=True,
                 status="AWAITING_UNINVOLVED_ADMIN",
-                description="Trainer David Lim modified score attributes after hours. Initial review recused due to trainer affiliation.",
+                description="Trainer Jordan Ramos modified score attributes after hours. Initial review recused due to trainer affiliation.",
                 event_count=1,
                 tags=["after_hours", "RECUSAL_FILED"],
                 metadata_info={"involved_admin_ids": [u_admin1.id]},

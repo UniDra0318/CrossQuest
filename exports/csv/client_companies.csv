@@ -1,0 +1,144 @@
+id,code,name,client_type,industry,created_at
+5701f80d-ffdb-4ec5-96a1-b4906ae52ac7,AOS,Acen Operations Services Inc.,ENTERPRISE,Energy & Utilities,2026-11-08 00:38:13.859476
+27ff3c71-0cb4-48e3-943a-b12de7ba8402,AOS_2,Acen Operations Services Inc.,ENTERPRISE,Energy & Utilities,2026-11-08 00:38:13.860332
+4b8314ea-ef35-40a4-91a3-208cf3a3cb28,AOS_3,Acen Operations Services Inc.,ENTERPRISE,Energy & Utilities,2026-11-08 00:38:13.860881
+11d34d93-de5e-4263-82cb-3615c5ced56e,AMIHAN_SOLUTI,Amihan Solutions (OPC),SME,Technology & Software,2026-11-08 00:38:13.861387
+3ab5c2fc-9ff8-4317-880d-5a9f0d725b87,AMIHAN_SOLUTI_2,Amihan Solutions (OPC),SME,Technology & Software,2026-11-08 00:38:13.861907
+0f8217e9-f436-40d1-9add-f95f0e6fa8ea,ANALOG_DEVICE_INC,Analog Devices Inc,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.862328
+3d015085-0901-43ca-aa38-15183801c943,ADP4,Analog Devices Inc (SI 0239) PO# 47398712,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.862764
+c7a140ab-f713-4253-8a6d-0f421103c26a,ANGELI_ALCANT,Angelito Alcantara,SME,Corporate Enterprise,2026-11-08 00:38:13.863166
+468faec0-a8ae-474b-867e-f4e114f65ef1,ANGELI_ALCANT_2,Angelito Alcantara,SME,Corporate Enterprise,2026-11-08 00:38:13.863550
+5f1342eb-df63-4d7b-aa65-67bddd5bbd01,ANGELI_ALCANT_3,Angelito Alcantara,SME,Corporate Enterprise,2026-11-08 00:38:13.864007
+a53b4507-3b19-4138-bdbe-8688ce79cf7b,AYALA_LAND_INC,Ayala Land Inc.,ENTERPRISE,Real Estate & Construction,2026-11-08 00:38:13.864425
+a4ebb8cb-a159-423e-a9ca-3361fad362b1,AYALA_LAND_INC_2,Ayala Land Inc.,ENTERPRISE,Real Estate & Construction,2026-11-08 00:38:13.864875
+0aab717d-fe08-4b21-8e3d-ad00dd6cc56f,BIBSP,Boehringer Ingelheim Business Services Philippines Inc.,ENTERPRISE,Healthcare & Pharmaceuticals,2026-11-08 00:38:13.865322
+706378c3-6d51-460c-9f41-7ace7165bdf0,BIBSP_2,Boehringer Ingelheim Business Services Philippines Inc.,ENTERPRISE,Healthcare & Pharmaceuticals,2026-11-08 00:38:13.865707
+78374f5d-3572-4ab2-93b0-321c6606d86a,DERIC_CENTON_MACALI,Deric Centones Macalinao,SME,Corporate Enterprise,2026-11-08 00:38:13.866140
+37327f6e-88a0-455a-abca-fd2354792c6e,DERIC_CENTON_MACALI_2,Deric Centones Macalinao,SME,Corporate Enterprise,2026-11-08 00:38:13.866665
+a4db021f-1322-4c36-b596-68b1413c9256,DDH,"Diliman Doctors Hospital, Inc.",ENTERPRISE,Healthcare & Pharmaceuticals,2026-11-08 00:38:13.867076
+7431de8d-c3b7-4513-a7cd-c95854b44504,DDH_2,"Diliman Doctors Hospital, Inc.",ENTERPRISE,Healthcare & Pharmaceuticals,2026-11-08 00:38:13.867457
+af464ea2-86b9-4ff4-a396-37d79f542f72,EWALIC,East West Ageas Life Insurance Corporation,ENTERPRISE,Financial Services & Insurance,2026-11-08 00:38:13.867832
+6463e864-1854-4dfe-872c-5b7c446bdcc1,EWALIC_2,East West Ageas Life Insurance Corporation,ENTERPRISE,Financial Services & Insurance,2026-11-08 00:38:13.868161
+f5662aa5-67ca-4ea4-ac8e-490b509c9a8e,EMS,"Expedise Management Solutions, Inc.",ENTERPRISE,Technology & Software,2026-11-08 00:38:13.868520
+e310da1a-2a24-4084-b047-eda51f029a69,EMS_2,"Expedise Management Solutions, Inc.",ENTERPRISE,Technology & Software,2026-11-08 00:38:13.868863
+35615d94-ad30-4571-8707-5b8fc259178f,FFHT,"First Flow HVAC Technologies, Inc.",ENTERPRISE,Energy & Utilities,2026-11-08 00:38:13.869187
+5062faed-f0c6-4f06-96b3-ccfa6059ab57,FFHT_2,"First Flow HVAC Technologies, Inc.",ENTERPRISE,Energy & Utilities,2026-11-08 00:38:13.869505
+8a552b7b-1c3f-44fd-b671-68cbaa14bb87,GLADYS_RUIZ,Gladys Ruiz,SME,Corporate Enterprise,2026-11-08 00:38:13.869852
+b88b1032-35b0-41e5-b000-d3f807ebff7d,GLADYS_RUIZ_2,Gladys Ruiz,SME,Corporate Enterprise,2026-11-08 00:38:13.870188
+b8e33016-4bac-45ca-ae4a-50e7b21a65a1,IPROY_SERVI,IPRoyal Services FZE LLC,SME,Technology & Software,2026-11-08 00:38:13.870649
+7e57adab-3fe3-42bf-8ade-69e3781bc3e1,IPROY_SERVI_2,IPRoyal Services FZE LLC,SME,Technology & Software,2026-11-08 00:38:13.870988
+f13a7f08-0847-4d66-b1a1-2a154725bcc3,IGBDSC,Immensity Group Business Development Services Corporation,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.871319
+a5d962ee-9914-4edd-a1ff-e60ad4482c33,IGBDSC_2,Immensity Group Business Development Services Corporation,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.871903
+b1752e20-a5fb-4e46-a7e7-6e64ef285fcc,ISLA_LPG_CORPOR,Isla LPG Corporation,ENTERPRISE,Energy & Utilities,2026-11-08 00:38:13.872292
+5cdd1fb1-c2d4-4728-8e5f-db9d7ad2f7d6,ISLA_LPG_CORPOR_2,Isla LPG Corporation (SI # 0213 to 0215),ENTERPRISE,Energy & Utilities,2026-11-08 00:38:13.872721
+116c5514-5eae-4d8f-837d-c592d6cc2f9b,JOCELY_B_CAPIST,Jocelyn B. Capistrano,SME,Corporate Enterprise,2026-11-08 00:38:13.873120
+02c30291-e699-4da9-ae35-4822c34e8206,JOCELY_B_CAPIST_2,Jocelyn B. Capistrano,SME,Corporate Enterprise,2026-11-08 00:38:13.873704
+52f5b59e-a50b-4bc5-87c1-1327e92ffecc,JOCELY_B_CAPIST_3,Jocelyn B. Capistrano,SME,Corporate Enterprise,2026-11-08 00:38:13.874313
+e6b96856-951c-4998-aed8-9d3134abf743,KIMBER_ANN_ESTEBA,Kimberly Ann Esteban,SME,Corporate Enterprise,2026-11-08 00:38:13.874733
+d69177a9-fce2-4fe8-8d5e-4b3e2f8c37cb,KIMBER_ANN_ESTEBA_2,Kimberly Ann Esteban,SME,Corporate Enterprise,2026-11-08 00:38:13.875143
+cd8d7dad-9c26-48f3-aa3d-bc31fef92ac5,KRISTI_CASTIL,Kristine Castillo,SME,Corporate Enterprise,2026-11-08 00:38:13.875599
+81379ed5-67dc-4d83-92c2-7695fd5de8c4,KRISTI_CASTIL_2,Kristine Castillo,SME,Corporate Enterprise,2026-11-08 00:38:13.876001
+4205cd77-f176-4021-9953-b887eb18c695,LAARNI_UYCHUT,Laarni Uychutin,SME,Corporate Enterprise,2026-11-08 00:38:13.876371
+ad932810-542a-4293-b949-e8340abcbffb,LAARNI_UYCHUT_2,Laarni Uychutin,SME,Corporate Enterprise,2026-11-08 00:38:13.876747
+fe9f7e83-6ab8-4765-8daa-5001a3cfcbbe,MJCS,Ma. Janet C. Sibayan,SME,Corporate Enterprise,2026-11-08 00:38:13.877095
+9a1b374e-6809-4c8e-bb3d-506283d500fc,MJCS_2,Ma. Janet C. Sibayan (SI 0238),SME,Corporate Enterprise,2026-11-08 00:38:13.877428
+dd85878f-2d8b-47f3-a108-cd9731d34d33,MKLT,Ma. Kristina Luisa Tayag,SME,Corporate Enterprise,2026-11-08 00:38:13.877787
+dd13bd12-abb8-4ee5-a405-1fd069e7a4a5,MKLT_2,Ma. Kristina Luisa Tayag,SME,Corporate Enterprise,2026-11-08 00:38:13.878164
+bcc3d1a9-b0de-4f05-a0bf-68315b4425c8,MA_NONICA_PORMIL,Ma. Nonica Pormilda,SME,Corporate Enterprise,2026-11-08 00:38:13.878560
+3ef6fcf3-e20a-4831-8948-e953b0f923a2,MA_NONICA_PORMIL_2,Ma. Nonica Pormilda,SME,Corporate Enterprise,2026-11-08 00:38:13.878902
+57dcaecd-5cc8-48e1-9e8c-e9b53cd3caa8,MIKE_ANGELO_VILLAN,Mike Angelo Villanueva,SME,Corporate Enterprise,2026-11-08 00:38:13.879231
+53d04f5c-d619-4c62-be99-6707650abb00,MIKE_ANGELO_VILLAN_2,Mike Angelo Villanueva,SME,Corporate Enterprise,2026-11-08 00:38:13.879551
+bede1a13-1717-42ea-8737-c4b7ada815e8,MIKKA_BARLIS,Mikka Barlis,SME,Corporate Enterprise,2026-11-08 00:38:13.879960
+abf895c4-3aa8-4ad9-8398-14b798f4b3b0,MIKKA_BARLIS_2,Mikka Barlis (SI 0237),SME,Corporate Enterprise,2026-11-08 00:38:13.880349
+7eeee4ec-7495-477c-ac86-cf16f5c638b6,MOS,"Mploy Outsourcing Solutions, Inc.",ENTERPRISE,Technology & Software,2026-11-08 00:38:13.880663
+0fe578b5-334a-4a06-b82e-9a3b03bc945c,MOS_2,"Mploy Outsourcing Solutions, Inc.",ENTERPRISE,Technology & Software,2026-11-08 00:38:13.880974
+c8e74574-809f-4d78-bad1-ccd4cdccd4ee,MYKA_ELLA_BAUTIS,Myka Ella Bautista,SME,Corporate Enterprise,2026-11-08 00:38:13.881302
+c8320598-d163-44b5-840a-0a0f45196647,MYKA_ELLA_BAUTIS_2,Myka Ella Bautista,SME,Corporate Enterprise,2026-11-08 00:38:13.881658
+18850a65-759a-4424-b45c-f4f7e5d13447,NETWOR_SOLUTI_CORPOR,Networklab Solutions Corporation,ENTERPRISE,Technology & Software,2026-11-08 00:38:13.882009
+ef0a97f8-56bd-491d-8b0b-c848c21db84c,NETWOR_SOLUTI_CORPOR_2,Networklab Solutions Corporation,ENTERPRISE,Technology & Software,2026-11-08 00:38:13.882400
+1ec34e06-31ff-4902-9191-914fe97f05c0,NETWOR_SOLUTI_CORPOR_3,Networklab Solutions Corporation,ENTERPRISE,Technology & Software,2026-11-08 00:38:13.882756
+c90f29e8-e06d-47cd-b353-38dc47c245b3,NSE,Norden Subic Entrepreneurs Inc.,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.883111
+20bd8519-f5a0-4efd-b14f-62c458d27fb0,NSE_2,Norden Subic Entrepreneurs Inc.,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.883443
+164b405b-4721-405c-888c-7978aa906d15,OCEANA_PHILS_INC,"OceanaGold Phils., Inc.",ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.883756
+611ff25a-10f6-4fa4-9a81-5c5572f8e51b,OCEANA_PHILS_INC_2,"OceanaGold Phils., Inc.",ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.884063
+3272f852-7de9-4470-864d-c1e75f5cdefa,PHILIP_SAVING_BANK,Philippine Savings Bank,SME,Financial Services & Insurance,2026-11-08 00:38:13.884380
+10502be5-6baf-48e6-8e47-8650c89db743,PHILIP_SAVING_BANK_2,Philippine Savings Bank,SME,Financial Services & Insurance,2026-11-08 00:38:13.884686
+bf10806b-401d-417a-bffa-15ee1fc507a8,ROP,Red Oak Properties Inc.,ENTERPRISE,Real Estate & Construction,2026-11-08 00:38:13.884993
+6b8e67ce-7aa9-4f00-87ec-2864ea83035a,ROP_2,Red Oak Properties Inc.,ENTERPRISE,Real Estate & Construction,2026-11-08 00:38:13.885315
+6c32c058-6f26-4fa2-9644-cf0882a053ba,ROP_3,Red Oak Properties Inc.,ENTERPRISE,Real Estate & Construction,2026-11-08 00:38:13.885671
+7952d76f-ac33-4d37-95be-194b349ef406,ROP_4,"Red Oak Properties, Inc.",ENTERPRISE,Real Estate & Construction,2026-11-08 00:38:13.886022
+83f97a9e-af0e-43e5-be9d-4192975b8d29,ROP_5,"Red Oak Properties, Inc.",ENTERPRISE,Real Estate & Construction,2026-11-08 00:38:13.886367
+ab1f97d0-ff44-4ab8-ac3f-ef73e3004df7,RHYAN_DEPANT,Rhyan Depante,SME,Corporate Enterprise,2026-11-08 00:38:13.886678
+59cb4831-d46f-4018-8c1d-b1cf7b74f4ce,RHYAN_DEPANT_2,Rhyan Depante,SME,Corporate Enterprise,2026-11-08 00:38:13.886984
+7765e67d-6e13-4f51-8c5f-d0f84a3e7328,RON_ROBERT_DESPI,Ron Robert Despi,SME,Corporate Enterprise,2026-11-08 00:38:13.887300
+02e03c82-0589-4e83-8fc4-f3594c819905,RON_ROBERT_DESPI_2,Ron Robert Despi,SME,Corporate Enterprise,2026-11-08 00:38:13.887611
+984ce4d0-fd82-436e-b4fa-4f7dadab8ff0,SECURI_BANK_CORPOR,Security Bank Corporation,ENTERPRISE,Financial Services & Insurance,2026-11-08 00:38:13.887916
+13b4640a-d3b8-4404-b472-40e0f6b6d98d,SECURI_BANK_CORPOR_2,Security Bank Corporation,ENTERPRISE,Financial Services & Insurance,2026-11-08 00:38:13.888221
+5d03d003-2bea-4c84-a3ee-df9a2c94d653,SERVIE_PHILIP_INC,Servier Philippines Inc.,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.888542
+3fd1d8e7-762b-4e9e-9de9-14e70d6a0f36,SPP0,Servier Philippines Inc. (SI 0249) PO # 0000052497,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.888891
+b01c7976-da8e-4b84-bd1d-9c7223dda3fa,SYDENH_LABORA_INC,Sydenham Laboratories Inc.,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.889206
+92eaea6d-07cf-4d7f-9355-6c6ad65d6d93,SYDENH_LABORA_INC_2,Sydenham Laboratories Inc.,ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.889575
+cae4b2fd-561c-4789-bce9-e3ba12efa8a7,UNIVER_ROBINA_CORPOR,Universal Robina Corporation,ENTERPRISE,Consumer Goods & Retail,2026-11-08 00:38:13.889944
+5aa8a24d-ef3a-4c9c-b022-c4080f915f85,UNIVER_ROBINA_CORPOR_2,Universal Robina Corporation,ENTERPRISE,Consumer Goods & Retail,2026-11-08 00:38:13.890318
+5e371032-6c07-4168-a895-381df8fe46b8,UNIVER_ROBINA_CORPOR_3,Universal Robina Corporation,ENTERPRISE,Consumer Goods & Retail,2026-11-08 00:38:13.890686
+d26b0c94-f970-44a0-b987-cbc4a141a1f2,VHL,Vertiv (Singapore) Holdings PTE LTD-ROHQ,ENTERPRISE,Technology & Software,2026-11-08 00:38:13.891035
+68322e0a-c1d9-44de-a736-0c35e4037e7f,VHL_2,Vertiv (Singapore) Holdings PTE LTD-ROHQ,ENTERPRISE,Technology & Software,2026-11-08 00:38:13.891396
+c2b47f3d-8360-447b-84c7-64cae5341046,WCD,"Wee Community Developers, Inc.",ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.891750
+dc24540c-f4dd-4b50-a864-b060176e9115,WCD_2,"Wee Community Developers, Inc.",ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.892101
+85809737-2613-423d-9e5b-a8cf79348570,XSDS,"Xinyx Semiconductor Design Services, Inc.",ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.892440
+0e997c91-8e97-46ff-b613-dd19b7e19fb9,XSDS_2,"Xinyx Semiconductor Design Services, Inc. (SI 0228)",ENTERPRISE,Corporate Enterprise,2026-11-08 00:38:13.892771
+comp-gam-a,CORP_GAM_A,Gamification Corp A,COMPANY,,2026-11-08 00:49:01.428192
+comp-gam-b,CORP_GAM_B,Gamification Corp B,COMPANY,,2026-11-08 00:49:01.428199
+d03f1037-e5fe-4a61-9eb7-097cfee5ee98,ALPHA_CORP,Alpha Corp,COMPANY,,2026-11-08 01:40:25.085208
+f453352e-334a-4821-a0dc-4026d5e63424,CORP_ALPHA,Alpha Corp,COMPANY,,2026-11-08 08:17:41.215351
+3da800b0-0ccc-424c-97c5-0a849ff13b20,CORP_BETA,Beta Industries,COMPANY,,2026-11-08 08:17:41.215388
+058746c7-6a5a-4033-b314-82cdf3fd3c69,CORP_RPT_ALPHA,Report Alpha Corp,COMPANY,,2026-11-09 02:42:13.848160
+50bb7d25-2045-48e3-8fd1-756c7439fd44,CORP_RPT_BETA,Report Beta Corp,COMPANY,,2026-11-09 02:42:13.848172
+055ee573-adbb-4c19-9eb1-b06c3e11e3ed,CORP_VER_ALPHA,Versioned Corp Alpha,COMPANY,,2026-11-09 02:47:14.848932
+456ceada-02ac-421d-893a-259301bf6198,COMP_ALPHA,Alpha Holdings,COMPANY,,2026-11-09 02:47:16.278203
+6819456c-651f-4455-ad80-6fa06d7ed746,COMP_OMEGA,Omega Corp,COMPANY,,2026-11-09 02:47:16.278217
+c8b8c0f3-c2c3-46e8-afc7-1b73ab862134,CORP_1C650,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 02:47:16.415231
+08b7e9df-f008-4271-89a3-d60566633734,IND_33F7D,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 02:47:16.428783
+comp-cert-1,CORP_CERT_CO,Cert Corporation,COMPANY,,2026-11-09 02:47:16.913667
+ac8bc6e5-4f0d-4c43-83c2-eb976829d87f,CORP_PILOT_A,CORP_PILOT_A,COMPANY,,2026-11-09 02:47:25.657854
+bab2f6b6-0076-4291-965a-1b4fdd2572f7,CORP_PILOT_B,CORP_PILOT_B,COMPANY,,2026-11-09 02:47:25.691953
+35c31770-e366-4a15-8708-00c33d791e85,CORP_92858,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 03:30:58.120111
+f008143a-f002-4fcd-87d4-cefeac7827d0,IND_9A2A7,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 03:30:58.134397
+bd9a2322-b96e-4cd3-89b1-bb92863c6035,CORP_1F554,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 03:48:51.328447
+54671059-5263-4881-979a-ab65ed608c87,IND_11EB6,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 03:48:51.340605
+420a431d-6406-4c4c-87a1-66f36ddc2a78,CORP_0C82E,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 03:49:41.069268
+4406bf4f-cce8-4e02-8138-060b2dca51ce,IND_61ECE,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 03:49:41.083616
+33a2c1ee-e7b9-4b41-a24f-c07e2bddda72,CORP_44CF1,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 04:04:46.987991
+34da2006-370e-48d3-aea1-25d517e0021e,IND_BEB1B,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 04:04:47.004998
+dd98c904-66c1-4e56-8e58-df73d678102b,CORP_3073E,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 04:19:05.399617
+af0759bf-9758-41a0-935a-f4b340d8cd40,IND_294CA,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 04:19:05.412722
+353576c5-a0d8-45bc-a24d-59a06b4c6697,CORP_2DDE9,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 04:19:53.332147
+4b38bc3f-1cda-4af3-a34e-450098e3198a,IND_AC8F7,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 04:19:53.351990
+6cf1b9fd-1036-4aff-aa0d-65f5bf18157c,CORP_ADC4F,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 04:27:25.014499
+3d65fa01-533f-48fd-9d1f-129728da704f,IND_6B8E1,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 04:27:25.028928
+f2971884-c3b5-4263-969b-ffa3a78acd99,CORP_17870,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 04:31:47.386114
+abe73ba0-8fdc-491c-815c-a741565b296a,IND_67BBB,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 04:31:47.402980
+a6529b86-0c1d-47d8-b1d7-ccbff736a334,CORP_8684D,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 04:57:25.557835
+b0db7d9c-7167-4fd3-acaa-351978a36ce3,IND_49324,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 04:57:25.575813
+20229a4a-9554-4f3d-bd17-18eba7886d1c,CORP_12979,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 05:04:52.119066
+f2522e71-90a9-418c-a577-a9352a146e5b,IND_83E6A,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 05:04:52.134544
+f638601d-169a-45c3-9214-62af6d255320,CORP_8FEED,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 05:25:53.736291
+b4f3b241-a48a-4884-85d1-0c6ce278e538,IND_FED1F,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 05:25:53.751247
+7b7ac21f-dffd-4582-9036-72eadd2e4480,CORP_6FA56,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 05:32:37.540428
+3a15b80d-f211-4896-b459-95f578918fe5,IND_1B719,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 05:32:37.568806
+2f21df90-8649-425a-beda-2be22bdc85d2,CORP_FB2CC,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 05:50:05.306101
+acd64184-5479-4b6e-a2a4-8c88ca12f315,IND_7ACF9,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 05:50:05.336742
+6511f128-6a5a-401c-b185-85bdeab861af,CORP_CAA54,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 22:22:35.268535
+cccbc861-5ea2-40f9-9ad9-fb5029a8ed0c,IND_11546,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 22:22:35.280577
+50b2f656-334b-4c83-acdf-e0fbcd2f90be,CORP_D5DC0,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 22:50:02.780438
+92c26ab4-80f9-44f7-a6ab-151ede17930d,IND_46947,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 22:50:02.793769
+07d5761a-d686-45f3-b391-d7c24e61ef5d,CORP_A2934,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 22:50:55.713844
+1103b9fb-2d90-467a-b6da-4f24d7a31f4e,IND_82439,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 22:50:55.726250
+8bd58088-ceff-4068-a63f-100c442a29ee,CORP_135A8,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 23:39:49.339215
+2a7d1628-e502-4010-accf-4364c37f3fee,IND_F35D1,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 23:39:49.356777
+a96bc52f-21af-46be-88e8-edfd616a30b6,CORP_6807B,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-09 23:40:42.511556
+aaae1442-00a6-4681-8453-57d2d6abf8c1,IND_06812,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-09 23:40:42.523778
+f192180d-33b2-42a7-a7be-1667d21fb552,CORP_8E0E5,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-10 00:36:54.484998
+e907b4f2-5e8a-4f0b-8cf7-c1fccbc7af34,IND_39D9A,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-10 00:36:54.515055
+6f2b0050-4129-4984-8549-41af92e06492,CORP_E96CE,Acme Cyber Systems Inc.,COMPANY,Cybersecurity,2026-11-10 00:57:56.015409
+11db2e53-1fa3-4b31-ad58-164ab99f4cbe,IND_390B6,Maria Santos (Independent Consultant),INDIVIDUAL,Consulting,2026-11-10 00:57:56.036865

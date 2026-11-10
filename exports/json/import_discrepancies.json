@@ -1,0 +1,123 @@
+[
+  {
+    "id": "4d9fa150-7c82-4e75-9cfc-13b2dbab776d",
+    "batch_id": "4d5d9fb4-8f40-4595-ae79-fe34021ac2cb",
+    "source_row_no": 1,
+    "issue_type": "MISSING_TRAINEE_CODE",
+    "field_name": "trainee_code",
+    "resolution": "CORRECT",
+    "resolution_reason": "Administrative data correction on pilot record.",
+    "resolved_by_user_id": "a6a9ceba-2656-44f2-89d6-18bb6bffd212",
+    "resolved_at": "2026-11-10 00:58:05.352807"
+  },
+  {
+    "id": "d6ba2bff-f209-4e69-b031-d9f0b53f5178",
+    "batch_id": "4d5d9fb4-8f40-4595-ae79-fe34021ac2cb",
+    "source_row_no": 2,
+    "issue_type": "MISSING_COURSE_NAME",
+    "field_name": "course_name",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "16f75f5c-43e3-46a8-b24b-ec141efccb67",
+    "batch_id": "4d5d9fb4-8f40-4595-ae79-fe34021ac2cb",
+    "source_row_no": 3,
+    "issue_type": "INVALID_SCORE_FORMAT",
+    "field_name": "score",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "76d61d23-3714-45b1-b3f6-88383ffab027",
+    "batch_id": "ae701aa2-5b1b-43e2-8768-a8063e0bd4d6",
+    "source_row_no": 1,
+    "issue_type": "MISSING_TRAINEE_CODE",
+    "field_name": "trainee_code",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "6466daea-233a-40fb-997b-e9125bcc9c0e",
+    "batch_id": "ae701aa2-5b1b-43e2-8768-a8063e0bd4d6",
+    "source_row_no": 1,
+    "issue_type": "MISSING_COURSE_NAME",
+    "field_name": "course_name",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "f5a39b8f-57f9-4d2b-9cdb-5ddac193e222",
+    "batch_id": "ae701aa2-5b1b-43e2-8768-a8063e0bd4d6",
+    "source_row_no": 1,
+    "issue_type": "MISSING_COMPANY_CODE",
+    "field_name": "company_code",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "9417a6f9-ed04-4035-a155-a05edc3b24ca",
+    "batch_id": "ae701aa2-5b1b-43e2-8768-a8063e0bd4d6",
+    "source_row_no": 2,
+    "issue_type": "MISSING_TRAINEE_CODE",
+    "field_name": "trainee_code",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "70f12dbc-e711-45b6-b652-fc0c43df5fdc",
+    "batch_id": "ae701aa2-5b1b-43e2-8768-a8063e0bd4d6",
+    "source_row_no": 2,
+    "issue_type": "MISSING_COURSE_NAME",
+    "field_name": "course_name",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "561922a2-c627-4044-a594-4e2cd4f8d75f",
+    "batch_id": "ae701aa2-5b1b-43e2-8768-a8063e0bd4d6",
+    "source_row_no": 2,
+    "issue_type": "MISSING_COMPANY_CODE",
+    "field_name": "company_code",
+    "resolution": null,
+    "resolution_reason": null,
+    "resolved_by_user_id": null,
+    "resolved_at": null
+  },
+  {
+    "id": "535685ec-db79-4ff7-92e4-8084951ef83c",
+    "batch_id": "52130474-3682-4e1f-9c93-0f5bc254ec38",
+    "source_row_no": 149,
+    "issue_type": "DUPLICATE_ROW",
+    "field_name": "participant_name",
+    "resolution": "MERGE_DUPLICATE",
+    "resolution_reason": "Verified duplicate cohort registration with HR sponsor; merged into single participant profile.",
+    "resolved_by_user_id": "a6a9ceba-2656-44f2-89d6-18bb6bffd212",
+    "resolved_at": "2026-11-10 00:58:05.700442"
+  },
+  {
+    "id": "7187f4e6-0295-4401-b88f-97dc707afb6a",
+    "batch_id": "52130474-3682-4e1f-9c93-0f5bc254ec38",
+    "source_row_no": 150,
+    "issue_type": "DUPLICATE_ROW",
+    "field_name": "participant_name",
+    "resolution": "MERGE_DUPLICATE",
+    "resolution_reason": "Verified duplicate cohort registration with HR sponsor; merged into single participant profile.",
+    "resolved_by_user_id": "a6a9ceba-2656-44f2-89d6-18bb6bffd212",
+    "resolved_at": "2026-11-10 00:58:05.731848"
+  }
+]

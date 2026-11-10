@@ -154,11 +154,20 @@ def test_four_completion_statuses_and_am_restrictions(client: TestClient, db_ses
     # 1. AM sets status to 'In progress' with attendance 'Present' -> SUCCESS
     res = client.put(
         f"/api/v1/records/{rec.id}",
-        json={"status": "In progress", "attendance_status": "Present", "score": 85.0},
+        json={"status": "In progress", "attendance_status": "Present"},
         headers=am_headers
     )
     assert res.status_code == 200
     assert res.json()["status"] == "In progress"
+
+    # 1b. AM attempts to modify evaluation score -> 403 Forbidden (Only Admin enters scores)
+    res_score = client.put(
+        f"/api/v1/records/{rec.id}",
+        json={"score": 85.0},
+        headers=am_headers
+    )
+    assert res_score.status_code == 403
+    assert "Score entry is reserved for Administrators" in res_score.json()["detail"]
 
     # 2. AM sets status to 'Not completed' with attendance 'Absent' -> SUCCESS
     res = client.put(

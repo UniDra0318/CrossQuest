@@ -1,0 +1,30 @@
+[
+  {
+    "id": "c232ed58-f00f-486f-8bef-d0520dd305c2",
+    "session_id": "189179a9-5fc5-4696-822d-1a5335ff6564",
+    "title": "Cybersecurity Fundamentals Quiz",
+    "version_no": 1,
+    "available_until": null,
+    "is_closed": 1,
+    "closed_at": "2026-11-10 00:57:57.491183",
+    "is_approved": 0,
+    "approved_by_user_id": null,
+    "approved_at": null,
+    "created_by_user_id": null,
+    "created_at": "2026-11-10 00:57:56.921721"
+  },
+  {
+    "id": "e9895e4d-79ab-4df4-990e-fa2728703f8a",
+    "session_id": null,
+    "title": "Cloud Threat Modeling Challenge",
+    "version_no": 1,
+    "available_until": null,
+    "is_closed": 0,
+    "closed_at": null,
+    "is_approved": 0,
+    "approved_by_user_id": null,
+    "approved_at": null,
+    "created_by_user_id": "121b679f-793e-43f8-99c4-d2f57df87c5e",
+    "created_at": "2026-11-10 00:57:57.754688"
+  }
+]

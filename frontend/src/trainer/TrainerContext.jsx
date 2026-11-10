@@ -198,9 +198,10 @@ export function TrainerProvider({ children }) {
       let effectiveCohorts = (c && c.length > 0) ? c : [];
       if (effectiveCohorts.length === 0 && activeSessions.length > 0) {
         effectiveCohorts = activeSessions.map(sess => {
+          const isSigned = Boolean(sess.trainer_signed_off);
           const recs = sess.records || sess.roster || [];
           const enrolled = recs.length || 2;
-          const certified = recs.filter(item => item.status?.toLowerCase() === 'completed').length;
+          const certified = isSigned ? recs.filter(item => item.status?.toLowerCase() === 'completed').length : 0;
           const scores = recs.filter(item => item.score != null).map(item => item.score);
           const avg = scores.length ? Math.round((scores.reduce((acc, b) => acc + b, 0) / scores.length) * 10) / 10 : 88.5;
           return {
@@ -212,11 +213,12 @@ export function TrainerProvider({ children }) {
             schedule: sess.start_date ? `${new Date(sess.start_date).toLocaleDateString()} - ${sess.end_date ? new Date(sess.end_date).toLocaleDateString() : 'Ongoing'}` : 'Mon / Wed / Fri · 09:00–12:00 PHT',
             scope: recs[0]?.company_code || 'CORP_ALPHA',
             enrolled,
-            certified: certified || (sess.trainer_signed_off ? enrolled : 0),
+            certified,
             avg,
-            status: sess.trainer_signed_off ? 'COMPLETED' : (sess.is_future_dated ? 'UPCOMING' : 'ACTIVE COHORT'),
+            status: isSigned ? 'COMPLETED' : (sess.is_future_dated ? 'UPCOMING' : 'ACTIVE COHORT'),
             daysLeft: sess.is_future_dated ? 14 : 0,
-            signedOff: Boolean(sess.trainer_signed_off)
+            signedOff: isSigned,
+            signed_off: isSigned
           };
         });
       }
@@ -308,13 +310,17 @@ export function TrainerProvider({ children }) {
             { id: 'SESS-2026-09B', org: 'Maya FinTech Digital Innovations', enrolled: 2, certified: 2 },
             { id: 'SESS-2026-10C', org: 'Ayala Retail Omnichannel Corp', enrolled: 2, certified: 2 },
             { id: 'SESS-2026-11D', org: 'San Miguel Conglomerate Holdings', enrolled: 2, certified: 1 }
-          ]).map(cohort => ({
-            id: cohort.name || cohort.id,
-            org: cohort.org || cohort.name || cohort.id,
-            rate: cohort.enrolled ? Math.round(((cohort.certified || 0) / cohort.enrolled) * 100) : 0,
-            certified: cohort.certified || 0,
-            enrolled: cohort.enrolled || 2
-          })),
+          ]).map(cohort => {
+            const isSigned = Boolean(cohort.signed_off || cohort.signedOff || cohort.trainer_signed_off || cohort.status === 'COMPLETED' || cohort.status === 'Completed');
+            const certCount = isSigned ? (cohort.certified || 0) : 0;
+            return {
+              id: cohort.name || cohort.id,
+              org: cohort.org || cohort.name || cohort.id,
+              rate: cohort.enrolled ? Math.round((certCount / cohort.enrolled) * 100) : 0,
+              certified: certCount,
+              enrolled: cohort.enrolled || 2
+            };
+          }),
           benchmarks: [
             { format: 'Kahoot 4-tile', correct: 92, secs: 14.8 },
             { format: 'Sequence', correct: 84, secs: 28.2 },

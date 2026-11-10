@@ -4,9 +4,9 @@ export const DEMO_USERS = {
   // --- ADMINISTRATORS ---
   admin: {
     id: "016868d1-5238-49a4-9b3f-1cd205dbdc44",
-    email: "admin@crossworks.ph",
-    name: "Dr. Julian Mercer",
-    title: "Principal Security Administrator",
+    email: "joey.mallari@xworks.ph",
+    name: "Joselito 'Joey' Mallari Jr.",
+    title: "Principal Consultant & Lead Administrator",
     role: "admin",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["ALL"],
@@ -15,144 +15,76 @@ export const DEMO_USERS = {
   },
   admin_general: {
     id: "d3c5e17f-1854-488d-8f0f-36ff72ed1745",
-    email: "info@crossworks.ph",
-    name: "Crossworks Administration",
-    title: "Operations & Peer Review Administrator",
+    email: "len.mallari@xworks.ph",
+    name: "Len Mallari",
+    title: "Compliance Administrator & Peer Reviewer",
     role: "admin",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["ALL"],
     assigned_client_accounts: ["ALL"],
-    initials: "CA"
+    initials: "LM"
   },
 
   // --- ACCOUNT MANAGERS ---
   account_manager: {
     id: "0525a57b-668d-46cf-ab3b-6f6862920a9c",
-    email: "sharon@crossworks.ph",
-    name: "Sharon De Vera",
-    title: "Account Manager (Vertiv, Red Oak, EastWest)",
+    email: "erika.bana@crossworks.ph",
+    name: "Erika Bana",
+    title: "Account Manager (Enterprise Accounts)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["VHL_2", "ROP_3", "EWALIC_2"],
     assigned_client_accounts: ["VHL_2", "ROP_3", "EWALIC_2"],
+    initials: "EB"
+  },
+  am_sharon: {
+    id: "d6cfb2eb-07d2-4629-8f41-60fee732c5d3",
+    email: "sharon.devera@crossworks.ph",
+    name: "Sharon De Vera",
+    title: "Account Manager (Strategic Accounts)",
+    role: "account_manager",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
+    assigned_client_accounts: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
     initials: "SD"
   },
   am_brian: {
     id: "8049c06b-c340-4d3f-8fca-1e83a4beb4f1",
-    email: "brian@crossworks.ph",
+    email: "brian.mendoza@crossworks.ph",
     name: "Brian Mendoza",
-    title: "Account Manager (IPRoyal & Amihan)",
+    title: "Account Manager (Tech & Telecom)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
     assigned_companies: ["IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
     assigned_client_accounts: ["IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
     initials: "BM"
   },
-  am_quel: {
-    id: "d6cfb2eb-07d2-4629-8f41-60fee732c5d3",
-    email: "quel@crossworks.ph",
-    name: "Raquel 'Quel' Santos",
-    title: "Account Manager (Universal Robina & Isla LPG)",
-    role: "account_manager",
-    organization: "Crossworks Training & Consulting",
-    assigned_companies: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
-    assigned_client_accounts: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
-    initials: "QS"
-  },
-  am_jordan: {
-    id: "2cc2fae0-d941-4d81-9e55-04e822726a6a",
-    email: "jordan.sales@crossworks.ph",
-    name: "Jordan Ramos (Sales)",
-    title: "Account Manager (Ayala Land & Boehringer)",
-    role: "account_manager",
-    organization: "Crossworks Training & Consulting",
-    assigned_companies: ["AYALA_LAND_INC_2", "BIBSP_2"],
-    assigned_client_accounts: ["AYALA_LAND_INC_2", "BIBSP_2"],
-    initials: "JR"
-  },
-
-  am_cez: {
-    id: "e9c51def-d5a4-40ec-b61e-e3461921b8fe",
-    email: "cez@crossworks.ph",
-    name: "Cezanne Garcia",
-    title: "Account Manager (Enterprise Accounts)",
-    role: "account_manager",
-    organization: "Crossworks Training & Consulting",
-    assigned_companies: ["VHL_2", "AMIHAN_SOLUTI_2"],
-    assigned_client_accounts: ["VHL_2", "AMIHAN_SOLUTI_2"],
-    initials: "CG"
-  },
-
-  // --- TRAINERS ---
-  trainer: {
-    id: "76be0c39-21c3-46ae-ba5d-0cb2dd203bfe",
-    email: "trainer.lead@crossworks.ph",
-    name: "Jordan Ramos (Trainer)",
-    title: "Lead Technical Trainer (Cybersecurity & GenAI)",
-    role: "trainer",
-    organization: "Crossworks Training & Consulting",
-    assigned_companies: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
-    assigned_client_accounts: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
-    initials: "JR"
-  },
-  trainer_billy: {
-    id: "ad5d83e0-c70b-4bef-851e-6e4bddc44b87",
-    email: "billy@crossworks.ph",
-    name: "Billy Fernandez",
-    title: "Senior Trainer (Cloud & Infrastructure)",
-    role: "trainer",
-    organization: "Crossworks Training & Consulting",
-    assigned_companies: ["EWALIC_2", "ROP_3"],
-    assigned_client_accounts: ["EWALIC_2", "ROP_3"],
-    initials: "BF"
-  },
-  trainer_jobert: {
-    id: "58b734d7-e08d-4fb4-829f-38fa0d53f4b1",
-    email: "jobert@crossworks.ph",
-    name: "Jobert Cruz",
-    title: "Senior Trainer (Enterprise Architecture & Data)",
-    role: "trainer",
-    organization: "Crossworks Training & Consulting",
-    assigned_companies: ["ISLA_LPG_CORPOR", "UNIVER_ROBINA_CORPOR_3"],
-    assigned_client_accounts: ["ISLA_LPG_CORPOR", "UNIVER_ROBINA_CORPOR_3"],
-    initials: "JC"
-  },
-  trainer_owen: {
-    id: "da0ea449-ace9-49a6-9ce8-5afdc4b4edd2",
-    email: "owen@crossworks.ph",
-    name: "Owen Castillo",
-    title: "Senior Trainer (Modern App Dev & Security)",
-    role: "trainer",
-    organization: "Crossworks Training & Consulting",
-    assigned_companies: ["AYALA_LAND_INC_2", "BIBSP_2"],
-    assigned_client_accounts: ["AYALA_LAND_INC_2", "BIBSP_2"],
-    initials: "OC"
-  },
 
   // --- FINANCE & OPERATIONS ---
   finance: {
     id: "553b1112-b37b-4a4a-9e03-575caa636bea",
     email: "finance@crossworks.ph",
-    name: "Elena Vance",
-    title: "Finance & Operations Specialist",
+    name: "Elena Santos",
+    title: "Finance & Billing Specialist",
     role: "finance",
     organization: "Crossworks Operations & Billing",
     company_code: "CROSSWORKS",
     assigned_companies: ["ALL"],
     assigned_client_accounts: ["ALL"],
-    initials: "EV"
+    initials: "ES"
   },
-  finance_maricar: {
-    id: "5265ad2f-ce42-4678-9ef4-cd8e198ba655",
-    email: "maricar.finance@crossworks.ph",
-    name: "Maricar Ramos",
-    title: "Billing & Audit Analyst",
-    role: "finance",
-    organization: "Crossworks Operations & Billing",
-    company_code: "CROSSWORKS",
-    assigned_companies: ["ALL"],
-    assigned_client_accounts: ["ALL"],
-    initials: "MR"
+
+  // --- LEAD TRAINER ---
+  trainer: {
+    id: "76be0c39-21c3-46ae-ba5d-0cb2dd203bfe",
+    email: "jordan.ramos@crossworks.ph",
+    name: "Jordan Ramos",
+    title: "Lead Technical Instructor: Zero-Trust & Cloud",
+    role: "trainer",
+    organization: "Crossworks Training & Consulting",
+    assigned_companies: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    assigned_client_accounts: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    initials: "JR"
   },
 
   // --- TRAINEES WITH REAL PILOT ACCOUNTS & RECORDS ---
@@ -482,9 +414,26 @@ export function AuthProvider({ children }) {
       });
       if (res.ok) {
         const data = await res.json();
-        setToken(data.access_token);
-        localStorage.setItem('crossquest_auth_token', data.access_token);
-        localStorage.setItem('crossquest_auth_email', user.email);
+        let activeToken = data.access_token;
+        if (data.mfa_required && data.challenge_token) {
+          const mfaRes = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              challenge_token: data.challenge_token,
+              code: 'DEV_MFA_BYPASS'
+            })
+          });
+          if (mfaRes.ok) {
+            const mfaData = await mfaRes.json();
+            activeToken = mfaData.access_token;
+          }
+        }
+        if (activeToken) {
+          setToken(activeToken);
+          localStorage.setItem('crossquest_auth_token', activeToken);
+          localStorage.setItem('crossquest_auth_email', user.email);
+        }
       }
     } catch (e) {
       console.warn("Could not acquire backend token for role switch:", e);

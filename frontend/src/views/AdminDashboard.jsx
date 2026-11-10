@@ -76,13 +76,35 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
   const [liveRules, setLiveRules] = useState([]);
   const [editingStaffUser, setEditingStaffUser] = useState(null);
 
+  // Helper to format staff users consistently for PeopleAccess table
+  const formatStaffUser = (u) => {
+    const roleNorm = (u.role || 'STAFF').toLowerCase();
+    const defaultLevel = roleNorm.includes('admin') ? 3 :
+      (roleNorm.includes('account') || roleNorm.includes('staff') || roleNorm.includes('finance')) ? 2 : 1;
+    const level = (typeof u.clearance_level === 'number' && u.clearance_level >= 1 && u.clearance_level <= 3)
+      ? u.clearance_level
+      : defaultLevel;
+
+    return {
+      id: u.id,
+      name: u.full_name || u.name,
+      initials: (u.full_name || u.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+      email: u.email,
+      role: (u.role || 'STAFF').replace(/_/g, ' ').toUpperCase(),
+      level: level,
+      clients: u.assigned_client_accounts || ['CORP_ALPHA'],
+      is_active: u.is_active !== false,
+      tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : u.role === 'trainee' ? 'blue' : 'orange'
+    };
+  };
+
   // Client Companies & Tenancy Registry State
   const DEFAULT_COMPANIES = [
-    { code: 'CORP_ALPHA', name: 'San Miguel Conglomerate Holdings', industry: 'Conglomerate & Industrial', am_name: 'Marcus Reyes' },
-    { code: 'FINTECH_BETA', name: 'Maya FinTech Digital Innovations', industry: 'Financial Services & Digital Payments', am_name: 'Andrea Salazar' },
-    { code: 'RETAIL_GAMMA', name: 'Ayala Retail Omnichannel Corp', industry: 'Retail & Supply Chain', am_name: 'Andrea Salazar' },
-    { code: 'BANK_DELTA', name: 'BDO Unibank Enterprise Systems', industry: 'Commercial Banking & Capital Markets', am_name: 'Marcus Reyes' },
-    { code: 'TELCO_EPSILON', name: 'Globe Telecom Digital Infrastructure', industry: 'Telecommunications & Cloud', am_name: 'Marcus Reyes' }
+    { code: 'CORP_ALPHA', name: 'San Miguel Conglomerate Holdings', industry: 'Conglomerate & Industrial', am_name: 'Erika Bana' },
+    { code: 'FINTECH_BETA', name: 'Maya FinTech Digital Innovations', industry: 'Financial Services & Digital Payments', am_name: 'Sharon De Vera' },
+    { code: 'RETAIL_GAMMA', name: 'Ayala Retail Omnichannel Corp', industry: 'Retail & Supply Chain', am_name: 'Sharon De Vera' },
+    { code: 'BANK_DELTA', name: 'BDO Unibank Enterprise Systems', industry: 'Commercial Banking & Capital Markets', am_name: 'Erika Bana' },
+    { code: 'TELCO_EPSILON', name: 'Globe Telecom Digital Infrastructure', industry: 'Telecommunications & Cloud', am_name: 'Brian Mendoza' }
   ];
   const [companiesList, setCompaniesList] = useState(DEFAULT_COMPANIES);
   const [isCreateCompanyOpen, setIsCreateCompanyOpen] = useState(false);
@@ -135,14 +157,14 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         code: cleanCode,
         name: cleanName,
         industry: newCompanyForm.industry.trim(),
-        am_name: selectedAm?.name || 'Marcus Reyes'
+        am_name: selectedAm?.name || 'Erika Bana'
       };
 
       setCompaniesList(prev => [newCompObj, ...prev]);
       setCreatedCompanyResult({
         ...companyRes.data,
         attribute_token: `CLIENT${cleanCode}V1`,
-        assigned_am: selectedAm?.name || 'Marcus Reyes'
+        assigned_am: selectedAm?.name || 'Erika Bana'
       });
     } else {
       setCreateCompanyError(companyRes.error || 'Failed to create client company.');
@@ -335,30 +357,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               code: c.code,
               name: c.name,
               industry: c.industry || 'Enterprise Client',
-              am_name: am?.full_name || am?.name || (c.code === 'TELCO_EPSILON' ? 'Marcus Reyes' : 'Unassigned')
+              am_name: am?.full_name || am?.name || (c.code === 'TELCO_EPSILON' ? 'Brian Mendoza' : 'Unassigned')
             };
           }));
         }
         if (dbStaff && dbStaff.length > 0) {
-          setStaffList(dbStaff.map(u => {
-            const roleNorm = (u.role || 'STAFF').toLowerCase();
-            const defaultLevel = roleNorm.includes('admin') ? 3 :
-              (roleNorm.includes('account') || roleNorm.includes('staff') || roleNorm.includes('finance')) ? 2 : 1;
-            const level = (typeof u.clearance_level === 'number' && u.clearance_level >= 1 && u.clearance_level <= 3)
-              ? u.clearance_level
-              : defaultLevel;
-
-            return {
-              id: u.id,
-              name: u.full_name || u.name,
-              initials: (u.full_name || u.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
-              email: u.email,
-              role: (u.role || 'STAFF').replace(/_/g, ' ').toUpperCase(),
-              level: level,
-              clients: u.assigned_client_accounts || ['CORP_ALPHA'],
-              tone: u.role === 'admin' ? 'purple' : u.role === 'trainer' ? 'green' : 'orange'
-            };
-          }));
+          setStaffList(dbStaff.map(formatStaffUser));
         }
         if (dbRecords && dbRecords.length > 0) {
           setRecords(dbRecords.map((r, idx) => {
@@ -592,7 +596,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           token={token}
           onRefreshStaff={async () => {
             const s = await fetchStaffUsers(token);
-            if (s) setStaffList(s);
+            if (s && s.length > 0) setStaffList(s.map(formatStaffUser));
           }}
         />
       )}
@@ -1303,7 +1307,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                     <input 
                       type="text" 
                       required
-                      placeholder="e.g. Andrea Salazar"
+                      placeholder="e.g. Erika Bana"
                       value={newUserForm.full_name}
                       onChange={(e) => setNewUserForm({ ...newUserForm, full_name: e.target.value })}
                       style={{

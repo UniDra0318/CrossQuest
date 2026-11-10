@@ -259,8 +259,7 @@ export default function Sessions() {
       for (const [recId, data] of Object.entries(attendanceEdits)) {
         await updateParticipantAttendance(recId, {
           status: data.status,
-          attendance_status: data.attendance_status,
-          score: data.score ? parseFloat(data.score) : null
+          attendance_status: data.attendance_status
         }).catch(() => null);
       }
 
@@ -447,7 +446,7 @@ export default function Sessions() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Info size={16} color="#0284c7" />
           <span>
-            <strong>Interactive Cohorts:</strong> Click any session card with the <span style={{ color: '#0284c7', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Pencil size={11} /> Editable</span> badge to update participant attendance, roster status, and practical evaluation scores.
+            <strong>Interactive Cohorts:</strong> Click any session card with the <span style={{ color: '#0284c7', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Pencil size={11} /> Editable</span> badge to update participant attendance and roster status.
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '11.5px' }}>
@@ -1179,7 +1178,7 @@ export default function Sessions() {
                         </th>
                         <th style={{ padding: '10px 14px', fontWeight: 700 }}>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            SCORE (OPTIONAL) <Pencil size={11} color="#0284c7" />
+                            SCORE (ADMIN-ONLY) <Lock size={11} color="#64748b" />
                           </span>
                         </th>
                       </tr>
@@ -1249,21 +1248,23 @@ export default function Sessions() {
                           </td>
 
                           <td style={{ padding: '10px 14px' }}>
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              placeholder="Optional"
-                              value={row.score}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setAttendanceEdits(prev => ({
-                                  ...prev,
-                                  [recId]: { ...prev[recId], score: val }
-                                }));
+                            <span
+                              title="Evaluation scores are entered exclusively by Administrators (Chapter III, Table 9)"
+                              style={{
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#f8fafc',
+                                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0',
+                                color: row.score !== '' && row.score != null ? (isDark ? '#38bdf8' : '#0284c7') : (isDark ? '#64748b' : '#94a3b8'),
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
                               }}
-                              style={{ width: '80px', padding: '6px 8px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12px' }}
-                            />
+                            >
+                              {row.score !== '' && row.score != null ? `${row.score}%` : 'Unassigned'}
+                            </span>
                           </td>
                         </tr>
                       ))}

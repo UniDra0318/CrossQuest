@@ -1,0 +1,63 @@
+id,course_code,name,description,acronym_3,created_at
+0f84d2d5-ca98-4fc3-a2b0-11a215c335c2,CRS-AP-A349,Agile PME,Professional development curriculum: Agile PME. Aligned with Crossworks industry standards.,AP,2026-11-08 00:38:13.906624
+ee16b408-ce10-4c1f-b593-2c9c02ed8828,CRS-BCME-6F33,Business Continuity Management Essentials,Professional development curriculum: Business Continuity Management Essentials. Aligned with Crossworks industry standards.,BCM,2026-11-08 00:38:13.907685
+0301535d-d621-41a1-bc9e-3f36c3acb4b9,CRS-COA-1CCB,Coaching,Professional development curriculum: Coaching. Aligned with Crossworks industry standards.,COA,2026-11-08 00:38:13.907986
+471c977d-b3b3-461f-96a8-e01d8e9f135d,CRS-CON-364D,CONNECT,Professional development curriculum: CONNECT. Aligned with Crossworks industry standards.,CON,2026-11-08 00:38:13.908274
+25f38973-6e17-4a59-bf72-2d7c49129c0f,CRS-CON-9EDC,Consulting,Professional development curriculum: Consulting. Aligned with Crossworks industry standards.,CON,2026-11-08 00:38:13.908553
+18ee64bd-309d-4954-bea9-4288ea429f8b,CRS-CP-1A05,Customized Program,Professional development curriculum: Customized Program. Aligned with Crossworks industry standards.,CP,2026-11-08 00:38:13.908834
+42eccf69-c05e-44b8-ac03-6aa1f90ebcee,CRS-ERM-FB94,Enterprise Risk Management,Professional development curriculum: Enterprise Risk Management. Aligned with Crossworks industry standards.,ERM,2026-11-08 00:38:13.909111
+ac6cd1cf-f3c1-44fa-bb25-476369213064,CRS-IL-175C,Impactful Leadership,Professional development curriculum: Impactful Leadership. Aligned with Crossworks industry standards.,IL,2026-11-08 00:38:13.909394
+4b56e7c6-d55c-420d-a768-c45ca240b4b4,CRS-IDP-01F4,Implementing Data Privacy,Professional development curriculum: Implementing Data Privacy. Aligned with Crossworks industry standards.,IDP,2026-11-08 00:38:13.909668
+426dc4cf-2422-4c74-ac2c-b4cc04b27c5d,CRS-ITDT-D719,Innovation through Design Thinking,Professional development curriculum: Innovation through Design Thinking. Aligned with Crossworks industry standards.,ITD,2026-11-08 00:38:13.909948
+987a07cb-8894-44e5-91a0-7d32db9f1515,CRS-I2E-A663,ISMS 27001 Essentials,Professional development curriculum: ISMS 27001 Essentials. Aligned with Crossworks industry standards.,I2E,2026-11-08 00:38:13.910247
+46804bfc-48a6-49d4-a941-857d9e612edc,CRS-I2IA-00E0,ISMS 27001 Internal Auditor,Professional development curriculum: ISMS 27001 Internal Auditor. Aligned with Crossworks industry standards.,I2I,2026-11-08 00:38:13.910574
+a3eacf06-4130-427c-aede-5d095e60facb,CRS-I2LA-5565,ISMS 27001 Lead Auditor Certification,Professional development curriculum: ISMS 27001 Lead Auditor Certification. Aligned with Crossworks industry standards.,I2L,2026-11-08 00:38:13.910879
+86b8b9c2-9646-4ac1-b95f-2756d5b16126,CRS-I2MI-16B7,ISMS 27001:2022 Managing Infosec Controls,Professional development curriculum: ISMS 27001:2022 Managing Infosec Controls. Aligned with Crossworks industry standards.,I2M,2026-11-08 00:38:13.911191
+e149be73-4093-4dc3-8887-fe975f9223d1,CRS-I2TA-37C2,ISMS 27001:2022 Transition Awareness,Professional development curriculum: ISMS 27001:2022 Transition Awareness. Aligned with Crossworks industry standards.,I2T,2026-11-08 00:38:13.911528
+8ea93fc2-73b6-41b8-a255-f3a2d79c325d,CRS-I3C-0D3F,ISO 31000 CRM,Professional development curriculum: ISO 31000 CRM. Aligned with Crossworks industry standards.,I3C,2026-11-08 00:38:13.911816
+0ab6ec92-88c7-44f8-89c9-0c58e4080014,CRS-MDP-9C84,Management Development Program,Professional development curriculum: Management Development Program. Aligned with Crossworks industry standards.,MDP,2026-11-08 00:38:13.912098
+6a1c1b43-8214-45d5-bca9-c086e3c9a42e,CRS-MSE-AD1A,Managing Stakeholders Effectively,Professional development curriculum: Managing Stakeholders Effectively. Aligned with Crossworks industry standards.,MSE,2026-11-08 00:38:13.912392
+b439ec4a-97a9-423c-af73-ba934be29caa,CRS-MEE-8C32,Maximizing Employee Engagement,Professional development curriculum: Maximizing Employee Engagement. Aligned with Crossworks industry standards.,MEE,2026-11-08 00:38:13.912677
+22c2d91d-b6e3-4ba9-a007-c81718891d99,CRS-NR-22C9,Negotiating for Results,Professional development curriculum: Negotiating for Results. Aligned with Crossworks industry standards.,NR,2026-11-08 00:38:13.913043
+a45546d3-1bc7-4b19-9017-8b7e2fe8d4f4,CRS-PDPA-1882,Performing Data Privacy Audits,Professional development curriculum: Performing Data Privacy Audits. Aligned with Crossworks industry standards.,PDP,2026-11-08 00:38:13.913336
+758d045f-c1f8-47a9-be04-e3e7497d14cf,CRS-PR(-E95F,PMP Review (Saturdays),Professional development curriculum: PMP Review (Saturdays). Aligned with Crossworks industry standards.,PR(,2026-11-08 00:38:13.913617
+092b6541-e7b2-4b22-b882-312ea9bf8780,CRS-PR(-7E39,PMP Review (Weekdays),Professional development curriculum: PMP Review (Weekdays). Aligned with Crossworks industry standards.,PR(,2026-11-08 00:38:13.913904
+43440a6b-5a0c-4ce5-995c-4a6eb24d21f5,CRS-PME-FF0C,Project Management Essentials,Professional development curriculum: Project Management Essentials. Aligned with Crossworks industry standards.,PME,2026-11-08 00:38:13.914190
+8d13a065-a79f-4952-a013-5ffb0e4567c8,CRS-SMT-EE1E,Strategic Management Tools,Professional development curriculum: Strategic Management Tools. Aligned with Crossworks industry standards.,SMT,2026-11-08 00:38:13.914483
+5db3b3d3-d252-4c71-acc1-58d66dd825f2,CRS-TB-A8F2,Team Building,Professional development curriculum: Team Building. Aligned with Crossworks industry standards.,TB,2026-11-08 00:38:13.914763
+f14e8ede-e71d-4a05-bf87-3163c4746503,CRS-VM-483A,Vendor Management,Professional development curriculum: Vendor Management. Aligned with Crossworks industry standards.,VM,2026-11-08 00:38:13.915046
+0842ada3-a172-4bd7-8e9f-77a17927086b,CRS-WAV-8F4B,WAVE,Professional development curriculum: WAVE. Aligned with Crossworks industry standards.,WAV,2026-11-08 00:38:13.915378
+486d38c8-e7c8-4aac-98fd-b244c5509f9d,CRS-TTWA-D5B1,Train the Trainer with Addie,Professional development curriculum: Train the Trainer with Addie. Aligned with Crossworks industry standards.,TTW,2026-11-08 00:38:13.915674
+2256bfae-e9c5-4d84-ac9d-23cd651eedae,CRS-MBPS-314C,Mastering Business Presentation Skills,Professional development curriculum: Mastering Business Presentation Skills. Aligned with Crossworks industry standards.,MBP,2026-11-08 00:38:13.915960
+43ffe361-43ed-4477-89ad-fce2fae7d643,CRS-CMS-09CC,Compliance Management Systems,Professional development curriculum: Compliance Management Systems. Aligned with Crossworks industry standards.,CMS,2026-11-08 00:38:13.916261
+7c35f5df-a71c-4997-9fec-84214de0e946,CRS-SUP-F266,Supervisory Upskilling Program for Excellent,Custom enterprise module: Supervisory Upskilling Program for Excellent,SUP,2026-11-08 00:38:13.916581
+e6f6f134-ef6e-46a8-b4e9-c71d74d9da1a,CRS-CAP-CCC5,Certified Associate in Project Management (CAPM),Custom enterprise module: Certified Associate in Project Management (CAPM),CAP,2026-11-08 00:38:13.920593
+bab950d5-bd8a-4d81-af48-4cd6a20410fe,CRS-BSS-5BEE,Business Strategy Simulatuon,Custom enterprise module: Business Strategy Simulatuon,BSS,2026-11-08 00:38:13.931078
+5a42cba3-29f9-4900-a136-255175450c72,CRS-PMP-380e97,Project Management Professional Bootcamp,,PMP,2026-11-08 01:40:26.335169
+9dd5e3bf-9400-45b7-9dd6-4ea52b2c4e25,CRS-PMP-b27513,Project Management Professional Bootcamp,,PMP,2026-11-08 01:42:28.802589
+fdaed9e8-891e-4766-ae90-d12088db59b3,CRS-PMP-27bb75,Project Management Professional Bootcamp,,PMP,2026-11-08 08:17:48.157908
+0fda1081-9c39-4354-951b-1d461aa7c92a,CRS-PMP-e14245,Project Management Professional Bootcamp,,PMP,2026-11-08 09:02:24.168783
+ceec36ba-714d-41f3-8322-bfd8c1583c01,CRS-PMP-75002a,Project Management Professional Bootcamp,,PMP,2026-11-09 02:47:29.660914
+635a889f-e0fe-4229-87d5-85558a1ba083,CRS-PMP-15484b,Project Management Professional Bootcamp,,PMP,2026-11-09 02:56:40.792498
+eb72c3da-e395-4f5d-a838-d3d044b8ca77,CRS-PMP-56bfc7,Project Management Professional Bootcamp,,PMP,2026-11-09 03:03:35.837890
+57ddb8e7-319a-4223-a345-4c5d9417b4ad,CRS-PMP-131271,Project Management Professional Bootcamp,,PMP,2026-11-09 03:31:06.951832
+416d4ccd-2c70-4d1c-8e6c-838461be8743,CRS-PMP-048369,Project Management Professional Bootcamp,,PMP,2026-11-09 03:48:59.308314
+3da5b473-079a-4f0a-9b0b-6bbc172a4728,CRS-PMP-3aacaf,Project Management Professional Bootcamp,,PMP,2026-11-09 03:49:50.477524
+ada45dac-26b5-4d07-a40d-b3d6398286f1,CRS-PMP-481d6f,Project Management Professional Bootcamp,,PMP,2026-11-09 04:04:58.630278
+4f471793-d566-45c6-86be-b4a90922ad28,CRS-PMP-60818b,Project Management Professional Bootcamp,,PMP,2026-11-09 04:19:15.958725
+b65baaeb-dd19-4bbb-8c93-a9ef768f76f5,CRS-PMP-2e62dc,Project Management Professional Bootcamp,,PMP,2026-11-09 04:19:34.783018
+819e9f96-79dc-417b-8d12-314eb927a6f0,CRS-PMP-e68129,Project Management Professional Bootcamp,,PMP,2026-11-09 04:20:02.400710
+9af3b1e1-b1e2-470e-87d5-3938741197c3,CRS-PMP-8d7366,Project Management Professional Bootcamp,,PMP,2026-11-09 04:31:57.343741
+3963b5bd-55b1-40be-a2f1-a49eebd5910f,CRS-PMP-768538,Project Management Professional Bootcamp,,PMP,2026-11-09 04:57:26.976766
+65154153-7869-4449-aeb3-56b33e135848,CRS-PMP-5b8981,Project Management Professional Bootcamp,,PMP,2026-11-09 05:05:03.182096
+ca772892-c6bf-4b51-a580-2dddce2438fa,CRS-PMP-4dd16f,Project Management Professional Bootcamp,,PMP,2026-11-09 05:26:04.074489
+1872ee8c-99b5-4b2c-ac12-fb9062e2923c,CRS-PMP-8f0f57,Project Management Professional Bootcamp,,PMP,2026-11-09 05:32:52.690727
+07e30b2e-9d2c-4c9a-9901-5ffb38b87d0f,CRS-PMP-7fb74c,Project Management Professional Bootcamp,,PMP,2026-11-09 05:50:16.146687
+60a2a44f-8c7c-41d5-babb-1751eca301fc,CRS-PMP-ea6661,Project Management Professional Bootcamp,,PMP,2026-11-09 22:22:43.361173
+dc764218-e869-418d-97ea-c33198f64b88,CRS-PMP-73cba5,Project Management Professional Bootcamp,,PMP,2026-11-09 22:50:11.264274
+fa2163d9-6877-472b-a4bf-d6972e6922c2,CRS-PMP-7c689c,Project Management Professional Bootcamp,,PMP,2026-11-09 22:50:40.357356
+15e5c2ce-8a68-4f6e-818f-2f0a98e2a5c3,CRS-PMP-a9d0ec,Project Management Professional Bootcamp,,PMP,2026-11-09 22:51:03.960558
+f9b2f10f-885b-4bc4-9ade-a5a5169263bb,CRS-PMP-242fd6,Project Management Professional Bootcamp,,PMP,2026-11-09 23:39:57.989277
+1d30c5ba-b4cc-4c07-902c-69e1a64d3b79,CRS-PMP-bb4746,Project Management Professional Bootcamp,,PMP,2026-11-09 23:40:50.832336
+ff9891dc-4550-4a5b-889b-7280c34a31d5,CRS-PMP-c54fa2,Project Management Professional Bootcamp,,PMP,2026-11-10 00:37:12.408029
+19cda429-fae1-4421-bc4c-271fb949e04e,CRS-PMP-beaf81,Project Management Professional Bootcamp,,PMP,2026-11-10 00:58:09.050997

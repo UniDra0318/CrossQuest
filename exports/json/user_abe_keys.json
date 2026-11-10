@@ -1,0 +1,110 @@
+[
+  {
+    "id": "91f7077e-c6c8-43db-ba28-6f2a32f61182",
+    "user_id": "14f06ba1-e1b9-4a27-bd04-f696aa1977fb",
+    "status": "active",
+    "wrapped_dek": "TE9DQUw6BS43C+ed/uLxLnpzs5e43AgVh3KExYw1ToQxjwhTf5HUv1gqNbllhLOA7KAVlMWhLbEyrdJ2qzG8zvnz",
+    "nonce": "WZxFei/l1ANhswpt",
+    "key_ciphertext": "Hqf8RhyHX/SxAhV6gAZjwxj3i+peEIXPeER/Nlld6YFjFGHdD68pMMbjH+ZHEue6LYm+e60/aqLTY1HT7cc8RQ60dYGNKV766CbZAHA4OZcYuSHx81Z7yUNmPYg3s0TTF0AMEQ8MpY95H7EsG5f6Zl+TgfG8RpAo4uChSty2Y0c/3GTKqyMM4C4v9RVBl1xKB94GJVSJ5yJBgwFihFec54y9yqe1yfzP3ISdIue6Pf2bJA+Z2q/KEDpaTu/I0ONTfQ==",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:44.144563",
+    "revoked_at": null,
+    "material_deleted_at": null
+  },
+  {
+    "id": "a2dd9c88-ae24-4f52-84e7-abfe2683f679",
+    "user_id": "4ee98173-6559-4df7-b67a-c573c6d83006",
+    "status": "active",
+    "wrapped_dek": "TE9DQUw6wkCYHURp+lA61AJUS/WNkhVyBEV361KfZRL6aR/Bxs2aM+eKg4FwCVm98cdMD9XKXvjMqrk6BrYqeRGL",
+    "nonce": "aHHMNht9aTaGJI92",
+    "key_ciphertext": "towPuTHiUtyDftt9P/SxIN6PiUA3h/UcMI0yMz2PPgJCrVqC50Q1HZxagUfmpedEZXj9jf88issZ6HD0/OZfqrySIAPeamoT2c+mmHYOcJGoKsqiEt34SIONr+aCYLJoyHbKRRpE5LO7Zuw/uhr/MaJH3gk83buGaW42cknEZKCy37CfIDXEj2HvCweyx0/lo2Qz+e/1dXyDxqoVxyqUQPsqJBks12Wcq0dBic1mVSMTA1idzGmreNJ1dSK1NSDMLo34WmYyw4cVRwPIOYs7ShEEfY2EVTILXjQrxO7+KXeROsiOzVA=",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:47.200802",
+    "revoked_at": null,
+    "material_deleted_at": null
+  },
+  {
+    "id": "9c8e2ea4-9266-46bf-987e-16e40e15a4fc",
+    "user_id": "e45e4c59-7324-443f-8d0f-a7904ebdb777",
+    "status": "retired",
+    "wrapped_dek": "TE9DQUw6fndU6wshxIiO2bDQslOo06w6ewKrdPHHAh7LH9avp+m1OZzs26gZAt9RkYxv49Av75cglfKhh55cBYee",
+    "nonce": "P1qsfaZTFCMM0Amo",
+    "key_ciphertext": "UNLC/b5mMUzATuXn0dh5uI79A3qbmEl2g/rKy8+zZ9/8JS7gww+IhSAOa1Vuiz5iU5veS1XR/z5Qd4Ox5teOa/IW6y8QhcOF+pdY1M22IJWDJCxOg5O9HR8EGtoDleu0PPcS5xsbZuqHSo7krkveGP7pBsYQ9uTo97IXSsLrMsOnbGmabfpiZlXbapsI9lGXmNDJVpdQGX4st0QKHtgKkha9TE3s37e2s04O9q5e5irewrc2n31cZ6zorEjkcgz9Se7Ih97xSJA=",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:54.795740",
+    "revoked_at": "2026-11-10 00:57:54.823470",
+    "material_deleted_at": null
+  },
+  {
+    "id": "e6bb9b72-1f26-4c7f-af01-bbdacb915c2b",
+    "user_id": "e45e4c59-7324-443f-8d0f-a7904ebdb777",
+    "status": "retired",
+    "wrapped_dek": "TE9DQUw6jIFBr8MkBc+KQivIYx0dipkL5E0M0L5O9niTi+12ygijNuoqHXbKBrbUvYAPH5MgOCpyEPJyRZr/BXzt",
+    "nonce": "VIN214o/BYuPJLTY",
+    "key_ciphertext": "34P5cvuMDMeCLRT3nAuJroQ4LMjH1E7U6yJiq22UtFnjRTqFHwF2zzYMykIgUyEnYzTMMtmUvJBHgVSGvESJzX4fJmd6IEW4pF9m4YdYr+uNn+P1o05wx2LM2vHwwwrR1PLWMgINT+rW/xvxQs9CjsPs4IcbkRRpZCCUmryILq/tOTZRvr01qypOZXmIk8WkRHr8B4e3pyWZHFXRQMcrw4IyMYv/onvaHRvhAs9f5HeaLNBO/KcBZt2NpmoOarO8UBR5LbDYt1Q=",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:54.823470",
+    "revoked_at": "2026-11-10 00:57:54.878425",
+    "material_deleted_at": null
+  },
+  {
+    "id": "bf6b5c2e-39e7-4a76-aac1-3775b44d7cb5",
+    "user_id": "e45e4c59-7324-443f-8d0f-a7904ebdb777",
+    "status": "active",
+    "wrapped_dek": "TE9DQUw6gwUMeNJIIe3LRbNgZhdWeQX1K3wQnUdKCVPNOKRoq/pytGfFCYpzvUr+xLNWOauq2ou+9mHpTXJfL8NR",
+    "nonce": "/GUcjr7T43/3ojFk",
+    "key_ciphertext": "yybVTZrElrOWVybwF0MiYjq/XZU4imEdbWHndsZAD5NZc1e+/vwcs0ctuoQhgrKeQ/uWTA+/gyfrhX/CN1S9QW1KvSHfkRB9EIpCEmyD4G+H2i6WhaUBwYah4jFyAzV29CfDa3Q5GKGr3jkgNGTzOuKcqo8apAEJMftemUFQta94vdfl8b7q2vpmkHW2Hh7K47U0ytqnBszzaQPN5jvLFdDYZ5FhAPsj2R9cYohNvmXit+Ro7SU+S+TDEhmKz1ZrvpPb4oZxjRc=",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:54.878425",
+    "revoked_at": null,
+    "material_deleted_at": null
+  },
+  {
+    "id": "26f9f29f-666e-4c71-be20-7c7537b65f1b",
+    "user_id": "675f690c-3d36-4228-8aff-c998b71db928",
+    "status": "revoked",
+    "wrapped_dek": null,
+    "nonce": "SL4X7pHBGDMzv1uT",
+    "key_ciphertext": "",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:55.033661",
+    "revoked_at": "2026-11-10 00:57:55.049374",
+    "material_deleted_at": "2026-11-10 00:57:55.049374"
+  },
+  {
+    "id": "f270e06a-d1df-47c4-93ea-fd7208536d16",
+    "user_id": "675f690c-3d36-4228-8aff-c998b71db928",
+    "status": "revoked",
+    "wrapped_dek": null,
+    "nonce": "yf0Bfvg4yNLACFPc",
+    "key_ciphertext": "",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:55.659039",
+    "revoked_at": "2026-11-10 00:57:55.685203",
+    "material_deleted_at": "2026-11-10 00:57:55.685203"
+  },
+  {
+    "id": "ba9ac9eb-6ea4-402a-b800-5754792e8a75",
+    "user_id": "675f690c-3d36-4228-8aff-c998b71db928",
+    "status": "active",
+    "wrapped_dek": "TE9DQUw674vCYcTBkpwCDTTcRU1tj1WM4bhP8CR6aRW2M1AmEKl4pMKRwW/AIxEerL1WOZmg/b5e9z8XP2gN2O6k",
+    "nonce": "TyGkeBD3NX2i0iVq",
+    "key_ciphertext": "d2Qe0uowLe671adG+V5Am3V3lTGlw9ho9jZ0gRLcPC+88wWKVDIoUEzrSnjCS2IUtyzrG925FgeJuvk3yM1/+tQYRY2Eooo0vwnvlKMwpsf9gSeNgAZjwFta+JYtz+ohcggqeiLd5+i00RBGbR/aP+aW2fx0X7ZpCmeouiCS2nVNE3Cpr8sm0UoQ5ZNgh1WGNtypjo5aoqQEnYvDpe2k4OEC1D1rd72ny6Qy+TR72BRGCiIfZrarkRPTblf9pMgazfnw/4g4pos=",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:57:55.731567",
+    "revoked_at": null,
+    "material_deleted_at": null
+  },
+  {
+    "id": "88cdd6fd-5966-4118-90a0-0e604d8e4f99",
+    "user_id": "3153ba81-dcda-4e2d-99ce-4cb4da8fd4e3",
+    "status": "active",
+    "wrapped_dek": "TE9DQUw6Eq1FEfhkGp5MUCIBo4PsUbK8Lqe/hC4Xru07X8S+Fypbyo6yjwyeAAT3wsVuKigFpSHKeeX6NlUby2Dk",
+    "nonce": "uQlEEmClxcf3ZMlq",
+    "key_ciphertext": "pnMsZIbR8XDpa0pw/i2rNeNmCKUdt5LYY84EZmkeWqcjywjP4+DZxQ0g6Z3Bfvhx1ydArmSYKtH3QPcZFd8r1f+MfsZTfUJAOtpNzfU9WfOJ7Wh2JQ2X8H6iqhsvBJEL4eJsT6MXQKVGhmze7hfE4i+ahFqzBumM/kYpVBrkrM379VyStyZH0JHwyfnv47IR1X4cqw==",
+    "kms_key_arn": "arn:aws:kms:ap-southeast-1:local:crossquest-master-key",
+    "issued_at": "2026-11-10 00:58:07.289729",
+    "revoked_at": null,
+    "material_deleted_at": null
+  }
+]

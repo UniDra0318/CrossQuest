@@ -1,0 +1,722 @@
+[
+  {
+    "id": "ecee18a3-5a51-4b53-8e65-c2f075a67ee4",
+    "token": "CLIENTCORPTEST01V1",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPTEST01",
+    "version": 1,
+    "status": "active",
+    "created_at": "2026-11-09 02:47:14.833074"
+  },
+  {
+    "id": "d125ac98-792d-4a90-9ed2-3c6eff98e853",
+    "token": "ROLEACCTMGRV1",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 1,
+    "status": "retired",
+    "created_at": "2026-11-09 02:47:14.841456"
+  },
+  {
+    "id": "d5b0969a-3514-4733-8d9d-56c4a37c0758",
+    "token": "CLIENTCORPVERALPHAV1",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 1,
+    "status": "retired",
+    "created_at": "2026-11-09 02:47:15.302207"
+  },
+  {
+    "id": "32028011-bba7-4a95-9aed-d1450a18098e",
+    "token": "CLIENTCORPVERALPHAV2",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 2,
+    "status": "retired",
+    "created_at": "2026-11-09 02:47:15.309377"
+  },
+  {
+    "id": "b4c54b28-93af-4f96-950e-f9dbe14461aa",
+    "token": "ROLEACCTMGRV2",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 2,
+    "status": "retired",
+    "created_at": "2026-11-09 02:47:15.442042"
+  },
+  {
+    "id": "91c845a9-8556-4395-b461-6905c0008a06",
+    "token": "TRAININGSESS202601V1",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 1,
+    "status": "retired",
+    "created_at": "2026-11-09 02:47:15.448618"
+  },
+  {
+    "id": "d7deec43-7d0d-497a-a7e9-3d5452717849",
+    "token": "TRAININGSESS202601V2",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 2,
+    "status": "retired",
+    "created_at": "2026-11-09 02:47:15.453795"
+  },
+  {
+    "id": "f109c0f0-0c9e-449b-81a4-d7cf59c217d3",
+    "token": "CLIENTCORPVERALPHAV3",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 3,
+    "status": "retired",
+    "created_at": "2026-11-09 02:47:15.539600"
+  },
+  {
+    "id": "d42c64f2-d058-4ebe-b2f9-18cf0f715bab",
+    "token": "CLIENTCORPVERALPHAV4",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 4,
+    "status": "retired",
+    "created_at": "2026-11-09 03:30:57.443582"
+  },
+  {
+    "id": "4d0f3a90-f239-48f1-a2f3-40b595c5e0bc",
+    "token": "ROLEACCTMGRV3",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 3,
+    "status": "retired",
+    "created_at": "2026-11-09 03:30:57.547293"
+  },
+  {
+    "id": "907ea02c-e2bd-4530-84f6-18b3719fe132",
+    "token": "TRAININGSESS202601V3",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 3,
+    "status": "retired",
+    "created_at": "2026-11-09 03:30:57.555616"
+  },
+  {
+    "id": "6605eec1-34ea-4304-a683-d3f3ecdc705a",
+    "token": "CLIENTCORPVERALPHAV5",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 5,
+    "status": "retired",
+    "created_at": "2026-11-09 03:30:57.650735"
+  },
+  {
+    "id": "6bc14bd5-c2f3-44b1-9696-7cc5412fa44a",
+    "token": "CLIENTCORPVERALPHAV6",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 6,
+    "status": "retired",
+    "created_at": "2026-11-09 03:48:50.703851"
+  },
+  {
+    "id": "84ebcd64-c50f-44b2-99c7-602ce1424065",
+    "token": "ROLEACCTMGRV4",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 4,
+    "status": "retired",
+    "created_at": "2026-11-09 03:48:50.801151"
+  },
+  {
+    "id": "5807aa77-49cb-46b1-bf18-ba5fd1f013ff",
+    "token": "TRAININGSESS202601V4",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 4,
+    "status": "retired",
+    "created_at": "2026-11-09 03:48:50.811631"
+  },
+  {
+    "id": "bbfb01fa-6391-494b-8a28-99f8c71dc284",
+    "token": "CLIENTCORPVERALPHAV7",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 7,
+    "status": "retired",
+    "created_at": "2026-11-09 03:48:50.893532"
+  },
+  {
+    "id": "f538c141-b753-4989-8f51-ad672144a89e",
+    "token": "CLIENTCORPVERALPHAV8",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 8,
+    "status": "retired",
+    "created_at": "2026-11-09 03:49:40.453379"
+  },
+  {
+    "id": "ab9d1b13-d533-4fcb-9045-f2bb454e0f11",
+    "token": "ROLEACCTMGRV5",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 5,
+    "status": "retired",
+    "created_at": "2026-11-09 03:49:40.572573"
+  },
+  {
+    "id": "a7ca5ec4-dba1-4a44-97a3-e1823d90f266",
+    "token": "TRAININGSESS202601V5",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 5,
+    "status": "retired",
+    "created_at": "2026-11-09 03:49:40.582333"
+  },
+  {
+    "id": "d7c621bd-146e-48d0-b882-063baabf2dba",
+    "token": "CLIENTCORPVERALPHAV9",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 9,
+    "status": "retired",
+    "created_at": "2026-11-09 03:49:40.665757"
+  },
+  {
+    "id": "8a82b0a7-effa-46e6-bf53-159116fdbb5f",
+    "token": "CLIENTCORPVERALPHAV10",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 10,
+    "status": "retired",
+    "created_at": "2026-11-09 04:04:46.367130"
+  },
+  {
+    "id": "a1bd3c2d-7314-4ae2-b474-566a60b31bdd",
+    "token": "ROLEACCTMGRV6",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 6,
+    "status": "retired",
+    "created_at": "2026-11-09 04:04:46.484330"
+  },
+  {
+    "id": "02a3dd2f-c80f-4c97-95e8-d54a2f159360",
+    "token": "TRAININGSESS202601V6",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 6,
+    "status": "retired",
+    "created_at": "2026-11-09 04:04:46.495531"
+  },
+  {
+    "id": "b71737cb-1a1a-4c89-add7-964a9c9283c9",
+    "token": "CLIENTCORPVERALPHAV11",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 11,
+    "status": "retired",
+    "created_at": "2026-11-09 04:04:46.593051"
+  },
+  {
+    "id": "903d8e75-64a1-49cb-a636-6968a182e975",
+    "token": "CLIENTCORPVERALPHAV12",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 12,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:04.740549"
+  },
+  {
+    "id": "1ab0d2d7-71ca-45eb-89d3-251c53fabfc2",
+    "token": "ROLEACCTMGRV7",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 7,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:04.854331"
+  },
+  {
+    "id": "ce9485e8-7f64-4200-9bc4-8e10fcdf541a",
+    "token": "TRAININGSESS202601V7",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 7,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:04.864531"
+  },
+  {
+    "id": "3de11df6-01f4-481e-bb71-afd90944d31f",
+    "token": "CLIENTCORPVERALPHAV13",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 13,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:04.974333"
+  },
+  {
+    "id": "18bcf412-f5e7-49a5-86af-633254b892fc",
+    "token": "CLIENTCORPVERALPHAV14",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 14,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:52.548104"
+  },
+  {
+    "id": "bb8a7a3e-24b3-4528-aa43-1b879c2f832b",
+    "token": "ROLEACCTMGRV8",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 8,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:52.652759"
+  },
+  {
+    "id": "5877d380-ccb0-44d0-94bc-11c488247fe9",
+    "token": "TRAININGSESS202601V8",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 8,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:52.661327"
+  },
+  {
+    "id": "14b66a0b-a4eb-4c98-b206-19336e72003b",
+    "token": "CLIENTCORPVERALPHAV15",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 15,
+    "status": "retired",
+    "created_at": "2026-11-09 04:19:52.746694"
+  },
+  {
+    "id": "774a1f43-71bd-422b-b605-4a8e6efd4553",
+    "token": "CLIENTCORPVERALPHAV16",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 16,
+    "status": "retired",
+    "created_at": "2026-11-09 04:31:46.702747"
+  },
+  {
+    "id": "b562909e-85ea-4814-aac5-8f7ad331cd81",
+    "token": "ROLEACCTMGRV9",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 9,
+    "status": "retired",
+    "created_at": "2026-11-09 04:31:46.826680"
+  },
+  {
+    "id": "e525be3e-a15d-48be-b496-baeab138b020",
+    "token": "TRAININGSESS202601V9",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 9,
+    "status": "retired",
+    "created_at": "2026-11-09 04:31:46.839608"
+  },
+  {
+    "id": "ea0a37fb-a630-4646-8448-d21eb9c674b0",
+    "token": "CLIENTCORPVERALPHAV17",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 17,
+    "status": "retired",
+    "created_at": "2026-11-09 04:31:46.950231"
+  },
+  {
+    "id": "bd440b95-6461-4b77-8938-7a2c1941320c",
+    "token": "CLIENTCORPVERALPHAV18",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 18,
+    "status": "retired",
+    "created_at": "2026-11-09 05:04:51.511135"
+  },
+  {
+    "id": "44c01c1f-f680-48c3-996a-25f769709739",
+    "token": "ROLEACCTMGRV10",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 10,
+    "status": "retired",
+    "created_at": "2026-11-09 05:04:51.611641"
+  },
+  {
+    "id": "3375ea62-e98f-47aa-a257-ad7cb4676286",
+    "token": "TRAININGSESS202601V10",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 10,
+    "status": "retired",
+    "created_at": "2026-11-09 05:04:51.622583"
+  },
+  {
+    "id": "430f2696-47c7-41df-ac6b-081bf9c5deb7",
+    "token": "CLIENTCORPVERALPHAV19",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 19,
+    "status": "retired",
+    "created_at": "2026-11-09 05:04:51.705005"
+  },
+  {
+    "id": "214672d6-8480-4a07-9762-e09a55318968",
+    "token": "CLIENTCORPVERALPHAV20",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 20,
+    "status": "retired",
+    "created_at": "2026-11-09 05:25:53.126362"
+  },
+  {
+    "id": "913427ff-6197-48f8-8afa-ca976cbaea69",
+    "token": "ROLEACCTMGRV11",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 11,
+    "status": "retired",
+    "created_at": "2026-11-09 05:25:53.235585"
+  },
+  {
+    "id": "7d6f62f1-728c-4b52-9ae6-8e6d7b12b1c6",
+    "token": "TRAININGSESS202601V11",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 11,
+    "status": "retired",
+    "created_at": "2026-11-09 05:25:53.244119"
+  },
+  {
+    "id": "64c9a026-0646-447c-aab4-4d7600570801",
+    "token": "CLIENTCORPVERALPHAV21",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 21,
+    "status": "retired",
+    "created_at": "2026-11-09 05:25:53.342922"
+  },
+  {
+    "id": "57b31942-d087-41e8-9ecf-794fa7f416dd",
+    "token": "CLIENTCORPVERALPHAV22",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 22,
+    "status": "retired",
+    "created_at": "2026-11-09 05:32:36.468791"
+  },
+  {
+    "id": "6aadbf91-e573-4156-8325-7ad66c017b1e",
+    "token": "ROLEACCTMGRV12",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 12,
+    "status": "retired",
+    "created_at": "2026-11-09 05:32:36.586540"
+  },
+  {
+    "id": "983c3d9a-ba49-4895-b990-94c02bbbb0c4",
+    "token": "TRAININGSESS202601V12",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 12,
+    "status": "retired",
+    "created_at": "2026-11-09 05:32:36.597293"
+  },
+  {
+    "id": "7e587577-4fe3-48c8-900e-f9a986c85eb9",
+    "token": "CLIENTCORPVERALPHAV23",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 23,
+    "status": "retired",
+    "created_at": "2026-11-09 05:32:36.730803"
+  },
+  {
+    "id": "e7f7427f-6a11-409a-9f99-71f7f20459d5",
+    "token": "CLIENTCORPVERALPHAV24",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 24,
+    "status": "retired",
+    "created_at": "2026-11-09 05:50:04.314047"
+  },
+  {
+    "id": "49643ad6-d61e-4276-b12f-fae66f0b2f97",
+    "token": "ROLEACCTMGRV13",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 13,
+    "status": "retired",
+    "created_at": "2026-11-09 05:50:04.457696"
+  },
+  {
+    "id": "0c4ded52-5b23-44a0-bfc2-3e6cf6ad9585",
+    "token": "TRAININGSESS202601V13",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 13,
+    "status": "retired",
+    "created_at": "2026-11-09 05:50:04.473968"
+  },
+  {
+    "id": "b758fb9d-2216-470e-b01b-a4e144be83f3",
+    "token": "CLIENTCORPVERALPHAV25",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 25,
+    "status": "retired",
+    "created_at": "2026-11-09 05:50:04.641654"
+  },
+  {
+    "id": "635882e9-389d-44e7-befc-6de977186f7e",
+    "token": "CLIENTCORPVERALPHAV26",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 26,
+    "status": "retired",
+    "created_at": "2026-11-09 22:22:34.705864"
+  },
+  {
+    "id": "c9a5f091-7a3d-4907-983c-bfae907e1b7f",
+    "token": "ROLEACCTMGRV14",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 14,
+    "status": "retired",
+    "created_at": "2026-11-09 22:22:34.801497"
+  },
+  {
+    "id": "7ea86a4a-22b3-4c61-a5fa-441ad6f3da19",
+    "token": "TRAININGSESS202601V14",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 14,
+    "status": "retired",
+    "created_at": "2026-11-09 22:22:34.810294"
+  },
+  {
+    "id": "145476d8-6295-41cd-aa17-186c5a34af2b",
+    "token": "CLIENTCORPVERALPHAV27",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 27,
+    "status": "retired",
+    "created_at": "2026-11-09 22:22:34.883543"
+  },
+  {
+    "id": "c6fea5b7-1568-4612-ad01-e0f8ccd4c4ab",
+    "token": "CLIENTCORPVERALPHAV28",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 28,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:02.206326"
+  },
+  {
+    "id": "3d3a4aab-84e8-4d37-8dab-ef5d2e3335e8",
+    "token": "ROLEACCTMGRV15",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 15,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:02.311847"
+  },
+  {
+    "id": "d03091e0-8eeb-4ff1-a8f4-e2a9678874f9",
+    "token": "TRAININGSESS202601V15",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 15,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:02.322201"
+  },
+  {
+    "id": "8f95ebfb-60ac-4d2e-b573-b93d6fee6abd",
+    "token": "CLIENTCORPVERALPHAV29",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 29,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:02.418594"
+  },
+  {
+    "id": "ea3bb251-2148-4762-bcdb-ab0dd91e15ca",
+    "token": "CLIENTCORPVERALPHAV30",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 30,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:55.148036"
+  },
+  {
+    "id": "c88ad95c-8f0a-44d3-bb7d-e5234447e74b",
+    "token": "ROLEACCTMGRV16",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 16,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:55.250987"
+  },
+  {
+    "id": "8e103cf8-2280-4550-8c84-6a0fad1342ac",
+    "token": "TRAININGSESS202601V16",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 16,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:55.260081"
+  },
+  {
+    "id": "8f56a62f-dc9c-412b-bd81-51ba297613a7",
+    "token": "CLIENTCORPVERALPHAV31",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 31,
+    "status": "retired",
+    "created_at": "2026-11-09 22:50:55.347704"
+  },
+  {
+    "id": "ce9b86a4-3491-4ba6-88bc-53cd2043efb1",
+    "token": "CLIENTCORPVERALPHAV32",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 32,
+    "status": "retired",
+    "created_at": "2026-11-09 23:39:48.747724"
+  },
+  {
+    "id": "13ad6776-ac63-4557-998a-477af47efdfc",
+    "token": "ROLEACCTMGRV17",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 17,
+    "status": "retired",
+    "created_at": "2026-11-09 23:39:48.852740"
+  },
+  {
+    "id": "99bd0454-d1ad-40e8-91fd-31d2e9479a9f",
+    "token": "TRAININGSESS202601V17",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 17,
+    "status": "retired",
+    "created_at": "2026-11-09 23:39:48.861123"
+  },
+  {
+    "id": "2ff173dc-61e5-4e9a-9f1c-3ae4b5d82c74",
+    "token": "CLIENTCORPVERALPHAV33",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 33,
+    "status": "retired",
+    "created_at": "2026-11-09 23:39:48.948548"
+  },
+  {
+    "id": "6702f4fa-dde9-428b-a598-6c5b00be8fe9",
+    "token": "CLIENTCORPVERALPHAV34",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 34,
+    "status": "retired",
+    "created_at": "2026-11-09 23:40:41.924625"
+  },
+  {
+    "id": "6f2e02cb-1fb3-479e-b5c8-41ae7b0143ae",
+    "token": "ROLEACCTMGRV18",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 18,
+    "status": "retired",
+    "created_at": "2026-11-09 23:40:42.037624"
+  },
+  {
+    "id": "d5f32eda-9141-4b7b-be7b-48340a18b013",
+    "token": "TRAININGSESS202601V18",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 18,
+    "status": "retired",
+    "created_at": "2026-11-09 23:40:42.046235"
+  },
+  {
+    "id": "6c24dbc5-d77c-4d50-a982-dd19043e21c5",
+    "token": "CLIENTCORPVERALPHAV35",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 35,
+    "status": "retired",
+    "created_at": "2026-11-09 23:40:42.133711"
+  },
+  {
+    "id": "5ea96967-2bd7-4faf-b37e-c8af3e0d252a",
+    "token": "CLIENTCORPVERALPHAV36",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 36,
+    "status": "retired",
+    "created_at": "2026-11-10 00:36:53.599917"
+  },
+  {
+    "id": "c7ba8531-822e-4260-9b1f-1f04b26c282f",
+    "token": "ROLEACCTMGRV19",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 19,
+    "status": "retired",
+    "created_at": "2026-11-10 00:36:53.708193"
+  },
+  {
+    "id": "e176f8ff-fbe0-434a-aa8d-cc9f82cea06e",
+    "token": "TRAININGSESS202601V19",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 19,
+    "status": "retired",
+    "created_at": "2026-11-10 00:36:53.718766"
+  },
+  {
+    "id": "f8eaa937-81f5-4e26-9f02-e2f07c015fb3",
+    "token": "CLIENTCORPVERALPHAV37",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 37,
+    "status": "retired",
+    "created_at": "2026-11-10 00:36:53.811811"
+  },
+  {
+    "id": "5bbcf8a1-27cf-4ff2-a348-40fea606fdd4",
+    "token": "CLIENTCORPVERALPHAV38",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 38,
+    "status": "retired",
+    "created_at": "2026-11-10 00:57:54.863811"
+  },
+  {
+    "id": "c16549e7-c6ee-4ee6-ba1c-0f65d8dab6c8",
+    "token": "ROLEACCTMGRV20",
+    "attribute_type": "ROLE",
+    "ref_code": "ACCTMGR",
+    "version": 20,
+    "status": "active",
+    "created_at": "2026-11-10 00:57:55.000904"
+  },
+  {
+    "id": "931c0467-47a0-42fa-8720-efe66390a4a4",
+    "token": "TRAININGSESS202601V20",
+    "attribute_type": "TRAINING",
+    "ref_code": "SESS202601",
+    "version": 20,
+    "status": "active",
+    "created_at": "2026-11-10 00:57:55.014643"
+  },
+  {
+    "id": "fa2fd772-c056-4c5f-bf4c-887f72a67f20",
+    "token": "CLIENTCORPVERALPHAV39",
+    "attribute_type": "CLIENT",
+    "ref_code": "CORPVERALPHA",
+    "version": 39,
+    "status": "active",
+    "created_at": "2026-11-10 00:57:55.146809"
+  }
+]

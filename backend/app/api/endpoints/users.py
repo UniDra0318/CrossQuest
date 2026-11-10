@@ -3,6 +3,7 @@ import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
+from sqlalchemy import case
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
@@ -56,7 +57,12 @@ def get_system_overview(
     admin_user: User = Depends(get_current_admin_user)
 ):
     """Computes real-time system overview metrics for the Admin Dashboard from the database."""
-    users_total = db.query(User).count()
+    test_filter = (
+        ~User.email.like("%@test.ph") &
+        ~User.email.like("%features%") &
+        ~User.full_name.ilike("%Tester%")
+    )
+    users_total = db.query(User).filter(test_filter).count()
     clients_total = db.query(ClientCompany).count()
     records_total = db.query(TrainingRecord).filter(TrainingRecord.deleted_at == None).count()
 
@@ -75,7 +81,7 @@ def get_system_overview(
 
     role_counts = {}
     for r in ("admin", "account_manager", "finance", "trainer", "trainee"):
-        role_counts[r] = db.query(User).filter(User.role == r).count()
+        role_counts[r] = db.query(User).filter(test_filter, User.role == r).count()
 
     return SystemOverviewResponse(
         users_total=users_total,
@@ -114,11 +120,41 @@ def list_trainers(
 
 @router.get("/", response_model=List[UserResponse])
 def list_users(
+    role: Optional[str] = None,
+    exclude_test: bool = True,
+    exclude_trainees: bool = False,
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_current_admin_user)
 ):
-    """Admin endpoint to list all system accounts (FR-01, FR-02)."""
-    users = db.query(User).all()
+    """Admin endpoint to list system accounts (FR-01, FR-02).
+    Lists all provisioned system accounts (administrators, account managers, trainers,
+    finance officers, and trainees) while filtering out internal automated test fixtures.
+    """
+    query = db.query(User)
+    if exclude_test:
+        query = query.filter(
+            ~User.email.like("%@test.ph"),
+            ~User.email.like("%features%"),
+            ~User.email.like("%tester%"),
+            ~User.full_name.ilike("%Feature Tester%"),
+            ~User.full_name.ilike("%Tester%")
+        )
+    if exclude_trainees:
+        query = query.filter(User.role != "trainee")
+    if role:
+        query = query.filter(User.role == role)
+
+    # Order by account hierarchy: Admin (1) -> AM (2) -> Finance (3) -> Trainer (4) -> Trainee (5)
+    role_hierarchy = case(
+        (User.role == "admin", 1),
+        (User.role == "account_manager", 2),
+        (User.role == "finance", 3),
+        (User.role == "trainer", 4),
+        (User.role == "trainee", 5),
+        else_=6
+    )
+    query = query.order_by(role_hierarchy.asc(), User.full_name.asc())
+    users = query.all()
     for u in users:
         if not u.clearance_level:
             if u.role == "admin":

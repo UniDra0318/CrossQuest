@@ -1,0 +1,12 @@
+id,batch_id,source_row_no,issue_type,field_name,resolution,resolution_reason,resolved_by_user_id,resolved_at
+4d9fa150-7c82-4e75-9cfc-13b2dbab776d,4d5d9fb4-8f40-4595-ae79-fe34021ac2cb,1,MISSING_TRAINEE_CODE,trainee_code,CORRECT,Administrative data correction on pilot record.,a6a9ceba-2656-44f2-89d6-18bb6bffd212,2026-11-10 00:58:05.352807
+d6ba2bff-f209-4e69-b031-d9f0b53f5178,4d5d9fb4-8f40-4595-ae79-fe34021ac2cb,2,MISSING_COURSE_NAME,course_name,,,,
+16f75f5c-43e3-46a8-b24b-ec141efccb67,4d5d9fb4-8f40-4595-ae79-fe34021ac2cb,3,INVALID_SCORE_FORMAT,score,,,,
+76d61d23-3714-45b1-b3f6-88383ffab027,ae701aa2-5b1b-43e2-8768-a8063e0bd4d6,1,MISSING_TRAINEE_CODE,trainee_code,,,,
+6466daea-233a-40fb-997b-e9125bcc9c0e,ae701aa2-5b1b-43e2-8768-a8063e0bd4d6,1,MISSING_COURSE_NAME,course_name,,,,
+f5a39b8f-57f9-4d2b-9cdb-5ddac193e222,ae701aa2-5b1b-43e2-8768-a8063e0bd4d6,1,MISSING_COMPANY_CODE,company_code,,,,
+9417a6f9-ed04-4035-a155-a05edc3b24ca,ae701aa2-5b1b-43e2-8768-a8063e0bd4d6,2,MISSING_TRAINEE_CODE,trainee_code,,,,
+70f12dbc-e711-45b6-b652-fc0c43df5fdc,ae701aa2-5b1b-43e2-8768-a8063e0bd4d6,2,MISSING_COURSE_NAME,course_name,,,,
+561922a2-c627-4044-a594-4e2cd4f8d75f,ae701aa2-5b1b-43e2-8768-a8063e0bd4d6,2,MISSING_COMPANY_CODE,company_code,,,,
+535685ec-db79-4ff7-92e4-8084951ef83c,52130474-3682-4e1f-9c93-0f5bc254ec38,149,DUPLICATE_ROW,participant_name,MERGE_DUPLICATE,Verified duplicate cohort registration with HR sponsor; merged into single participant profile.,a6a9ceba-2656-44f2-89d6-18bb6bffd212,2026-11-10 00:58:05.700442
+7187f4e6-0295-4401-b88f-97dc707afb6a,52130474-3682-4e1f-9c93-0f5bc254ec38,150,DUPLICATE_ROW,participant_name,MERGE_DUPLICATE,Verified duplicate cohort registration with HR sponsor; merged into single participant profile.,a6a9ceba-2656-44f2-89d6-18bb6bffd212,2026-11-10 00:58:05.731848

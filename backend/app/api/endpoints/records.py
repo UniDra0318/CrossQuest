@@ -272,8 +272,8 @@ def list_training_records(
             score=r.score,
             completion_date=r.completion_date,
             encryption_policy=r.encryption_policy,
-            policy_version=r.policy_version,
-            is_encrypted=r.is_encrypted,
+            policy_version=r.policy_version or 1,
+            is_encrypted=True if r.is_encrypted is None else bool(r.is_encrypted),
             deleted_at=r.deleted_at,
             deleted_by=r.deleted_by,
             created_at=r.created_at
@@ -506,6 +506,13 @@ def edit_training_record(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A training record cannot become Completed without official Trainer session sign-off."
+            )
+
+        # Prohibit Account Manager from entering or updating evaluation scores (Chapter III Table 9, Table 16)
+        if update_in.score is not None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account Managers are not permitted to enter or modify practical evaluation scores. Score entry is reserved for Administrators."
             )
 
     # Mandatory Reason Check for Record Corrections (U-05, FR-08)

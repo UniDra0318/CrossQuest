@@ -81,22 +81,22 @@ export default function LandingView() {
 
           {/* Meta ticker */}
           <div className="hero__meta">
-            <span>[ GAMIFIED ENTERPRISE LEARNING ]</span>
-            <span>QUESTS LIVE NOW &#9679;</span>
+            <span>[ ZERO-TRUST LEARNING &amp; PRIVACY ASSURANCE ]</span>
+            <span>PILOT READY &#9679;</span>
           </div>
 
           {/* Giant Title */}
           <h1 className="hero__title">
-            LEVEL <span>UP</span>
+            ZERO-TRUST <span>LEARNING</span>
           </h1>
 
           {/* Row: Left Copy & Right 3D Stage */}
           <div className="hero__row">
             {/* Left Copy */}
             <div className="hero__copy">
-              <span className="hero__kicker">ONBOARDING / COMPLIANCE / CERTIFICATION</span>
+              <span className="hero__kicker">CP-ABE CIPHERTEXT ISOLATION &bull; AUDIT LEDGER &bull; GAMIFIED COMPLIANCE</span>
               <p className="hero__lede">
-                Complete today's interactive quest to extend your <strong>7-day streak</strong> and climb the corporate leaderboard.
+                CrossQuest combines mathematical attribute-based encryption, strict role-scoped access boundaries, and interactive gamified cohorts for enterprise cybersecurity and compliance training.
               </p>
 
               {/* Enterprise Action Buttons */}

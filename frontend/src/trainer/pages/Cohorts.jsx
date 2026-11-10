@@ -12,7 +12,10 @@ export default function Cohorts() {
   const isDark = effectiveTheme === 'dark';
 
   const totalEnrolled = cohorts.reduce((acc, c) => acc + (c.enrolled || 0), 0);
-  const totalCertified = cohorts.reduce((acc, c) => acc + (c.certified || 0), 0);
+  const totalCertified = cohorts.reduce((acc, c) => {
+    const isSigned = Boolean(c.signed_off || c.signedOff || c.trainer_signed_off || c.status === 'COMPLETED' || c.status === 'Completed');
+    return acc + (isSigned ? (c.certified || 0) : 0);
+  }, 0);
   const avgOverall = cohorts.length
     ? Math.round((cohorts.reduce((acc, c) => acc + (c.avg || 0), 0) / cohorts.length) * 10) / 10
     : 0;
@@ -64,11 +67,12 @@ export default function Cohorts() {
       <div className="trn-cards">
         {cohorts && cohorts.length > 0 ? (
           cohorts.map((cohort) => {
-            const passPercent = cohort.enrolled ? Math.round((cohort.certified / cohort.enrolled) * 100) : 0;
-            const isSignedOff = Boolean(cohort.signed_off || cohort.trainer_signed_off || cohort.status === 'Completed');
+            const isSignedOff = Boolean(cohort.signed_off || cohort.signedOff || cohort.trainer_signed_off || cohort.status === 'COMPLETED' || cohort.status === 'Completed');
             const isFuture = !isSignedOff && cohort.schedule && new Date(cohort.schedule.split(' ')[0]) > new Date();
             const sessionStatus = isSignedOff ? 'Signed off' : isFuture ? 'Future' : 'Awaiting sign-off';
             const statusClass = isSignedOff ? 'adm-chip--green' : isFuture ? 'adm-chip--blue' : 'adm-chip--orange';
+            const effectiveCertified = isSignedOff ? (cohort.certified || 0) : 0;
+            const passPercent = cohort.enrolled ? Math.round((effectiveCertified / cohort.enrolled) * 100) : 0;
 
             return (
               <div
@@ -96,9 +100,17 @@ export default function Cohorts() {
               <div style={{ marginTop: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600 }}>
                   <span>Certification Progress</span>
-                  <span>{cohort.certified} / {cohort.enrolled} ({passPercent}%)</span>
+                  {isSignedOff ? (
+                    <span style={{ color: isDark ? '#34d399' : '#059669' }}>
+                      {effectiveCertified} / {cohort.enrolled} ({passPercent}%)
+                    </span>
+                  ) : (
+                    <span style={{ color: isDark ? '#fbbf24' : '#b45309' }}>
+                      Pending Sign-off (0 / {cohort.enrolled})
+                    </span>
+                  )}
                 </div>
-                <div className="adm-progress adm-progress--green" style={{ marginTop: '8px' }}>
+                <div className={`adm-progress ${isSignedOff ? 'adm-progress--green' : 'adm-progress--amber'}`} style={{ marginTop: '8px' }}>
                   <i style={{ width: `${passPercent}%` }} />
                 </div>
               </div>

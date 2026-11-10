@@ -31,6 +31,7 @@ export default function PeopleAccess({
 }) {
   const { isDark } = useTheme();
   const [staffSearch, setStaffSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
   const [companySearch, setCompanySearch] = useState('');
   const [actionToast, setActionToast] = useState(null);
   const [processingUserId, setProcessingUserId] = useState(null);
@@ -61,23 +62,52 @@ export default function PeopleAccess({
     }
   };
 
-  // Filtered staff
+  const staffCount = useMemo(() => staffList.filter(s => (s.role || '').toLowerCase() !== 'trainee').length, [staffList]);
+  const traineeCount = useMemo(() => staffList.filter(s => (s.role || '').toLowerCase() === 'trainee').length, [staffList]);
+
+  // Filtered accounts (Staff, Trainees, All)
   const filteredStaff = useMemo(() => {
-    if (!staffSearch) return staffList;
+    let list = staffList;
+    if (roleFilter === 'STAFF') {
+      list = list.filter(s => (s.role || '').toLowerCase() !== 'trainee');
+    } else if (roleFilter === 'TRAINEE') {
+      list = list.filter(s => (s.role || '').toLowerCase() === 'trainee');
+    }
+    if (!staffSearch) return list;
     const q = staffSearch.toLowerCase();
-    return staffList.filter(s =>
+    return list.filter(s =>
       (s.name && s.name.toLowerCase().includes(q)) ||
       (s.email && s.email.toLowerCase().includes(q)) ||
       (s.role && s.role.toLowerCase().includes(q))
     );
-  }, [staffList, staffSearch]);
+  }, [staffList, staffSearch, roleFilter]);
+
+  // Sort accounts by account hierarchy: Admin (Level 3) -> AM (Level 2) -> Finance (Level 2) -> Trainer (Level 1) -> Trainee (Level 1)
+  const sortedStaff = useMemo(() => {
+    const ROLE_HIERARCHY_RANK = {
+      admin: 1,
+      'account manager': 2,
+      account_manager: 2,
+      finance: 3,
+      trainer: 4,
+      trainee: 5
+    };
+    return [...filteredStaff].sort((a, b) => {
+      const roleA = (a.role || '').toLowerCase().trim();
+      const roleB = (b.role || '').toLowerCase().trim();
+      const rankA = ROLE_HIERARCHY_RANK[roleA] || (a.level ? 10 - a.level : 99);
+      const rankB = ROLE_HIERARCHY_RANK[roleB] || (b.level ? 10 - b.level : 99);
+      if (rankA !== rankB) return rankA - rankB;
+      return (a.name || a.email || '').localeCompare(b.name || b.email || '');
+    });
+  }, [filteredStaff]);
 
   const {
     currentPage: staffPage,
     setCurrentPage: setStaffPage,
     paginatedItems: pagedStaff,
     totalItems: totalStaff
-  } = usePagination(filteredStaff, 4);
+  } = usePagination(sortedStaff, 4);
 
   // Filtered companies
   const filteredCompanies = useMemo(() => {
@@ -108,9 +138,9 @@ export default function PeopleAccess({
             <span>ROLE-BASED ATTRIBUTE AUTHORITY &bull; CP-ABE ENCLAVE</span>
           </div>
 
-          <h2 className="trainee-hero-headline">Staff Access &amp; Clearances</h2>
+          <h2 className="trainee-hero-headline">Account Access &amp; Clearances</h2>
           <p className="trainee-hero-sub">
-            Configure administrative roles, multi-level cryptographic clearances, and assigned tenant access scopes.
+            Configure administrative roles, trainee credentials, multi-level cryptographic clearances, and assigned tenant access scopes.
           </p>
 
           <div className="trainee-hero-actions">
@@ -118,23 +148,23 @@ export default function PeopleAccess({
               type="button"
               className="trainee-hero-primary-btn adm-staff-primary-btn"
               onClick={onOpenCreateUserModal}
-              title="Provision a new staff account with cryptographic keys"
+              title="Provision a new enterprise account with cryptographic keys"
             >
               <UserPlus size={14} />
-              <span>Provision Staff Account</span>
+              <span>Provision New Account</span>
             </button>
           </div>
         </div>
 
-        {/* 4-Cell Bento Telemetry Grid for Staff */}
+        {/* 4-Cell Bento Telemetry Grid for Accounts */}
         <div className="trainee-hero-metrics-panel">
           <div className="hero-metric-cell adm-staff-metric-cell">
-            <span className="metric-tag">TOTAL PERSONNEL</span>
+            <span className="metric-tag">TOTAL DIRECTORY</span>
             <div className="metric-num">
               {staffList.length}
-              <span className="metric-unit">USERS</span>
+              <span className="metric-unit">ACCOUNTS</span>
             </div>
-            <span className="metric-sub-label">Authorized directory</span>
+            <span className="metric-sub-label">Provisioned directory</span>
           </div>
 
           <div className="hero-metric-cell adm-staff-metric-cell">
@@ -166,15 +196,69 @@ export default function PeopleAccess({
         </div>
       </section>
 
-      {/* 1. Staff Access & Role Management Panel */}
+      {/* 1. Account Access & Role Management Panel */}
       <div className="adm-panel adm-vault-panel">
-        <div className="adm-panel__head adm-vault-controls">
+        <div className="adm-panel__head adm-vault-controls" style={{ flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={() => { setRoleFilter('ALL'); setStaffPage(1); }}
+              style={{
+                padding: '7px 14px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                background: roleFilter === 'ALL' ? (isDark ? '#4338ca' : '#6366f1') : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
+                color: roleFilter === 'ALL' ? '#ffffff' : (isDark ? '#94a3b8' : '#64748b'),
+                transition: 'all 0.15s ease'
+              }}
+            >
+              All Accounts ({staffList.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRoleFilter('STAFF'); setStaffPage(1); }}
+              style={{
+                padding: '7px 14px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                background: roleFilter === 'STAFF' ? (isDark ? '#4338ca' : '#6366f1') : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
+                color: roleFilter === 'STAFF' ? '#ffffff' : (isDark ? '#94a3b8' : '#64748b'),
+                transition: 'all 0.15s ease'
+              }}
+            >
+              Staff ({staffCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRoleFilter('TRAINEE'); setStaffPage(1); }}
+              style={{
+                padding: '7px 14px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                background: roleFilter === 'TRAINEE' ? (isDark ? '#4338ca' : '#6366f1') : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
+                color: roleFilter === 'TRAINEE' ? '#ffffff' : (isDark ? '#94a3b8' : '#64748b'),
+                transition: 'all 0.15s ease'
+              }}
+            >
+              Trainees ({traineeCount})
+            </button>
+          </div>
+
           <div className="adm-vault-search-wrap">
             <div className="adm-search adm-vault-search">
               <Search size={15} />
               <input 
                 type="text" 
-                placeholder="Search staff members by name, email, or role..." 
+                placeholder="Search accounts by name, email, or role..." 
                 value={staffSearch}
                 onChange={(e) => setStaffSearch(e.target.value)}
               />
@@ -222,7 +306,7 @@ export default function PeopleAccess({
         <div className="adm-scroll" style={{ maxHeight: 'none', overflowY: 'visible' }}>
           <div className="adm-table">
             <div className="adm-grid adm-grid--access adm-th">
-              <div>STAFF MEMBER</div>
+              <div>ACCOUNT HOLDER</div>
               <div>ASSIGNED ROLE</div>
               <div>CLEARANCE LEVEL</div>
               <div>ASSIGNED CLIENT TENANTS</div>
@@ -357,8 +441,8 @@ export default function PeopleAccess({
             ) : (
               <TableEmptyBlock
                 icon={Users}
-                title="No Staff Accounts Located"
-                subtitle="No team members match the current search query or clearance criteria."
+                title="No Accounts Located"
+                subtitle="No accounts match the current search query or clearance criteria."
               />
             )}
           </div>
@@ -369,7 +453,7 @@ export default function PeopleAccess({
           totalItems={totalStaff}
           pageSize={4}
           onPageChange={setStaffPage}
-          itemName="staff accounts"
+          itemName="accounts"
         />
       </div>
 
@@ -544,7 +628,7 @@ export default function PeopleAccess({
                     <div>
                       <span className="client-comp-manager" style={{ fontSize: '12.5px', fontWeight: 700, color: isDark ? '#f8fafc' : '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8' }} />
-                        {c.am_name || 'Marcus Reyes'}
+                        {c.am_name || 'Unassigned'}
                       </span>
                     </div>
 

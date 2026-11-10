@@ -49,8 +49,9 @@ export async function getCohorts(token) {
     if (sessions && sessions.length > 0) {
       return sessions.map((s) => {
         const records = s.records || s.roster || [];
+        const isSigned = Boolean(s.trainer_signed_off);
         const enrolled = records.length;
-        const certified = records.filter(r => r.status?.toLowerCase() === 'completed').length;
+        const certified = isSigned ? records.filter(r => r.status?.toLowerCase() === 'completed').length : 0;
         const scores = records.filter(r => r.score != null).map(r => r.score);
         const avg = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : 88.5;
         const org = records[0]?.company_name || s.delivery_type || 'San Miguel Corporation';
@@ -65,11 +66,12 @@ export async function getCohorts(token) {
           schedule,
           scope: records[0]?.company_code || 'CORP_ALPHA',
           enrolled: enrolled || 2,
-          certified: certified || (s.trainer_signed_off ? enrolled : 0),
+          certified,
           avg,
           daysLeft: s.is_future_dated ? 14 : 0,
-          signedOff: Boolean(s.trainer_signed_off),
-          status: s.trainer_signed_off ? 'COMPLETED' : (s.is_future_dated ? 'UPCOMING' : 'ACTIVE COHORT')
+          signedOff: isSigned,
+          signed_off: isSigned,
+          status: isSigned ? 'COMPLETED' : (s.is_future_dated ? 'UPCOMING' : 'ACTIVE COHORT')
         };
       });
     }

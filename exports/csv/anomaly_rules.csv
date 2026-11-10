@@ -1,0 +1,11 @@
+id,rule_code,parameters,version_no,client_reviewed,description,last_edited_by_user_id
+9ac8b772-f463-4704-bf65-939879099b24,R1_OUT_OF_SCOPE,"{""threshold"": 1, ""window_minutes"": 1440, ""severity"": ""LOW""}",1,1,Single out-of-scope attempt aggregated daily,
+48d9032c-3eee-48f5-965c-5bdef016a178,R1_REPEATED_OUT_OF_SCOPE,"{""threshold"": 3, ""window_minutes"": 15, ""severity"": ""MEDIUM""}",1,1,Repeated out-of-scope attempts in 15 min,
+5a69f0b2-c8e5-4926-995a-bc7b7d5d2785,R2_FAILED_LOGINS_ACCOUNT,"{""threshold"": 5, ""window_minutes"": 10, ""severity"": ""MEDIUM""}",1,1,Failed logins for single account,935c91c0-3f9b-4120-b267-21a10d555419
+6dcd38cb-0f6e-4367-944d-715207bf04fb,R2_FAILED_LOGINS_IP,"{""threshold"": 10, ""distinct_usernames_threshold"": 2, ""window_minutes"": 10, ""severity"": ""MEDIUM""}",1,1,Failed logins for single IP (>=10 failures across >=2 distinct usernames in 10 min),935c91c0-3f9b-4120-b267-21a10d555419
+0f6ff5a9-e339-4190-90dc-2593a3028ca7,R3_HIGH_RECORD_ACCESS,"{""thresholds"": {""account_manager"": 25, ""trainer"": 25, ""finance"": 50, ""admin"": 50, ""trainee"": 15}, ""window_minutes"": 15}",1,1,Updated threshold per CCIS pilot review,935c91c0-3f9b-4120-b267-21a10d555419
+be382e24-35b6-4e91-b122-c2f379e0f06f,R3_REPORT_BURSTS,"{""threshold"": 5, ""window_minutes"": 60, ""severity"": ""MEDIUM""}",1,1,Report generation bursts,
+922db112-01e4-4110-b53d-5080e265fae5,R4_RECORD_DELETION,"{""threshold"": 1, ""severity"": ""HIGH""}",1,1,Soft deletion of client data,
+253d0a1a-9d39-4ab3-8d8c-e731a0d8d586,R4_RECORD_EDIT,"{""threshold"": 1, ""severity"": ""LOW""}",1,1,Edit of client data,
+a0513bed-5805-495a-a1e3-f7e47e60e66f,R4_BULK_EDIT,"{""threshold"": 10, ""window_minutes"": 15, ""severity"": ""MEDIUM""}",1,1,Bulk record edits in 15 min,
+ea7202fe-21d0-4ced-9179-d15be1654e56,S1_AFTER_HOURS,"{""start_hour"":9,""end_hour"":18,""tz"":""Asia/Manila""}",1,1,After-hours supporting indicator,

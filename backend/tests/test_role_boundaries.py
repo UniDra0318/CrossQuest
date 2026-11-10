@@ -482,3 +482,14 @@ def test_tc_xcl_09_option_b_shared_trainee_cross_company_viewing_and_write_block
     )
     assert resp_update.status_code == 403
     assert "Cannot modify training records for unassigned client companies" in resp_update.json()["detail"]
+
+    # 4. Score Entry Prohibition: am_alpha attempts to update score on ASSIGNED company record -> HTTP 403 Forbidden (Chapter III Table 9, Table 16)
+    rec_assigned_alpha = seed_test_data["rec_a"]
+    resp_score_update = client.put(
+        f"/api/v1/records/{rec_assigned_alpha.id}",
+        json={"status": "In progress", "score": 95.0, "attendance_status": "Present"},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert resp_score_update.status_code == 403
+    assert "Score entry is reserved for Administrators" in resp_score_update.json()["detail"]
+

@@ -269,14 +269,41 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                       </td>
                     )}
                     <td style={{ padding: '12px 16px', color: '#334155' }}>{r.courseName || '—'}</td>
-                    <td style={{ padding: '12px 16px', color: '#64748b' }}>{r.completionDate || (r.status === 'completed' ? '—' : 'In Progress')}</td>
+                    <td style={{ padding: '12px 16px', color: '#64748b' }}>{r.completionDate || '—'}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{ color: '#059669', fontWeight: 800 }}>{r.score != null ? `${r.score}%` : '—'}</span>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: r.status === 'completed' ? '#ecfdf5' : '#fffbeb', color: r.status === 'completed' ? '#059669' : '#b45309', border: r.status === 'completed' ? '1px solid #a7f3d0' : '1px solid #fde68a' }}>
-                        {r.status === 'completed' ? 'Certified' : 'In Training'}
-                      </span>
+                      {(() => {
+                        const raw = (r.status || 'Enrolled').toLowerCase();
+                        let badgeBg = '#f0f9ff';
+                        let badgeColor = '#0284c7';
+                        let badgeBorder = '1px solid #bae6fd';
+                        let displayStatus = 'Enrolled';
+
+                        if (raw === 'completed') {
+                          badgeBg = '#ecfdf5';
+                          badgeColor = '#059669';
+                          badgeBorder = '1px solid #a7f3d0';
+                          displayStatus = 'Completed';
+                        } else if (raw === 'in progress' || raw === 'in_progress') {
+                          badgeBg = '#fffbeb';
+                          badgeColor = '#b45309';
+                          badgeBorder = '1px solid #fde68a';
+                          displayStatus = 'In progress';
+                        } else if (raw === 'not completed' || raw === 'not_completed') {
+                          badgeBg = '#fef2f2';
+                          badgeColor = '#dc2626';
+                          badgeBorder = '1px solid #fecaca';
+                          displayStatus = 'Not completed';
+                        }
+
+                        return (
+                          <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: badgeBg, color: badgeColor, border: badgeBorder }}>
+                            {displayStatus}
+                          </span>
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))

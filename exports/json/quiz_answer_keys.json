@@ -1,0 +1,23 @@
+[
+  {
+    "id": "8184a2d9-7dd5-4b6a-aa09-77b62f4e50b5",
+    "question_id": "6f74b376-5540-4e72-a787-3f83e2b10727",
+    "correct_answer": 0,
+    "explanation": "Ciphertext-Policy Attribute-Based Encryption embeds policies into ciphertexts.",
+    "created_at": "2026-11-10 00:57:56.935075"
+  },
+  {
+    "id": "e56a3053-4f26-446f-9b90-d49f900a4ffa",
+    "question_id": "3e490ce3-a759-4c4f-a29f-b04056a3c0a8",
+    "correct_answer": 1,
+    "explanation": "BN254 is a Barreto-Naehrig pairing-friendly elliptic curve offering ~128-bit security.",
+    "created_at": "2026-11-10 00:57:56.935080"
+  },
+  {
+    "id": "9a6d18bb-d3e6-4cc1-ba8f-522ceecb42d1",
+    "question_id": "e93b6deb-a843-4d34-8a57-a6bb63014f44",
+    "correct_answer": 0,
+    "explanation": "Updated explanation.",
+    "created_at": "2026-11-10 00:57:57.770474"
+  }
+]

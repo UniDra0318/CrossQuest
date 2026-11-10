@@ -1,0 +1,1146 @@
+[
+  {
+    "id": "5701f80d-ffdb-4ec5-96a1-b4906ae52ac7",
+    "code": "AOS",
+    "name": "Acen Operations Services Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Energy & Utilities",
+    "created_at": "2026-11-08 00:38:13.859476"
+  },
+  {
+    "id": "27ff3c71-0cb4-48e3-943a-b12de7ba8402",
+    "code": "AOS_2",
+    "name": "Acen Operations Services Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Energy & Utilities",
+    "created_at": "2026-11-08 00:38:13.860332"
+  },
+  {
+    "id": "4b8314ea-ef35-40a4-91a3-208cf3a3cb28",
+    "code": "AOS_3",
+    "name": "Acen Operations Services Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Energy & Utilities",
+    "created_at": "2026-11-08 00:38:13.860881"
+  },
+  {
+    "id": "11d34d93-de5e-4263-82cb-3615c5ced56e",
+    "code": "AMIHAN_SOLUTI",
+    "name": "Amihan Solutions (OPC)",
+    "client_type": "SME",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.861387"
+  },
+  {
+    "id": "3ab5c2fc-9ff8-4317-880d-5a9f0d725b87",
+    "code": "AMIHAN_SOLUTI_2",
+    "name": "Amihan Solutions (OPC)",
+    "client_type": "SME",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.861907"
+  },
+  {
+    "id": "0f8217e9-f436-40d1-9add-f95f0e6fa8ea",
+    "code": "ANALOG_DEVICE_INC",
+    "name": "Analog Devices Inc",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.862328"
+  },
+  {
+    "id": "3d015085-0901-43ca-aa38-15183801c943",
+    "code": "ADP4",
+    "name": "Analog Devices Inc (SI 0239) PO# 47398712",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.862764"
+  },
+  {
+    "id": "c7a140ab-f713-4253-8a6d-0f421103c26a",
+    "code": "ANGELI_ALCANT",
+    "name": "Angelito Alcantara",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.863166"
+  },
+  {
+    "id": "468faec0-a8ae-474b-867e-f4e114f65ef1",
+    "code": "ANGELI_ALCANT_2",
+    "name": "Angelito Alcantara",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.863550"
+  },
+  {
+    "id": "5f1342eb-df63-4d7b-aa65-67bddd5bbd01",
+    "code": "ANGELI_ALCANT_3",
+    "name": "Angelito Alcantara",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.864007"
+  },
+  {
+    "id": "a53b4507-3b19-4138-bdbe-8688ce79cf7b",
+    "code": "AYALA_LAND_INC",
+    "name": "Ayala Land Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Real Estate & Construction",
+    "created_at": "2026-11-08 00:38:13.864425"
+  },
+  {
+    "id": "a4ebb8cb-a159-423e-a9ca-3361fad362b1",
+    "code": "AYALA_LAND_INC_2",
+    "name": "Ayala Land Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Real Estate & Construction",
+    "created_at": "2026-11-08 00:38:13.864875"
+  },
+  {
+    "id": "0aab717d-fe08-4b21-8e3d-ad00dd6cc56f",
+    "code": "BIBSP",
+    "name": "Boehringer Ingelheim Business Services Philippines Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Healthcare & Pharmaceuticals",
+    "created_at": "2026-11-08 00:38:13.865322"
+  },
+  {
+    "id": "706378c3-6d51-460c-9f41-7ace7165bdf0",
+    "code": "BIBSP_2",
+    "name": "Boehringer Ingelheim Business Services Philippines Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Healthcare & Pharmaceuticals",
+    "created_at": "2026-11-08 00:38:13.865707"
+  },
+  {
+    "id": "78374f5d-3572-4ab2-93b0-321c6606d86a",
+    "code": "DERIC_CENTON_MACALI",
+    "name": "Deric Centones Macalinao",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.866140"
+  },
+  {
+    "id": "37327f6e-88a0-455a-abca-fd2354792c6e",
+    "code": "DERIC_CENTON_MACALI_2",
+    "name": "Deric Centones Macalinao",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.866665"
+  },
+  {
+    "id": "a4db021f-1322-4c36-b596-68b1413c9256",
+    "code": "DDH",
+    "name": "Diliman Doctors Hospital, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Healthcare & Pharmaceuticals",
+    "created_at": "2026-11-08 00:38:13.867076"
+  },
+  {
+    "id": "7431de8d-c3b7-4513-a7cd-c95854b44504",
+    "code": "DDH_2",
+    "name": "Diliman Doctors Hospital, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Healthcare & Pharmaceuticals",
+    "created_at": "2026-11-08 00:38:13.867457"
+  },
+  {
+    "id": "af464ea2-86b9-4ff4-a396-37d79f542f72",
+    "code": "EWALIC",
+    "name": "East West Ageas Life Insurance Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Financial Services & Insurance",
+    "created_at": "2026-11-08 00:38:13.867832"
+  },
+  {
+    "id": "6463e864-1854-4dfe-872c-5b7c446bdcc1",
+    "code": "EWALIC_2",
+    "name": "East West Ageas Life Insurance Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Financial Services & Insurance",
+    "created_at": "2026-11-08 00:38:13.868161"
+  },
+  {
+    "id": "f5662aa5-67ca-4ea4-ac8e-490b509c9a8e",
+    "code": "EMS",
+    "name": "Expedise Management Solutions, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.868520"
+  },
+  {
+    "id": "e310da1a-2a24-4084-b047-eda51f029a69",
+    "code": "EMS_2",
+    "name": "Expedise Management Solutions, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.868863"
+  },
+  {
+    "id": "35615d94-ad30-4571-8707-5b8fc259178f",
+    "code": "FFHT",
+    "name": "First Flow HVAC Technologies, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Energy & Utilities",
+    "created_at": "2026-11-08 00:38:13.869187"
+  },
+  {
+    "id": "5062faed-f0c6-4f06-96b3-ccfa6059ab57",
+    "code": "FFHT_2",
+    "name": "First Flow HVAC Technologies, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Energy & Utilities",
+    "created_at": "2026-11-08 00:38:13.869505"
+  },
+  {
+    "id": "8a552b7b-1c3f-44fd-b671-68cbaa14bb87",
+    "code": "GLADYS_RUIZ",
+    "name": "Gladys Ruiz",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.869852"
+  },
+  {
+    "id": "b88b1032-35b0-41e5-b000-d3f807ebff7d",
+    "code": "GLADYS_RUIZ_2",
+    "name": "Gladys Ruiz",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.870188"
+  },
+  {
+    "id": "b8e33016-4bac-45ca-ae4a-50e7b21a65a1",
+    "code": "IPROY_SERVI",
+    "name": "IPRoyal Services FZE LLC",
+    "client_type": "SME",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.870649"
+  },
+  {
+    "id": "7e57adab-3fe3-42bf-8ade-69e3781bc3e1",
+    "code": "IPROY_SERVI_2",
+    "name": "IPRoyal Services FZE LLC",
+    "client_type": "SME",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.870988"
+  },
+  {
+    "id": "f13a7f08-0847-4d66-b1a1-2a154725bcc3",
+    "code": "IGBDSC",
+    "name": "Immensity Group Business Development Services Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.871319"
+  },
+  {
+    "id": "a5d962ee-9914-4edd-a1ff-e60ad4482c33",
+    "code": "IGBDSC_2",
+    "name": "Immensity Group Business Development Services Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.871903"
+  },
+  {
+    "id": "b1752e20-a5fb-4e46-a7e7-6e64ef285fcc",
+    "code": "ISLA_LPG_CORPOR",
+    "name": "Isla LPG Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Energy & Utilities",
+    "created_at": "2026-11-08 00:38:13.872292"
+  },
+  {
+    "id": "5cdd1fb1-c2d4-4728-8e5f-db9d7ad2f7d6",
+    "code": "ISLA_LPG_CORPOR_2",
+    "name": "Isla LPG Corporation (SI # 0213 to 0215)",
+    "client_type": "ENTERPRISE",
+    "industry": "Energy & Utilities",
+    "created_at": "2026-11-08 00:38:13.872721"
+  },
+  {
+    "id": "116c5514-5eae-4d8f-837d-c592d6cc2f9b",
+    "code": "JOCELY_B_CAPIST",
+    "name": "Jocelyn B. Capistrano",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.873120"
+  },
+  {
+    "id": "02c30291-e699-4da9-ae35-4822c34e8206",
+    "code": "JOCELY_B_CAPIST_2",
+    "name": "Jocelyn B. Capistrano",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.873704"
+  },
+  {
+    "id": "52f5b59e-a50b-4bc5-87c1-1327e92ffecc",
+    "code": "JOCELY_B_CAPIST_3",
+    "name": "Jocelyn B. Capistrano",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.874313"
+  },
+  {
+    "id": "e6b96856-951c-4998-aed8-9d3134abf743",
+    "code": "KIMBER_ANN_ESTEBA",
+    "name": "Kimberly Ann Esteban",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.874733"
+  },
+  {
+    "id": "d69177a9-fce2-4fe8-8d5e-4b3e2f8c37cb",
+    "code": "KIMBER_ANN_ESTEBA_2",
+    "name": "Kimberly Ann Esteban",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.875143"
+  },
+  {
+    "id": "cd8d7dad-9c26-48f3-aa3d-bc31fef92ac5",
+    "code": "KRISTI_CASTIL",
+    "name": "Kristine Castillo",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.875599"
+  },
+  {
+    "id": "81379ed5-67dc-4d83-92c2-7695fd5de8c4",
+    "code": "KRISTI_CASTIL_2",
+    "name": "Kristine Castillo",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.876001"
+  },
+  {
+    "id": "4205cd77-f176-4021-9953-b887eb18c695",
+    "code": "LAARNI_UYCHUT",
+    "name": "Laarni Uychutin",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.876371"
+  },
+  {
+    "id": "ad932810-542a-4293-b949-e8340abcbffb",
+    "code": "LAARNI_UYCHUT_2",
+    "name": "Laarni Uychutin",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.876747"
+  },
+  {
+    "id": "fe9f7e83-6ab8-4765-8daa-5001a3cfcbbe",
+    "code": "MJCS",
+    "name": "Ma. Janet C. Sibayan",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.877095"
+  },
+  {
+    "id": "9a1b374e-6809-4c8e-bb3d-506283d500fc",
+    "code": "MJCS_2",
+    "name": "Ma. Janet C. Sibayan (SI 0238)",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.877428"
+  },
+  {
+    "id": "dd85878f-2d8b-47f3-a108-cd9731d34d33",
+    "code": "MKLT",
+    "name": "Ma. Kristina Luisa Tayag",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.877787"
+  },
+  {
+    "id": "dd13bd12-abb8-4ee5-a405-1fd069e7a4a5",
+    "code": "MKLT_2",
+    "name": "Ma. Kristina Luisa Tayag",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.878164"
+  },
+  {
+    "id": "bcc3d1a9-b0de-4f05-a0bf-68315b4425c8",
+    "code": "MA_NONICA_PORMIL",
+    "name": "Ma. Nonica Pormilda",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.878560"
+  },
+  {
+    "id": "3ef6fcf3-e20a-4831-8948-e953b0f923a2",
+    "code": "MA_NONICA_PORMIL_2",
+    "name": "Ma. Nonica Pormilda",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.878902"
+  },
+  {
+    "id": "57dcaecd-5cc8-48e1-9e8c-e9b53cd3caa8",
+    "code": "MIKE_ANGELO_VILLAN",
+    "name": "Mike Angelo Villanueva",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.879231"
+  },
+  {
+    "id": "53d04f5c-d619-4c62-be99-6707650abb00",
+    "code": "MIKE_ANGELO_VILLAN_2",
+    "name": "Mike Angelo Villanueva",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.879551"
+  },
+  {
+    "id": "bede1a13-1717-42ea-8737-c4b7ada815e8",
+    "code": "MIKKA_BARLIS",
+    "name": "Mikka Barlis",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.879960"
+  },
+  {
+    "id": "abf895c4-3aa8-4ad9-8398-14b798f4b3b0",
+    "code": "MIKKA_BARLIS_2",
+    "name": "Mikka Barlis (SI 0237)",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.880349"
+  },
+  {
+    "id": "7eeee4ec-7495-477c-ac86-cf16f5c638b6",
+    "code": "MOS",
+    "name": "Mploy Outsourcing Solutions, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.880663"
+  },
+  {
+    "id": "0fe578b5-334a-4a06-b82e-9a3b03bc945c",
+    "code": "MOS_2",
+    "name": "Mploy Outsourcing Solutions, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.880974"
+  },
+  {
+    "id": "c8e74574-809f-4d78-bad1-ccd4cdccd4ee",
+    "code": "MYKA_ELLA_BAUTIS",
+    "name": "Myka Ella Bautista",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.881302"
+  },
+  {
+    "id": "c8320598-d163-44b5-840a-0a0f45196647",
+    "code": "MYKA_ELLA_BAUTIS_2",
+    "name": "Myka Ella Bautista",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.881658"
+  },
+  {
+    "id": "18850a65-759a-4424-b45c-f4f7e5d13447",
+    "code": "NETWOR_SOLUTI_CORPOR",
+    "name": "Networklab Solutions Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.882009"
+  },
+  {
+    "id": "ef0a97f8-56bd-491d-8b0b-c848c21db84c",
+    "code": "NETWOR_SOLUTI_CORPOR_2",
+    "name": "Networklab Solutions Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.882400"
+  },
+  {
+    "id": "1ec34e06-31ff-4902-9191-914fe97f05c0",
+    "code": "NETWOR_SOLUTI_CORPOR_3",
+    "name": "Networklab Solutions Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.882756"
+  },
+  {
+    "id": "c90f29e8-e06d-47cd-b353-38dc47c245b3",
+    "code": "NSE",
+    "name": "Norden Subic Entrepreneurs Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.883111"
+  },
+  {
+    "id": "20bd8519-f5a0-4efd-b14f-62c458d27fb0",
+    "code": "NSE_2",
+    "name": "Norden Subic Entrepreneurs Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.883443"
+  },
+  {
+    "id": "164b405b-4721-405c-888c-7978aa906d15",
+    "code": "OCEANA_PHILS_INC",
+    "name": "OceanaGold Phils., Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.883756"
+  },
+  {
+    "id": "611ff25a-10f6-4fa4-9a81-5c5572f8e51b",
+    "code": "OCEANA_PHILS_INC_2",
+    "name": "OceanaGold Phils., Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.884063"
+  },
+  {
+    "id": "3272f852-7de9-4470-864d-c1e75f5cdefa",
+    "code": "PHILIP_SAVING_BANK",
+    "name": "Philippine Savings Bank",
+    "client_type": "SME",
+    "industry": "Financial Services & Insurance",
+    "created_at": "2026-11-08 00:38:13.884380"
+  },
+  {
+    "id": "10502be5-6baf-48e6-8e47-8650c89db743",
+    "code": "PHILIP_SAVING_BANK_2",
+    "name": "Philippine Savings Bank",
+    "client_type": "SME",
+    "industry": "Financial Services & Insurance",
+    "created_at": "2026-11-08 00:38:13.884686"
+  },
+  {
+    "id": "bf10806b-401d-417a-bffa-15ee1fc507a8",
+    "code": "ROP",
+    "name": "Red Oak Properties Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Real Estate & Construction",
+    "created_at": "2026-11-08 00:38:13.884993"
+  },
+  {
+    "id": "6b8e67ce-7aa9-4f00-87ec-2864ea83035a",
+    "code": "ROP_2",
+    "name": "Red Oak Properties Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Real Estate & Construction",
+    "created_at": "2026-11-08 00:38:13.885315"
+  },
+  {
+    "id": "6c32c058-6f26-4fa2-9644-cf0882a053ba",
+    "code": "ROP_3",
+    "name": "Red Oak Properties Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Real Estate & Construction",
+    "created_at": "2026-11-08 00:38:13.885671"
+  },
+  {
+    "id": "7952d76f-ac33-4d37-95be-194b349ef406",
+    "code": "ROP_4",
+    "name": "Red Oak Properties, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Real Estate & Construction",
+    "created_at": "2026-11-08 00:38:13.886022"
+  },
+  {
+    "id": "83f97a9e-af0e-43e5-be9d-4192975b8d29",
+    "code": "ROP_5",
+    "name": "Red Oak Properties, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Real Estate & Construction",
+    "created_at": "2026-11-08 00:38:13.886367"
+  },
+  {
+    "id": "ab1f97d0-ff44-4ab8-ac3f-ef73e3004df7",
+    "code": "RHYAN_DEPANT",
+    "name": "Rhyan Depante",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.886678"
+  },
+  {
+    "id": "59cb4831-d46f-4018-8c1d-b1cf7b74f4ce",
+    "code": "RHYAN_DEPANT_2",
+    "name": "Rhyan Depante",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.886984"
+  },
+  {
+    "id": "7765e67d-6e13-4f51-8c5f-d0f84a3e7328",
+    "code": "RON_ROBERT_DESPI",
+    "name": "Ron Robert Despi",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.887300"
+  },
+  {
+    "id": "02e03c82-0589-4e83-8fc4-f3594c819905",
+    "code": "RON_ROBERT_DESPI_2",
+    "name": "Ron Robert Despi",
+    "client_type": "SME",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.887611"
+  },
+  {
+    "id": "984ce4d0-fd82-436e-b4fa-4f7dadab8ff0",
+    "code": "SECURI_BANK_CORPOR",
+    "name": "Security Bank Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Financial Services & Insurance",
+    "created_at": "2026-11-08 00:38:13.887916"
+  },
+  {
+    "id": "13b4640a-d3b8-4404-b472-40e0f6b6d98d",
+    "code": "SECURI_BANK_CORPOR_2",
+    "name": "Security Bank Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Financial Services & Insurance",
+    "created_at": "2026-11-08 00:38:13.888221"
+  },
+  {
+    "id": "5d03d003-2bea-4c84-a3ee-df9a2c94d653",
+    "code": "SERVIE_PHILIP_INC",
+    "name": "Servier Philippines Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.888542"
+  },
+  {
+    "id": "3fd1d8e7-762b-4e9e-9de9-14e70d6a0f36",
+    "code": "SPP0",
+    "name": "Servier Philippines Inc. (SI 0249) PO # 0000052497",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.888891"
+  },
+  {
+    "id": "b01c7976-da8e-4b84-bd1d-9c7223dda3fa",
+    "code": "SYDENH_LABORA_INC",
+    "name": "Sydenham Laboratories Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.889206"
+  },
+  {
+    "id": "92eaea6d-07cf-4d7f-9355-6c6ad65d6d93",
+    "code": "SYDENH_LABORA_INC_2",
+    "name": "Sydenham Laboratories Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.889575"
+  },
+  {
+    "id": "cae4b2fd-561c-4789-bce9-e3ba12efa8a7",
+    "code": "UNIVER_ROBINA_CORPOR",
+    "name": "Universal Robina Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Consumer Goods & Retail",
+    "created_at": "2026-11-08 00:38:13.889944"
+  },
+  {
+    "id": "5aa8a24d-ef3a-4c9c-b022-c4080f915f85",
+    "code": "UNIVER_ROBINA_CORPOR_2",
+    "name": "Universal Robina Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Consumer Goods & Retail",
+    "created_at": "2026-11-08 00:38:13.890318"
+  },
+  {
+    "id": "5e371032-6c07-4168-a895-381df8fe46b8",
+    "code": "UNIVER_ROBINA_CORPOR_3",
+    "name": "Universal Robina Corporation",
+    "client_type": "ENTERPRISE",
+    "industry": "Consumer Goods & Retail",
+    "created_at": "2026-11-08 00:38:13.890686"
+  },
+  {
+    "id": "d26b0c94-f970-44a0-b987-cbc4a141a1f2",
+    "code": "VHL",
+    "name": "Vertiv (Singapore) Holdings PTE LTD-ROHQ",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.891035"
+  },
+  {
+    "id": "68322e0a-c1d9-44de-a736-0c35e4037e7f",
+    "code": "VHL_2",
+    "name": "Vertiv (Singapore) Holdings PTE LTD-ROHQ",
+    "client_type": "ENTERPRISE",
+    "industry": "Technology & Software",
+    "created_at": "2026-11-08 00:38:13.891396"
+  },
+  {
+    "id": "c2b47f3d-8360-447b-84c7-64cae5341046",
+    "code": "WCD",
+    "name": "Wee Community Developers, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.891750"
+  },
+  {
+    "id": "dc24540c-f4dd-4b50-a864-b060176e9115",
+    "code": "WCD_2",
+    "name": "Wee Community Developers, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.892101"
+  },
+  {
+    "id": "85809737-2613-423d-9e5b-a8cf79348570",
+    "code": "XSDS",
+    "name": "Xinyx Semiconductor Design Services, Inc.",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.892440"
+  },
+  {
+    "id": "0e997c91-8e97-46ff-b613-dd19b7e19fb9",
+    "code": "XSDS_2",
+    "name": "Xinyx Semiconductor Design Services, Inc. (SI 0228)",
+    "client_type": "ENTERPRISE",
+    "industry": "Corporate Enterprise",
+    "created_at": "2026-11-08 00:38:13.892771"
+  },
+  {
+    "id": "comp-gam-a",
+    "code": "CORP_GAM_A",
+    "name": "Gamification Corp A",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-08 00:49:01.428192"
+  },
+  {
+    "id": "comp-gam-b",
+    "code": "CORP_GAM_B",
+    "name": "Gamification Corp B",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-08 00:49:01.428199"
+  },
+  {
+    "id": "d03f1037-e5fe-4a61-9eb7-097cfee5ee98",
+    "code": "ALPHA_CORP",
+    "name": "Alpha Corp",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-08 01:40:25.085208"
+  },
+  {
+    "id": "f453352e-334a-4821-a0dc-4026d5e63424",
+    "code": "CORP_ALPHA",
+    "name": "Alpha Corp",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-08 08:17:41.215351"
+  },
+  {
+    "id": "3da800b0-0ccc-424c-97c5-0a849ff13b20",
+    "code": "CORP_BETA",
+    "name": "Beta Industries",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-08 08:17:41.215388"
+  },
+  {
+    "id": "058746c7-6a5a-4033-b314-82cdf3fd3c69",
+    "code": "CORP_RPT_ALPHA",
+    "name": "Report Alpha Corp",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:42:13.848160"
+  },
+  {
+    "id": "50bb7d25-2045-48e3-8fd1-756c7439fd44",
+    "code": "CORP_RPT_BETA",
+    "name": "Report Beta Corp",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:42:13.848172"
+  },
+  {
+    "id": "055ee573-adbb-4c19-9eb1-b06c3e11e3ed",
+    "code": "CORP_VER_ALPHA",
+    "name": "Versioned Corp Alpha",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:47:14.848932"
+  },
+  {
+    "id": "456ceada-02ac-421d-893a-259301bf6198",
+    "code": "COMP_ALPHA",
+    "name": "Alpha Holdings",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:47:16.278203"
+  },
+  {
+    "id": "6819456c-651f-4455-ad80-6fa06d7ed746",
+    "code": "COMP_OMEGA",
+    "name": "Omega Corp",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:47:16.278217"
+  },
+  {
+    "id": "c8b8c0f3-c2c3-46e8-afc7-1b73ab862134",
+    "code": "CORP_1C650",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 02:47:16.415231"
+  },
+  {
+    "id": "08b7e9df-f008-4271-89a3-d60566633734",
+    "code": "IND_33F7D",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 02:47:16.428783"
+  },
+  {
+    "id": "comp-cert-1",
+    "code": "CORP_CERT_CO",
+    "name": "Cert Corporation",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:47:16.913667"
+  },
+  {
+    "id": "ac8bc6e5-4f0d-4c43-83c2-eb976829d87f",
+    "code": "CORP_PILOT_A",
+    "name": "CORP_PILOT_A",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:47:25.657854"
+  },
+  {
+    "id": "bab2f6b6-0076-4291-965a-1b4fdd2572f7",
+    "code": "CORP_PILOT_B",
+    "name": "CORP_PILOT_B",
+    "client_type": "COMPANY",
+    "industry": null,
+    "created_at": "2026-11-09 02:47:25.691953"
+  },
+  {
+    "id": "35c31770-e366-4a15-8708-00c33d791e85",
+    "code": "CORP_92858",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 03:30:58.120111"
+  },
+  {
+    "id": "f008143a-f002-4fcd-87d4-cefeac7827d0",
+    "code": "IND_9A2A7",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 03:30:58.134397"
+  },
+  {
+    "id": "bd9a2322-b96e-4cd3-89b1-bb92863c6035",
+    "code": "CORP_1F554",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 03:48:51.328447"
+  },
+  {
+    "id": "54671059-5263-4881-979a-ab65ed608c87",
+    "code": "IND_11EB6",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 03:48:51.340605"
+  },
+  {
+    "id": "420a431d-6406-4c4c-87a1-66f36ddc2a78",
+    "code": "CORP_0C82E",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 03:49:41.069268"
+  },
+  {
+    "id": "4406bf4f-cce8-4e02-8138-060b2dca51ce",
+    "code": "IND_61ECE",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 03:49:41.083616"
+  },
+  {
+    "id": "33a2c1ee-e7b9-4b41-a24f-c07e2bddda72",
+    "code": "CORP_44CF1",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 04:04:46.987991"
+  },
+  {
+    "id": "34da2006-370e-48d3-aea1-25d517e0021e",
+    "code": "IND_BEB1B",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 04:04:47.004998"
+  },
+  {
+    "id": "dd98c904-66c1-4e56-8e58-df73d678102b",
+    "code": "CORP_3073E",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 04:19:05.399617"
+  },
+  {
+    "id": "af0759bf-9758-41a0-935a-f4b340d8cd40",
+    "code": "IND_294CA",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 04:19:05.412722"
+  },
+  {
+    "id": "353576c5-a0d8-45bc-a24d-59a06b4c6697",
+    "code": "CORP_2DDE9",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 04:19:53.332147"
+  },
+  {
+    "id": "4b38bc3f-1cda-4af3-a34e-450098e3198a",
+    "code": "IND_AC8F7",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 04:19:53.351990"
+  },
+  {
+    "id": "6cf1b9fd-1036-4aff-aa0d-65f5bf18157c",
+    "code": "CORP_ADC4F",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 04:27:25.014499"
+  },
+  {
+    "id": "3d65fa01-533f-48fd-9d1f-129728da704f",
+    "code": "IND_6B8E1",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 04:27:25.028928"
+  },
+  {
+    "id": "f2971884-c3b5-4263-969b-ffa3a78acd99",
+    "code": "CORP_17870",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 04:31:47.386114"
+  },
+  {
+    "id": "abe73ba0-8fdc-491c-815c-a741565b296a",
+    "code": "IND_67BBB",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 04:31:47.402980"
+  },
+  {
+    "id": "a6529b86-0c1d-47d8-b1d7-ccbff736a334",
+    "code": "CORP_8684D",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 04:57:25.557835"
+  },
+  {
+    "id": "b0db7d9c-7167-4fd3-acaa-351978a36ce3",
+    "code": "IND_49324",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 04:57:25.575813"
+  },
+  {
+    "id": "20229a4a-9554-4f3d-bd17-18eba7886d1c",
+    "code": "CORP_12979",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 05:04:52.119066"
+  },
+  {
+    "id": "f2522e71-90a9-418c-a577-a9352a146e5b",
+    "code": "IND_83E6A",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 05:04:52.134544"
+  },
+  {
+    "id": "f638601d-169a-45c3-9214-62af6d255320",
+    "code": "CORP_8FEED",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 05:25:53.736291"
+  },
+  {
+    "id": "b4f3b241-a48a-4884-85d1-0c6ce278e538",
+    "code": "IND_FED1F",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 05:25:53.751247"
+  },
+  {
+    "id": "7b7ac21f-dffd-4582-9036-72eadd2e4480",
+    "code": "CORP_6FA56",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 05:32:37.540428"
+  },
+  {
+    "id": "3a15b80d-f211-4896-b459-95f578918fe5",
+    "code": "IND_1B719",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 05:32:37.568806"
+  },
+  {
+    "id": "2f21df90-8649-425a-beda-2be22bdc85d2",
+    "code": "CORP_FB2CC",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 05:50:05.306101"
+  },
+  {
+    "id": "acd64184-5479-4b6e-a2a4-8c88ca12f315",
+    "code": "IND_7ACF9",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 05:50:05.336742"
+  },
+  {
+    "id": "6511f128-6a5a-401c-b185-85bdeab861af",
+    "code": "CORP_CAA54",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 22:22:35.268535"
+  },
+  {
+    "id": "cccbc861-5ea2-40f9-9ad9-fb5029a8ed0c",
+    "code": "IND_11546",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 22:22:35.280577"
+  },
+  {
+    "id": "50b2f656-334b-4c83-acdf-e0fbcd2f90be",
+    "code": "CORP_D5DC0",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 22:50:02.780438"
+  },
+  {
+    "id": "92c26ab4-80f9-44f7-a6ab-151ede17930d",
+    "code": "IND_46947",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 22:50:02.793769"
+  },
+  {
+    "id": "07d5761a-d686-45f3-b391-d7c24e61ef5d",
+    "code": "CORP_A2934",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 22:50:55.713844"
+  },
+  {
+    "id": "1103b9fb-2d90-467a-b6da-4f24d7a31f4e",
+    "code": "IND_82439",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 22:50:55.726250"
+  },
+  {
+    "id": "8bd58088-ceff-4068-a63f-100c442a29ee",
+    "code": "CORP_135A8",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 23:39:49.339215"
+  },
+  {
+    "id": "2a7d1628-e502-4010-accf-4364c37f3fee",
+    "code": "IND_F35D1",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 23:39:49.356777"
+  },
+  {
+    "id": "a96bc52f-21af-46be-88e8-edfd616a30b6",
+    "code": "CORP_6807B",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-09 23:40:42.511556"
+  },
+  {
+    "id": "aaae1442-00a6-4681-8453-57d2d6abf8c1",
+    "code": "IND_06812",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-09 23:40:42.523778"
+  },
+  {
+    "id": "f192180d-33b2-42a7-a7be-1667d21fb552",
+    "code": "CORP_8E0E5",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-10 00:36:54.484998"
+  },
+  {
+    "id": "e907b4f2-5e8a-4f0b-8cf7-c1fccbc7af34",
+    "code": "IND_39D9A",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-10 00:36:54.515055"
+  },
+  {
+    "id": "6f2b0050-4129-4984-8549-41af92e06492",
+    "code": "CORP_E96CE",
+    "name": "Acme Cyber Systems Inc.",
+    "client_type": "COMPANY",
+    "industry": "Cybersecurity",
+    "created_at": "2026-11-10 00:57:56.015409"
+  },
+  {
+    "id": "11db2e53-1fa3-4b31-ad58-164ab99f4cbe",
+    "code": "IND_390B6",
+    "name": "Maria Santos (Independent Consultant)",
+    "client_type": "INDIVIDUAL",
+    "industry": "Consulting",
+    "created_at": "2026-11-10 00:57:56.036865"
+  }
+]

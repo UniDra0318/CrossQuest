@@ -36,10 +36,10 @@ def feature_fixture(db_session: Session):
     db = db_session
 
     # Admin User
-    admin = db.query(User).filter_by(email="admin_features@xworks.ph").first()
+    admin = db.query(User).filter_by(email="admin_features@test.ph").first()
     if not admin:
         admin = User(
-            email="admin_features@xworks.ph",
+            email="admin_features@test.ph",
             username="admin_features",
             full_name="Admin Feature Tester",
             role="admin",
@@ -49,10 +49,10 @@ def feature_fixture(db_session: Session):
         db.add(admin)
 
     # Account Manager User
-    am = db.query(User).filter_by(email="am_features@xworks.ph").first()
+    am = db.query(User).filter_by(email="am_features@test.ph").first()
     if not am:
         am = User(
-            email="am_features@xworks.ph",
+            email="am_features@test.ph",
             username="am_features",
             full_name="Account Manager Feature Tester",
             role="account_manager",
@@ -63,10 +63,10 @@ def feature_fixture(db_session: Session):
         db.add(am)
 
     # Trainer User
-    trainer = db.query(User).filter_by(email="trainer_features@xworks.ph").first()
+    trainer = db.query(User).filter_by(email="trainer_features@test.ph").first()
     if not trainer:
         trainer = User(
-            email="trainer_features@xworks.ph",
+            email="trainer_features@test.ph",
             username="trainer_features",
             full_name="Trainer Feature Tester",
             role="trainer",
@@ -76,10 +76,10 @@ def feature_fixture(db_session: Session):
         db.add(trainer)
 
     # Trainee User
-    trainee_user = db.query(User).filter_by(email="trainee_features@xworks.ph").first()
+    trainee_user = db.query(User).filter_by(email="trainee_features@test.ph").first()
     if not trainee_user:
         trainee_user = User(
-            email="trainee_features@xworks.ph",
+            email="trainee_features@test.ph",
             username="trainee_features",
             full_name="Juan Trainee",
             role="trainee",
@@ -104,14 +104,14 @@ def feature_fixture(db_session: Session):
     db.commit()
 
     # Trainee Profile
-    trainee = db.query(Trainee).filter_by(email="trainee_features@xworks.ph").first()
+    trainee = db.query(Trainee).filter_by(email="trainee_features@test.ph").first()
     if not trainee:
         trainee = Trainee(
             trainee_code=f"TRN-{uuid.uuid4().hex[:6].upper()}",
             user_id=trainee_user.id,
             first_name="Juan",
             last_name="Trainee",
-            email="trainee_features@xworks.ph",
+            email="trainee_features@test.ph",
             current_company_id=comp_a.id
         )
         db.add(trainee)
@@ -133,7 +133,7 @@ def test_fr26_request_password_reset_anti_enumeration(client: TestClient, featur
     email_service.sent_emails.clear()
 
     # 1. Existing active user request
-    resp_valid = client.post("/api/v1/auth/request-password-reset", json={"email": "trainee_features@xworks.ph"})
+    resp_valid = client.post("/api/v1/auth/request-password-reset", json={"email": "trainee_features@test.ph"})
     assert resp_valid.status_code == 200
     data_valid = resp_valid.json()
     assert "password reset link has been dispatched" in data_valid["message"]
@@ -148,10 +148,10 @@ def test_fr26_request_password_reset_anti_enumeration(client: TestClient, featur
     assert (token_record.expires_at - now_utc).total_seconds() <= 15 * 60 + 5
 
     # Verify email was dispatched
-    assert any(e["to"] == "trainee_features@xworks.ph" for e in email_service.sent_emails)
+    assert any(e["to"] == "trainee_features@test.ph" for e in email_service.sent_emails)
 
     # 2. Non-existent email request receives exact same response (Anti-enumeration)
-    resp_invalid = client.post("/api/v1/auth/request-password-reset", json={"email": "nonexistent_target@xworks.ph"})
+    resp_invalid = client.post("/api/v1/auth/request-password-reset", json={"email": "nonexistent_target@test.ph"})
     assert resp_invalid.status_code == 200
     assert resp_invalid.json()["message"] == data_valid["message"]
 

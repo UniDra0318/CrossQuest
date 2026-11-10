@@ -95,7 +95,7 @@ const FALLBACK_PERSONAS = [
   },
   {
     id: "persona_am_alpha",
-    name: "Marcus Reyes",
+    name: "Erika Bana",
     role: "Account Manager",
     organization: "Assigned: San Miguel & BDO Unibank",
     attributes: ["ROLEACCTMGR", "CLIENTCORPALPHAV1", "CLIENTBANKDELTAV1"],
@@ -104,7 +104,7 @@ const FALLBACK_PERSONAS = [
   },
   {
     id: "persona_am_beta",
-    name: "Andrea Salazar",
+    name: "Sharon De Vera",
     role: "Account Manager",
     organization: "Assigned: Maya FinTech & Ayala Retail",
     attributes: ["ROLEACCTMGR", "CLIENTFINTECHBETAV1", "CLIENTRETAILGAMMAV1"],
@@ -122,7 +122,7 @@ const FALLBACK_PERSONAS = [
   },
   {
     id: "persona_trainer_david",
-    name: "David Lim",
+    name: "Jordan Ramos",
     role: "Lead Security Trainer",
     organization: "Crossworks Instructor Faculty",
     attributes: ["ROLETRAINER", "TRAININGSEC2026V1"],
@@ -190,7 +190,7 @@ export default function CryptoSandboxLab() {
         const data = await fetchCryptoPersonas();
         if (data && Array.isArray(data)) {
           setPersonas(data);
-          setSelectedPersona(data[1]); // Default to Marcus Reyes (AM Alpha)
+          setSelectedPersona(data[1]); // Default to Erika Bana (AM Alpha)
         }
       } catch (err) {
         console.warn("Could not load personas from API:", err);

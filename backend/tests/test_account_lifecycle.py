@@ -22,7 +22,7 @@ from sqlalchemy import text
 from app.main import app
 from app.core.database import SessionLocal, Base, engine
 from app.core.security import get_password_hash, verify_password
-from app.models.entities import User, UserSession, PasswordResetToken, UserAbeKey
+from app.models.entities import User, UserSession, PasswordResetToken, UserAbeKey, UserKeyAttribute, AccessLog
 
 client = TestClient(app)
 
@@ -46,7 +46,11 @@ def setup_test_users():
     # Clean test users if exist
     db.query(PasswordResetToken).delete()
     db.query(UserSession).delete()
+    db.query(UserKeyAttribute).delete()
     db.query(UserAbeKey).delete()
+    test_user_ids = [u.id for u in db.query(User.id).filter(User.email.in_(["lifecycle_admin@test.ph", "lifecycle_staff@test.ph"])).all()]
+    if test_user_ids:
+        db.query(AccessLog).filter(AccessLog.actor_user_id.in_(test_user_ids)).delete(synchronize_session=False)
     db.query(User).filter(User.email.in_(["lifecycle_admin@test.ph", "lifecycle_staff@test.ph"])).delete()
     db.commit()
 

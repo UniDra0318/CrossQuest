@@ -38,6 +38,7 @@ frontend/dist-ssr/
 # Databases & local files
 *.sqlite3
 *.db
+*.sql
 postgres_data/
 
 # IDE
@@ -46,6 +47,8 @@ postgres_data/
 
 # Restricted Storage & Test Credentials
 backend/storage/
+backend/backend/
+storage/
 backend/keys/
 *.key
 TEST_CREDENTIALS.md

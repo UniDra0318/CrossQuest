@@ -1,0 +1,29 @@
+[
+  {
+    "id": "6f74b376-5540-4e72-a787-3f83e2b10727",
+    "quiz_id": "c232ed58-f00f-486f-8bef-d0520dd305c2",
+    "question_text": "What does CP-ABE stand for?",
+    "options": "[\"Ciphertext-Policy Attribute-Based Encryption\", \"Central Public AES\", \"Core Protection ABE\"]",
+    "correct_answer": 0,
+    "explanation": null,
+    "points": 20
+  },
+  {
+    "id": "3e490ce3-a759-4c4f-a29f-b04056a3c0a8",
+    "quiz_id": "c232ed58-f00f-486f-8bef-d0520dd305c2",
+    "question_text": "Which curve provides 128-bit security for pairings?",
+    "options": "[\"Secp256k1\", \"BN254\", \"Curve25519\"]",
+    "correct_answer": 1,
+    "explanation": null,
+    "points": 30
+  },
+  {
+    "id": "e93b6deb-a843-4d34-8a57-a6bb63014f44",
+    "quiz_id": "e9895e4d-79ab-4df4-990e-fa2728703f8a",
+    "question_text": "Updated: What is the primary objective of STRIDE threat modeling?",
+    "options": "[\"Identify system threats and vulnerabilities\", \"Compile source code\", \"Deploy containers\", \"Format database\"]",
+    "correct_answer": 0,
+    "explanation": "Updated explanation.",
+    "points": 20
+  }
+]

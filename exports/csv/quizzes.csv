@@ -1,0 +1,3 @@
+id,session_id,title,version_no,available_until,is_closed,closed_at,is_approved,approved_by_user_id,approved_at,created_by_user_id,created_at
+c232ed58-f00f-486f-8bef-d0520dd305c2,189179a9-5fc5-4696-822d-1a5335ff6564,Cybersecurity Fundamentals Quiz,1,,1,2026-11-10 00:57:57.491183,0,,,,2026-11-10 00:57:56.921721
+e9895e4d-79ab-4df4-990e-fa2728703f8a,,Cloud Threat Modeling Challenge,1,,0,,0,,,121b679f-793e-43f8-99c4-d2f57df87c5e,2026-11-10 00:57:57.754688

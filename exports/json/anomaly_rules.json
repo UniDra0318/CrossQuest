@@ -1,0 +1,92 @@
+[
+  {
+    "id": "9ac8b772-f463-4704-bf65-939879099b24",
+    "rule_code": "R1_OUT_OF_SCOPE",
+    "parameters": "{\"threshold\": 1, \"window_minutes\": 1440, \"severity\": \"LOW\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Single out-of-scope attempt aggregated daily",
+    "last_edited_by_user_id": null
+  },
+  {
+    "id": "48d9032c-3eee-48f5-965c-5bdef016a178",
+    "rule_code": "R1_REPEATED_OUT_OF_SCOPE",
+    "parameters": "{\"threshold\": 3, \"window_minutes\": 15, \"severity\": \"MEDIUM\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Repeated out-of-scope attempts in 15 min",
+    "last_edited_by_user_id": null
+  },
+  {
+    "id": "5a69f0b2-c8e5-4926-995a-bc7b7d5d2785",
+    "rule_code": "R2_FAILED_LOGINS_ACCOUNT",
+    "parameters": "{\"threshold\": 5, \"window_minutes\": 10, \"severity\": \"MEDIUM\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Failed logins for single account",
+    "last_edited_by_user_id": "935c91c0-3f9b-4120-b267-21a10d555419"
+  },
+  {
+    "id": "6dcd38cb-0f6e-4367-944d-715207bf04fb",
+    "rule_code": "R2_FAILED_LOGINS_IP",
+    "parameters": "{\"threshold\": 10, \"distinct_usernames_threshold\": 2, \"window_minutes\": 10, \"severity\": \"MEDIUM\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Failed logins for single IP (>=10 failures across >=2 distinct usernames in 10 min)",
+    "last_edited_by_user_id": "935c91c0-3f9b-4120-b267-21a10d555419"
+  },
+  {
+    "id": "0f6ff5a9-e339-4190-90dc-2593a3028ca7",
+    "rule_code": "R3_HIGH_RECORD_ACCESS",
+    "parameters": "{\"thresholds\": {\"account_manager\": 25, \"trainer\": 25, \"finance\": 50, \"admin\": 50, \"trainee\": 15}, \"window_minutes\": 15}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Updated threshold per CCIS pilot review",
+    "last_edited_by_user_id": "935c91c0-3f9b-4120-b267-21a10d555419"
+  },
+  {
+    "id": "be382e24-35b6-4e91-b122-c2f379e0f06f",
+    "rule_code": "R3_REPORT_BURSTS",
+    "parameters": "{\"threshold\": 5, \"window_minutes\": 60, \"severity\": \"MEDIUM\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Report generation bursts",
+    "last_edited_by_user_id": null
+  },
+  {
+    "id": "922db112-01e4-4110-b53d-5080e265fae5",
+    "rule_code": "R4_RECORD_DELETION",
+    "parameters": "{\"threshold\": 1, \"severity\": \"HIGH\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Soft deletion of client data",
+    "last_edited_by_user_id": null
+  },
+  {
+    "id": "253d0a1a-9d39-4ab3-8d8c-e731a0d8d586",
+    "rule_code": "R4_RECORD_EDIT",
+    "parameters": "{\"threshold\": 1, \"severity\": \"LOW\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Edit of client data",
+    "last_edited_by_user_id": null
+  },
+  {
+    "id": "a0513bed-5805-495a-a1e3-f7e47e60e66f",
+    "rule_code": "R4_BULK_EDIT",
+    "parameters": "{\"threshold\": 10, \"window_minutes\": 15, \"severity\": \"MEDIUM\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "Bulk record edits in 15 min",
+    "last_edited_by_user_id": null
+  },
+  {
+    "id": "ea7202fe-21d0-4ced-9179-d15be1654e56",
+    "rule_code": "S1_AFTER_HOURS",
+    "parameters": "{\"start_hour\":9,\"end_hour\":18,\"tz\":\"Asia/Manila\"}",
+    "version_no": 1,
+    "client_reviewed": 1,
+    "description": "After-hours supporting indicator",
+    "last_edited_by_user_id": null
+  }
+]

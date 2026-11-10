@@ -72,9 +72,9 @@ class PasswordChangeRequest(BaseModel):
 class UserResponse(UserBase):
     id: str
     is_active: bool
-    force_password_change: bool = False
-    mfa_enabled: bool = False
-    created_at: datetime
+    force_password_change: Optional[bool] = False
+    mfa_enabled: Optional[bool] = False
+    created_at: Optional[datetime] = None
     streak: Optional[int] = None
     attributes: Optional[Dict[str, Any]] = None
 
@@ -167,11 +167,11 @@ class TrainingRecordResponse(BaseModel):
     score: Optional[float] = None
     completion_date: Optional[datetime] = None
     encryption_policy: str
-    policy_version: int
-    is_encrypted: bool
+    policy_version: Optional[int] = 1
+    is_encrypted: Optional[bool] = True
     deleted_at: Optional[datetime] = None
     deleted_by: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     streak: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)

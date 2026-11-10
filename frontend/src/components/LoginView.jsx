@@ -95,18 +95,25 @@ export default function LoginView() {
   };
 
   const roleList = [
-    { key: 'admin', title: 'Principal Consultant & Admin', name: 'Dr. Julian Mercer', org: 'Crossworks Leadership', icon: Shield, badgeClass: 'admin' },
-    { key: 'admin_general', title: 'Operations Administrator', name: 'Crossworks Administration', org: 'Crossworks Operations', icon: Shield, badgeClass: 'admin' },
-    { key: 'account_manager', title: 'Account Manager (Vertiv & Red Oak)', name: 'Sharon De Vera', org: 'VHL_2 • ROP_3', icon: Key, badgeClass: 'staff' },
-    { key: 'am_brian', title: 'Account Manager (IPRoyal & Amihan)', name: 'Brian Mendoza', org: 'IPROY_SERVI_2 • AMIHAN_SOLUTI_2', icon: Key, badgeClass: 'staff' },
-    { key: 'finance', title: 'Finance & Operations Specialist', name: 'Elena Vance', org: 'Crossworks Operations & Billing', icon: Building2, badgeClass: 'finance' },
-    { key: 'trainer', title: 'Lead Trainer (Cybersecurity & GenAI)', name: 'Jordan Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
-    { key: 'trainer_billy', title: 'Senior Trainer (Cloud & Infra)', name: 'Billy Fernandez', org: 'Crossworks Senior Trainer', icon: GraduationCap, badgeClass: 'trainer' },
+    { key: 'admin', title: 'Principal Consultant & Lead Admin', name: "Joselito 'Joey' Mallari Jr.", org: 'Crossworks Leadership', icon: Shield, badgeClass: 'admin' },
+    { key: 'admin_general', title: 'Compliance Administrator & Peer Reviewer', name: 'Len Mallari', org: 'Crossworks Administration', icon: Shield, badgeClass: 'admin' },
+    { key: 'account_manager', title: 'Account Manager (Enterprise Accounts)', name: 'Erika Bana', org: 'Crossworks Client Portfolio', icon: Key, badgeClass: 'staff' },
+    { key: 'am_sharon', title: 'Account Manager (Strategic Accounts)', name: 'Sharon De Vera', org: 'Crossworks Client Portfolio', icon: Key, badgeClass: 'staff' },
+    { key: 'am_brian', title: 'Account Manager (Tech & Telecom)', name: 'Brian Mendoza', org: 'Crossworks Client Portfolio', icon: Key, badgeClass: 'staff' },
+    { key: 'finance', title: 'Finance & Billing Specialist', name: 'Elena Santos', org: 'Crossworks Operations & Billing', icon: Building2, badgeClass: 'finance' },
+    { key: 'trainer', title: 'Lead Technical Instructor', name: 'Jordan Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
     { key: 'trainee', title: 'Trainee (Vertiv Holdings)', name: 'Andrea Aguilar', org: 'VHL_2 • TRN-8000', icon: Award, badgeClass: 'trainee' },
     { key: 'trainee_ricardo', title: 'Trainee (IPRoyal Services)', name: 'Ricardo Ocampo', org: 'IPROY_SERVI_2 • TRN-8001', icon: Award, badgeClass: 'trainee' },
     { key: 'trainee_bea', title: 'Trainee (IPRoyal Services)', name: 'Bea Macaraeg', org: 'IPROY_SERVI_2 • TRN-8002', icon: Award, badgeClass: 'trainee' },
     { key: 'trainee_rafael', title: 'Trainee (Amihan Solutions)', name: 'Rafael Dizon', org: 'AMIHAN_SOLUTI_2 • TRN-8015', icon: Award, badgeClass: 'trainee' }
   ];
+
+  const showDevTab = import.meta.env.DEV && (
+    typeof window !== 'undefined' && (
+      new URLSearchParams(window.location.search).get('dev') === 'true' ||
+      import.meta.env.VITE_ENABLE_DEV_LOGIN === 'true'
+    )
+  );
 
   return (
     <div className="clean-login-viewport">
@@ -282,15 +289,15 @@ export default function LoginView() {
           ) : (
             <>
               {/* Tabs: Sign In vs Quick Demo Roles */}
-              <div className="login-toggle-tabs">
-                <button
-                  type="button"
-                  className={`toggle-tab-btn ${activeTab === 'credentials' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('credentials')}
-                >
-                  Sign In
-                </button>
-                {import.meta.env.DEV && (
+              {showDevTab && (
+                <div className="login-toggle-tabs">
+                  <button
+                    type="button"
+                    className={`toggle-tab-btn ${activeTab === 'credentials' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('credentials')}
+                  >
+                    Sign In
+                  </button>
                   <button
                     type="button"
                     className={`toggle-tab-btn ${activeTab === 'demo' ? 'active' : ''}`}
@@ -298,10 +305,10 @@ export default function LoginView() {
                   >
                     Quick Role Access (Dev)
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
-              {activeTab === 'credentials' || !import.meta.env.DEV ? (
+              {activeTab === 'credentials' || !showDevTab ? (
                 <form onSubmit={handleSubmit} className="clean-login-form">
                   {loginError && (
                     <div style={{
