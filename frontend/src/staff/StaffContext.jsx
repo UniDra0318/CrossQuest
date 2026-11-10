@@ -5,7 +5,7 @@ import { getStaffMe, getPortfolios, getStaffRecords, decryptRecord } from '../ap
 const StaffContext = createContext(null);
 
 export function StaffProvider({ children }) {
-  const { currentUser } = useAuth();
+  const { currentUser, token } = useAuth();
   const [me, setMe] = useState(null);
   const [portfolios, setPortfolios] = useState([]);
   const [records, setRecords] = useState([]);
@@ -34,7 +34,7 @@ export function StaffProvider({ children }) {
 
   useEffect(() => {
     loadData();
-  }, [currentUser]);
+  }, [currentUser, token]);
 
   const handleDecrypt = async (record) => {
     setDecryptingId(record.id);

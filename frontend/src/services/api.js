@@ -42,7 +42,7 @@ export async function authFetch(url, options = {}, token) {
     try {
       const savedUserStr = localStorage.getItem('crossquest_auth_user');
       const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
-      const email = savedUser?.email || (savedUser?.role === 'admin' ? 'admin@crossworks.ph' : 'admin@crossworks.ph');
+      const email = savedUser?.email || 'joey.mallari@xworks.ph';
 
       const formData = new URLSearchParams();
       formData.append('username', email);
@@ -74,6 +74,10 @@ export async function authFetch(url, options = {}, token) {
         if (freshToken) {
           activeToken = freshToken;
           localStorage.setItem('crossquest_auth_token', freshToken);
+          localStorage.setItem('crossquest_auth_email', email);
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: freshToken, email } }));
+          }
           headers['Authorization'] = `Bearer ${freshToken}`;
           // Retry original request once with fresh bearer token
           res = await fetch(url, { ...options, headers });

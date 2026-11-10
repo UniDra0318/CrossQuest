@@ -71,6 +71,10 @@ def generate_client_report(
     if not company:
         raise HTTPException(status_code=404, detail="Client company not found")
 
+    company_id = company.id
+    company_name = company.name
+    company_code_val = company.code
+
     client_ip = _get_client_ip(request)
 
     # Restrict to Account Managers, Administrators, and Finance (OI-04, Table 17)
@@ -81,24 +85,24 @@ def generate_client_report(
         )
 
     # Scoping check: Account Manager can only generate for assigned client companies (SEC-10)
-    if current_user.role == "account_manager" and company.code not in (current_user.assigned_client_accounts or []):
+    if current_user.role == "account_manager" and company_code_val not in (current_user.assigned_client_accounts or []):
         log = AccessLog(
             actor_user_id=current_user.id,
             actor_role=current_user.role,
             event_type="ACCESS_DENIED",
             resource_type="REPORT",
-            company_id=company.id,
+            company_id=company_id,
             outcome="DENIED",
             reason_code="OUT_OF_SCOPE",
             source_ip=client_ip,
-            details={"target_company": company.code}
+            details={"target_company": company_code_val}
         )
         db.add(log)
         db.commit()
-        anomaly_detector.record_out_of_scope_attempt(current_user, f"REPORT:{company.code}", company.code, db)
+        anomaly_detector.record_out_of_scope_attempt(current_user, f"REPORT:{company_code_val}", company_code_val, db)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Not authorized to generate reports for unassigned company '{company.code}'."
+            detail=f"Not authorized to generate reports for unassigned company '{company_code_val}'."
         )
 
     # Query training records for this client company under RLS / scoping logic
@@ -106,7 +110,7 @@ def generate_client_report(
         db.query(TrainingRecord, Trainee)
         .join(Trainee, TrainingRecord.trainee_id == Trainee.id)
         .filter(
-            TrainingRecord.company_at_completion_id == company.id,
+            TrainingRecord.company_at_completion_id == company_id,
             TrainingRecord.deleted_at == None
         )
     )
@@ -142,10 +146,10 @@ def generate_client_report(
         actor_role=current_user.role,
         event_type="REPORT_GENERATED",
         resource_type="REPORT",
-        company_id=company.id,
+        company_id=company_id,
         outcome="SUCCESS",
         source_ip=client_ip,
-        details={"company_code": company.code, "record_count": total_records}
+        details={"company_code": company_code_val, "record_count": total_records}
     )
     db.add(log)
     db.commit()
@@ -156,8 +160,8 @@ def generate_client_report(
     # Proposed layout (Section 3.8.4, OI-10): header + training, training date, trainee table
     return {
         "header": {
-            "client_name": company.name,
-            "client_code": company.code,
+            "client_name": company_name,
+            "client_code": company_code_val,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "generated_by_user": current_user.full_name,
             "user_role": current_user.role

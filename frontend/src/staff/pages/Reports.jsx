@@ -48,10 +48,10 @@ export default function Reports() {
   const paramScope = searchParams.get('scope');
   const firstAssignedScope = useMemo(() => {
     if (paramScope) return paramScope;
-    if (assignedList.length > 0 && assignedList[0] !== 'ALL') return assignedList[0];
     const match = companiesList.find(c => c.is_assigned);
     if (match) return match.code;
-    return companiesList[0]?.code || 'CORP_ALPHA';
+    if (assignedList.length > 0 && assignedList[0] !== 'ALL') return assignedList[0];
+    return companiesList[0]?.code || 'VHL';
   }, [paramScope, assignedList, companiesList]);
 
   const [selectedScope, setSelectedScope] = useState(paramScope || firstAssignedScope);
@@ -77,14 +77,19 @@ export default function Reports() {
   const [errorDetails, setErrorDetails] = useState(null);
   const [successToast, setSuccessToast] = useState(null);
 
-  // Sync selected scope when default resolved or query changes
+  // Sync selected scope when default resolved, persona switches, or query changes
   useEffect(() => {
     if (paramScope && paramScope !== selectedScope) {
       setSelectedScope(paramScope);
-    } else if (!paramScope && firstAssignedScope && selectedScope === 'CORP_ALPHA' && !assignedList.includes('CORP_ALPHA')) {
-      setSelectedScope(firstAssignedScope);
+    } else if (!paramScope && firstAssignedScope) {
+      const validAssigned = companiesList.length > 0
+        ? companiesList.some(c => c.code === selectedScope && c.is_assigned)
+        : assignedList.includes(selectedScope);
+      if (!validAssigned && selectedScope !== firstAssignedScope) {
+        setSelectedScope(firstAssignedScope);
+      }
     }
-  }, [paramScope, firstAssignedScope]);
+  }, [paramScope, firstAssignedScope, companiesList, assignedList, selectedScope]);
 
   // Load companies list with assigned metadata
   useEffect(() => {
@@ -93,7 +98,8 @@ export default function Reports() {
       try {
         const data = await fetchAssignedClientCompanies(token);
         if (isMounted && data && Array.isArray(data)) {
-          setCompaniesList(data);
+          const sorted = [...data].sort((a, b) => Number(Boolean(b.is_assigned)) - Number(Boolean(a.is_assigned)));
+          setCompaniesList(sorted);
           return;
         }
       } catch (err) {
@@ -173,7 +179,7 @@ export default function Reports() {
 
   useEffect(() => {
     loadReportData(selectedScope, statusFilter);
-  }, [selectedScope, statusFilter]);
+  }, [selectedScope, statusFilter, token, companiesList]);
 
   const handleScopeChange = (newScope) => {
     setSelectedScope(newScope);

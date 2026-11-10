@@ -14,7 +14,7 @@ export const DEMO_USERS = {
     initials: "JM"
   },
   admin_general: {
-    id: "d3c5e17f-1854-488d-8f0f-36ff72ed1745",
+    id: "5f9f8fa9-e288-4291-9ca7-acadcdd8faef",
     email: "len.mallari@xworks.ph",
     name: "Len Mallari",
     title: "Compliance Administrator & Peer Reviewer",
@@ -27,25 +27,25 @@ export const DEMO_USERS = {
 
   // --- ACCOUNT MANAGERS ---
   account_manager: {
-    id: "0525a57b-668d-46cf-ab3b-6f6862920a9c",
+    id: "81847717-dd7f-48fe-91ad-4391018fdef8",
     email: "erika.bana@crossworks.ph",
     name: "Erika Bana",
     title: "Account Manager (Enterprise Accounts)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["VHL_2", "ROP_3", "EWALIC_2"],
-    assigned_client_accounts: ["VHL_2", "ROP_3", "EWALIC_2"],
+    assigned_companies: ["VHL", "ROP", "EWALIC"],
+    assigned_client_accounts: ["VHL", "ROP", "EWALIC"],
     initials: "EB"
   },
   am_sharon: {
-    id: "d6cfb2eb-07d2-4629-8f41-60fee732c5d3",
+    id: "0525a57b-668d-46cf-ab3b-6f6862920a9c",
     email: "sharon.devera@crossworks.ph",
     name: "Sharon De Vera",
     title: "Account Manager (Strategic Accounts)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
-    assigned_client_accounts: ["UNIVER_ROBINA_CORPOR_3", "ISLA_LPG_CORPOR"],
+    assigned_companies: ["UNIVER_ROBINA_CORPOR", "ISLA_LPG_CORPOR", "AYALA_LAND_INC", "BIBSP"],
+    assigned_client_accounts: ["UNIVER_ROBINA_CORPOR", "ISLA_LPG_CORPOR", "AYALA_LAND_INC", "BIBSP"],
     initials: "SD"
   },
   am_brian: {
@@ -55,14 +55,14 @@ export const DEMO_USERS = {
     title: "Account Manager (Tech & Telecom)",
     role: "account_manager",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
-    assigned_client_accounts: ["IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    assigned_companies: ["IPROY_SERVI", "AMIHAN_SOLUTI", "SECURI_BANK_CORPOR", "PHILIP_SAVING_BANK", "XSDS"],
+    assigned_client_accounts: ["IPROY_SERVI", "AMIHAN_SOLUTI", "SECURI_BANK_CORPOR", "PHILIP_SAVING_BANK", "XSDS"],
     initials: "BM"
   },
 
   // --- FINANCE & OPERATIONS ---
   finance: {
-    id: "553b1112-b37b-4a4a-9e03-575caa636bea",
+    id: "3cce3076-e622-4468-921b-039ea82cae3b",
     email: "finance@crossworks.ph",
     name: "Elena Santos",
     title: "Finance & Billing Specialist",
@@ -76,14 +76,14 @@ export const DEMO_USERS = {
 
   // --- LEAD TRAINER ---
   trainer: {
-    id: "76be0c39-21c3-46ae-ba5d-0cb2dd203bfe",
+    id: "467d91d2-8dae-49a8-a90d-05c903a09a81",
     email: "jordan.ramos@crossworks.ph",
     name: "Jordan Ramos",
     title: "Lead Technical Instructor: Zero-Trust & Cloud",
     role: "trainer",
     organization: "Crossworks Training & Consulting",
-    assigned_companies: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
-    assigned_client_accounts: ["VHL_2", "IPROY_SERVI_2", "AMIHAN_SOLUTI_2"],
+    assigned_companies: ["VHL", "IPROY_SERVI", "AMIHAN_SOLUTI"],
+    assigned_client_accounts: ["VHL", "IPROY_SERVI", "AMIHAN_SOLUTI"],
     initials: "JR"
   },
 
@@ -92,13 +92,13 @@ export const DEMO_USERS = {
     id: "e335aea7-fe01-436f-a05c-9db2fee10cfd",
     email: "andrea.aguilar@vertiv.com",
     name: "Andrea Aguilar",
-    title: "Vertiv Holdings Ltd (VHL_2)",
+    title: "Vertiv Holdings Ltd (VHL)",
     role: "trainee",
     organization: "Vertiv Holdings Ltd",
     trainee_code: "TRN-8000",
     display_name: "AndreaVertiv",
-    company_code: "VHL_2",
-    assigned_companies: ["VHL_2"],
+    company_code: "VHL",
+    assigned_companies: ["VHL"],
     streak: 8,
     points: 13500,
     level: 4,
@@ -115,13 +115,13 @@ export const DEMO_USERS = {
     id: "35076d4f-7548-4131-8dd1-6fc07389b17d",
     email: "ricardo.ocampo@iproyal.com",
     name: "Ricardo Ocampo",
-    title: "IPRoyal Services (IPROY_SERVI_2)",
+    title: "IPRoyal Services (IPROY_SERVI)",
     role: "trainee",
     organization: "IPRoyal Services",
     trainee_code: "TRN-8001",
     display_name: "RicardoOps",
-    company_code: "IPROY_SERVI_2",
-    assigned_companies: ["IPROY_SERVI_2"],
+    company_code: "IPROY_SERVI",
+    assigned_companies: ["IPROY_SERVI"],
     streak: 6,
     points: 10200,
     level: 3,
@@ -138,13 +138,13 @@ export const DEMO_USERS = {
     id: "82dd244c-84c5-4831-9381-279bd9fd5c37",
     email: "bea.macaraeg@iproyal.com",
     name: "Bea Macaraeg",
-    title: "IPRoyal Services (IPROY_SERVI_2)",
+    title: "IPRoyal Services (IPROY_SERVI)",
     role: "trainee",
     organization: "IPRoyal Services",
     trainee_code: "TRN-8002",
     display_name: "BeaMacaraeg",
-    company_code: "IPROY_SERVI_2",
-    assigned_companies: ["IPROY_SERVI_2"],
+    company_code: "IPROY_SERVI",
+    assigned_companies: ["IPROY_SERVI"],
     streak: 11,
     points: 14800,
     level: 5,
@@ -161,13 +161,13 @@ export const DEMO_USERS = {
     id: "d4799846-9779-4b67-acc5-09a5d69a0ade",
     email: "rafael.dizon@amihansolutions.com",
     name: "Rafael Dizon",
-    title: "Amihan Solutions (AMIHAN_SOLUTI_2)",
+    title: "Amihan Solutions (AMIHAN_SOLUTI)",
     role: "trainee",
     organization: "Amihan Solutions",
     trainee_code: "TRN-8015",
     display_name: "RafaelDev",
-    company_code: "AMIHAN_SOLUTI_2",
-    assigned_companies: ["AMIHAN_SOLUTI_2"],
+    company_code: "AMIHAN_SOLUTI",
+    assigned_companies: ["AMIHAN_SOLUTI"],
     streak: 4,
     points: 8100,
     level: 2,
@@ -184,13 +184,13 @@ export const DEMO_USERS = {
     id: "7084364a-d26c-4154-b10f-b5c0cac75fe5",
     email: "rowena.cabrera@ewageas.com",
     name: "Rowena Cabrera",
-    title: "EastWest Ageas (EWALIC_2)",
+    title: "EastWest Ageas (EWALIC)",
     role: "trainee",
     organization: "EastWest Ageas Life Insurance",
     trainee_code: "TRN-8032",
     display_name: "RowenaEW",
-    company_code: "EWALIC_2",
-    assigned_companies: ["EWALIC_2"],
+    company_code: "EWALIC",
+    assigned_companies: ["EWALIC"],
     streak: 9,
     points: 12400,
     level: 4,
@@ -230,13 +230,13 @@ export const DEMO_USERS = {
     id: "78ef52e6-69f3-4be7-88fa-e8c6b78984be",
     email: "arvin.natividad@urc.com.ph",
     name: "Arvin Natividad",
-    title: "Universal Robina (UNIVER_ROBINA_CORPOR_3)",
+    title: "Universal Robina (UNIVER_ROBINA_CORPOR)",
     role: "trainee",
     organization: "Universal Robina Corporation",
     trainee_code: "TRN-8139",
     display_name: "ArvinURC",
-    company_code: "UNIVER_ROBINA_CORPOR_3",
-    assigned_companies: ["UNIVER_ROBINA_CORPOR_3"],
+    company_code: "UNIVER_ROBINA_CORPOR",
+    assigned_companies: ["UNIVER_ROBINA_CORPOR"],
     streak: 7,
     points: 11800,
     level: 3,
@@ -253,13 +253,13 @@ export const DEMO_USERS = {
     id: "d0068942-b729-4ae4-8611-916b94884110",
     email: "camille.morales@boehringer-ingelheim.com",
     name: "Camille Morales",
-    title: "Boehringer Ingelheim (BIBSP_2)",
+    title: "Boehringer Ingelheim (BIBSP)",
     role: "trainee",
     organization: "Boehringer Ingelheim",
     trainee_code: "TRN-8071",
     display_name: "CamilleBI",
-    company_code: "BIBSP_2",
-    assigned_companies: ["BIBSP_2"],
+    company_code: "BIBSP",
+    assigned_companies: ["BIBSP"],
     streak: 10,
     points: 14200,
     level: 4,
@@ -276,13 +276,13 @@ export const DEMO_USERS = {
     id: "7ee5f39e-efb0-4c1a-afdd-0b680128e924",
     email: "santos.vincent@ayalaland.com.ph",
     name: "Vincent Santos",
-    title: "Ayala Land (AYALA_LAND_INC_2)",
+    title: "Ayala Land (AYALA_LAND_INC)",
     role: "trainee",
     organization: "Ayala Land Inc",
     trainee_code: "TRN-8088",
     display_name: "VincentAyala",
-    company_code: "AYALA_LAND_INC_2",
-    assigned_companies: ["AYALA_LAND_INC_2"],
+    company_code: "AYALA_LAND_INC",
+    assigned_companies: ["AYALA_LAND_INC"],
     streak: 6,
     points: 10500,
     level: 3,
@@ -302,6 +302,27 @@ export function normalizeRole(role) {
   return String(role).toLowerCase().trim();
 }
 
+function isJwtExpired(tokenStr) {
+  if (!tokenStr) return true;
+  try {
+    const parts = tokenStr.split('.');
+    if (parts.length !== 3) return true;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const jsonStr = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const payload = JSON.parse(jsonStr);
+    if (!payload.exp) return false;
+    // Buffer with 30 seconds
+    return (payload.exp * 1000) < (Date.now() + 30000);
+  } catch {
+    return true;
+  }
+}
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -312,10 +333,10 @@ export function AuthProvider({ children }) {
         const parsed = JSON.parse(saved);
         // Find matching persona in DEMO_USERS to upgrade any stale cached object
         const matchingDemo = Object.values(DEMO_USERS).find(
-          u => u.id === parsed.id || u.email === parsed.email || u.role === parsed.role
+          u => u.id === parsed.id || u.email === parsed.email
         );
         if (matchingDemo) {
-          const upgraded = { ...matchingDemo, ...parsed, name: matchingDemo.name, title: matchingDemo.title, initials: matchingDemo.initials };
+          const upgraded = { ...matchingDemo, ...parsed, name: matchingDemo.name, title: matchingDemo.title, initials: matchingDemo.initials, assigned_companies: matchingDemo.assigned_companies, assigned_client_accounts: matchingDemo.assigned_client_accounts, company_code: matchingDemo.company_code || parsed.company_code };
           upgraded.role = normalizeRole(upgraded.role);
           // Ensure streak, points, level, and quiz_progress from DEMO_USERS if missing or stale
           if (upgraded.points === undefined || upgraded.quiz_progress === undefined) {
@@ -337,6 +358,21 @@ export function AuthProvider({ children }) {
 
   const [token, setToken] = useState(() => localStorage.getItem('crossquest_auth_token') || null);
 
+  // Listen for transparent re-authentications from api.js
+  useEffect(() => {
+    const handleTokenRefreshed = (e) => {
+      if (e.detail?.token) {
+        setToken(e.detail.token);
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('crossquest_token_refreshed', handleTokenRefreshed);
+      return () => {
+        window.removeEventListener('crossquest_token_refreshed', handleTokenRefreshed);
+      };
+    }
+  }, []);
+
   // Resilient token synchronization: on mount or whenever currentUser changes, verify/acquire token
   useEffect(() => {
     let isMounted = true;
@@ -346,7 +382,9 @@ export function AuthProvider({ children }) {
 
       const storedToken = localStorage.getItem('crossquest_auth_token');
       const storedEmail = localStorage.getItem('crossquest_auth_email');
-      if (!storedToken || !token || storedEmail !== activeUser.email) {
+      const expired = isJwtExpired(storedToken);
+
+      if (!storedToken || !token || storedEmail !== activeUser.email || expired) {
         try {
           const formData = new URLSearchParams();
           formData.append('username', activeUser.email);
@@ -369,7 +407,7 @@ export function AuthProvider({ children }) {
     };
     syncToken();
     return () => { isMounted = false; };
-  }, [currentUser]);
+  }, [currentUser, token]);
 
 
   const loginRole = async (roleKey) => {
@@ -400,9 +438,6 @@ export function AuthProvider({ children }) {
       console.warn("Could not re-hydrate persona progress:", e);
     }
 
-    setCurrentUser(user);
-    localStorage.setItem('crossquest_auth_user', JSON.stringify(user));
-
     try {
       const formData = new URLSearchParams();
       formData.append('username', user.email);
@@ -430,14 +465,17 @@ export function AuthProvider({ children }) {
           }
         }
         if (activeToken) {
-          setToken(activeToken);
           localStorage.setItem('crossquest_auth_token', activeToken);
           localStorage.setItem('crossquest_auth_email', user.email);
+          setToken(activeToken);
         }
       }
     } catch (e) {
       console.warn("Could not acquire backend token for role switch:", e);
     }
+
+    localStorage.setItem('crossquest_auth_user', JSON.stringify(user));
+    setCurrentUser(user);
     return user;
   };
 

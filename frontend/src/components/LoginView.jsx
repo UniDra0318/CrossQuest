@@ -120,10 +120,10 @@ export default function LoginView() {
     { key: 'am_brian', title: 'Account Manager (Tech & Telecom)', name: 'Brian Mendoza', org: 'Crossworks Client Portfolio', icon: Key, badgeClass: 'staff' },
     { key: 'finance', title: 'Finance & Billing Specialist', name: 'Elena Santos', org: 'Crossworks Operations & Billing', icon: Building2, badgeClass: 'finance' },
     { key: 'trainer', title: 'Lead Technical Instructor', name: 'Jordan Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
-    { key: 'trainee', title: 'Trainee (Vertiv Holdings)', name: 'Andrea Aguilar', org: 'VHL_2 • TRN-8000', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_ricardo', title: 'Trainee (IPRoyal Services)', name: 'Ricardo Ocampo', org: 'IPROY_SERVI_2 • TRN-8001', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_bea', title: 'Trainee (IPRoyal Services)', name: 'Bea Macaraeg', org: 'IPROY_SERVI_2 • TRN-8002', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_rafael', title: 'Trainee (Amihan Solutions)', name: 'Rafael Dizon', org: 'AMIHAN_SOLUTI_2 • TRN-8015', icon: Award, badgeClass: 'trainee' }
+    { key: 'trainee', title: 'Trainee (Vertiv Holdings)', name: 'Andrea Aguilar', org: 'VHL • TRN-8000', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_ricardo', title: 'Trainee (IPRoyal Services)', name: 'Ricardo Ocampo', org: 'IPROY_SERVI • TRN-8001', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_bea', title: 'Trainee (IPRoyal Services)', name: 'Bea Macaraeg', org: 'IPROY_SERVI • TRN-8002', icon: Award, badgeClass: 'trainee' },
+    { key: 'trainee_rafael', title: 'Trainee (Amihan Solutions)', name: 'Rafael Dizon', org: 'AMIHAN_SOLUTI • TRN-8015', icon: Award, badgeClass: 'trainee' }
   ];
 
   const showDevTab = import.meta.env.DEV && (

@@ -52,7 +52,7 @@ services:
         condition: service_healthy
 
   localstack:
-    image: localstack/localstack:latest
+    image: localstack/localstack:2026.10.6
     container_name: crossquest-localstack
     restart: always
     ports:
@@ -60,6 +60,7 @@ services:
     environment:
       - SERVICES=kms,secretsmanager
       - DEFAULT_REGION=ap-southeast-1
+      - LOCALSTACK_AUTH_TOKEN=ls-nOhAJApU-MUha-5210-QaPI-QISoCAQI89da
 
 
   frontend:

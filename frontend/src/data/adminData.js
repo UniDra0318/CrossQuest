@@ -34,15 +34,15 @@ export const staff = [
   { id: 'u-5', name: 'Brian Mendoza', initials: 'BM', email: 'brian.mendoza@crossworks.ph', role: 'ACCOUNT MANAGER', level: 2, clients: ['TELCO_EPSILON'], tone: 'orange' },
   { id: 'u-6', name: 'Elena Santos', initials: 'ES', email: 'elena.santos@crossworks.ph', role: 'FINANCE', level: 2, clients: ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA', 'BANK_DELTA', 'TELCO_EPSILON'], tone: 'orange' },
   { id: 'u-7', name: 'Jordan Ramos', initials: 'JR', email: 'jordan.ramos@crossworks.ph', role: 'TRAINER', level: 1, clients: ['CORP_ALPHA', 'FINTECH_BETA', 'RETAIL_GAMMA', 'BANK_DELTA', 'TELCO_EPSILON'], tone: 'green' },
-  { id: 'u-trn-1', name: 'Andrea Aguilar', initials: 'AA', email: 'andrea.aguilar@vertiv.com', role: 'TRAINEE', level: 1, clients: ['VHL_2'], tone: 'blue' },
-  { id: 'u-trn-2', name: 'Ricardo Ocampo', initials: 'RO', email: 'ricardo.ocampo@iproyal.com', role: 'TRAINEE', level: 1, clients: ['IPROY_SERVI_2'], tone: 'blue' },
-  { id: 'u-trn-3', name: 'Bea Macaraeg', initials: 'BM', email: 'bea.macaraeg@iproyal.com', role: 'TRAINEE', level: 1, clients: ['IPROY_SERVI_2'], tone: 'blue' },
-  { id: 'u-trn-4', name: 'Rafael Dizon', initials: 'RD', email: 'rafael.dizon@amihansolutions.com', role: 'TRAINEE', level: 1, clients: ['AMIHAN_SOLUTI_2'], tone: 'blue' },
-  { id: 'u-trn-5', name: 'Rowena Cabrera', initials: 'RC', email: 'rowena.cabrera@ewageas.com', role: 'TRAINEE', level: 1, clients: ['EWALIC_2'], tone: 'blue' },
+  { id: 'u-trn-1', name: 'Andrea Aguilar', initials: 'AA', email: 'andrea.aguilar@vertiv.com', role: 'TRAINEE', level: 1, clients: ['VHL'], tone: 'blue' },
+  { id: 'u-trn-2', name: 'Ricardo Ocampo', initials: 'RO', email: 'ricardo.ocampo@iproyal.com', role: 'TRAINEE', level: 1, clients: ['IPROY_SERVI'], tone: 'blue' },
+  { id: 'u-trn-3', name: 'Bea Macaraeg', initials: 'BM', email: 'bea.macaraeg@iproyal.com', role: 'TRAINEE', level: 1, clients: ['IPROY_SERVI'], tone: 'blue' },
+  { id: 'u-trn-4', name: 'Rafael Dizon', initials: 'RD', email: 'rafael.dizon@amihansolutions.com', role: 'TRAINEE', level: 1, clients: ['AMIHAN_SOLUTI'], tone: 'blue' },
+  { id: 'u-trn-5', name: 'Rowena Cabrera', initials: 'RC', email: 'rowena.cabrera@ewageas.com', role: 'TRAINEE', level: 1, clients: ['EWALIC'], tone: 'blue' },
   { id: 'u-trn-6', name: 'Joshua Javier', initials: 'JJ', email: 'jjavier@islalpg.com', role: 'TRAINEE', level: 1, clients: ['ISLA_LPG_CORPOR'], tone: 'blue' },
-  { id: 'u-trn-7', name: 'Arvin Natividad', initials: 'AN', email: 'arvin.natividad@urc.com.ph', role: 'TRAINEE', level: 1, clients: ['UNIVER_ROBINA_CORPOR_3'], tone: 'blue' },
-  { id: 'u-trn-8', name: 'Camille Morales', initials: 'CM', email: 'camille.morales@boehringer-ingelheim.com', role: 'TRAINEE', level: 1, clients: ['BIBSP_2'], tone: 'blue' },
-  { id: 'u-trn-9', name: 'Vincent Santos', initials: 'VS', email: 'santos.vincent@ayalaland.com.ph', role: 'TRAINEE', level: 1, clients: ['AYALA_LAND_INC_2'], tone: 'blue' }
+  { id: 'u-trn-7', name: 'Arvin Natividad', initials: 'AN', email: 'arvin.natividad@urc.com.ph', role: 'TRAINEE', level: 1, clients: ['UNIVER_ROBINA_CORPOR'], tone: 'blue' },
+  { id: 'u-trn-8', name: 'Camille Morales', initials: 'CM', email: 'camille.morales@boehringer-ingelheim.com', role: 'TRAINEE', level: 1, clients: ['BIBSP'], tone: 'blue' },
+  { id: 'u-trn-9', name: 'Vincent Santos', initials: 'VS', email: 'santos.vincent@ayalaland.com.ph', role: 'TRAINEE', level: 1, clients: ['AYALA_LAND_INC'], tone: 'blue' }
 ];
 
 // type: OUT_OF_SCOPE | OFF_HOURS | FAILED_ATTEMPTS ; status: UNREVIEWED | RESOLVED
@@ -55,15 +55,15 @@ export const anomalies = [
 const AM = (c) => `(ROLE:ADMIN) OR (ROLE:ACCOUNT_MANAGER AND COMPANY:${c})`;
 // status: COMPLETED | IN_PROGRESS
 export const records = [
-  { id: 'rec-pilot-001', trainee: 'Andrea Aguilar', email: 'andrea.aguilar@vertiv.com', org: 'Vertiv (Singapore) Holdings PTE LTD-ROHQ', course: 'Supervisory Upskilling Program for Excellent', policy: AM('VHL_2'), status: 'COMPLETED' },
-  { id: 'rec-pilot-002', trainee: 'Ricardo Ocampo', email: 'ricardo.ocampo@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
-  { id: 'rec-pilot-003', trainee: 'Bea Macaraeg', email: 'bea.macaraeg@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
-  { id: 'rec-pilot-004', trainee: 'Adrian Natividad', email: 'adrian.natividad@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
-  { id: 'rec-pilot-005', trainee: 'Karen Concepcion', email: 'karen.concepcion@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI_2'), status: 'COMPLETED' },
-  { id: 'rec-pilot-010', trainee: 'Jerome Enriquez', email: 'jenriquez@redoakproperties.com.ph', org: 'Red Oak Properties Inc.', course: 'Supervisory Upskilling Program for Excellent', policy: AM('ROP_3'), status: 'COMPLETED' },
-  { id: 'rec-pilot-032', trainee: 'Rowena Cabrera', email: 'rowena.cabrera@ewageas.com', org: 'East West Ageas Life Insurance', course: 'Business Strategy Simulation', policy: AM('EWALIC_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-001', trainee: 'Andrea Aguilar', email: 'andrea.aguilar@vertiv.com', org: 'Vertiv (Singapore) Holdings PTE LTD-ROHQ', course: 'Supervisory Upskilling Program for Excellent', policy: AM('VHL'), status: 'COMPLETED' },
+  { id: 'rec-pilot-002', trainee: 'Ricardo Ocampo', email: 'ricardo.ocampo@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI'), status: 'COMPLETED' },
+  { id: 'rec-pilot-003', trainee: 'Bea Macaraeg', email: 'bea.macaraeg@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI'), status: 'COMPLETED' },
+  { id: 'rec-pilot-004', trainee: 'Adrian Natividad', email: 'adrian.natividad@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI'), status: 'COMPLETED' },
+  { id: 'rec-pilot-005', trainee: 'Karen Concepcion', email: 'karen.concepcion@iproyal.com', org: 'IPRoyal Services FZE LLC', course: 'Supervisory Upskilling Program for Excellent', policy: AM('IPROY_SERVI'), status: 'COMPLETED' },
+  { id: 'rec-pilot-010', trainee: 'Jerome Enriquez', email: 'jenriquez@redoakproperties.com.ph', org: 'Red Oak Properties Inc.', course: 'Supervisory Upskilling Program for Excellent', policy: AM('ROP'), status: 'COMPLETED' },
+  { id: 'rec-pilot-032', trainee: 'Rowena Cabrera', email: 'rowena.cabrera@ewageas.com', org: 'East West Ageas Life Insurance', course: 'Business Strategy Simulation', policy: AM('EWALIC'), status: 'COMPLETED' },
   { id: 'rec-pilot-049', trainee: 'Joshua Javier', email: 'jjavier@islalpg.com', org: 'Isla LPG Corporation', course: 'Negotiating for Results', policy: AM('ISLA_LPG_CORPOR'), status: 'IN_PROGRESS' },
-  { id: 'rec-pilot-088', trainee: 'Vincent Santos', email: 'santos.vincent@ayalaland.com.ph', org: 'Ayala Land Inc.', course: 'PMP Review (Saturdays)', policy: AM('AYALA_LAND_INC_2'), status: 'COMPLETED' },
+  { id: 'rec-pilot-088', trainee: 'Vincent Santos', email: 'santos.vincent@ayalaland.com.ph', org: 'Ayala Land Inc.', course: 'PMP Review (Saturdays)', policy: AM('AYALA_LAND_INC'), status: 'COMPLETED' },
 ];
 
 export const settings = {
