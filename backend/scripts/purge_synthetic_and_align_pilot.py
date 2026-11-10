@@ -16,10 +16,7 @@ import sqlite3
 from datetime import datetime, timezone
 from sqlalchemy import create_engine, text
 
-ADMIN_DATABASE_URL = os.getenv(
-    "ADMIN_DATABASE_URL",
-    "postgresql+psycopg2://crossquest_admin:crossquest_secret_password@postgres:5432/crossquest_db"
-)
+ADMIN_DATABASE_URL = os.environ["ADMIN_DATABASE_URL"]
 
 def purge_company_cascade(conn, cid, code_or_name):
     # 1. Trainees belonging to this synthetic company
@@ -121,7 +118,9 @@ def run():
 
         # 2. Purge 'Crossworks Administration' (info@crossworks.ph) and test users (@test.ph)
         joey = conn.execute(text("SELECT id FROM users WHERE email = 'joey.mallari@xworks.ph'")).fetchone()
-        joey_id = joey[0] if joey else '016868d1-5238-49a4-9b3f-1cd205dbdc44'
+        joey_id = joey[0] if joey else None
+        if joey_id is None:
+            raise SystemExit("Abort: joey.mallari@xworks.ph not found; refusing to purge.")
 
         users_to_delete = conn.execute(
             text("SELECT id, email, full_name FROM users WHERE email = 'info@crossworks.ph' OR email LIKE '%@test.ph'")
@@ -131,9 +130,8 @@ def run():
         for u in users_to_delete:
             uid = u[0]
             # Re-point admin foreign keys
-            conn.execute(text("UPDATE anomaly_rules SET last_edited_by_user_id = :jid WHERE last_edited_by_user_id = :uid"), {"jid": joey_id, "uid": uid})
-            conn.execute(text("UPDATE anomaly_alerts SET reviewed_by_user_id = :jid WHERE reviewed_by_user_id = :uid"), {"jid": joey_id, "uid": uid})
-            conn.execute(text("UPDATE anomaly_alerts SET subject_user_id = NULL WHERE subject_user_id = :uid"), {"uid": uid})
+            conn.execute(text("UPDATE anomaly_rules SET last_edited_by_user_id = NULL WHERE last_edited_by_user_id = :uid"), {"uid": uid})
+            conn.execute(text("DELETE FROM anomaly_alerts WHERE reviewed_by_user_id = :uid OR subject_user_id = :uid"), {"uid": uid})
             conn.execute(text("UPDATE training_sessions SET trainer_sign_off_user_id = :jid WHERE trainer_sign_off_user_id = :uid"), {"jid": joey_id, "uid": uid})
             conn.execute(text("UPDATE training_records SET deleted_by = :jid WHERE deleted_by = :uid"), {"jid": joey_id, "uid": uid})
             conn.execute(text("UPDATE training_record_versions SET edited_by_user_id = :jid WHERE edited_by_user_id = :uid"), {"jid": joey_id, "uid": uid})
@@ -170,6 +168,8 @@ def run():
 
         # 3. Verify Genuine Administrators
         admins = conn.execute(text("SELECT email, full_name, role FROM users WHERE role = 'admin'")).fetchall()
+        if len(admins) < 2:
+            raise RuntimeError(f"Abort: only {len(admins)} admin(s) remain; peer review needs at least 2. Rolling back.")
         print(f"\nRemaining Administrators ({len(admins)}):")
         for a in admins:
             print(f" ✓ {a[0]} ({a[1]})")
