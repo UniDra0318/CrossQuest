@@ -1,5 +1,5 @@
 import { authFetch, fetchCompanies, fetchRecords, decryptRecordApi } from '../services/api.js';
-import { me as mockMe, portfolios as mockPortfolios, records as mockRecords, decryptedView } from '../data/staffData.js';
+import { me as mockMe, portfolios as mockPortfolios, records as mockRecords } from '../data/staffData.js';
 
 const API_BASE = 'http://localhost:8000/api/v1';
 
@@ -121,40 +121,30 @@ export async function getStaffRecords() {
  * Returns decrypted evaluation if authorized, or 403 and triggers anomaly alert if out of scope.
  */
 export async function decryptRecord(id) {
-  try {
-    const result = await decryptRecordApi(id);
-    if (result && result.ok && result.data) {
-      const dec = result.data;
-      return {
-        id: dec.record_id,
-        trainee: dec.trainee_name,
-        email: dec.trainee_email,
-        org: dec.company_name || dec.company_code,
-        course: dec.course_name,
-        status: dec.status,
-        score: dec.score,
-        completionDate: dec.completion_date,
-        assessmentNotes: dec.decrypted_content?.assessment_notes || 'Official Crossworks training assessment record.',
-        practicalLab: dec.decrypted_content?.practical_lab || 'Distinction',
-        certificateRef: dec.decrypted_content?.certificate_reference || `CERT-${dec.record_id?.substring(0, 8)}`,
-        decryptedAt: new Date().toLocaleTimeString(),
-        policySatisfied: true
-      };
-    }
-  } catch (err) {
-    if (err.status === 403 || err.message?.includes('denied') || err.message?.includes('scope')) {
-      throw err;
-    }
+  const result = await decryptRecordApi(id);
+  if (!result || !result.ok || !result.data) {
+    const errorMsg = result?.error || 'CP-ABE Decryption failed: Cryptographic policy unsatisfied or server error.';
+    const err = new Error(errorMsg);
+    err.status = result?.status || 500;
+    throw err;
   }
 
-  // Fallback to mock decryption for local demo
-  const rec = mockRecords.find((r) => r.id === id);
-  if (!rec) throw new Error('Record not found.');
-  const me = await getStaffMe();
-  if (!(me.scopes || ['CORP_ALPHA']).includes(rec.scope)) {
-    throw Object.assign(new Error('Access denied. Out of authorized client scope.'), { status: 403 });
-  }
-  return decryptedView(rec);
+  const dec = result.data;
+  return {
+    id: dec.record_id,
+    trainee: dec.trainee_name,
+    email: dec.trainee_email,
+    org: dec.company_name || dec.company_code,
+    course: dec.course_name,
+    status: dec.status,
+    score: dec.score,
+    completionDate: dec.completion_date,
+    assessmentNotes: dec.decrypted_content?.assessment_notes || 'Official Crossworks training assessment record.',
+    practicalLab: dec.decrypted_content?.practical_lab || 'Distinction',
+    certificateRef: dec.decrypted_content?.certificate_reference || `CERT-${dec.record_id?.substring(0, 8)}`,
+    decryptedAt: new Date().toLocaleTimeString(),
+    policySatisfied: true
+  };
 }
 
 /** GET /api/v1/reports/company/:scope -> Real executive company report */

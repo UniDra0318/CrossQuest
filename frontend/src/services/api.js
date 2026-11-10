@@ -138,17 +138,16 @@ export async function createEncryptedRecordApi(recordData, token) {
 
 export async function decryptRecordApi(recordId, token) {
   try {
-    const res = await fetch(`${API_BASE}/records/${recordId}/decrypt`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-      }
-    });
-    const data = await res.json();
-    return { ok: res.ok, data };
+    const res = await authFetch(`${API_BASE}/records/${recordId}/decrypt`, {
+      method: 'POST'
+    }, token);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: data.detail || `Decryption failed (${res.status})` };
+    }
+    return { ok: true, data };
   } catch (err) {
-    return { ok: false, error: err.message };
+    return { ok: false, status: err.status || 500, error: err.message };
   }
 }
 

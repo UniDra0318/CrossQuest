@@ -490,7 +490,7 @@ class AttributeManager:
                             "abe_ciphertext": rec.abe_ciphertext,
                             "payload_ciphertext": rec.payload_ciphertext,
                             "nonce": rec.nonce,
-                            "engine": "charm-bsw07" if cpabe_engine.charm_available else "simulation"
+                            "engine": "charm-bsw07"
                         }
 
                         trainee = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()

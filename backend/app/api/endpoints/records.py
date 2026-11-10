@@ -416,15 +416,22 @@ def decrypt_training_record(
         "abe_ciphertext": record.abe_ciphertext,
         "payload_ciphertext": record.payload_ciphertext,
         "nonce": record.nonce,
-        "engine": "charm-bsw07" if cpabe_engine.charm_available else "simulation"
+        "engine": "charm-bsw07"
     }
 
-    decrypted_content = cpabe_engine.decrypt_record(
-        encrypted_record=cipher_package,
-        user_key_info=user_key_info,
-        record_id=f"rec-{trainee_code}",
-        version=record.policy_version
-    )
+    try:
+        decrypted_content = cpabe_engine.decrypt_record(
+            encrypted_record=cipher_package,
+            user_key_info=user_key_info,
+            record_id=f"rec-{trainee_code}",
+            version=record.policy_version
+        )
+    except Exception as e:
+        logger.error(f"CP-ABE decryption failed for record {record_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"CP-ABE Decryption Error: {str(e)}"
+        )
 
     if decrypted_content is None:
         log = AccessLog(

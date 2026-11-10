@@ -64,21 +64,20 @@ class CPABEEngine:
 
     def __init__(self, group_name: str = "SS512"):
         # SS512 is the Type 1 symmetric pairing curve settled in TC-CRY-01 feasibility test for BSW07
-        # Fail-closed enforcement: production MUST refuse to run in simulation mode (SEC-04, VR-24)
-        if getattr(settings, "ENVIRONMENT", "development") == "production" and not CHARM_AVAILABLE:
+        # Fail-closed enforcement: system requires native Charm-Crypto and strictly forbids fake fallbacks (SEC-04, VR-24)
+        if not CHARM_AVAILABLE:
             raise RuntimeError(
                 "FAIL-CLOSED SECURITY ENFORCEMENT: Charm-Crypto native pairing library is not available. "
-                "Production environment refuses to start CP-ABE engine in simulation mode (SEC-04, VR-24)."
+                "The system refuses to operate without native CP-ABE (BSW07) and fake simulation fallbacks are disallowed (SEC-04, VR-24)."
             )
-        self.charm_available = CHARM_AVAILABLE
+        self.charm_available = True
         self.group_name = group_name
         self.group = None
         self.cpabe = None
         self.master_public_key = None
         self.master_secret_key = None
 
-        if self.charm_available:
-            self._init_charm()
+        self._init_charm()
 
     def _init_charm(self):
         try:
@@ -112,45 +111,30 @@ class CPABEEngine:
                         f.write(objectToBytes(self.master_secret_key, self.group))
                     logger.info(f"Generated and persisted new CP-ABE master keys to {mpk_path} and {msk_path}")
         except Exception as e:
-            if getattr(settings, "ENVIRONMENT", "development") == "production":
-                raise RuntimeError(
-                    f"FAIL-CLOSED SECURITY ENFORCEMENT: Charm pairing group or master key initialization failed in production: {e}"
-                ) from e
-            logger.warning(f"Could not initialize Charm pairing group: {e}. Defaulting to simulation mode.")
-            self.charm_available = False
+            raise RuntimeError(
+                f"FAIL-CLOSED SECURITY ENFORCEMENT: Charm pairing group or master key initialization failed: {e}"
+            ) from e
 
     def generate_user_private_key(self, user_attributes: List[str]) -> Dict[str, Any]:
-        """Generates a private key for a user with the given set of attributes."""
-        sanitized_attrs = [sanitize_token(attr) for attr in user_attributes if attr]
-        
-        if self.charm_available:
-            try:
-                key = self.cpabe.keygen(self.master_public_key, self.master_secret_key, sanitized_attrs)
-                serialized_key = base64.b64encode(objectToBytes(key, self.group)).decode("utf-8")
-                return {
-                    "attributes": sanitized_attrs,
-                    "key_data": serialized_key,
-                    "engine": "charm-bsw07"
-                }
-            except Exception as e:
-                logger.error(f"Charm keygen error: {e}")
-                if getattr(settings, "ENVIRONMENT", "development") == "production":
-                    raise RuntimeError(
-                        f"FAIL-CLOSED SECURITY ENFORCEMENT: Charm key generation failed in production: {e}"
-                    ) from e
-
-        if getattr(settings, "ENVIRONMENT", "development") == "production":
+        """Generates a private key for a user with the given set of attributes using Charm BSW07."""
+        if not self.charm_available or not self.cpabe:
             raise RuntimeError(
-                "FAIL-CLOSED SECURITY ENFORCEMENT: Simulation key generation is strictly forbidden in production (SEC-04, VR-24)."
+                "FAIL-CLOSED SECURITY ENFORCEMENT: Charm-Crypto CP-ABE engine is unavailable. "
+                "Key generation cannot proceed and fake simulation fallbacks are strictly forbidden (SEC-04, VR-24)."
             )
 
-        # Authenticated simulation key
-        simulated_key = f"SIMKEY_{':'.join(sorted(sanitized_attrs))}"
-        return {
-            "attributes": sanitized_attrs,
-            "key_data": base64.b64encode(simulated_key.encode("utf-8")).decode("utf-8"),
-            "engine": "simulation"
-        }
+        sanitized_attrs = [sanitize_token(attr) for attr in user_attributes if attr]
+        try:
+            key = self.cpabe.keygen(self.master_public_key, self.master_secret_key, sanitized_attrs)
+            serialized_key = base64.b64encode(objectToBytes(key, self.group)).decode("utf-8")
+            return {
+                "attributes": sanitized_attrs,
+                "key_data": serialized_key,
+                "engine": "charm-bsw07"
+            }
+        except Exception as e:
+            logger.error(f"Charm keygen error: {e}")
+            raise RuntimeError(f"CP-ABE key generation failed: {e}") from e
 
     def encrypt_record(
         self,
@@ -159,77 +143,52 @@ class CPABEEngine:
         record_id: str = "default_rec",
         version: int = 1
     ) -> Dict[str, Any]:
-        """Encrypts sensitive training record payload using hybrid encryption (DD-02, SEC-04).
+        """Encrypts sensitive training record payload using hybrid CP-ABE BSW07 + AES-256-GCM (DD-02, SEC-04).
         
         1. Encrypts pairing element under policy with CP-ABE BSW07.
         2. Derives 256-bit symmetric key using HKDF.
         3. Encrypts JSON payload with AES-256-GCM, binding record_id, version, and policy as AAD.
         """
+        if not self.charm_available or not self.cpabe:
+            raise RuntimeError(
+                "FAIL-CLOSED SECURITY ENFORCEMENT: Charm-Crypto CP-ABE engine is unavailable. "
+                "Encryption cannot proceed and fake simulation fallbacks are strictly forbidden (SEC-04, VR-24)."
+            )
+
         payload_bytes = json.dumps(plaintext_data, sort_keys=True).encode("utf-8")
         aad = f"{record_id}:{version}:{policy_str}".encode("utf-8")
         nonce = os.urandom(12)
 
-        if self.charm_available:
-            try:
-                msg = self.group.random(GT)
-                ciphertext = self.cpabe.encrypt(self.master_public_key, msg, policy_str)
-                abe_cipher_bytes = objectToBytes(ciphertext, self.group)
-                serialized_abe_cipher = base64.b64encode(abe_cipher_bytes).decode("utf-8")
+        try:
+            msg = self.group.random(GT)
+            ciphertext = self.cpabe.encrypt(self.master_public_key, msg, policy_str)
+            abe_cipher_bytes = objectToBytes(ciphertext, self.group)
+            serialized_abe_cipher = base64.b64encode(abe_cipher_bytes).decode("utf-8")
 
-                # Derive AES-256 key from pairing element via HKDF
-                raw_element = objectToBytes(msg, self.group)
-                hkdf = HKDF(
-                    algorithm=hashes.SHA256(),
-                    length=32,
-                    salt=nonce,
-                    info=b"crossquest-cpabe-aes256gcm",
-                )
-                aes_key = hkdf.derive(raw_element)
-                
-                aesgcm = AESGCM(aes_key)
-                encrypted_payload = aesgcm.encrypt(nonce, payload_bytes, aad)
-
-                return {
-                    "policy": policy_str,
-                    "policy_version": version,
-                    "abe_ciphertext": serialized_abe_cipher,
-                    "payload_ciphertext": base64.b64encode(encrypted_payload).decode("utf-8"),
-                    "nonce": base64.b64encode(nonce).decode("utf-8"),
-                    "engine": "charm-bsw07"
-                }
-            except Exception as e:
-                logger.error(f"Charm encryption failed: {e}")
-                if getattr(settings, "ENVIRONMENT", "development") == "production":
-                    raise RuntimeError(
-                        f"FAIL-CLOSED SECURITY ENFORCEMENT: Charm encryption failed in production: {e}"
-                    ) from e
-                logger.warning(f"Charm encryption failed: {e}. Falling back to simulation.")
-
-        if getattr(settings, "ENVIRONMENT", "development") == "production":
-            raise RuntimeError(
-                "FAIL-CLOSED SECURITY ENFORCEMENT: Simulation encryption is strictly forbidden in production (SEC-04, VR-24)."
+            # Derive AES-256 key from pairing element via HKDF
+            raw_element = objectToBytes(msg, self.group)
+            hkdf = HKDF(
+                algorithm=hashes.SHA256(),
+                length=32,
+                salt=nonce,
+                info=b"crossquest-cpabe-aes256gcm",
             )
+            aes_key = hkdf.derive(raw_element)
+            
+            aesgcm = AESGCM(aes_key)
+            encrypted_payload = aesgcm.encrypt(nonce, payload_bytes, aad)
 
-        # Simulation mode: deterministic HKDF key derived from policy
-        sim_secret = f"SIM_SECRET_{policy_str}".encode("utf-8")
-        hkdf = HKDF(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=nonce,
-            info=b"crossquest-sim-aes256gcm",
-        )
-        aes_key = hkdf.derive(sim_secret)
-        aesgcm = AESGCM(aes_key)
-        encrypted_payload = aesgcm.encrypt(nonce, payload_bytes, aad)
-
-        return {
-            "policy": policy_str,
-            "policy_version": version,
-            "abe_ciphertext": base64.b64encode(f"SIM_ABE_{policy_str}".encode("utf-8")).decode("utf-8"),
-            "payload_ciphertext": base64.b64encode(encrypted_payload).decode("utf-8"),
-            "nonce": base64.b64encode(nonce).decode("utf-8"),
-            "engine": "simulation"
-        }
+            return {
+                "policy": policy_str,
+                "policy_version": version,
+                "abe_ciphertext": serialized_abe_cipher,
+                "payload_ciphertext": base64.b64encode(encrypted_payload).decode("utf-8"),
+                "nonce": base64.b64encode(nonce).decode("utf-8"),
+                "engine": "charm-bsw07"
+            }
+        except Exception as e:
+            logger.error(f"Charm encryption failed: {e}")
+            raise RuntimeError(f"CP-ABE encryption failed: {e}") from e
 
     def decrypt_record(
         self,
@@ -243,6 +202,18 @@ class CPABEEngine:
         Performs authenticated AES-256-GCM decryption with AAD check.
         Returns decrypted dict if valid, or None if policy is unsatisfied or tamper is detected (TC-CRY-03, TC-CRY-04).
         """
+        if not self.charm_available or not self.cpabe:
+            raise RuntimeError(
+                "FAIL-CLOSED SECURITY ENFORCEMENT: Charm-Crypto CP-ABE engine is unavailable. "
+                "Decryption cannot proceed and fake simulation fallbacks are strictly forbidden (SEC-04, VR-24)."
+            )
+
+        if encrypted_record.get("engine") != "charm-bsw07":
+            raise RuntimeError(
+                f"FAIL-CLOSED SECURITY ENFORCEMENT: Ciphertext engine '{encrypted_record.get('engine')}' is invalid. "
+                f"Native charm-bsw07 is strictly required; fake simulation records cannot be decrypted."
+            )
+
         policy = encrypted_record.get("policy", "")
         policy_ver = version if version is not None else encrypted_record.get("policy_version", 1)
         aad = f"{record_id}:{policy_ver}:{policy}".encode("utf-8")
@@ -256,51 +227,28 @@ class CPABEEngine:
             nonce = base64.b64decode(encrypted_record["nonce"])
             payload_cipher = base64.b64decode(encrypted_record["payload_ciphertext"])
 
-            if self.charm_available and encrypted_record.get("engine") == "charm-bsw07":
-                cipher_bytes = base64.b64decode(encrypted_record["abe_ciphertext"])
-                cipher_obj = bytesToObject(cipher_bytes, self.group)
-                key_bytes = base64.b64decode(user_key_info["key_data"])
-                key_obj = bytesToObject(key_bytes, self.group)
+            cipher_bytes = base64.b64decode(encrypted_record["abe_ciphertext"])
+            cipher_obj = bytesToObject(cipher_bytes, self.group)
+            key_bytes = base64.b64decode(user_key_info["key_data"])
+            key_obj = bytesToObject(key_bytes, self.group)
 
-                decrypted_msg = self.cpabe.decrypt(self.master_public_key, key_obj, cipher_obj)
-                if decrypted_msg is False or decrypted_msg is None:
-                    return None
-
-                raw_element = objectToBytes(decrypted_msg, self.group)
-                hkdf = HKDF(
-                    algorithm=hashes.SHA256(),
-                    length=32,
-                    salt=nonce,
-                    info=b"crossquest-cpabe-aes256gcm",
-                )
-                aes_key = hkdf.derive(raw_element)
-            elif encrypted_record.get("engine") == "charm-bsw07" and not self.charm_available:
-                if getattr(settings, "ENVIRONMENT", "development") == "production":
-                    raise RuntimeError(
-                        "FAIL-CLOSED SECURITY ENFORCEMENT: Cannot decrypt Charm-BSW07 ciphertext without Charm native library in production."
-                    )
-                logger.error("Cannot decrypt Charm-BSW07 ciphertext without Charm native library.")
+            decrypted_msg = self.cpabe.decrypt(self.master_public_key, key_obj, cipher_obj)
+            if decrypted_msg is False or decrypted_msg is None:
                 return None
-            else:
-                if getattr(settings, "ENVIRONMENT", "development") == "production":
-                    raise RuntimeError(
-                        "FAIL-CLOSED SECURITY ENFORCEMENT: Simulation record decryption is strictly forbidden in production (SEC-04, VR-24)."
-                    )
-                sim_secret = f"SIM_SECRET_{policy}".encode("utf-8")
-                hkdf = HKDF(
-                    algorithm=hashes.SHA256(),
-                    length=32,
-                    salt=nonce,
-                    info=b"crossquest-sim-aes256gcm",
-                )
-                aes_key = hkdf.derive(sim_secret)
+
+            raw_element = objectToBytes(decrypted_msg, self.group)
+            hkdf = HKDF(
+                algorithm=hashes.SHA256(),
+                length=32,
+                salt=nonce,
+                info=b"crossquest-cpabe-aes256gcm",
+            )
+            aes_key = hkdf.derive(raw_element)
 
             aesgcm = AESGCM(aes_key)
             decrypted_bytes = aesgcm.decrypt(nonce, payload_cipher, aad)
             return json.loads(decrypted_bytes.decode("utf-8"))
         except Exception as e:
-            if getattr(settings, "ENVIRONMENT", "development") == "production" and isinstance(e, RuntimeError):
-                raise
             logger.debug(f"Decryption or GCM authentication tag verification failed: {e}")
             return None
 

@@ -388,7 +388,7 @@ def test_tc_xcl_06_trainee_cross_company_credential_mobility(db_session: Session
         "payload_ciphertext": rec_a.payload_ciphertext,
         "nonce": rec_a.nonce,
     }
-    enc_pkg["engine"] = "charm-bsw07" if cpabe_engine.charm_available else "simulation"
+    enc_pkg["engine"] = "charm-bsw07"
 
     # Trainee can still decrypt the historical record completed at Company Alpha!
     decrypted = cpabe_engine.decrypt_record(enc_pkg, trainee_key, record_id=f"rec-{t1.trainee_code}")
