@@ -38,24 +38,24 @@ def get_current_user(
 
     # Role-based idle timeout and 12-hour max session check on every authenticated request (SEC-07, OI-17)
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
-    active_sessions = (
-        db.query(UserSession)
-        .filter(UserSession.user_id == user.id, UserSession.is_revoked == False)
-        .all()
-    )
-    if active_sessions:
+    all_user_sessions = db.query(UserSession).filter(UserSession.user_id == user.id).all()
+    if all_user_sessions:
+        active_sessions = [s for s in all_user_sessions if not s.is_revoked]
+        if not active_sessions:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session has been logged out or revoked (SEC-01, SEC-07)."
+            )
         for s in active_sessions:
             if s.max_expires_at and now_utc > s.max_expires_at:
                 s.is_revoked = True
-            elif s.idle_timeout_sec and s.last_active_at:
-                if (now_utc - s.last_active_at).total_seconds() > s.idle_timeout_sec:
-                    s.is_revoked = True
+            elif s.idle_timeout_sec and s.last_active_at and (now_utc - s.last_active_at).total_seconds() > s.idle_timeout_sec:
+                s.is_revoked = True
             else:
                 s.last_active_at = now_utc
         db.commit()
 
-        has_active = any(not s.is_revoked for s in active_sessions)
-        if not has_active:
+        if not any(not s.is_revoked for s in active_sessions):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Session timed out due to inactivity or expired (SEC-07, OI-17)."
@@ -68,6 +68,13 @@ def get_current_user(
     # Generate and inject HMAC-signed context for PostgreSQL RLS (SEC-08, SEC-24, OI-14)
     signed_ctx = sign_context(user_id=user.id, role=user.role, trainee_id=trainee_id)
     request_context_var.set(signed_ctx)
+    if db.bind and db.bind.dialect.name == "postgresql":
+        from sqlalchemy import text
+        db.execute(text("SELECT set_config('crossquest.current_user_id', :uid, true)"), {"uid": signed_ctx["user_id"]})
+        db.execute(text("SELECT set_config('crossquest.current_role', :role, true)"), {"role": signed_ctx["role"]})
+        db.execute(text("SELECT set_config('crossquest.current_trainee_id', :tid, true)"), {"tid": signed_ctx["trainee_id"]})
+        db.execute(text("SELECT set_config('crossquest.context_expiry', :exp, true)"), {"exp": str(signed_ctx["expiry"])})
+        db.execute(text("SELECT set_config('crossquest.context_signature', :sig, true)"), {"sig": signed_ctx["signature"]})
 
     return user
 

@@ -299,7 +299,7 @@ def verify_mfa_login(
     is_valid = False
 
     # 0. Dev bypass for quick role switcher in dev mode
-    if cleaned_code == "DEV_MFA_BYPASS":
+    if cleaned_code == "DEV_MFA_BYPASS" and settings.ENVIRONMENT != "production":
         is_valid = True
 
     # 1. Check TOTP authenticator code
@@ -581,6 +581,9 @@ def confirm_password_reset(
     user = db.query(User).filter(User.id == reset_token.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
+
+    if len(reset_in.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long (SEC-01).")
 
     user.hashed_password = get_password_hash(reset_in.new_password)
     user.force_password_change = False

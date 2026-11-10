@@ -246,7 +246,7 @@ export default function Sessions() {
         trainee: r.trainee || r.trainee_name || r.name,
         email: r.trainee_email || r.email,
         attendance_status: r.attendance_status || 'Present',
-        status: r.status === 'Completed' ? 'In progress' : (r.status || 'Enrolled'),
+        status: r.status === 'Completed' ? 'In progress' : (r.status || 'In progress'),
         score: r.score != null ? r.score : ''
       };
     });
@@ -1222,7 +1222,6 @@ export default function Sessions() {
                                 }}
                                 style={{ padding: '6px 10px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12px' }}
                               >
-                                <option value="Enrolled">Enrolled</option>
                                 <option value="In progress">In progress</option>
                                 <option value="Not completed">Not completed</option>
                               </select>

@@ -60,11 +60,7 @@ def get_system_overview(
     admin_user: User = Depends(get_current_admin_user)
 ):
     """Computes real-time system overview metrics for the Admin Dashboard from the database."""
-    test_filter = (
-        ~User.email.like("%@test.ph") &
-        ~User.email.like("%features%") &
-        ~User.full_name.ilike("%Tester%")
-    )
+    test_filter = ~User.email.like("%@test.ph")
     users_total = db.query(User).filter(test_filter).count()
     clients_total = db.query(ClientCompany).count()
     records_total = db.query(TrainingRecord).filter(TrainingRecord.deleted_at == None).count()
@@ -136,11 +132,7 @@ def list_users(
     query = db.query(User)
     if exclude_test:
         query = query.filter(
-            ~User.email.like("%@test.ph"),
-            ~User.email.like("%features%"),
-            ~User.email.like("%tester%"),
-            ~User.full_name.ilike("%Feature Tester%"),
-            ~User.full_name.ilike("%Tester%")
+            ~User.email.like("%@test.ph")
         )
     if exclude_trainees:
         query = query.filter(User.role != "trainee")

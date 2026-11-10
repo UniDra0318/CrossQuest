@@ -681,9 +681,13 @@ def commit_batch_records(
         else:
             comp_code = comp_name.replace(" ", "_").replace(".", "").replace(",", "").upper()[:20]
 
-        trainee_code = data.get("trainee_code") or f"TRN-{hashlib.sha256(str(data.get('participant_name', '')).encode()).hexdigest()[:6].upper()}"
+        raw_email = (data.get("participant_email") or "").strip().lower()
+        trainee_code = data.get("trainee_code") or f"TRN-{hashlib.sha256((raw_email or str(data.get('participant_name', ''))).encode()).hexdigest()[:6].upper()}"
+        email = raw_email or f"{trainee_code.lower()}@imported.ph"
+
         course_name = data.get("program_name") or data.get("course_name") or "Corporate Certification"
-        score = float(data.get("score", 85.0)) if data.get("score") else 85.0
+        raw_score = data.get("score")
+        score = float(raw_score) if (raw_score is not None and str(raw_score).strip() != "") else None
 
         # Resolve or create ClientCompany
         comp = db.query(ClientCompany).filter(ClientCompany.code == comp_code).first()
@@ -694,12 +698,13 @@ def commit_batch_records(
             db.refresh(comp)
 
         # Resolve or create Trainee
-        trainee = db.query(Trainee).filter(Trainee.trainee_code == trainee_code).first()
+        trainee = db.query(Trainee).filter(
+            (Trainee.email == email) | (Trainee.trainee_code == trainee_code)
+        ).first()
         if not trainee:
             name_parts = str(data.get("participant_name", "Trainee")).split(" ", 1)
             first_name = name_parts[0]
             last_name = name_parts[1] if len(name_parts) > 1 else "Participant"
-            email = data.get("participant_email") or f"{trainee_code.lower()}@imported.ph"
 
             trainee = Trainee(
                 current_company_id=comp.id,
@@ -711,6 +716,36 @@ def commit_batch_records(
             db.add(trainee)
             db.commit()
             db.refresh(trainee)
+
+        # Parse training_date and resolve or create TrainingSession
+        raw_date = data.get("training_date")
+        training_dt = None
+        if raw_date:
+            try:
+                training_dt = datetime.fromisoformat(str(raw_date).replace("Z", "+00:00")).replace(tzinfo=None)
+            except Exception:
+                try:
+                    training_dt = datetime.strptime(str(raw_date)[:10], "%Y-%m-%d")
+                except Exception:
+                    training_dt = None
+
+        session_id = None
+        if training_dt:
+            sess_code = f"SESS-{comp.code[:6]}-{training_dt.strftime('%Y%m%d')}"
+            session = db.query(TrainingSession).filter(TrainingSession.session_code == sess_code).first()
+            if not session:
+                session = TrainingSession(
+                    company_id=comp.id,
+                    session_code=sess_code,
+                    start_date=training_dt,
+                    end_date=training_dt,
+                    venue="Crossworks Training Facility",
+                    status="completed"
+                )
+                db.add(session)
+                db.commit()
+                db.refresh(session)
+            session_id = session.id
 
         # CP-ABE Encryption
         policy = cpabe_engine.build_record_policy(
@@ -729,14 +764,18 @@ def commit_batch_records(
             version=1
         )
 
+        raw_status = data.get("status")
+        status_val = raw_status if raw_status in ("In progress", "Not completed") else "Not completed"
+
         record = TrainingRecord(
             trainee_id=trainee.id,
+            session_id=session_id,
             company_at_completion_id=comp.id,
             course_name=course_name,
-            status=data.get("status", "Completed"),
+            status=status_val,
             attendance_status="Present",
             score=score,
-            completion_date=now_utc,
+            completion_date=None,
             encryption_policy=policy,
             policy_version=1,
             abe_ciphertext=encrypted_pkg.get("abe_ciphertext"),

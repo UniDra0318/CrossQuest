@@ -136,7 +136,7 @@ class TrainingRecordCreate(BaseModel):
     session_id: Optional[str] = None
     company_at_completion_id: str
     course_name: str
-    status: str = "In progress" # Enrolled, In progress, Completed, Not completed
+    status: str = "In progress" # In progress, Completed, Not completed
     score: Optional[float] = None
     # Sensitive attributes for hybrid CP-ABE payload
     assessment_notes: Optional[str] = None
@@ -145,7 +145,7 @@ class TrainingRecordCreate(BaseModel):
     extension_fields: Optional[Dict[str, Any]] = None
 
 class TrainingRecordUpdate(BaseModel):
-    status: Optional[str] = None # Enrolled, In progress, Completed, Not completed
+    status: Optional[str] = None # In progress, Completed, Not completed
     attendance_status: Optional[str] = None # Present, Absent, Excused
     score: Optional[float] = None
     completion_date: Optional[datetime] = None

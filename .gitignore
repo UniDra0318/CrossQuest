@@ -36,9 +36,13 @@ frontend/dist-ssr/
 .env.local
 
 # Databases & local files
-*.sqlite3
+*.sql
+!backend/migrations/*.sql
+!migrations/*.sqlite3
 *.db
 *.sql
+!backend/migrations/*.sql
+!migrations/*.sql
 postgres_data/
 
 # IDE

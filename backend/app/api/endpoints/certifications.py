@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from app.core.database import get_db
 from app.models.entities import (
-    Certificate, CertificationType, Notification, Trainee, ClientCompany, User, AccessLog
+    Certificate, CertificationType, Notification, Trainee, ClientCompany, User, AccessLog,
+    Course, TrainerAssignment, TrainingSession, TrainingRecord
 )
 from app.schemas.schemas import (
     CertificateResponse, CertificationTypeResponse, NotificationResponse,
@@ -331,6 +332,14 @@ def download_certificate_pdf(
         db.commit()
 
     trainee_full_name = f"{trainee.first_name} {trainee.last_name}".strip()
+    trainer_name = "Joselito Mallari Jr."
+    if cert.record_id:
+        rec = db.query(TrainingRecord).filter(TrainingRecord.id == cert.record_id).first()
+        if rec and rec.session_id:
+            assignment = db.query(TrainerAssignment).filter(TrainerAssignment.session_id == rec.session_id).first()
+            if assignment and assignment.user:
+                trainer_name = assignment.user.full_name
+
     pdf_bytes = pdf_generator.generate_certificate_pdf(
         trainee_name=trainee_full_name,
         course_title=cert.title,
@@ -338,6 +347,7 @@ def download_certificate_pdf(
         issue_date=cert.issue_date,
         expiry_date=cert.expiry_date,
         company_name=company_name,
+        trainer_name=trainer_name,
         reissue_count=cert.reissue_count or 0
     )
 
@@ -378,8 +388,28 @@ def reissue_certificate(
     cert.reissue_reason = req.reason.strip()
     cert.reissued_by_user_id = current_user.id
     
-    # Generate new serial for the reissue
-    cert.serial_number = generate_cert_serial(db, company_code, datetime.now(timezone.utc))
+    # Look up linked record, course, and session for standardized serial
+    course_tla = None
+    first_training_day = None
+    if cert.record_id:
+        rec = db.query(TrainingRecord).filter(TrainingRecord.id == cert.record_id).first()
+        if rec:
+            if rec.session_id:
+                sess = db.query(TrainingSession).filter(TrainingSession.id == rec.session_id).first()
+                if sess:
+                    first_training_day = sess.start_date
+                    if sess.course_id:
+                        crs = db.query(Course).filter(Course.id == sess.course_id).first()
+                        if crs and crs.acronym_3:
+                            course_tla = crs.acronym_3
+            if not course_tla and rec.course_name:
+                course_tla = "".join([c for c in rec.course_name if c.isalnum()])[:3].upper()
+
+    cert.serial_number = generate_cert_serial(
+        db,
+        course_tla=course_tla or company_code,
+        training_date=first_training_day or cert.issue_date or datetime.now(timezone.utc)
+    )
     db.commit()
     db.refresh(cert)
 
@@ -459,8 +489,13 @@ def submit_external_credential_renewal(
     company_code = company.code if company else "CRO"
 
     issue_dt = req.issue_date or datetime.now(timezone.utc)
-    # Default 36 months validity
-    expiry_dt = req.expiry_date or (issue_dt + timedelta(days=36 * 30))
+    STANDARD_36M_CERTS = {"PMP", "CAPM", "PMI_ACP", "PMI-ACP", "CPMAI", "PMI-CPMAI", "ISO_31000", "PECB_ISO_31000"}
+    if req.expiry_date is not None:
+        expiry_dt = req.expiry_date
+    elif req.cert_type_code and req.cert_type_code.upper() in STANDARD_36M_CERTS:
+        expiry_dt = issue_dt + timedelta(days=36 * 30)
+    else:
+        expiry_dt = None
     serial = generate_cert_serial(db, company_code, issue_dt)
 
     cert = Certificate(

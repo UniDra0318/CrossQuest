@@ -205,7 +205,7 @@ class TrainingRecord(Base):
     company_at_completion_id = Column(String(36), ForeignKey("client_companies.id"), nullable=False)
     course_name = Column(String(200), nullable=False)
     
-    # Completion statuses: Enrolled, In progress, Completed, Not completed (Section 3.5.3)
+    # Completion statuses: In progress, Completed, Not completed (FR-13, OI-02, Table 12)
     status = Column(String(50), default="In progress")
     attendance_status = Column(String(50), default="Present") # Present, Absent, Excused
     completion_date = Column(DateTime, nullable=True)

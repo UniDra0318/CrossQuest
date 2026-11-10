@@ -1379,7 +1379,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                         </td>
                         <td>
                           <span className={`adm-chip ${rec.status === 'Completed' ? 'adm-chip--green' : rec.status === 'Not completed' ? 'adm-chip--red' : 'adm-chip--orange'}`}>
-                            {rec.status || 'Enrolled'}
+                            {rec.status || 'In progress'}
                           </span>
                         </td>
                         <td>

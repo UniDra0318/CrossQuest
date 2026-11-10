@@ -47,6 +47,22 @@ def create_training_record(
     if current_user.role not in ("admin", "finance", "account_manager"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create training records")
 
+    if record_in.score is not None and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Score entry is reserved for Administrators (Table 3, Table 12)."
+        )
+    if record_in.status == "Completed":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A training record cannot become Completed without official Trainer session sign-off."
+        )
+    if record_in.status not in ("In progress", "Not completed"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid completion status. Must be In progress or Not completed."
+        )
+
     company = db.query(ClientCompany).filter(ClientCompany.id == record_in.company_at_completion_id).first()
     if not company:
         raise HTTPException(status_code=404, detail="Client company not found")
@@ -363,9 +379,6 @@ def decrypt_training_record(
             detail="Access Denied: Record is outside your authorized organizational scope."
         )
 
-    # 2. Check Rule R3-a: High record access
-    anomaly_detector.check_high_record_access(current_user, db)
-
     trainee_obj = db.query(Trainee).filter(Trainee.id == record.trainee_id).first()
     trainee_code = trainee_obj.trainee_code if trainee_obj else ""
 
@@ -470,6 +483,9 @@ def decrypt_training_record(
     db.add(log)
     db.commit()
 
+    # Check Rule R3-a: High record access (counted including this access event)
+    anomaly_detector.check_high_record_access(current_user, db)
+
     t_name = f"{record.trainee.first_name} {record.trainee.last_name}".strip() if record.trainee else "Unknown Trainee"
     t_email = record.trainee.email if record.trainee else ""
     c_name = company.name if company else "Unknown Organization"
@@ -516,7 +532,7 @@ def edit_training_record(
     company = db.query(ClientCompany).filter(ClientCompany.id == record.company_at_completion_id).first()
     company_code = company.code if company else ""
 
-    # Account Manager Scoping and Restrictions
+    # 1. Account Manager Scoping (cannot touch unassigned client companies)
     if current_user.role == "account_manager":
         assigned_codes = current_user.assigned_client_accounts or []
         if company_code not in assigned_codes:
@@ -525,22 +541,28 @@ def edit_training_record(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Cannot modify training records for unassigned client companies."
             )
-        
-        # A record cannot become Completed without Trainer sign-off!
+
+    # 2. Score entry/modification is strictly Admin-only (Table 3, Table 12)
+    if update_in.score is not None and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account Managers and Finance are not permitted to enter or modify evaluation scores. Score entry is reserved for Administrators."
+        )
+
+    # 3. Account Manager Lifecycle Restrictions
+    if current_user.role == "account_manager":
         if update_in.status == "Completed":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A training record cannot become Completed without official Trainer session sign-off."
             )
-
-        # Prohibit Account Manager from entering or updating evaluation scores (Chapter III Table 9, Table 16)
-        if update_in.score is not None:
+        if record.status == "Completed":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account Managers are not permitted to enter or modify practical evaluation scores. Score entry is reserved for Administrators."
+                detail="Account Managers cannot modify a training record once it is Completed (U-02)."
             )
 
-    # Mandatory Reason Check for Record Corrections (U-05, FR-08)
+    # 3. Mandatory Reason Check for Record Corrections (U-05, FR-08)
     if current_user.role in ("admin", "finance"):
         if not update_in.reason or not update_in.reason.strip():
             raise HTTPException(
@@ -548,7 +570,28 @@ def edit_training_record(
                 detail="A mandatory explanation reason must be provided for record modifications (U-05)."
             )
 
-    # Save previous version to version history before modifying (DD-06, Section 3.5.2, p. 33)
+    # 4. Validate status (3 statuses only) and Trainer sign-off + attendance BEFORE writing version row
+    effective_attendance = update_in.attendance_status or record.attendance_status
+    if update_in.status is not None:
+        if update_in.status not in ("In progress", "Not completed", "Completed"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid completion status. Must be In progress, Not completed, or Completed."
+            )
+        if update_in.status == "Completed":
+            if effective_attendance == "Absent":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="An absent participant cannot be marked Completed (OI-02)."
+                )
+            session = db.query(TrainingSession).filter(TrainingSession.id == record.session_id).first() if record.session_id else None
+            if not session or not session.trainer_signed_off:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Training record cannot be marked Completed without official Trainer session sign-off."
+                )
+
+    # 5. Save previous version to version history AFTER validation passes (DD-06)
     version_count = db.query(func.count(TrainingRecordVersion.id)).filter(TrainingRecordVersion.record_id == record.id).scalar() or 0
     prev_version = TrainingRecordVersion(
         record_id=record.id,
@@ -563,19 +606,6 @@ def edit_training_record(
 
     changed_fields = []
     if update_in.status is not None:
-        # Validate status in the 4 allowed statuses
-        if update_in.status not in ("Enrolled", "In progress", "Not completed", "Completed"):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid completion status. Must be Enrolled, In progress, Not completed, or Completed."
-            )
-        if update_in.status == "Completed" and record.session_id:
-            session = db.query(TrainingSession).filter(TrainingSession.id == record.session_id).first()
-            if session and not session.trainer_signed_off and current_user.role != "admin":
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Training record cannot be marked Completed because the training session has not been signed off by the Trainer."
-                )
         record.status = update_in.status
         changed_fields.append("status")
 
@@ -591,10 +621,30 @@ def edit_training_record(
         record.completion_date = update_in.completion_date
         changed_fields.append("completion_date")
 
+    if update_in.assessment_notes is not None:
+        changed_fields.append("assessment_notes")
+
+    # Re-encrypt payload when score or assessment_notes changes
+    if update_in.score is not None or update_in.assessment_notes is not None:
+        trainee_obj = db.query(Trainee).filter(Trainee.id == record.trainee_id).first()
+        t_code = trainee_obj.trainee_code if trainee_obj else "default"
+        new_payload = {
+            "score": record.score,
+            "assessment_notes": update_in.assessment_notes or "Official Crossworks training assessment record.",
+        }
+        enc_res = cpabe_engine.encrypt_record(
+            plaintext_data=new_payload,
+            policy_str=record.encryption_policy,
+            record_id=f"rec-{t_code}",
+            version=record.policy_version or 1
+        )
+        record.abe_ciphertext = enc_res.get("abe_ciphertext")
+        record.payload_ciphertext = enc_res.get("payload_ciphertext")
+        record.nonce = enc_res.get("nonce")
+
     db.commit()
     db.refresh(record)
 
-    # Log to audit log
     log = AccessLog(
         actor_user_id=current_user.id,
         actor_role=current_user.role,
@@ -612,8 +662,13 @@ def edit_training_record(
     db.add(log)
     db.commit()
 
-    # Trigger Rule R4-b (or R4-c if bulk)
-    anomaly_detector.record_edit_event(current_user, record.id, changed_fields, db)
+    # Exempt Finance controlled pilot import reconciliation edits from R4 alerts (Table 13, U-13)
+    reason_lower = (update_in.reason or "").lower()
+    is_finance_import_edit = (
+        current_user.role == "finance" and ("import" in reason_lower or "reconcil" in reason_lower)
+    )
+    if not is_finance_import_edit:
+        anomaly_detector.record_edit_event(current_user, record.id, changed_fields, db)
 
     return record
 
@@ -750,10 +805,17 @@ def sign_off_training_session(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You are not the designated Trainer for this training session."
             )
-    elif current_user.role != "admin":
+    else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only the assigned Trainer or an Administrator can sign off a training session."
+            detail="Only the assigned Trainer can sign off a training session (Table 9)."
+        )
+
+    # Block repeat sign-offs (U-17)
+    if session.trainer_signed_off:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Training session has already been signed off (U-17)."
         )
 
     # TC-DAT-17 & TC-CRT-11: Future-Date & Timezone Protection (Asia/Manila UTC+8)
@@ -785,8 +847,14 @@ def sign_off_training_session(
         if comp.status not in ("Completed", "Not completed"):
             continue
 
+        if comp.status == "Completed" and rec.attendance_status == "Absent":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Absent participant cannot be marked Completed (OI-02)."
+            )
+
         rec.status = comp.status
-        if comp.score is not None:
+        if comp.score is not None and current_user.role == "admin":
             rec.score = comp.score
         records_updated += 1
 

@@ -275,11 +275,11 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       {(() => {
-                        const raw = (r.status || 'Enrolled').toLowerCase();
-                        let badgeBg = '#f0f9ff';
-                        let badgeColor = '#0284c7';
-                        let badgeBorder = '1px solid #bae6fd';
-                        let displayStatus = 'Enrolled';
+                        const raw = (r.status || 'In progress').toLowerCase();
+                        let badgeBg = '#fffbeb';
+                        let badgeColor = '#b45309';
+                        let badgeBorder = '1px solid #fde68a';
+                        let displayStatus = 'In progress';
 
                         if (raw === 'completed') {
                           badgeBg = '#ecfdf5';

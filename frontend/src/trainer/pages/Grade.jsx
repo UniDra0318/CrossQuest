@@ -138,7 +138,7 @@ export default function Grade() {
         completions: Object.entries(completions).map(([recordId, data]) => ({
           record_id: recordId,
           status: data.status,
-          score: (data.score !== '' && data.score !== null && !isNaN(Number(data.score))) ? Number(data.score) : null,
+          score: null,
         })),
       };
 
@@ -453,31 +453,9 @@ export default function Grade() {
 
                         {/* Score Input */}
                         <td style={{ padding: '12px 14px' }}>
-                          {isSessionDone ? (
-                            <span style={{ fontWeight: 800, fontSize: '13px' }}>
-                              {rec.score != null ? `${rec.score}%` : 'N/A'}
-                            </span>
-                          ) : (
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="0.5"
-                              disabled={isFuture}
-                              value={comp?.score ?? ''}
-                              onChange={(e) => handleAttendeeScoreChange(rec.record_id, e.target.value)}
-                              placeholder="Optional"
-                              style={{
-                                width: '75px',
-                                padding: '4px 8px',
-                                fontSize: '12px',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '4px',
-                                textAlign: 'right',
-                                fontWeight: 700,
-                              }}
-                            />
-                          )}
+                          <span style={{ fontWeight: 800, fontSize: '13px' }}>
+                            {rec.score != null ? `${rec.score}%` : 'Admin Only'}
+                          </span>
                         </td>
 
                         {/* Certificate Serial */}

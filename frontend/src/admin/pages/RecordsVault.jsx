@@ -590,7 +590,6 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
                   onChange={(e) => setEditStatus(e.target.value)}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
                 >
-                  <option value="Enrolled">Enrolled</option>
                   <option value="In progress">In progress</option>
                   <option value="Completed">Completed</option>
                   <option value="Not completed">Not completed</option>
@@ -814,7 +813,6 @@ export default function RecordsVault({ records = [], token, onRefreshRecords }) 
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#1e293b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '13px' }}
                   >
                     <option value="In progress">In progress</option>
-                    <option value="Enrolled">Enrolled</option>
                     <option value="Completed">Completed</option>
                     <option value="Not completed">Not completed</option>
                   </select>

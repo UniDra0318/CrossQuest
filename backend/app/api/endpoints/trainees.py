@@ -156,15 +156,15 @@ def record_trainee_company_change(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Records a Trainee's company change while preserving historical training records (FR-15).
+    """Records a Trainee's company change while preserving historical training records (FR-15, U-06).
     Closes active TraineeAffiliation, creates a new one, and updates trainee.current_company_id.
     Prior training records retain their original company_at_completion_id.
-    Permitted for Administrator, Finance, and assigned Account Managers.
+    Permitted for Administrator only.
     """
-    if current_user.role not in ("admin", "finance", "account_manager"):
+    if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to change trainee company affiliation (FR-15)."
+            detail="Only Administrators can change trainee company affiliation (FR-15, U-06)."
         )
 
     trainee = db.query(Trainee).filter(Trainee.id == trainee_id).first()

@@ -45,11 +45,22 @@ def hmac_username(username: str) -> str:
     return hmac.new(settings.SECRET_KEY.encode("utf-8"), normalized.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
+COMMON_WEAK_PASSWORDS = {
+    "password", "password123", "12345678", "123456789", "qwerty123",
+    "admin123", "letmein123", "welcome123", "crossquest", "crossworks"
+}
+
+def validate_password_strength(password: str) -> None:
+    if not password or len(password) < 8:
+        raise ValueError("Password must be at least 8 characters long (SEC-01).")
+    if password.strip().lower() in COMMON_WEAK_PASSWORDS:
+        raise ValueError("Password is too common or leaked. Choose a stronger password (SEC-01).")
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
         return pwd_context.verify(plain_password, hashed_password)
     except Exception:
-        return plain_password == hashed_password
+        return False
 
 
 def get_password_hash(password: str) -> str:

@@ -112,6 +112,29 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
 
+CREATE OR REPLACE FUNCTION app_is_shared_trainee(target_trainee_id TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+    uid TEXT;
+    now_ts TIMESTAMP WITHOUT TIME ZONE;
+BEGIN
+    uid := app_ctx_get('current_user_id');
+    IF uid IS NULL THEN
+        RETURN FALSE;
+    END IF;
+    now_ts := NOW() AT TIME ZONE 'UTC';
+    RETURN EXISTS (
+        SELECT 1 FROM training_records tr
+        JOIN account_manager_assignments ama ON ama.company_id = tr.company_at_completion_id
+        WHERE tr.trainee_id = target_trainee_id
+          AND tr.deleted_at IS NULL
+          AND ama.user_id = uid
+          AND ama.valid_from <= now_ts
+          AND (ama.valid_to IS NULL OR ama.valid_to > now_ts)
+    );
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
+
 -- 5. Row-Level Security Policies for Training Records (Table 19)
 ALTER TABLE training_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE training_records FORCE ROW LEVEL SECURITY;
@@ -122,7 +145,7 @@ USING (
     app_ctx_get('current_role') = 'ADMIN'
     OR (deleted_at IS NULL AND (
         app_ctx_get('current_role') = 'FINANCE'
-        OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND app_has_company(company_at_completion_id))
+        OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND (app_has_company(company_at_completion_id) OR app_is_shared_trainee(trainee_id)))
         OR (app_ctx_get('current_role') = 'TRAINER' AND session_id IS NOT NULL AND app_has_session(session_id))
         OR (app_ctx_get('current_role') = 'TRAINEE' AND trainee_id = app_ctx_get('current_trainee_id'))
     ))
@@ -140,10 +163,14 @@ CREATE POLICY tr_update ON training_records FOR UPDATE TO PUBLIC
 USING (
     app_ctx_get('current_role') = 'ADMIN'
     OR (app_ctx_get('current_role') = 'FINANCE' AND deleted_at IS NULL)
+    OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND deleted_at IS NULL AND app_has_company(company_at_completion_id))
+    OR (app_ctx_get('current_role') = 'TRAINER' AND deleted_at IS NULL AND session_id IS NOT NULL AND app_has_session(session_id))
 )
 WITH CHECK (
     app_ctx_get('current_role') = 'ADMIN'
     OR (app_ctx_get('current_role') = 'FINANCE' AND deleted_at IS NULL)
+    OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND deleted_at IS NULL AND app_has_company(company_at_completion_id))
+    OR (app_ctx_get('current_role') = 'TRAINER' AND deleted_at IS NULL AND session_id IS NOT NULL AND app_has_session(session_id))
 );
 
 -- 6. RLS Policies for Certificates & Notifications
