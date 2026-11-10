@@ -1772,6 +1772,62 @@ button:disabled {
   border-color: rgba(244, 63, 94, 0.35) !important;
 }
 
+/* System Settings Hero Stage (Deep Violet & Slate Cockpit) */
+.adm-settings-hero-stage {
+  background: linear-gradient(135deg, #181028 0%, #251640 50%, #391c62 100%);
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  box-shadow: 0 12px 36px rgba(37, 22, 64, 0.25);
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.adm-settings-primary-btn {
+  background: linear-gradient(135deg, #ff7a1a 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(255, 122, 26, 0.35) !important;
+}
+
+.adm-settings-primary-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 122, 26, 0.45) !important;
+}
+
+.adm-settings-metric-cell {
+  background: rgba(24, 16, 40, 0.55) !important;
+  border-color: rgba(167, 139, 250, 0.18) !important;
+}
+
+.adm-settings-metric-cell:hover {
+  border-color: rgba(167, 139, 250, 0.35) !important;
+}
+
+/* Equal-Height 2-Column Grid for System Settings */
+.adm-settings-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+  margin-top: 0;
+}
+
+@media (max-width: 900px) {
+  .adm-settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adm-settings-card {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.adm-settings-card .adm-field:last-child {
+  margin-bottom: 0;
+}
+
 /* Staff Access & Clearances Hero Stage (Royal Midnight Indigo Theme) */
 .adm-staff-hero-stage {
   background: linear-gradient(135deg, #1e1338 0%, #2b1754 50%, #431d78 100%);

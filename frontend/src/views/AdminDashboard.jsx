@@ -524,16 +524,8 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           case 'records_vault':
           case 'attribute_authority':
           case 'anomalies':
-            return null;
           case 'system_settings':
-            return (
-              <PageHeader
-                title="Settings"
-                subtitle="Platform security engine parameters, anomaly rules, and 12-month retention schedules."
-                badge="ACTIVE CONFIGURATION"
-                badgeType="default"
-              />
-            );
+            return null;
           case 'admin_overview':
           default:
             return (
