@@ -694,7 +694,7 @@ class PDFGenerator:
             [
                 Paragraph(f"<b>Cryptographic Policy:</b> CP-ABE BSW07 (SS512 Curve)", meta_val),
                 Paragraph(f"<b>Audit Retention:</b> 12-Month Lifecycle (SEC-20)", meta_val),
-                Paragraph(f"<b>Tamper Verification:</b> HMAC-SHA256 Signed Contexts", meta_val)
+                Paragraph(f"<b>Audit Log:</b> Append-only (SEC-12)", meta_val)
             ]
         ]
         meta_table = Table(meta_data, colWidths=[173, 173, 174])
@@ -720,7 +720,7 @@ class PDFGenerator:
             [
                 Paragraph("<b>TOTAL INCIDENTS</b>", meta_label),
                 Paragraph("<b>PENDING REVIEW</b>", meta_label),
-                Paragraph("<b>CLOSED & SIGNED</b>", meta_label),
+                Paragraph("<b>CLOSED</b>", meta_label),
                 Paragraph("<b>HIGH SEVERITY</b>", meta_label),
                 Paragraph("<b>AFTER-HOURS (S1)</b>", meta_label),
             ],

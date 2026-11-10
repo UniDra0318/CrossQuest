@@ -81,7 +81,7 @@ def get_executive_anomaly_report(
         })
 
     # Resolve co-administrator from database for dual-admin peer review sign-off
-    co_admin = db.query(User).filter(User.role == "admin", User.id != admin_user.id).first()
+    co_admin = db.query(User).filter(User.role == "admin", User.is_active == True, User.id != admin_user.id).first()
     co_admin_name = co_admin.full_name if (co_admin and co_admin.full_name) else "Authorized Co-Administrator"
     co_admin_title = (getattr(co_admin, "title", None) if co_admin else None) or "Co-Administrator (Peer Review Authority)"
 
@@ -200,6 +200,13 @@ def review_anomaly_alert(
     if not alert:
         raise HTTPException(status_code=404, detail="Anomaly alert not found")
 
+    # Closed alerts are immutable: no reopening, re-closing, or overwriting disposition/note/reviewer (Table 15, OI-30)
+    if alert.status == "CLOSED":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Closed alerts are immutable and cannot be reopened or re-reviewed."
+        )
+
     # 1. Peer Review check (OI-30):
     # An Administrator cannot review or resolve an alert where they are the subject (subject_user_id != self)
     if alert.subject_user_id and alert.subject_user_id == admin_user.id:
@@ -240,7 +247,7 @@ def review_anomaly_alert(
         alert.metadata_info = {**meta, "involved_admin_ids": inv}
 
     if new_status == "CLOSED":
-        if not review_in.disposition:
+        if review_in.disposition not in ("CLOSED_EXPECTED_ACTIVITY", "CLOSED_FOLLOW_UP_REQUIRED"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A disposition ('CLOSED_EXPECTED_ACTIVITY' or 'CLOSED_FOLLOW_UP_REQUIRED') is required to close an alert."
@@ -553,7 +560,7 @@ def update_anomaly_rule(
             rule_code=rule_code,
             parameters=update_in.parameters or {},
             version_no=1,
-            client_reviewed=update_in.client_reviewed if update_in.client_reviewed is not None else False,
+            client_reviewed=False,  # new rules always start Pending Review; approval needs a different admin (OI-08)
             last_edited_by_user_id=admin_user.id,
             description=update_in.description
         )
@@ -569,6 +576,11 @@ def update_anomaly_rule(
             # An administrator tuning a rule cannot self-approve in the same edit call.
             rule.client_reviewed = False
         elif update_in.client_reviewed is not None:
+            if update_in.client_reviewed and rule.last_edited_by_user_id == admin_user.id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Conflict of interest: An administrator cannot approve their own rule threshold edits. Independent peer administrator review is required (U-16, OI-08)."
+                )
             rule.client_reviewed = update_in.client_reviewed
         if update_in.description is not None:
             rule.description = update_in.description
@@ -577,7 +589,7 @@ def update_anomaly_rule(
     log = AccessLog(
         actor_user_id=admin_user.id,
         actor_role=admin_user.role,
-        event_type="RULE_MODIFIED",
+        event_type="RULE_APPROVED" if (update_in.parameters is None and update_in.client_reviewed is True and rule.client_reviewed) else "RULE_MODIFIED",
         resource_type="ANOMALY_RULE",
         resource_id=rule.id,
         outcome="SUCCESS",

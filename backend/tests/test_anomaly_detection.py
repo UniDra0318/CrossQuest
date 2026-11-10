@@ -1148,3 +1148,32 @@ def test_tc_ano_30_detector_db_error_handling_and_rollback(test_user: User, db_s
     assert rules == {}
     # Warning must be logged
     assert "Could not read rule parameters from database" in caplog.text
+
+
+def test_tc_ano_29_rule_self_approval_bypass_blocked(client: TestClient, admin_user: User, second_admin_user: User):
+    """TC-ANO-29: The editing admin cannot approve their own rule edit via PUT client_reviewed (U-16, OI-08)."""
+    h1 = {"Authorization": f"Bearer {create_access_token(subject=admin_user.id)}"}
+    h2 = {"Authorization": f"Bearer {create_access_token(subject=second_admin_user.id)}"}
+    url = "/api/v1/anomalies/rules/R3_HIGH_RECORD_ACCESS"
+    r = client.put(url, json={"parameters": {"thresholds": {"account_manager": 31, "trainer": 31}, "window_minutes": 15}, "reason": "tune"}, headers=h1)
+    assert r.status_code == 200 and r.json()["client_reviewed"] is False
+    assert client.put(url, json={"client_reviewed": True, "reason": "self"}, headers=h1).status_code == 403
+    r2 = client.put(url, json={"client_reviewed": True, "reason": "peer"}, headers=h2)
+    assert r2.status_code == 200 and r2.json()["client_reviewed"] is True
+
+
+def test_tc_ano_30_closed_alert_immutable_and_disposition_validated(
+    client: TestClient, admin_user: User, second_admin_user: User, db_session: Session
+):
+    """TC-ANO-30: Closed alerts cannot be reopened; invalid dispositions are rejected (Table 15, OI-30)."""
+    alert = AnomalyAlert(subject_user_id=None, rule_code="R1_OUT_OF_SCOPE", description="immutability check", status="NEW")
+    db_session.add(alert)
+    db_session.commit()
+    db_session.refresh(alert)
+    h1 = {"Authorization": f"Bearer {create_access_token(subject=admin_user.id)}"}
+    h2 = {"Authorization": f"Bearer {create_access_token(subject=second_admin_user.id)}"}
+    url = f"/api/v1/anomalies/alerts/{alert.id}/review"
+    assert client.put(url, json={"status": "CLOSED", "disposition": "WHATEVER", "review_note": "n"}, headers=h1).status_code == 400
+    assert client.put(url, json={"status": "CLOSED", "disposition": "CLOSED_EXPECTED_ACTIVITY", "review_note": "n"}, headers=h1).status_code == 200
+    assert client.put(url, json={"status": "UNDER_REVIEW", "review_note": "again"}, headers=h2).status_code == 409
+

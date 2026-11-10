@@ -464,15 +464,7 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
       try {
         updated = await reviewAnomalyAlert(selectedAlertForReview.id, payload, token);
       } catch (apiErr) {
-        console.warn('Backend review API call failed, applying local state update:', apiErr);
-        updated = {
-          ...selectedAlertForReview,
-          status: reviewStatus,
-          disposition: reviewStatus === 'CLOSED' ? reviewDisposition : selectedAlertForReview.disposition,
-          review_note: reviewNote.trim(),
-          reviewed_at: new Date().toISOString(),
-          reviewer_user_id: currentUser?.id || 'USR-ADM-01'
-        };
+        throw apiErr;
       }
       setAlerts(prev => prev.map(a => a.id === updated.id ? updated : a));
       setActionSuccessToast(`Alert ${(updated.id || '').slice(0, 8)}... successfully updated to ${updated.status}.`);
@@ -607,14 +599,7 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
           reason: ruleReason
         }, token);
       } catch (apiErr) {
-        console.warn('Backend rule update API call failed, applying local state update:', apiErr);
-        updated = {
-          ...editingRule,
-          parameters: ruleParams,
-          client_reviewed: ruleClientReviewed,
-          version_no: (editingRule.version_no || 1) + 1,
-          updated_at: new Date().toISOString()
-        };
+        throw apiErr;
       }
       setRules(prev => prev.map(r => r.rule_code === updated.rule_code ? updated : r));
       onRuleUpdated?.(updated);
