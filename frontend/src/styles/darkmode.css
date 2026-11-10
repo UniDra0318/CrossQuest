@@ -18,6 +18,8 @@ html.dark,
   --cq-lav: #0f172a;
   --cq-lav-2: #090d16;
   --cq-line: rgba(255, 255, 255, 0.12);
+  --cq-card-bg: #111827;
+  --cq-table-hover: #1e293b;
 
   /* index.css variables in dark mode */
   --bg-app: #090d16;
@@ -739,7 +741,19 @@ html.dark table,
 html.dark .clean-table,
 [data-theme="dark"] .clean-table,
 html.dark .adm-table,
-[data-theme="dark"] .adm-table {
+[data-theme="dark"] .adm-table,
+html.dark .adm-vault-table,
+[data-theme="dark"] .adm-vault-table,
+html.dark .roster-table,
+[data-theme="dark"] .roster-table,
+html.dark .stf-table,
+[data-theme="dark"] .stf-table,
+html.dark .report-table,
+[data-theme="dark"] .report-table,
+html.dark .cq-table,
+[data-theme="dark"] .cq-table,
+html.dark .trainee-transcript-table,
+[data-theme="dark"] .trainee-transcript-table {
   background: transparent !important;
   color: #f1f5f9 !important;
 }
@@ -747,7 +761,9 @@ html.dark .adm-table,
 html.dark thead tr,
 [data-theme="dark"] thead tr,
 html.dark .clean-table thead tr,
-[data-theme="dark"] .clean-table thead tr {
+[data-theme="dark"] .clean-table thead tr,
+html.dark .trainee-transcript-table thead tr,
+[data-theme="dark"] .trainee-transcript-table thead tr {
   background-color: #1e293b !important;
   border-bottom: 2px solid #334155 !important;
 }
@@ -757,7 +773,9 @@ html.dark th,
 html.dark .clean-table th,
 [data-theme="dark"] .clean-table th,
 html.dark .clean-table thead th,
-[data-theme="dark"] .clean-table thead th {
+[data-theme="dark"] .clean-table thead th,
+html.dark .trainee-transcript-table th,
+[data-theme="dark"] .trainee-transcript-table th {
   background-color: #1e293b !important;
   color: #cbd5e1 !important;
   border-color: #334155 !important;
@@ -768,23 +786,87 @@ html.dark td,
 html.dark .clean-table td,
 [data-theme="dark"] .clean-table td,
 html.dark .adm-table td,
-[data-theme="dark"] .adm-table td {
+[data-theme="dark"] .adm-table td,
+html.dark .trainee-transcript-table td,
+[data-theme="dark"] .trainee-transcript-table td {
   border-color: #1e293b !important;
   color: #cbd5e1 !important;
+  background-color: transparent !important;
 }
 
 html.dark td strong,
 [data-theme="dark"] td strong,
 html.dark .clean-table td strong,
-[data-theme="dark"] .clean-table td strong {
+[data-theme="dark"] .clean-table td strong,
+html.dark .trainee-transcript-table td strong,
+[data-theme="dark"] .trainee-transcript-table td strong {
   color: #f8fafc !important;
+}
+
+html.dark tr:hover,
+[data-theme="dark"] tr:hover,
+html.dark tbody tr:hover,
+[data-theme="dark"] tbody tr:hover,
+html.dark .clean-table tr:hover,
+[data-theme="dark"] .clean-table tr:hover,
+html.dark .clean-table tbody tr:hover,
+[data-theme="dark"] .clean-table tbody tr:hover,
+html.dark .trainee-transcript-table tr:hover,
+[data-theme="dark"] .trainee-transcript-table tr:hover,
+html.dark .trainee-transcript-table tbody tr:hover,
+[data-theme="dark"] .trainee-transcript-table tbody tr:hover,
+html.dark .adm-table tr:hover,
+[data-theme="dark"] .adm-table tr:hover,
+html.dark .adm-vault-table tr:hover,
+[data-theme="dark"] .adm-vault-table tr:hover,
+html.dark .roster-table tr:hover,
+[data-theme="dark"] .roster-table tr:hover,
+html.dark .stf-table tr:hover,
+[data-theme="dark"] .stf-table tr:hover {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
 }
 
 html.dark tr:hover td,
 [data-theme="dark"] tr:hover td,
+html.dark tbody tr:hover td,
+[data-theme="dark"] tbody tr:hover td,
+html.dark .clean-table tr:hover td,
+[data-theme="dark"] .clean-table tr:hover td,
 html.dark .clean-table tbody tr:hover td,
-[data-theme="dark"] .clean-table tbody tr:hover td {
-  background-color: rgba(255, 255, 255, 0.04) !important;
+[data-theme="dark"] .clean-table tbody tr:hover td,
+html.dark .trainee-transcript-table tr:hover td,
+[data-theme="dark"] .trainee-transcript-table tr:hover td,
+html.dark .trainee-transcript-table tbody tr:hover td,
+[data-theme="dark"] .trainee-transcript-table tbody tr:hover td,
+html.dark .adm-table tr:hover td,
+[data-theme="dark"] .adm-table tr:hover td,
+html.dark .adm-vault-table tr:hover td,
+[data-theme="dark"] .adm-vault-table tr:hover td,
+html.dark .roster-table tr:hover td,
+[data-theme="dark"] .roster-table tr:hover td,
+html.dark .stf-table tr:hover td,
+[data-theme="dark"] .stf-table tr:hover td {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+html.dark tr:hover td strong,
+[data-theme="dark"] tr:hover td strong,
+html.dark .clean-table tbody tr:hover td strong,
+[data-theme="dark"] .clean-table tbody tr:hover td strong,
+html.dark .trainee-transcript-table tbody tr:hover td strong,
+[data-theme="dark"] .trainee-transcript-table tbody tr:hover td strong,
+html.dark .adm-table tbody tr:hover td strong,
+[data-theme="dark"] .adm-table tbody tr:hover td strong,
+html.dark .adm-vault-table tbody tr:hover td strong,
+[data-theme="dark"] .adm-vault-table tbody tr:hover td strong,
+html.dark .roster-table tbody tr:hover td strong,
+[data-theme="dark"] .roster-table tbody tr:hover td strong,
+html.dark .stf-table tbody tr:hover td strong,
+[data-theme="dark"] .stf-table tbody tr:hover td strong {
+  color: #ffffff !important;
 }
 
 html.dark .btn-secondary,

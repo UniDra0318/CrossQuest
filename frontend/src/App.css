@@ -2245,7 +2245,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  background: #ffffff;
+  background: transparent;
 }
 
 .clean-table th {
@@ -2266,7 +2266,7 @@
 }
 
 .clean-table tr:hover {
-  background: #f8fafc;
+  background: var(--cq-table-hover, #f8fafc);
 }
 
 /* Modals */
@@ -7206,7 +7206,7 @@ html.dark .node-active-guard,
 }
 
 .clean-table tbody tr:hover {
-  background: #fcfaff;
+  background: var(--cq-table-hover, #fcfaff);
 }
 
 .table-responsive {
