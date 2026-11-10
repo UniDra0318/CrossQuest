@@ -7216,7 +7216,7 @@ html.dark .node-active-guard,
   overflow-y: auto;
   border: 1.5px solid #e2e8f0;
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--cq-card-bg, #ffffff);
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
 }
 

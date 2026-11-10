@@ -1316,18 +1316,17 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   value={trainingsSearch}
                   onChange={(e) => setTrainingsSearch(e.target.value)}
                   className="stf-search-input"
-                  style={{ minWidth: '220px', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  style={{ minWidth: '220px', padding: '8px 12px', borderRadius: '8px', fontSize: '13px' }}
                 />
                 {trainingCompanies.length > 1 && (
                   <select
                     value={trainingsFilter}
                     onChange={(e) => setTrainingsFilter(e.target.value)}
+                    className="stf-select"
                     style={{
                       padding: '8px 12px',
                       borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '13px',
-                      background: 'var(--cq-card-bg, #ffffff)'
+                      fontSize: '13px'
                     }}
                   >
                     <option value="ALL">All Companies ({trainingsList.length})</option>
@@ -1372,15 +1371,15 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               />
             ) : (
               <div className="table-responsive" style={{ overflowX: 'auto', marginTop: '16px' }}>
-                <table className="adm-table">
+                <table className="clean-table trainee-transcript-table">
                   <thead>
                     <tr>
-                      <th>Course Title</th>
-                      <th>Client Organization</th>
-                      <th>Completion Date</th>
-                      <th>Status</th>
-                      <th>Score / Grade</th>
-                      <th>Data Protection</th>
+                      <th style={{ minWidth: '240px' }}>Course Title</th>
+                      <th style={{ minWidth: '200px' }}>Client Organization</th>
+                      <th style={{ minWidth: '140px' }}>Completion Date</th>
+                      <th style={{ minWidth: '120px' }}>Status</th>
+                      <th style={{ minWidth: '110px' }}>Score / Grade</th>
+                      <th style={{ minWidth: '150px' }}>Data Protection</th>
                     </tr>
                   </thead>
                   <tbody>
