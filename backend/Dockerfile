@@ -27,13 +27,15 @@ RUN wget https://crypto.stanford.edu/pbc/files/pbc-0.5.14.tar.gz && \
 
 # Build and install charm-crypto from repository
 WORKDIR /tmp
+ARG CHARM_REF
+RUN test -n "$CHARM_REF" || (echo "Build with --build-arg CHARM_REF=<tag-or-commit of Charm-Crypto matching spec v21>" && exit 1)
 RUN git clone https://github.com/JHUISI/charm.git && \
     cd charm && \
+    git checkout "$CHARM_REF" && \
     ./configure.sh && \
     make && \
     make install && \
-    rm -rf /tmp/charm && \
-    printf 'Metadata-Version: 2.1\nName: charm-crypto\nVersion: 0.62\n' > /usr/local/lib/python3.11/site-packages/charm_crypto_framework-0.63-py3.11-linux-x86_64.egg/EGG-INFO/PKG-INFO
+    rm -rf /tmp/charm
 
 WORKDIR /app
 

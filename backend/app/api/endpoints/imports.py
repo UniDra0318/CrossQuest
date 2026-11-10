@@ -24,7 +24,7 @@ from sqlalchemy import desc
 from app.core.database import get_db
 from app.models.entities import (
     ImportBatch, ImportStagingRow, ImportDiscrepancy, User, TrainingRecord,
-    ClientCompany, Trainee, AccessLog
+    ClientCompany, Trainee, TrainingSession, AccessLog
 )
 from app.schemas.schemas import DiscrepancyResolveRequest, ReconciliationReportResponse
 from app.api.deps import get_current_user, get_current_admin_user
@@ -283,7 +283,8 @@ async def upload_workbook_batch(
         dedup_key = (
             str(prog).strip().lower(),
             str(p_name).strip().lower(),
-            p_email
+            p_email,
+            t_date.strftime("%Y-%m-%d") if t_date else ""
         )
 
         if dedup_key in seen_dedup_keys:
@@ -670,124 +671,129 @@ def commit_batch_records(
     committed = 0
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
 
-    for row in rows:
-        data = row.raw_data or {}
-        comp_name = data.get("standardized_customer") or data.get("customer") or "Unknown Corp"
-        is_indiv = data.get("is_individual_retail", False)
-        
-        # Determine company code
-        if is_indiv:
-            comp_code = data.get("pseudonymized_tenant") or _pseudonymize_individual(comp_name)
-        else:
-            comp_code = comp_name.replace(" ", "_").replace(".", "").replace(",", "").upper()[:20]
+    try:
+        for row in rows:
+            data = row.raw_data or {}
+            comp_name = data.get("standardized_customer") or data.get("customer") or "Unknown Corp"
+            is_indiv = data.get("is_individual_retail", False)
+            
+            # Determine company code
+            if is_indiv:
+                comp_code = data.get("pseudonymized_tenant") or _pseudonymize_individual(comp_name)
+            else:
+                comp_code = comp_name.replace(" ", "_").replace(".", "").replace(",", "").upper()[:20]
 
-        raw_email = (data.get("participant_email") or "").strip().lower()
-        trainee_code = data.get("trainee_code") or f"TRN-{hashlib.sha256((raw_email or str(data.get('participant_name', ''))).encode()).hexdigest()[:6].upper()}"
-        email = raw_email or f"{trainee_code.lower()}@imported.ph"
+            raw_email = (data.get("participant_email") or "").strip().lower()
+            trainee_code = data.get("trainee_code") or f"TRN-{hashlib.sha256((raw_email or str(data.get('participant_name', ''))).encode()).hexdigest()[:6].upper()}"
+            email = raw_email or f"{trainee_code.lower()}@imported.ph"
 
-        course_name = data.get("program_name") or data.get("course_name") or "Corporate Certification"
-        raw_score = data.get("score")
-        score = float(raw_score) if (raw_score is not None and str(raw_score).strip() != "") else None
+            course_name = data.get("program_name") or data.get("course_name") or "Corporate Certification"
+            raw_score = data.get("score")
+            score = float(raw_score) if (raw_score is not None and str(raw_score).strip() != "") else None
 
-        # Resolve or create ClientCompany
-        comp = db.query(ClientCompany).filter(ClientCompany.code == comp_code).first()
-        if not comp:
-            comp = ClientCompany(name=comp_name, code=comp_code)
-            db.add(comp)
-            db.commit()
-            db.refresh(comp)
+            # Resolve or create ClientCompany
+            comp = db.query(ClientCompany).filter(ClientCompany.code == comp_code).first()
+            if not comp:
+                comp = ClientCompany(name=comp_name, code=comp_code)
+                db.add(comp)
+                db.flush()
+                db.refresh(comp)
 
-        # Resolve or create Trainee
-        trainee = db.query(Trainee).filter(
-            (Trainee.email == email) | (Trainee.trainee_code == trainee_code)
-        ).first()
-        if not trainee:
-            name_parts = str(data.get("participant_name", "Trainee")).split(" ", 1)
-            first_name = name_parts[0]
-            last_name = name_parts[1] if len(name_parts) > 1 else "Participant"
+            # Resolve or create Trainee
+            trainee = db.query(Trainee).filter(
+                (Trainee.email == email) | (Trainee.trainee_code == trainee_code)
+            ).first()
+            if not trainee:
+                name_parts = str(data.get("participant_name", "Trainee")).split(" ", 1)
+                first_name = name_parts[0]
+                last_name = name_parts[1] if len(name_parts) > 1 else "Participant"
 
-            trainee = Trainee(
-                current_company_id=comp.id,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-                trainee_code=trainee_code
-            )
-            db.add(trainee)
-            db.commit()
-            db.refresh(trainee)
-
-        # Parse training_date and resolve or create TrainingSession
-        raw_date = data.get("training_date")
-        training_dt = None
-        if raw_date:
-            try:
-                training_dt = datetime.fromisoformat(str(raw_date).replace("Z", "+00:00")).replace(tzinfo=None)
-            except Exception:
-                try:
-                    training_dt = datetime.strptime(str(raw_date)[:10], "%Y-%m-%d")
-                except Exception:
-                    training_dt = None
-
-        session_id = None
-        if training_dt:
-            sess_code = f"SESS-{comp.code[:6]}-{training_dt.strftime('%Y%m%d')}"
-            session = db.query(TrainingSession).filter(TrainingSession.session_code == sess_code).first()
-            if not session:
-                session = TrainingSession(
-                    company_id=comp.id,
-                    session_code=sess_code,
-                    start_date=training_dt,
-                    end_date=training_dt,
-                    venue="Crossworks Training Facility",
-                    status="completed"
+                trainee = Trainee(
+                    current_company_id=comp.id,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    trainee_code=trainee_code
                 )
-                db.add(session)
-                db.commit()
-                db.refresh(session)
-            session_id = session.id
+                db.add(trainee)
+                db.flush()
+                db.refresh(trainee)
 
-        # CP-ABE Encryption
-        policy = cpabe_engine.build_record_policy(
-            company_code=comp.code,
-            trainee_code=trainee.trainee_code
-        )
-        encrypted_pkg = cpabe_engine.encrypt_record(
-            plaintext_data={
-                "score": score,
-                "course_name": course_name,
-                "imported_from_batch": batch.id,
-                "is_individual_retail": is_indiv
-            },
-            policy_str=policy,
-            record_id=f"rec-{trainee.trainee_code}",
-            version=1
-        )
+            # Parse training_date and resolve or create TrainingSession
+            raw_date = data.get("training_date")
+            training_dt = None
+            if raw_date:
+                try:
+                    training_dt = datetime.fromisoformat(str(raw_date).replace("Z", "+00:00")).replace(tzinfo=None)
+                except Exception:
+                    try:
+                        training_dt = datetime.strptime(str(raw_date)[:10], "%Y-%m-%d")
+                    except Exception:
+                        training_dt = None
 
-        raw_status = data.get("status")
-        status_val = raw_status if raw_status in ("In progress", "Not completed") else "Not completed"
+            session_id = None
+            if training_dt:
+                sess_code = f"SESS-{comp.code[:6]}-{training_dt.strftime('%Y%m%d')}-{hashlib.sha256(course_name.encode()).hexdigest()[:4].upper()}"
+                session = db.query(TrainingSession).filter(TrainingSession.session_code == sess_code).first()
+                if not session:
+                    session = TrainingSession(
+                        session_code=sess_code,
+                        course_name=course_name,
+                        start_date=training_dt,
+                        end_date=training_dt,
+                        venue="TBD (pilot import)",
+                        trainer_signed_off=False
+                    )
+                    db.add(session)
+                    db.flush()
+                    db.refresh(session)
+                session_id = session.id
 
-        record = TrainingRecord(
-            trainee_id=trainee.id,
-            session_id=session_id,
-            company_at_completion_id=comp.id,
-            course_name=course_name,
-            status=status_val,
-            attendance_status="Present",
-            score=score,
-            completion_date=None,
-            encryption_policy=policy,
-            policy_version=1,
-            abe_ciphertext=encrypted_pkg.get("abe_ciphertext"),
-            payload_ciphertext=encrypted_pkg.get("payload_ciphertext"),
-            nonce=encrypted_pkg.get("nonce"),
-            is_encrypted=True
-        )
-        db.add(record)
-        row.validation_status = "COMMITTED"
-        committed += 1
+            # CP-ABE Encryption
+            policy = cpabe_engine.build_record_policy(
+                company_code=comp.code,
+                trainee_code=trainee.trainee_code
+            )
+            encrypted_pkg = cpabe_engine.encrypt_record(
+                plaintext_data={
+                    "score": score,
+                    "course_name": course_name,
+                    "imported_from_batch": batch.id,
+                    "is_individual_retail": is_indiv
+                },
+                policy_str=policy,
+                record_id=f"rec-{trainee.trainee_code}",
+                version=1
+            )
 
-    db.commit()
+            raw_status = data.get("status")
+            status_val = raw_status if raw_status in ("In progress", "Not completed") else "Not completed"
+
+            record = TrainingRecord(
+                trainee_id=trainee.id,
+                session_id=session_id,
+                company_at_completion_id=comp.id,
+                course_name=course_name,
+                status=status_val,
+                attendance_status=None,
+                score=score,
+                completion_date=None,
+                import_batch_id=batch.id,
+                encryption_policy=policy,
+                policy_version=1,
+                abe_ciphertext=encrypted_pkg.get("abe_ciphertext"),
+                payload_ciphertext=encrypted_pkg.get("payload_ciphertext"),
+                nonce=encrypted_pkg.get("nonce"),
+                is_encrypted=True
+            )
+            db.add(record)
+            row.validation_status = "COMMITTED"
+            committed += 1
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
 
     # Immutable Audit Log (TC-DAT-07)
     log = AccessLog(

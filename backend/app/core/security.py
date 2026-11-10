@@ -31,6 +31,13 @@ def create_mfa_challenge_token(user_id: str) -> str:
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
+def create_mfa_setup_token(user_id: str) -> str:
+    """15-minute token that is valid ONLY for /auth/mfa/setup and /auth/mfa/enable."""
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode = {"exp": expire, "sub": str(user_id), "type": "mfa_setup"}
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
 def decode_token(token: str) -> dict:
     """Decodes and validates a JWT token."""
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])

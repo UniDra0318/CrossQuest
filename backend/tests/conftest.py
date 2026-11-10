@@ -11,6 +11,7 @@ import pytest
 from typing import Generator, Dict, Any
 from fastapi.testclient import TestClient
 from sqlalchemy import text
+from app.core.config import settings
 from app.main import app
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import get_password_hash, create_access_token
@@ -18,6 +19,11 @@ from app.models.entities import (
     User, ClientCompany, Trainee, TrainingSession, TrainingRecord,
     AccountManagerAssignment, TrainerAssignment, UserSession
 )
+
+
+@pytest.fixture(autouse=True)
+def _disable_privileged_mfa_enforcement(monkeypatch):
+    monkeypatch.setattr(settings, "ENFORCE_PRIVILEGED_MFA", False)
 
 
 @pytest.fixture(scope="session")
@@ -101,6 +107,7 @@ def setup_test_database():
             "ALTER TABLE import_batches ADD COLUMN quarantined_count INTEGER DEFAULT 0",
             "ALTER TABLE import_batches ADD COLUMN distinct_customers_count INTEGER DEFAULT 0",
             "ALTER TABLE import_batches ADD COLUMN reconciled BOOLEAN DEFAULT 0",
+            "ALTER TABLE training_records ADD COLUMN import_batch_id VARCHAR(36)",
             "ALTER TABLE import_discrepancies ADD COLUMN resolution_reason TEXT",
             "ALTER TABLE import_discrepancies ADD COLUMN resolved_by_user_id VARCHAR(36)",
             "ALTER TABLE import_discrepancies ADD COLUMN resolved_at DATETIME",

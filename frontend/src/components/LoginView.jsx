@@ -18,6 +18,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ROLE_HOME } from '../routes/routeConfig';
+import { setupMfaApi, enableMfaApi } from '../services/api';
 import logoStacked from '../assets/crossquest-logo-stacked.svg';
 
 export default function LoginView() {
@@ -50,6 +51,23 @@ export default function LoginView() {
       setMfaRequired(true);
       setChallengeToken(result.challenge_token);
       setMfaUserMeta({ name: result.full_name, role: result.role, email });
+      return;
+    }
+
+    if (result?.mfa_setup_required) {
+      setLoading(true);
+      try {
+        const setup = await setupMfaApi(result.setup_token);
+        const code = window.prompt(`Your role requires authenticator setup.\nSecret: ${setup.secret}\nEnter the 6-digit code from your authenticator app to enable MFA:`);
+        if (code) {
+          const enableRes = await enableMfaApi(setup.secret, code, result.setup_token);
+          alert(`MFA enabled successfully! Please save your recovery codes:\n${enableRes.recovery_codes.join('\n')}\nPlease log in again.`);
+        }
+      } catch (err) {
+        setLoginError(err.message || 'MFA setup failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 

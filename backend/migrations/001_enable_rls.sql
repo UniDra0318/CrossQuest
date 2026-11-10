@@ -276,9 +276,11 @@ CREATE POLICY log_delete ON access_logs FOR DELETE TO PUBLIC USING (false);
 
 -- 10. Role Privileges & Deletion Revocation (DD-06, FR-08, TC-RLS-12)
 DO $$
+DECLARE pw TEXT := current_setting('crossquest.app_password', true);
 BEGIN
     IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'crossquest_app') THEN
-        CREATE ROLE crossquest_app WITH LOGIN PASSWORD 'app_secure_password';
+        IF pw IS NULL OR pw = '' THEN RAISE EXCEPTION 'Set crossquest.app_password before running this migration'; END IF;
+        EXECUTE format('CREATE ROLE crossquest_app WITH LOGIN PASSWORD %L', pw);
     END IF;
 END $$;
 
@@ -353,9 +355,11 @@ $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public, internal_s
 -- 13. Table Ownership & Privileges Separation (Phase 5)
 -- Dedicated table owner role ensures runtime app role cannot bypass RLS
 DO $$
+DECLARE pw TEXT := current_setting('crossquest.admin_password', true);
 BEGIN
     IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'crossquest_admin') THEN
-        CREATE ROLE crossquest_admin WITH LOGIN PASSWORD 'admin_secure_password';
+        IF pw IS NULL OR pw = '' THEN RAISE EXCEPTION 'Set crossquest.admin_password before running this migration'; END IF;
+        EXECUTE format('CREATE ROLE crossquest_admin WITH LOGIN PASSWORD %L', pw);
     END IF;
 END $$;
 

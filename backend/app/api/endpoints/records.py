@@ -300,6 +300,76 @@ def list_training_records(
     return results
 
 
+def _decrypt_record_payload(
+    record: TrainingRecord,
+    current_user: User,
+    db: Session,
+    trainee_code: str,
+    is_shared_trainee_view: bool = False,
+    company_code: str = ""
+) -> Optional[dict]:
+    """Helper that loads active key / unwrap / decrypts record payload without destroying fields."""
+    if is_shared_trainee_view:
+        effective_companies = list(current_user.assigned_client_accounts or [])
+        if company_code and company_code not in effective_companies:
+            effective_companies.append(company_code)
+        opt_b_attrs = cpabe_engine.build_user_attributes(
+            role=current_user.role,
+            assigned_companies=effective_companies,
+            client_versions={company_code: record.policy_version}
+        )
+        user_key_info = cpabe_engine.generate_user_private_key(opt_b_attrs)
+    else:
+        active_key = (
+            db.query(UserAbeKey)
+            .filter(UserAbeKey.user_id == current_user.id, UserAbeKey.status == "active")
+            .order_by(desc(UserAbeKey.issued_at))
+            .first()
+        )
+
+        if not active_key:
+            active_key = attribute_manager.issue_or_rekey_user(db=db, user=current_user)
+
+        unwrapped_str = attribute_manager.envelope_decrypt_key(
+            active_key.wrapped_dek,
+            active_key.nonce,
+            active_key.key_ciphertext,
+            active_key.kms_key_arn
+        )
+        if not unwrapped_str:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Cryptographic key enclave failure: Unable to unwrap user private key."
+            )
+
+        user_key_info = json.loads(unwrapped_str)
+
+    cipher_package = {
+        "policy": record.encryption_policy,
+        "policy_version": record.policy_version,
+        "abe_ciphertext": record.abe_ciphertext,
+        "payload_ciphertext": record.payload_ciphertext,
+        "nonce": record.nonce,
+        "engine": "charm-bsw07"
+    }
+
+    try:
+        decrypted_content = cpabe_engine.decrypt_record(
+            encrypted_record=cipher_package,
+            user_key_info=user_key_info,
+            record_id=f"rec-{trainee_code}",
+            version=record.policy_version
+        )
+    except Exception as e:
+        logger.error(f"CP-ABE decryption failed for record {record.id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"CP-ABE Decryption Error: {str(e)}"
+        )
+
+    return decrypted_content
+
+
 @router.post("/{record_id}/decrypt", response_model=DecryptedRecordResponse)
 def decrypt_training_record(
     record_id: str,
@@ -382,69 +452,14 @@ def decrypt_training_record(
     trainee_obj = db.query(Trainee).filter(Trainee.id == record.trainee_id).first()
     trainee_code = trainee_obj.trainee_code if trainee_obj else ""
 
-    # Option B (Chapter III Section 3.2.1): Shared trainee cross-company viewing
-    # Account Manager for Company A is permitted to decrypt Company B's record for a shared trainee.
-    # Since the stored key only contains Company A's tokens, a scoped evaluation key is minted for Option B viewing.
-    if is_shared_trainee_view:
-        effective_companies = list(current_user.assigned_client_accounts or [])
-        if company_code and company_code not in effective_companies:
-            effective_companies.append(company_code)
-        opt_b_attrs = cpabe_engine.build_user_attributes(
-            role=current_user.role,
-            assigned_companies=effective_companies,
-            client_versions={company_code: record.policy_version}
-        )
-        user_key_info = cpabe_engine.generate_user_private_key(opt_b_attrs)
-    else:
-        # 3. Load active CP-ABE user key from secure server-side enclave store (Figure 11, Section 3.6.4, DD-09)
-        active_key = (
-            db.query(UserAbeKey)
-            .filter(UserAbeKey.user_id == current_user.id, UserAbeKey.status == "active")
-            .order_by(desc(UserAbeKey.issued_at))
-            .first()
-        )
-
-        # If no key exists yet for user, issue one using attribute_manager
-        if not active_key:
-            active_key = attribute_manager.issue_or_rekey_user(db=db, user=current_user)
-
-        # Unwrap key material from KMS envelope
-        unwrapped_str = attribute_manager.envelope_decrypt_key(
-            active_key.wrapped_dek,
-            active_key.nonce,
-            active_key.key_ciphertext,
-            active_key.kms_key_arn
-        )
-        if not unwrapped_str:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Cryptographic key enclave failure: Unable to unwrap user private key."
-            )
-
-        user_key_info = json.loads(unwrapped_str)
-
-    cipher_package = {
-        "policy": record.encryption_policy,
-        "policy_version": record.policy_version,
-        "abe_ciphertext": record.abe_ciphertext,
-        "payload_ciphertext": record.payload_ciphertext,
-        "nonce": record.nonce,
-        "engine": "charm-bsw07"
-    }
-
-    try:
-        decrypted_content = cpabe_engine.decrypt_record(
-            encrypted_record=cipher_package,
-            user_key_info=user_key_info,
-            record_id=f"rec-{trainee_code}",
-            version=record.policy_version
-        )
-    except Exception as e:
-        logger.error(f"CP-ABE decryption failed for record {record_id}: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"CP-ABE Decryption Error: {str(e)}"
-        )
+    decrypted_content = _decrypt_record_payload(
+        record=record,
+        current_user=current_user,
+        db=db,
+        trainee_code=trainee_code,
+        is_shared_trainee_view=is_shared_trainee_view,
+        company_code=company_code
+    )
 
     if decrypted_content is None:
         log = AccessLog(
@@ -514,7 +529,7 @@ def edit_training_record(
     current_user: User = Depends(get_current_user)
 ):
     """Edits a training record with strict role boundaries (Phase 2, Section 3.5.3, Table 16/17):
-    - Account Manager: records attendance and pre-completion statuses (Enrolled, In progress, Not completed) for assigned clients.
+    - Account Manager: records attendance and pre-completion statuses (In progress, Not completed) for assigned clients.
       Cannot mark as Completed without Trainer sign-off.
     - Admin & Finance: may edit records but MANDATES an explanation reason and generates a version history row.
     - Trainer & Trainee: DENIED.
@@ -579,10 +594,10 @@ def edit_training_record(
                 detail="Invalid completion status. Must be In progress, Not completed, or Completed."
             )
         if update_in.status == "Completed":
-            if effective_attendance == "Absent":
+            if effective_attendance != "Present":
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="An absent participant cannot be marked Completed (OI-02)."
+                    detail="Participant must have attended all sessions (attendance Present) to be marked Completed (OI-02)."
                 )
             session = db.query(TrainingSession).filter(TrainingSession.id == record.session_id).first() if record.session_id else None
             if not session or not session.trainer_signed_off:
@@ -590,19 +605,6 @@ def edit_training_record(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Training record cannot be marked Completed without official Trainer session sign-off."
                 )
-
-    # 5. Save previous version to version history AFTER validation passes (DD-06)
-    version_count = db.query(func.count(TrainingRecordVersion.id)).filter(TrainingRecordVersion.record_id == record.id).scalar() or 0
-    prev_version = TrainingRecordVersion(
-        record_id=record.id,
-        version_no=version_count + 1,
-        abe_ciphertext=record.abe_ciphertext,
-        payload_ciphertext=record.payload_ciphertext,
-        policy_tokens=record.encryption_policy,
-        edited_by_user_id=current_user.id,
-        reason=update_in.reason.strip() if update_in.reason else None
-    )
-    db.add(prev_version)
 
     changed_fields = []
     if update_in.status is not None:
@@ -624,14 +626,30 @@ def edit_training_record(
     if update_in.assessment_notes is not None:
         changed_fields.append("assessment_notes")
 
-    # Re-encrypt payload when score or assessment_notes changes
+    # Snapshot previous version ciphertexts before modifying
+    old_abe_ct = record.abe_ciphertext
+    old_payload_ct = record.payload_ciphertext
+    old_policy = record.encryption_policy
+
+    # Re-encrypt payload when score or assessment_notes changes (preserving other encrypted fields)
     if update_in.score is not None or update_in.assessment_notes is not None:
         trainee_obj = db.query(Trainee).filter(Trainee.id == record.trainee_id).first()
         t_code = trainee_obj.trainee_code if trainee_obj else "default"
-        new_payload = {
-            "score": record.score,
-            "assessment_notes": update_in.assessment_notes or "Official Crossworks training assessment record.",
-        }
+        if record.abe_ciphertext and record.is_encrypted:
+            existing_payload = _decrypt_record_payload(record, current_user, db, t_code)
+            if existing_payload is None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Cannot update encrypted fields: the existing payload could not be read with your attributes."
+                )
+        else:
+            existing_payload = {"score": record.score}
+        new_payload = dict(existing_payload)
+        if update_in.score is not None:
+            new_payload["score"] = record.score
+        if update_in.assessment_notes is not None:
+            new_payload["assessment_notes"] = update_in.assessment_notes
+
         enc_res = cpabe_engine.encrypt_record(
             plaintext_data=new_payload,
             policy_str=record.encryption_policy,
@@ -641,6 +659,19 @@ def edit_training_record(
         record.abe_ciphertext = enc_res.get("abe_ciphertext")
         record.payload_ciphertext = enc_res.get("payload_ciphertext")
         record.nonce = enc_res.get("nonce")
+
+    # 5. Save previous version to version history AFTER validation and decrypt checks pass (DD-06)
+    version_count = db.query(func.count(TrainingRecordVersion.id)).filter(TrainingRecordVersion.record_id == record.id).scalar() or 0
+    prev_version = TrainingRecordVersion(
+        record_id=record.id,
+        version_no=version_count + 1,
+        abe_ciphertext=old_abe_ct,
+        payload_ciphertext=old_payload_ct,
+        policy_tokens=old_policy,
+        edited_by_user_id=current_user.id,
+        reason=update_in.reason.strip() if update_in.reason else None
+    )
+    db.add(prev_version)
 
     db.commit()
     db.refresh(record)
@@ -656,17 +687,15 @@ def edit_training_record(
         source_ip=_get_client_ip(request),
         details={
             "fields_changed": changed_fields,
-            "reason": update_in.reason if update_in.reason else "Account Manager attendance / status update"
+            "reason": update_in.reason if update_in.reason else "Account Manager attendance / status update",
+            "import_exempt": bool(record.import_batch_id and current_user.role == "finance")
         }
     )
     db.add(log)
     db.commit()
 
-    # Exempt Finance controlled pilot import reconciliation edits from R4 alerts (Table 13, U-13)
-    reason_lower = (update_in.reason or "").lower()
-    is_finance_import_edit = (
-        current_user.role == "finance" and ("import" in reason_lower or "reconcil" in reason_lower)
-    )
+    # Exempt Finance edits on pilot-import records from R4 alerts (Table 13, U-13)
+    is_finance_import_edit = current_user.role == "finance" and record.import_batch_id is not None
     if not is_finance_import_edit:
         anomaly_detector.record_edit_event(current_user, record.id, changed_fields, db)
 
@@ -835,6 +864,7 @@ def sign_off_training_session(
 
     certs_issued = 0
     records_updated = 0
+    not_eligible_ids = []
 
     for comp in signoff_in.completions:
         rec = db.query(TrainingRecord).filter(
@@ -847,11 +877,10 @@ def sign_off_training_session(
         if comp.status not in ("Completed", "Not completed"):
             continue
 
-        if comp.status == "Completed" and rec.attendance_status == "Absent":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Absent participant cannot be marked Completed (OI-02)."
-            )
+        if comp.status == "Completed" and rec.attendance_status != "Present":
+            # Attendance rule (OI-02): only fully attending (Present) participants can complete.
+            not_eligible_ids.append(rec.id)
+            comp.status = "Not completed"
 
         rec.status = comp.status
         if comp.score is not None and current_user.role == "admin":
@@ -940,7 +969,8 @@ def sign_off_training_session(
         "trainer_signed_off": session.trainer_signed_off,
         "trainer_sign_off_at": session.trainer_sign_off_at,
         "certificates_issued": certs_issued,
-        "participants_updated": records_updated
+        "participants_updated": records_updated,
+        "not_eligible_record_ids": not_eligible_ids
     }
 
 

@@ -350,7 +350,7 @@ class PDFGenerator:
                 Paragraph(t.get("trainee_name", "N/A"), td_style),
                 Paragraph(t.get("course_name", "N/A")[:35], td_style),
                 Paragraph(str(t.get("training_date", "In progress")), td_style),
-                Paragraph(t.get("status", "Enrolled"), td_style),
+                Paragraph(t.get("status", "In progress"), td_style),
                 Paragraph(f"{t.get('score')}%" if t.get("score") is not None else "--", td_style)
             ])
 

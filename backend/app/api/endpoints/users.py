@@ -62,6 +62,10 @@ def get_system_overview(
     """Computes real-time system overview metrics for the Admin Dashboard from the database."""
     test_filter = ~User.email.like("%@test.ph")
     users_total = db.query(User).filter(test_filter).count()
+    fallback = False
+    if users_total == 0:
+        users_total = db.query(User).count()
+        fallback = True
     clients_total = db.query(ClientCompany).count()
     records_total = db.query(TrainingRecord).filter(TrainingRecord.deleted_at == None).count()
 
@@ -80,7 +84,10 @@ def get_system_overview(
 
     role_counts = {}
     for r in ("admin", "account_manager", "finance", "trainer", "trainee"):
-        role_counts[r] = db.query(User).filter(test_filter, User.role == r).count()
+        q = db.query(User).filter(User.role == r)
+        if not fallback:
+            q = q.filter(test_filter)
+        role_counts[r] = q.count()
 
     return SystemOverviewResponse(
         users_total=users_total,

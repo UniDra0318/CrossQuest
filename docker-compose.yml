@@ -21,6 +21,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        CHARM_REF: ${CHARM_REF:?set CHARM_REF in .env}
     container_name: crossquest-backend
     restart: always
     # NOTE: Default values are intended strictly for local development/testing.
@@ -29,6 +31,8 @@ services:
       # Connect as runtime unprivileged role (crossquest_app) so PostgreSQL Row-Level Security (RLS) is strictly enforced
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://${POSTGRES_APP_USER:-crossquest_app}:${POSTGRES_APP_PASSWORD:-app_secure_password}@postgres:5432/${POSTGRES_DB:-crossquest_db}}
       ADMIN_DATABASE_URL: ${ADMIN_DATABASE_URL:-postgresql+psycopg2://${POSTGRES_USER:-crossquest_admin}:${POSTGRES_PASSWORD:-crossquest_secret_password}@postgres:5432/${POSTGRES_DB:-crossquest_db}}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:-app_secure_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crossquest_secret_password}
       SECRET_KEY: ${SECRET_KEY:-supersecretjwtkeyforcrossquestplatformchangeinproduction}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-10}
       CONTEXT_SIGNING_SECRET: ${CONTEXT_SIGNING_SECRET:-crossquest_internal_context_signing_secret_key_change_in_prod}
@@ -39,6 +43,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./exports:/exports
     depends_on:
       postgres:
         condition: service_healthy

@@ -79,6 +79,23 @@ def get_current_user(
     return user
 
 
+def get_mfa_enrollment_user(
+    db: Session = Depends(get_db),
+    token: str = Depends(oauth2_scheme)
+) -> User:
+    """Accepts either a normal access token or a one-purpose mfa_setup token."""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+    if payload.get("type") == "mfa_setup":
+        user = db.query(User).filter(User.id == payload.get("sub")).first()
+        if not user or not user.is_active:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+        return user
+    return get_current_user(db=db, token=token)
+
+
 def get_current_admin_user(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "admin" and not current_user.is_superuser:
         raise HTTPException(

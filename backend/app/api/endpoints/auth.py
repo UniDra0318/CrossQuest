@@ -14,14 +14,14 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import (
     verify_password, get_password_hash, create_access_token,
-    create_mfa_challenge_token, decode_token, hmac_username
+    create_mfa_challenge_token, create_mfa_setup_token, decode_token, hmac_username
 )
 from app.models.entities import User, AccessLog, UserSession, PasswordResetToken
 from app.schemas.schemas import (
     Token, UserCreate, UserResponse, PasswordResetConfirm, PasswordResetRequest,
     MFASetupResponse, MFAEnableRequest, MFAEnableResponse, MFAVerifyRequest
 )
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_mfa_enrollment_user
 from app.anomaly.detector import anomaly_detector
 from app.services.email_service import email_service
 from sqlalchemy import func
@@ -72,7 +72,7 @@ def _get_role_idle_timeout(role: str) -> int:
     return settings.IDLE_TIMEOUT_TRAINEE            # 60 minutes (3600s)
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=None)
 def login_access_token(
     request: Request,
     response: Response,
@@ -132,6 +132,18 @@ def login_access_token(
             "user_id": user.id,
             "full_name": user.full_name,
             "assigned_client_accounts": user.assigned_client_accounts or []
+        }
+
+    # 1b. Privileged roles must enroll TOTP before any access token is issued (SEC-01, OI-26)
+    if settings.ENFORCE_PRIVILEGED_MFA and user.role in ("admin", "finance") and not user.mfa_enabled:
+        return {
+            "mfa_setup_required": True,
+            "setup_token": create_mfa_setup_token(user.id),
+            "role": user.role,
+            "user_id": user.id,
+            "full_name": user.full_name,
+            "assigned_client_accounts": user.assigned_client_accounts or [],
+            "mfa_required": False
         }
 
     # 2. Issue short-lived access token (10 minutes per OI-17)
@@ -206,7 +218,7 @@ def login_access_token(
 @router.post("/mfa/setup", response_model=MFASetupResponse)
 def setup_mfa(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_mfa_enrollment_user)
 ):
     """Generates a new TOTP secret and QR code for authenticator enrollment (SEC-01, OI-26)."""
     secret = pyotp.random_base32()
@@ -243,7 +255,7 @@ def setup_mfa(
 def enable_mfa(
     req: MFAEnableRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_mfa_enrollment_user)
 ):
     """Verifies initial code from authenticator app, enables MFA, and returns 8 single-use recovery codes."""
     totp = pyotp.TOTP(req.secret)
@@ -299,7 +311,7 @@ def verify_mfa_login(
     is_valid = False
 
     # 0. Dev bypass for quick role switcher in dev mode
-    if cleaned_code == "DEV_MFA_BYPASS" and settings.ENVIRONMENT != "production":
+    if cleaned_code == "DEV_MFA_BYPASS" and settings.ALLOW_DEV_MFA_BYPASS and settings.ENVIRONMENT == "development":
         is_valid = True
 
     # 1. Check TOTP authenticator code

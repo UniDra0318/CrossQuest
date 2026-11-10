@@ -466,6 +466,16 @@ export function AuthProvider({ children }) {
           };
         }
 
+        if (data.mfa_setup_required) {
+          return {
+            success: false,
+            mfa_setup_required: true,
+            setup_token: data.setup_token,
+            role: data.role,
+            full_name: data.full_name
+          };
+        }
+
         setToken(data.access_token);
         localStorage.setItem('crossquest_auth_token', data.access_token);
 

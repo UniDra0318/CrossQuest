@@ -105,17 +105,24 @@ import os
 Base = declarative_base()
 
 def init_db_rls(target_engine=None):
-    """Applies PostgreSQL Row-Level Security policies and context functions (SEC-08, Table 19)."""
+    """Applies auto-migrations (RLS, columns) in order on PostgreSQL (SEC-08, Table 19)."""
     eng = target_engine or admin_engine
     if eng.dialect.name == "postgresql":
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        migration_path = os.path.join(base_dir, "migrations", "001_enable_rls.sql")
-        if os.path.exists(migration_path):
-            with open(migration_path, "r", encoding="utf-8") as f:
+        app_pw = os.getenv("POSTGRES_APP_PASSWORD", "app_secure_password")
+        admin_pw = os.getenv("POSTGRES_PASSWORD", "crossquest_secret_password")
+        # 004_rls_remaining_tables.sql is deliberately NOT listed: apply it by hand after testing.
+        for name in ("001_enable_rls.sql", "002_add_user_job_title.sql", "003_add_record_import_batch.sql"):
+            path = os.path.join(base_dir, "migrations", name)
+            if not os.path.exists(path):
+                continue
+            with open(path, "r", encoding="utf-8") as f:
                 sql_content = f.read()
             with eng.connect() as conn:
                 raw_conn = conn.connection
                 cursor = raw_conn.cursor()
+                cursor.execute("SELECT set_config('crossquest.app_password', %s, false)", (app_pw,))
+                cursor.execute("SELECT set_config('crossquest.admin_password', %s, false)", (admin_pw,))
                 cursor.execute(sql_content)
                 raw_conn.commit()
                 cursor.close()

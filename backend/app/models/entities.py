@@ -207,7 +207,7 @@ class TrainingRecord(Base):
     
     # Completion statuses: In progress, Completed, Not completed (FR-13, OI-02, Table 12)
     status = Column(String(50), default="In progress")
-    attendance_status = Column(String(50), default="Present") # Present, Absent, Excused
+    attendance_status = Column(String(50), nullable=True, default=None) # Present, Absent, Excused
     completion_date = Column(DateTime, nullable=True)
     score = Column(Float, nullable=True) # Kept in plaintext for progress count; official sensitive details encrypted
 
@@ -218,6 +218,7 @@ class TrainingRecord(Base):
     payload_ciphertext = Column(Text, nullable=False) # AES-256-GCM encrypted payload
     nonce = Column(String(64), nullable=True) # 12-byte GCM nonce (base64)
     is_encrypted = Column(Boolean, default=True)
+    import_batch_id = Column(String(36), ForeignKey("import_batches.id"), nullable=True)  # set only for pilot-import records (R4 exemption, U-13)
 
     # Soft deletion: hidden from non-Admins, audited immediately (DD-06, FR-08, Section 3.5.3)
     deleted_at = Column(DateTime, nullable=True)

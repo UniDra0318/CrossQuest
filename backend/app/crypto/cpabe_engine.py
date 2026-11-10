@@ -63,7 +63,7 @@ class CPABEEngine:
     """Hybrid CP-ABE Cryptographic Engine with AES-256-GCM and HKDF key derivation."""
 
     def __init__(self, group_name: str = "SS512"):
-        # SS512 is the Type 1 symmetric pairing curve settled in TC-CRY-01 feasibility test for BSW07
+        # SS512 (Type 1 symmetric pairing) is the working curve; final selection stays open under OI-18 until the Iteration 0 feasibility result is recorded.
         # Fail-closed enforcement: system requires native Charm-Crypto and strictly forbids fake fallbacks (SEC-04, VR-24)
         if not CHARM_AVAILABLE:
             raise RuntimeError(

@@ -474,6 +474,7 @@ class TrainerSignOffResponse(BaseModel):
     trainer_sign_off_at: datetime
     certificates_issued: int
     participants_updated: int
+    not_eligible_record_ids: List[str] = []
 
 
 class DiscrepancyResolveRequest(BaseModel):
