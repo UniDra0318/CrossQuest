@@ -1589,6 +1589,8 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                           borderRadius: '12px', 
                           fontSize: '11px', 
                           fontWeight: 700,
+                          whiteSpace: 'nowrap',
+                          display: 'inline-block',
                           background: rule.client_reviewed 
                             ? (isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5') 
                             : (isDark ? 'rgba(217, 119, 6, 0.2)' : '#fef3c7'),
@@ -1603,49 +1605,50 @@ export default function AdminPeerReviewAnomalyDesk({ onRuleUpdated }) {
                         {rule.client_reviewed ? 'Approved ✓' : 'Pending Review'}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                      {!rule.client_reviewed && (
-                        rule.last_edited_by_user_id && rule.last_edited_by_user_id === currentUser?.id ? (
-                          <span style={{ marginRight: '10px', fontSize: '11px', fontWeight: 700, color: themeStyles.textMuted }}>
-                            Awaiting peer review
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleApproveRule(rule)}
-                            disabled={approvingRuleCode === rule.rule_code}
-                            style={{
-                              marginRight: '8px',
-                              padding: '6px 14px',
-                              borderRadius: '8px',
-                              background: '#059669',
-                              border: 'none',
-                              color: '#ffffff',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {approvingRuleCode === rule.rule_code ? 'Approving...' : 'Approve'}
-                          </button>
-                        )
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => openEditRuleModal(rule)}
-                        style={{
-                          padding: '6px 14px',
-                          borderRadius: '8px',
-                          background: themeStyles.inputBg,
-                          border: themeStyles.inputBorder,
-                          color: themeStyles.textMain,
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Tune Threshold
-                      </button>
+                    <td style={{ padding: '14px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+                        {!rule.client_reviewed && (
+                          rule.last_edited_by_user_id && rule.last_edited_by_user_id === currentUser?.id ? (
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: themeStyles.textMuted }}>
+                              Awaiting peer review
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleApproveRule(rule)}
+                              disabled={approvingRuleCode === rule.rule_code}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                background: '#059669',
+                                border: 'none',
+                                color: '#ffffff',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {approvingRuleCode === rule.rule_code ? 'Approving...' : 'Approve'}
+                            </button>
+                          )
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => openEditRuleModal(rule)}
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '8px',
+                            background: themeStyles.inputBg,
+                            border: themeStyles.inputBorder,
+                            color: themeStyles.textMain,
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Tune Threshold
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
