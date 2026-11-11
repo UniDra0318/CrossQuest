@@ -572,6 +572,8 @@ class TrainingSessionResponse(BaseModel):
     trainer_sign_off_at: Optional[datetime] = None
     created_at: datetime
     assigned_trainers: Optional[List[Dict[str, Any]]] = []
+    participant_count: int = 0
+    board_stage: str = "awaiting_signoff"
 
     model_config = ConfigDict(from_attributes=True)
 

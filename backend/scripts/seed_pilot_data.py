@@ -323,6 +323,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
 
             s_date = dt if isinstance(dt, datetime) else datetime(2026, 8, 15)
             e_date = s_date + timedelta(days=2)
+            is_past = e_date < datetime.now()
             assigned_tr = trainer_users.get("jordan")
             # match trainer
             if "billy" in prog_name.lower():
@@ -341,13 +342,15 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
                 delivery_type=str(t_type or 'Public'),
                 delivery_mode=str(deliv or 'F2F'),
                 venue="Crossworks Corporate Training Center, Makati" if deliv == 'F2F' else "CrossQuest Secure Virtual Sandbox Room",
-                trainer_signed_off=True,
-                trainer_sign_off_at=e_date,
-                trainer_sign_off_user_id=assigned_tr.id if assigned_tr else u_admin1.id,
-                trainer_sign_off_notes=f"All {pax or 1} participant(s) completed required compliance criteria."
+                trainer_signed_off=is_past,
+                trainer_sign_off_at=e_date if is_past else None,
+                trainer_sign_off_user_id=(assigned_tr.id if assigned_tr else u_admin1.id) if is_past else None,
+                trainer_sign_off_notes=(f"All {pax or 1} participant(s) completed required compliance criteria." if is_past else None)
             )
             db.add(sess)
             db.flush()
+            if assigned_tr:
+                db.add(TrainerAssignment(user_id=assigned_tr.id, session_id=sess.id, valid_from=s_date))
             session_models.append(sess)
 
     # 7. Ingest 150 Trainees (Participants)
@@ -522,14 +525,11 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
     # Generate CP-ABE Encrypted Records for each Trainee
     print("Generating CP-ABE hybrid-encrypted training records...")
     records_count = 0
+    past_sessions = [s for s in session_models if s.trainer_signed_off]
     for idx, (trainee, u_trn, co, prog_name) in enumerate(trainee_models):
-        target_sess = None
-        for s in session_models:
-            if prog_name.lower() in s.course_name.lower():
-                target_sess = s
-                break
-        if not target_sess:
-            target_sess = session_models[idx % len(session_models)]
+        matches = [s for s in past_sessions if prog_name.lower() in s.course_name.lower()]
+        pool = matches or past_sessions
+        target_sess = pool[idx % len(pool)]
 
         pol = f"ROLEADMIN or ROLEFINANCE or (ROLEACCTMGR and CLIENT{co.code}V1) or (ROLETRAINER and TRAINING{target_sess.session_code.replace('-', '')}V1) or TRAINEE{trainee.trainee_code.replace('-', '')}"
         score = 85.0 + (idx * 3.7) % 15.0

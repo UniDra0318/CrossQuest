@@ -2,7 +2,7 @@ import json
 import csv
 import io
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional
+from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy import func, or_, desc
 from sqlalchemy.orm import Session
@@ -1144,6 +1144,16 @@ def list_training_sessions(
     sessions = db.query(TrainingSession).order_by(TrainingSession.start_date.desc()).all()
     result = []
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+    enrolled: Dict[str, int] = {}
+    pending_attendance: Dict[str, int] = {}
+    for sid, att in (
+        db.query(TrainingRecord.session_id, TrainingRecord.attendance_status)
+        .filter(TrainingRecord.session_id.isnot(None), TrainingRecord.deleted_at.is_(None))
+        .all()
+    ):
+        enrolled[sid] = enrolled.get(sid, 0) + 1
+        if att is None:
+            pending_attendance[sid] = pending_attendance.get(sid, 0) + 1
 
     for s in sessions:
         trainers_list = []
@@ -1172,7 +1182,13 @@ def list_training_sessions(
             trainer_signed_off=bool(s.trainer_signed_off),
             trainer_sign_off_at=s.trainer_sign_off_at,
             created_at=s.created_at,
-            assigned_trainers=trainers_list
+            assigned_trainers=trainers_list,
+            participant_count=enrolled.get(s.id, 0),
+            board_stage=(
+                "completed" if s.trainer_signed_off
+                else "needs_attendance" if (enrolled.get(s.id, 0) == 0 or pending_attendance.get(s.id, 0) > 0)
+                else "awaiting_signoff"
+            )
         ))
 
     return result

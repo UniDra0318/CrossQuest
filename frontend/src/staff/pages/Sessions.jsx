@@ -58,6 +58,8 @@ const getVenueDisplay = (sess) => {
 };
 
 const PAGE_SIZE = 6;
+const stageOf = (s) => s.board_stage || (s.trainer_signed_off ? 'completed' : 'awaiting_signoff');
+const byParticipants = (a, b) => (b.participant_count || 0) - (a.participant_count || 0);
 
 const getTrainerDisplay = (sess) => {
   if (sess?.trainers && sess.trainers.length > 0) return sess.trainers.join(', ');
@@ -172,15 +174,15 @@ export default function Sessions() {
   // 2. Awaiting Trainer sign-off: AM attendance marked, awaiting trainer evaluation sign-off
   // 3. Completed: Trainer signed off
   const columnNeedsAttendance = useMemo(() => {
-    return clientFilteredSessions.filter(s => !s.trainer_signed_off && (s.needs_attendance || s.status === 'Needs Attendance'));
+    return clientFilteredSessions.filter(s => stageOf(s) === 'needs_attendance').sort(byParticipants);
   }, [clientFilteredSessions]);
 
   const columnAwaitingSignOff = useMemo(() => {
-    return clientFilteredSessions.filter(s => !s.trainer_signed_off && !(s.needs_attendance || s.status === 'Needs Attendance'));
+    return clientFilteredSessions.filter(s => stageOf(s) === 'awaiting_signoff').sort(byParticipants);
   }, [clientFilteredSessions]);
 
   const columnCompleted = useMemo(() => {
-    return clientFilteredSessions.filter(s => s.trainer_signed_off || s.status === 'Completed');
+    return clientFilteredSessions.filter(s => stageOf(s) === 'completed').sort(byParticipants);
   }, [clientFilteredSessions]);
 
   const visibleNeeds = columnNeedsAttendance.slice(0, visibleCounts.needs);
@@ -278,7 +280,7 @@ export default function Sessions() {
       // Transition session from "Needs attendance" to "Awaiting Trainer sign-off"
       setSessions(prev => prev.map(s => {
         if (s.id === activeSession.id) {
-          return { ...s, needs_attendance: false, status: 'Awaiting Sign-off' };
+          return { ...s, needs_attendance: false, status: 'Awaiting Sign-off', board_stage: 'awaiting_signoff' };
         }
         return s;
       }));
@@ -603,7 +605,7 @@ export default function Sessions() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <UserCheck size={13} />
-                      <span>Trainer: {getTrainerDisplay(sess)}</span>
+                      <span>Trainer: {getTrainerDisplay(sess)} • {sess.participant_count ?? 0} enrolled</span>
                     </div>
                   </div>
                   <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -774,7 +776,7 @@ export default function Sessions() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <UserCheck size={13} />
-                      <span>Trainer: {getTrainerDisplay(sess)}</span>
+                      <span>Trainer: {getTrainerDisplay(sess)} • {sess.participant_count ?? 0} enrolled</span>
                     </div>
                   </div>
                   <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -946,7 +948,7 @@ export default function Sessions() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <UserCheck size={13} />
-                      <span>Trainer: {getTrainerDisplay(sess)}</span>
+                      <span>Trainer: {getTrainerDisplay(sess)} • {sess.participant_count ?? 0} enrolled</span>
                     </div>
                   </div>
                   <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: isDark ? '1px solid #1f2937' : '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
