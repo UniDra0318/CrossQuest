@@ -444,7 +444,7 @@ ALTER TABLE trainer_assignments FORCE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tra_select ON trainer_assignments;
 CREATE POLICY tra_select ON trainer_assignments FOR SELECT TO PUBLIC
 USING (
-    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
+    app_ctx_get('current_role') IN ('ADMIN', 'FINANCE', 'ACCOUNT_MANAGER')
     OR user_id = app_ctx_get('current_user_id')
 );
 

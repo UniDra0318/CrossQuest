@@ -57,13 +57,15 @@ const getVenueDisplay = (sess) => {
   return 'Crossworks Makati Learning Hub';
 };
 
+const PAGE_SIZE = 6;
+
 const getTrainerDisplay = (sess) => {
   if (sess?.trainers && sess.trainers.length > 0) return sess.trainers.join(', ');
   if (sess?.assigned_trainers && sess.assigned_trainers.length > 0) {
     const names = sess.assigned_trainers.map(t => t.trainer_name).filter(Boolean);
     if (names.length > 0) return names.join(', ');
   }
-  return sess?.trainer_name || 'Lead Trainer';
+  return sess?.trainer_name || 'Unassigned';
 };
 
 export default function Sessions() {
@@ -103,6 +105,12 @@ export default function Sessions() {
   const [activeSession, setActiveSession] = useState(null);
   const [savingAttendance, setSavingAttendance] = useState(false);
   const [attendanceEdits, setAttendanceEdits] = useState({});
+  const [visibleCounts, setVisibleCounts] = useState({ needs: PAGE_SIZE, awaiting: PAGE_SIZE, completed: PAGE_SIZE });
+  const showMore = (key) => setVisibleCounts(prev => ({ ...prev, [key]: prev[key] + PAGE_SIZE }));
+  const showLess = (key) => setVisibleCounts(prev => ({ ...prev, [key]: PAGE_SIZE }));
+  useEffect(() => {
+    setVisibleCounts({ needs: PAGE_SIZE, awaiting: PAGE_SIZE, completed: PAGE_SIZE });
+  }, [selectedClient]);
 
   const loadData = async () => {
     setLoading(true);
@@ -174,6 +182,10 @@ export default function Sessions() {
   const columnCompleted = useMemo(() => {
     return clientFilteredSessions.filter(s => s.trainer_signed_off || s.status === 'Completed');
   }, [clientFilteredSessions]);
+
+  const visibleNeeds = columnNeedsAttendance.slice(0, visibleCounts.needs);
+  const visibleAwaiting = columnAwaitingSignOff.slice(0, visibleCounts.awaiting);
+  const visibleCompleted = columnCompleted.slice(0, visibleCounts.completed);
 
   const handleOpenNewModal = () => {
     setFormError(null);
@@ -535,7 +547,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              columnNeedsAttendance.map(sess => (
+              visibleNeeds.map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -621,6 +633,18 @@ export default function Sessions() {
                 </div>
               ))
             )}
+            {columnNeedsAttendance.length > PAGE_SIZE && (
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', paddingTop: '4px' }}>
+                {visibleCounts.needs < columnNeedsAttendance.length && (
+                  <button type="button" className="adm-chip" onClick={() => showMore('needs')}>
+                    Show {Math.min(PAGE_SIZE, columnNeedsAttendance.length - visibleCounts.needs)} more ({columnNeedsAttendance.length - visibleCounts.needs} remaining)
+                  </button>
+                )}
+                {visibleCounts.needs > PAGE_SIZE && (
+                  <button type="button" className="adm-chip" onClick={() => showLess('needs')}>Show less</button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -694,7 +718,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              columnAwaitingSignOff.map(sess => (
+              visibleAwaiting.map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -780,6 +804,18 @@ export default function Sessions() {
                 </div>
               ))
             )}
+            {columnAwaitingSignOff.length > PAGE_SIZE && (
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', paddingTop: '4px' }}>
+                {visibleCounts.awaiting < columnAwaitingSignOff.length && (
+                  <button type="button" className="adm-chip" onClick={() => showMore('awaiting')}>
+                    Show {Math.min(PAGE_SIZE, columnAwaitingSignOff.length - visibleCounts.awaiting)} more ({columnAwaitingSignOff.length - visibleCounts.awaiting} remaining)
+                  </button>
+                )}
+                {visibleCounts.awaiting > PAGE_SIZE && (
+                  <button type="button" className="adm-chip" onClick={() => showLess('awaiting')}>Show less</button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -853,7 +889,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              columnCompleted.map(sess => (
+              visibleCompleted.map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -937,6 +973,18 @@ export default function Sessions() {
                   </div>
                 </div>
               ))
+            )}
+            {columnCompleted.length > PAGE_SIZE && (
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', paddingTop: '4px' }}>
+                {visibleCounts.completed < columnCompleted.length && (
+                  <button type="button" className="adm-chip" onClick={() => showMore('completed')}>
+                    Show {Math.min(PAGE_SIZE, columnCompleted.length - visibleCounts.completed)} more ({columnCompleted.length - visibleCounts.completed} remaining)
+                  </button>
+                )}
+                {visibleCounts.completed > PAGE_SIZE && (
+                  <button type="button" className="adm-chip" onClick={() => showLess('completed')}>Show less</button>
+                )}
+              </div>
             )}
           </div>
         </div>
