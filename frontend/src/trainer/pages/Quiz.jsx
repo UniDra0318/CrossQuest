@@ -155,6 +155,7 @@ export default function Quiz() {
   const {
     quizzes,
     handleCreateQuiz,
+    sessions,
     handleAddQuestion,
     handleUpdateQuestion,
     handleDeleteQuestion,
@@ -162,10 +163,11 @@ export default function Quiz() {
     handleResetQuizzes,
     loading,
   } = useTrainer();
-  const { token } = useAuth();
+  const { token, currentUser } = useAuth();
 
   const [activeQuizId, setActiveQuizId] = useState(null);
   const [newQuizTitle, setNewQuizTitle] = useState('');
+  const [newQuizSessionId, setNewQuizSessionId] = useState('');
   const [newQuestionPrompt, setNewQuestionPrompt] = useState('');
   const [newQuestionExplanation, setNewQuestionExplanation] = useState('');
   const [creatingQuiz, setCreatingQuiz] = useState(false);
@@ -390,12 +392,14 @@ export default function Quiz() {
 
   const onCreateQuiz = async (e) => {
     e.preventDefault();
-    if (!newQuizTitle.trim()) return;
+    if (!newQuizTitle.trim() || !newQuizSessionId) return;
     setCreatingQuiz(true);
     try {
-      const created = await handleCreateQuiz(newQuizTitle.trim());
+      const created = await handleCreateQuiz(newQuizTitle.trim(), newQuizSessionId);
       setNewQuizTitle('');
       if (created) setActiveQuizId(created.id);
+    } catch (err) {
+      alert(err.message || 'Could not create quiz.');
     } finally {
       setCreatingQuiz(false);
     }
@@ -501,6 +505,12 @@ export default function Quiz() {
     }
   };
 
+  const quizGroups = Object.entries((quizzes || []).reduce((acc, q) => {
+    (acc[q.course || 'Unassigned'] ||= []).push(q);
+    return acc;
+  }, {}));
+  const scopeLabel = currentUser?.role === 'admin' ? 'GLOBAL SCOPE · all courses & sessions' : 'LIMITED SCOPE · assigned sessions only (U-12)';
+
   return (
     <div className="trn-split trn-split--quiz" style={{ marginTop: '24px' }}>
       {/* =========================================================================
@@ -510,6 +520,7 @@ export default function Quiz() {
         <div className="adm-panel__head" style={{ padding: '0 0 16px 0', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--cq-line)' }}>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 800 }}>Assessments ({quizzes.length})</h2>
+            <span className="adm-mono" style={{ fontSize: '10px', color: '#8b5cf6', display: 'block' }}>{scopeLabel}</span>
             <span className="adm-mono" style={{ fontSize: '11px', color: isDark ? '#94a3b8' : '#64748b' }}>Curriculum Knowledge Challenges</span>
           </div>
           <button
@@ -530,50 +541,57 @@ export default function Quiz() {
 
         {/* Assessment Items List */}
         <div className="trn-quizlist" style={{ marginTop: '16px' }}>
-          {quizzes.map((q) => {
-            const isSelected = activeQuiz && activeQuiz.id === q.id;
-            const qCount = q.questions ? q.questions.length : (q.questionsCount || 0);
-            return (
-              <button
-                key={q.id}
-                type="button"
-                className={isSelected ? 'on' : ''}
-                onClick={() => { if (editingQuestionId) cancelEditing(); setActiveQuizId(q.id); }}
-                style={{
-                  padding: '16px',
-                  borderRadius: '16px',
-                  border: isSelected
-                    ? '2px solid #8b5cf6'
-                    : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #cbd5e1'),
-                  background: isSelected
-                    ? (isDark ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 27, 75, 0.8) 100%)' : '#f5f3ff')
-                    : (isDark ? '#111827' : '#ffffff'),
-                  boxShadow: isSelected ? '0 8px 24px rgba(139, 92, 246, 0.25)' : 'none',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                  <strong style={{ fontSize: '14px', lineHeight: 1.3, color: isSelected ? '#a5b4fc' : (isDark ? '#f8fafc' : '#1e293b') }}>
-                    {q.title}
-                  </strong>
-                  <span
-                    className={`adm-chip ${qCount > 0 ? 'adm-chip--green' : 'adm-chip--amber'}`}
-                    style={{ fontSize: '10px', padding: '2px 8px', flexShrink: 0 }}
+          {quizGroups.map(([course, items]) => (
+            <React.Fragment key={course}>
+              <div className="adm-mono" style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.04em', margin: '14px 0 6px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                {course.toUpperCase()} ({items.length})
+              </div>
+              {items.map((q) => {
+                const isSelected = activeQuiz && activeQuiz.id === q.id;
+                const qCount = q.questions ? q.questions.length : (q.questionsCount || 0);
+                return (
+                  <button
+                    key={q.id}
+                    type="button"
+                    className={isSelected ? 'on' : ''}
+                    onClick={() => { if (editingQuestionId) cancelEditing(); setActiveQuizId(q.id); }}
+                    style={{
+                      padding: '16px',
+                      borderRadius: '16px',
+                      border: isSelected
+                        ? '2px solid #8b5cf6'
+                        : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #cbd5e1'),
+                      background: isSelected
+                        ? (isDark ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 27, 75, 0.8) 100%)' : '#f5f3ff')
+                        : (isDark ? '#111827' : '#ffffff'),
+                      boxShadow: isSelected ? '0 8px 24px rgba(139, 92, 246, 0.25)' : 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                      transition: 'all 0.15s ease'
+                    }}
                   >
-                    {qCount} Qs
-                  </span>
-                </div>
-                <small style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                  {q.category}
-                </small>
-              </button>
-            );
-          })}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                      <strong style={{ fontSize: '14px', lineHeight: 1.3, color: isSelected ? '#a5b4fc' : (isDark ? '#f8fafc' : '#1e293b') }}>
+                        {q.title}
+                      </strong>
+                      <span
+                        className={`adm-chip ${qCount > 0 ? 'adm-chip--green' : 'adm-chip--amber'}`}
+                        style={{ fontSize: '10px', padding: '2px 8px', flexShrink: 0 }}
+                      >
+                        {qCount} Qs
+                      </span>
+                    </div>
+                    <small style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                      {q.category}
+                    </small>
+                  </button>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </div>
 
         {/* Create new quiz form */}
@@ -581,7 +599,19 @@ export default function Quiz() {
           <label className="adm-label" style={{ fontSize: '10.5px', color: isDark ? '#cbd5e1' : '#475569' }}>
             CREATE NEW ASSESSMENT
           </label>
-          <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+          <select
+            value={newQuizSessionId}
+            onChange={(e) => setNewQuizSessionId(e.target.value)}
+            className="adm-input"
+            style={{ width: '100%', marginBottom: '8px', marginTop: '8px' }}
+            required
+          >
+            <option value="">Select course session…</option>
+            {(sessions || []).map(s => (
+              <option key={s.id} value={s.id}>{s.course_name} · {s.session_code}</option>
+            ))}
+          </select>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <input
               type="text"
               placeholder="e.g. Threat Intelligence & MITRE ATT&CK"
@@ -600,7 +630,7 @@ export default function Quiz() {
             />
             <button
               type="submit"
-              disabled={creatingQuiz || !newQuizTitle.trim()}
+              disabled={creatingQuiz || !newQuizTitle.trim() || !newQuizSessionId}
               className="adm-btn adm-btn-solid cq-btn--purple"
               style={{ padding: '10px 14px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
             >

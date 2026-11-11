@@ -3,14 +3,15 @@ import hashlib
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Body
 from sqlalchemy import case, desc
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password
 from app.models.entities import (
     User, Trainee, AccessLog, UserSession, PasswordResetToken, UserAbeKey, GamificationProgress,
-    ClientCompany, TrainingRecord, AnomalyAlert, AccountManagerAssignment, UserKeyAttribute
+    ClientCompany, TrainingRecord, AnomalyAlert, AccountManagerAssignment, UserKeyAttribute,
+    Course, TrainerProgram
 )
 from app.schemas.schemas import (
     UserResponse, UserAttributeUpdate, UserCreateAdmin, UserActivationResponse, PasswordChangeRequest,
@@ -128,6 +129,43 @@ def list_trainers(
         resp.attributes = {"title": title_val}
         results.append(resp)
     return results
+
+
+@router.get("/courses")
+def list_courses_admin(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Administrators only.")
+    return [{"id": c.id, "course_code": c.course_code, "name": c.name, "acronym_3": c.acronym_3}
+            for c in db.query(Course).order_by(Course.name).all()]
+
+
+@router.get("/{user_id}/programs")
+def get_trainer_programs(user_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Forbidden.")
+    rows = db.query(TrainerProgram).filter(TrainerProgram.user_id == user_id).all()
+    return [{"course_id": r.course_id} for r in rows]
+
+
+@router.put("/{user_id}/programs")
+def set_trainer_programs(user_id: str, payload: dict = Body(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Admin adds/edits the programs (courses) a Trainer may author quizzes for. Not in the paper; added by design."""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Administrators only.")
+    target = db.query(User).filter(User.id == user_id, User.role == "trainer").first()
+    if not target:
+        raise HTTPException(status_code=404, detail="Trainer not found.")
+    wanted = set(payload.get("course_ids") or [])
+    valid = {c.id for c in db.query(Course).filter(Course.id.in_(wanted)).all()} if wanted else set()
+    existing = db.query(TrainerProgram).filter(TrainerProgram.user_id == user_id).all()
+    for row in existing:
+        if row.course_id not in valid:
+            db.delete(row)
+    have = {r.course_id for r in existing}
+    for cid in valid - have:
+        db.add(TrainerProgram(user_id=user_id, course_id=cid, assigned_by=current_user.id))
+    db.commit()
+    return {"user_id": user_id, "course_ids": sorted(valid)}
 
 
 @router.get("/", response_model=List[UserResponse])

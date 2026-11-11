@@ -27,6 +27,7 @@ export const ROUTES = [
   // Admin
   { path: '/admin',          roles: ['admin'], label: 'Home',              title: 'Overview',                      page: 'admin_overview',     icon: LayoutDashboard },
   { path: '/admin/records',  roles: ['admin'], label: 'Training Records',  title: 'Training Records Vault',        page: 'records_vault',       icon: FileText },
+  { path: '/admin/quizzes',  roles: ['admin'], label: 'Quizzes and Teams', title: 'Quizzes & Teams (Global Scope)', page: 'admin_quizzes',      icon: Sparkles },
   { path: '/admin/people',   roles: ['admin'], label: 'People and Access', title: 'People & Attribute Authority',  page: 'attribute_authority', icon: Users },
   { path: '/admin/alerts',   roles: ['admin'], label: 'Alerts',            title: 'Anomaly Detection & Alerts',    page: 'anomalies',           icon: ShieldAlert },
   { path: '/admin/settings', roles: ['admin'], label: 'Settings',          title: 'System Settings & Baseline',    page: 'system_settings',     icon: Settings },

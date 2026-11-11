@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # Role-based Idle Timeouts in Seconds (SEC-07)
     IDLE_TIMEOUT_ADMIN_FINANCE: int = 900       # 15 minutes
     IDLE_TIMEOUT_STAFF_TRAINER: int = 1800      # 30 minutes
-    IDLE_TIMEOUT_TRAINEE: int = 3600            # 60 minutes
+    IDLE_TIMEOUT_TRAINEE: int = 1800            # 30 minutes (OI-17)
 
     # Email Delivery (crossquest@xworks.ph)
     EMAILS_FROM_EMAIL: str = "crossquest@xworks.ph"

@@ -62,6 +62,9 @@ import PeopleAccess from '../admin/pages/PeopleAccess';
 import Alerts from '../admin/pages/Alerts';
 import RecordsVault from '../admin/pages/RecordsVault';
 import SystemSettings from '../admin/pages/SystemSettings';
+import { TrainerProvider } from '../trainer/TrainerContext';
+import Quiz from '../trainer/pages/Quiz';
+import '../trainer/trainer.css';
 import '../styles/admin.css';
 export default function AdminDashboard({ activeSubView, setActiveView }) {
   const { token, currentUser } = useAuth();
@@ -531,6 +534,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           case 'attribute_authority':
           case 'anomalies':
           case 'system_settings':
+          case 'admin_quizzes':
             return null;
           case 'admin_overview':
           default:
@@ -561,7 +565,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           VIEW 1: SECURITY OVERVIEW
           ===================================================================== */}
       {/* Route-driven Modular Admin Pages */}
-      {(!activeSubView || activeSubView === 'admin_overview' || !['attribute_authority', 'anomalies', 'records_vault', 'system_settings'].includes(activeSubView)) && (
+      {(!activeSubView || activeSubView === 'admin_overview' || !['attribute_authority', 'anomalies', 'records_vault', 'system_settings', 'admin_quizzes'].includes(activeSubView)) && (
         <Overview
           overview={overview}
           unreviewedCount={unreviewedCount}
@@ -620,6 +624,12 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
           }}
           onTuneRules={() => setActiveView && setActiveView('anomalies')}
         />
+      )}
+
+      {activeSubView === 'admin_quizzes' && (
+        <TrainerProvider>
+          <Quiz />
+        </TrainerProvider>
       )}
 
       {/* =====================================================================

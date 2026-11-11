@@ -41,97 +41,57 @@ export function isTokenExpired(tokenStr) {
   }
 }
 
-/**
- * Re-authenticates the current active persona or user to obtain a fresh access token.
- */
-export async function refreshAuthToken(preferredEmail = null) {
+export const SESSION_EXPIRED_EVENT = 'crossquest_session_expired';
+const emitExpired = (reason) => {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT, { detail: { reason } }));
+};
+const IDLE_RE = /inactiv|timed out|idle/i;
+
+/** Renews the 10-min access token via the server refresh cookie. Server enforces idle + 12h max (SEC-07, OI-17). */
+export async function refreshAuthToken() {
   try {
-    let email = preferredEmail;
-    if (!email) {
-      const savedUserStr = localStorage.getItem('crossquest_auth_user');
-      const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
-      email = savedUser?.email || localStorage.getItem('crossquest_auth_email') || 'erika.bana@crossworks.ph';
-    }
-
-    const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', 'password123');
-
-    const loginRes = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
     });
-
-    if (loginRes.ok) {
-      const loginData = await loginRes.json();
-      let freshToken = loginData.access_token;
-      if (loginData.mfa_required && loginData.challenge_token) {
-        const mfaRes = await fetch(`${API_BASE}/auth/mfa/verify`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            challenge_token: loginData.challenge_token,
-            code: 'DEV_MFA_BYPASS'
-          })
-        });
-        if (mfaRes.ok) {
-          const mfaData = await mfaRes.json();
-          freshToken = mfaData.access_token;
-        }
-      }
-      if (freshToken) {
-        localStorage.setItem('crossquest_auth_token', freshToken);
-        localStorage.setItem('crossquest_auth_email', email);
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: freshToken, email } }));
-        }
-        return freshToken;
+    if (res.ok) {
+      const d = await res.json();
+      if (d.access_token) {
+        localStorage.setItem('crossquest_auth_token', d.access_token);
+        window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: d.access_token } }));
+        return d.access_token;
       }
     }
-  } catch (e) {
-    console.warn('Auto re-authentication failed:', e);
-  }
+    if (res.status === 401 || res.status === 403) {
+      let detail = ''; try { detail = (await res.json()).detail || ''; } catch {}
+      emitExpired(IDLE_RE.test(detail) ? 'idle' : 'expired');
+    }
+  } catch (e) { console.warn('Token refresh failed:', e); }
   return null;
 }
 
-/**
- * Resilient authenticated fetch helper that automatically adds Bearer headers
- * and seamlessly re-authenticates if a 401 Unauthorized is received (e.g. backend restart or token expiration).
- */
+/** Authenticated fetch. NEVER silently re-logs in: a timed-out/revoked session ends at /login. */
 export async function authFetch(url, options = {}, token) {
-  // Prefer valid unexpired token
-  let activeToken = token;
-  if (!activeToken || isTokenExpired(activeToken)) {
-    activeToken = localStorage.getItem('crossquest_auth_token');
-  }
-  if (!activeToken || isTokenExpired(activeToken)) {
-    activeToken = await refreshAuthToken();
-  }
+  let activeToken = token || localStorage.getItem('crossquest_auth_token');
+  if (!activeToken || isTokenExpired(activeToken)) activeToken = await refreshAuthToken();
+  if (!activeToken) return new Response(JSON.stringify({ detail: 'Session expired' }), { status: 401 });
 
-  const headers = { ...(options.headers || {}) };
-  if (activeToken) {
-    headers['Authorization'] = `Bearer ${activeToken}`;
-  }
-
+  const headers = { ...(options.headers || {}), Authorization: `Bearer ${activeToken}` };
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
   let res;
   try {
     res = await fetch(url, { ...options, headers, signal: options.signal || controller.signal });
-  } finally {
-    clearTimeout(timeoutId);
-  }
+  } finally { clearTimeout(timeoutId); }
 
   if (res.status === 401) {
-    const freshToken = await refreshAuthToken();
-    if (freshToken) {
-      headers['Authorization'] = `Bearer ${freshToken}`;
-      // Retry original request once with fresh bearer token
-      res = await fetch(url, { ...options, headers });
+    let detail = ''; try { detail = (await res.clone().json()).detail || ''; } catch {}
+    if (/timed out|inactiv|revoked|logged out|maximum/i.test(detail)) {
+      emitExpired(IDLE_RE.test(detail) ? 'idle' : 'expired');
+    } else {
+      const fresh = await refreshAuthToken();
+      if (fresh) { headers.Authorization = `Bearer ${fresh}`; res = await fetch(url, { ...options, headers }); }
     }
   }
-
   return res;
 }
 
@@ -1380,5 +1340,37 @@ export async function removeTraineeFromTeam(teamId, traineeId, token) {
     throw new Error(err.detail || 'Failed to remove trainee from team');
   }
   return res.json();
+}
+
+export async function submitQuizAnswers(traineeId, quizId, answers, token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/submit-quiz`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        trainee_id: traineeId, quiz_id: quizId, answers,
+        attempt_id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `att-${Date.now()}`
+      })
+    }, token);
+    if (res.ok) { const d = await res.json(); return { score: d.last_score ?? 0 }; }
+  } catch (err) { console.warn('submitQuizAnswers failed:', err); }
+  return null;
+}
+
+export async function fetchAdminCourses(token) {
+  try { const r = await authFetch(`${API_BASE}/users/courses`, {}, token); if (r.ok) return await r.json(); } catch {}
+  return [];
+}
+export async function fetchTrainerPrograms(userId, token) {
+  try { const r = await authFetch(`${API_BASE}/users/${userId}/programs`, {}, token); if (r.ok) return await r.json(); } catch {}
+  return [];
+}
+export async function saveTrainerPrograms(userId, courseIds, token) {
+  try {
+    const r = await authFetch(`${API_BASE}/users/${userId}/programs`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_ids: courseIds })
+    }, token);
+    return r.ok;
+  } catch { return false; }
 }
 

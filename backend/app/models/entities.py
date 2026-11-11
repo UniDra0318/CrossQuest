@@ -188,6 +188,17 @@ class TrainerAssignment(Base):
     session = relationship("TrainingSession", back_populates="trainer_assignments")
 
 
+class TrainerProgram(Base):
+    """Admin-managed program (course) scope for a Trainer. Extends session-based TrainerAssignment."""
+    __tablename__ = "trainer_programs"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    course_id = Column(String(36), ForeignKey("courses.id"), nullable=False, index=True)
+    assigned_by = Column(String(36), nullable=True)
+    created_at = Column(DateTime, default=utc_now)
+
+
 class TrainingRecord(Base):
     """Training record entity with DD-02 separation of queryable plaintext vs hybrid CP-ABE ciphertext.
     

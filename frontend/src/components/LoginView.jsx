@@ -30,6 +30,11 @@ export default function LoginView() {
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(null);
   const [activeTab, setActiveTab] = useState('credentials'); // 'credentials' | 'demo'
+  const [timeoutNotice] = useState(() => {
+    const r = sessionStorage.getItem('crossquest_logout_reason');
+    sessionStorage.removeItem('crossquest_logout_reason');
+    return r;
+  });
 
   // MFA Challenge State (SEC-01, OI-26)
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -328,6 +333,13 @@ export default function LoginView() {
 
               {activeTab === 'credentials' || !showDevTab ? (
                 <form onSubmit={handleSubmit} className="clean-login-form">
+                  {timeoutNotice && (
+                    <div role="alert" style={{ padding: '10px 14px', borderRadius: '10px', marginBottom: '12px', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', color: '#f59e0b', fontSize: '13px', fontWeight: 600 }}>
+                      {timeoutNotice === 'idle'
+                        ? 'You were signed out after a period of inactivity (15 min for Admin/Finance, 30 min for other roles).'
+                        : 'Your session expired. Please sign in again.'}
+                    </div>
+                  )}
                   {loginError && (
                     <div style={{
                       padding: '10px 14px',

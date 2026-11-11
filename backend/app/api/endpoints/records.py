@@ -1020,50 +1020,61 @@ def list_assigned_training_sessions(
 
     query = db.query(TrainingSession)
     if current_user.role == "trainer":
-        query = query.join(TrainerAssignment, TrainerAssignment.session_id == TrainingSession.id)\
-                     .filter(TrainerAssignment.user_id == current_user.id)
+        assigned_ids = db.query(TrainerAssignment.session_id).filter(
+            TrainerAssignment.user_id == current_user.id,
+            (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > now_manila_naive)
+        )
+        query = query.filter(TrainingSession.id.in_(assigned_ids))
 
     sessions = query.order_by(TrainingSession.start_date.desc()).all()
+    sids = [s.id for s in sessions]
+
+    # Batch load: 1 query for records, then 3 bulk lookups (was 3 queries per record)
+    recs_by_sid = {}
+    all_recs = []
+    if sids:
+        all_recs = db.query(TrainingRecord).filter(
+            TrainingRecord.session_id.in_(sids), TrainingRecord.deleted_at == None
+        ).all()
+        for r in all_recs:
+            recs_by_sid.setdefault(r.session_id, []).append(r)
+
+    trainees, companies, certs = {}, {}, {}
+    if all_recs:
+        from app.core.database import admin_engine
+        from sqlalchemy.orm import sessionmaker as _sm
+        t_ids = {r.trainee_id for r in all_recs if r.trainee_id}
+        c_ids = {r.company_at_completion_id for r in all_recs if r.company_at_completion_id}
+        r_ids = [r.id for r in all_recs]
+        with _sm(bind=admin_engine)() as adm_db:
+            if t_ids:
+                trainees = {t.id: t for t in adm_db.query(Trainee).filter(Trainee.id.in_(t_ids)).all()}
+            if c_ids:
+                companies = {c.id: c for c in adm_db.query(ClientCompany).filter(ClientCompany.id.in_(c_ids)).all()}
+            certs = {c.record_id: c for c in adm_db.query(Certificate).filter(Certificate.record_id.in_(r_ids)).all()}
 
     result = []
     for s in sessions:
         is_future = bool(s.start_date and s.start_date > now_manila_naive)
-
-        records = db.query(TrainingRecord).filter(
-            TrainingRecord.session_id == s.id,
-            TrainingRecord.deleted_at == None
-        ).all()
-
         roster_items = []
-        from app.core.database import admin_engine
-        from sqlalchemy.orm import sessionmaker as _sm
-        _AdminSession = _sm(bind=admin_engine)
-        with _AdminSession() as adm_db:
-            for r in records:
-                cert = adm_db.query(Certificate).filter(Certificate.record_id == r.id).first()
-                t_obj = r.trainee or adm_db.query(Trainee).filter(Trainee.id == r.trainee_id).first()
-                c_obj = r.company_at_completion or adm_db.query(ClientCompany).filter(ClientCompany.id == r.company_at_completion_id).first()
-                trainee_name = f"{t_obj.first_name} {t_obj.last_name}".strip() if t_obj else "Participant"
-                trainee_email = t_obj.email if t_obj else ""
-                trainee_code = t_obj.trainee_code if t_obj else r.id
-
-                company_name = c_obj.name if c_obj else "Crossworks Partner"
-                company_code = c_obj.code if c_obj else "VHL"
-
-                roster_items.append({
-                    "record_id": r.id,
-                    "trainee_id": r.trainee_id,
-                    "trainee_code": trainee_code,
-                    "trainee_name": trainee_name,
-                    "trainee_email": trainee_email,
-                    "company_name": company_name,
-                    "company_code": company_code,
-                    "status": r.status,
-                    "attendance_status": r.attendance_status,
-                    "score": r.score,
-                    "completion_date": r.completion_date.isoformat() if r.completion_date else None,
-                    "certificate_serial": cert.serial_number if cert else None
-                })
+        for r in recs_by_sid.get(s.id, []):
+            t_obj = trainees.get(r.trainee_id)
+            c_obj = companies.get(r.company_at_completion_id)
+            cert = certs.get(r.id)
+            roster_items.append({
+                "record_id": r.id,
+                "trainee_id": r.trainee_id,
+                "trainee_code": t_obj.trainee_code if t_obj else r.id,
+                "trainee_name": f"{t_obj.first_name} {t_obj.last_name}".strip() if t_obj else "Participant",
+                "trainee_email": t_obj.email if t_obj else "",
+                "company_name": c_obj.name if c_obj else "Crossworks Partner",
+                "company_code": c_obj.code if c_obj else "VHL",
+                "status": r.status,
+                "attendance_status": r.attendance_status,
+                "score": r.score,
+                "completion_date": r.completion_date.isoformat() if r.completion_date else None,
+                "certificate_serial": cert.serial_number if cert else None
+            })
 
         result.append({
             "id": s.id,

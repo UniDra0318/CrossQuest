@@ -6,7 +6,7 @@ import { useTrainer } from '../TrainerContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function Cohorts() {
-  const { cohorts, loading } = useTrainer();
+  const { cohorts, loading, loadError, loadData } = useTrainer();
   const navigate = useNavigate();
   const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
   const isDark = effectiveTheme === 'dark';
@@ -22,6 +22,9 @@ export default function Cohorts() {
 
   if (loading && (!cohorts || cohorts.length === 0)) {
     return <div className="adm-state">Loading assigned cohorts catalog...</div>;
+  }
+  if (loadError && (!cohorts || cohorts.length === 0)) {
+    return <div className="adm-state">{loadError} <button type="button" className="trn-link" onClick={() => loadData()}>Retry</button></div>;
   }
 
   return (

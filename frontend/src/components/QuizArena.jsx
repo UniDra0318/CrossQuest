@@ -109,7 +109,7 @@ function prepareQuizQuestions(quiz, initialSession) {
   });
 }
 
-export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
+export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSubmitServer }) {
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   const { theme, effectiveTheme } = useTheme();
@@ -171,6 +171,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const [currentIndex, setCurrentIndex] = useState(() => initialSession?.currentIndex || 0);
   const [correctCount, setCorrectCount] = useState(() => initialSession?.correctCount || 0);
   const [answeredState, setAnsweredState] = useState(null); // 'correct' | 'wrong' | null
+  const [serverAnswers, setServerAnswers] = useState({});
+  const [serverScore, setServerScore] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [identificationInput, setIdentificationInput] = useState('');
   
@@ -278,6 +280,13 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     if (answeredState !== null) return;
     setSelectedOption(optionIdx);
 
+    if (quiz.serverScored) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setServerAnswers(prev => ({ ...prev, [currentQ.id]: optionIdx }));
+      setAnsweredState('submitted'); // no correct/wrong reveal until the quiz closes (OI-23)
+      return;
+    }
+
     const isCorrect = optionIdx === currentQ.correctAnswer;
     const userAns = currentQ.options[optionIdx];
     evaluateAnswer(isCorrect, userAns);
@@ -380,14 +389,19 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     });
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (currentIndex + 1 < totalQuestions) {
       const nextIdx = currentIndex + 1;
       setCurrentIndex(nextIdx);
       saveProgress({ currentIndex: nextIdx, answeredState: null });
     } else {
-      // Quiz Finished! Transition to results stage within QuizArena
-      // Keep trainee on results screen so they can review their score and full question summary
+      if (quiz.serverScored && onSubmitServer) {
+        const res = await onSubmitServer(serverAnswers);
+        if (!res) { alert('Could not submit your answers. Check your connection and try again.'); return; }
+        const pct = Math.round(res.score);
+        setServerScore(pct);
+        setCorrectCount(Math.round((pct / 100) * totalQuestions));
+      }
       setStage('completed');
       localStorage.removeItem('crossquest_quiz_session');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -399,7 +413,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       alert("Cannot submit assessment while offline. Quizzes require an active internet connection per security policy SEC-26.");
       return;
     }
-    const finalAccuracy = Math.round((correctCount / totalQuestions) * 100);
+    const finalAccuracy = serverScore ?? Math.round((correctCount / totalQuestions) * 100);
     if (onFinish) {
       onFinish({
         quizId: quiz.id,
@@ -408,7 +422,8 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
         correctCount,
         totalQuestions,
         pointsEarned: pointsTotal,
-        passed: finalAccuracy >= (quiz.passingScore || 80)
+        passed: finalAccuracy >= (quiz.passingScore || 80),
+        serverScored: Boolean(quiz.serverScored),
       });
     } else if (onExit) {
       onExit();
@@ -2037,6 +2052,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                   {answeredState === 'correct' && '🎉 Correct! That is right!'}
                   {answeredState === 'wrong' && '❌ Incorrect Answer'}
                   {answeredState === 'timeout' && '⏰ Time Expired!'}
+                  {answeredState === 'submitted' && '✓ Answer Recorded'}
                 </div>
                 {answeredState !== 'correct' && showCorrectAnswers && currentQ.type !== 'sequence_order' && (
                   <div className="feedback-solution-box animate-fadeIn">

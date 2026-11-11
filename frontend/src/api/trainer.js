@@ -1,4 +1,4 @@
-import { RUBRIC, PASS_MARK, tierFor, cohorts as mockCohorts } from '../data/trainerData.js';
+import { RUBRIC, PASS_MARK, tierFor } from '../data/trainerData.js';
 import { QUIZ_DATABASE, getActiveQuizDatabase, addQuestionToQuizStorage, deleteQuestionFromQuizStorage, updateQuestionInQuizStorage, updateQuizMetadataStorage, resetQuizDatabaseToDefaults } from '../data/quizDatabase.js';
 import {
   authFetch,
@@ -42,86 +42,39 @@ export async function getTrainerMe() {
   };
 }
 
-/** GET real assigned cohorts / sessions from database */
-export async function getCohorts(token) {
-  try {
-    const sessions = await fetchTrainerSessions(token);
-    if (sessions && sessions.length > 0) {
-      return sessions.map((s) => {
-        const records = s.records || s.roster || [];
-        const isSigned = Boolean(s.trainer_signed_off);
-        const enrolled = records.length;
-        const certified = isSigned ? records.filter(r => r.status?.toLowerCase() === 'completed').length : 0;
-        const scores = records.filter(r => r.score != null).map(r => r.score);
-        const avg = scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : 88.5;
-        const org = records[0]?.company_name || s.delivery_type || 'San Miguel Corporation';
-        const schedule = s.start_date ? `${new Date(s.start_date).toLocaleDateString()} - ${s.end_date ? new Date(s.end_date).toLocaleDateString() : 'Ongoing'}` : 'Mon / Wed / Fri · 09:00–12:00 PHT';
-
-        return {
-          id: s.session_code || s.id,
-          sessionId: s.id,
-          name: s.session_code,
-          course: s.course_name,
-          org,
-          schedule,
-          scope: records[0]?.company_code || 'CORP_ALPHA',
-          enrolled: enrolled || 2,
-          certified,
-          avg,
-          daysLeft: s.is_future_dated ? 14 : 0,
-          signedOff: isSigned,
-          signed_off: isSigned,
-          status: isSigned ? 'COMPLETED' : (s.is_future_dated ? 'UPCOMING' : 'ACTIVE COHORT')
-        };
-      });
-    }
-  } catch (err) {
-    console.warn('Could not fetch real cohorts from DB:', err);
-  }
-
-  return mockCohorts;
+/** Pure: sessions (from /records/sessions/assigned) -> cohort cards */
+export function deriveCohorts(sessions = []) {
+  return (sessions || []).map((s) => {
+    const records = s.records || [];
+    const isSigned = Boolean(s.trainer_signed_off);
+    const scores = records.filter(r => r.score != null).map(r => r.score);
+    return {
+      id: s.session_code || s.id, sessionId: s.id, name: s.session_code, course: s.course_name,
+      org: records[0]?.company_name || s.delivery_type || '—',
+      schedule: s.start_date ? `${new Date(s.start_date).toLocaleDateString()} - ${s.end_date ? new Date(s.end_date).toLocaleDateString() : 'Ongoing'}` : '—',
+      scope: records[0]?.company_code || '—',
+      enrolled: records.length,
+      certified: isSigned ? records.filter(r => r.status?.toLowerCase() === 'completed').length : 0,
+      avg: scores.length ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10 : null,
+      daysLeft: s.is_future_dated ? 14 : 0,
+      signedOff: isSigned, signed_off: isSigned,
+      status: isSigned ? 'COMPLETED' : (s.is_future_dated ? 'UPCOMING' : 'ACTIVE COHORT')
+    };
+  });
 }
 
-/** GET real trainee roster from database */
-export async function getRoster(token) {
-  try {
-    const sessions = await fetchTrainerSessions(token);
-    if (sessions && sessions.length > 0) {
-      const allRoster = [];
-      sessions.forEach((s) => {
-        const records = s.records || s.roster || [];
-        records.forEach((r) => {
-          allRoster.push({
-            id: r.record_id || r.id,
-            traineeId: r.trainee_id,
-            name: r.trainee_name || 'Trainee Learner',
-            email: r.trainee_email || '',
-            companyName: r.company_name || 'San Miguel Corporation',
-            scope: r.company_code || 'CORP_ALPHA',
-            cohort: s.session_code,
-            sessionId: s.id,
-            status: r.status || 'In progress',
-            score: r.score != null ? r.score : null,
-            tier: r.score != null ? tierFor(r.score) : 'Admin Only',
-            state: (r.status?.toLowerCase() === 'completed' || s.trainer_signed_off) ? 'CERTIFIED' : 'PENDING',
-            attendance: r.attendance_status || 'Present',
-            certificateSerial: r.certificate_serial
-          });
-        });
-      });
-      if (allRoster.length > 0) return allRoster;
-    }
-  } catch (err) {
-    console.warn('Could not fetch real roster from DB:', err);
-  }
-
-  return [
-    { id: 't1', name: 'Juan Dela Cruz', email: 'juan.delacruz@sanmiguel.com.ph', scope: 'CORP_ALPHA', companyName: 'San Miguel Corporation', cohort: 'SESS-2026-08A', score: 94.5, tier: 'High Distinction', state: 'CERTIFIED', attendance: 'Present' },
-    { id: 't2', name: 'Maria Clara', email: 'maria.clara@maya.ph', scope: 'FINTECH_BETA', companyName: 'Maya FinTech Innovations', cohort: 'SESS-2026-09B', score: 88.0, tier: 'Pass with Merit', state: 'CERTIFIED', attendance: 'Present' },
-    { id: 't3', name: 'Beatrice Tan', email: 'beatrice.tan@sanmiguel.com.ph', scope: 'CORP_ALPHA', companyName: 'San Miguel Corporation', cohort: 'SESS-2026-08A', score: 98.0, tier: 'Perfect Score', state: 'CERTIFIED', attendance: 'Present' },
-    { id: 't4', name: 'Gabriel Ramos', email: 'gabriel.ramos@ayala.com.ph', scope: 'RETAIL_GAMMA', companyName: 'Ayala Retail Omnichannel', cohort: 'SESS-2026-10C', score: 86.0, tier: 'Pass with Merit', state: 'PENDING', attendance: 'Present' },
-    { id: 't5', name: 'Carlos Mendoza', email: 'carlos.mendoza@maya.ph', scope: 'FINTECH_BETA', companyName: 'Maya FinTech Innovations', cohort: 'SESS-2026-11D', score: 79.5, tier: 'Passing Baseline', state: 'PENDING', attendance: 'Present' },
-  ];
+/** Pure: sessions -> flat roster rows */
+export function deriveRoster(sessions = []) {
+  const out = [];
+  (sessions || []).forEach((s) => (s.records || []).forEach((r) => out.push({
+    id: r.record_id, traineeId: r.trainee_id, name: r.trainee_name || 'Trainee',
+    email: r.trainee_email || '', companyName: r.company_name || '', scope: r.company_code || '',
+    cohort: s.session_code, sessionId: s.id, status: r.status || 'In progress',
+    score: r.score != null ? r.score : null, tier: r.score != null ? tierFor(r.score) : 'Admin Only',
+    state: (r.status?.toLowerCase() === 'completed' || s.trainer_signed_off) ? 'CERTIFIED' : 'PENDING',
+    attendance: r.attendance_status || 'Present', certificateSerial: r.certificate_serial
+  })));
+  return out;
 }
 
 /** Grade trainee & sign off */
@@ -165,163 +118,36 @@ export async function gradeTrainee(recordId, body = {}) {
 
 /** GET /api/v1/gamification/quizzes -> Real quizzes from database + Active Curriculum */
 export async function getQuizzes(token) {
-  const normalizedQuizzes = [];
-  const existingTitles = new Set();
-
-  // 1. Fetch backend database quizzes & their real questions
-  try {
-    const list = await fetchQuizzes(token);
-    if (list && list.length > 0) {
-      for (const q of list) {
-        existingTitles.add(q.title.toLowerCase().trim());
-        let questions = [];
-        try {
-          const dbQuestions = await fetchQuizQuestionsApi(q.id, token);
-          if (dbQuestions && dbQuestions.length > 0) {
-            questions = dbQuestions.map((item, idx) => ({
-              id: item.id || `q-${idx}`,
-              type: 'kahoot',
-              prompt: item.question_text || item.question || 'Course question',
-              options: Array.isArray(item.options) ? item.options : ['Option A', 'Option B', 'Option C', 'Option D'],
-              answer: item.correct_answer ?? item.correct_option ?? 0,
-              points: item.points || 10,
-              explanation: item.explanation || 'Standard course competency benchmark.'
-            }));
-          }
-        } catch (e) {
-          console.warn(`Could not load questions for quiz ${q.id}:`, e);
-        }
-
-        normalizedQuizzes.push({
-          id: q.id,
-          category: q.course_name || 'Enterprise Curriculum',
-          title: q.title,
-          timePerQ: 45,
-          pass: 80,
-          questionsCount: questions.length || q.questions_count || 0,
-          isClosed: q.is_closed,
-          completed: q.completed,
-          score: q.score,
-          questions
-        });
-      }
-    }
-  } catch (err) {
-    console.warn('Could not fetch real quizzes from backend:', err);
-  }
-
-  // 2. Load standard enterprise assessments from quizDatabase.js
-  try {
-    const activeDb = getActiveQuizDatabase();
-    if (activeDb) {
-      Object.values(activeDb).forEach((qObj) => {
-        const titleKey = qObj.title.toLowerCase().trim();
-        // If already present in backend list, merge any missing questions
-        const existingQuiz = normalizedQuizzes.find(item => item.title.toLowerCase().trim() === titleKey);
-
-        const mappedQuestions = (qObj.questions || []).map((q) => {
-          let normType = q.type || 'kahoot';
-          if (normType === 'multiple_choice') normType = 'kahoot';
-          else if (normType === 'sequence_order') normType = 'sequence';
-          else if (normType === 'diagram_analysis') normType = 'hotspot';
-
-          return {
-            id: q.id,
-            type: normType,
-            prompt: q.question || q.prompt || q.question_text || 'Assessment Prompt',
-            options: q.options || [],
-            answer: q.correctAnswer ?? q.answer ?? 0,
-            accepted: q.acceptedAnswers || q.accepted || [],
-            steps: q.steps || [],
-            answerLabel: q.answerLabel || q.targetHotspotLabel || '',
-            pairs: q.pairs || [],
-            diagramType: q.diagramType || 'security_pipeline',
-            diagramTitle: q.diagramTitle || undefined,
-            customNodes: q.customNodes || undefined,
-            customLayout: q.customLayout || undefined,
-            points: q.points || 10,
-            explanation: q.explanation || ''
-          };
-        });
-
-        if (existingQuiz) {
-          // If the backend quiz had 0 questions, backfill from active curriculum database
-          if (existingQuiz.questions.length === 0 && mappedQuestions.length > 0) {
-            existingQuiz.questions = mappedQuestions;
-            existingQuiz.questionsCount = mappedQuestions.length;
-          }
-        } else {
-          // Append curriculum challenge
-          normalizedQuizzes.push({
-            id: qObj.id,
-            category: qObj.category || 'Enterprise Curriculum',
-            title: qObj.title,
-            timePerQ: qObj.timePerQuestion || 45,
-            pass: qObj.passingScore || 80,
-            questionsCount: mappedQuestions.length,
-            isClosed: false,
-            completed: false,
-            score: null,
-            questions: mappedQuestions
-          });
-        }
-      });
-    }
-  } catch (err) {
-    console.warn('Could not load enterprise curriculum database:', err);
-  }
-
-  return normalizedQuizzes;
+  const list = (await fetchQuizzes(token)) || [];
+  return Promise.all(list.map(async (q) => {
+    let questions = [];
+    try {
+      const rows = await fetchQuizQuestionsApi(q.id, token);
+      questions = (rows || []).map((item, idx) => ({
+        id: item.id || `q-${idx}`, type: 'kahoot', prompt: item.question_text || '',
+        options: Array.isArray(item.options) ? item.options : [],
+        answer: item.correct_answer ?? 0, points: item.points || 10, explanation: item.explanation || ''
+      }));
+    } catch (e) { console.warn(`Could not load questions for quiz ${q.id}:`, e); }
+    return {
+      id: q.id, sessionId: q.session_id, courseId: q.course_id,
+      course: q.course_name || 'Unassigned', category: q.course_name || 'Unassigned',
+      title: q.title, timePerQ: 45, pass: 80,
+      questionsCount: questions.length || q.questions_count || 0,
+      isClosed: q.is_closed, isApproved: !!q.is_approved, completed: q.completed, score: q.score, questions
+    };
+  }));
 }
 
 /** POST /api/v1/gamification/quizzes -> Create quiz in database and storage */
-export async function createQuiz(title, token) {
-  let createdQuiz = null;
-  try {
-    const result = await createQuizApi({ title }, token);
-    if (result) {
-      createdQuiz = {
-        id: result.id,
-        category: 'Enterprise Curriculum',
-        title: result.title,
-        timePerQ: 45,
-        pass: 80,
-        questionsCount: 0,
-        questions: []
-      };
-    }
-  } catch (e) {
-    console.warn('Backend quiz creation failed, saving to curriculum storage:', e);
-  }
-
-  if (!createdQuiz) {
-    const fallbackId = `quiz-${Date.now()}`;
-    createdQuiz = {
-      id: fallbackId,
-      category: 'Enterprise Curriculum',
-      title,
-      timePerQ: 45,
-      pass: 80,
-      questionsCount: 0,
-      questions: []
-    };
-  }
-
-  try {
-    const qObj = {
-      id: createdQuiz.id,
-      title: createdQuiz.title,
-      category: createdQuiz.category,
-      timePerQuestion: 45,
-      passingScore: 80,
-      questions: []
-    };
-    const current = getActiveQuizDatabase();
-    current[createdQuiz.id] = qObj;
-    localStorage.setItem('crossquest_quiz_database', JSON.stringify(current));
-  } catch (e) {}
-
-  return createdQuiz;
+export async function createQuiz(title, sessionId, token) {
+  const result = await createQuizApi({ title, session_id: sessionId }, token);
+  if (!result) throw new Error('Quiz creation failed. You may not be assigned to that session.');
+  return {
+    id: result.id, sessionId: result.session_id, courseId: result.course_id,
+    course: result.course_name, category: result.course_name, title: result.title,
+    timePerQ: 45, pass: 80, questionsCount: 0, isApproved: false, questions: []
+  };
 }
 
 /** POST /api/v1/gamification/quizzes/:id/questions -> Add question in database & storage */
@@ -477,9 +303,9 @@ export async function resetQuizzes() {
 }
 
 /** Analytics computed from real database roster and cohorts */
-export async function getAnalytics(scope = 'ALL', token) {
-  const roster = await getRoster(token);
-  const cohorts = await getCohorts(token);
+export async function getAnalytics(scope = 'ALL', token, sessions = []) {
+  const roster = deriveRoster(sessions);
+  const cohorts = deriveCohorts(sessions);
 
   const filtered = scope === 'ALL' ? roster : roster.filter(r => r.scope === scope);
   const scored = filtered.filter(r => r.score != null);

@@ -5,7 +5,7 @@ import { TablePagination, usePagination } from '../../components/TablePagination
 import { useTrainer } from '../TrainerContext';
 
 export default function Roster({ sessionFilter, onNavigateTab }) {
-  const { roster, setSelectedTraineeId, exportRosterCsv, handleAssignTeam, loading } = useTrainer();
+  const { roster, setSelectedTraineeId, exportRosterCsv, handleAssignTeam, loading, loadError, loadData } = useTrainer();
   const [search, setSearch] = useState('');
   const [scopeFilter, setScopeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -71,6 +71,9 @@ export default function Roster({ sessionFilter, onNavigateTab }) {
 
   if (loading && (!roster || roster.length === 0)) {
     return <div className="adm-state">Loading trainee roster...</div>;
+  }
+  if (loadError && (!roster || roster.length === 0)) {
+    return <div className="adm-state">{loadError} <button type="button" className="trn-link" onClick={() => loadData()}>Retry</button></div>;
   }
 
   return (

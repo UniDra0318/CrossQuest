@@ -29,10 +29,11 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { setupMfaApi, enableMfaApi } from '../services/api';
+import { setupMfaApi, enableMfaApi, SESSION_EXPIRED_EVENT } from '../services/api';
 
 export default function ProfileSettingsModal({ isOpen, onClose }) {
   const { currentUser, token, DEMO_USERS } = useAuth();
+  const idleMin = ['admin', 'finance'].includes(currentUser?.role) ? 15 : 30; // OI-17
   const { 
     theme, 
     setTheme, 
@@ -726,17 +727,29 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
 
                 <div style={{ height: '1px', background: isDark ? '#334155' : '#e2e8f0' }} />
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Clock size={20} color="#f59e0b" />
                     <div>
                       <span style={{ fontWeight: '800', fontSize: '14px', display: 'block' }}>Role-Based Session Idle Timeout</span>
-                      <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>Auto-locks inactive sessions after 15 minutes of inactivity</span>
+                      <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>Auto-locks inactive sessions after {idleMin} minutes of inactivity</span>
                     </div>
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '999px', background: '#fffbeb', color: '#b45309', fontSize: '11px', fontWeight: '800' }}>
-                    15-MIN IDLE
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: '999px', background: '#fffbeb', color: '#b45309', fontSize: '11px', fontWeight: '800' }}>
+                      {idleMin}-MIN IDLE
+                    </span>
+                    {import.meta.env.DEV && (
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn--light"
+                        style={{ padding: '5px 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                        onClick={() => window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT, { detail: { reason: 'idle' } }))}
+                      >
+                        Simulate Idle Timeout
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 

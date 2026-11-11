@@ -19,6 +19,7 @@ import { TablePagination, TablePaginationCompact, usePagination } from '../../co
 import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { useTheme } from '../../contexts/ThemeContext';
 import { disableUser, reenableUser } from '../../services/api';
+import TrainerProgramsModal from './TrainerProgramsModal';
 
 export default function PeopleAccess({
   staffList = [],
@@ -33,6 +34,7 @@ export default function PeopleAccess({
   const [staffSearch, setStaffSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [companySearch, setCompanySearch] = useState('');
+  const [programsTrainer, setProgramsTrainer] = useState(null);
   const [actionToast, setActionToast] = useState(null);
   const [processingUserId, setProcessingUserId] = useState(null);
 
@@ -130,6 +132,9 @@ export default function PeopleAccess({
 
   return (
     <div className="adm-people-access-page" style={{ marginTop: '10px' }}>
+      {programsTrainer && (
+        <TrainerProgramsModal trainer={programsTrainer} token={token} onClose={() => setProgramsTrainer(null)} />
+      )}
       {/* 1. Staff Access & Role Management Hero Stage (Royal Indigo / Violet Cockpit) */}
       <section className="trainee-hero-stage adm-staff-hero-stage">
         <div className="trainee-hero-content">
@@ -421,6 +426,17 @@ export default function PeopleAccess({
                               <Edit2 size={13} />
                               <span>Edit Roles</span>
                             </button>
+                            {String(user.role || '').toLowerCase().includes('trainer') && (
+                              <button
+                                type="button"
+                                className="adm-btn adm-btn--light"
+                                style={{ padding: '7px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
+                                onClick={() => setProgramsTrainer(user)}
+                                title="Add/edit programs this trainer can author quizzes for"
+                              >
+                                <span>Programs</span>
+                              </button>
+                            )}
                             <button
                               type="button"
                               className="adm-btn adm-btn--light"

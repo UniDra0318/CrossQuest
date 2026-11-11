@@ -14,25 +14,79 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, date, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import desc, func
 
 from app.core.database import get_db
 from app.core.config import settings
 from app.models.entities import (
     GamificationProgress, Trainee, Quiz, QuizQuestion, QuizAnswerKey,
     QuizAttempt, Team, TeamMember, User, TrainingSession, TrainingRecord,
-    TrainerAssignment, AccessLog
+    TrainerAssignment, AccessLog, TrainerProgram
 )
 from app.schemas.schemas import (
     GamificationResponse, QuizSubmitRequest, LeaderboardOptOutRequest,
-    LeaderboardEntry, QuizQuestionTraineeView, QuizSubmissionResult,
+    LeaderboardEntry, QuizQuestionTraineeView, QuizQuestionStaffView, QuizSubmissionResult,
     QuizQuestionReview, QuizListItem, QuizCreate, QuizQuestionCreate,
     TeamCreate, TeamResponse, TeamMemberAdd, TeamMemberResponse
 )
 from app.api.deps import get_current_user
 
 router = APIRouter()
+
+_PALETTE = ["#1368ce", "#059669", "#dc2626", "#7c3aed", "#d97706", "#0891b2"]
+
+
+def _course_color(key) -> str:
+    return _PALETTE[sum(ord(c) for c in str(key or "x")) % len(_PALETTE)]
+
+
+def _trainee_for(db: Session, user: User):
+    return db.query(Trainee).filter((Trainee.user_id == user.id) | (Trainee.email == user.email)).first()
+
+
+def _scope_for(db: Session, user: User):
+    """None = unrestricted (admin). Else (session_ids, course_ids) the user may access quizzes for."""
+    if user.role == "admin":
+        return None
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    if user.role == "trainer":
+        sids = {a.session_id for a in db.query(TrainerAssignment).filter(
+            TrainerAssignment.user_id == user.id,
+            (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > now)).all()}
+        cids = {p.course_id for p in db.query(TrainerProgram).filter(TrainerProgram.user_id == user.id).all()}
+        return sids, cids
+    if user.role == "trainee":
+        t = _trainee_for(db, user)
+        if not t:
+            return set(), set()
+        sids = {r.session_id for r in db.query(TrainingRecord).filter(
+            TrainingRecord.trainee_id == t.id, TrainingRecord.deleted_at == None,
+            TrainingRecord.session_id != None).all()}
+        cids = {s.course_id for s in db.query(TrainingSession).filter(TrainingSession.id.in_(sids)).all()
+                if s.course_id} if sids else set()
+        return sids, cids
+    return set(), set()
+
+
+def _scope_match(user: User, scope, quiz: Quiz) -> bool:
+    sids, cids = scope
+    if user.role == "trainer" and quiz.created_by_user_id == user.id:
+        return True
+    s = quiz.session
+    return bool(s and (s.id in sids or (s.course_id and s.course_id in cids)))
+
+
+def _quiz_in_scope(db: Session, user: User, quiz: Quiz) -> bool:
+    scope = _scope_for(db, user)
+    return True if scope is None else _scope_match(user, scope, quiz)
+
+
+def _require_quiz_scope(db: Session, user: User, quiz: Quiz) -> None:
+    if user.role not in ("admin", "trainer"):
+        raise HTTPException(status_code=403, detail="Only trainers and administrators can manage quizzes.")
+    if not _quiz_in_scope(db, user, quiz):
+        raise HTTPException(status_code=403, detail="Trainers are limited to quizzes of assigned sessions/programs (U-12).")
 
 
 def update_trainee_activity_streak(db: Session, trainee: Trainee, gam: GamificationProgress) -> int:
@@ -150,82 +204,44 @@ def list_quizzes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Returns all quizzes from the database with question counts and completion status."""
-    quizzes = db.query(Quiz).order_by(Quiz.created_at.desc()).all()
-
-    trainee = None
+    """Role-scoped quiz catalog. Admin: all. Trainer: assigned sessions/programs. Trainee: approved quizzes of enrolled courses only."""
+    scope = _scope_for(db, current_user)
+    quizzes = db.query(Quiz).options(joinedload(Quiz.session)).order_by(Quiz.created_at.desc()).all()
     if current_user.role == "trainee":
-        trainee = db.query(Trainee).filter(
-            (Trainee.user_id == current_user.id) | (Trainee.email == current_user.email)
-        ).first()
+        quizzes = [x for x in quizzes if x.is_approved]
+    if scope is not None:
+        quizzes = [x for x in quizzes if _scope_match(current_user, scope, x)]
+    if not quizzes:
+        return []
+
+    ids = [x.id for x in quizzes]
+    counts = dict(db.query(QuizQuestion.quiz_id, func.count(QuizQuestion.id))
+                  .filter(QuizQuestion.quiz_id.in_(ids)).group_by(QuizQuestion.quiz_id).all())
+    attempts = {}
+    if current_user.role == "trainee":
+        trainee = _trainee_for(db, current_user)
+        if trainee:
+            attempts = {a.quiz_id: a for a in db.query(QuizAttempt).filter(
+                QuizAttempt.trainee_id == trainee.id, QuizAttempt.is_scored == True,
+                QuizAttempt.quiz_id.in_(ids)).all()}
+    creator_ids = {x.created_by_user_id for x in quizzes if x.created_by_user_id}
+    creators = {u.id: u.full_name for u in db.query(User).filter(User.id.in_(creator_ids)).all()} if creator_ids else {}
 
     results = []
     for q in quizzes:
-        q_count = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == q.id).count()
-        completed = False
-        score = None
-        if trainee:
-            att = db.query(QuizAttempt).filter(
-                QuizAttempt.quiz_id == q.id,
-                QuizAttempt.trainee_id == trainee.id,
-                QuizAttempt.is_scored == True
-            ).first()
-            if att:
-                completed = True
-                score = att.score
-
-        course_name = None
-        instructor_name = None
-        category = "Corporate Training"
-        header_color = "#1368ce"
-
-        if q.session:
-            course_name = getattr(q.session, 'course_name', None)
-
-        if q.created_by_user_id:
-            creator = db.query(User).filter(User.id == q.created_by_user_id).first()
-            if creator:
-                instructor_name = f"Lead Trainer {creator.full_name}" if "Trainer" not in creator.full_name else creator.full_name
-
-        if not instructor_name and q.session and getattr(q.session, 'trainer_sign_off_user_id', None):
-            tr_user = db.query(User).filter(User.id == q.session.trainer_sign_off_user_id).first()
-            if tr_user:
-                instructor_name = f"Lead Trainer {tr_user.full_name}"
-
-        # Align categories and colors based on course or title
-        low_title = (q.title + " " + (course_name or "")).lower()
-        if "project" in low_title or "agile" in low_title or "pme" in low_title or "pmp" in low_title:
-            category = "Project Management"
-            header_color = "#1368ce"
-            if not instructor_name: instructor_name = "Lead Course Trainer"
-        elif "connect" in low_title or "communication" in low_title or "executive" in low_title or "leadership" in low_title:
-            category = "Executive Leadership"
-            header_color = "#059669"
-            if not instructor_name: instructor_name = "Lead Course Trainer"
-        elif "coach" in low_title or "supervis" in low_title or "upskilling" in low_title or "sup" in low_title:
-            category = "Supervisory Mastery"
-            header_color = "#dc2626"
-            if not instructor_name: instructor_name = "Lead Course Trainer"
-        elif "risk" in low_title or "continuity" in low_title or "bcm" in low_title or "iso" in low_title or "crm" in low_title:
-            category = "Risk & Governance"
-            header_color = "#7c3aed"
-            if not instructor_name: instructor_name = "Lead Course Trainer"
-        else:
-            if not instructor_name: instructor_name = "Lead Course Trainer"
-
+        sess = q.session
+        course_name = sess.course_name if sess else None
+        att = attempts.get(q.id)
         results.append(QuizListItem(
-            id=q.id,
-            title=q.title,
-            session_id=q.session_id,
+            id=q.id, title=q.title, session_id=q.session_id,
+            course_id=sess.course_id if sess else None,
             course_name=course_name,
-            instructor_name=instructor_name,
-            category=category,
-            header_color=header_color,
-            version_no=q.version_no,
-            is_closed=q.is_closed,
-            questions_count=q_count,
-            completed=completed,
-            score=score,
+            instructor_name=creators.get(q.created_by_user_id) or "Assigned Trainer",
+            category=course_name or "Unassigned",
+            header_color=_course_color((sess.course_id if sess else None) or course_name),
+            version_no=q.version_no, is_closed=q.is_closed, is_approved=bool(q.is_approved),
+            approved_at=q.approved_at, questions_count=counts.get(q.id, 0),
+            completed=bool(att), score=att.score if att else None,
             created_at=q.created_at or datetime.now(timezone.utc)
         ))
     return results
@@ -237,32 +253,28 @@ def create_quiz(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Trainers and Admins create a new quiz in the database."""
+    """Admin: any course/session (global). Trainer: assigned sessions / admin-granted programs only (U-12)."""
     if current_user.role not in ("trainer", "admin"):
         raise HTTPException(status_code=403, detail="Only trainers and administrators can create quizzes.")
+    if not payload.session_id:
+        raise HTTPException(status_code=400, detail="Select the course session this quiz belongs to.")
+    sess = db.query(TrainingSession).filter(TrainingSession.id == payload.session_id).first()
+    if not sess:
+        raise HTTPException(status_code=404, detail="Training session not found.")
+    scope = _scope_for(db, current_user)
+    if scope is not None and sess.id not in scope[0] and not (sess.course_id and sess.course_id in scope[1]):
+        raise HTTPException(status_code=403, detail="Trainers can only create quizzes for assigned sessions or programs (U-12).")
 
-    quiz = Quiz(
-        title=payload.title,
-        session_id=payload.session_id,
-        created_by_user_id=current_user.id,
-        version_no=1,
-        is_closed=False
-    )
+    quiz = Quiz(title=payload.title, session_id=sess.id, created_by_user_id=current_user.id, version_no=1, is_closed=False)
     db.add(quiz)
     db.commit()
     db.refresh(quiz)
-
     return QuizListItem(
-        id=quiz.id,
-        title=quiz.title,
-        session_id=quiz.session_id,
-        course_name=None,
-        version_no=quiz.version_no,
-        is_closed=quiz.is_closed,
-        questions_count=0,
-        completed=False,
-        score=None,
-        created_at=quiz.created_at or datetime.now(timezone.utc)
+        id=quiz.id, title=quiz.title, session_id=quiz.session_id, course_id=sess.course_id,
+        course_name=sess.course_name, instructor_name=current_user.full_name,
+        category=sess.course_name, header_color=_course_color(sess.course_id or sess.course_name),
+        version_no=quiz.version_no, is_closed=False, is_approved=False, questions_count=0,
+        completed=False, score=None, created_at=quiz.created_at or datetime.now(timezone.utc)
     )
 
 
@@ -280,6 +292,7 @@ def add_quiz_question(
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
+    _require_quiz_scope(db, current_user, quiz)
 
     question = QuizQuestion(
         quiz_id=quiz.id,
@@ -328,6 +341,7 @@ def update_quiz_question(
     ).first()
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
+    _require_quiz_scope(db, current_user, question.quiz)
 
     question.question_text = payload.question_text
     question.options = payload.options
@@ -375,6 +389,7 @@ def delete_quiz_question(
     ).first()
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
+    _require_quiz_scope(db, current_user, question.quiz)
 
     db.delete(question)
     db.commit()
@@ -394,32 +409,36 @@ def delete_quiz(
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
+    _require_quiz_scope(db, current_user, quiz)
 
     db.delete(quiz)
     db.commit()
     return {"status": "success", "message": "Quiz deleted."}
 
 
-@router.get("/quizzes/{quiz_id}/questions", response_model=List[QuizQuestionTraineeView])
+@router.get("/quizzes/{quiz_id}/questions", response_model=List[QuizQuestionStaffView])
 def get_quiz_questions_for_trainee(
     quiz_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Returns quiz questions WITHOUT answer keys or explanations (SEC-26)."""
+    """Trainees get questions WITHOUT keys (SEC-26). Trainers/Admins in scope also get keys for authoring."""
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
+    if current_user.role not in ("admin", "trainer", "trainee") or not _quiz_in_scope(db, current_user, quiz):
+        raise HTTPException(status_code=403, detail="Quiz is outside your course/session scope.")
+    if current_user.role == "trainee" and not quiz.is_approved:
+        raise HTTPException(status_code=403, detail="Quiz is not approved yet.")
 
+    staff = current_user.role in ("admin", "trainer")
     questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz_id).all()
-    # Strip correct answers and explanations
     return [
-        QuizQuestionTraineeView(
-            id=q.id,
-            quiz_id=q.quiz_id,
-            question_text=q.question_text,
-            options=q.options or [],
-            points=q.points or 10
+        QuizQuestionStaffView(
+            id=q.id, quiz_id=q.quiz_id, question_text=q.question_text,
+            options=q.options or [], points=q.points or 10,
+            correct_answer=q.correct_answer if staff else None,
+            explanation=q.explanation if staff else None,
         )
         for q in questions
     ]
@@ -505,6 +524,9 @@ def submit_quiz_attempt(
                 adb.commit()
                 adb.refresh(quiz_adm)
         quiz = db.query(Quiz).filter(Quiz.id == quiz_data.quiz_id).first() or quiz_adm
+
+    if quiz.session_id is not None and not _quiz_in_scope(db, current_user, quiz):
+        raise HTTPException(status_code=403, detail="This quiz is not part of a course you are enrolled in.")
 
     # 4. Enforce ONE scored attempt per quiz version (SEC-26)
     quiz_ver = quiz.version_no or 1
@@ -607,7 +629,8 @@ def submit_quiz_attempt(
         badges=progress.badges,
         quizzes_completed=progress.quizzes_completed,
         streak=streak,
-        current_streak=streak
+        current_streak=streak,
+        last_score=earned_score
     )
 
 
@@ -681,7 +704,6 @@ def close_quiz_session(
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
-
     quiz.is_closed = True
     quiz.closed_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.commit()
@@ -701,7 +723,6 @@ def get_quiz_review(
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
-
     attempt = db.query(QuizAttempt).filter(QuizAttempt.id == attempt_id, QuizAttempt.quiz_id == quiz_id).first()
     if not attempt:
         raise HTTPException(status_code=404, detail="Quiz attempt not found")
@@ -917,18 +938,7 @@ def approve_quiz(
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found.")
 
-    if current_user.role == "trainer" and quiz.session_id:
-        now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
-        assigned = db.query(TrainerAssignment).filter(
-            TrainerAssignment.session_id == quiz.session_id,
-            TrainerAssignment.user_id == current_user.id,
-            (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > now_utc)
-        ).first()
-        if not assigned and quiz.created_by_user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Trainer can only approve quizzes for assigned training sessions."
-            )
+    _require_quiz_scope(db, current_user, quiz)
 
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
     quiz.is_approved = True

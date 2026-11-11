@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authFetch, SESSION_EXPIRED_EVENT } from '../services/api';
 
 export const DEMO_USERS = {
   // --- ADMINISTRATORS ---
@@ -373,59 +374,6 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Resilient token synchronization: on mount or whenever currentUser changes, verify/acquire token
-  useEffect(() => {
-    let isMounted = true;
-    const syncToken = async () => {
-      const activeUser = currentUser || (localStorage.getItem('crossquest_auth_user') ? JSON.parse(localStorage.getItem('crossquest_auth_user')) : null);
-      if (!activeUser?.email) return;
-
-      const storedToken = localStorage.getItem('crossquest_auth_token');
-      const storedEmail = localStorage.getItem('crossquest_auth_email');
-      const expired = isJwtExpired(storedToken);
-
-      if (!storedToken || !token || storedEmail !== activeUser.email || expired) {
-        try {
-          const formData = new URLSearchParams();
-          formData.append('username', activeUser.email);
-          formData.append('password', 'password123');
-          const res = await fetch('http://localhost:8000/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData
-          });
-          if (res.ok && isMounted) {
-            const data = await res.json();
-            let freshToken = data.access_token;
-            if (data.mfa_required && data.challenge_token) {
-              const mfaRes = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  challenge_token: data.challenge_token,
-                  code: 'DEV_MFA_BYPASS'
-                })
-              });
-              if (mfaRes.ok) {
-                const mfaData = await mfaRes.json();
-                freshToken = mfaData.access_token;
-              }
-            }
-            if (freshToken) {
-              setToken(freshToken);
-              localStorage.setItem('crossquest_auth_token', freshToken);
-              localStorage.setItem('crossquest_auth_email', activeUser.email);
-            }
-          }
-        } catch (e) {
-          console.warn("AuthContext auto-sync warning:", e);
-        }
-      }
-    };
-    syncToken();
-    return () => { isMounted = false; };
-  }, [currentUser, token]);
-
   useEffect(() => {
     const handleRefreshed = (e) => {
       if (e.detail?.token) {
@@ -437,71 +385,6 @@ export function AuthProvider({ children }) {
       return () => window.removeEventListener('crossquest_token_refreshed', handleRefreshed);
     }
   }, []);
-
-  // Proactive token refresh: refresh before expiration or when tab becomes visible
-  useEffect(() => {
-    const checkAndRefresh = async () => {
-      const activeUser = currentUser || (localStorage.getItem('crossquest_auth_user') ? JSON.parse(localStorage.getItem('crossquest_auth_user')) : null);
-      if (!activeUser?.email) return;
-
-      const storedToken = localStorage.getItem('crossquest_auth_token');
-      if (isJwtExpired(storedToken)) {
-        try {
-          const formData = new URLSearchParams();
-          formData.append('username', activeUser.email);
-          formData.append('password', 'password123');
-          const res = await fetch('http://localhost:8000/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData
-          });
-          if (res.ok) {
-            const data = await res.json();
-            let freshToken = data.access_token;
-            if (data.mfa_required && data.challenge_token) {
-              const mfaRes = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  challenge_token: data.challenge_token,
-                  code: 'DEV_MFA_BYPASS'
-                })
-              });
-              if (mfaRes.ok) {
-                const mfaData = await mfaRes.json();
-                freshToken = mfaData.access_token;
-              }
-            }
-            if (freshToken) {
-              setToken(freshToken);
-              localStorage.setItem('crossquest_auth_token', freshToken);
-              localStorage.setItem('crossquest_auth_email', activeUser.email);
-            }
-          }
-        } catch (e) {
-          console.warn("AuthContext visibility/periodic refresh error:", e);
-        }
-      }
-    };
-
-    const handleVisibility = () => {
-      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        checkAndRefresh();
-      }
-    };
-
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', handleVisibility);
-    }
-    const interval = setInterval(checkAndRefresh, 3 * 60 * 1000); // Check every 3 minutes
-
-    return () => {
-      clearInterval(interval);
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('visibilitychange', handleVisibility);
-      }
-    };
-  }, [currentUser]);
 
 
   const loginRole = async (roleKey) => {
@@ -538,6 +421,7 @@ export function AuthProvider({ children }) {
       formData.append('password', 'password123');
       const res = await fetch('http://localhost:8000/api/v1/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData
       });
@@ -547,6 +431,7 @@ export function AuthProvider({ children }) {
         if (data.mfa_required && data.challenge_token) {
           const mfaRes = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               challenge_token: data.challenge_token,
@@ -581,6 +466,7 @@ export function AuthProvider({ children }) {
 
       const res = await fetch('http://localhost:8000/api/v1/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData
       });
@@ -647,6 +533,7 @@ export function AuthProvider({ children }) {
     try {
       const res = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ challenge_token: challengeToken, code: code.trim() })
       });
@@ -686,12 +573,43 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = (reason) => {
+    if (reason === 'idle' || reason === 'expired') sessionStorage.setItem('crossquest_logout_reason', reason);
+    fetch('http://localhost:8000/api/v1/auth/logout', {
+      method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).catch(() => {});
     setCurrentUser(null);
     setToken(null);
     localStorage.removeItem('crossquest_auth_user');
     localStorage.removeItem('crossquest_auth_token');
+    localStorage.removeItem('crossquest_auth_email');
   };
+
+  // SEC-07 / OI-17: real inactivity timer (Admin/Finance 15 min, AM/Trainer/Trainee 30 min) + server-expiry listener
+  useEffect(() => {
+    if (!currentUser) return;
+    const limitMs = (['admin', 'finance'].includes(currentUser.role) ? 15 : 30) * 60 * 1000;
+    let last = Date.now();
+    let lastPing = Date.now();
+    const onActivity = () => {
+      last = Date.now();
+      // Keep the server-side idle clock aligned with real UI activity (throttled)
+      if (Date.now() - lastPing > 4 * 60 * 1000) {
+        lastPing = Date.now();
+        authFetch('http://localhost:8000/api/v1/users/me', {}, localStorage.getItem('crossquest_auth_token')).catch(() => {});
+      }
+    };
+    const evts = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    evts.forEach((e) => window.addEventListener(e, onActivity, { passive: true }));
+    const timer = setInterval(() => { if (Date.now() - last > limitMs) logout('idle'); }, 5000);
+    const onExpired = (e) => logout(e.detail?.reason || 'expired');
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => {
+      clearInterval(timer);
+      evts.forEach((e) => window.removeEventListener(e, onActivity));
+      window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    };
+  }, [currentUser]);
 
   return (
     <AuthContext.Provider value={{ currentUser, token, loginRole, loginWithCredentials, completeMfaLogin, logout, DEMO_USERS }}>

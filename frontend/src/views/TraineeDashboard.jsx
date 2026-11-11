@@ -28,7 +28,6 @@ import {
   Compass,
   ArrowUpRight
 } from 'lucide-react';
-import { getActiveQuizDatabase } from '../data/quizDatabase';
 import QuizArena from '../components/QuizArena';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -43,6 +42,8 @@ import {
   fetchExpiryNotifications,
   triggerExpirySweep,
   fetchQuizzes,
+  fetchQuizQuestionsApi,
+  submitQuizAnswers,
   downloadCertificatePdf
 } from '../services/api';
 import BitMascot from '../components/BitMascot/BitMascot';
@@ -409,15 +410,25 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   // B9: Trainee Home 3 core pillars derived data
   const featuredCourse = assignedActivities && assignedActivities.length > 0 ? assignedActivities[0] : null;
   const expiringCredential = displayCertificates.find(c => c.isRenewalApproaching || (c.daysUntilExpiry !== null && c.daysUntilExpiry <= 90)) || (displayCertificates.length > 0 ? displayCertificates[0] : null);
-  const quizDbList = Object.values(getActiveQuizDatabase());
-  const nextQuizItem = quizDbList.find(q => !quizScoreStatus[q.id]?.completed) || quizDbList[0];
+  const nextQuizItem = (realQuizzes || []).find(q => !(q.completed || quizScoreStatus[q.id]?.completed)) || (realQuizzes || [])[0];
 
   // Start quiz by ID (from assigned card or catalog)
-  const handleStartQuizById = (quizId) => {
-    if (!isOnline) return; // SEC-26: block offline quiz launch
-    const db = getActiveQuizDatabase();
-    const q = db[quizId] || db['act-1'];
-    setActiveQuiz(q);
+  const handleServerSubmit = async (answers) => submitQuizAnswers(currentUser.id, activeQuiz.id, answers, token);
+
+  const handleStartQuizById = async (quizId) => {
+    if (!isOnline) return; // SEC-26
+    const meta = (realQuizzes || []).find(q => q.id === quizId);
+    if (!meta) return;
+    const qs = await fetchQuizQuestionsApi(quizId, token);
+    if (!qs || qs.length === 0) { alert('This quiz has no questions yet.'); return; }
+    setActiveQuiz({
+      id: meta.id, title: meta.title, instructor: meta.instructor_name || 'Assigned Trainer',
+      category: meta.category || meta.course_name || 'Course', headerColor: meta.header_color || '#1368ce',
+      timePerQuestion: 45, passingScore: 80, showCorrectAnswers: false, serverScored: true,
+      description: meta.course_name || '', learningObjectives: [],
+      // NOTE: no correctAnswer on purpose, so QuizArena does not shuffle options (server scores by original index)
+      questions: qs.map(q => ({ id: q.id, type: 'multiple_choice', question: q.question_text, options: q.options, points: q.points }))
+    });
   };
 
   // Quiz finish handler with immediate state update, localStorage persistence & backend sync
@@ -464,10 +475,11 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     }
 
     // 3. Sync with backend API
-    if (currentUser?.id) {
+    if (currentUser?.id && !resultData.serverScored) {
       await submitQuizScore(currentUser.id, resultData.quizId, resultData.scorePercentage, token);
     }
 
+    fetchQuizzes(token).then(l => l && setRealQuizzes(l));
     setActiveQuiz(null);
   };
 
@@ -610,6 +622,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           initialSession={null}
           onFinish={handleQuizFinish}
           onExit={handleQuizExit}
+          onSubmitServer={handleServerSubmit}
         />
       </div>
     );
@@ -1062,68 +1075,63 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             </div>
           </div>
 
-          <div className="quizzes-catalog-grid">
-            {Object.values(getActiveQuizDatabase()).map((quizItem) => {
-              const status = quizScoreStatus[quizItem.id];
-
+          {(() => {
+            const list = realQuizzes || [];
+            if (list.length === 0) {
+              return <p className="catalog-subtitle">No quizzes are available for your enrolled courses yet.</p>;
+            }
+            const groups = list.reduce((acc, q) => { (acc[q.course_name || 'Other'] ||= []).push(q); return acc; }, {});
+            return Object.entries(groups).map(([course, items]) => {
+              const done = items.filter(q => q.completed || quizScoreStatus[q.id]?.completed).length;
               return (
-                <div key={quizItem.id} className="quiz-catalog-card card-gamified">
-                  <div className="catalog-card-top" style={{ borderTop: `4px solid ${quizItem.headerColor}` }}>
-                    <div className="flex-between">
-                      <span className="catalog-category-tag" style={{ color: quizItem.headerColor }}>
-                        {quizItem.category}
-                      </span>
-                      <span className="catalog-time-tag">
-                        <Clock size={12} /> {quizItem.timePerQuestion}s / Q
-                      </span>
-                    </div>
-                    <h3 className="catalog-card-title">{quizItem.title}</h3>
-                    <p className="catalog-instructor-tag">Instructor: {quizItem.instructor}</p>
+                <section key={course} style={{ marginBottom: 28 }}>
+                  <div className="flex-between" style={{ marginBottom: 10 }}>
+                    <h3 style={{ fontWeight: 800 }}>{course}</h3>
+                    <span className="catalog-time-tag">{done} / {items.length} completed</span>
                   </div>
-
-                  <div className="catalog-card-body">
-                    <p className="catalog-quiz-desc">{quizItem.description}</p>
-
-                    <div className="catalog-types-row">
-                      <span className="qtype-badge">Kahoot 4-Choice</span>
-                      <span className="qtype-badge">Identification</span>
-                      <span className="qtype-badge">Sequence Order</span>
-                      <span className="qtype-badge">Diagram Analysis</span>
-                    </div>
-
-                    <div className="catalog-meta-row">
-                      <div className="catalog-meta-item">
-                        <span className="meta-k">Passing Grade:</span>
-                        <span className="meta-v">{quizItem.passingScore}%</span>
-                      </div>
-                      <div className="catalog-meta-item">
-                        <span className="meta-k">Items:</span>
-                        <span className="meta-v">{quizItem.questions.length} Questions</span>
-                      </div>
-                      <div className="catalog-meta-item">
-                        <span className="meta-k">Status:</span>
-                        <span className={`meta-v ${status?.completed ? 'text-emerald' : 'text-amber'}`}>
-                          {status?.completed ? `${status.score}% Passed` : 'Pending'}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="quizzes-catalog-grid">
+                    {items.map((quizItem) => {
+                      const isDone = quizItem.completed || quizScoreStatus[quizItem.id]?.completed;
+                      const score = quizItem.score ?? quizScoreStatus[quizItem.id]?.score;
+                      return (
+                        <div key={quizItem.id} className="quiz-catalog-card card-gamified">
+                          <div className="catalog-card-top" style={{ borderTop: `4px solid ${quizItem.header_color || '#1368ce'}` }}>
+                            <div className="flex-between">
+                              <span className="catalog-category-tag" style={{ color: quizItem.header_color }}>{quizItem.category || course}</span>
+                              <span className="catalog-time-tag"><Clock size={12} /> 45s / Q</span>
+                            </div>
+                            <h3 className="catalog-card-title">{quizItem.title}</h3>
+                            <p className="catalog-instructor-tag">Instructor: {quizItem.instructor_name || 'Assigned Trainer'}</p>
+                          </div>
+                          <div className="catalog-card-body">
+                            <div className="catalog-meta-row">
+                              <div className="catalog-meta-item"><span className="meta-k">Passing Grade:</span><span className="meta-v">80%</span></div>
+                              <div className="catalog-meta-item"><span className="meta-k">Items:</span><span className="meta-v">{quizItem.questions_count} Questions</span></div>
+                              <div className="catalog-meta-item">
+                                <span className="meta-k">Status:</span>
+                                <span className={`meta-v ${isDone ? 'text-emerald' : 'text-amber'}`}>{isDone ? `${Math.round(score ?? 0)}% Submitted` : 'Pending'}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="catalog-card-actions">
+                            <button
+                              className="btn-tactile btn-tactile-purple w-full"
+                              onClick={() => handleStartQuizById(quizItem.id)}
+                              disabled={!isOnline || isDone || quizItem.is_closed || quizItem.questions_count === 0}
+                              title={!isOnline ? 'Requires network connection (SEC-26)' : (isDone ? 'One scored attempt per quiz (SEC-26)' : undefined)}
+                            >
+                              <Play size={15} />
+                              <span>{isDone ? 'Completed' : 'Start Assessment'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-
-                  <div className="catalog-card-actions">
-                    <button
-                      className={`btn-tactile btn-tactile-purple w-full`}
-                      onClick={() => handleStartQuizById(quizItem.id)}
-                      disabled={!isOnline}
-                      title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
-                    >
-                      <Play size={15} />
-                      <span>{status?.completed ? 'Retake Assessment' : 'Start Assessment'}</span>
-                    </button>
-                  </div>
-                </div>
+                </section>
               );
-            })}
-          </div>
+            });
+          })()}
         </div>
       )}
 

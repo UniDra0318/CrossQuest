@@ -205,6 +205,7 @@ class QuizListItem(BaseModel):
     id: str
     title: str
     session_id: Optional[str] = None
+    course_id: Optional[str] = None
     course_name: Optional[str] = None
     instructor_name: Optional[str] = None
     category: Optional[str] = None
@@ -281,6 +282,7 @@ class GamificationResponse(BaseModel):
     quizzes_completed: int
     streak: Optional[int] = 0
     current_streak: Optional[int] = 0
+    last_score: Optional[float] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -313,6 +315,12 @@ class QuizQuestionTraineeView(BaseModel):
     points: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class QuizQuestionStaffView(QuizQuestionTraineeView):
+    """Trainer/Admin authoring view. correct_answer/explanation stay None for trainees (SEC-26)."""
+    correct_answer: Optional[int] = None
+    explanation: Optional[str] = None
 
 class QuizQuestionReview(BaseModel):
     question_id: str
