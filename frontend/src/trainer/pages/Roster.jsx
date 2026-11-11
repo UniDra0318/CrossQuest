@@ -4,11 +4,12 @@ import { TableEmptyBlock } from '../../components/TableEmptyState';
 import { TablePagination, usePagination } from '../../components/TablePagination';
 import { useTrainer } from '../TrainerContext';
 
-export default function Roster({ onNavigateTab }) {
+export default function Roster({ sessionFilter, onNavigateTab }) {
   const { roster, setSelectedTraineeId, exportRosterCsv, handleAssignTeam, loading } = useTrainer();
   const [search, setSearch] = useState('');
   const [scopeFilter, setScopeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const availableScopes = Array.from(new Set((roster || []).map(r => r.scope).filter(Boolean)));
   const [savingTraineeId, setSavingTraineeId] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -33,12 +34,16 @@ export default function Roster({ onNavigateTab }) {
   };
 
   const filtered = roster.filter((t) => {
+    if (sessionFilter && t.cohort !== sessionFilter && t.sessionId !== sessionFilter) {
+      return false;
+    }
     const matchesSearch =
       t.name.toLowerCase().includes(search.toLowerCase()) ||
       t.cohort.toLowerCase().includes(search.toLowerCase()) ||
       t.scope.toLowerCase().includes(search.toLowerCase());
     const matchesScope = scopeFilter === 'ALL' || t.scope === scopeFilter;
-    const matchesStatus = statusFilter === 'ALL' || t.state === statusFilter;
+    const normStatus = t.status || (t.state === 'CERTIFIED' ? 'Completed' : 'In progress');
+    const matchesStatus = statusFilter === 'ALL' || normStatus === statusFilter || t.state === statusFilter;
     return matchesSearch && matchesScope && matchesStatus;
   });
 
@@ -113,18 +118,18 @@ export default function Roster({ onNavigateTab }) {
           <div className="stf-select">
             <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value)}>
               <option value="ALL">All Client Scopes</option>
-              <option value="CORP_ALPHA">CORP_ALPHA (San Miguel)</option>
-              <option value="FINTECH_BETA">FINTECH_BETA (Maya)</option>
-              <option value="RETAIL_GAMMA">RETAIL_GAMMA (Ayala)</option>
+              {availableScopes.map((sc) => (
+                <option key={sc} value={sc}>{sc}</option>
+              ))}
             </select>
           </div>
 
           <div className="stf-select">
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="ALL">All States</option>
-              <option value="CERTIFIED">CERTIFIED</option>
-              <option value="PENDING REVIEW">PENDING REVIEW</option>
-              <option value="DRAFTING">DRAFTING</option>
+              <option value="ALL">All Statuses (OI-01)</option>
+              <option value="Completed">Completed</option>
+              <option value="In progress">In progress</option>
+              <option value="Not completed">Not completed</option>
             </select>
           </div>
 
@@ -145,9 +150,9 @@ export default function Roster({ onNavigateTab }) {
           <div className="adm-grid trn-rgrid adm-th">
             <div>TRAINEE</div>
             <div>CLIENT SCOPE</div>
-            <div>COHORT</div>
-            <div>SCORE & EVALUATION</div>
-            <div>CERTIFICATION STATE</div>
+            <div>SESSION &amp; TEAM</div>
+            <div>ATTENDANCE &amp; SCORE</div>
+            <div>COMPLETION STATUS</div>
             <div>ACTION</div>
           </div>
 
@@ -206,27 +211,27 @@ export default function Roster({ onNavigateTab }) {
                   </div>
                 </div>
 
-                {/* 4. Score & Tier */}
+                {/* 4. Attendance & Score (Admin-only per FR-10) */}
                 <div className="trn-score">
-                  <span>{t.score != null ? `${t.score}%` : 'Pending'}</span>
-                  <span className={`adm-chip ${getTierChipClass(t.tier)}`}>
-                    {t.tier}
+                  <span className="adm-chip adm-chip--green" style={{ fontSize: '11px' }}>
+                    {t.attendance || 'Present'}
+                  </span>
+                  <span style={{ fontSize: '12px', color: '#64748b' }}>
+                    {t.score != null ? `Score: ${t.score}%` : 'Score: Admin Only'}
                   </span>
                 </div>
 
-                {/* 5. Status */}
+                {/* 5. Official 3-Status Model (OI-01) */}
                 <div className="trn-statuscell">
-                  <span
-                    className={`adm-chip ${
-                      t.state === 'CERTIFIED'
-                        ? 'adm-chip--green'
-                        : t.state === 'PENDING REVIEW'
-                        ? 'adm-chip--red'
-                        : 'adm-chip--amber'
-                    }`}
-                  >
-                    {t.state}
-                  </span>
+                  {(() => {
+                    const st = t.status || (t.state === 'CERTIFIED' ? 'Completed' : 'In progress');
+                    const chipCls = st === 'Completed' ? 'adm-chip--green' : st === 'Not completed' ? 'adm-chip--red' : 'adm-chip--amber';
+                    return (
+                      <span className={`adm-chip ${chipCls}`}>
+                        {st}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 {/* 6. Action */}
@@ -237,7 +242,7 @@ export default function Roster({ onNavigateTab }) {
                     style={{ fontSize: '12px', padding: '8px 14px' }}
                     onClick={() => handleGradeTrainee(t.id)}
                   >
-                    Grade & Certify
+                    Review &amp; Sign-Off
                   </button>
                 </div>
               </div>

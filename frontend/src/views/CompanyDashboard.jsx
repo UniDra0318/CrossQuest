@@ -26,7 +26,7 @@ import '../styles/admin.css';
 import '../staff/staff.css';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { fetchRecords } from '../services/api';
+import { fetchRecords, updateTrainingRecord } from '../services/api';
 
 export default function CompanyDashboard({ activeSubView, setActiveView }) {
   const { currentUser, token } = useAuth();
@@ -40,6 +40,48 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
   const [usingFallback, setUsingFallback] = useState(false);
   const [recordsError, setRecordsError] = useState(null);
   const [recordSearch, setRecordSearch] = useState('');
+
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [editStatus, setEditStatus] = useState('In progress');
+  const [editAttendance, setEditAttendance] = useState('Present');
+  const [editReason, setEditReason] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState(null);
+
+  const handleOpenFinanceEdit = (rec) => {
+    setEditingRecord(rec);
+    setEditStatus(rec.status || 'In progress');
+    setEditAttendance(rec.attendanceStatus || 'Present');
+    setEditReason('');
+    setEditError(null);
+  };
+
+  const handleSaveFinanceEdit = async (e) => {
+    e.preventDefault();
+    if (!editReason || !editReason.trim()) {
+      setEditError('A mandatory reason is required for record corrections (U-05, Table 9).');
+      return;
+    }
+    setEditSaving(true);
+    setEditError(null);
+    try {
+      await updateTrainingRecord(editingRecord.id, {
+        status: editStatus,
+        attendance_status: editAttendance,
+        reason: editReason.trim()
+      }, token);
+      setRecords(prev => prev.map(item => item.id === editingRecord.id ? {
+        ...item,
+        status: editStatus,
+        attendanceStatus: editAttendance
+      } : item));
+      setEditingRecord(null);
+    } catch (err) {
+      setEditError(err.message || 'Failed to update training record.');
+    } finally {
+      setEditSaving(false);
+    }
+  };
 
   const loadCompanyData = async () => {
     setIsLoading(true);
@@ -222,12 +264,13 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                   <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>COMPLETION DATE</th>
                   <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>CERTIFIED SCORE</th>
                   <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569' }}>STATUS</th>
+                  {isFinance && <th style={{ padding: '12px 16px', fontWeight: 800, color: isDark ? '#94a3b8' : '#475569', textAlign: 'right' }}>ACTIONS</th>}
                 </tr>
               </thead>
               <tbody>
                 {recordsError ? (
                   <TableEmptyRow
-                    colSpan={isFinance ? 6 : 5}
+                    colSpan={isFinance ? 7 : 5}
                     icon={AlertTriangle}
                     title="Couldn't load records. Retry"
                     subtitle="A communication error occurred while retrieving training vault records."
@@ -306,11 +349,23 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
                         );
                       })()}
                     </td>
+                    {isFinance && (
+                      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenFinanceEdit(r)}
+                          className="adm-btn adm-btn--light"
+                          style={{ padding: '5px 10px', fontSize: '11.5px', fontWeight: 700 }}
+                        >
+                          Correct Record
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
                 ) : (
                   <TableEmptyRow
-                    colSpan={isFinance ? 6 : 5}
+                    colSpan={isFinance ? 7 : 5}
                     icon={Users}
                     title="No Trainees Found in Roster"
                     subtitle="No cohort participants match the active status filter or search parameters."
@@ -337,6 +392,56 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
       {/* 4. FINANCE PILOT DATA IMPORT & RECONCILIATION DESK */}
       {currentTab === 'finance_reconciliation' && (
         <FinanceReconciliationDesk />
+      )}
+
+      {/* Finance Record Correction Modal (Table 9, Section M3, U-05, U-13) */}
+      {editingRecord && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: isDark ? '#0f172a' : '#ffffff', borderRadius: '20px', maxWidth: '480px', width: '100%', padding: '24px', border: isDark ? '1px solid #334155' : '1px solid #e2e8f0', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.35)' }}>
+            <h3 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
+              Finance Record Correction (U-05)
+            </h3>
+            <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: '#64748b' }}>
+              {editingRecord.traineeName} &bull; {editingRecord.courseName} ({editingRecord.companyCode})
+            </p>
+            {editError && (
+              <div style={{ marginBottom: '12px', padding: '10px 12px', borderRadius: '8px', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91b1b', fontSize: '12px', fontWeight: 600 }}>
+                {editError}
+              </div>
+            )}
+            <form onSubmit={handleSaveFinanceEdit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>COMPLETION STATUS (OI-01)</label>
+                <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}>
+                  <option value="In progress">In progress</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Not completed">Not completed</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>ATTENDANCE STATUS (OI-02)</label>
+                <select value={editAttendance} onChange={(e) => setEditAttendance(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}>
+                  <option value="Present">Present</option>
+                  <option value="Absent">Absent</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>ASSESSMENT SCORE (FR-10 / U-08)</label>
+                <input type="text" disabled value={editingRecord.score != null ? `${editingRecord.score}% (Admin-Only)` : 'Admin-Only (Moodle Pilot Rule)'} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#f8fafc', color: '#64748b', fontSize: '12.5px', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>MANDATORY CORRECTION REASON (U-05)</label>
+                <textarea rows="2" required value={editReason} onChange={(e) => setEditReason(e.target.value)} placeholder="State reason for correction (logged in version history)..." style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '12.5px', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
+                <button type="button" onClick={() => setEditingRecord(null)} className="adm-btn adm-btn--light" style={{ padding: '8px 14px', fontSize: '12.5px' }}>Cancel</button>
+                <button type="submit" disabled={editSaving} className="adm-btn adm-btn--primary" style={{ padding: '8px 16px', fontSize: '12.5px' }}>
+                  {editSaving ? 'Saving...' : 'Save Correction'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
       </div>
     </div>

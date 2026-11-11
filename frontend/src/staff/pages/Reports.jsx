@@ -665,10 +665,11 @@ export default function Reports() {
                 <thead>
                   <tr style={{ background: isDark ? '#0f172a' : '#f8fafc', borderBottom: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', color: isDark ? '#94a3b8' : '#475569', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     <th style={{ padding: '14px 24px' }}>Trainee Participant</th>
-                    <th style={{ padding: '14px 20px' }}>Course Program</th>
+                    <th style={{ padding: '14px 20px' }}>Training Title</th>
+                    <th style={{ padding: '14px 16px' }}>Venue</th>
                     <th style={{ padding: '14px 20px' }}>Completion Status</th>
-                    <th style={{ padding: '14px 20px' }}>Evaluation Accuracy</th>
-                    <th style={{ padding: '14px 24px', textAlign: 'right' }}>Completion Date</th>
+                    <th style={{ padding: '14px 20px' }}>Score</th>
+                    <th style={{ padding: '14px 24px', textAlign: 'right' }}>Training Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -717,6 +718,11 @@ export default function Reports() {
                           {/* Course Program */}
                           <td style={{ padding: '14px 20px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#334155' }}>
                             {t.course_name}
+                          </td>
+
+                          {/* Venue */}
+                          <td style={{ padding: '14px 16px', fontSize: '12.5px', color: isDark ? '#cbd5e1' : '#475569' }}>
+                            {t.venue || 'Online'}
                           </td>
 
                           {/* Status */}
@@ -774,7 +780,7 @@ export default function Reports() {
                     })
                   ) : (
                     <TableEmptyRow
-                      colSpan={5}
+                      colSpan={6}
                       icon={Users}
                       title="No Trainee Records Found"
                       subtitle="No participant training records match the current filter criteria."

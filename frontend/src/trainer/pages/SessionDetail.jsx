@@ -18,13 +18,23 @@ import Grade from './Grade';
 export default function SessionDetail({ sessionId: propSessionId }) {
   const params = useParams();
   const navigate = useNavigate();
-  const { cohorts } = useTrainer();
+  const { cohorts, sessions, setSelectedSessionId } = useTrainer();
   const { isDark } = useTheme();
 
   const sessionId = propSessionId || params.id;
-  const cohort = cohorts?.find(c => c.id === sessionId);
+  const cohort = cohorts?.find(c => c.id === sessionId || c.sessionId === sessionId);
 
   const [activeTab, setActiveTab] = useState('participants'); // 'participants' | 'signoff'
+
+  React.useEffect(() => {
+    if (!sessionId) return;
+    const matchSess = (sessions || []).find(s => s.id === sessionId || s.session_code === sessionId);
+    if (matchSess && setSelectedSessionId) {
+      setSelectedSessionId(matchSess.id);
+    } else if (cohort?.sessionId && setSelectedSessionId) {
+      setSelectedSessionId(cohort.sessionId);
+    }
+  }, [sessionId, cohort, sessions, setSelectedSessionId]);
 
   if (!sessionId || !cohort) {
     return (
@@ -169,7 +179,10 @@ export default function SessionDetail({ sessionId: propSessionId }) {
       {/* Tab View Content */}
       <div>
         {activeTab === 'participants' ? (
-          <Roster />
+          <Roster
+            sessionFilter={cohort.id}
+            onNavigateTab={() => setActiveTab('signoff')}
+          />
         ) : (
           <Grade />
         )}

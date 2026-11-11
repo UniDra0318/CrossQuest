@@ -329,8 +329,9 @@ class PDFGenerator:
             [
                 Paragraph("<b>Trainee ID</b>", th_style),
                 Paragraph("<b>Participant Name</b>", th_style),
-                Paragraph("<b>Course Module</b>", th_style),
+                Paragraph("<b>Training Course</b>", th_style),
                 Paragraph("<b>Date</b>", th_style),
+                Paragraph("<b>Venue</b>", th_style),
                 Paragraph("<b>Status</b>", th_style),
                 Paragraph("<b>Score</b>", th_style)
             ]
@@ -340,8 +341,9 @@ class PDFGenerator:
             table_rows.append([
                 Paragraph(t.get("trainee_code", "N/A"), td_style),
                 Paragraph(t.get("trainee_name", "N/A"), td_style),
-                Paragraph(t.get("course_name", "N/A")[:35], td_style),
-                Paragraph(str(t.get("training_date", "In progress")), td_style),
+                Paragraph(t.get("course_name", "N/A")[:30], td_style),
+                Paragraph(str(t.get("training_date", "Scheduled")), td_style),
+                Paragraph(str(t.get("venue", "Online"))[:22], td_style),
                 Paragraph(t.get("status", "In progress"), td_style),
                 Paragraph(f"{t.get('score')}%" if t.get("score") is not None else "--", td_style)
             ])
@@ -350,10 +352,10 @@ class PDFGenerator:
             table_rows.append([
                 Paragraph("No training records found for this client.", td_style),
                 Paragraph("", td_style), Paragraph("", td_style), Paragraph("", td_style),
-                Paragraph("", td_style), Paragraph("", td_style)
+                Paragraph("", td_style), Paragraph("", td_style), Paragraph("", td_style)
             ])
 
-        roster_table = Table(table_rows, colWidths=[70, 120, 160, 65, 65, 40])
+        roster_table = Table(table_rows, colWidths=[62, 105, 130, 58, 70, 60, 35])
         roster_table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#44337A")),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),

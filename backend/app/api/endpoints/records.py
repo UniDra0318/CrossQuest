@@ -891,6 +891,32 @@ def sign_off_training_session(
         if comp.status == "Completed":
             rec.completion_date = now_utc
 
+        # Re-encrypt CP-ABE payload so decrypted ciphertext matches signed-off status & completion_date
+        if rec.is_encrypted and rec.encryption_policy:
+            t_obj_enc = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()
+            c_obj_enc = db.query(ClientCompany).filter(ClientCompany.id == rec.company_at_completion_id).first()
+            t_code_enc = t_obj_enc.trainee_code if t_obj_enc else "UNKNOWN"
+            updated_payload = {
+                "trainee_name": f"{t_obj_enc.first_name} {t_obj_enc.last_name}".strip() if t_obj_enc else "Unknown",
+                "trainee_email": t_obj_enc.email if t_obj_enc else "",
+                "company": c_obj_enc.name if c_obj_enc else "",
+                "course": rec.course_name,
+                "session_code": session.session_code,
+                "status": rec.status,
+                "attendance_status": rec.attendance_status,
+                "score": rec.score,
+                "completion_date": rec.completion_date.isoformat() if rec.completion_date else None
+            }
+            enc_res = cpabe_engine.encrypt_record(
+                plaintext_data=updated_payload,
+                policy_str=rec.encryption_policy,
+                record_id=f"rec-{t_code_enc}",
+                version=rec.policy_version or 1
+            )
+            rec.abe_ciphertext = enc_res.get("abe_ciphertext")
+            rec.payload_ciphertext = enc_res.get("payload_ciphertext")
+            rec.nonce = enc_res.get("nonce")
+
             # Sync Gamification & streak on attendance/completion (Phase 6)
             if rec.trainee_id:
                 t_obj = db.query(Trainee).filter(Trainee.id == rec.trainee_id).first()
@@ -1113,6 +1139,21 @@ def create_training_session(
     db.add(new_session)
     db.commit()
     db.refresh(new_session)
+
+    if getattr(session_in, "trainer_name", None):
+        tr_name = session_in.trainer_name.strip()
+        tr_user = db.query(User).filter(
+            User.role == "trainer",
+            (User.full_name.ilike(f"%{tr_name}%")) | (User.username.ilike(f"%{tr_name}%"))
+        ).first()
+        if tr_user:
+            db.add(TrainerAssignment(
+                session_id=new_session.id,
+                user_id=tr_user.id,
+                valid_from=datetime.now(timezone.utc).replace(tzinfo=None)
+            ))
+            db.commit()
+            db.refresh(new_session)
 
     # Audit log
     log = AccessLog(

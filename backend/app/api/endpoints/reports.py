@@ -135,18 +135,32 @@ def generate_client_report(
     records = query.order_by(TrainingRecord.completion_date.desc().nullslast()).all()
 
     # Pre-extract trainee details into plain dicts before commit to prevent lazy reload under cleared RLS context
-    trainee_list = [
-        {
+    trainee_list = []
+    for r, t in records:
+        sess = r.session
+        if r.completion_date:
+            t_date = r.completion_date.strftime("%Y-%m-%d")
+        elif sess and sess.start_date:
+            t_date = sess.start_date.strftime("%Y-%m-%d")
+        else:
+            t_date = "Scheduled"
+        if sess:
+            if (sess.delivery_mode and sess.delivery_mode.lower() == "online") or (sess.delivery_type and "online" in sess.delivery_type.lower()):
+                venue_val = "Online"
+            else:
+                venue_val = (sess.venue or "").strip() or "Crossworks Makati Learning Hub"
+        else:
+            venue_val = "Online"
+        trainee_list.append({
             "record_id": r.id,
             "trainee_code": t.trainee_code,
             "trainee_name": f"{t.first_name} {t.last_name}",
             "course_name": r.course_name,
-            "training_date": r.completion_date.strftime("%Y-%m-%d") if r.completion_date else "In progress",
+            "training_date": t_date,
+            "venue": venue_val,
             "status": r.status,
             "score": r.score
-        }
-        for r, t in records
-    ]
+        })
 
     total_records = len(trainee_list)
     completed_count = sum(1 for item in trainee_list if item["status"] == "Completed")
@@ -269,9 +283,9 @@ def download_client_report_csv(
     writer.writerow(["Compliance Rate", report_data["summary"]["compliance_rate"]])
     writer.writerow([])
 
-    # Trainee Records Table
+    # Trainee Records Table (Figure 18: includes Venue)
     writer.writerow(["TRAINEE TRAINING RECORDS"])
-    writer.writerow(["Record ID", "Trainee Code", "Trainee Name", "Course Name", "Training Date", "Status", "Score"])
+    writer.writerow(["Record ID", "Trainee Code", "Trainee Name", "Course Name", "Training Date", "Venue", "Status", "Score"])
 
     for tr in report_data.get("trainees", []):
         score_val = f"{tr['score']}%" if tr["score"] is not None else "N/A"
@@ -281,6 +295,7 @@ def download_client_report_csv(
             tr["trainee_name"],
             tr["course_name"],
             tr["training_date"],
+            tr.get("venue", "Online"),
             tr["status"],
             score_val
         ])
@@ -370,14 +385,14 @@ def download_client_report_excel(
         ws.cell(row=row, column=2, value=mval).font = regular_font
         row += 1
 
-    # Table Header
+    # Table Header (Figure 18: includes Venue)
     row += 2
-    headers = ["Record ID", "Trainee Code", "Trainee Name", "Course Name", "Training Date", "Status", "Score"]
+    headers = ["Record ID", "Trainee Code", "Trainee Name", "Course Name", "Training Date", "Venue", "Status", "Score"]
     for col_idx, h in enumerate(headers, 1):
         cell = ws.cell(row=row, column=col_idx, value=h)
         cell.fill = navy_fill
         cell.font = white_bold
-        cell.alignment = Alignment(horizontal="center" if col_idx in (2, 5, 6, 7) else "left")
+        cell.alignment = Alignment(horizontal="center" if col_idx in (2, 5, 7, 8) else "left")
 
     table_start_row = row
 
@@ -390,6 +405,7 @@ def download_client_report_excel(
             tr["trainee_name"],
             tr["course_name"],
             tr["training_date"],
+            tr.get("venue", "Online"),
             tr["status"],
             score_val
         ]
@@ -397,7 +413,7 @@ def download_client_report_excel(
             c = ws.cell(row=row, column=col_idx, value=val)
             c.font = regular_font
             c.border = border_thin
-            if col_idx in (2, 5, 6, 7):
+            if col_idx in (2, 5, 7, 8):
                 c.alignment = Alignment(horizontal="center")
 
     # Auto-adjust column widths

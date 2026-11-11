@@ -240,9 +240,10 @@ export function TrainerProvider({ children }) {
               cohort: sess.session_code,
               sessionId: sess.id,
               status: rec.status || 'In progress',
+              state: rec.status === 'Completed' ? 'CERTIFIED' : 'PENDING',
               attendance: rec.attendance_status || 'Present',
-              score: rec.score != null ? rec.score : 85,
-              tier: tierFor(rec.score != null ? rec.score : 85),
+              score: rec.score != null ? rec.score : null,
+              tier: rec.score != null ? tierFor(rec.score) : 'Admin Only',
               certificateSerial: rec.certificate_serial || null
             });
           });

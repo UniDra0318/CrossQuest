@@ -218,7 +218,8 @@ export default function Sessions() {
         start_date: new Date(newSession.start_date).toISOString(),
         end_date: new Date(newSession.end_date).toISOString(),
         delivery_mode: newSession.delivery_mode,
-        venue: venue
+        venue: venue,
+        trainer_name: newSession.trainer_name.trim()
       };
 
       const created = await createTrainingSession(payload);

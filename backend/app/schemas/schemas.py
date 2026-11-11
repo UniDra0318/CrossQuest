@@ -558,6 +558,7 @@ class TrainingSessionCreate(BaseModel):
     delivery_type: str = "Public" # Public, Dedicated
     delivery_mode: str = "F2F" # F2F, Online, Hybrid
     venue: Optional[str] = None
+    trainer_name: Optional[str] = None
 
 class TrainingSessionResponse(BaseModel):
     id: str

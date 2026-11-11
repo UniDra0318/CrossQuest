@@ -100,8 +100,9 @@ export async function getRoster(token) {
             scope: r.company_code || 'CORP_ALPHA',
             cohort: s.session_code,
             sessionId: s.id,
-            score: r.score != null ? r.score : 85.0,
-            tier: tierFor(r.score != null ? r.score : 85.0),
+            status: r.status || 'In progress',
+            score: r.score != null ? r.score : null,
+            tier: r.score != null ? tierFor(r.score) : 'Admin Only',
             state: (r.status?.toLowerCase() === 'completed' || s.trainer_signed_off) ? 'CERTIFIED' : 'PENDING',
             attendance: r.attendance_status || 'Present',
             certificateSerial: r.certificate_serial
