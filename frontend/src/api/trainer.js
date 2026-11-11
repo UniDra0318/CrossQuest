@@ -7,6 +7,7 @@ import {
   fetchQuizQuestionsApi,
   createQuizApi,
   fetchQuizCoursesApi,
+  fetchQuizAnalyticsApi,
   addQuizQuestionApi,
   deleteQuizQuestionApi,
   updateQuizQuestionApi
@@ -117,27 +118,33 @@ export async function gradeTrainee(recordId, body = {}) {
   };
 }
 
-/** GET /api/v1/gamification/quizzes -> Real quizzes from database + Active Curriculum */
+/** GET /api/v1/gamification/quizzes -> Quiz catalog metadata only (questions are lazy-loaded per active quiz) */
 export async function getQuizzes(token) {
   const list = (await fetchQuizzes(token)) || [];
-  return Promise.all(list.map(async (q) => {
-    let questions = [];
-    try {
-      const rows = await fetchQuizQuestionsApi(q.id, token);
-      questions = (rows || []).map((item, idx) => ({
-        id: item.id || `q-${idx}`, type: 'kahoot', prompt: item.question_text || '',
-        options: Array.isArray(item.options) ? item.options : [],
-        answer: item.correct_answer ?? 0, points: item.points || 10, explanation: item.explanation || ''
-      }));
-    } catch (e) { console.warn(`Could not load questions for quiz ${q.id}:`, e); }
-    return {
-      id: q.id, sessionId: q.session_id, courseId: q.course_id,
-      course: q.course_name || 'Unassigned', category: q.course_name || 'Unassigned',
-      title: q.title, timePerQ: 45, pass: 80,
-      questionsCount: questions.length || q.questions_count || 0,
-      isClosed: q.is_closed, isApproved: !!q.is_approved, completed: q.completed, score: q.score, questions
-    };
+  return list.map((q) => ({
+    id: q.id, sessionId: q.session_id, courseId: q.course_id,
+    course: q.course_name || 'Unassigned', category: q.course_name || 'Unassigned',
+    title: q.title, timePerQ: 45, pass: 80,
+    questionsCount: q.questions_count || 0,
+    questionsLoaded: false,
+    isClosed: q.is_closed, isApproved: !!q.is_approved, completed: q.completed, score: q.score,
+    questions: []
   }));
+}
+
+/** GET /api/v1/gamification/quizzes/:id/questions -> Lazy-load questions for one selected quiz */
+export async function getQuizQuestions(quizId, token) {
+  const rows = await fetchQuizQuestionsApi(quizId, token);
+  return (rows || []).map((item, idx) => ({
+    id: item.id || `q-${idx}`, type: 'kahoot', prompt: item.question_text || '',
+    options: Array.isArray(item.options) ? item.options : [],
+    answer: item.correct_answer ?? 0, points: item.points || 10, explanation: item.explanation || ''
+  }));
+}
+
+/** GET /api/v1/gamification/quiz-analytics -> Real quiz attempt analytics by course */
+export async function getQuizAnalytics(token) {
+  return await fetchQuizAnalyticsApi(token);
 }
 
 export async function createQuiz(title, courseId, token) {
@@ -332,13 +339,7 @@ export function computeAnalytics(scope = 'ALL', sessions = []) {
   }));
   orgs.sort((a, b) => b.rate - a.rate || b.enrolled - a.enrolled || String(a.id).localeCompare(String(b.id)));
 
-  const benchmarksList = [
-    { format: 'Kahoot 4-tile', correct: 92, secs: 14.8 },
-    { format: 'Sequence', correct: 84, secs: 28.2 },
-    { format: 'Matching pairs', correct: 78, secs: 32.5 },
-    { format: 'Diagram hotspot', correct: 74, secs: 36.1 },
-    { format: 'Identification', correct: 88, secs: 19.4 }
-  ];
+  const benchmarksList = [];
 
   const activeCount = filtered.length;
   const passRate = activeCount ? Math.round((passing / activeCount) * 100) : 0;

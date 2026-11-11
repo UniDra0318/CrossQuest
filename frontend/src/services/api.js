@@ -1397,3 +1397,13 @@ export async function switchMyCompanyApi(companyCode, token) {
   }
   return res.json();
 }
+
+export async function fetchQuizAnalyticsApi(token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quiz-analytics`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn('API error fetching quiz analytics:', err);
+  }
+  return null;
+}

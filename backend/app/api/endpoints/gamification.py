@@ -218,6 +218,86 @@ def toggle_leaderboard_opt_out(
     }
 
 
+@router.get("/quiz-analytics")
+def get_quiz_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Real quiz-attempt performance aggregated by course for Trainer/Admin Results."""
+    if current_user.role not in ("admin", "trainer"):
+        raise HTTPException(status_code=403, detail="Only trainers and administrators can view quiz analytics.")
+
+    scope = _scope_for(db, current_user)
+    quizzes = db.query(Quiz).options(joinedload(Quiz.session), joinedload(Quiz.course)).all()
+    if scope is not None:
+        quizzes = [q for q in quizzes if _scope_match(current_user, scope, q)]
+
+    if not quizzes:
+        return {
+            "total_quizzes": 0, "approved_quizzes": 0, "total_attempts": 0,
+            "unique_trainees": 0, "avg_score": None, "pass_rate": 0, "by_course": []
+        }
+
+    q_ids = [q.id for q in quizzes]
+    attempts = db.query(QuizAttempt).filter(
+        QuizAttempt.quiz_id.in_(q_ids),
+        QuizAttempt.is_scored == True
+    ).all()
+
+    att_by_quiz = {}
+    for a in attempts:
+        att_by_quiz.setdefault(a.quiz_id, []).append(a)
+
+    by_course = {}
+    for q in quizzes:
+        cid = _quiz_course_id(q) or "unassigned"
+        cname = (q.course.name if q.course else None) or (q.session.course_name if q.session else None) or "Unassigned"
+        bucket = by_course.setdefault(cid, {
+            "course_id": cid, "course_name": cname, "quizzes_count": 0,
+            "approved_count": 0, "scores": [], "trainees": set()
+        })
+        bucket["quizzes_count"] += 1
+        if q.is_approved:
+            bucket["approved_count"] += 1
+        for a in att_by_quiz.get(q.id, []):
+            bucket["scores"].append(float(a.score or 0.0))
+            if a.trainee_id:
+                bucket["trainees"].add(a.trainee_id)
+
+    course_rows = []
+    all_scores = []
+    all_trainees = set()
+    for b in by_course.values():
+        sc = b["scores"]
+        all_scores.extend(sc)
+        all_trainees |= b["trainees"]
+        cnt = len(sc)
+        passed = sum(1 for x in sc if x >= 80.0)
+        course_rows.append({
+            "course_id": b["course_id"],
+            "course_name": b["course_name"],
+            "quizzes_count": b["quizzes_count"],
+            "approved_count": b["approved_count"],
+            "attempts_count": cnt,
+            "unique_trainees": len(b["trainees"]),
+            "avg_score": round(sum(sc) / cnt, 1) if cnt else None,
+            "pass_rate": round((passed / cnt) * 100) if cnt else 0,
+        })
+
+    course_rows.sort(key=lambda r: (-r["attempts_count"], -(r["avg_score"] or 0.0), r["course_name"]))
+    total_att = len(all_scores)
+    total_passed = sum(1 for x in all_scores if x >= 80.0)
+    return {
+        "total_quizzes": len(quizzes),
+        "approved_quizzes": sum(1 for q in quizzes if q.is_approved),
+        "total_attempts": total_att,
+        "unique_trainees": len(all_trainees),
+        "avg_score": round(sum(all_scores) / total_att, 1) if total_att else None,
+        "pass_rate": round((total_passed / total_att) * 100) if total_att else 0,
+        "by_course": course_rows,
+    }
+
+
 @router.get("/quiz-courses")
 def list_quiz_courses(
     db: Session = Depends(get_db),

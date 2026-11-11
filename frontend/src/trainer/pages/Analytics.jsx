@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
 import { TablePagination, usePagination } from '../../components/TablePagination';
 
 export default function Analytics({ onNavigateTab }) {
   const { isDark } = useTheme();
-  const { analytics, selectedScope, setSelectedScope, setSelectedTraineeId, loading } = useTrainer();
+  const { analytics, quizAnalytics, loadQuizAnalytics, selectedScope, setSelectedScope, setSelectedTraineeId, loading } = useTrainer();
+
+  useEffect(() => { loadQuizAnalytics?.(); }, [loadQuizAnalytics]);
 
   const orgPg = usePagination(analytics?.orgs || [], 6);
   const remPg = usePagination(analytics?.remediation || [], 6);
+  const qzPg = usePagination(quizAnalytics?.by_course || [], 5);
 
   if (loading && !analytics) {
     return <div className="adm-state">Loading cohort analytics...</div>;
@@ -65,9 +68,13 @@ export default function Analytics({ onNavigateTab }) {
 
         <div className="adm-tile">
           <div>
-            <span className="adm-label">COMPLETION VELOCITY</span>
-            <div className="adm-tile__num">{analytics?.velocity ?? '3m 48s'}</div>
-            <span className="adm-mono">Per 5-Question Lab</span>
+            <span className="adm-label">QUIZ ATTEMPTS</span>
+            <div className="adm-tile__num">{quizAnalytics?.total_attempts ?? 0}</div>
+            <span className="adm-mono">
+              {quizAnalytics?.total_attempts
+                ? `Avg ${quizAnalytics.avg_score}% · ${quizAnalytics.pass_rate}% pass`
+                : `${quizAnalytics?.approved_quizzes ?? 0} approved quizzes`}
+            </span>
           </div>
         </div>
       </div>
@@ -124,30 +131,41 @@ export default function Analytics({ onNavigateTab }) {
           <TablePagination currentPage={orgPg.currentPage} totalItems={orgPg.totalItems} pageSize={6} itemName="cohorts" onPageChange={orgPg.setCurrentPage} />
         </div>
 
-        {/* Interactive Challenge Format Benchmarks */}
+        {/* Real Quiz Performance by Course */}
         <div className="adm-panel trn-pad">
           <div className="adm-panel__head" style={{ padding: '0 0 16px 0', borderBottom: '1px solid var(--cq-line)' }}>
-            <h2>Challenge Format Benchmarks</h2>
-            <span className="adm-label">SAMPLE DATA · ACCURACY & TIMING</span>
+            <h2>Course Quiz Performance</h2>
+            <span className="adm-label">LIVE QUIZ ATTEMPTS · BY COURSE</span>
           </div>
 
           <div style={{ marginTop: '16px', display: 'grid', gap: '12px' }}>
-            {analytics?.benchmarks?.map((b) => (
-              <div key={b.format} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(23,16,43,.08)' }}>
-                <div>
-                  <strong>{b.format}</strong>
-                  {b.secs && <div className="adm-mono">{b.secs}s average response</div>}
-                </div>
-                <div>
-                  {b.correct != null ? (
-                    <span className="adm-chip adm-chip--green">{b.correct}% accuracy</span>
-                  ) : (
-                    <span className="adm-chip adm-chip--amber">Manual Review</span>
-                  )}
-                </div>
+            {(!quizAnalytics?.by_course || quizAnalytics.by_course.length === 0) ? (
+              <div className="adm-state" style={{ padding: '20px 0' }}>
+                No quiz attempts recorded in your course scope yet.
               </div>
-            ))}
+            ) : (
+              qzPg.paginatedItems.map((c) => (
+                <div key={c.course_id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(23,16,43,.08)' }}>
+                  <div>
+                    <strong>{c.course_name}</strong>
+                    <div className="adm-mono">
+                      {c.quizzes_count} quiz{c.quizzes_count === 1 ? '' : 'zes'} · {c.attempts_count} attempt{c.attempts_count === 1 ? '' : 's'} ({c.unique_trainees} trainee{c.unique_trainees === 1 ? '' : 's'})
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    {c.avg_score != null ? (
+                      <span className={`adm-chip ${c.avg_score >= 80 ? 'adm-chip--green' : 'adm-chip--amber'}`}>
+                        Avg {c.avg_score}% ({c.pass_rate}% pass)
+                      </span>
+                    ) : (
+                      <span className="adm-chip adm-chip--blue">No attempts</span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
+          <TablePagination currentPage={qzPg.currentPage} totalItems={qzPg.totalItems} pageSize={5} itemName="courses" onPageChange={qzPg.setCurrentPage} />
         </div>
 
         {/* Remediation Queue */}

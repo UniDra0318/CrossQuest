@@ -162,6 +162,7 @@ export default function Quiz() {
     handleUpdateSettings,
     handleResetQuizzes,
     loadQuizzes,
+    loadQuizQuestions,
     quizzesLoading,
   } = useTrainer();
   const { token, currentUser } = useAuth();
@@ -330,6 +331,12 @@ export default function Quiz() {
   const activeQuiz = (quizzes && quizzes.length > 0)
     ? (quizzes.find((q) => q.id === activeQuizId) || quizzes[0])
     : null;
+
+  useEffect(() => {
+    if (activeQuiz && !activeQuiz.questionsLoaded) {
+      loadQuizQuestions(activeQuiz.id);
+    }
+  }, [activeQuiz?.id, activeQuiz?.questionsLoaded, loadQuizQuestions]);
 
   if (quizzesLoading && (!quizzes || quizzes.length === 0)) {
     return <div className="adm-state">Loading quiz assessment studio...</div>;
