@@ -88,7 +88,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     return {
       id: u.id,
       name: u.full_name || u.name,
-      initials: (u.full_name || u.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+      initials: (u.full_name || u.name || 'U').replace(/'[^']*'/g, '').trim().split(/\s+/).filter(Boolean).map(n => n.replace(/[^A-Za-z]/g, '')[0]).filter(Boolean).join('').slice(0, 2).toUpperCase(),
       email: u.email,
       role: (u.role || 'STAFF').replace(/_/g, ' ').toUpperCase(),
       level: level,
@@ -241,7 +241,7 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
         {
           id: u.id,
           name: u.full_name,
-          initials: u.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+          initials: u.full_name.replace(/'[^']*'/g, '').trim().split(/\s+/).filter(Boolean).map(n => n.replace(/[^A-Za-z]/g, '')[0]).filter(Boolean).join('').slice(0, 2).toUpperCase(),
           email: u.email,
           role: u.role.replace(/_/g, ' ').toUpperCase(),
           level: level,

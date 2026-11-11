@@ -138,10 +138,9 @@ describe('Create Session Flow for Account Managers (B12)', () => {
     const venueInput = screen.getByPlaceholderText(/e\.g\. Online \(Zoom\)/i);
     fireEvent.change(venueInput, { target: { value: 'Crossworks Manila HQ' } });
 
-    // Select trainer
-    const selects = screen.getAllByRole('combobox');
-    // First select is Course, second is Assigned Instructor
-    fireEvent.change(selects[1], { target: { value: 'Jordan Ramos' } });
+    // Select trainer after async lookup resolves
+    const trainerOption = await screen.findByRole('option', { name: /Jordan Ramos/i });
+    fireEvent.change(trainerOption.closest('select'), { target: { value: 'Jordan Ramos' } });
 
     // Submit session creation form
     const form = venueInput.closest('form');

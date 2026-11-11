@@ -1155,7 +1155,7 @@ button:disabled {
 }
 
 .adm-grid--access {
-  grid-template-columns: 240px 140px 120px 1fr 200px;
+  grid-template-columns: 240px 160px 165px 1fr 220px;
 }
 
 .adm-grid--vault {

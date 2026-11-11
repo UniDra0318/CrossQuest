@@ -19,11 +19,96 @@ export function triggerBlobDownload(blob, filename) {
 const API_BASE = 'http://localhost:8000/api/v1';
 
 /**
+ * Helper to check whether a JWT token has expired or is about to expire (15s buffer).
+ */
+export function isTokenExpired(tokenStr) {
+  if (!tokenStr) return true;
+  try {
+    const parts = tokenStr.split('.');
+    if (parts.length !== 3) return true;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const jsonStr = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const payload = JSON.parse(jsonStr);
+    if (!payload.exp) return false;
+    return (payload.exp * 1000) < (Date.now() + 15000);
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Re-authenticates the current active persona or user to obtain a fresh access token.
+ */
+export async function refreshAuthToken(preferredEmail = null) {
+  try {
+    let email = preferredEmail;
+    if (!email) {
+      const savedUserStr = localStorage.getItem('crossquest_auth_user');
+      const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+      email = savedUser?.email || localStorage.getItem('crossquest_auth_email') || 'erika.bana@crossworks.ph';
+    }
+
+    const formData = new URLSearchParams();
+    formData.append('username', email);
+    formData.append('password', 'password123');
+
+    const loginRes = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData
+    });
+
+    if (loginRes.ok) {
+      const loginData = await loginRes.json();
+      let freshToken = loginData.access_token;
+      if (loginData.mfa_required && loginData.challenge_token) {
+        const mfaRes = await fetch(`${API_BASE}/auth/mfa/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            challenge_token: loginData.challenge_token,
+            code: 'DEV_MFA_BYPASS'
+          })
+        });
+        if (mfaRes.ok) {
+          const mfaData = await mfaRes.json();
+          freshToken = mfaData.access_token;
+        }
+      }
+      if (freshToken) {
+        localStorage.setItem('crossquest_auth_token', freshToken);
+        localStorage.setItem('crossquest_auth_email', email);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: freshToken, email } }));
+        }
+        return freshToken;
+      }
+    }
+  } catch (e) {
+    console.warn('Auto re-authentication failed:', e);
+  }
+  return null;
+}
+
+/**
  * Resilient authenticated fetch helper that automatically adds Bearer headers
  * and seamlessly re-authenticates if a 401 Unauthorized is received (e.g. backend restart or token expiration).
  */
 export async function authFetch(url, options = {}, token) {
-  let activeToken = token || localStorage.getItem('crossquest_auth_token');
+  // Prefer valid unexpired token
+  let activeToken = token;
+  if (!activeToken || isTokenExpired(activeToken)) {
+    activeToken = localStorage.getItem('crossquest_auth_token');
+  }
+  if (!activeToken || isTokenExpired(activeToken)) {
+    activeToken = await refreshAuthToken();
+  }
+
   const headers = { ...(options.headers || {}) };
   if (activeToken) {
     headers['Authorization'] = `Bearer ${activeToken}`;
@@ -39,52 +124,11 @@ export async function authFetch(url, options = {}, token) {
   }
 
   if (res.status === 401) {
-    try {
-      const savedUserStr = localStorage.getItem('crossquest_auth_user');
-      const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
-      const email = savedUser?.email || 'joey.mallari@xworks.ph';
-
-      const formData = new URLSearchParams();
-      formData.append('username', email);
-      formData.append('password', 'password123');
-
-      const loginRes = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData
-      });
-
-      if (loginRes.ok) {
-        const loginData = await loginRes.json();
-        let freshToken = loginData.access_token;
-        if (loginData.mfa_required && loginData.challenge_token) {
-          const mfaRes = await fetch(`${API_BASE}/auth/mfa/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              challenge_token: loginData.challenge_token,
-              code: 'DEV_MFA_BYPASS'
-            })
-          });
-          if (mfaRes.ok) {
-            const mfaData = await mfaRes.json();
-            freshToken = mfaData.access_token;
-          }
-        }
-        if (freshToken) {
-          activeToken = freshToken;
-          localStorage.setItem('crossquest_auth_token', freshToken);
-          localStorage.setItem('crossquest_auth_email', email);
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: freshToken, email } }));
-          }
-          headers['Authorization'] = `Bearer ${freshToken}`;
-          // Retry original request once with fresh bearer token
-          res = await fetch(url, { ...options, headers });
-        }
-      }
-    } catch (e) {
-      console.warn('Auto re-authentication failed:', e);
+    const freshToken = await refreshAuthToken();
+    if (freshToken) {
+      headers['Authorization'] = `Bearer ${freshToken}`;
+      // Retry original request once with fresh bearer token
+      res = await fetch(url, { ...options, headers });
     }
   }
 
@@ -330,6 +374,21 @@ export async function submitTrainerSignOff(sessionId, payload, token) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.detail || `Sign-off failed (${res.status})`);
+  }
+  return data;
+}
+
+export async function enrollTraineeInSessionApi(sessionId, payload, token) {
+  const res = await authFetch(`${API_BASE}/records/sessions/${sessionId}/enroll`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  }, token);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `Enrollment failed (${res.status})`);
   }
   return data;
 }

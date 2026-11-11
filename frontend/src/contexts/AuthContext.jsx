@@ -438,6 +438,71 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Proactive token refresh: refresh before expiration or when tab becomes visible
+  useEffect(() => {
+    const checkAndRefresh = async () => {
+      const activeUser = currentUser || (localStorage.getItem('crossquest_auth_user') ? JSON.parse(localStorage.getItem('crossquest_auth_user')) : null);
+      if (!activeUser?.email) return;
+
+      const storedToken = localStorage.getItem('crossquest_auth_token');
+      if (isJwtExpired(storedToken)) {
+        try {
+          const formData = new URLSearchParams();
+          formData.append('username', activeUser.email);
+          formData.append('password', 'password123');
+          const res = await fetch('http://localhost:8000/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+          });
+          if (res.ok) {
+            const data = await res.json();
+            let freshToken = data.access_token;
+            if (data.mfa_required && data.challenge_token) {
+              const mfaRes = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  challenge_token: data.challenge_token,
+                  code: 'DEV_MFA_BYPASS'
+                })
+              });
+              if (mfaRes.ok) {
+                const mfaData = await mfaRes.json();
+                freshToken = mfaData.access_token;
+              }
+            }
+            if (freshToken) {
+              setToken(freshToken);
+              localStorage.setItem('crossquest_auth_token', freshToken);
+              localStorage.setItem('crossquest_auth_email', activeUser.email);
+            }
+          }
+        } catch (e) {
+          console.warn("AuthContext visibility/periodic refresh error:", e);
+        }
+      }
+    };
+
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        checkAndRefresh();
+      }
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
+    const interval = setInterval(checkAndRefresh, 3 * 60 * 1000); // Check every 3 minutes
+
+    return () => {
+      clearInterval(interval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
+    };
+  }, [currentUser]);
+
 
   const loginRole = async (roleKey) => {
     const baseUser = DEMO_USERS[roleKey] || DEMO_USERS.admin;

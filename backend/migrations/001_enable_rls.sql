@@ -209,7 +209,17 @@ CREATE POLICY trainee_select ON trainees FOR SELECT TO PUBLIC
 USING (
     app_ctx_get('current_role') IN ('ADMIN', 'FINANCE')
     OR (app_ctx_get('current_role') = 'TRAINEE' AND user_id = app_ctx_get('current_user_id'))
-    OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND current_company_id IS NOT NULL AND app_has_company(current_company_id))
+    OR (app_ctx_get('current_role') = 'ACCOUNT_MANAGER' AND (
+        (current_company_id IS NOT NULL AND app_has_company(current_company_id))
+        OR app_is_shared_trainee(id)
+    ))
+    OR (app_ctx_get('current_role') = 'TRAINER' AND EXISTS (
+        SELECT 1 FROM training_records tr
+        WHERE tr.trainee_id = trainees.id
+          AND tr.deleted_at IS NULL
+          AND tr.session_id IS NOT NULL
+          AND app_has_session(tr.session_id)
+    ))
 );
 
 DROP POLICY IF EXISTS trainee_update ON trainees;

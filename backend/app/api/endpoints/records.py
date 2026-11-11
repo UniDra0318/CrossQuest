@@ -2,7 +2,7 @@ import json
 import csv
 import io
 from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy import func, or_, desc
 from sqlalchemy.orm import Session
@@ -1035,33 +1035,35 @@ def list_assigned_training_sessions(
         ).all()
 
         roster_items = []
-        for r in records:
-            cert = db.query(Certificate).filter(Certificate.record_id == r.id).first()
-            trainee_name = "Unknown Trainee"
-            trainee_email = ""
-            trainee_code = ""
-            if r.trainee:
-                trainee_name = f"{r.trainee.first_name} {r.trainee.last_name}".strip()
-                trainee_email = r.trainee.email
-                trainee_code = r.trainee.trainee_code
+        from app.core.database import admin_engine
+        from sqlalchemy.orm import sessionmaker as _sm
+        _AdminSession = _sm(bind=admin_engine)
+        with _AdminSession() as adm_db:
+            for r in records:
+                cert = adm_db.query(Certificate).filter(Certificate.record_id == r.id).first()
+                t_obj = r.trainee or adm_db.query(Trainee).filter(Trainee.id == r.trainee_id).first()
+                c_obj = r.company_at_completion or adm_db.query(ClientCompany).filter(ClientCompany.id == r.company_at_completion_id).first()
+                trainee_name = f"{t_obj.first_name} {t_obj.last_name}".strip() if t_obj else "Participant"
+                trainee_email = t_obj.email if t_obj else ""
+                trainee_code = t_obj.trainee_code if t_obj else r.id
 
-            company_name = r.company_at_completion.name if r.company_at_completion else "Unknown"
-            company_code = r.company_at_completion.code if r.company_at_completion else "CRO"
+                company_name = c_obj.name if c_obj else "Crossworks Partner"
+                company_code = c_obj.code if c_obj else "VHL"
 
-            roster_items.append({
-                "record_id": r.id,
-                "trainee_id": r.trainee_id,
-                "trainee_code": trainee_code,
-                "trainee_name": trainee_name,
-                "trainee_email": trainee_email,
-                "company_name": company_name,
-                "company_code": company_code,
-                "status": r.status,
-                "attendance_status": r.attendance_status,
-                "score": r.score,
-                "completion_date": r.completion_date.isoformat() if r.completion_date else None,
-                "certificate_serial": cert.serial_number if cert else None
-            })
+                roster_items.append({
+                    "record_id": r.id,
+                    "trainee_id": r.trainee_id,
+                    "trainee_code": trainee_code,
+                    "trainee_name": trainee_name,
+                    "trainee_email": trainee_email,
+                    "company_name": company_name,
+                    "company_code": company_code,
+                    "status": r.status,
+                    "attendance_status": r.attendance_status,
+                    "score": r.score,
+                    "completion_date": r.completion_date.isoformat() if r.completion_date else None,
+                    "certificate_serial": cert.serial_number if cert else None
+                })
 
         result.append({
             "id": s.id,
@@ -1182,22 +1184,57 @@ def list_training_sessions(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Lists all training sessions with venue, delivery mode, and assigned trainers."""
+    """Lists training sessions scoped to the user's role with accurate enrollment counts and client_code."""
+    from app.core.database import admin_engine
+    from sqlalchemy.orm import sessionmaker as _sm
     sessions = db.query(TrainingSession).order_by(TrainingSession.start_date.desc()).all()
     result = []
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
-    enrolled: Dict[str, int] = {}
-    pending_attendance: Dict[str, int] = {}
-    for sid, att in (
-        db.query(TrainingRecord.session_id, TrainingRecord.attendance_status)
+
+    # Scoped records visible to current user
+    scoped_enrolled: Dict[str, int] = {}
+    scoped_pending: Dict[str, int] = {}
+    scoped_client_codes: Dict[str, List[str]] = {}
+    for sid, att, cid in (
+        db.query(TrainingRecord.session_id, TrainingRecord.attendance_status, TrainingRecord.company_at_completion_id)
         .filter(TrainingRecord.session_id.isnot(None), TrainingRecord.deleted_at.is_(None))
         .all()
     ):
-        enrolled[sid] = enrolled.get(sid, 0) + 1
+        scoped_enrolled[sid] = scoped_enrolled.get(sid, 0) + 1
         if att is None:
-            pending_attendance[sid] = pending_attendance.get(sid, 0) + 1
+            scoped_pending[sid] = scoped_pending.get(sid, 0) + 1
+
+    # Global counts via admin_engine so we distinguish truly empty newly-created sessions from foreign-client sessions
+    global_enrolled: Dict[str, int] = {}
+    session_primary_client: Dict[str, str] = {}
+    _AdminSession = _sm(bind=admin_engine)
+    with _AdminSession() as adm_db:
+        comp_map = {c.id: c.code for c in adm_db.query(ClientCompany).all()}
+        for sid, cid in (
+            adm_db.query(TrainingRecord.session_id, TrainingRecord.company_at_completion_id)
+            .filter(TrainingRecord.session_id.isnot(None), TrainingRecord.deleted_at.is_(None))
+            .all()
+        ):
+            global_enrolled[sid] = global_enrolled.get(sid, 0) + 1
+            ccode = comp_map.get(cid)
+            if ccode:
+                if sid not in session_primary_client:
+                    session_primary_client[sid] = ccode
+                if current_user.role != "account_manager" or ccode in (current_user.assigned_client_accounts or []):
+                    scoped_client_codes.setdefault(sid, [])
+                    if ccode not in scoped_client_codes[sid]:
+                        scoped_client_codes[sid].append(ccode)
+
+    am_clients = set(current_user.assigned_client_accounts or [])
 
     for s in sessions:
+        g_count = global_enrolled.get(s.id, 0)
+        s_count = scoped_enrolled.get(s.id, 0)
+
+        # For Account Managers, hide sessions that belong solely to other AMs' clients (where g_count > 0 but s_count == 0)
+        if current_user.role == "account_manager" and g_count > 0 and s_count == 0:
+            continue
+
         trainers_list = []
         for ta in s.trainer_assignments:
             is_active = (ta.valid_to is None or ta.valid_to > now_utc)
@@ -1210,6 +1247,10 @@ def list_training_sessions(
                 "valid_to": ta.valid_to.isoformat() if ta.valid_to else None,
                 "is_active": is_active
             })
+
+        eff_count = s_count if current_user.role == "account_manager" else g_count
+        codes_for_sess = scoped_client_codes.get(s.id) or ([session_primary_client[s.id]] if s.id in session_primary_client else [])
+        client_label = ", ".join(codes_for_sess[:2]) if codes_for_sess else (list(am_clients)[0] if am_clients else "VHL")
 
         result.append(TrainingSessionResponse(
             id=s.id,
@@ -1225,15 +1266,126 @@ def list_training_sessions(
             trainer_sign_off_at=s.trainer_sign_off_at,
             created_at=s.created_at,
             assigned_trainers=trainers_list,
-            participant_count=enrolled.get(s.id, 0),
+            participant_count=eff_count,
+            client_code=client_label,
             board_stage=(
                 "completed" if s.trainer_signed_off
-                else "needs_attendance" if (enrolled.get(s.id, 0) == 0 or pending_attendance.get(s.id, 0) > 0)
+                else "needs_attendance" if (eff_count == 0 or scoped_pending.get(s.id, 0) > 0)
                 else "awaiting_signoff"
             )
         ))
 
     return result
+
+
+@router.post("/sessions/{session_id}/enroll")
+def enroll_trainee_in_session(
+    session_id: str,
+    req: Dict[str, Any],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Enrolls an existing or new Trainee into a training session with CP-ABE encryption (FR-06, SEC-07)."""
+    if current_user.role not in ("admin", "account_manager"):
+        raise HTTPException(status_code=403, detail="Only Account Managers and Administrators can enroll trainees in a session.")
+
+    session = db.query(TrainingSession).filter(TrainingSession.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Training session not found.")
+    if session.trainer_signed_off:
+        raise HTTPException(status_code=400, detail="Cannot enroll trainees into a session that has already been signed off.")
+
+    trainee_id = req.get("trainee_id")
+    company_code = (req.get("company_code") or "").strip().upper()
+
+    if trainee_id:
+        trainee = db.query(Trainee).filter(Trainee.id == trainee_id).first()
+        if not trainee:
+            raise HTTPException(status_code=404, detail="Trainee not found.")
+        company = db.query(ClientCompany).filter(ClientCompany.id == trainee.current_company_id).first()
+    else:
+        email = (req.get("email") or "").strip().lower()
+        first_name = (req.get("first_name") or "").strip()
+        last_name = (req.get("last_name") or "").strip()
+        if not email or not first_name:
+            raise HTTPException(status_code=400, detail="Select an existing trainee or provide first_name, last_name, and email.")
+        if not company_code and current_user.assigned_client_accounts:
+            company_code = current_user.assigned_client_accounts[0]
+        company = db.query(ClientCompany).filter(ClientCompany.code == company_code).first() or db.query(ClientCompany).first()
+        trainee = db.query(Trainee).filter(Trainee.email.ilike(email)).first()
+        if not trainee:
+            t_code = f"TRN-{int(datetime.now(timezone.utc).timestamp()) % 100000:05d}"
+            trainee = Trainee(
+                first_name=first_name,
+                last_name=last_name or "Learner",
+                email=email,
+                trainee_code=t_code,
+                display_name=f"{first_name}{t_code[-3:]}",
+                current_company_id=company.id
+            )
+            db.add(trainee)
+            db.flush()
+
+    if not company:
+        company = db.query(ClientCompany).first()
+
+    if current_user.role == "account_manager" and company.code not in (current_user.assigned_client_accounts or []):
+        raise HTTPException(status_code=403, detail=f"Account Manager is not authorized for client company '{company.code}'.")
+
+    existing = db.query(TrainingRecord).filter(
+        TrainingRecord.session_id == session.id,
+        TrainingRecord.trainee_id == trainee.id,
+        TrainingRecord.deleted_at.is_(None)
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Trainee is already enrolled in this session.")
+
+    policy = cpabe_engine.build_record_policy(
+        company_code=company.code,
+        session_code=session.session_code,
+        trainee_code=trainee.trainee_code
+    )
+    payload = {
+        "trainee_name": f"{trainee.first_name} {trainee.last_name}".strip(),
+        "trainee_email": trainee.email,
+        "company": company.name,
+        "course": session.course_name,
+        "session_code": session.session_code,
+        "status": "In progress",
+        "attendance_status": "Present",
+        "score": None,
+        "completion_date": None
+    }
+    rec_id = f"rec-{uuid.uuid4().hex[:8]}"
+    enc = cpabe_engine.encrypt_record(payload, policy, record_id=f"rec-{trainee.trainee_code}", version=1)
+    new_rec = TrainingRecord(
+        id=rec_id,
+        trainee_id=trainee.id,
+        session_id=session.id,
+        company_at_completion_id=company.id,
+        course_name=session.course_name,
+        status="In progress",
+        attendance_status="Present",
+        encryption_policy=policy,
+        policy_version=1,
+        abe_ciphertext=enc.get("abe_ciphertext"),
+        payload_ciphertext=enc.get("payload_ciphertext"),
+        nonce=enc.get("nonce"),
+        is_encrypted=True
+    )
+    db.add(new_rec)
+    db.commit()
+    return {
+        "id": new_rec.id,
+        "session_id": session.id,
+        "trainee_id": trainee.id,
+        "trainee_name": f"{trainee.first_name} {trainee.last_name}".strip(),
+        "trainee_email": trainee.email,
+        "company_code": company.code,
+        "status": "In progress",
+        "attendance_status": "Present",
+        "score": None
+    }
 
 
 # -----------------------------------------------------------------------------

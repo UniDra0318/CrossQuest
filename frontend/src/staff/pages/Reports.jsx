@@ -97,7 +97,7 @@ export default function Reports() {
     let isMounted = true;
     async function loadCompanies() {
       try {
-        const data = await fetchAssignedClientCompanies(token);
+        const data = await fetchAssignedClientCompanies();
         if (isMounted && data && Array.isArray(data)) {
           const sorted = [...data].sort((a, b) => Number(Boolean(b.is_assigned)) - Number(Boolean(a.is_assigned)));
           setCompaniesList(sorted);
@@ -120,7 +120,7 @@ export default function Reports() {
     }
     loadCompanies();
     return () => { isMounted = false; };
-  }, [token, portfolios, assignedList]);
+  }, [portfolios, assignedList]);
 
   // Load report data for selectedScope with strict boundary enforcement
   const loadReportData = async (scope = selectedScope, status = statusFilter) => {
@@ -143,7 +143,7 @@ export default function Reports() {
 
     // 2. Authorized scope: query live backend API
     try {
-      const data = await fetchClientReport(scope, { statusFilter: status }, token);
+      const data = await fetchClientReport(scope, { statusFilter: status });
       setReport(data);
     } catch (err) {
       console.warn('API report fetch failed, evaluating scope restriction:', err);
@@ -180,7 +180,7 @@ export default function Reports() {
 
   useEffect(() => {
     loadReportData(selectedScope, statusFilter);
-  }, [selectedScope, statusFilter, token, companiesList]);
+  }, [selectedScope, statusFilter, companiesList]);
 
   const handleScopeChange = (newScope) => {
     setSelectedScope(newScope);
@@ -193,7 +193,7 @@ export default function Reports() {
     setSuccessToast(null);
 
     try {
-      await downloadClientReportPdf(selectedScope, { statusFilter }, token);
+      await downloadClientReportPdf(selectedScope, { statusFilter });
       setSuccessToast(`Official ReportLab PDF generated and downloaded for ${selectedScope}.`);
     } catch (err) {
       console.error('PDF download error:', err);
@@ -210,7 +210,7 @@ export default function Reports() {
     setSuccessToast(null);
 
     try {
-      await downloadClientReportCsv(selectedScope, { statusFilter }, token);
+      await downloadClientReportCsv(selectedScope, { statusFilter });
       setSuccessToast(`Official Client Audit Ledger (CSV) downloaded for ${selectedScope}.`);
     } catch (err) {
       console.error('CSV download error:', err);
@@ -225,7 +225,7 @@ export default function Reports() {
     setSuccessToast(null);
 
     try {
-      await downloadClientReportExcel(selectedScope, { statusFilter }, token);
+      await downloadClientReportExcel(selectedScope, { statusFilter });
       setSuccessToast(`Official Client Training Workbook (Excel) downloaded for ${selectedScope}.`);
     } catch (err) {
       console.error('Excel download error:', err);

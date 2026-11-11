@@ -568,16 +568,24 @@ class TrainingSessionResponse(BaseModel):
     start_date: datetime
     end_date: datetime
     delivery_type: str
-    delivery_mode: str = "F2F"
+    delivery_mode: Optional[str] = "F2F"
     venue: Optional[str] = None
-    trainer_signed_off: bool = False
+    trainer_signed_off: bool
     trainer_sign_off_at: Optional[datetime] = None
     created_at: datetime
-    assigned_trainers: Optional[List[Dict[str, Any]]] = []
+    assigned_trainers: List[Dict[str, Any]] = []
     participant_count: int = 0
-    board_stage: str = "awaiting_signoff"
+    board_stage: Optional[str] = None
+    client_code: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+class SessionEnrollRequest(BaseModel):
+    trainee_id: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    company_code: Optional[str] = None
 
 class TrainerAssignmentCreate(BaseModel):
     user_id: str

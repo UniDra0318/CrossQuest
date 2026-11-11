@@ -28,7 +28,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getTrainingSessions, createTrainingSession, updateParticipantAttendance, getStaffRecords } from '../../api/staff';
-import { fetchTrainers } from '../../services/api';
+import { fetchTrainers, fetchTrainees, enrollTraineeInSessionApi } from '../../services/api';
 
 const DEFAULT_COURSES = [
   'Agile PME & Project Management Challenge',
@@ -89,7 +89,10 @@ export default function Sessions() {
   const [showNewModal, setShowNewModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState(null);
-  const [availableTrainers, setAvailableTrainers] = useState([]);
+  const [availableTrainers, setAvailableTrainers] = useState([
+    { id: 'trn-001', name: 'Jordan Ramos', title: 'Certified Lead Trainer' },
+    { id: 'trn-002', name: 'Billy Santos', title: 'Associate Technical Trainer' }
+  ]);
   const [newSession, setNewSession] = useState({
     course_name: DEFAULT_COURSES[0],
     session_code: '',
@@ -98,7 +101,7 @@ export default function Sessions() {
     delivery_mode: 'Online',
     venue: 'Online (Virtual Meeting)',
     client_code: assignedClients[0] || 'CORP_ALPHA',
-    trainer_name: '',
+    trainer_name: 'Jordan Ramos',
     participants_input: ''
   });
 
@@ -107,12 +110,27 @@ export default function Sessions() {
   const [savingAttendance, setSavingAttendance] = useState(false);
   const [attendanceEdits, setAttendanceEdits] = useState({});
 
+  // Per-column pagination states (4 cards per page, no internal scrollbar)
+  const [pageNeeds, setPageNeeds] = useState(1);
+  const [pageAwait, setPageAwait] = useState(1);
+  const [pageComp, setPageComp] = useState(1);
+  const COL_PAGE_SIZE = 4;
+
+  // Trainee enrollment state inside roster modal
+  const [availableTrainees, setAvailableTrainees] = useState([]);
+  const [selectedTraineeId, setSelectedTraineeId] = useState('');
+  const [enrollFirstName, setEnrollFirstName] = useState('');
+  const [enrollLastName, setEnrollLastName] = useState('');
+  const [enrollEmail, setEnrollEmail] = useState('');
+  const [enrollError, setEnrollError] = useState(null);
+  const [enrolling, setEnrolling] = useState(false);
+
   const loadData = async () => {
     setLoading(true);
     setLoadError(null);
     setTrainersError(null);
     try {
-      const [sessList, recList, trainersRes] = await Promise.all([
+      const [sessList, recList, trainersRes, traineesRes] = await Promise.all([
         getTrainingSessions().catch(err => {
           throw new Error(`Failed to load sessions: ${err.message || 'Server error'}`);
         }),
@@ -120,8 +138,13 @@ export default function Sessions() {
         fetchTrainers(token).catch(err => {
           setTrainersError(err.message || 'Could not retrieve trainer list from server.');
           return [];
-        })
+        }),
+        fetchTrainees(token).catch(() => [])
       ]);
+
+      if (traineesRes && Array.isArray(traineesRes)) {
+        setAvailableTrainees(traineesRes);
+      }
 
       if (trainersRes && trainersRes.length > 0) {
         setAvailableTrainers(trainersRes.map(t => ({
@@ -291,6 +314,61 @@ export default function Sessions() {
       alert('Error updating participant attendance');
     } finally {
       setSavingAttendance(false);
+    }
+  };
+
+  const handleEnrollTrainee = async (e) => {
+    e.preventDefault();
+    if (!activeSession) return;
+    setEnrolling(true);
+    setEnrollError(null);
+    try {
+      const payload = selectedTraineeId ? {
+        trainee_id: selectedTraineeId
+      } : {
+        first_name: enrollFirstName.trim(),
+        last_name: enrollLastName.trim(),
+        email: enrollEmail.trim(),
+        company_code: activeSession.client_code || assignedClients[0]
+      };
+      const enrolled = await enrollTraineeInSessionApi(activeSession.id, payload, token);
+      
+      setAttendanceEdits(prev => ({
+        ...prev,
+        [enrolled.id]: {
+          trainee: enrolled.trainee_name,
+          email: enrolled.trainee_email,
+          attendance_status: 'Present',
+          status: 'In progress',
+          score: ''
+        }
+      }));
+
+      setRecords(prev => [
+        ...prev,
+        {
+          id: enrolled.id,
+          session_id: activeSession.id,
+          trainee: enrolled.trainee_name,
+          trainee_name: enrolled.trainee_name,
+          trainee_email: enrolled.trainee_email,
+          attendance_status: 'Present',
+          status: 'In progress',
+          score: null
+        }
+      ]);
+
+      setSessions(prev => prev.map(s => s.id === activeSession.id ? { ...s, participant_count: (s.participant_count || 0) + 1 } : s));
+      setActiveSession(prev => prev ? { ...prev, participant_count: (prev.participant_count || 0) + 1 } : prev);
+
+      setSelectedTraineeId('');
+      setEnrollFirstName('');
+      setEnrollLastName('');
+      setEnrollEmail('');
+    } catch (err) {
+      setEnrollError(err.message || 'Failed to enroll participant.');
+    } finally {
+      setEnrolling(false);
     }
   };
 
@@ -516,7 +594,7 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', maxHeight: 'calc(100vh - 340px)', overflowY: 'auto', overflowX: 'hidden', paddingRight: '8px', scrollbarWidth: 'thin' }}>
+          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', overflow: 'visible' }}>
             {columnNeedsAttendance.length === 0 ? (
               <div
                 style={{
@@ -556,7 +634,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              columnNeedsAttendance.map(sess => (
+              columnNeedsAttendance.slice((pageNeeds - 1) * COL_PAGE_SIZE, pageNeeds * COL_PAGE_SIZE).map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -643,6 +721,13 @@ export default function Sessions() {
               ))
             )}
           </div>
+          {columnNeedsAttendance.length > COL_PAGE_SIZE && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '10px', borderTop: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #f1f5f9', fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
+              <button type="button" disabled={pageNeeds === 1} onClick={() => setPageNeeds(p => Math.max(1, p - 1))} className="adm-btn adm-btn--light" style={{ padding: '4px 10px', fontSize: '11px', cursor: pageNeeds === 1 ? 'not-allowed' : 'pointer' }}>&larr; Prev</button>
+              <span style={{ fontWeight: 600 }}>Page {pageNeeds} of {Math.ceil(columnNeedsAttendance.length / COL_PAGE_SIZE)}</span>
+              <button type="button" disabled={pageNeeds >= Math.ceil(columnNeedsAttendance.length / COL_PAGE_SIZE)} onClick={() => setPageNeeds(p => p + 1)} className="adm-btn adm-btn--light" style={{ padding: '4px 10px', fontSize: '11px', cursor: pageNeeds >= Math.ceil(columnNeedsAttendance.length / COL_PAGE_SIZE) ? 'not-allowed' : 'pointer' }}>Next &rarr;</button>
+            </div>
+          )}
         </div>
 
         {/* Column 2: Awaiting Trainer Sign-Off */}
@@ -675,7 +760,7 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', maxHeight: 'calc(100vh - 340px)', overflowY: 'auto', overflowX: 'hidden', paddingRight: '8px', scrollbarWidth: 'thin' }}>
+          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', overflow: 'visible' }}>
             {columnAwaitingSignOff.length === 0 ? (
               <div
                 style={{
@@ -715,7 +800,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              columnAwaitingSignOff.map(sess => (
+              columnAwaitingSignOff.slice((pageAwait - 1) * COL_PAGE_SIZE, pageAwait * COL_PAGE_SIZE).map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -802,6 +887,13 @@ export default function Sessions() {
               ))
             )}
           </div>
+          {columnAwaitingSignOff.length > COL_PAGE_SIZE && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '10px', borderTop: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #f1f5f9', fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
+              <button type="button" disabled={pageAwait === 1} onClick={() => setPageAwait(p => Math.max(1, p - 1))} className="adm-btn adm-btn--light" style={{ padding: '4px 10px', fontSize: '11px', cursor: pageAwait === 1 ? 'not-allowed' : 'pointer' }}>&larr; Prev</button>
+              <span style={{ fontWeight: 600 }}>Page {pageAwait} of {Math.ceil(columnAwaitingSignOff.length / COL_PAGE_SIZE)}</span>
+              <button type="button" disabled={pageAwait >= Math.ceil(columnAwaitingSignOff.length / COL_PAGE_SIZE)} onClick={() => setPageAwait(p => p + 1)} className="adm-btn adm-btn--light" style={{ padding: '4px 10px', fontSize: '11px', cursor: pageAwait >= Math.ceil(columnAwaitingSignOff.length / COL_PAGE_SIZE) ? 'not-allowed' : 'pointer' }}>Next &rarr;</button>
+            </div>
+          )}
         </div>
 
         {/* Column 3: Completed */}
@@ -834,7 +926,7 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', maxHeight: 'calc(100vh - 340px)', overflowY: 'auto', overflowX: 'hidden', paddingRight: '8px', scrollbarWidth: 'thin' }}>
+          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', overflow: 'visible' }}>
             {columnCompleted.length === 0 ? (
               <div
                 style={{
@@ -874,7 +966,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              columnCompleted.map(sess => (
+              columnCompleted.slice((pageComp - 1) * COL_PAGE_SIZE, pageComp * COL_PAGE_SIZE).map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -960,6 +1052,13 @@ export default function Sessions() {
               ))
             )}
           </div>
+          {columnCompleted.length > COL_PAGE_SIZE && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '10px', borderTop: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #f1f5f9', fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
+              <button type="button" disabled={pageComp === 1} onClick={() => setPageComp(p => Math.max(1, p - 1))} className="adm-btn adm-btn--light" style={{ padding: '4px 10px', fontSize: '11px', cursor: pageComp === 1 ? 'not-allowed' : 'pointer' }}>&larr; Prev</button>
+              <span style={{ fontWeight: 600 }}>Page {pageComp} of {Math.ceil(columnCompleted.length / COL_PAGE_SIZE)}</span>
+              <button type="button" disabled={pageComp >= Math.ceil(columnCompleted.length / COL_PAGE_SIZE)} onClick={() => setPageComp(p => p + 1)} className="adm-btn adm-btn--light" style={{ padding: '4px 10px', fontSize: '11px', cursor: pageComp >= Math.ceil(columnCompleted.length / COL_PAGE_SIZE) ? 'not-allowed' : 'pointer' }}>Next &rarr;</button>
+            </div>
+          )}
         </div>
 
       </div>
@@ -1170,6 +1269,77 @@ export default function Sessions() {
                   {Object.keys(attendanceEdits).length} enrolled participants
                 </span>
               </div>
+
+              {!activeSession.trainer_signed_off && (
+                <div style={{ marginBottom: '18px', padding: '14px 16px', borderRadius: '14px', background: isDark ? '#1e293b' : '#f8fafc', border: isDark ? '1px solid #334155' : '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      + Enroll Participant into Session
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>CP-ABE Enveloped</span>
+                  </div>
+                  {enrollError && (
+                    <div style={{ marginBottom: '10px', padding: '6px 12px', borderRadius: '8px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', fontSize: '12px' }}>
+                      {enrollError}
+                    </div>
+                  )}
+                  <form onSubmit={handleEnrollTrainee} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ flex: '1 1 200px' }}>
+                      <select
+                        value={selectedTraineeId}
+                        onChange={(e) => {
+                          setSelectedTraineeId(e.target.value);
+                          if (e.target.value) {
+                            setEnrollFirstName('');
+                            setEnrollLastName('');
+                            setEnrollEmail('');
+                          }
+                        }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#0f172a' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12.5px' }}
+                      >
+                        <option value="">Select Existing Trainee...</option>
+                        {availableTrainees.map(t => (
+                          <option key={t.id} value={t.id}>
+                            {t.first_name} {t.last_name} ({t.trainee_code}) - {t.email}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {!selectedTraineeId && (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="First Name"
+                          value={enrollFirstName}
+                          onChange={(e) => setEnrollFirstName(e.target.value)}
+                          style={{ flex: '1 1 110px', padding: '8px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#0f172a' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12.5px' }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Last Name"
+                          value={enrollLastName}
+                          onChange={(e) => setEnrollLastName(e.target.value)}
+                          style={{ flex: '1 1 110px', padding: '8px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#0f172a' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12.5px' }}
+                        />
+                        <input
+                          type="email"
+                          placeholder="learner@company.com"
+                          value={enrollEmail}
+                          onChange={(e) => setEnrollEmail(e.target.value)}
+                          style={{ flex: '1 1 160px', padding: '8px 12px', borderRadius: '8px', border: isDark ? '1px solid #334155' : '1px solid #cbd5e1', background: isDark ? '#0f172a' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a', fontSize: '12.5px' }}
+                        />
+                      </>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={enrolling || (!selectedTraineeId && (!enrollFirstName || !enrollEmail))}
+                      style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#0284c7', color: '#ffffff', fontWeight: 700, fontSize: '12.5px', cursor: enrolling ? 'wait' : 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      {enrolling ? 'Enrolling...' : '+ Enroll in Session'}
+                    </button>
+                  </form>
+                </div>
+              )}
 
               {Object.keys(attendanceEdits).length === 0 ? (
                 <div style={{ padding: '48px 24px', textAlign: 'center', color: isDark ? '#94a3b8' : '#64748b' }}>

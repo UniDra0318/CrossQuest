@@ -401,33 +401,45 @@ export default function PeopleAccess({
                         </div>
                       </div>
                       <div style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                        <button 
-                          type="button" 
-                          className="adm-btn adm-btn--light"
-                          style={{ padding: '7px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
-                          onClick={() => startEditStaff && startEditStaff(user)}
-                          title={`Edit role and assigned clients for ${user.name}`}
-                        >
-                          <Edit2 size={13} />
-                          <span>Edit Roles</span>
-                        </button>
-                        <button
-                          type="button"
-                          className="adm-btn adm-btn--light"
-                          style={{
-                            padding: '7px 12px',
-                            fontSize: '12px',
-                            whiteSpace: 'nowrap',
-                            color: user.is_active !== false ? '#ef4444' : '#059669',
-                            borderColor: user.is_active !== false ? (isDark ? 'rgba(239, 68, 68, 0.4)' : '#fca5a5') : (isDark ? 'rgba(5, 150, 105, 0.4)' : '#a7f3d0')
-                          }}
-                          disabled={processingUserId === user.id}
-                          onClick={() => handleToggleUserStatus(user)}
-                          title={user.is_active !== false ? 'Disable account (FR-02, U-07)' : 'Re-enable account (FR-02, U-07)'}
-                        >
-                          {user.is_active !== false ? <UserX size={13} /> : <UserCheck size={13} />}
-                          <span>{user.is_active !== false ? 'Disable' : 'Re-enable'}</span>
-                        </button>
+                        {user.role.includes('ADMIN') ? (
+                          <span
+                            className="adm-chip adm-chip--violet"
+                            style={{ fontSize: '11px', padding: '6px 12px' }}
+                            title="Co-Administrator accounts are protected under dual-admin peer review (OI-08, OI-30)"
+                          >
+                            🔒 Protected Co-Admin (OI-30)
+                          </span>
+                        ) : (
+                          <>
+                            <button 
+                              type="button" 
+                              className="adm-btn adm-btn--light"
+                              style={{ padding: '7px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
+                              onClick={() => startEditStaff && startEditStaff(user)}
+                              title={`Edit role and assigned clients for ${user.name}`}
+                            >
+                              <Edit2 size={13} />
+                              <span>Edit Roles</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="adm-btn adm-btn--light"
+                              style={{
+                                padding: '7px 12px',
+                                fontSize: '12px',
+                                whiteSpace: 'nowrap',
+                                color: user.is_active !== false ? '#ef4444' : '#059669',
+                                borderColor: user.is_active !== false ? (isDark ? 'rgba(239, 68, 68, 0.4)' : '#fca5a5') : (isDark ? 'rgba(5, 150, 105, 0.4)' : '#a7f3d0')
+                              }}
+                              disabled={processingUserId === user.id}
+                              onClick={() => handleToggleUserStatus(user)}
+                              title={user.is_active !== false ? 'Disable account (FR-02, U-07)' : 'Re-enable account (FR-02, U-07)'}
+                            >
+                              {user.is_active !== false ? <UserX size={13} /> : <UserCheck size={13} />}
+                              <span>{user.is_active !== false ? 'Disable' : 'Re-enable'}</span>
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

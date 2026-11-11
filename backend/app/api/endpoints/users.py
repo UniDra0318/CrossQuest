@@ -299,8 +299,8 @@ def disable_user_account(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user.id == admin_user.id:
-        raise HTTPException(status_code=400, detail="Cannot disable your own administrator account.")
+    if user.id == admin_user.id or user.role == "admin":
+        raise HTTPException(status_code=403, detail="Administrator accounts cannot be disabled to preserve dual-admin peer review (OI-08, OI-30).")
 
     user.is_active = False
 
@@ -491,6 +491,11 @@ def update_user_attributes(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}"
+            )
+        if user.role == "admin" and attrs.role.lower() != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Administrator role cannot be demoted to preserve peer review oversight (OI-08, OI-30)."
             )
         user.role = attrs.role.lower()
 

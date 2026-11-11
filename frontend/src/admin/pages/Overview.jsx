@@ -203,7 +203,7 @@ export default function Overview({
                     <i style={{ background: '#ff7a1a' }} />
                     <div>
                       <strong>Top Layer</strong>
-                      <span>AES-256 + RSA Suite</span>
+                      <span>AES-256-GCM Envelope</span>
                     </div>
                   </li>
                   <li>
@@ -228,15 +228,15 @@ export default function Overview({
             <dl className="adm-dl">
               <div>
                 <dt>Scheme</dt>
-                <dd>{overview.architecture?.scheme || 'Native Charm CP-ABE'}</dd>
+                <dd>{overview.architecture?.scheme || 'CP-ABE (BSW07) + RBAC'}</dd>
               </div>
               <div>
                 <dt>Encryption Suite</dt>
-                <dd>{overview.architecture?.encryption || 'AES-256-GCM + SS512'}</dd>
+                <dd>{overview.architecture?.encryption || 'AES-256-GCM + SS512 Pairing'}</dd>
               </div>
               <div>
                 <dt>Authority</dt>
-                <dd>{overview.architecture?.authority || 'Decentralized Multi-Authority'}</dd>
+                <dd>{overview.architecture?.authority || 'Single Crossworks Master Authority'}</dd>
               </div>
               <div>
                 <dt>Master Public Key</dt>
@@ -256,7 +256,7 @@ export default function Overview({
               </div>
               <div>
                 <dt>Defense Layer</dt>
-                <dd>{overview.architecture?.defense || 'Strict Zero-Trust Model'}</dd>
+                <dd>{overview.architecture?.defense || 'PostgreSQL Row-Level Security (RLS)'}</dd>
               </div>
             </dl>
           </div>

@@ -1121,6 +1121,13 @@ html.dark .adm-alert--done,
   border-left-color: #64748b !important;
 }
 
+html.dark .adm-alert--done .adm-alert__icon,
+[data-theme="dark"] .adm-alert--done .adm-alert__icon {
+  background: rgba(148, 163, 184, 0.16) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(148, 163, 184, 0.32) !important;
+}
+
 html.dark .adm-alert__head strong,
 [data-theme="dark"] .adm-alert__head strong {
   color: #f8fafc !important;
