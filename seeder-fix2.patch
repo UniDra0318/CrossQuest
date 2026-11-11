@@ -1,0 +1,20 @@
+diff -ruN c/backend/seed_demo_scenarios.py d/backend/seed_demo_scenarios.py
+--- c/backend/seed_demo_scenarios.py	2026-11-11 20:48:44.495149722 +0000
++++ d/backend/seed_demo_scenarios.py	2026-11-11 20:48:44.498004132 +0000
+@@ -9,6 +9,7 @@
+ """
+ import sys
+ import uuid
++import hashlib
+ import json
+ from datetime import datetime, timedelta, timezone
+ from sqlalchemy import text
+@@ -329,7 +330,7 @@
+     db.query(QuizAttempt).filter(QuizAttempt.trainee_id == trn.id).delete()
+     for qz in quizzes[:count]:
+         db.add(QuizAttempt(
+-            id=f"att-scn-{trn.trainee_code}-{qz.id[:8]}",
++            id=f"att-{trn.trainee_code[-4:]}-{hashlib.md5(qz.id.encode()).hexdigest()[:20]}",
+             quiz_id=qz.id,
+             trainee_id=trn.id,
+             quiz_version=qz.version_no or 1,

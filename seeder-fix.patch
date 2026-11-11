@@ -1,0 +1,114 @@
+diff -ruN a/backend/app/api/endpoints/dev.py b/backend/app/api/endpoints/dev.py
+--- a/backend/app/api/endpoints/dev.py	2026-11-11 20:47:29.809315415 +0000
++++ b/backend/app/api/endpoints/dev.py	2026-11-11 20:47:29.811159275 +0000
+@@ -77,10 +77,10 @@
+     scn04_state = f"Score: {r04.score}%" if r04 and r04.score is not None else "Needs score correction"
+ 
+     a09 = db.query(AnomalyAlert).filter(AnomalyAlert.id == "alt-scn-09-joey").first()
+-    scn09_state = "Peer review completed" if (a09 and a09.is_resolved) else "Open alert awaiting peer review"
++    scn09_state = "Peer review completed" if (a09 and a09.status == "CLOSED") else "Open alert awaiting peer review"
+ 
+     b11 = db.query(ImportBatch).filter(ImportBatch.id == "imp-scn-11").first()
+-    scn11_state = f"Batch status: {b11.status}" if b11 else "Ready for reconciliation"
++    scn11_state = ("Reconciled" if b11.reconciled else f"{b11.quarantined_count} quarantined rows awaiting reconciliation") if b11 else "Ready for reconciliation"
+ 
+     return {
+         "SCN-01": {"state": scn01_state},
+diff -ruN a/backend/seed_demo_scenarios.py b/backend/seed_demo_scenarios.py
+--- a/backend/seed_demo_scenarios.py	2026-11-11 20:47:29.808332806 +0000
++++ b/backend/seed_demo_scenarios.py	2026-11-11 20:47:29.810231806 +0000
+@@ -201,7 +201,6 @@
+             role="trainer",
+             hashed_password=get_password_hash(DEV_PASSWORD),
+             is_active=True,
+-            is_activated=True,
+         )
+         db.add(billy)
+         db.flush()
+@@ -240,10 +239,9 @@
+                 email=email,
+                 full_name=f"{first} {last}",
+                 role="trainee",
+-                company_id=comp.id,
++                assigned_client_accounts=[comp_code],
+                 hashed_password=pw_hash,
+                 is_active=True,
+-                is_activated=(key != "scn_gabe"),
+             )
+             db.add(user)
+             db.flush()
+@@ -257,7 +255,7 @@
+                 last_name=last,
+                 email=email,
+                 display_name=disp,
+-                company_id=comp.id,
++                current_company_id=comp.id,
+                 current_streak=3,
+             )
+             db.add(trn)
+@@ -409,32 +407,35 @@
+     if not db.query(AnomalyAlert).filter(AnomalyAlert.id == "alt-scn-09-joey").first():
+         db.add(AnomalyAlert(
+             id="alt-scn-09-joey",
+-            user_id=staff["joey"].id,
+-            rule_triggered="R4_ADMIN_DELETION",
+-            severity="High",
++            subject_user_id=staff["joey"].id,
++            rule_code="R4_ADMIN_DELETION",
++            severity_base="HIGH", severity_final="HIGH", severity="HIGH",
++            status="NEW",
++            event_count=1,
+             description="Scenario SCN-09: Record soft-deletion by Administrator Joey Mallari requires peer review (OI-30).",
+-            is_resolved=False,
+         ))
+     if not db.query(AnomalyAlert).filter(AnomalyAlert.id == "alt-scn-09-am").first():
+         db.add(AnomalyAlert(
+             id="alt-scn-09-am",
+-            user_id=staff["erika"].id,
+-            rule_triggered="R1_SCOPE_VIOLATION",
+-            severity="Medium",
++            subject_user_id=staff["erika"].id,
++            rule_code="R1_OUT_OF_SCOPE",
++            severity_base="MEDIUM", severity_final="MEDIUM", severity="MEDIUM",
++            status="NEW",
++            event_count=1,
+             description="Scenario SCN-09: Out-of-scope tenant access attempt by Account Manager.",
+-            is_resolved=False,
+         ))
+ 
+     # SCN-11: Import batch with quarantined rows
+     if not db.query(ImportBatch).filter(ImportBatch.id == "imp-scn-11").first():
+         db.add(ImportBatch(
+             id="imp-scn-11",
+-            uploaded_by_user_id=staff["elena"].id,
+-            filename="scn11_quarantine_batch.csv",
+-            total_rows=10,
+-            imported_rows=8,
+-            quarantined_rows=2,
+-            status="Quarantined",
++            file_hash="scn11" + "0" * 59,
++            source_file_name="scn11_quarantine_batch.csv",
++            record_count=10,
++            in_scope_count=8,
++            quarantined_count=2,
++            reconciled=False,
++            loaded_by_user_id=staff["elena"].id,
+         ))
+ 
+     # SCN-12: Ivy, BIBSP (Sharon De Vera's scope)
+@@ -502,10 +503,11 @@
+         for aid in ("alt-scn-09-joey", "alt-scn-09-am"):
+             al = db.query(AnomalyAlert).filter(AnomalyAlert.id == aid).first()
+             if al:
+-                al.is_resolved = False
+-                al.resolved_at = None
+-                al.resolved_by_user_id = None
+-                al.resolution_notes = None
++                al.status = "NEW"
++                al.disposition = None
++                al.review_note = None
++                al.reviewed_by_user_id = None
++                al.reviewed_at = None
+ 
+ 
+ def remove_scenarios(db):

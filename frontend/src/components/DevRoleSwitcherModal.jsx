@@ -98,7 +98,13 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
   };
 
   const handleSwitchPersona = async (personaKey) => {
-    const switched = await loginRole(personaKey);
+    let switched;
+    try {
+      switched = await loginRole(personaKey);
+    } catch (err) {
+      window.alert(err?.message || 'Could not switch persona.');
+      return;
+    }
     setVisitedPersonas((prev) => ({ ...prev, [personaKey]: true }));
     onClose();
     const target = ROLE_HOME[switched?.role] || '/';

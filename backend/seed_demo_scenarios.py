@@ -9,6 +9,7 @@ Run inside the backend container:
 """
 import sys
 import uuid
+import hashlib
 import json
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import text
@@ -201,7 +202,6 @@ def _get_staff(db):
             role="trainer",
             hashed_password=get_password_hash(DEV_PASSWORD),
             is_active=True,
-            is_activated=True,
         )
         db.add(billy)
         db.flush()
@@ -240,10 +240,9 @@ def _ensure_synthetic_trainees(db, comp_map):
                 email=email,
                 full_name=f"{first} {last}",
                 role="trainee",
-                company_id=comp.id,
+                assigned_client_accounts=[comp_code],
                 hashed_password=pw_hash,
                 is_active=True,
-                is_activated=(key != "scn_gabe"),
             )
             db.add(user)
             db.flush()
@@ -257,7 +256,7 @@ def _ensure_synthetic_trainees(db, comp_map):
                 last_name=last,
                 email=email,
                 display_name=disp,
-                company_id=comp.id,
+                current_company_id=comp.id,
                 current_streak=3,
             )
             db.add(trn)
@@ -331,7 +330,7 @@ def _seed_attempts_for_trainee(db, trn, quizzes, count):
     db.query(QuizAttempt).filter(QuizAttempt.trainee_id == trn.id).delete()
     for qz in quizzes[:count]:
         db.add(QuizAttempt(
-            id=f"att-scn-{trn.trainee_code}-{qz.id[:8]}",
+            id=f"att-{trn.trainee_code[-4:]}-{hashlib.md5(qz.id.encode()).hexdigest()[:20]}",
             quiz_id=qz.id,
             trainee_id=trn.id,
             quiz_version=qz.version_no or 1,
@@ -409,32 +408,35 @@ def apply_scenarios(db):
     if not db.query(AnomalyAlert).filter(AnomalyAlert.id == "alt-scn-09-joey").first():
         db.add(AnomalyAlert(
             id="alt-scn-09-joey",
-            user_id=staff["joey"].id,
-            rule_triggered="R4_ADMIN_DELETION",
-            severity="High",
+            subject_user_id=staff["joey"].id,
+            rule_code="R4_ADMIN_DELETION",
+            severity_base="HIGH", severity_final="HIGH", severity="HIGH",
+            status="NEW",
+            event_count=1,
             description="Scenario SCN-09: Record soft-deletion by Administrator Joey Mallari requires peer review (OI-30).",
-            is_resolved=False,
         ))
     if not db.query(AnomalyAlert).filter(AnomalyAlert.id == "alt-scn-09-am").first():
         db.add(AnomalyAlert(
             id="alt-scn-09-am",
-            user_id=staff["erika"].id,
-            rule_triggered="R1_SCOPE_VIOLATION",
-            severity="Medium",
+            subject_user_id=staff["erika"].id,
+            rule_code="R1_OUT_OF_SCOPE",
+            severity_base="MEDIUM", severity_final="MEDIUM", severity="MEDIUM",
+            status="NEW",
+            event_count=1,
             description="Scenario SCN-09: Out-of-scope tenant access attempt by Account Manager.",
-            is_resolved=False,
         ))
 
     # SCN-11: Import batch with quarantined rows
     if not db.query(ImportBatch).filter(ImportBatch.id == "imp-scn-11").first():
         db.add(ImportBatch(
             id="imp-scn-11",
-            uploaded_by_user_id=staff["elena"].id,
-            filename="scn11_quarantine_batch.csv",
-            total_rows=10,
-            imported_rows=8,
-            quarantined_rows=2,
-            status="Quarantined",
+            file_hash="scn11" + "0" * 59,
+            source_file_name="scn11_quarantine_batch.csv",
+            record_count=10,
+            in_scope_count=8,
+            quarantined_count=2,
+            reconciled=False,
+            loaded_by_user_id=staff["elena"].id,
         ))
 
     # SCN-12: Ivy, BIBSP (Sharon De Vera's scope)
@@ -502,10 +504,11 @@ def reset_scenario(db, scenario_id: str):
         for aid in ("alt-scn-09-joey", "alt-scn-09-am"):
             al = db.query(AnomalyAlert).filter(AnomalyAlert.id == aid).first()
             if al:
-                al.is_resolved = False
-                al.resolved_at = None
-                al.resolved_by_user_id = None
-                al.resolution_notes = None
+                al.status = "NEW"
+                al.disposition = None
+                al.review_note = None
+                al.reviewed_by_user_id = None
+                al.reviewed_at = None
 
 
 def remove_scenarios(db):

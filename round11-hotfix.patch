@@ -1,0 +1,342 @@
+Binary files a/backend/app/api/__pycache__/deps.cpython-312.pyc and CrossQuest-backend-fixing/backend/app/api/__pycache__/deps.cpython-312.pyc differ
+diff -ruN -x node_modules a/backend/app/api/deps.py CrossQuest-backend-fixing/backend/app/api/deps.py
+--- a/backend/app/api/deps.py	2026-11-11 20:29:51.000000000 +0000
++++ b/backend/app/api/deps.py	2026-11-11 20:37:20.917001681 +0000
+@@ -86,16 +86,22 @@
+             trainee_obj = db.query(Trainee).filter((Trainee.user_id == user.id) | (Trainee.email == user.email)).first()
+             trainee_id = trainee_obj.id if trainee_obj else None
+ 
+-    # Generate and inject HMAC-signed context for PostgreSQL RLS (SEC-08, SEC-24, OI-14)
++    # Bind the RLS identity to THIS db session. after_begin (database.py) re-signs and applies it, transaction-local,
++    # on every transaction this request opens, so a commit mid-request or a recycled pooled connection can no
++    # longer carry another user's role (SEC-08, SEC-24, OI-14).
++    db.info["rls_identity"] = {"user_id": str(user.id), "role": user.role, "trainee_id": trainee_id}
+     signed_ctx = sign_context(user_id=user.id, role=user.role, trainee_id=trainee_id)
+     request_context_var.set(signed_ctx)
+     if db.bind and db.bind.dialect.name == "postgresql":
+         from sqlalchemy import text
+-        db.execute(text("SELECT set_config('crossquest.current_user_id', :uid, false)"), {"uid": signed_ctx["user_id"]})
+-        db.execute(text("SELECT set_config('crossquest.current_role', :role, false)"), {"role": signed_ctx["role"]})
+-        db.execute(text("SELECT set_config('crossquest.current_trainee_id', :tid, false)"), {"tid": signed_ctx["trainee_id"]})
+-        db.execute(text("SELECT set_config('crossquest.context_expiry', :exp, false)"), {"exp": str(signed_ctx["expiry"])})
+-        db.execute(text("SELECT set_config('crossquest.context_signature', :sig, false)"), {"sig": signed_ctx["signature"]})
++        for k, v in (
++            ("crossquest.current_user_id", signed_ctx["user_id"]),
++            ("crossquest.current_role", signed_ctx["role"]),
++            ("crossquest.current_trainee_id", signed_ctx["trainee_id"]),
++            ("crossquest.context_expiry", str(signed_ctx["expiry"])),
++            ("crossquest.context_signature", signed_ctx["signature"]),
++        ):
++            db.execute(text("SELECT set_config(:k, :v, true)"), {"k": k, "v": v or ""})
+ 
+     return user
+ 
+Binary files a/backend/app/api/endpoints/__pycache__/records.cpython-312.pyc and CrossQuest-backend-fixing/backend/app/api/endpoints/__pycache__/records.cpython-312.pyc differ
+diff -ruN -x node_modules a/backend/app/api/endpoints/records.py CrossQuest-backend-fixing/backend/app/api/endpoints/records.py
+--- a/backend/app/api/endpoints/records.py	2026-11-11 20:29:51.000000000 +0000
++++ b/backend/app/api/endpoints/records.py	2026-11-11 20:37:34.924427218 +0000
+@@ -1223,7 +1223,17 @@
+     """Lists training sessions scoped to the user's role with accurate enrollment counts and client_code."""
+     from app.core.database import admin_engine
+     from sqlalchemy.orm import sessionmaker as _sm
+-    sessions = db.query(TrainingSession).order_by(TrainingSession.start_date.desc()).all()
++    if current_user.role in ("trainee",):
++        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Trainees cannot list training sessions.")
++    sessions_q = db.query(TrainingSession)
++    if current_user.role == "trainer":
++        # U-12: a Trainer only ever sees sessions they are currently assigned to.
++        _now = datetime.now(timezone.utc).replace(tzinfo=None)
++        sessions_q = sessions_q.filter(TrainingSession.id.in_(
++            db.query(TrainerAssignment.session_id).filter(
++                TrainerAssignment.user_id == current_user.id,
++                (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > _now))))
++    sessions = sessions_q.order_by(TrainingSession.start_date.desc()).all()
+     result = []
+     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+ 
+Binary files a/backend/app/core/__pycache__/database.cpython-312.pyc and CrossQuest-backend-fixing/backend/app/core/__pycache__/database.cpython-312.pyc differ
+diff -ruN -x node_modules a/backend/app/core/database.py CrossQuest-backend-fixing/backend/app/core/database.py
+--- a/backend/app/core/database.py	2026-11-11 20:29:51.000000000 +0000
++++ b/backend/app/core/database.py	2026-11-11 20:37:20.916539780 +0000
+@@ -73,32 +73,28 @@
+ 
+ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+ 
+-# Re-inject transaction-local session settings on every transaction begin (SEC-08, TC-RLS-07)
++# Re-inject transaction-local session settings on every transaction begin (SEC-08, TC-RLS-07).
++# The identity lives on the Session (session.info) because FastAPI runs sync dependencies and endpoints in
++# separate thread contexts, so a ContextVar set inside a dependency never reaches the endpoint. Every
++# transaction is re-signed with a fresh expiry, and a Session with no identity gets EMPTY settings so a
++# pooled connection can never inherit a previous user's role (fail closed).
+ @event.listens_for(Session, "after_begin")
+ def receive_after_begin(session, transaction, connection):
+-    if connection.dialect.name == "postgresql":
+-        ctx = request_context_var.get()
+-        if ctx:
+-            connection.execute(
+-                text("SELECT set_config('crossquest.current_user_id', :uid, true)"),
+-                {"uid": ctx.get("user_id", "")}
+-            )
+-            connection.execute(
+-                text("SELECT set_config('crossquest.current_role', :role, true)"),
+-                {"role": ctx.get("role", "")}
+-            )
+-            connection.execute(
+-                text("SELECT set_config('crossquest.current_trainee_id', :tid, true)"),
+-                {"tid": ctx.get("trainee_id", "")}
+-            )
+-            connection.execute(
+-                text("SELECT set_config('crossquest.context_expiry', :exp, true)"),
+-                {"exp": str(ctx.get("expiry", ""))}
+-            )
+-            connection.execute(
+-                text("SELECT set_config('crossquest.context_signature', :sig, true)"),
+-                {"sig": ctx.get("signature", "")}
+-            )
++    if connection.dialect.name != "postgresql":
++        return
++    ident = session.info.get("rls_identity")
++    if ident:
++        ctx = sign_context(user_id=ident["user_id"], role=ident["role"], trainee_id=ident.get("trainee_id"))
++    else:
++        ctx = request_context_var.get() or {}
++    for key, val in (
++        ("crossquest.current_user_id", ctx.get("user_id", "")),
++        ("crossquest.current_role", ctx.get("role", "")),
++        ("crossquest.current_trainee_id", ctx.get("trainee_id", "")),
++        ("crossquest.context_expiry", str(ctx.get("expiry", ""))),
++        ("crossquest.context_signature", ctx.get("signature", "")),
++    ):
++        connection.execute(text("SELECT set_config(:k, :v, true)"), {"k": key, "v": val or ""})
+ 
+ import os
+ 
+diff -ruN a/frontend/src/components/DevRoleSwitcherModal.jsx CrossQuest-backend-fixing/frontend/src/components/DevRoleSwitcherModal.jsx
+--- a/frontend/src/components/DevRoleSwitcherModal.jsx	2026-11-11 20:29:51.000000000 +0000
++++ b/frontend/src/components/DevRoleSwitcherModal.jsx	2026-11-11 20:38:09.326973742 +0000
+@@ -98,7 +98,13 @@
+   };
+ 
+   const handleSwitchPersona = async (personaKey) => {
+-    const switched = await loginRole(personaKey);
++    let switched;
++    try {
++      switched = await loginRole(personaKey);
++    } catch (err) {
++      window.alert(err?.message || 'Could not switch persona.');
++      return;
++    }
+     setVisitedPersonas((prev) => ({ ...prev, [personaKey]: true }));
+     onClose();
+     const target = ROLE_HOME[switched?.role] || '/';
+diff -ruN a/frontend/src/contexts/AuthContext.jsx CrossQuest-backend-fixing/frontend/src/contexts/AuthContext.jsx
+--- a/frontend/src/contexts/AuthContext.jsx	2026-11-11 20:29:51.000000000 +0000
++++ b/frontend/src/contexts/AuthContext.jsx	2026-11-11 20:38:09.326487413 +0000
+@@ -1,5 +1,5 @@
+ import React, { createContext, useContext, useState, useEffect } from 'react';
+-import { authFetch, SESSION_EXPIRED_EVENT, switchMyCompanyApi } from '../services/api';
++import { authFetch, SESSION_EXPIRED_EVENT, switchMyCompanyApi, setAccessToken } from '../services/api';
+ 
+ export const DEMO_USERS = {
+   // --- ADMINISTRATORS ---
+@@ -477,6 +477,18 @@
+         .forEach((k) => localStorage.removeItem(k));
+     } catch (e) {}
+ 
++    // Drop the previous persona's refresh cookie + in-memory token BEFORE signing in as the next one. Otherwise,
++    // if the new login fails, every API call silently refreshes with the old user's cookie and the new persona
++    // shows that user's (often Administrator) data.
++    setAccessToken(null);
++    setToken(null);
++    try {
++      await fetch('http://localhost:8000/api/v1/auth/logout', {
++        method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
++      });
++    } catch {}
++    let acquired = false;
++
+     try {
+       const formData = new URLSearchParams();
+       formData.append('username', user.email);
+@@ -508,6 +520,8 @@
+         if (activeToken) {
+           try { localStorage.removeItem('crossquest_auth_token'); } catch {}
+           localStorage.setItem('crossquest_auth_email', user.email);
++          acquired = true;
++          setAccessToken(activeToken);
+           setToken(activeToken);
+           try {
+             const meRes = await fetch('http://localhost:8000/api/v1/users/me', {
+@@ -529,6 +543,9 @@
+       console.warn("Could not acquire backend token for role switch:", e);
+     }
+ 
++    if (!acquired) {
++      throw new Error(`Could not sign in as ${user.email}. Is the backend up and the persona seeded?`);
++    }
+     localStorage.setItem('crossquest_auth_user', JSON.stringify(user));
+     setCurrentUser(user);
+     return user;
+@@ -570,6 +587,7 @@
+           };
+         }
+ 
++        setAccessToken(data.access_token);
+         setToken(data.access_token);
+         try { localStorage.removeItem('crossquest_auth_token'); } catch {}
+ 
+@@ -620,6 +638,7 @@
+       }
+ 
+       const data = await res.json();
++      setAccessToken(data.access_token);
+       setToken(data.access_token);
+       try { localStorage.removeItem('crossquest_auth_token'); } catch {}
+ 
+@@ -674,6 +693,7 @@
+       method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+     }).catch(() => {});
+     setCurrentUser(null);
++    setAccessToken(null);
+     setToken(null);
+     localStorage.removeItem('crossquest_auth_user');
+     localStorage.removeItem('crossquest_auth_token');
+diff -ruN a/frontend/src/services/api.js CrossQuest-backend-fixing/frontend/src/services/api.js
+--- a/frontend/src/services/api.js	2026-11-11 20:29:51.000000000 +0000
++++ b/frontend/src/services/api.js	2026-11-11 20:37:34.924999619 +0000
+@@ -47,31 +47,44 @@
+ };
+ const IDLE_RE = /inactiv|timed out|idle/i;
+ 
++// Access token lives in memory only (capstone rule 8: no tokens in script-readable storage).
++let _accessToken = null;
++export function setAccessToken(t) { _accessToken = t || null; }
++export function getAccessToken() { return _accessToken; }
++
++// One refresh at a time. The server rotates the refresh cookie on every call, so two parallel refreshes make
++// the second one fail with "revoked refresh session" and log the person out (this was the Erika Bana logout).
++let _refreshInFlight = null;
++
+ /** Renews the 10-min access token via the server refresh cookie. Server enforces idle + 12h max (SEC-07, OI-17). */
+-export async function refreshAuthToken() {
+-  try {
+-    const res = await fetch(`${API_BASE}/auth/refresh`, {
+-      method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+-    });
+-    if (res.ok) {
+-      const d = await res.json();
+-      if (d.access_token) {
+-        localStorage.setItem('crossquest_auth_token', d.access_token);
+-        window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: d.access_token } }));
+-        return d.access_token;
++export function refreshAuthToken() {
++  if (_refreshInFlight) return _refreshInFlight;
++  _refreshInFlight = (async () => {
++    try {
++      const res = await fetch(`${API_BASE}/auth/refresh`, {
++        method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
++      });
++      if (res.ok) {
++        const d = await res.json();
++        if (d.access_token) {
++          _accessToken = d.access_token;
++          window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: d.access_token } }));
++          return d.access_token;
++        }
+       }
+-    }
+-    if (res.status === 401 || res.status === 403) {
+-      let detail = ''; try { detail = (await res.json()).detail || ''; } catch {}
+-      emitExpired(IDLE_RE.test(detail) ? 'idle' : 'expired');
+-    }
+-  } catch (e) { console.warn('Token refresh failed:', e); }
+-  return null;
++      if (res.status === 401 || res.status === 403) {
++        let detail = ''; try { detail = (await res.json()).detail || ''; } catch {}
++        emitExpired(IDLE_RE.test(detail) ? 'idle' : 'expired');
++      }
++    } catch (e) { console.warn('Token refresh failed:', e); }
++    return null;
++  })().finally(() => { _refreshInFlight = null; });
++  return _refreshInFlight;
+ }
+ 
+ /** Authenticated fetch. NEVER silently re-logs in: a timed-out/revoked session ends at /login. */
+ export async function authFetch(url, options = {}, token) {
+-  let activeToken = token || localStorage.getItem('crossquest_auth_token');
++  let activeToken = token || _accessToken;
+   if (!activeToken || isTokenExpired(activeToken)) activeToken = await refreshAuthToken();
+   if (!activeToken) return new Response(JSON.stringify({ detail: 'Session expired' }), { status: 401 });
+ 
+@@ -222,7 +235,7 @@
+ export async function fetchTraineeGamification(traineeId, token) {
+   try {
+     const headers = {};
+-    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('crossquest_auth_token') : null);
++    const authToken = token || _accessToken;
+     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+     const controller = new AbortController();
+     const timeoutId = setTimeout(() => controller.abort(), 2500);
+@@ -511,7 +524,7 @@
+ }
+ 
+ export async function downloadCertificatePdf(certificateId, token) {
+-  const authToken = token || localStorage.getItem('crossquest_auth_token');
++  const authToken = token || _accessToken;
+   const res = await fetch(`${API_BASE}/certifications/${encodeURIComponent(certificateId)}/pdf`, {
+     headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+   });
+@@ -525,7 +538,7 @@
+ }
+ 
+ export async function downloadBatchReconciliationPdf(batchId, token) {
+-  const authToken = token || localStorage.getItem('crossquest_auth_token');
++  const authToken = token || _accessToken;
+   const res = await fetch(`${API_BASE}/imports/batches/${encodeURIComponent(batchId)}/reconciliation/pdf`, {
+     headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+   });
+@@ -539,7 +552,7 @@
+ }
+ 
+ export async function downloadBatchReconciliationCsv(batchId, token) {
+-  const authToken = token || localStorage.getItem('crossquest_auth_token');
++  const authToken = token || _accessToken;
+   const res = await fetch(`${API_BASE}/imports/batches/${encodeURIComponent(batchId)}/reconciliation/csv`, {
+     headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+   });
+@@ -764,7 +777,7 @@
+ 
+ export async function downloadAnomalyReportPdf(token) {
+   try {
+-    const authToken = token || localStorage.getItem('crossquest_auth_token');
++    const authToken = token || _accessToken;
+     const headers = {};
+     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+     const res = await fetch(`${API_BASE}/anomalies/report/pdf`, { headers });
+@@ -780,7 +793,7 @@
+ 
+ export async function downloadAnomalyReportCsv(token) {
+   try {
+-    const authToken = token || localStorage.getItem('crossquest_auth_token');
++    const authToken = token || _accessToken;
+     const headers = {};
+     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+     const res = await fetch(`${API_BASE}/anomalies/report/csv`, { headers });
+@@ -1012,7 +1025,7 @@
+ 
+ export async function exportAuditLogsCsv(token) {
+   try {
+-    const authToken = token || localStorage.getItem('crossquest_auth_token');
++    const authToken = token || _accessToken;
+     // First try dedicated backend CSV endpoint
+     try {
+       const resCsv = await fetch(`${API_BASE}/anomalies/logs/csv`, {
+@@ -1057,7 +1070,7 @@
+ 
+ export async function exportVaultRecordsCsv(token) {
+   try {
+-    const authToken = token || localStorage.getItem('crossquest_auth_token');
++    const authToken = token || _accessToken;
+     try {
+       const resCsv = await fetch(`${API_BASE}/records/export/csv`, {
+         headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}

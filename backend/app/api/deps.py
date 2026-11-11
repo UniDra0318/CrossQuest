@@ -86,16 +86,22 @@ def get_current_user(
             trainee_obj = db.query(Trainee).filter((Trainee.user_id == user.id) | (Trainee.email == user.email)).first()
             trainee_id = trainee_obj.id if trainee_obj else None
 
-    # Generate and inject HMAC-signed context for PostgreSQL RLS (SEC-08, SEC-24, OI-14)
+    # Bind the RLS identity to THIS db session. after_begin (database.py) re-signs and applies it, transaction-local,
+    # on every transaction this request opens, so a commit mid-request or a recycled pooled connection can no
+    # longer carry another user's role (SEC-08, SEC-24, OI-14).
+    db.info["rls_identity"] = {"user_id": str(user.id), "role": user.role, "trainee_id": trainee_id}
     signed_ctx = sign_context(user_id=user.id, role=user.role, trainee_id=trainee_id)
     request_context_var.set(signed_ctx)
     if db.bind and db.bind.dialect.name == "postgresql":
         from sqlalchemy import text
-        db.execute(text("SELECT set_config('crossquest.current_user_id', :uid, false)"), {"uid": signed_ctx["user_id"]})
-        db.execute(text("SELECT set_config('crossquest.current_role', :role, false)"), {"role": signed_ctx["role"]})
-        db.execute(text("SELECT set_config('crossquest.current_trainee_id', :tid, false)"), {"tid": signed_ctx["trainee_id"]})
-        db.execute(text("SELECT set_config('crossquest.context_expiry', :exp, false)"), {"exp": str(signed_ctx["expiry"])})
-        db.execute(text("SELECT set_config('crossquest.context_signature', :sig, false)"), {"sig": signed_ctx["signature"]})
+        for k, v in (
+            ("crossquest.current_user_id", signed_ctx["user_id"]),
+            ("crossquest.current_role", signed_ctx["role"]),
+            ("crossquest.current_trainee_id", signed_ctx["trainee_id"]),
+            ("crossquest.context_expiry", str(signed_ctx["expiry"])),
+            ("crossquest.context_signature", signed_ctx["signature"]),
+        ):
+            db.execute(text("SELECT set_config(:k, :v, true)"), {"k": k, "v": v or ""})
 
     return user
 

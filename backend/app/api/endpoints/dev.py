@@ -77,10 +77,10 @@ def list_dev_scenarios(db: Session = Depends(get_db)):
     scn04_state = f"Score: {r04.score}%" if r04 and r04.score is not None else "Needs score correction"
 
     a09 = db.query(AnomalyAlert).filter(AnomalyAlert.id == "alt-scn-09-joey").first()
-    scn09_state = "Peer review completed" if (a09 and a09.is_resolved) else "Open alert awaiting peer review"
+    scn09_state = "Peer review completed" if (a09 and a09.status == "CLOSED") else "Open alert awaiting peer review"
 
     b11 = db.query(ImportBatch).filter(ImportBatch.id == "imp-scn-11").first()
-    scn11_state = f"Batch status: {b11.status}" if b11 else "Ready for reconciliation"
+    scn11_state = ("Reconciled" if b11.reconciled else f"{b11.quarantined_count} quarantined rows awaiting reconciliation") if b11 else "Ready for reconciliation"
 
     return {
         "SCN-01": {"state": scn01_state},

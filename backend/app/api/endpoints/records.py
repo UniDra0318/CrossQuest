@@ -1223,7 +1223,17 @@ def list_training_sessions(
     """Lists training sessions scoped to the user's role with accurate enrollment counts and client_code."""
     from app.core.database import admin_engine
     from sqlalchemy.orm import sessionmaker as _sm
-    sessions = db.query(TrainingSession).order_by(TrainingSession.start_date.desc()).all()
+    if current_user.role in ("trainee",):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Trainees cannot list training sessions.")
+    sessions_q = db.query(TrainingSession)
+    if current_user.role == "trainer":
+        # U-12: a Trainer only ever sees sessions they are currently assigned to.
+        _now = datetime.now(timezone.utc).replace(tzinfo=None)
+        sessions_q = sessions_q.filter(TrainingSession.id.in_(
+            db.query(TrainerAssignment.session_id).filter(
+                TrainerAssignment.user_id == current_user.id,
+                (TrainerAssignment.valid_to == None) | (TrainerAssignment.valid_to > _now))))
+    sessions = sessions_q.order_by(TrainingSession.start_date.desc()).all()
     result = []
     now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
 

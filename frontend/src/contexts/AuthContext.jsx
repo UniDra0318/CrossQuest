@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authFetch, SESSION_EXPIRED_EVENT, switchMyCompanyApi } from '../services/api';
+import { authFetch, SESSION_EXPIRED_EVENT, switchMyCompanyApi, setAccessToken } from '../services/api';
 
 export const DEMO_USERS = {
   // --- ADMINISTRATORS ---
@@ -477,6 +477,18 @@ export function AuthProvider({ children }) {
         .forEach((k) => localStorage.removeItem(k));
     } catch (e) {}
 
+    // Drop the previous persona's refresh cookie + in-memory token BEFORE signing in as the next one. Otherwise,
+    // if the new login fails, every API call silently refreshes with the old user's cookie and the new persona
+    // shows that user's (often Administrator) data.
+    setAccessToken(null);
+    setToken(null);
+    try {
+      await fetch('http://localhost:8000/api/v1/auth/logout', {
+        method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+    } catch {}
+    let acquired = false;
+
     try {
       const formData = new URLSearchParams();
       formData.append('username', user.email);
@@ -508,6 +520,8 @@ export function AuthProvider({ children }) {
         if (activeToken) {
           try { localStorage.removeItem('crossquest_auth_token'); } catch {}
           localStorage.setItem('crossquest_auth_email', user.email);
+          acquired = true;
+          setAccessToken(activeToken);
           setToken(activeToken);
           try {
             const meRes = await fetch('http://localhost:8000/api/v1/users/me', {
@@ -529,6 +543,9 @@ export function AuthProvider({ children }) {
       console.warn("Could not acquire backend token for role switch:", e);
     }
 
+    if (!acquired) {
+      throw new Error(`Could not sign in as ${user.email}. Is the backend up and the persona seeded?`);
+    }
     localStorage.setItem('crossquest_auth_user', JSON.stringify(user));
     setCurrentUser(user);
     return user;
@@ -570,6 +587,7 @@ export function AuthProvider({ children }) {
           };
         }
 
+        setAccessToken(data.access_token);
         setToken(data.access_token);
         try { localStorage.removeItem('crossquest_auth_token'); } catch {}
 
@@ -620,6 +638,7 @@ export function AuthProvider({ children }) {
       }
 
       const data = await res.json();
+      setAccessToken(data.access_token);
       setToken(data.access_token);
       try { localStorage.removeItem('crossquest_auth_token'); } catch {}
 
@@ -674,6 +693,7 @@ export function AuthProvider({ children }) {
       method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).catch(() => {});
     setCurrentUser(null);
+    setAccessToken(null);
     setToken(null);
     localStorage.removeItem('crossquest_auth_user');
     localStorage.removeItem('crossquest_auth_token');
