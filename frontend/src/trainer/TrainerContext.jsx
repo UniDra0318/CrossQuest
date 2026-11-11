@@ -5,6 +5,8 @@ import {
   deriveRoster,
   gradeTrainee,
   getQuizzes,
+  getQuizQuestions,
+  getQuizAttempts,
   getQuizCourses,
   createQuiz,
   addQuestion,
@@ -41,6 +43,8 @@ export function TrainerProvider({ children }) {
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [quizCourses, setQuizCourses] = useState([]);
+  const [quizAttempts, setQuizAttempts] = useState([]);
+  const [questionsLoadingId, setQuestionsLoadingId] = useState(null);
   const [selectedScope, setSelectedScope] = useState('ALL');
   const [selectedTraineeId, setSelectedTraineeId] = useState(null);
   const [gradeResult, setGradeResult] = useState(null);
@@ -72,18 +76,42 @@ export function TrainerProvider({ children }) {
     applySessions(s);
     setLoading(false);
     getTrainerMe().then(setMe).catch(() => {});
+    getQuizAttempts(token).then(setQuizAttempts).catch(() => {});
   }, [token, currentUser?.id]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  const loadQuizQuestions = useCallback(async (quizId, force = false) => {
+    if (!quizId) return [];
+    setQuestionsLoadingId(quizId);
+    try {
+      const loaded = await getQuizQuestions(quizId, token);
+      setQuizzes(prev => prev.map(q => q.id === quizId ? {
+        ...q,
+        questions: loaded,
+        questionsCount: loaded.length || q.questionsCount || 0,
+        questionsLoaded: true,
+      } : q));
+      return loaded;
+    } catch (e) {
+      console.warn('Question load failed:', e);
+      return [];
+    } finally {
+      setQuestionsLoadingId(prev => prev === quizId ? null : prev);
+    }
+  }, [token]);
+
   const loadQuizzes = useCallback(async () => {
     setQuizzesLoading(true);
     try {
-      const [qs, cs] = await Promise.all([getQuizzes(token), getQuizCourses(token)]);
-      setQuizzes(qs); setQuizCourses(cs);
+      const [qs, cs, atts] = await Promise.all([getQuizzes(token), getQuizCourses(token), getQuizAttempts(token)]);
+      setQuizzes(qs); setQuizCourses(cs); setQuizAttempts(atts || []);
+      if (qs && qs.length > 0) {
+        loadQuizQuestions(qs[0].id);
+      }
     } catch (e) { console.warn('Quiz load failed:', e); }
     finally { setQuizzesLoading(false); }
-  }, [token]);
+  }, [token, loadQuizQuestions]);
 
   const refreshSessions = async () => {
     await loadData(true);
@@ -107,38 +135,34 @@ export function TrainerProvider({ children }) {
 
   const handleCreateQuiz = async (title, courseId) => {
     const created = await createQuiz(title, courseId, token);
-    setQuizzes(await getQuizzes(token));
+    const qs = await getQuizzes(token);
+    setQuizzes(qs.map(q => q.id === created.id ? { ...q, questions: [], questionsLoaded: true } : q));
     return created;
   };
 
   const handleAddQuestion = async (quizId, q) => {
     await addQuestion(quizId, q, token);
-    const updated = await getQuizzes(token);
-    setQuizzes(updated);
+    await loadQuizQuestions(quizId, true);
   };
 
   const handleUpdateQuestion = async (quizId, qid, q) => {
     await updateQuestion(quizId, qid, q, token);
-    const updated = await getQuizzes(token);
-    setQuizzes(updated);
+    await loadQuizQuestions(quizId, true);
   };
 
   const handleDeleteQuestion = async (quizId, qid) => {
     await deleteQuestion(quizId, qid, token);
-    const updated = await getQuizzes(token);
-    setQuizzes(updated);
+    await loadQuizQuestions(quizId, true);
   };
 
   const handleUpdateSettings = async (quizId, settings) => {
     await updateQuizSettings(quizId, settings);
-    const updated = await getQuizzes(token);
-    setQuizzes(updated);
+    setQuizzes(prev => prev.map(q => q.id === quizId ? { ...q, ...settings } : q));
   };
 
   const handleResetQuizzes = async () => {
     await resetQuizzes();
-    const updated = await getQuizzes(token);
-    setQuizzes(updated);
+    await loadQuizzes();
   };
 
   const handleAssignTeam = async (traineeId, teamName) => {
@@ -202,6 +226,9 @@ export function TrainerProvider({ children }) {
         handleSignOffSession,
         quizzes,
         quizCourses,
+        quizAttempts,
+        loadQuizQuestions,
+        questionsLoadingId,
         analytics,
         selectedScope,
         setSelectedScope,

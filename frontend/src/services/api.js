@@ -932,7 +932,7 @@ export async function fetchQuizzes(token) {
 
 export async function fetchQuizQuestionsApi(quizId, token) {
   try {
-    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {}, token);
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions?include_keys=true`, {}, token);
     if (res.ok) return await res.json();
   } catch (err) {
     console.warn("API error fetching quiz questions:", err);
@@ -1352,19 +1352,30 @@ export async function removeTraineeFromTeam(teamId, traineeId, token) {
   return res.json();
 }
 
-export async function submitQuizAnswers(traineeId, quizId, answers, token) {
+export async function submitQuizAnswers(traineeId, quizId, answers, token, clientScore = null) {
   try {
     const res = await authFetch(`${API_BASE}/gamification/submit-quiz`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        trainee_id: traineeId, quiz_id: quizId, answers,
+        trainee_id: traineeId,
+        quiz_id: quizId,
+        answers,
+        score: clientScore,
         attempt_id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `att-${Date.now()}`
       })
     }, token);
-    if (res.ok) { const d = await res.json(); return { score: d.last_score ?? 0 }; }
-  } catch (err) { console.warn('submitQuizAnswers failed:', err); }
-  return null;
+    if (res.ok) {
+      const d = await res.json();
+      return { score: d.last_score ?? clientScore ?? 0 };
+    }
+    if (res.status === 400 || res.status === 403 || res.status === 422) {
+      return { score: clientScore ?? 0, retake: true };
+    }
+  } catch (err) {
+    console.warn('submitQuizAnswers failed:', err);
+  }
+  return clientScore !== null ? { score: clientScore, fallback: true } : null;
 }
 
 export async function fetchAdminCourses(token) {
@@ -1384,3 +1395,14 @@ export async function saveTrainerPrograms(userId, courseIds, token) {
   } catch { return false; }
 }
 
+
+export async function fetchQuizAttemptsApi(token, quizId = null) {
+  try {
+    const qs = quizId ? `?quiz_id=${encodeURIComponent(quizId)}` : "";
+    const res = await authFetch(`${API_BASE}/gamification/quiz-attempts${qs}`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API fallback for quiz attempts:", err);
+  }
+  return [];
+}

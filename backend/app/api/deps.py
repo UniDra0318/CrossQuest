@@ -87,7 +87,8 @@ def get_current_user(
             trainee_id = trainee_obj.id if trainee_obj else None
 
     # Generate and inject HMAC-signed context for PostgreSQL RLS (SEC-08, SEC-24, OI-14)
-    signed_ctx = sign_context(user_id=user.id, role=user.role, trainee_id=trainee_id)
+    rls_role = "ACCOUNT_MANAGER" if user.role == "company_staff" else user.role
+    signed_ctx = sign_context(user_id=user.id, role=rls_role, trainee_id=trainee_id)
     request_context_var.set(signed_ctx)
     if db.bind and db.bind.dialect.name == "postgresql":
         from sqlalchemy import text

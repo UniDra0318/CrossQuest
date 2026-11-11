@@ -226,10 +226,21 @@ class QuizCreate(BaseModel):
 
 class QuizQuestionCreate(BaseModel):
     question_text: str
-    options: List[str]
+    options: List[str] = []
     correct_option: int = 0
     points: int = 10
     explanation: Optional[str] = None
+    question_type: Optional[str] = "multiple_choice"
+    placeholder: Optional[str] = None
+    accepted_answers: Optional[List[str]] = None
+    initial_order: Optional[List[str]] = None
+    correct_order: Optional[List[str]] = None
+    pairs: Optional[List[Dict[str, Any]]] = None
+    diagram_type: Optional[str] = None
+    diagram_title: Optional[str] = None
+    custom_nodes: Optional[List[Dict[str, Any]]] = None
+    custom_layout: Optional[str] = None
+    answer_label: Optional[str] = None
 
 
 # Certification
@@ -291,7 +302,7 @@ class QuizSubmitRequest(BaseModel):
     attempt_id: Optional[str] = None # Client-generated UUID for idempotency
     trainee_id: str
     quiz_id: str
-    answers: Optional[Dict[str, int]] = None
+    answers: Optional[Dict[str, Any]] = None
     score: Optional[float] = None
     total_questions: Optional[int] = None
     submitted_offline: bool = False
@@ -314,6 +325,14 @@ class QuizQuestionTraineeView(BaseModel):
     question_text: str
     options: List[str]
     points: int
+    question_type: Optional[str] = "multiple_choice"
+    placeholder: Optional[str] = None
+    initial_order: Optional[List[str]] = None
+    pairs: Optional[List[Dict[str, Any]]] = None
+    diagram_type: Optional[str] = None
+    diagram_title: Optional[str] = None
+    custom_nodes: Optional[List[Dict[str, Any]]] = None
+    custom_layout: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -322,6 +341,9 @@ class QuizQuestionStaffView(QuizQuestionTraineeView):
     """Trainer/Admin authoring view. correct_answer/explanation stay None for trainees (SEC-26)."""
     correct_answer: Optional[int] = None
     explanation: Optional[str] = None
+    accepted_answers: Optional[List[str]] = None
+    correct_order: Optional[List[str]] = None
+    answer_label: Optional[str] = None
 
 class QuizQuestionReview(BaseModel):
     question_id: str

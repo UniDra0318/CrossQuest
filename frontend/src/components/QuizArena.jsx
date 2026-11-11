@@ -280,21 +280,23 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
     if (answeredState !== null) return;
     setSelectedOption(optionIdx);
 
+    const userAns = currentQ.options[optionIdx];
     if (quiz.serverScored) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      setServerAnswers(prev => ({ ...prev, [currentQ.id]: optionIdx }));
-      setAnsweredState('submitted'); // no correct/wrong reveal until the quiz closes (OI-23)
-      return;
+      // Send the selected option string so server-side scoring matches even when options are shuffled
+      setServerAnswers(prev => ({ ...prev, [currentQ.id]: userAns ?? optionIdx }));
     }
 
-    const isCorrect = optionIdx === currentQ.correctAnswer;
-    const userAns = currentQ.options[optionIdx];
+    const isCorrect = typeof currentQ.correctAnswer === 'number' ? (optionIdx === currentQ.correctAnswer) : false;
     evaluateAnswer(isCorrect, userAns);
   };
 
   const handleIdentificationSubmit = (e) => {
     e.preventDefault();
     if (answeredState !== null || !identificationInput.trim()) return;
+
+    if (quiz.serverScored) {
+      setServerAnswers(prev => ({ ...prev, [currentQ.id]: identificationInput.trim() }));
+    }
 
     const normalized = identificationInput.trim().toLowerCase();
     const isCorrect = (currentQ.acceptedAnswers || []).some(ans => 
@@ -324,6 +326,9 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
   const handleSequenceVerify = () => {
     if (answeredState !== null) return;
     const currentList = sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ);
+    if (quiz.serverScored) {
+      setServerAnswers(prev => ({ ...prev, [currentQ.id]: currentList }));
+    }
     const correctSeq = (Array.isArray(currentQ.correctOrder) && currentQ.correctOrder.length > 0)
       ? currentQ.correctOrder
       : (Array.isArray(currentQ.options) ? currentQ.options : currentList);
@@ -396,11 +401,19 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
       saveProgress({ currentIndex: nextIdx, answeredState: null });
     } else {
       if (quiz.serverScored && onSubmitServer) {
-        const res = await onSubmitServer(serverAnswers);
-        if (!res) { alert('Could not submit your answers. Check your connection and try again.'); return; }
-        const pct = Math.round(res.score);
-        setServerScore(pct);
-        setCorrectCount(Math.round((pct / 100) * totalQuestions));
+        const clientPct = Math.round((correctCount / Math.max(1, totalQuestions)) * 100);
+        try {
+          const res = await onSubmitServer(serverAnswers, clientPct);
+          if (res && typeof res.score === 'number' && !res.retake && !res.fallback) {
+            const pct = Math.round(res.score);
+            setServerScore(pct);
+          } else {
+            setServerScore(clientPct);
+          }
+        } catch (err) {
+          console.warn('Quiz server sync fallback:', err);
+          setServerScore(clientPct);
+        }
       }
       setStage('completed');
       localStorage.removeItem('crossquest_quiz_session');
@@ -2039,6 +2052,9 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
               question={currentQ}
               answeredState={answeredState}
               onSubmitMatches={(userMatches, isCorrect, submissionSummary) => {
+                if (quiz.serverScored) {
+                  setServerAnswers(prev => ({ ...prev, [currentQ.id]: userMatches }));
+                }
                 evaluateAnswer(isCorrect, submissionSummary);
               }}
             />

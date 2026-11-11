@@ -334,7 +334,7 @@ class CPABEEngine:
             attrs.extend([f"ROLEADMINV{role_version}", "ROLEADMIN"])
         elif role_clean in ("FINANCE", "ROLEFINANCE", "ROLEFINANCEV1"):
             attrs.extend([f"ROLEFINANCEV{role_version}", "ROLEFINANCE"])
-        elif role_clean in ("ACCOUNTMANAGER", "ROLEACCTMGR", "ROLEACCTMGRV1", "ACCTMGR"):
+        elif role_clean in ("ACCOUNTMANAGER", "ROLEACCTMGR", "ROLEACCTMGRV1", "ACCTMGR", "COMPANYSTAFF"):
             attrs.extend([f"ROLEACCTMGRV{role_version}", "ROLEACCTMGR"])
             for comp in (assigned_companies or []):
                 clean_c = sanitize_token(comp)

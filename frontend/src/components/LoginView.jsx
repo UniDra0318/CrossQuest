@@ -15,7 +15,7 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, DEMO_STATUS_MIX } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ROLE_HOME } from '../routes/routeConfig';
 import { setupMfaApi, enableMfaApi } from '../services/api';
@@ -120,15 +120,42 @@ export default function LoginView() {
   const roleList = [
     { key: 'admin', title: 'Principal Consultant & Lead Admin', name: "Joselito 'Joey' Mallari Jr.", org: 'Crossworks Leadership', icon: Shield, badgeClass: 'admin' },
     { key: 'admin_general', title: 'Compliance Administrator & Peer Reviewer', name: 'Len Mallari', org: 'Crossworks Administration', icon: Shield, badgeClass: 'admin' },
-    { key: 'account_manager', title: 'Account Manager (Enterprise Accounts)', name: 'Erika Bana', org: 'Crossworks Client Portfolio', icon: Key, badgeClass: 'staff' },
-    { key: 'am_sharon', title: 'Account Manager (Strategic Accounts)', name: 'Sharon De Vera', org: 'Crossworks Client Portfolio', icon: Key, badgeClass: 'staff' },
-    { key: 'am_brian', title: 'Account Manager (Tech & Telecom)', name: 'Brian Mendoza', org: 'Crossworks Client Portfolio', icon: Key, badgeClass: 'staff' },
+    { key: 'account_manager', title: 'Account Manager (Enterprise Accounts)', name: 'Erika Bana', org: 'VHL • AOS • ISLA_LPG_CORPOR (+4)', icon: Key, badgeClass: 'staff' },
+    { key: 'am_sharon', title: 'Account Manager (Strategic Accounts)', name: 'Sharon De Vera', org: 'ROP • URC • AYALA_LAND • BIBSP (+20)', icon: Key, badgeClass: 'staff' },
+    { key: 'am_brian', title: 'Account Manager (Tech & Telecom)', name: 'Brian Mendoza', org: 'IPROY_SERVI • SECURI_BANK • XSDS (+4)', icon: Key, badgeClass: 'staff' },
+    { key: 'am_joey', title: 'Account Manager (Commercial Accounts)', name: 'Jordan Ramos (Sales)', org: 'AMIHAN_SOLUTI • EWALIC', icon: Key, badgeClass: 'staff' },
     { key: 'finance', title: 'Finance & Billing Specialist', name: 'Elena Santos', org: 'Crossworks Operations & Billing', icon: Building2, badgeClass: 'finance' },
-    { key: 'trainer', title: 'Lead Technical Instructor', name: 'Jordan Ramos', org: 'Crossworks Lead Trainer', icon: GraduationCap, badgeClass: 'trainer' },
-    { key: 'trainee', title: 'Trainee (Vertiv Holdings)', name: 'Andrea Aguilar', org: 'VHL • TRN-8000', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_ricardo', title: 'Trainee (IPRoyal Services)', name: 'Ricardo Ocampo', org: 'IPROY_SERVI • TRN-8001', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_bea', title: 'Trainee (IPRoyal Services)', name: 'Bea Macaraeg', org: 'IPROY_SERVI • TRN-8002', icon: Award, badgeClass: 'trainee' },
-    { key: 'trainee_rafael', title: 'Trainee (Amihan Solutions)', name: 'Rafael Dizon', org: 'AMIHAN_SOLUTI • TRN-8015', icon: Award, badgeClass: 'trainee' }
+    ...Object.entries(DEMO_USERS)
+      .filter(([, u]) => u.role === 'company_staff')
+      .map(([key, u]) => ({
+        key,
+        title: `Company Staff (${u.organization})`,
+        name: u.name,
+        org: `${u.company_code} • ${u.email}`,
+        icon: Building2,
+        badgeClass: 'finance',
+      })),
+    ...Object.entries(DEMO_USERS)
+      .filter(([, u]) => u.role === 'trainer')
+      .map(([key, u]) => ({
+        key,
+        title: u.title || 'Lead Technical Instructor',
+        name: u.name,
+        org: `${u.email} • ${(u.assigned_companies || []).slice(0, 3).join(', ')}`,
+        icon: GraduationCap,
+        badgeClass: 'trainer',
+      })),
+    ...Object.entries(DEMO_USERS)
+      .filter(([, u]) => u.role === 'trainee')
+      .map(([key, u]) => ({
+        key,
+        title: `Trainee (${u.organization})`,
+        name: u.name,
+        org: `${(u.assigned_companies || [u.company_code]).join('+')} • ${u.trainee_code}` +
+             (DEMO_STATUS_MIX[key] ? ` • ${DEMO_STATUS_MIX[key].join(' / ')}` : ''),
+        icon: Award,
+        badgeClass: 'trainee',
+      })),
   ];
 
   const showDevTab = import.meta.env.DEV && (
@@ -410,7 +437,7 @@ export default function LoginView() {
                     Select any user persona to sign in instantly and explore their designated portal:
                   </p>
 
-                  <div className="demo-roles-stack">
+                  <div className="demo-roles-stack" style={{ maxHeight: '52vh', overflowY: 'auto', paddingRight: '4px' }}>
                     {roleList.map((r) => {
                       const Icon = r.icon;
                       return (

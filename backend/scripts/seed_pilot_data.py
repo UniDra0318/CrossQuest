@@ -493,6 +493,7 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
 
         quiz = Quiz(
             session_id=target_sess.id,
+            course_id=target_sess.course_id,
             title=q_spec["title"],
             version_no=1,
             is_closed=False,

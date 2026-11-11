@@ -44,7 +44,7 @@ def list_client_companies(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role == "account_manager":
+    if current_user.role in ("account_manager", "company_staff"):
         assigned = current_user.assigned_client_accounts or []
         return db.query(ClientCompany).filter(ClientCompany.code.in_(assigned)).all()
     return db.query(ClientCompany).all()
@@ -102,7 +102,7 @@ def list_trainees(
     if current_user.role == "trainee":
         # Trainee can only view own profile (FR-09)
         query = query.filter(Trainee.user_id == current_user.id)
-    elif current_user.role == "account_manager":
+    elif current_user.role in ("account_manager", "company_staff"):
         # Scoped to assigned companies
         assigned_codes = current_user.assigned_client_accounts or []
         assigned_companies = db.query(ClientCompany.id).filter(ClientCompany.code.in_(assigned_codes)).all()

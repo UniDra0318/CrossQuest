@@ -112,7 +112,7 @@ def init_db_rls(target_engine=None):
         app_pw = os.getenv("POSTGRES_APP_PASSWORD", "app_secure_password")
         admin_pw = os.getenv("POSTGRES_PASSWORD", "crossquest_secret_password")
         # 004_rls_remaining_tables.sql is deliberately NOT listed: apply it by hand after testing.
-        for name in ("001_enable_rls.sql", "002_add_user_job_title.sql", "003_add_record_import_batch.sql", "005_alert_peer_review_guard.sql"):
+        for name in ("001_enable_rls.sql", "002_add_user_job_title.sql", "003_add_record_import_batch.sql", "005_alert_peer_review_guard.sql", "006_acctmgr_view_trainer_assignments.sql", "007_trainer_programs.sql", "008_quiz_course_scope.sql"):
             path = os.path.join(base_dir, "migrations", name)
             if not os.path.exists(path):
                 continue

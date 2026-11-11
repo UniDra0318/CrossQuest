@@ -5,10 +5,12 @@ import { TablePagination, usePagination } from '../../components/TablePagination
 
 export default function Analytics({ onNavigateTab }) {
   const { isDark } = useTheme();
-  const { analytics, selectedScope, setSelectedScope, setSelectedTraineeId, loading } = useTrainer();
+  const { analytics, quizAttempts, selectedScope, setSelectedScope, setSelectedTraineeId, loading } = useTrainer();
 
   const orgPg = usePagination(analytics?.orgs || [], 6);
   const remPg = usePagination(analytics?.remediation || [], 6);
+  const filteredAttempts = (quizAttempts || []).filter(a => selectedScope === 'ALL' || a.company_code === selectedScope);
+  const attPg = usePagination(filteredAttempts, 6);
 
   if (loading && !analytics) {
     return <div className="adm-state">Loading cohort analytics...</div>;
@@ -185,6 +187,56 @@ export default function Analytics({ onNavigateTab }) {
           </div>
           <TablePagination currentPage={remPg.currentPage} totalItems={remPg.totalItems} pageSize={6} itemName="trainees" onPageChange={remPg.setCurrentPage} />
         </div>
+      </div>
+      {/* Scored Quiz Attempts Table (Round 11) */}
+      <div className="adm-panel trn-pad" style={{ marginTop: '20px' }}>
+        <div className="adm-panel__head" style={{ padding: '0 0 16px 0', borderBottom: '1px solid var(--cq-line)' }}>
+          <h2>Trainee Quiz Attempts &amp; Scores</h2>
+          <span className="adm-chip adm-chip--purple">
+            {filteredAttempts.length} SCORED ATTEMPTS
+          </span>
+        </div>
+
+        <div style={{ marginTop: '16px', display: 'grid', gap: '10px' }}>
+          {filteredAttempts.length === 0 ? (
+            <div className="adm-state" style={{ padding: '20px 0' }}>
+              No scored quiz attempts recorded yet for this scope.
+            </div>
+          ) : (
+            attPg.paginatedItems.map((att) => (
+              <div
+                key={att.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '10px',
+                  padding: '12px 14px',
+                  borderRadius: '12px',
+                  background: isDark ? '#111827' : 'var(--cq-lav-2)',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none'
+                }}
+              >
+                <div>
+                  <strong>{att.trainee_name}</strong>
+                  <span className="adm-mono" style={{ marginLeft: '8px', fontSize: '11.5px' }}>
+                    {att.trainee_code || ''} · {att.company_name || att.company_code || ''}
+                  </span>
+                  <div className="adm-mono" style={{ marginTop: '3px' }}>
+                    {att.quiz_title} ({att.course_name})
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className={`adm-chip ${att.passed ? 'adm-chip--green' : 'adm-chip--amber'}`}>
+                    {att.score}% ({att.total_points} pts)
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        <TablePagination currentPage={attPg.currentPage} totalItems={attPg.totalItems} pageSize={6} itemName="quiz attempts" onPageChange={attPg.setCurrentPage} />
       </div>
     </>
   );

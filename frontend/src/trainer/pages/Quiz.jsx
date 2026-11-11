@@ -162,6 +162,8 @@ export default function Quiz() {
     handleUpdateSettings,
     handleResetQuizzes,
     loadQuizzes,
+    loadQuizQuestions,
+    questionsLoadingId,
     quizzesLoading,
   } = useTrainer();
   const { token, currentUser } = useAuth();
@@ -326,10 +328,16 @@ export default function Quiz() {
   const [showBuilderDiagramPreview, setShowBuilderDiagramPreview] = useState(true);
   const [rosterDiagramToggles, setRosterDiagramToggles] = useState({});
 
-  // Fallback active quiz selection
+  // Fallback active quiz selection + lazy question loading when a quiz is selected
   const activeQuiz = (quizzes && quizzes.length > 0)
     ? (quizzes.find((q) => q.id === activeQuizId) || quizzes[0])
     : null;
+
+  useEffect(() => {
+    if (activeQuiz && !activeQuiz.questionsLoaded && loadQuizQuestions) {
+      loadQuizQuestions(activeQuiz.id);
+    }
+  }, [activeQuiz?.id, activeQuiz?.questionsLoaded, loadQuizQuestions]);
 
   if (quizzesLoading && (!quizzes || quizzes.length === 0)) {
     return <div className="adm-state">Loading quiz assessment studio...</div>;
@@ -512,7 +520,6 @@ export default function Quiz() {
   };
 
   const byCourse = {};
-  (quizCourses || []).forEach((c) => { byCourse[c.name] = []; });
   (quizzes || []).forEach((q) => { (byCourse[q.course || 'Unassigned'] ||= []).push(q); });
   const quizGroups = Object.entries(byCourse);
   const scopeLabel = currentUser?.role === 'admin' ? 'GLOBAL SCOPE · all courses' : 'LIMITED SCOPE · courses of assigned sessions and programs (U-12)';
@@ -552,14 +559,9 @@ export default function Quiz() {
               <div className="adm-mono" style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.04em', margin: '14px 0 6px', color: isDark ? '#94a3b8' : '#64748b' }}>
                 {course.toUpperCase()} ({items.length})
               </div>
-              {items.length === 0 && (
-                <small style={{ display: 'block', padding: '6px 4px 2px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                  No quizzes in this course yet. Create the first one below.
-                </small>
-              )}
               {items.map((q) => {
                 const isSelected = activeQuiz && activeQuiz.id === q.id;
-                const qCount = q.questions ? q.questions.length : (q.questionsCount || 0);
+                const qCount = q.questionsLoaded ? (q.questions ? q.questions.length : 0) : (q.questionsCount || 0);
                 return (
                   <button
                     key={q.id}
@@ -666,7 +668,7 @@ export default function Quiz() {
                   {activeQuiz.is_closed || activeQuiz.isClosed ? 'SESSION CLOSED' : 'ACTIVE SESSION'}
                 </span>
                 <span className="adm-chip adm-chip--purple" style={{ fontSize: '11.5px', padding: '4px 12px' }}>
-                  {activeQuiz.questions.length} QUESTIONS
+                  {activeQuiz.questionsLoaded ? activeQuiz.questions.length : (activeQuiz.questionsCount || 0)} QUESTIONS
                 </span>
                 {activeQuiz.is_approved || activeQuiz.isApproved ? (
                   <span className="adm-chip adm-chip--green" style={{ fontSize: '11.5px', padding: '4px 12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
@@ -1353,12 +1355,14 @@ export default function Quiz() {
                 ========================================================================= */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '28px 0 14px' }}>
               <span className="adm-label" style={{ fontSize: '12px', color: isDark ? '#cbd5e1' : '#334155' }}>
-                QUESTION ROSTER ({activeQuiz.questions.length})
+                QUESTION ROSTER ({activeQuiz.questionsLoaded ? activeQuiz.questions.length : (activeQuiz.questionsCount || 0)})
               </span>
             </div>
 
             <div style={{ display: 'grid', gap: '14px' }}>
-              {activeQuiz.questions.length === 0 ? (
+              {(!activeQuiz.questionsLoaded && questionsLoadingId === activeQuiz.id) ? (
+                <div className="adm-state" style={{ padding: '28px 20px' }}>Loading questions for {activeQuiz.title}...</div>
+              ) : activeQuiz.questions.length === 0 ? (
                 <div
                   className="adm-state"
                   style={{

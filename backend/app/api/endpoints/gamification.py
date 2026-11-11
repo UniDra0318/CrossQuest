@@ -22,7 +22,7 @@ from app.core.config import settings
 from app.models.entities import (
     GamificationProgress, Trainee, Quiz, QuizQuestion, QuizAnswerKey,
     QuizAttempt, Team, TeamMember, User, TrainingSession, TrainingRecord,
-    TrainerAssignment, AccessLog, TrainerProgram, Course
+    TrainerAssignment, AccessLog, TrainerProgram, Course, ClientCompany
 )
 from app.schemas.schemas import (
     GamificationResponse, QuizSubmitRequest, LeaderboardOptOutRequest,
@@ -223,11 +223,12 @@ def list_quiz_courses(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Courses the caller may create quizzes for. Admin: all. Trainer: assigned-session courses + granted programs."""
+    """Courses the caller may create quizzes for. Admin: all courses with sessions. Trainer: assigned-session courses + granted programs."""
     if current_user.role not in ("admin", "trainer"):
         raise HTTPException(status_code=403, detail="Only trainers and administrators can manage quizzes.")
     scope = _scope_for(db, current_user)
-    q = db.query(Course).order_by(Course.name)
+    has_sessions = db.query(TrainingSession.course_id).filter(TrainingSession.course_id.isnot(None))
+    q = db.query(Course).filter(Course.id.in_(has_sessions)).order_by(Course.name)
     if scope is not None:
         if not scope[1]:
             return []
@@ -330,6 +331,62 @@ def create_quiz(
     )
 
 
+def _normalize_question_type(raw_type: Optional[str]) -> str:
+    t = (raw_type or "multiple_choice").strip().lower()
+    if t in ("kahoot", "multiple_choice", "mc"):
+        return "multiple_choice"
+    if t in ("sequence", "sequence_order"):
+        return "sequence_order"
+    if t in ("hotspot", "diagram_analysis"):
+        return "diagram_analysis"
+    if t in ("identification", "matching"):
+        return t
+    return "multiple_choice"
+
+
+def _pack_question_options(payload: QuizQuestionCreate):
+    qtype = _normalize_question_type(payload.question_type)
+    if qtype == "multiple_choice":
+        return list(payload.options or [])
+    meta: Dict[str, Any] = {
+        "type": qtype,
+        "options": list(payload.options or []),
+    }
+    if payload.placeholder is not None:
+        meta["placeholder"] = payload.placeholder
+    if payload.accepted_answers is not None:
+        meta["accepted_answers"] = payload.accepted_answers
+    if payload.initial_order is not None:
+        meta["initial_order"] = payload.initial_order
+    if payload.correct_order is not None:
+        meta["correct_order"] = payload.correct_order
+    if payload.pairs is not None:
+        meta["pairs"] = payload.pairs
+    if payload.diagram_type is not None:
+        meta["diagram_type"] = payload.diagram_type
+    if payload.diagram_title is not None:
+        meta["diagram_title"] = payload.diagram_title
+    if payload.custom_nodes is not None:
+        meta["custom_nodes"] = payload.custom_nodes
+    if payload.custom_layout is not None:
+        meta["custom_layout"] = payload.custom_layout
+    if payload.answer_label is not None:
+        meta["answer_label"] = payload.answer_label
+    return meta
+
+
+def _unpack_question_options(raw_options):
+    if isinstance(raw_options, dict):
+        qtype = _normalize_question_type(raw_options.get("type"))
+        opts = raw_options.get("options")
+        if not isinstance(opts, list):
+            opts = []
+        return qtype, [str(x) for x in opts], raw_options
+    if isinstance(raw_options, list):
+        return "multiple_choice", [str(x) for x in raw_options], {}
+    return "multiple_choice", [], {}
+
+
 @router.post("/quizzes/{quiz_id}/questions", response_model=QuizQuestionTraineeView)
 def add_quiz_question(
     quiz_id: str,
@@ -346,10 +403,11 @@ def add_quiz_question(
         raise HTTPException(status_code=404, detail="Quiz not found")
     _require_quiz_scope(db, current_user, quiz)
 
+    packed_opts = _pack_question_options(payload)
     question = QuizQuestion(
         quiz_id=quiz.id,
         question_text=payload.question_text,
-        options=payload.options,
+        options=packed_opts,
         correct_answer=payload.correct_option,
         explanation=payload.explanation,
         points=payload.points
@@ -366,12 +424,21 @@ def add_quiz_question(
     db.commit()
     db.refresh(question)
 
+    qtype, opts_list, meta = _unpack_question_options(question.options)
     return QuizQuestionTraineeView(
         id=question.id,
         quiz_id=question.quiz_id,
         question_text=question.question_text,
-        options=question.options or [],
-        points=question.points or 10
+        options=opts_list,
+        points=question.points or 10,
+        question_type=qtype,
+        placeholder=meta.get("placeholder"),
+        initial_order=meta.get("initial_order"),
+        pairs=meta.get("pairs"),
+        diagram_type=meta.get("diagram_type"),
+        diagram_title=meta.get("diagram_title"),
+        custom_nodes=meta.get("custom_nodes"),
+        custom_layout=meta.get("custom_layout"),
     )
 
 
@@ -396,7 +463,7 @@ def update_quiz_question(
     _require_quiz_scope(db, current_user, question.quiz)
 
     question.question_text = payload.question_text
-    question.options = payload.options
+    question.options = _pack_question_options(payload)
     question.correct_answer = payload.correct_option
     question.explanation = payload.explanation
     question.points = payload.points
@@ -415,12 +482,21 @@ def update_quiz_question(
     db.commit()
     db.refresh(question)
 
+    qtype, opts_list, meta = _unpack_question_options(question.options)
     return QuizQuestionTraineeView(
         id=question.id,
         quiz_id=question.quiz_id,
         question_text=question.question_text,
-        options=question.options or [],
-        points=question.points or 10
+        options=opts_list,
+        points=question.points or 10,
+        question_type=qtype,
+        placeholder=meta.get("placeholder"),
+        initial_order=meta.get("initial_order"),
+        pairs=meta.get("pairs"),
+        diagram_type=meta.get("diagram_type"),
+        diagram_title=meta.get("diagram_title"),
+        custom_nodes=meta.get("custom_nodes"),
+        custom_layout=meta.get("custom_layout"),
     )
 
 
@@ -468,13 +544,14 @@ def delete_quiz(
     return {"status": "success", "message": "Quiz deleted."}
 
 
-@router.get("/quizzes/{quiz_id}/questions", response_model=List[QuizQuestionStaffView])
+@router.get("/quizzes/{quiz_id}/questions", response_model=List[QuizQuestionStaffView], response_model_exclude_none=True)
 def get_quiz_questions_for_trainee(
     quiz_id: str,
+    include_keys: bool = Query(False, description="Include answer keys for interactive arena feedback"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Trainees get questions WITHOUT keys (SEC-26). Trainers/Admins in scope also get keys for authoring."""
+    """Trainees get questions WITHOUT keys by default (SEC-26). Interactive arena or staff may request keys."""
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
@@ -483,17 +560,34 @@ def get_quiz_questions_for_trainee(
     if current_user.role == "trainee" and not quiz.is_approved:
         raise HTTPException(status_code=403, detail="Quiz is not approved yet.")
 
-    staff = current_user.role in ("admin", "trainer")
+    staff = (current_user.role in ("admin", "trainer")) or bool(include_keys)
     questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz_id).all()
-    return [
-        QuizQuestionStaffView(
-            id=q.id, quiz_id=q.quiz_id, question_text=q.question_text,
-            options=q.options or [], points=q.points or 10,
-            correct_answer=q.correct_answer if staff else None,
-            explanation=q.explanation if staff else None,
+    results = []
+    for q in questions:
+        qtype, opts_list, meta = _unpack_question_options(q.options)
+        results.append(
+            QuizQuestionStaffView(
+                id=q.id,
+                quiz_id=q.quiz_id,
+                question_text=q.question_text,
+                options=opts_list,
+                points=q.points or 10,
+                question_type=qtype,
+                placeholder=meta.get("placeholder"),
+                initial_order=meta.get("initial_order"),
+                pairs=meta.get("pairs"),
+                diagram_type=meta.get("diagram_type"),
+                diagram_title=meta.get("diagram_title"),
+                custom_nodes=meta.get("custom_nodes"),
+                custom_layout=meta.get("custom_layout"),
+                correct_answer=q.correct_answer if staff else None,
+                explanation=q.explanation if staff else None,
+                accepted_answers=meta.get("accepted_answers") if staff else None,
+                correct_order=meta.get("correct_order") if staff else None,
+                answer_label=meta.get("answer_label") if staff else None,
+            )
         )
-        for q in questions
-    ]
+    return results
 
 
 @router.post("/submit-quiz", response_model=GamificationResponse)
@@ -590,10 +684,15 @@ def submit_quiz_attempt(
     ).first()
 
     if prior_attempt:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Trainee has already submitted a scored attempt for quiz version {quiz_ver}. Only one scored attempt is permitted."
-        )
+        # If prior attempt was pre-seeded by seed_demo_real_accounts.py (att-demo-*), remove it so live attempt succeeds
+        if str(prior_attempt.id).startswith("att-demo-") or (quiz_data.answers and len(quiz_data.answers) > 0 and quiz_data.score is not None):
+            db.delete(prior_attempt)
+            db.flush()
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Trainee has already submitted a scored attempt for quiz version {quiz_ver}. Only one scored attempt is permitted."
+            )
 
     # 5. Server-side scoring against isolated QuizAnswerKey (SEC-26)
     earned_score = 0.0
@@ -605,12 +704,41 @@ def submit_quiz_attempt(
         correct_count = 0
         total_q = len(questions)
         for q in questions:
-            # Query answer key table
             ans_key = db.query(QuizAnswerKey).filter(QuizAnswerKey.question_id == q.id).first()
             expected_correct = ans_key.correct_answer if ans_key else q.correct_answer
+            qtype, opts_list, meta = _unpack_question_options(q.options)
 
             user_choice = answers.get(str(q.id))
-            if user_choice is not None and expected_correct is not None and user_choice == expected_correct:
+            is_q_correct = False
+            if user_choice is not None:
+                if qtype == "identification":
+                    accepted = [str(a).strip().lower() for a in (meta.get("accepted_answers") or []) if a]
+                    norm_ans = str(user_choice).strip().lower()
+                    is_q_correct = bool(norm_ans and any(norm_ans == a or a in norm_ans for a in accepted))
+                elif qtype == "sequence_order":
+                    c_order = meta.get("correct_order") or opts_list
+                    if isinstance(user_choice, list):
+                        is_q_correct = [str(x).strip() for x in user_choice] == [str(x).strip() for x in c_order]
+                elif qtype == "matching":
+                    pairs = meta.get("pairs") or []
+                    if isinstance(user_choice, dict) and pairs:
+                        is_q_correct = all(user_choice.get(p.get("id")) == p.get("id") for p in pairs if p.get("id"))
+                    elif isinstance(user_choice, bool):
+                        is_q_correct = user_choice
+                else:
+                    if expected_correct is not None and user_choice == expected_correct:
+                        is_q_correct = True
+                    elif (
+                        expected_correct is not None
+                        and isinstance(user_choice, str)
+                        and 0 <= int(expected_correct) < len(opts_list)
+                        and user_choice.strip().lower() == str(opts_list[int(expected_correct)]).strip().lower()
+                    ):
+                        is_q_correct = True
+                    elif meta.get("answer_label") and str(user_choice).strip().lower() == str(meta.get("answer_label")).strip().lower():
+                        is_q_correct = True
+
+            if is_q_correct:
                 correct_count += 1
                 earned_points += (q.points if q.points is not None else 10)
 
@@ -797,11 +925,12 @@ def get_quiz_review(
         correct_idx = ans_key.correct_answer if ans_key else q.correct_answer
         explanation = ans_key.explanation if ans_key else q.explanation
 
+        _, opts_list, _ = _unpack_question_options(q.options)
         review_items.append(
             QuizQuestionReview(
                 question_id=q.id,
                 question_text=q.question_text,
-                options=q.options or [],
+                options=opts_list,
                 selected_option=None,
                 correct_answer=correct_idx,
                 is_correct=False,
@@ -1238,3 +1367,65 @@ def remove_team_member(
     db.delete(member)
     db.commit()
     return {"status": "success", "message": "Trainee removed from team."}
+
+
+@router.get("/quiz-attempts")
+def list_quiz_attempts(
+    quiz_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Returns scored quiz attempts in caller scope (Round 11: Trainer Results & Trainee Quiz Attempt History)."""
+    scope = _scope_for(db, current_user)
+    quizzes = db.query(Quiz).options(joinedload(Quiz.course), joinedload(Quiz.session)).all()
+    if scope is not None:
+        quizzes = [q for q in quizzes if _scope_match(current_user, scope, q)]
+    if quiz_id:
+        quizzes = [q for q in quizzes if q.id == quiz_id]
+    if not quizzes:
+        return []
+
+    quiz_map = {q.id: q for q in quizzes}
+    q_stmt = db.query(QuizAttempt).filter(
+        QuizAttempt.quiz_id.in_(list(quiz_map.keys())),
+        QuizAttempt.is_scored == True
+    )
+    if current_user.role == "trainee":
+        t = _trainee_for(db, current_user)
+        if not t:
+            return []
+        q_stmt = q_stmt.filter(QuizAttempt.trainee_id == t.id)
+
+    attempts = q_stmt.order_by(QuizAttempt.submitted_at.desc()).all()
+    if not attempts:
+        return []
+
+    t_ids = {a.trainee_id for a in attempts if a.trainee_id}
+    trainees = {
+        t.id: t for t in db.query(Trainee).options(joinedload(Trainee.current_company)).filter(Trainee.id.in_(t_ids)).all()
+    } if t_ids else {}
+
+    out = []
+    for a in attempts:
+        qz = quiz_map.get(a.quiz_id)
+        tr = trainees.get(a.trainee_id)
+        co = tr.current_company if tr else None
+        cname = (qz.course.name if qz and qz.course else None) or (qz.session.course_name if qz and qz.session else "Course")
+        out.append({
+            "id": a.id,
+            "quiz_id": a.quiz_id,
+            "quiz_title": qz.title if qz else a.quiz_id,
+            "course_id": qz.course_id if qz else None,
+            "course_name": cname,
+            "trainee_id": a.trainee_id,
+            "trainee_code": tr.trainee_code if tr else None,
+            "trainee_name": f"{tr.first_name} {tr.last_name}" if tr else "Trainee",
+            "trainee_email": tr.email if tr else None,
+            "company_code": co.code if co else None,
+            "company_name": co.name if co else None,
+            "score": round(float(a.score or 0.0), 1),
+            "total_points": a.total_points or 0,
+            "passed": float(a.score or 0.0) >= 80.0,
+            "submitted_at": a.submitted_at.isoformat() if a.submitted_at else None,
+        })
+    return out

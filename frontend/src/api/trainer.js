@@ -9,7 +9,8 @@ import {
   fetchQuizCoursesApi,
   addQuizQuestionApi,
   deleteQuizQuestionApi,
-  updateQuizQuestionApi
+  updateQuizQuestionApi,
+  fetchQuizAttemptsApi
 } from '../services/api.js';
 
 const API_BASE = 'http://localhost:8000/api/v1';
@@ -117,27 +118,63 @@ export async function gradeTrainee(recordId, body = {}) {
   };
 }
 
-/** GET /api/v1/gamification/quizzes -> Real quizzes from database + Active Curriculum */
+export function mapBackendQuestionToStudio(item, idx = 0) {
+  const rawType = (item.question_type || 'multiple_choice').toLowerCase();
+  const studioType = rawType === 'multiple_choice' ? 'kahoot'
+    : rawType === 'sequence_order' ? 'sequence'
+    : rawType === 'diagram_analysis' ? 'hotspot'
+    : rawType;
+  return {
+    id: item.id || `q-${idx}`,
+    type: studioType,
+    prompt: item.question_text || '',
+    options: Array.isArray(item.options) ? item.options : [],
+    answer: item.correct_answer ?? 0,
+    points: item.points || 10,
+    explanation: item.explanation || '',
+    placeholder: item.placeholder || '',
+    accepted: Array.isArray(item.accepted_answers) ? item.accepted_answers : undefined,
+    steps: Array.isArray(item.correct_order) && item.correct_order.length > 0
+      ? item.correct_order
+      : (studioType === 'sequence' && Array.isArray(item.options) ? item.options : undefined),
+    initialOrder: Array.isArray(item.initial_order) ? item.initial_order : undefined,
+    pairs: Array.isArray(item.pairs) ? item.pairs : undefined,
+    diagramType: item.diagram_type || undefined,
+    diagramTitle: item.diagram_title || undefined,
+    customNodes: item.custom_nodes || undefined,
+    customLayout: item.custom_layout || undefined,
+    answerLabel: item.answer_label || undefined,
+    approved: true,
+  };
+}
+
+/** Lazily fetch questions for a single quiz on demand (Round 11) */
+export async function getQuizQuestions(quizId, token) {
+  try {
+    const rows = await fetchQuizQuestionsApi(quizId, token);
+    return (rows || []).map((item, idx) => mapBackendQuestionToStudio(item, idx));
+  } catch (e) {
+    console.warn(`Could not load questions for quiz ${quizId}:`, e);
+    return [];
+  }
+}
+
+/** GET /api/v1/gamification/quizzes -> Quiz catalog metadata (lazy question loading: questions fetched when selected) */
 export async function getQuizzes(token) {
   const list = (await fetchQuizzes(token)) || [];
-  return Promise.all(list.map(async (q) => {
-    let questions = [];
-    try {
-      const rows = await fetchQuizQuestionsApi(q.id, token);
-      questions = (rows || []).map((item, idx) => ({
-        id: item.id || `q-${idx}`, type: 'kahoot', prompt: item.question_text || '',
-        options: Array.isArray(item.options) ? item.options : [],
-        answer: item.correct_answer ?? 0, points: item.points || 10, explanation: item.explanation || ''
-      }));
-    } catch (e) { console.warn(`Could not load questions for quiz ${q.id}:`, e); }
-    return {
-      id: q.id, sessionId: q.session_id, courseId: q.course_id,
-      course: q.course_name || 'Unassigned', category: q.course_name || 'Unassigned',
-      title: q.title, timePerQ: 45, pass: 80,
-      questionsCount: questions.length || q.questions_count || 0,
-      isClosed: q.is_closed, isApproved: !!q.is_approved, completed: q.completed, score: q.score, questions
-    };
+  return list.map((q) => ({
+    id: q.id, sessionId: q.session_id, courseId: q.course_id,
+    course: q.course_name || 'Unassigned', category: q.course_name || 'Unassigned',
+    title: q.title, timePerQ: 45, pass: 80,
+    questionsCount: q.questions_count || 0,
+    isClosed: q.is_closed, isApproved: !!q.is_approved, completed: q.completed, score: q.score,
+    questions: [],
+    questionsLoaded: false,
   }));
+}
+
+export async function getQuizAttempts(token, quizId = null) {
+  return (await fetchQuizAttemptsApi(token, quizId)) || [];
 }
 
 export async function createQuiz(title, courseId, token) {
@@ -188,12 +225,26 @@ export async function addQuestion(quizId, q = {}, token) {
       ? q.options
       : (q.pairs ? q.pairs.map(p => `${p.left} -> ${p.right}`) : ['Option A', 'Option B', 'Option C', 'Option D']);
 
+    const backendType = normType === 'kahoot' ? 'multiple_choice'
+      : normType === 'sequence' ? 'sequence_order'
+      : normType === 'hotspot' ? 'diagram_analysis'
+      : normType;
     const payload = {
       question_text: q.prompt,
-      options: options,
+      options: normType === 'sequence' ? (q.steps || []) : options,
       correct_option: typeof q.answer === 'number' ? q.answer : 0,
-      points: 10,
-      explanation: q.explanation || 'Verified compliance rubric citation.'
+      points: 25,
+      explanation: q.explanation || 'Verified compliance rubric citation.',
+      question_type: backendType,
+      accepted_answers: q.accepted || undefined,
+      correct_order: q.steps || undefined,
+      initial_order: q.steps ? [...q.steps].reverse() : undefined,
+      pairs: q.pairs || undefined,
+      diagram_type: q.diagramType || undefined,
+      diagram_title: q.diagramTitle || undefined,
+      custom_nodes: q.customNodes || undefined,
+      custom_layout: q.customLayout || undefined,
+      answer_label: q.answerLabel || undefined,
     };
     await addQuizQuestionApi(quizId, payload, token);
   } catch (err) {
@@ -247,12 +298,26 @@ export async function updateQuestion(quizId, qid, q = {}, token) {
       ? q.options
       : (q.pairs ? q.pairs.map(p => `${p.left} -> ${p.right}`) : ['Option A', 'Option B', 'Option C', 'Option D']);
 
+    const backendType = normType === 'kahoot' ? 'multiple_choice'
+      : normType === 'sequence' ? 'sequence_order'
+      : normType === 'hotspot' ? 'diagram_analysis'
+      : normType;
     const payload = {
       question_text: q.prompt,
-      options: options,
+      options: normType === 'sequence' ? (q.steps || []) : options,
       correct_option: typeof q.answer === 'number' ? q.answer : 0,
-      points: 10,
-      explanation: q.explanation || 'Verified compliance rubric citation.'
+      points: 25,
+      explanation: q.explanation || 'Verified compliance rubric citation.',
+      question_type: backendType,
+      accepted_answers: q.accepted || undefined,
+      correct_order: q.steps || undefined,
+      initial_order: q.steps ? [...q.steps].reverse() : undefined,
+      pairs: q.pairs || undefined,
+      diagram_type: q.diagramType || undefined,
+      diagram_title: q.diagramTitle || undefined,
+      custom_nodes: q.customNodes || undefined,
+      custom_layout: q.customLayout || undefined,
+      answer_label: q.answerLabel || undefined,
     };
     await updateQuizQuestionApi(quizId, qid, payload, token);
   } catch (err) {}

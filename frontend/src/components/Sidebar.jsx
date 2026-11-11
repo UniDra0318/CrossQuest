@@ -100,6 +100,7 @@ export default function Sidebar({
       case 'admin': return 'Administrator';
       case 'account_manager': return 'Account Manager';
       case 'finance': return 'Finance & Operations';
+      case 'company_staff': return 'Company Staff (HR / L&D)';
       case 'trainer': return 'Lead Trainer';
       case 'trainee': return 'Trainee';
       default: return (role || '').replace(/_/g, ' ');
@@ -110,7 +111,8 @@ export default function Sidebar({
     switch(role) {
       case 'admin': return Shield;
       case 'account_manager': return Users;
-      case 'finance': return Building2;
+      case 'finance':
+      case 'company_staff': return Building2;
       case 'trainer': return GraduationCap;
       case 'trainee': return Award;
       default: return Users;

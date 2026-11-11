@@ -19,6 +19,7 @@ export const ROLE_HOME = {
   account_manager: '/am',
   trainer: '/trainer',
   finance: '/finance',
+  company_staff: '/finance',
   trainee: '/home',
 };
 
@@ -45,8 +46,8 @@ export const ROUTES = [
   { path: '/trainer/results',      roles: ['trainer'], label: 'Results',           title: 'Session Analytics',        page: 'trainer_analytics',      icon: BarChart3 },
 
   // Finance
-  { path: '/finance',         roles: ['finance'], label: 'Records',            title: 'Trainee Training Records',     page: 'company_trainees',       icon: FileText },
-  { path: '/finance/reports', roles: ['finance'], label: 'Reports',            title: 'Compliance & Audit Reports',   page: 'audit_certificate',      icon: ShieldCheck },
+  { path: '/finance',         roles: ['finance', 'company_staff'], label: 'Records',            title: 'Trainee Training Records',     page: 'company_trainees',       icon: FileText },
+  { path: '/finance/reports', roles: ['finance', 'company_staff'], label: 'Reports',            title: 'Compliance & Audit Reports',   page: 'audit_certificate',      icon: ShieldCheck },
   { path: '/finance/import',  roles: ['finance'], label: 'Import & Reconcile', title: 'Import & Reconciliation Desk', page: 'finance_reconciliation', icon: LayoutDashboard },
 
   // Trainee

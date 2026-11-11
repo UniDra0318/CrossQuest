@@ -15,7 +15,7 @@ import {
   Building,
   User
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, DEMO_STATUS_MIX } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ROLE_HOME } from '../routes/routeConfig';
 
@@ -33,7 +33,8 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
     switch(role) {
       case 'admin': return Shield;
       case 'account_manager': return Key;
-      case 'finance': return Building2;
+      case 'finance':
+      case 'company_staff': return Building2;
       case 'trainer': return GraduationCap;
       case 'trainee': return Award;
       default: return User;
@@ -47,6 +48,7 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
       case 'trainer': return { bg: '#e0e7ff', text: '#4338ca', border: '#a5b4fc' };
       case 'trainee': return { bg: '#dcfce7', text: '#15803d', border: '#86efac' };
       case 'finance': return { bg: '#f3e8ff', text: '#7e22ce', border: '#d8b4fe' };
+      case 'company_staff': return { bg: '#e0f2fe', text: '#0369a1', border: '#7dd3fc' };
       default: return { bg: '#f1f5f9', text: '#475569', border: '#cbd5e1' };
     }
   };
@@ -62,7 +64,12 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
     { id: 'IPROY_SERVI', label: 'IPRoyal Services' },
     { id: 'AMIHAN_SOLUTI', label: 'Amihan Solutions' },
     { id: 'EWALIC', label: 'EastWest Ageas' },
-    { id: 'ROP', label: 'Red Oak Properties' }
+    { id: 'ROP', label: 'Red Oak Properties' },
+    { id: 'ISLA_LPG_CORPOR', label: 'Isla LPG' },
+    { id: 'UNIVER_ROBINA_CORPOR', label: 'Universal Robina' },
+    { id: 'BIBSP', label: 'Boehringer Ingelheim' },
+    { id: 'AYALA_LAND_INC', label: 'Ayala Land' },
+    { id: 'SECURI_BANK_CORPOR', label: 'Security Bank' }
   ];
 
   const filteredPersonas = allPersonas.filter(u => {
@@ -151,7 +158,7 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
                 </span>
               </div>
               <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                Instantly simulate real database records, scopes, streaks, and CP-ABE clearances across all 5 pilot companies.
+                Instantly simulate real database records, scopes, streaks, and CP-ABE clearances across all 10 pilot companies.
               </span>
             </div>
           </div>
@@ -368,6 +375,40 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
                     }}>
                       <Flame size={11} fill="#ea580c" />
                       {u.streak}d Streak
+                    </span>
+                  )}
+                  {DEMO_STATUS_MIX[u.key] && DEMO_STATUS_MIX[u.key].map((st, idx) => {
+                    const colors = st === 'Completed'
+                      ? { bg: '#dcfce7', text: '#15803d', border: '#86efac' }
+                      : st === 'In progress'
+                        ? { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' }
+                        : { bg: '#fee2e2', text: '#b91c1c', border: '#fca5a5' };
+                    return (
+                      <span key={`${st}-${idx}`} style={{
+                        padding: '2px 7px',
+                        borderRadius: '6px',
+                        fontSize: '10px',
+                        fontWeight: '800',
+                        background: colors.bg,
+                        color: colors.text,
+                        border: `1px solid ${colors.border}`
+                      }}>
+                        {st}
+                      </span>
+                    );
+                  })}
+
+                  {u.role === 'trainee' && Array.isArray(u.assigned_companies) && u.assigned_companies.length > 1 && (
+                    <span style={{
+                      padding: '2px 7px',
+                      borderRadius: '6px',
+                      fontSize: '10px',
+                      fontWeight: '700',
+                      background: isDark ? '#1e1b4b' : '#eef2ff',
+                      color: isDark ? '#a5b4fc' : '#4338ca',
+                      border: `1px solid ${isDark ? '#3730a3' : '#c7d2fe'}`
+                    }}>
+                      {u.assigned_companies.join(' · ')}
                     </span>
                   )}
                 </div>

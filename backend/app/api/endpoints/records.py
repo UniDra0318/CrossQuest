@@ -229,7 +229,7 @@ def list_training_records(
 
     if current_user.role in ("admin", "finance"):
         pass # All records
-    elif current_user.role == "account_manager":
+    elif current_user.role in ("account_manager", "company_staff"):
         assigned_codes = current_user.assigned_client_accounts or []
         assigned_companies = db.query(ClientCompany.id).filter(ClientCompany.code.in_(assigned_codes)).all()
         company_ids = [c[0] for c in assigned_companies]
@@ -392,7 +392,7 @@ def decrypt_training_record(
     is_shared_trainee_view = False
     if current_user.role in ("admin", "finance"):
         is_in_scope = True
-    elif current_user.role == "account_manager":
+    elif current_user.role in ("account_manager", "company_staff"):
         assigned_codes = current_user.assigned_client_accounts or []
         if company_code in assigned_codes:
             is_in_scope = True

@@ -153,7 +153,7 @@ function MainAppShell({ page }) {
                   <TrainerDashboard activeSubView={page} setActiveView={handleNavChange} />
                 )}
 
-                {currentUser?.role === 'finance' && (
+                {(currentUser?.role === 'finance' || currentUser?.role === 'company_staff') && (
                   <CompanyDashboard activeSubView={page} setActiveView={handleNavChange} />
                 )}
 
@@ -290,7 +290,7 @@ function AppRoutes() {
         element={
           currentRole === 'admin' 
             ? <Navigate to="/admin/records" replace /> 
-            : currentRole === 'finance' 
+            : (currentRole === 'finance' || currentRole === 'company_staff') 
               ? <Navigate to="/finance" replace /> 
               : <Navigate to="/am" replace />
         } 
@@ -300,7 +300,7 @@ function AppRoutes() {
         element={
           currentRole === 'trainer' 
             ? <Navigate to="/trainer" replace /> 
-            : currentRole === 'finance' 
+            : (currentRole === 'finance' || currentRole === 'company_staff') 
               ? <Navigate to="/finance" replace /> 
               : <Navigate to="/am" replace />
         } 
@@ -309,7 +309,7 @@ function AppRoutes() {
       <Route 
         path="/compliance" 
         element={
-          currentRole === 'finance' 
+          (currentRole === 'finance' || currentRole === 'company_staff') 
             ? <Navigate to="/finance/reports" replace /> 
             : <Navigate to="/am/reports" replace />
         } 

@@ -34,7 +34,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
   const { effectiveTheme } = useTheme?.() || { effectiveTheme: 'light' };
   const isDark = effectiveTheme === 'dark';
 
-  const companyCode = currentUser?.company_code || 'CORP_ALPHA';
+  const companyCode = currentUser?.company_code || currentUser?.assigned_companies?.[0] || currentUser?.assigned_client_accounts?.[0] || 'VHL';
   const [records, setRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [usingFallback, setUsingFallback] = useState(false);
@@ -146,7 +146,7 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
     totalItems: totalTrainees
   } = usePagination(filteredRecords, 4);
 
-  const completed = displayedRecords.filter(r => r.status === 'completed').length;
+  const completed = displayedRecords.filter(r => r.status?.toLowerCase() === 'completed').length;
   const avgScore = displayedRecords.length > 0 
     ? (displayedRecords.reduce((acc, r) => acc + (r.score || 0), 0) / displayedRecords.length).toFixed(1)
     : '0.0';

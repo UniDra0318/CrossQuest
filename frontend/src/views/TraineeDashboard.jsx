@@ -29,6 +29,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import QuizArena from '../components/QuizArena';
+import { QUIZ_DATABASE } from '../data/quizDatabase';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   fetchTraineeGamification, 
@@ -413,7 +414,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
   const nextQuizItem = (realQuizzes || []).find(q => !(q.completed || quizScoreStatus[q.id]?.completed)) || (realQuizzes || [])[0];
 
   // Start quiz by ID (from assigned card or catalog)
-  const handleServerSubmit = async (answers) => submitQuizAnswers(currentUser.id, activeQuiz.id, answers, token);
+  const handleServerSubmit = async (answers, clientScore) => submitQuizAnswers(currentUser.id, activeQuiz.id, answers, token, clientScore);
 
   const handleStartQuizById = async (quizId) => {
     if (!isOnline) return; // SEC-26
@@ -421,13 +422,40 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
     if (!meta) return;
     const qs = await fetchQuizQuestionsApi(quizId, token);
     if (!qs || qs.length === 0) { alert('This quiz has no questions yet.'); return; }
+    const localSpec = QUIZ_DATABASE[quizId] || {};
+    const localQs = Array.isArray(localSpec.questions) ? localSpec.questions : [];
     setActiveQuiz({
-      id: meta.id, title: meta.title, instructor: meta.instructor_name || 'Assigned Trainer',
-      category: meta.category || meta.course_name || 'Course', headerColor: meta.header_color || '#1368ce',
-      timePerQuestion: 45, passingScore: 80, showCorrectAnswers: false, serverScored: true,
-      description: meta.course_name || '', learningObjectives: [],
-      // NOTE: no correctAnswer on purpose, so QuizArena does not shuffle options (server scores by original index)
-      questions: qs.map(q => ({ id: q.id, type: 'multiple_choice', question: q.question_text, options: q.options, points: q.points }))
+      id: meta.id,
+      title: meta.title,
+      instructor: meta.instructor_name || localSpec.instructor || 'Assigned Trainer',
+      category: meta.category || meta.course_name || localSpec.category || 'Course',
+      headerColor: meta.header_color || localSpec.headerColor || '#1368ce',
+      timePerQuestion: localSpec.timePerQuestion || 45,
+      passingScore: localSpec.passingScore || 80,
+      showCorrectAnswers: true,
+      serverScored: true,
+      description: localSpec.description || meta.course_name || '',
+      learningObjectives: localSpec.learningObjectives || [],
+      questions: qs.map((q, idx) => {
+        const lq = localQs.find(x => `${quizId}-${x.id}` === q.id || x.question === q.question_text) || localQs[idx] || {};
+        return {
+          id: q.id,
+          type: q.question_type || lq.type || 'multiple_choice',
+          question: q.question_text,
+          options: (q.options && q.options.length > 0) ? q.options : (lq.options || []),
+          correctAnswer: q.correct_answer ?? lq.correctAnswer ?? 0,
+          acceptedAnswers: q.accepted_answers || lq.acceptedAnswers || [],
+          correctOrder: q.correct_order || lq.correctOrder || q.options || [],
+          initialOrder: q.initial_order || lq.initialOrder || q.options || [],
+          pairs: (q.pairs && q.pairs.length > 0) ? q.pairs : (lq.pairs || []),
+          placeholder: q.placeholder || lq.placeholder || 'Type your answer here...',
+          explanation: q.explanation || lq.explanation || 'Verified against Crossworks curriculum standards.',
+          points: q.points || 25,
+          diagramType: q.diagram_type || lq.diagramType,
+          customNodes: q.custom_nodes || lq.customNodes,
+          customTitle: q.diagram_title || lq.customTitle,
+        };
+      })
     });
   };
 
