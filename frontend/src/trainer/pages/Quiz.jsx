@@ -35,12 +35,15 @@ import { useTrainer } from '../TrainerContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { closeQuizApi, approveQuizApi } from '../../services/api';
 
+const ENABLE_PHASE2_TYPES = false;
+
 const QUESTION_FORMATS = [
   { id: 'kahoot', label: 'Kahoot 4-Tile', icon: Layers, iconChar: '🎴', tagColor: 'violet', desc: 'Single-choice question with 4 colored option cards' },
-  { id: 'matching', label: 'Matching Pairs', icon: Link2, iconChar: '🔗', tagColor: 'blue', desc: 'Connect Column A concepts to Column B definitions' },
+  { id: 'true_false', label: 'True / False', icon: CheckCircle2, iconChar: '✓', tagColor: 'cyan', desc: 'Binary True or False verification question' },
+  ...(ENABLE_PHASE2_TYPES ? [{ id: 'matching', label: 'Matching Pairs', icon: Link2, iconChar: '🔗', tagColor: 'blue', desc: 'Connect Column A concepts to Column B definitions' }] : []),
   { id: 'identification', label: 'Identification', icon: FileText, iconChar: '✍️', tagColor: 'amber', desc: 'Direct term input with accepted variant matching' },
   { id: 'sequence', label: 'Sequence Order', icon: ListOrdered, iconChar: '🔢', tagColor: 'green', desc: 'Arrange operational steps in correct chronological order' },
-  { id: 'hotspot', label: 'Diagram Hotspot', icon: Eye, iconChar: '🎯', tagColor: 'orange', desc: 'Identify target security component in architecture diagrams' }
+  ...(ENABLE_PHASE2_TYPES ? [{ id: 'hotspot', label: 'Diagram Hotspot', icon: Eye, iconChar: '🎯', tagColor: 'orange', desc: 'Identify target security component in architecture diagrams' }] : [])
 ];
 
 export const DIAGRAM_TEMPLATES = [
@@ -168,6 +171,8 @@ export default function Quiz() {
   const { token, currentUser } = useAuth();
 
   const [activeQuizId, setActiveQuizId] = useState(null);
+  const [courseFilter, setCourseFilter] = useState('ALL');
+  const [openCourses, setOpenCourses] = useState({});
   const [newQuizTitle, setNewQuizTitle] = useState('');
   const [newQuizCourseId, setNewQuizCourseId] = useState('');
   const [newQuestionPrompt, setNewQuestionPrompt] = useState('');
@@ -243,7 +248,10 @@ export default function Quiz() {
     setNewQuestionPrompt(q.prompt || q.question || '');
     setNewQuestionExplanation(q.explanation || '');
 
-    if (type === 'kahoot') {
+    if (type === 'true_false') {
+      setKahootOptions(['True', 'False', '', '']);
+      setKahootCorrectIdx(q.answer === 1 ? 1 : 0);
+    } else if (type === 'kahoot') {
       const opts = Array.isArray(q.options) && q.options.length >= 2
         ? [...q.options, '', '', '', ''].slice(0, 4)
         : ['', '', '', ''];
@@ -428,7 +436,10 @@ export default function Quiz() {
       explanation: newQuestionExplanation.trim() || 'Standard curriculum competency benchmark.'
     };
 
-    if (questionType === 'kahoot') {
+    if (questionType === 'true_false') {
+      payload.options = ['True', 'False'];
+      payload.answer = kahootCorrectIdx === 1 ? 1 : 0;
+    } else if (questionType === 'kahoot') {
       const validOpts = kahootOptions.map(o => o.trim()).filter(Boolean);
       if (validOpts.length < 2) {
         alert('Please provide at least 2 options for multiple choice.');
@@ -477,12 +488,16 @@ export default function Quiz() {
       payload.answer = newQuestionAnswer.trim();
     }
 
-    if (editingQuestionId) {
-      await handleUpdateQuestion(activeQuiz.id, editingQuestionId, payload);
-    } else {
-      await handleAddQuestion(activeQuiz.id, payload);
+    try {
+      if (editingQuestionId) {
+        await handleUpdateQuestion(activeQuiz.id, editingQuestionId, payload);
+      } else {
+        await handleAddQuestion(activeQuiz.id, payload);
+      }
+      cancelEditing();
+    } catch (err) {
+      alert(err.message || 'Failed to save question.');
     }
-    cancelEditing();
     return;
     setNewQuestionPrompt('');
     setNewQuestionExplanation('');
@@ -503,6 +518,8 @@ export default function Quiz() {
       case 'kahoot':
       case 'multiple_choice':
         return { label: 'KAHOOT 4-TILE', chip: 'adm-chip--violet' };
+      case 'true_false':
+        return { label: 'TRUE / FALSE', chip: 'adm-chip--cyan' };
       case 'matching':
         return { label: 'MATCHING PAIRS', chip: 'adm-chip--blue' };
       case 'identification':
@@ -519,9 +536,10 @@ export default function Quiz() {
   };
 
   const byCourse = {};
-  (quizCourses || []).forEach((c) => { byCourse[c.name] = []; });
   (quizzes || []).forEach((q) => { (byCourse[q.course || 'Unassigned'] ||= []).push(q); });
-  const quizGroups = Object.entries(byCourse);
+  const quizGroups = Object.entries(byCourse)
+    .filter(([course]) => courseFilter === 'ALL' || course === courseFilter)
+    .sort(([a], [b]) => a.localeCompare(b));
   const scopeLabel = currentUser?.role === 'admin' ? 'GLOBAL SCOPE · all courses' : 'LIMITED SCOPE · courses of assigned sessions and programs (U-12)';
 
   return (
@@ -552,64 +570,105 @@ export default function Quiz() {
           </button>
         </div>
 
+        {/* Course Filter */}
+        <div style={{ marginTop: '12px' }}>
+          <select
+            value={courseFilter}
+            onChange={(e) => setCourseFilter(e.target.value)}
+            className="adm-input"
+            style={{ width: '100%', fontSize: '12px', padding: '8px 10px' }}
+          >
+            <option value="ALL">All courses ({Object.keys(byCourse).length})</option>
+            {Object.keys(byCourse).sort((a, b) => a.localeCompare(b)).map((courseName) => (
+              <option key={courseName} value={courseName}>{courseName}</option>
+            ))}
+          </select>
+        </div>
+
         {/* Assessment Items List */}
-        <div className="trn-quizlist" style={{ marginTop: '16px', maxHeight: '55vh', overflowY: 'auto', paddingRight: '4px' }}>
-          {quizGroups.map(([course, items]) => (
-            <React.Fragment key={course}>
-              <div className="adm-mono" style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.04em', margin: '14px 0 6px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                {course.toUpperCase()} ({items.length})
-              </div>
-              {items.length === 0 && (
-                <small style={{ display: 'block', padding: '6px 4px 2px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                  No quizzes in this course yet. Create the first one below.
-                </small>
-              )}
-              {items.map((q) => {
-                const isSelected = activeQuiz && activeQuiz.id === q.id;
-                const qCount = q.questions ? q.questions.length : (q.questionsCount || 0);
-                return (
-                  <button
-                    key={q.id}
-                    type="button"
-                    className={isSelected ? 'on' : ''}
-                    onClick={() => { if (editingQuestionId) cancelEditing(); setActiveQuizId(q.id); }}
-                    style={{
-                      padding: '16px',
-                      borderRadius: '16px',
-                      border: isSelected
-                        ? '2px solid #8b5cf6'
-                        : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #cbd5e1'),
-                      background: isSelected
-                        ? (isDark ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 27, 75, 0.8) 100%)' : '#f5f3ff')
-                        : (isDark ? '#111827' : '#ffffff'),
-                      boxShadow: isSelected ? '0 8px 24px rgba(139, 92, 246, 0.25)' : 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '6px',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                      <strong style={{ fontSize: '14px', lineHeight: 1.3, color: isSelected ? '#a5b4fc' : (isDark ? '#f8fafc' : '#1e293b') }}>
-                        {q.title}
-                      </strong>
-                      <span
-                        className={`adm-chip ${qCount > 0 ? 'adm-chip--green' : 'adm-chip--amber'}`}
-                        style={{ fontSize: '10px', padding: '2px 8px', flexShrink: 0 }}
-                      >
-                        {qCount} Qs
-                      </span>
-                    </div>
-                    <small style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                      {q.category}
-                    </small>
-                  </button>
-                );
-              })}
-            </React.Fragment>
-          ))}
+        <div className="trn-quizlist" style={{ marginTop: '12px', maxHeight: '55vh', overflowY: 'auto', paddingRight: '4px' }}>
+          {quizGroups.map(([course, items]) => {
+            const isGroupOpen = quizGroups.length === 1 ? openCourses[course] !== false : !!openCourses[course];
+            return (
+              <React.Fragment key={course}>
+                <button
+                  type="button"
+                  title={course}
+                  onClick={() => setOpenCourses((prev) => ({ ...prev, [course]: !isGroupOpen }))}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px',
+                    padding: '8px 4px',
+                    margin: '10px 0 4px',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    color: isDark ? '#cbd5e1' : '#334155',
+                    fontSize: '12px',
+                    fontWeight: 700
+                  }}
+                >
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {course}
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                    <span className="adm-chip adm-chip--solid" style={{ fontSize: '10px', padding: '1px 7px' }}>
+                      {items.length}
+                    </span>
+                    {isGroupOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </span>
+                </button>
+                {isGroupOpen && items.map((q) => {
+                  const isSelected = activeQuiz && activeQuiz.id === q.id;
+                  const qCount = q.questionsLoaded ? q.questions.length : (q.questionsCount || 0);
+                  return (
+                    <button
+                      key={q.id}
+                      type="button"
+                      className={isSelected ? 'on' : ''}
+                      onClick={() => { if (editingQuestionId) cancelEditing(); setActiveQuizId(q.id); }}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '16px',
+                        border: isSelected
+                          ? '2px solid #8b5cf6'
+                          : (isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #cbd5e1'),
+                        background: isSelected
+                          ? (isDark ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 27, 75, 0.8) 100%)' : '#f5f3ff')
+                          : (isDark ? '#111827' : '#ffffff'),
+                        boxShadow: isSelected ? '0 8px 24px rgba(139, 92, 246, 0.25)' : 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                        <strong style={{ fontSize: '14px', lineHeight: 1.3, color: isSelected ? '#a5b4fc' : (isDark ? '#f8fafc' : '#1e293b') }}>
+                          {q.title}
+                        </strong>
+                        <span
+                          className={`adm-chip ${qCount > 0 ? 'adm-chip--green' : 'adm-chip--amber'}`}
+                          style={{ fontSize: '10px', padding: '2px 8px', flexShrink: 0 }}
+                        >
+                          {qCount} Qs
+                        </span>
+                      </div>
+                      <small style={{ fontSize: '11.5px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                        {q.isApproved ? 'Approved' : 'Draft'} · {qCount} questions
+                      </small>
+                    </button>
+                  );
+                })}
+              </React.Fragment>
+            );
+          })}
         </div>
 
         {/* Create new quiz form */}
@@ -954,6 +1013,53 @@ export default function Quiz() {
               {/* =========================================================================
                   DYNAMIC FORMAT CONTROLS (5 Types)
                   ========================================================================= */}
+
+              {/* 1b. TRUE / FALSE */}
+              {questionType === 'true_false' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: isDark ? '#cbd5e1' : '#475569', textTransform: 'uppercase' }}>
+                    True / False Answer (Select radio to designate correct answer):
+                  </span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                    {['True', 'False'].map((label, idx) => {
+                      const isCorrect = (kahootCorrectIdx === 1 ? 1 : 0) === idx;
+                      return (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => setKahootCorrectIdx(idx)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            padding: '12px 14px',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            border: isCorrect
+                              ? '2px solid #10b981'
+                              : (isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1'),
+                            background: isCorrect
+                              ? (isDark ? '#064e3b' : '#ecfdf5')
+                              : (isDark ? '#0b0f19' : '#ffffff'),
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="tfCorrect"
+                            checked={isCorrect}
+                            onChange={() => setKahootCorrectIdx(idx)}
+                            style={{ accentColor: '#10b981', cursor: 'pointer', transform: 'scale(1.15)' }}
+                          />
+                          <strong style={{ fontSize: '13.5px', color: isCorrect ? '#34d399' : (isDark ? '#f8fafc' : '#1e293b') }}>
+                            {label}
+                          </strong>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* 1. KAHOOT 4-TILE */}
               {questionType === 'kahoot' && (

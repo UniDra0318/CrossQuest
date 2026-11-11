@@ -311,7 +311,7 @@ def verify_mfa_login(
     is_valid = False
 
     # 0. Dev bypass for quick role switcher in dev mode
-    if cleaned_code == "DEV_MFA_BYPASS" and settings.ALLOW_DEV_MFA_BYPASS and settings.ENVIRONMENT == "development":
+    if cleaned_code == "DEV_MFA_BYPASS" and settings.ALLOW_DEV_MFA_BYPASS and settings.ALLOW_DEV_SCENARIOS and settings.ENVIRONMENT != "production":
         is_valid = True
 
     # 1. Check TOTP authenticator code

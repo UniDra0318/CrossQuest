@@ -82,7 +82,7 @@ function prepareQuizQuestions(quiz, initialSession) {
     const cloned = JSON.parse(JSON.stringify(q));
 
     // Multiple choice or Diagram analysis: shuffle options and remap correctAnswer index
-    if (cloned.type === 'multiple_choice' || cloned.type === 'diagram_analysis') {
+    if (cloned.type === 'multiple_choice' || cloned.type === 'true_false' || cloned.type === 'diagram_analysis') {
       if (Array.isArray(cloned.options) && typeof cloned.correctAnswer === 'number') {
         const correctText = cloned.options[cloned.correctAnswer];
         cloned.options = shuffleArray(cloned.options);
@@ -296,6 +296,13 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
     e.preventDefault();
     if (answeredState !== null || !identificationInput.trim()) return;
 
+    if (quiz.serverScored) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setServerAnswers(prev => ({ ...prev, [currentQ.id]: identificationInput.trim() }));
+      setAnsweredState('submitted');
+      return;
+    }
+
     const normalized = identificationInput.trim().toLowerCase();
     const isCorrect = (currentQ.acceptedAnswers || []).some(ans => 
       normalized === ans.toLowerCase() || normalized.includes(ans.toLowerCase())
@@ -324,6 +331,12 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
   const handleSequenceVerify = () => {
     if (answeredState !== null) return;
     const currentList = sequenceItems.length > 0 ? sequenceItems : extractSequenceItems(currentQ);
+    if (quiz.serverScored) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      setServerAnswers(prev => ({ ...prev, [currentQ.id]: currentList }));
+      setAnsweredState('submitted');
+      return;
+    }
     const correctSeq = (Array.isArray(currentQ.correctOrder) && currentQ.correctOrder.length > 0)
       ? currentQ.correctOrder
       : (Array.isArray(currentQ.options) ? currentQ.options : currentList);
@@ -1403,6 +1416,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
                             <span className="summary-q-num">Q{qIdx + 1}</span>
                             <span className="summary-q-type-badge">
                               {q.type === 'multiple_choice' && 'Multiple Choice'}
+                              {q.type === 'true_false' && 'True / False'}
                               {q.type === 'identification' && 'Identification'}
                               {q.type === 'sequence_order' && 'Sequence Reordering'}
                               {q.type === 'diagram_analysis' && 'Diagram Analysis'}
@@ -1765,6 +1779,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
           {/* Question Type Tag */}
           <div className="question-type-indicator">
             {currentQ.type === 'multiple_choice' && <span className="type-tag tag-choice">Multiple Choice (Select 1 of 4)</span>}
+            {currentQ.type === 'true_false' && <span className="type-tag tag-choice">True / False</span>}
             {currentQ.type === 'identification' && <span className="type-tag tag-input">Identification (Type the term)</span>}
             {currentQ.type === 'sequence_order' && <span className="type-tag tag-sequence">Interactive Sequence Ordering</span>}
             {currentQ.type === 'diagram_analysis' && <span className="type-tag tag-diagram">Architecture Diagram Analysis</span>}
@@ -1806,7 +1821,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
           </div>
 
           {/* 1. MULTIPLE CHOICE OR DIAGRAM CHOICES */}
-          {(currentQ.type === 'multiple_choice' || currentQ.type === 'diagram_analysis') && (
+          {(currentQ.type === 'multiple_choice' || currentQ.type === 'true_false' || currentQ.type === 'diagram_analysis') && (
             <div className="kahoot-tiles-grid">
               {currentQ.options.map((opt, idx) => {
                 const tileStyle = KAHOOT_TILES[idx % 4];
@@ -2058,7 +2073,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSu
                   <div className="feedback-solution-box animate-fadeIn">
                     <span className="feedback-solution-tag">Correct Solution:</span>
                     <span className="feedback-solution-text">
-                      {currentQ.type === 'multiple_choice' || currentQ.type === 'diagram_analysis'
+                      {currentQ.type === 'multiple_choice' || currentQ.type === 'true_false' || currentQ.type === 'diagram_analysis'
                         ? (Array.isArray(currentQ.options) && currentQ.options[currentQ.correctAnswer] ? currentQ.options[currentQ.correctAnswer] : `Option ${currentQ.correctAnswer + 1}`)
                         : currentQ.type === 'identification'
                         ? (Array.isArray(currentQ.acceptedAnswers) && currentQ.acceptedAnswers.length > 0 ? currentQ.acceptedAnswers.join(' / ') : (currentQ.correctAnswer || currentQ.answer || 'N/A'))

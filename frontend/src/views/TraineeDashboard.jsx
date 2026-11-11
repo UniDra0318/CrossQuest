@@ -351,7 +351,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       });
       return sorted.slice(0, 4).map((q, idx) => {
         const status = quizScoreStatus[q.id] || {};
-        const qCount = q.questions_count || 5;
+        const qCount = q.questions_count ?? 0;
         const trackFallback = idx === 0 ? TRACKS.infosec : idx === 1 ? TRACKS.access : idx === 2 ? TRACKS.privacy : TRACKS.database;
         const defaultTrainer = 'Instructor not assigned';
         const defaultCat = idx === 0 ? 'Project Management' : idx === 1 ? 'Executive Leadership' : idx === 2 ? 'Supervisory Mastery' : 'Risk & Governance';
@@ -417,7 +417,19 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       timePerQuestion: 45, passingScore: 80, showCorrectAnswers: false, serverScored: true,
       description: meta.course_name || '', learningObjectives: [],
       // NOTE: no correctAnswer on purpose, so QuizArena does not shuffle options (server scores by original index)
-      questions: qs.map(q => ({ id: q.id, type: 'multiple_choice', question: q.question_text, options: q.options, points: q.points }))
+      questions: qs.map(q => {
+        const qt = q.question_type || 'multiple_choice';
+        const steps = Array.isArray(q.payload?.steps) ? q.payload.steps : [];
+        return {
+          id: q.id,
+          type: qt === 'sequence' ? 'sequence_order' : qt,
+          question: q.question_text,
+          options: q.options || [],
+          steps,
+          initialOrder: steps,
+          points: q.points
+        };
+      })
     });
   };
 
@@ -786,7 +798,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                       Latest Training
                     </span>
                     <span className="pillar-status-chip">
-                      <BookOpen size={13} style={{ color: '#4f46e5' }} /> {latestTraining ? trStatus : 'No Record Yet'}
+                      <BookOpen size={13} style={{ color: '#4f46e5' }} />{' '}
+                      {realQuizzes && realQuizzes.length > 0 && realQuizzes.every(q => q.completed || quizScoreStatus[q.id]?.completed) && trStatus !== 'Completed'
+                        ? 'Awaiting trainer sign-off'
+                        : (latestTraining ? trStatus : 'No Record Yet')}
                     </span>
                   </div>
 
@@ -927,7 +942,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
               <div className="pillar-chips-wrap">
                 <span className="pillar-chip">
-                  {nextQuizItem?.questions?.length || 4} Questions
+                  {nextQuizItem?.questions_count ?? nextQuizItem?.questions?.length ?? 0} Questions
                 </span>
                 <span className="pillar-chip">
                   {nextQuizItem?.timePerQuestion || 30}s / Question

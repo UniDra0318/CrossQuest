@@ -132,7 +132,12 @@ export function TrainerProvider({ children }) {
   };
 
   const handleAddQuestion = async (quizId, q) => {
-    await addQuestion(quizId, q, token);
+    const added = await addQuestion(quizId, q, token);
+    setQuizzes((prev) => prev.map((quiz) => {
+      if (quiz.id !== quizId) return quiz;
+      const nextQs = [...(quiz.questions || []), added];
+      return { ...quiz, questions: nextQs, questionsCount: nextQs.length };
+    }));
     await loadQuizQuestions(quizId, true);
   };
 
@@ -143,6 +148,11 @@ export function TrainerProvider({ children }) {
 
   const handleDeleteQuestion = async (quizId, qid) => {
     await deleteQuestion(quizId, qid, token);
+    setQuizzes((prev) => prev.map((quiz) => {
+      if (quiz.id !== quizId) return quiz;
+      const nextQs = (quiz.questions || []).filter((item) => item.id !== qid);
+      return { ...quiz, questions: nextQs, questionsCount: nextQs.length };
+    }));
     await loadQuizQuestions(quizId, true);
   };
 

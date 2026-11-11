@@ -826,9 +826,8 @@ def sign_off_training_session(
     """Trainer signs off once per session and confirms each participant's completion (Phase 2, Section 3.5.3).
     
     Permissions:
-    - Assigned Trainer for the session.
-    - Administrator.
-    - All other roles: DENIED.
+    - Assigned Trainer for the session only (U-17).
+    - All other roles (including Administrator): DENIED.
     
     Upon sign-off:
     - Session is marked signed off.

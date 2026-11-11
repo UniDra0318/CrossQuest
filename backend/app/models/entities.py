@@ -127,6 +127,7 @@ class Course(Base):
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     acronym_3 = Column(String(10), nullable=True) # Official pilot three-letter acronym (e.g. PMP, BSS, CRM, SEC)
+    is_pilot = Column(Boolean, nullable=False, default=False, server_default='false')
     created_at = Column(DateTime, default=utc_now)
 
     sessions = relationship("TrainingSession", back_populates="course")
@@ -359,8 +360,10 @@ class QuizQuestion(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     quiz_id = Column(String(36), ForeignKey("quizzes.id"), nullable=False)
+    question_type = Column(String(30), nullable=False, default='multiple_choice', server_default='multiple_choice')
     question_text = Column(Text, nullable=False)
     options = Column(JSON, nullable=False) # List of option strings
+    payload = Column(JSON, nullable=True)
     correct_answer = Column(Integer, nullable=True) # Kept for fallback/compat, answer_key is authoritative
     explanation = Column(Text, nullable=True)
     points = Column(Integer, default=10)
@@ -379,6 +382,7 @@ class QuizAnswerKey(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     question_id = Column(String(36), ForeignKey("quiz_questions.id", ondelete="CASCADE"), unique=True, nullable=False)
     correct_answer = Column(Integer, nullable=False) # Index (0-based)
+    answer_payload = Column(JSON, nullable=True)
     explanation = Column(Text, nullable=True)
     created_at = Column(DateTime, default=utc_now)
 

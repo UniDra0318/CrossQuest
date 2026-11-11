@@ -10,6 +10,7 @@ Implements:
 """
 
 import uuid
+import random
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -31,6 +32,7 @@ from app.schemas.schemas import (
     TeamCreate, TeamResponse, TeamMemberAdd, TeamMemberResponse
 )
 from app.api.deps import get_current_user
+from app.services.quiz_grading import grade_answer
 
 router = APIRouter()
 
@@ -308,6 +310,7 @@ def list_quiz_courses(
         raise HTTPException(status_code=403, detail="Only trainers and administrators can manage quizzes.")
     scope = _scope_for(db, current_user)
     q = db.query(Course).order_by(Course.name)
+    q = q.filter(Course.is_pilot == True)
     if scope is not None:
         if not scope[1]:
             return []
@@ -428,8 +431,10 @@ def add_quiz_question(
 
     question = QuizQuestion(
         quiz_id=quiz.id,
+        question_type=payload.question_type,
         question_text=payload.question_text,
-        options=payload.options,
+        options=payload.options or [],
+        payload=payload.payload,
         correct_answer=payload.correct_option,
         explanation=payload.explanation,
         points=payload.points
@@ -440,6 +445,7 @@ def add_quiz_question(
     answer_key = QuizAnswerKey(
         question_id=question.id,
         correct_answer=payload.correct_option,
+        answer_payload=payload.answer_payload,
         explanation=payload.explanation
     )
     db.add(answer_key)
@@ -449,8 +455,10 @@ def add_quiz_question(
     return QuizQuestionTraineeView(
         id=question.id,
         quiz_id=question.quiz_id,
+        question_type=question.question_type or 'multiple_choice',
         question_text=question.question_text,
         options=question.options or [],
+        payload=question.payload,
         points=question.points or 10
     )
 
@@ -475,19 +483,23 @@ def update_quiz_question(
         raise HTTPException(status_code=404, detail="Question not found")
     _require_quiz_scope(db, current_user, question.quiz)
 
+    question.question_type = payload.question_type
     question.question_text = payload.question_text
-    question.options = payload.options
+    question.options = payload.options or []
+    question.payload = payload.payload
     question.correct_answer = payload.correct_option
     question.explanation = payload.explanation
     question.points = payload.points
 
     if question.answer_key:
         question.answer_key.correct_answer = payload.correct_option
+        question.answer_key.answer_payload = payload.answer_payload
         question.answer_key.explanation = payload.explanation
     else:
         answer_key = QuizAnswerKey(
             question_id=question.id,
             correct_answer=payload.correct_option,
+            answer_payload=payload.answer_payload,
             explanation=payload.explanation
         )
         db.add(answer_key)
@@ -498,8 +510,10 @@ def update_quiz_question(
     return QuizQuestionTraineeView(
         id=question.id,
         quiz_id=question.quiz_id,
+        question_type=question.question_type or 'multiple_choice',
         question_text=question.question_text,
         options=question.options or [],
+        payload=question.payload,
         points=question.points or 10
     )
 
@@ -564,16 +578,33 @@ def get_quiz_questions_for_trainee(
         raise HTTPException(status_code=403, detail="Quiz is not approved yet.")
 
     staff = current_user.role in ("admin", "trainer")
-    questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz_id).all()
-    return [
-        QuizQuestionStaffView(
-            id=q.id, quiz_id=q.quiz_id, question_text=q.question_text,
-            options=q.options or [], points=q.points or 10,
-            correct_answer=q.correct_answer if staff else None,
-            explanation=q.explanation if staff else None,
+    questions = db.query(QuizQuestion).options(joinedload(QuizQuestion.answer_key)).filter(QuizQuestion.quiz_id == quiz_id).all()
+    out = []
+    for q in questions:
+        qtype = q.question_type or 'multiple_choice'
+        q_payload = dict(q.payload) if isinstance(q.payload, dict) else q.payload
+        if not staff and qtype == 'sequence' and isinstance(q_payload, dict) and isinstance(q_payload.get('steps'), list):
+            steps = list(q_payload['steps'])
+            if len(steps) > 1:
+                shuffled = random.sample(steps, len(steps))
+                if shuffled == steps:
+                    shuffled = steps[1:] + steps[:1]
+                q_payload['steps'] = shuffled
+        out.append(
+            QuizQuestionStaffView(
+                id=q.id,
+                quiz_id=q.quiz_id,
+                question_type=qtype,
+                question_text=q.question_text,
+                options=q.options or [],
+                payload=q_payload,
+                points=q.points or 10,
+                correct_answer=q.correct_answer if staff else None,
+                answer_payload=(q.answer_key.answer_payload if q.answer_key else None) if staff else None,
+                explanation=q.explanation if staff else None,
+            )
         )
-        for q in questions
-    ]
+    return out
 
 
 @router.post("/submit-quiz", response_model=GamificationResponse)
@@ -685,12 +716,10 @@ def submit_quiz_attempt(
         correct_count = 0
         total_q = len(questions)
         for q in questions:
-            # Query answer key table
+            # Query answer key table (SEC-26)
             ans_key = db.query(QuizAnswerKey).filter(QuizAnswerKey.question_id == q.id).first()
-            expected_correct = ans_key.correct_answer if ans_key else q.correct_answer
-
             user_choice = answers.get(str(q.id))
-            if user_choice is not None and expected_correct is not None and user_choice == expected_correct:
+            if grade_answer(q, ans_key, user_choice):
                 correct_count += 1
                 earned_points += (q.points if q.points is not None else 10)
 

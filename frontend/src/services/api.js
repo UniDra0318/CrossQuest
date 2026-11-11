@@ -965,31 +965,25 @@ export async function fetchQuizCoursesApi(token) {
 }
 
 export async function addQuizQuestionApi(quizId, payload, token) {
-  try {
-    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }, token);
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn("API error adding quiz question:", err);
-  }
-  return null;
+  const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }, token);
+  if (res.ok) return await res.json();
+  const err = await res.json().catch(() => ({}));
+  throw new Error(err.detail || 'Failed to add quiz question.');
 }
 
 export async function updateQuizQuestionApi(quizId, questionId, payload, token) {
-  try {
-    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions/${questionId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }, token);
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn("API error updating quiz question:", err);
-  }
-  return null;
+  const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions/${questionId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }, token);
+  if (res.ok) return await res.json();
+  const err = await res.json().catch(() => ({}));
+  throw new Error(err.detail || 'Failed to update quiz question.');
 }
 
 export async function deleteQuizQuestionApi(quizId, questionId, token) {
