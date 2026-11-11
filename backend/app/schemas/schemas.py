@@ -165,6 +165,7 @@ class TrainingRecordResponse(BaseModel):
     company_at_completion_id: str
     course_name: str
     status: str
+    attendance_status: Optional[str] = None
     score: Optional[float] = None
     completion_date: Optional[datetime] = None
     encryption_policy: str

@@ -525,23 +525,23 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
     # Generate CP-ABE Encrypted Records for each Trainee
     print("Generating CP-ABE hybrid-encrypted training records...")
     records_count = 0
-    past_sessions = [s for s in session_models if s.trainer_signed_off]
     for idx, (trainee, u_trn, co, prog_name) in enumerate(trainee_models):
-        matches = [s for s in past_sessions if prog_name.lower() in s.course_name.lower()]
-        pool = matches or past_sessions
+        matches = [s for s in session_models if prog_name.lower() in s.course_name.lower()]
+        pool = matches or session_models
         target_sess = pool[idx % len(pool)]
+        is_signed = bool(target_sess.trainer_signed_off)
 
         pol = f"ROLEADMIN or ROLEFINANCE or (ROLEACCTMGR and CLIENT{co.code}V1) or (ROLETRAINER and TRAINING{target_sess.session_code.replace('-', '')}V1) or TRAINEE{trainee.trainee_code.replace('-', '')}"
-        score = 85.0 + (idx * 3.7) % 15.0
+        score = round(85.0 + (idx * 3.7) % 15.0, 1) if is_signed else None
         rec_id = f"rec-pilot-{idx + 1:03d}"
         payload = {
-            "score": round(score, 1),
+            "score": score,
             "trainee_name": f"{trainee.first_name} {trainee.last_name}",
             "trainee_email": trainee.email,
             "company": co.name,
             "course": prog_name,
             "session_code": target_sess.session_code,
-            "completion_date": str(target_sess.end_date.date() if hasattr(target_sess.end_date, 'date') else target_sess.end_date)
+            "completion_date": str(target_sess.end_date.date() if hasattr(target_sess.end_date, 'date') else target_sess.end_date) if is_signed else None
         }
         enc = cpabe_engine.encrypt_record(payload, pol, record_id=f"rec-{trainee.trainee_code}", version=1)
 
@@ -551,10 +551,10 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
             session_id=target_sess.id,
             company_at_completion_id=co.id,
             course_name=prog_name,
-            status="Completed",
-            attendance_status="Present",
-            completion_date=target_sess.end_date,
-            score=round(score, 1),
+            status="Completed" if is_signed else "Not completed",
+            attendance_status="Present" if is_signed else None,
+            completion_date=target_sess.end_date if is_signed else None,
+            score=score,
             encryption_policy=pol,
             policy_version=1,
             abe_ciphertext=enc.get("abe_ciphertext"),
@@ -564,24 +564,24 @@ def seed_pilot(db_url: str = "sqlite:///./crossquest_pilot.db"):
         )
         db.add(tr_rec)
 
-        # 36-Month Certified Certificate
-        serial = f"PILOT-{co.code[:4]}-{2026}-{idx+1:03d}"
-        issue_d = target_sess.end_date if isinstance(target_sess.end_date, datetime) else datetime(2026, 8, 15)
-        expiry_d = issue_d + timedelta(days=36 * 30)
-        cert = Certificate(
-            record_id=rec_id,
-            trainee_id=trainee.id,
-            cert_type_code="COMPLIANCE",
-            title=f"Certified Specialist in {prog_name}",
-            serial_number=serial,
-            issue_date=issue_d,
-            expiry_date=expiry_d,
-            expiry_basis="Calculated: issue_date + 36 months validity per FR-18",
-            status="Valid",
-            is_self_reported=False,
-            is_nearing_renewal=False
-        )
-        db.add(cert)
+        if is_signed:
+            serial = f"PILOT-{co.code[:4]}-{2026}-{idx+1:03d}"
+            issue_d = target_sess.end_date if isinstance(target_sess.end_date, datetime) else datetime(2026, 8, 15)
+            expiry_d = issue_d + timedelta(days=36 * 30)
+            cert = Certificate(
+                record_id=rec_id,
+                trainee_id=trainee.id,
+                cert_type_code="COMPLIANCE",
+                title=f"Certified Specialist in {prog_name}",
+                serial_number=serial,
+                issue_date=issue_d,
+                expiry_date=expiry_d,
+                expiry_basis="Calculated: issue_date + 36 months validity per FR-18",
+                status="Valid",
+                is_self_reported=False,
+                is_nearing_renewal=False
+            )
+            db.add(cert)
         records_count += 1
 
     db.commit()

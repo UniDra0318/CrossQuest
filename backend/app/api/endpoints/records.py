@@ -287,6 +287,7 @@ def list_training_records(
             company_at_completion_id=r.company_at_completion_id,
             course_name=r.course_name,
             status=r.status,
+            attendance_status=r.attendance_status,
             score=r.score,
             completion_date=r.completion_date,
             encryption_policy=r.encryption_policy,

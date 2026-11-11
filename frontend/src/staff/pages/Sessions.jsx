@@ -266,6 +266,17 @@ export default function Sessions() {
         }).catch(() => null);
       }
 
+      // Sync updated attendance & status into local records state
+      setRecords(prev => prev.map(r => {
+        const edit = attendanceEdits[r.id];
+        if (!edit) return r;
+        return {
+          ...r,
+          status: edit.status,
+          attendance_status: edit.attendance_status
+        };
+      }));
+
       // Transition session from "Needs attendance" to "Awaiting Trainer sign-off"
       setSessions(prev => prev.map(s => {
         if (s.id === activeSession.id) {
