@@ -780,21 +780,21 @@ def seed_database():
 
         # 11. Seed Quizzes, Questions & Isolated Answer Keys (SEC-26)
         quiz1 = Quiz(
-            session_id=sess1.id,
+            course_id=sess1.course_id,
             title="Enterprise Security Audit Challenge",
             version_no=1,
             is_closed=False,
             created_by_user_id=u_trainer1.id
         )
         quiz2 = Quiz(
-            session_id=sess1.id,
+            course_id=sess1.course_id,
             title="Role-Based Access & Policy Verification",
             version_no=1,
             is_closed=False,
             created_by_user_id=u_trainer1.id
         )
         quiz3 = Quiz(
-            session_id=sess3.id,
+            course_id=sess3.course_id,
             title="Multi-Tenant Cryptographic Isolation Challenge",
             version_no=1,
             is_closed=False,

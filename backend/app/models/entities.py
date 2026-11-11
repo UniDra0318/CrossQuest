@@ -333,6 +333,7 @@ class Quiz(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     session_id = Column(String(36), ForeignKey("training_sessions.id"), nullable=True)
+    course_id = Column(String(36), ForeignKey("courses.id"), nullable=True, index=True)
     title = Column(String(200), nullable=False)
     version_no = Column(Integer, default=1)
     available_until = Column(DateTime, nullable=True)
@@ -345,6 +346,7 @@ class Quiz(Base):
     created_at = Column(DateTime, default=utc_now)
 
     session = relationship("TrainingSession", back_populates="quizzes")
+    course = relationship("Course")
     questions = relationship("QuizQuestion", back_populates="quiz", cascade="all, delete-orphan")
     attempts = relationship("QuizAttempt", back_populates="quiz")
 

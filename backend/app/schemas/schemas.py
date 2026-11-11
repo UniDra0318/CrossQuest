@@ -222,6 +222,7 @@ class QuizListItem(BaseModel):
 class QuizCreate(BaseModel):
     title: str
     session_id: Optional[str] = None
+    course_id: Optional[str] = None
 
 class QuizQuestionCreate(BaseModel):
     question_text: str

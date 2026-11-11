@@ -6,6 +6,7 @@ import {
   fetchQuizzes,
   fetchQuizQuestionsApi,
   createQuizApi,
+  fetchQuizCoursesApi,
   addQuizQuestionApi,
   deleteQuizQuestionApi,
   updateQuizQuestionApi
@@ -139,15 +140,19 @@ export async function getQuizzes(token) {
   }));
 }
 
-/** POST /api/v1/gamification/quizzes -> Create quiz in database and storage */
-export async function createQuiz(title, sessionId, token) {
-  const result = await createQuizApi({ title, session_id: sessionId }, token);
-  if (!result) throw new Error('Quiz creation failed. You may not be assigned to that session.');
+export async function createQuiz(title, courseId, token) {
+  const result = await createQuizApi({ title, course_id: courseId }, token);
+  if (!result) throw new Error('Quiz creation failed. Check that the course is in your scope and the title is not already used in that course.');
   return {
-    id: result.id, sessionId: result.session_id, courseId: result.course_id,
+    id: result.id, sessionId: null, courseId: result.course_id,
     course: result.course_name, category: result.course_name, title: result.title,
     timePerQ: 45, pass: 80, questionsCount: 0, isApproved: false, questions: []
   };
+}
+
+/** GET /api/v1/gamification/quiz-courses -> courses the caller may create quizzes for */
+export async function getQuizCourses(token) {
+  return (await fetchQuizCoursesApi(token)) || [];
 }
 
 /** POST /api/v1/gamification/quizzes/:id/questions -> Add question in database & storage */

@@ -5,6 +5,7 @@ import {
   deriveRoster,
   gradeTrainee,
   getQuizzes,
+  getQuizCourses,
   createQuiz,
   addQuestion,
   deleteQuestion,
@@ -39,6 +40,7 @@ export function TrainerProvider({ children }) {
   const [sessions, setSessions] = useState([]);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
+  const [quizCourses, setQuizCourses] = useState([]);
   const [selectedScope, setSelectedScope] = useState('ALL');
   const [selectedTraineeId, setSelectedTraineeId] = useState(null);
   const [gradeResult, setGradeResult] = useState(null);
@@ -76,7 +78,10 @@ export function TrainerProvider({ children }) {
 
   const loadQuizzes = useCallback(async () => {
     setQuizzesLoading(true);
-    try { setQuizzes(await getQuizzes(token)); } catch (e) { console.warn('Quiz load failed:', e); }
+    try {
+      const [qs, cs] = await Promise.all([getQuizzes(token), getQuizCourses(token)]);
+      setQuizzes(qs); setQuizCourses(cs);
+    } catch (e) { console.warn('Quiz load failed:', e); }
     finally { setQuizzesLoading(false); }
   }, [token]);
 
@@ -100,8 +105,8 @@ export function TrainerProvider({ children }) {
     return res;
   };
 
-  const handleCreateQuiz = async (title, sessionId) => {
-    const created = await createQuiz(title, sessionId, token);
+  const handleCreateQuiz = async (title, courseId) => {
+    const created = await createQuiz(title, courseId, token);
     setQuizzes(await getQuizzes(token));
     return created;
   };
@@ -196,6 +201,7 @@ export function TrainerProvider({ children }) {
         refreshSessions,
         handleSignOffSession,
         quizzes,
+        quizCourses,
         analytics,
         selectedScope,
         setSelectedScope,

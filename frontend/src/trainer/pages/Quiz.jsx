@@ -155,7 +155,7 @@ export default function Quiz() {
   const {
     quizzes,
     handleCreateQuiz,
-    sessions,
+    quizCourses,
     handleAddQuestion,
     handleUpdateQuestion,
     handleDeleteQuestion,
@@ -168,11 +168,14 @@ export default function Quiz() {
 
   const [activeQuizId, setActiveQuizId] = useState(null);
   const [newQuizTitle, setNewQuizTitle] = useState('');
-  const [newQuizSessionId, setNewQuizSessionId] = useState('');
+  const [newQuizCourseId, setNewQuizCourseId] = useState('');
   const [newQuestionPrompt, setNewQuestionPrompt] = useState('');
   const [newQuestionExplanation, setNewQuestionExplanation] = useState('');
 
   useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
+  useEffect(() => {
+    if (!newQuizCourseId && quizCourses && quizCourses.length === 1) setNewQuizCourseId(quizCourses[0].id);
+  }, [quizCourses, newQuizCourseId]);
   const [creatingQuiz, setCreatingQuiz] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
 
@@ -395,10 +398,10 @@ export default function Quiz() {
 
   const onCreateQuiz = async (e) => {
     e.preventDefault();
-    if (!newQuizTitle.trim() || !newQuizSessionId) return;
+    if (!newQuizTitle.trim() || !newQuizCourseId) return;
     setCreatingQuiz(true);
     try {
-      const created = await handleCreateQuiz(newQuizTitle.trim(), newQuizSessionId);
+      const created = await handleCreateQuiz(newQuizTitle.trim(), newQuizCourseId);
       setNewQuizTitle('');
       if (created) setActiveQuizId(created.id);
     } catch (err) {
@@ -508,11 +511,11 @@ export default function Quiz() {
     }
   };
 
-  const quizGroups = Object.entries((quizzes || []).reduce((acc, q) => {
-    (acc[q.course || 'Unassigned'] ||= []).push(q);
-    return acc;
-  }, {}));
-  const scopeLabel = currentUser?.role === 'admin' ? 'GLOBAL SCOPE · all courses & sessions' : 'LIMITED SCOPE · assigned sessions only (U-12)';
+  const byCourse = {};
+  (quizCourses || []).forEach((c) => { byCourse[c.name] = []; });
+  (quizzes || []).forEach((q) => { (byCourse[q.course || 'Unassigned'] ||= []).push(q); });
+  const quizGroups = Object.entries(byCourse);
+  const scopeLabel = currentUser?.role === 'admin' ? 'GLOBAL SCOPE · all courses' : 'LIMITED SCOPE · courses of assigned sessions and programs (U-12)';
 
   return (
     <div className="trn-split trn-split--quiz" style={{ marginTop: '24px' }}>
@@ -543,12 +546,17 @@ export default function Quiz() {
         </div>
 
         {/* Assessment Items List */}
-        <div className="trn-quizlist" style={{ marginTop: '16px' }}>
+        <div className="trn-quizlist" style={{ marginTop: '16px', maxHeight: '55vh', overflowY: 'auto', paddingRight: '4px' }}>
           {quizGroups.map(([course, items]) => (
             <React.Fragment key={course}>
               <div className="adm-mono" style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.04em', margin: '14px 0 6px', color: isDark ? '#94a3b8' : '#64748b' }}>
                 {course.toUpperCase()} ({items.length})
               </div>
+              {items.length === 0 && (
+                <small style={{ display: 'block', padding: '6px 4px 2px', color: isDark ? '#94a3b8' : '#64748b' }}>
+                  No quizzes in this course yet. Create the first one below.
+                </small>
+              )}
               {items.map((q) => {
                 const isSelected = activeQuiz && activeQuiz.id === q.id;
                 const qCount = q.questions ? q.questions.length : (q.questionsCount || 0);
@@ -600,18 +608,13 @@ export default function Quiz() {
         {/* Create new quiz form */}
         <form onSubmit={onCreateQuiz} style={{ marginTop: '20px', paddingTop: '16px', borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid var(--cq-line)' }}>
           <label className="adm-label" style={{ fontSize: '10.5px', color: isDark ? '#cbd5e1' : '#475569' }}>
-            CREATE NEW ASSESSMENT
+            CREATE NEW ASSESSMENT FOR A COURSE
           </label>
-          <select
-            value={newQuizSessionId}
-            onChange={(e) => setNewQuizSessionId(e.target.value)}
-            className="adm-input"
-            style={{ width: '100%', marginBottom: '8px', marginTop: '8px' }}
-            required
-          >
-            <option value="">Select course session…</option>
-            {(sessions || []).map(s => (
-              <option key={s.id} value={s.id}>{s.course_name} · {s.session_code}</option>
+          <select value={newQuizCourseId} onChange={(e) => setNewQuizCourseId(e.target.value)}
+            className="adm-input" style={{ width: '100%', marginBottom: '8px', marginTop: '8px' }} required>
+            <option value="">Select course…</option>
+            {(quizCourses || []).map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -633,7 +636,7 @@ export default function Quiz() {
             />
             <button
               type="submit"
-              disabled={creatingQuiz || !newQuizTitle.trim() || !newQuizSessionId}
+              disabled={creatingQuiz || !newQuizTitle.trim() || !newQuizCourseId}
               className="adm-btn adm-btn-solid cq-btn--purple"
               style={{ padding: '10px 14px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
             >

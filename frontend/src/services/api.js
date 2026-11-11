@@ -954,6 +954,16 @@ export async function createQuizApi(payload, token) {
   return null;
 }
 
+export async function fetchQuizCoursesApi(token) {
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quiz-courses`, {}, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error fetching quiz courses:", err);
+  }
+  return [];
+}
+
 export async function addQuizQuestionApi(quizId, payload, token) {
   try {
     const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {

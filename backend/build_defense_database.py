@@ -1346,7 +1346,7 @@ def build_database(target_url: str, apply_changes: bool = False):
             )
             qz = Quiz(
                 id=str(uuid.uuid4()),
-                session_id=matched_sess.id,
+                course_id=matched_sess.course_id,
                 title=q_title,
                 version_no=1,
                 available_until=now_utc + timedelta(days=60),
