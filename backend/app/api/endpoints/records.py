@@ -10,7 +10,7 @@ from app.core.database import get_db
 from app.models.entities import (
     TrainingRecord, TrainingRecordVersion, Trainee, ClientCompany, User, AccessLog,
     AccountManagerAssignment, TrainerAssignment, TrainingSession, Certificate, GamificationProgress, Course,
-    UserAbeKey
+    UserAbeKey, Team, TeamMember
 )
 from app.schemas.schemas import (
     TrainingRecordCreate, TrainingRecordUpdate, TrainingRecordResponse, DecryptedRecordResponse,
@@ -1053,6 +1053,15 @@ def list_assigned_training_sessions(
                 companies = {c.id: c for c in adm_db.query(ClientCompany).filter(ClientCompany.id.in_(c_ids)).all()}
             certs = {c.record_id: c for c in adm_db.query(Certificate).filter(Certificate.record_id.in_(r_ids)).all()}
 
+    team_by_member = {}
+    if sids:
+        for sid_, tid_, tname_ in (
+            db.query(Team.session_id, TeamMember.trainee_id, Team.team_name)
+            .join(TeamMember, TeamMember.team_id == Team.id)
+            .filter(Team.session_id.in_(sids)).all()
+        ):
+            team_by_member[(sid_, tid_)] = tname_
+
     result = []
     for s in sessions:
         is_future = bool(s.start_date and s.start_date > now_manila_naive)
@@ -1073,7 +1082,8 @@ def list_assigned_training_sessions(
                 "attendance_status": r.attendance_status,
                 "score": r.score,
                 "completion_date": r.completion_date.isoformat() if r.completion_date else None,
-                "certificate_serial": cert.serial_number if cert else None
+                "certificate_serial": cert.serial_number if cert else None,
+                "team_name": team_by_member.get((s.id, r.trainee_id))
             })
 
         result.append({
@@ -1091,6 +1101,7 @@ def list_assigned_training_sessions(
             "venue": s.venue or ("Online (Virtual Meeting)" if s.delivery_mode == "Online" else "Crossworks Makati Learning Hub"),
             "delivery_mode": s.delivery_mode or "F2F",
             "is_future_dated": is_future,
+            "client_names": sorted({i["company_name"] for i in roster_items if i["company_name"]}),
             "attendees_count": len(roster_items),
             "completed_count": sum(1 for item in roster_items if item["status"] == "Completed"),
             "records": roster_items

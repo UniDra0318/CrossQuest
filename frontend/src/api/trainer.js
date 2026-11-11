@@ -72,7 +72,7 @@ export function deriveRoster(sessions = []) {
     cohort: s.session_code, sessionId: s.id, status: r.status || 'In progress',
     score: r.score != null ? r.score : null, tier: r.score != null ? tierFor(r.score) : 'Admin Only',
     state: (r.status?.toLowerCase() === 'completed' || s.trainer_signed_off) ? 'CERTIFIED' : 'PENDING',
-    attendance: r.attendance_status || 'Present', certificateSerial: r.certificate_serial
+    attendance: r.attendance_status || 'Present', team: r.team_name || null, certificateSerial: r.certificate_serial
   })));
   return out;
 }
@@ -303,7 +303,7 @@ export async function resetQuizzes() {
 }
 
 /** Analytics computed from real database roster and cohorts */
-export async function getAnalytics(scope = 'ALL', token, sessions = []) {
+export function computeAnalytics(scope = 'ALL', sessions = []) {
   const roster = deriveRoster(sessions);
   const cohorts = deriveCohorts(sessions);
 
@@ -311,7 +311,7 @@ export async function getAnalytics(scope = 'ALL', token, sessions = []) {
   const scored = filtered.filter(r => r.score != null);
   const meanScore = scored.length
     ? Math.round(scored.reduce((acc, r) => acc + (r.score || 0), 0) / scored.length * 10) / 10
-    : 88.5;
+    : null;
   const passing = scored.filter(r => r.score >= PASS_MARK).length;
   const tiers = ['Perfect Score', 'High Distinction', 'Pass with Merit', 'Passing Baseline'].map(tier => ({
     tier,
@@ -323,8 +323,10 @@ export async function getAnalytics(scope = 'ALL', token, sessions = []) {
     org: c.org || c.name || c.id,
     rate: c.enrolled ? Math.round(((c.certified || 0) / c.enrolled) * 100) : 0,
     certified: c.certified || 0,
-    enrolled: c.enrolled || 2
+    enrolled: c.enrolled || 0
   }));
+  orgs.sort((a, b) => b.rate - a.rate || b.enrolled - a.enrolled || String(a.id).localeCompare(String(b.id)));
+
   const benchmarksList = [
     { format: 'Kahoot 4-tile', correct: 92, secs: 14.8 },
     { format: 'Sequence', correct: 84, secs: 28.2 },
@@ -334,26 +336,24 @@ export async function getAnalytics(scope = 'ALL', token, sessions = []) {
   ];
 
   const activeCount = filtered.length;
-  const passRate = activeCount ? Math.round((passing / activeCount) * 100) : 90;
+  const passRate = activeCount ? Math.round((passing / activeCount) * 100) : 0;
+  const remediation = filtered.filter(r => r.score == null || r.score < PASS_MARK)
+    .sort((a, b) => (a.score == null) - (b.score == null) || (a.score ?? 0) - (b.score ?? 0)
+      || String(a.cohort).localeCompare(String(b.cohort)) || a.name.localeCompare(b.name));
 
   return {
     scope,
-    active: activeCount || 10,
-    passRate: activeCount ? passRate : 90,
-    mean: meanScore != null ? meanScore : 88.5,
+    active: activeCount,
+    passRate: activeCount ? passRate : 0,
+    mean: meanScore,
     velocity: '3m 48s',
-    remediation: filtered.filter(r => r.score == null || r.score < PASS_MARK),
+    remediation,
     tiers,
-    orgs: orgs.length > 0 ? orgs : [
-      { id: 'SESS-2026-08A', org: 'San Miguel Conglomerate Holdings', rate: 100, certified: 4, enrolled: 4 },
-      { id: 'SESS-2026-09B', org: 'Maya FinTech Digital Innovations', rate: 100, certified: 2, enrolled: 2 },
-      { id: 'SESS-2026-10C', org: 'Ayala Retail Omnichannel Corp', rate: 100, certified: 2, enrolled: 2 },
-      { id: 'SESS-2026-11D', org: 'San Miguel Conglomerate Holdings', rate: 50, certified: 1, enrolled: 2 }
-    ],
+    orgs,
     benchmarks: benchmarksList,
     kpis: {
       completionRate: passRate,
-      meanScore: meanScore != null ? meanScore : 88.5,
+      meanScore: meanScore,
       atRiskCount: filtered.filter(r => (r.score || 0) < PASS_MARK).length,
       medianTimeSecs: 42
     },

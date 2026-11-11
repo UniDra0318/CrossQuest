@@ -148,7 +148,7 @@ export default function SessionDetail({ sessionId: propSessionId }) {
             <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
               <span>📅 {cohort.schedule}</span>
               <span>•</span>
-              <span>👥 {cohort.enrolled || 8} Participants</span>
+              <span>👥 {cohort.enrolled || 0} Participants</span>
             </div>
           </div>
         </div>

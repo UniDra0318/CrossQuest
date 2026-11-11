@@ -1,10 +1,14 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTrainer } from '../TrainerContext';
+import { TablePagination, usePagination } from '../../components/TablePagination';
 
 export default function Analytics({ onNavigateTab }) {
   const { isDark } = useTheme();
   const { analytics, selectedScope, setSelectedScope, setSelectedTraineeId, loading } = useTrainer();
+
+  const orgPg = usePagination(analytics?.orgs || [], 6);
+  const remPg = usePagination(analytics?.remediation || [], 6);
 
   if (loading && !analytics) {
     return <div className="adm-state">Loading cohort analytics...</div>;
@@ -54,7 +58,7 @@ export default function Analytics({ onNavigateTab }) {
         <div className="adm-tile">
           <div>
             <span className="adm-label">COHORT MEAN SCORE</span>
-            <div className="adm-tile__num">{analytics?.mean ?? 'N/A'}%</div>
+            <div className="adm-tile__num">{analytics?.mean != null ? `${analytics.mean}%` : '—'}</div>
             <span className="adm-mono">Pass Threshold: 75.0%</span>
           </div>
         </div>
@@ -105,7 +109,7 @@ export default function Analytics({ onNavigateTab }) {
           </div>
 
           <div style={{ marginTop: '16px', display: 'grid', gap: '16px' }}>
-            {analytics?.orgs?.map((org) => (
+            {orgPg.paginatedItems.map((org) => (
               <div key={org.id}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600 }}>
                   <span>{org.org} ({org.id})</span>
@@ -117,13 +121,14 @@ export default function Analytics({ onNavigateTab }) {
               </div>
             ))}
           </div>
+          <TablePagination currentPage={orgPg.currentPage} totalItems={orgPg.totalItems} pageSize={6} itemName="cohorts" onPageChange={orgPg.setCurrentPage} />
         </div>
 
         {/* Interactive Challenge Format Benchmarks */}
         <div className="adm-panel trn-pad">
           <div className="adm-panel__head" style={{ padding: '0 0 16px 0', borderBottom: '1px solid var(--cq-line)' }}>
             <h2>Challenge Format Benchmarks</h2>
-            <span className="adm-label">ACCURACY & TIMING</span>
+            <span className="adm-label">SAMPLE DATA · ACCURACY & TIMING</span>
           </div>
 
           <div style={{ marginTop: '16px', display: 'grid', gap: '12px' }}>
@@ -160,7 +165,7 @@ export default function Analytics({ onNavigateTab }) {
                 🎉 No trainees currently require remediation in this scope.
               </div>
             ) : (
-              analytics.remediation.map((r) => (
+              remPg.paginatedItems.map((r) => (
                 <div key={r.id} className="trn-rem" style={{ padding: '12px 14px', borderRadius: '12px', background: isDark ? '#111827' : 'var(--cq-lav-2)', border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : 'none' }}>
                   <div>
                     <strong>{r.name}</strong>
@@ -178,6 +183,7 @@ export default function Analytics({ onNavigateTab }) {
               ))
             )}
           </div>
+          <TablePagination currentPage={remPg.currentPage} totalItems={remPg.totalItems} pageSize={6} itemName="trainees" onPageChange={remPg.setCurrentPage} />
         </div>
       </div>
     </>

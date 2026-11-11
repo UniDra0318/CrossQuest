@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   getTrainerMe,
   deriveCohorts,
@@ -11,7 +11,7 @@ import {
   updateQuestion,
   updateQuizSettings,
   resetQuizzes,
-  getAnalytics,
+  computeAnalytics,
   downloadCsv,
   RUBRIC,
   PASS_MARK,
@@ -28,73 +28,60 @@ import { useAuth } from '../contexts/AuthContext';
 
 const TrainerContext = createContext(null);
 
+let sessionsCache = { key: null, at: 0, data: null };
+const CACHE_MS = 60000;
+
 export function TrainerProvider({ children }) {
-  const { token } = useAuth();
+  const { token, currentUser } = useAuth();
   const [me, setMe] = useState(null);
   const [cohorts, setCohorts] = useState([]);
   const [roster, setRoster] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
   const [selectedScope, setSelectedScope] = useState('ALL');
   const [selectedTraineeId, setSelectedTraineeId] = useState(null);
   const [gradeResult, setGradeResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [quizzesLoading, setQuizzesLoading] = useState(false);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setLoadError(null);
-    try {
-      const s = await fetchTrainerSessions(token); // ONE call to /records/sessions/assigned
-      if (s === null) throw new Error('Could not load assigned sessions. Check the backend and retry.');
+  const analytics = useMemo(() => computeAnalytics(selectedScope, sessions), [selectedScope, sessions]);
 
-      const [meR, qR, teamsR] = await Promise.allSettled([
-        getTrainerMe(),
-        getQuizzes(token),
-        Promise.all(s.map(sess => fetchSessionTeams(sess.id, token))),
-      ]);
-      const u = meR.status === 'fulfilled' && meR.value ? meR.value : { name: 'Trainer', email: '', role: 'Trainer', initials: 'TR', scopes: [] };
-      const q = qR.status === 'fulfilled' && Array.isArray(qR.value) ? qR.value : [];
+  const applySessions = (s) => {
+    const r = deriveRoster(s);
+    setSessions(s); setCohorts(deriveCohorts(s)); setRoster(r);
+    setSelectedSessionId(prev => prev || (s.find(x => !x.trainer_signed_off && !x.is_future_dated) || s[0])?.id || null);
+    setSelectedTraineeId(prev => prev || r[0]?.id || null);
+  };
 
-      let r = deriveRoster(s);
-      if (teamsR.status === 'fulfilled') {
-        const memberTeamMap = {};
-        teamsR.value.forEach(list => (Array.isArray(list) ? list : []).forEach(team =>
-          (team.members || []).forEach(m => { if (m.trainee_id) memberTeamMap[m.trainee_id] = team.team_name; })));
-        r = r.map(item => ({ ...item, team: memberTeamMap[item.traineeId] || item.team || null }));
-      }
-      const a = await getAnalytics(selectedScope, token, s);
-
-      setMe(u); setSessions(s); setCohorts(deriveCohorts(s)); setRoster(r); setQuizzes(q); setAnalytics(a);
-      if (!selectedSessionId && s.length > 0) {
-        const pending = s.find(item => !item.trainer_signed_off && !item.is_future_dated);
-        setSelectedSessionId(pending ? pending.id : s[0].id);
-      }
-      if (!selectedTraineeId && r.length > 0) setSelectedTraineeId(r[0].id);
-    } catch (err) {
-      console.warn('Failed to load trainer data:', err);
-      setLoadError(err.message || 'Failed to load trainer data.');
-      setSessions([]); setCohorts([]); setRoster([]);
-    } finally {
-      setLoading(false);
+  const loadData = useCallback(async (force = false) => {
+    const key = currentUser?.id || 'anon';
+    if (!force && sessionsCache.key === key && Date.now() - sessionsCache.at < CACHE_MS) {
+      applySessions(sessionsCache.data); setLoading(false); return;
     }
-  }, [selectedScope, selectedTraineeId, selectedSessionId, token]);
+    setLoading(true); setLoadError(null);
+    const s = await fetchTrainerSessions(token);   // the ONLY request needed for Sessions/Results
+    if (s === null) {
+      setLoadError('Could not load assigned sessions. Check the backend and retry.');
+      setLoading(false); return;
+    }
+    sessionsCache = { key, at: Date.now(), data: s };
+    applySessions(s);
+    setLoading(false);
+    getTrainerMe().then(setMe).catch(() => {});
+  }, [token, currentUser?.id]);
 
-  useEffect(() => {
-    loadData();
-  }, [selectedScope]);
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const loadQuizzes = useCallback(async () => {
+    setQuizzesLoading(true);
+    try { setQuizzes(await getQuizzes(token)); } catch (e) { console.warn('Quiz load failed:', e); }
+    finally { setQuizzesLoading(false); }
+  }, [token]);
 
   const refreshSessions = async () => {
-    try {
-      const s = await fetchTrainerSessions(token);
-      if (s && s.length > 0) {
-        setSessions(s);
-      }
-    } catch (err) {
-      console.warn('Could not refresh sessions:', err);
-    }
+    await loadData(true);
   };
 
   const handleSignOffSession = async (sessionId, payload) => {
@@ -104,7 +91,7 @@ export function TrainerProvider({ children }) {
     return res;
   };
 
-  const refreshRoster = async () => { await loadData(); };
+  const refreshRoster = async () => { await loadData(true); };
 
   const handleGrade = async (id, data) => {
     const res = await gradeTrainee(id, data);
@@ -184,6 +171,7 @@ export function TrainerProvider({ children }) {
     }
 
     // 3. Only update local state AFTER server confirms success (no fake-save)
+    sessionsCache.at = 0;
     setRoster(prev => prev.map(t => (t.id === traineeId || t.traineeId === traineeId) ? { ...t, team: teamName || null } : t));
     return { success: true, teamName };
   };
@@ -218,6 +206,8 @@ export function TrainerProvider({ children }) {
         loading,
         loadError,
         loadData,
+        loadQuizzes,
+        quizzesLoading,
         handleGrade,
         handleCreateQuiz,
         handleAddQuestion,

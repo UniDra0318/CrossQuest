@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Layers,
   Link2,
@@ -161,7 +161,8 @@ export default function Quiz() {
     handleDeleteQuestion,
     handleUpdateSettings,
     handleResetQuizzes,
-    loading,
+    loadQuizzes,
+    quizzesLoading,
   } = useTrainer();
   const { token, currentUser } = useAuth();
 
@@ -170,6 +171,8 @@ export default function Quiz() {
   const [newQuizSessionId, setNewQuizSessionId] = useState('');
   const [newQuestionPrompt, setNewQuestionPrompt] = useState('');
   const [newQuestionExplanation, setNewQuestionExplanation] = useState('');
+
+  useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
   const [creatingQuiz, setCreatingQuiz] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
 
@@ -325,7 +328,7 @@ export default function Quiz() {
     ? (quizzes.find((q) => q.id === activeQuizId) || quizzes[0])
     : null;
 
-  if (loading && (!quizzes || quizzes.length === 0)) {
+  if (quizzesLoading && (!quizzes || quizzes.length === 0)) {
     return <div className="adm-state">Loading quiz assessment studio...</div>;
   }
 
