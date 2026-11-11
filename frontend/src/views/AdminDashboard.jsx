@@ -98,13 +98,15 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
     };
   };
 
-  // Client Companies & Tenancy Registry State
+  // Client Companies & Tenancy Registry State (Official Crossworks Pilot Tenants)
   const DEFAULT_COMPANIES = [
-    { code: 'CORP_ALPHA', name: 'San Miguel Conglomerate Holdings', industry: 'Conglomerate & Industrial', am_name: 'Erika Bana' },
-    { code: 'FINTECH_BETA', name: 'Maya FinTech Digital Innovations', industry: 'Financial Services & Digital Payments', am_name: 'Sharon De Vera' },
-    { code: 'RETAIL_GAMMA', name: 'Ayala Retail Omnichannel Corp', industry: 'Retail & Supply Chain', am_name: 'Sharon De Vera' },
-    { code: 'BANK_DELTA', name: 'BDO Unibank Enterprise Systems', industry: 'Commercial Banking & Capital Markets', am_name: 'Erika Bana' },
-    { code: 'TELCO_EPSILON', name: 'Globe Telecom Digital Infrastructure', industry: 'Telecommunications & Cloud', am_name: 'Brian Mendoza' }
+    { code: 'VHL', name: 'Vertiv (Singapore) Holdings PTE LTD-ROHQ', industry: 'Technology & Critical Digital Infrastructure', am_name: 'Erika Bana' },
+    { code: 'ROP', name: 'Republic of the Philippines', industry: 'Government & Public Administration', am_name: 'Erika Bana' },
+    { code: 'EWALIC', name: 'East West Ageas Life Insurance Corporation', industry: 'Insurance & Financial Services', am_name: 'Erika Bana' },
+    { code: 'WCD', name: 'Wee Community Developers, Inc.', industry: 'Real Estate & Infrastructure Development', am_name: 'Erika Bana' },
+    { code: 'DDH', name: 'Davao Doctors Hospital', industry: 'Healthcare & Hospital Administration', am_name: 'Erika Bana' },
+    { code: 'ISLA_LPG_CORPOR', name: 'Isla LPG Corporation', industry: 'Energy & Utilities', am_name: 'Sharon De Vera' },
+    { code: 'AYALA_LAND_INC', name: 'Ayala Land, Inc.', industry: 'Property Development & Commercial Real Estate', am_name: 'Sharon De Vera' }
   ];
   const [companiesList, setCompaniesList] = useState(DEFAULT_COMPANIES);
   const [isCreateCompanyOpen, setIsCreateCompanyOpen] = useState(false);
@@ -989,20 +991,17 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
               }}
               style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}
             >
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px' }}>
-                {/* Role Select */}
+              <div>
+                {/* Role Select (SEC-11: Uniform sensitivity, no separate clearance tiers) */}
                 <div>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, letterSpacing: '0.06em', color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
-                    ASSIGNED ROLE
+                    ASSIGNED ROLE (TABLE 9 RBAC)
                   </label>
                   <select 
                     value={editForm.role}
                     onChange={(e) => {
                       const nextRole = e.target.value;
-                      const roleNorm = nextRole.toLowerCase();
-                      const autoLevel = roleNorm.includes('admin') ? 3 :
-                        (roleNorm.includes('staff') || roleNorm.includes('account') || roleNorm.includes('finance')) ? 2 : 1;
-                      setEditForm({ ...editForm, role: nextRole, level: autoLevel });
+                      setEditForm({ ...editForm, role: nextRole, level: 1 });
                     }}
                     style={{
                       width: '100%',
@@ -1019,37 +1018,9 @@ export default function AdminDashboard({ activeSubView, setActiveView }) {
                   >
                     <option value="ADMIN">ADMIN (System Administrator)</option>
                     <option value="ACCOUNT MANAGER">ACCOUNT MANAGER (Client Scoped)</option>
-                    <option value="CROSSWORKS STAFF">CROSSWORKS STAFF</option>
-                    <option value="FINANCE">FINANCE (Audit & Verification)</option>
-                    <option value="TRAINER">TRAINER (Sessions & Quizzes)</option>
-                    <option value="TRAINEE">TRAINEE (Learning Quests)</option>
-                  </select>
-                </div>
-
-                {/* Clearance Level */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, letterSpacing: '0.06em', color: isDark ? '#cbd5e1' : '#475569', marginBottom: '6px' }}>
-                    CLEARANCE LEVEL
-                  </label>
-                  <select 
-                    value={editForm.level}
-                    onChange={(e) => setEditForm({ ...editForm, level: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: '10px',
-                      border: isDark ? '1px solid #334155' : '1.5px solid #cbd5e1',
-                      background: isDark ? '#1e293b' : '#ffffff',
-                      color: isDark ? '#f8fafc' : '#0f172a',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <option value={1}>Level 1 (Standard Scope)</option>
-                    <option value={2}>Level 2 (Supervisor / Client Scope)</option>
-                    <option value={3}>Level 3 (Executive Master / Root)</option>
+                    <option value="FINANCE">FINANCE (Audit &amp; Reconciliation)</option>
+                    <option value="TRAINER">TRAINER (Sessions &amp; Quizzes)</option>
+                    <option value="TRAINEE">TRAINEE (Trainings, Credentials &amp; Quizzes)</option>
                   </select>
                 </div>
               </div>

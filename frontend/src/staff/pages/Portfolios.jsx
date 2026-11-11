@@ -137,7 +137,7 @@ export default function Portfolios() {
               {activePortfoliosCount}
               <span className="metric-unit" style={{ color: '#6ee7b7' }}>ACTIVE</span>
             </div>
-            <span className="metric-sub-label">Authorized security clearance</span>
+            <span className="metric-sub-label">Assigned client scope (SEC-10)</span>
           </div>
 
           <div className="hero-metric-cell am-portfolio-metric-cell">
@@ -164,7 +164,7 @@ export default function Portfolios() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
-              Client Directory &amp; Access Clearance
+              Client Directory &amp; Assigned Scope
             </h3>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: isDark ? '#94a3b8' : '#64748b' }}>
               Scroll horizontally to inspect assigned enterprise accounts, training agreements, and CP-ABE encryption policies.
@@ -414,7 +414,7 @@ export default function Portfolios() {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px', paddingTop: '4px', borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid #f1f5f9' }}>
-                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500 }}>Access Clearance</span>
+                      <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontWeight: 500 }}>Scope Access</span>
                       <span 
                         style={{
                           fontSize: '10.5px',

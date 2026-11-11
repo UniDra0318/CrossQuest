@@ -48,7 +48,8 @@ class PDFGenerator:
         expiry_date: Optional[datetime] = None,
         company_name: str = "Crossworks Training & Consulting Corp.",
         trainer_name: str = "Authorized Lead Trainer",
-        reissue_count: int = 0
+        reissue_count: int = 0,
+        venue: str = "Online"
     ) -> bytes:
         """Generates an official landscape Certificate of Completion PDF (ReportLab, AAAYYYYMMDD-01 serial)."""
         buffer = io.BytesIO()
@@ -134,40 +135,31 @@ class PDFGenerator:
         c.setFillColor(colors.HexColor("#718096"))
         c.drawCentredString(width / 2.0, height - 295, f"Enterprise Program conducted for {company_name}")
 
-        # 9. Signatures Block
-        sig_y = 110
-        # Left signature: Managing Director / Academic
+        # 9. Single Assigned Trainer Signatory Block (OI-10, Section M5)
+        sig_y = 115
         c.setStrokeColor(colors.HexColor("#CBD5E0"))
         c.setLineWidth(1)
-        c.line(80, sig_y + 20, 260, sig_y + 20)
+        c.line(width / 2.0 - 110, sig_y + 20, width / 2.0 + 110, sig_y + 20)
         c.setFont("Helvetica-Bold", 11)
         c.setFillColor(colors.HexColor("#2D3748"))
-        c.drawCentredString(170, sig_y + 6, trainer_name)
-        c.setFont("Helvetica", 8)
+        c.drawCentredString(width / 2.0, sig_y + 6, trainer_name)
+        c.setFont("Helvetica", 8.5)
         c.setFillColor(colors.HexColor("#718096"))
-        c.drawCentredString(170, sig_y - 6, "Lead Instructor / Technical Trainer")
+        c.drawCentredString(width / 2.0, sig_y - 6, "Assigned Trainer & Signatory — Crossworks Training and Consulting Corp.")
 
-        # Right signature: Managing Director
-        c.line(width - 260, sig_y + 20, width - 80, sig_y + 20)
-        c.setFont("Helvetica-Bold", 11)
-        c.setFillColor(colors.HexColor("#2D3748"))
-        c.drawCentredString(width - 170, sig_y + 6, "Crossworks Training & Consulting")
-        c.setFont("Helvetica", 8)
-        c.setFillColor(colors.HexColor("#718096"))
-        c.drawCentredString(width - 170, sig_y - 6, "Managing Director & Signatory")
-
-        # 10. Serial Number, Dates, and Security Footer
+        # 10. Serial Number, Training Date, Venue, and Non-Expiring Status
         issue_str = issue_date.strftime("%B %d, %Y") if issue_date else "N/A"
+        clean_venue = venue.strip() if venue and venue.strip() else "Online"
         if expiry_date:
-            validity_line = f"Issue Date: {issue_str}    |    Valid Until: {expiry_date.strftime('%B %d, %Y')}"
+            validity_line = f"Training Date: {issue_str}  |  Venue: {clean_venue}  |  Valid Until: {expiry_date.strftime('%B %d, %Y')}"
         else:
-            validity_line = f"Issue Date: {issue_str}    |    Status: Lifetime / Non-Expiring"
+            validity_line = f"Training Date: {issue_str}  |  Venue: {clean_venue}  |  Status: Non-Expiring Completion Certificate"
 
         c.setFont("Helvetica", 9)
         c.setFillColor(colors.HexColor("#4A5568"))
         c.drawCentredString(
             width / 2.0,
-            sig_y + 16,
+            sig_y - 24,
             validity_line
         )
 
@@ -177,7 +169,7 @@ class PDFGenerator:
         c.setFillColor(colors.HexColor("#6B46C1"))
         c.drawCentredString(
             width / 2.0,
-            sig_y - 4,
+            sig_y - 40,
             f"Certificate Serial: {serial_number}{reissue_text}"
         )
 

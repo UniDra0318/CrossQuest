@@ -34,7 +34,8 @@ import {
 
 export default function Reports() {
   const { token, currentUser } = useAuth();
-  const { portfolios } = useStaff();
+  const staffCtx = useStaff?.() || {};
+  const portfolios = staffCtx.portfolios || [];
   const [searchParams, setSearchParams] = useSearchParams();
 
   const assignedList = useMemo(() => {
@@ -60,7 +61,7 @@ export default function Reports() {
 
   // Helper: Check if a company code is within the current user's authorized scope
   const isScopeAssigned = (scopeCode) => {
-    if (currentUser?.role === 'admin') return true;
+    if (currentUser?.role === 'admin' || currentUser?.role === 'finance') return true;
     if (companiesList.length > 0) {
       const match = companiesList.find(c => c.code === scopeCode);
       if (match) return Boolean(match.is_assigned);
@@ -258,7 +259,7 @@ export default function Reports() {
   const isDark = effectiveTheme === 'dark';
 
   const currentCompanyMeta = companiesList.find(c => c.code === selectedScope);
-  const isAssigned = currentCompanyMeta ? currentCompanyMeta.is_assigned : selectedScope === 'CORP_ALPHA' || selectedScope === 'BANK_DELTA';
+  const isAssigned = currentCompanyMeta ? currentCompanyMeta.is_assigned : (assignedList || []).includes(selectedScope) || selectedScope === 'VHL';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
@@ -305,11 +306,11 @@ export default function Reports() {
                   ))
                 ) : (
                   <>
-                    <option value="CORP_ALPHA">San Miguel Conglomerate (CORP_ALPHA) ✓ [Assigned]</option>
-                    <option value="BANK_DELTA">BDO Unibank Systems (BANK_DELTA) ✓ [Assigned]</option>
-                    <option value="FINTECH_BETA">Maya FinTech Digital (FINTECH_BETA) 🔒 [Restricted Scope]</option>
-                    <option value="RETAIL_GAMMA">Ayala Retail Corp (RETAIL_GAMMA) 🔒 [Restricted Scope]</option>
-                    <option value="TELCO_EPSILON">Globe Telecom Digital (TELCO_EPSILON) 🔒 [Restricted Scope]</option>
+                    <option value="VHL">Vertiv (Singapore) Holdings PTE LTD-ROHQ (VHL) ✓ [Assigned]</option>
+                    <option value="ROP">Republic of the Philippines (ROP) ✓ [Assigned]</option>
+                    <option value="EWALIC">East West Ageas Life Insurance (EWALIC) ✓ [Assigned]</option>
+                    <option value="WCD">Wee Community Developers, Inc. (WCD) ✓ [Assigned]</option>
+                    <option value="DDH">Davao Doctors Hospital (DDH) ✓ [Assigned]</option>
                   </>
                 )}
               </select>

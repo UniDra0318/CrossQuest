@@ -187,7 +187,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [resultsTab, setResultsTab] = useState('leaderboard'); // 'leaderboard' | 'teams' | 'xp'
   const { currentUser } = useAuth?.() || { currentUser: null };
-  const showCorrectAnswers = quiz?.showCorrectAnswers !== false;
+  const showCorrectAnswers = Boolean(quiz?.is_closed || quiz?.isClosed || quiz?.showCorrectAnswers === true);
 
   const [timeLeft, setTimeLeft] = useState(() => initialSession?.timeLeft || quiz.timePerQuestion || 45);
   const [floatingPoint, setFloatingPoint] = useState(null);
@@ -768,14 +768,14 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
               </div>
             )}
 
-            {/* Continuous Auto-Save Protection Notice */}
+            {/* Online-Only Single Scored Attempt Notice (SEC-26 & OI-23) */}
             <div className="briefing-unpausable-notice-box" style={{ background: 'rgba(16, 185, 129, 0.08)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#065f46' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <CheckCircle2 size={18} className="text-emerald flex-shrink-0" />
-                <strong>Continuous Auto-Save Protected:</strong>
+                <strong>Online-Only Single Scored Attempt (SEC-26 &amp; OI-23):</strong>
               </div>
               <div style={{ opacity: 0.9 }}>
-                Your progress and answers are continuously saved to your account in real time. If you experience an unstable connection or close your browser, you can resume seamlessly without losing completed questions.
+                Quizzes run online only without local question caching. Your overall score is shown immediately upon submission, and per-question answer feedback is released after the quiz closes.
               </div>
             </div>
 
@@ -832,19 +832,18 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
       finalScorePct >= 70 ? '🎯 QUALIFIED PRACTITIONER' :
       '📚 TRAINING CANDIDATE';
 
+    const userNickname = currentUser?.display_name || `Participant_${(currentUser?.initials || 'TR')}`;
     const basePeers = [
-      { name: 'Ricardo Ocampo', role: 'IPRoyal Services FZE LLC', score: 2850, accuracy: '95%', speed: '3.4s', avatar: 'RO' },
-      { name: 'Bea Macaraeg', role: 'IPRoyal Services FZE LLC', score: 2620, accuracy: '92%', speed: '3.8s', avatar: 'BM' },
-      { name: 'Adrian Natividad', role: 'IPRoyal Services FZE LLC', score: 2190, accuracy: '88%', speed: '4.2s', avatar: 'AN' },
-      { name: 'Rowena Cabrera', role: 'East West Ageas Life Insurance', score: 1840, accuracy: '82%', speed: '4.9s', avatar: 'RC' },
-      { name: 'Jerome Enriquez', role: 'Red Oak Properties Inc.', score: 1650, accuracy: '78%', speed: '5.3s', avatar: 'JE' },
-      { name: 'Karen Concepcion', role: 'IPRoyal Services FZE LLC', score: 1480, accuracy: '75%', speed: '5.7s', avatar: 'KC' },
-      { name: 'Joshua Javier', role: 'Isla LPG Corporation', score: 1380, accuracy: '70%', speed: '6.2s', avatar: 'JJ' },
+      { name: 'RicardoOps', role: 'Class Cohort Nickname', score: 2850, accuracy: '95%', speed: '3.4s', avatar: 'RO' },
+      { name: 'BeaMacaraeg', role: 'Class Cohort Nickname', score: 2620, accuracy: '92%', speed: '3.8s', avatar: 'BM' },
+      { name: 'RowenaEW', role: 'Class Cohort Nickname', score: 1840, accuracy: '82%', speed: '4.9s', avatar: 'RE' },
+      { name: 'JoshuaLPG', role: 'Class Cohort Nickname', score: 1650, accuracy: '78%', speed: '5.3s', avatar: 'JL' },
+      { name: 'ArvinURC', role: 'Class Cohort Nickname', score: 1480, accuracy: '75%', speed: '5.7s', avatar: 'AU' },
     ];
 
     const userCandidate = {
-      name: `${traineeName} (You)`,
-      role: currentUser?.organization || 'Vertiv Holdings Ltd',
+      name: `${userNickname} (You)`,
+      role: 'Class Cohort Nickname',
       score: pointsTotal,
       accuracy: `${finalScorePct}%`,
       speed: `${avgSpeedSec}s`,
@@ -869,12 +868,10 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
     const fastestSpeed = Math.min(avgSpeedSec, 3.4).toFixed(1);
     const medianPts = Math.round(sortedCandidates.reduce((acc, c) => acc + c.score, 0) / sortedCandidates.length);
 
-    const userOrg = currentUser?.organization || 'Vertiv Holdings Ltd';
     const teamStandingsData = [
-      { rank: 1, teamName: `${userOrg} (Cohort Pilot Operations)`, score: 15185 + pointsTotal, accuracy: '94%', members: 6, isUserTeam: true, icon: '⚡', trend: '+280 Today' },
-      { rank: 2, teamName: 'IPRoyal Services FZE LLC (Technical Excellence)', score: 14890, accuracy: '91%', members: 8, isUserTeam: false, icon: '🛡️', trend: '+190 Today' },
-      { rank: 3, teamName: 'East West Ageas Life (Business Strategy & Risk)', score: 12420, accuracy: '85%', members: 6, isUserTeam: false, icon: '🔥', trend: '+140 Today' },
-      { rank: 4, teamName: 'Red Oak Properties (Enterprise Operations)', score: 11240, accuracy: '82%', members: 5, isUserTeam: false, icon: '🚀', trend: '+110 Today' },
+      { rank: 1, teamName: 'Team Alpha (Session Squad)', score: 5185 + pointsTotal, accuracy: '94%', members: 5, isUserTeam: true, icon: '⚡', trend: '+280 Today' },
+      { rank: 2, teamName: 'Team Vanguard (Session Squad)', score: 4890, accuracy: '91%', members: 5, isUserTeam: false, icon: '🛡️', trend: '+190 Today' },
+      { rank: 3, teamName: 'Team Sentinel (Session Squad)', score: 4420, accuracy: '85%', members: 5, isUserTeam: false, icon: '🔥', trend: '+140 Today' },
     ];
 
     return (
@@ -915,7 +912,7 @@ export default function QuizArena({ quiz, initialSession, onFinish, onExit }) {
                   <Trophy size={46} className="trophy-victory text-gold flex-shrink-0" />
                   <div>
                     <h2 className="results-heading-compact">
-                      {passed ? '🎉 Assessment Passed & Certified!' : 'Assessment Completed'}
+                      {passed ? '🎉 Quiz Completed — Score Recorded!' : 'Quiz Attempt Completed'}
                     </h2>
                     <p className="results-subtext-compact">
                       {passed 

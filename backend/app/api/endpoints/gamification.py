@@ -825,8 +825,7 @@ def get_company_leaderboard(
     entries = []
     for rank, trainee in enumerate(trainees, start=1):
         gam = db.query(GamificationProgress).filter(GamificationProgress.trainee_id == trainee.id).first()
-        full_name = f"{trainee.first_name} {trainee.last_name}".strip() if trainee.first_name else None
-        name = trainee.display_name or full_name or f"Colleague #{rank}"
+        name = trainee.display_name or f"Colleague #{rank}"
         entries.append(
             LeaderboardEntry(
                 rank=rank,

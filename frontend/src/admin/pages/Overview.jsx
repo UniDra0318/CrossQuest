@@ -77,7 +77,7 @@ export default function Overview({
           title="Click to view staff permissions"
         >
           <div className="adm-kpi__top">
-            <span className="adm-label">STAFF CLEARANCES</span>
+            <span className="adm-label">PROVISIONED ACCOUNTS</span>
             <span className="adm-pill adm-pill--blue">{clients.length} CLIENTS</span>
           </div>
           <div className="adm-kpi__num">{staffList.length} Accounts</div>

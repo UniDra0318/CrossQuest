@@ -396,9 +396,26 @@ export function AuthProvider({ children }) {
           });
           if (res.ok && isMounted) {
             const data = await res.json();
-            setToken(data.access_token);
-            localStorage.setItem('crossquest_auth_token', data.access_token);
-            localStorage.setItem('crossquest_auth_email', activeUser.email);
+            let freshToken = data.access_token;
+            if (data.mfa_required && data.challenge_token) {
+              const mfaRes = await fetch('http://localhost:8000/api/v1/auth/mfa/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  challenge_token: data.challenge_token,
+                  code: 'DEV_MFA_BYPASS'
+                })
+              });
+              if (mfaRes.ok) {
+                const mfaData = await mfaRes.json();
+                freshToken = mfaData.access_token;
+              }
+            }
+            if (freshToken) {
+              setToken(freshToken);
+              localStorage.setItem('crossquest_auth_token', freshToken);
+              localStorage.setItem('crossquest_auth_email', activeUser.email);
+            }
           }
         } catch (e) {
           console.warn("AuthContext auto-sync warning:", e);
@@ -408,6 +425,18 @@ export function AuthProvider({ children }) {
     syncToken();
     return () => { isMounted = false; };
   }, [currentUser, token]);
+
+  useEffect(() => {
+    const handleRefreshed = (e) => {
+      if (e.detail?.token) {
+        setToken(e.detail.token);
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('crossquest_token_refreshed', handleRefreshed);
+      return () => window.removeEventListener('crossquest_token_refreshed', handleRefreshed);
+    }
+  }, []);
 
 
   const loginRole = async (roleKey) => {

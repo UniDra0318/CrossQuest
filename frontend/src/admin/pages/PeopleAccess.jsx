@@ -138,9 +138,9 @@ export default function PeopleAccess({
             <span>ROLE-BASED ATTRIBUTE AUTHORITY &bull; CP-ABE ENCLAVE</span>
           </div>
 
-          <h2 className="trainee-hero-headline">Account Access &amp; Clearances</h2>
+          <h2 className="trainee-hero-headline">People &amp; Attribute Authority</h2>
           <p className="trainee-hero-sub">
-            Configure administrative roles, trainee credentials, multi-level cryptographic clearances, and assigned tenant access scopes.
+            Configure user roles, trainee accounts, and assigned client company CP-ABE attributes under uniform record sensitivity (SEC-11).
           </p>
 
           <div className="trainee-hero-actions">
@@ -168,12 +168,12 @@ export default function PeopleAccess({
           </div>
 
           <div className="hero-metric-cell adm-staff-metric-cell">
-            <span className="metric-tag">CLEARANCE LEVEL 3</span>
+            <span className="metric-tag">STAFF &amp; ADMIN ROLES</span>
             <div className="metric-num" style={{ color: '#c4b5fd' }}>
-              {staffList.filter(s => s.level >= 3).length}
-              <span className="metric-unit" style={{ color: '#e9d5ff' }}>EXEC</span>
+              {staffList.filter(s => !s.role.includes('TRAINEE')).length}
+              <span className="metric-unit" style={{ color: '#e9d5ff' }}>STAFF</span>
             </div>
-            <span className="metric-sub-label">Full cryptographic scope</span>
+            <span className="metric-sub-label">Uniform sensitivity (SEC-11)</span>
           </div>
 
           <div className="hero-metric-cell adm-staff-metric-cell">
@@ -308,7 +308,7 @@ export default function PeopleAccess({
             <div className="adm-grid adm-grid--access adm-th">
               <div>ACCOUNT HOLDER</div>
               <div>ASSIGNED ROLE</div>
-              <div>CLEARANCE LEVEL</div>
+              <div>SENSITIVITY POLICY</div>
               <div>ASSIGNED CLIENT TENANTS</div>
               <div style={{ textAlign: 'right' }}>ACTIONS</div>
             </div>
@@ -339,14 +339,9 @@ export default function PeopleAccess({
                         </span>
                       </div>
                       <div>
-                        <div className="adm-level">
-                          <span>
-                            <i className="on" style={{ height: '10px' }} />
-                            <i className={user.level >= 2 ? 'on' : ''} style={{ height: '15px' }} />
-                            <i className={user.level >= 3 ? 'on' : ''} style={{ height: '20px' }} />
-                          </span>
-                          <b>Level {user.level}</b>
-                        </div>
+                        <span className="adm-chip adm-chip--blue" style={{ fontSize: '11px' }}>
+                          Uniform (SEC-11)
+                        </span>
                       </div>
                       <div>
                         <div className="adm-wrap">
@@ -411,7 +406,7 @@ export default function PeopleAccess({
                           className="adm-btn adm-btn--light"
                           style={{ padding: '7px 12px', fontSize: '12px', whiteSpace: 'nowrap' }}
                           onClick={() => startEditStaff && startEditStaff(user)}
-                          title={`Edit roles and clearances for ${user.name}`}
+                          title={`Edit role and assigned clients for ${user.name}`}
                         >
                           <Edit2 size={13} />
                           <span>Edit Roles</span>
@@ -442,7 +437,7 @@ export default function PeopleAccess({
               <TableEmptyBlock
                 icon={Users}
                 title="No Accounts Located"
-                subtitle="No accounts match the current search query or clearance criteria."
+                subtitle="No accounts match the current search query or role filter."
               />
             )}
           </div>

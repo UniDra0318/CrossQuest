@@ -333,9 +333,16 @@ def download_certificate_pdf(
 
     trainee_full_name = f"{trainee.first_name} {trainee.last_name}".strip()
     trainer_name = "Joselito Mallari Jr."
+    venue_label = "Online"
     if cert.record_id:
         rec = db.query(TrainingRecord).filter(TrainingRecord.id == cert.record_id).first()
         if rec and rec.session_id:
+            sess = db.query(TrainingSession).filter(TrainingSession.id == rec.session_id).first()
+            if sess:
+                if sess.delivery_type and "online" in sess.delivery_type.lower():
+                    venue_label = "Online"
+                else:
+                    venue_label = getattr(sess, "venue", None) or sess.delivery_type or "Online"
             assignment = db.query(TrainerAssignment).filter(TrainerAssignment.session_id == rec.session_id).first()
             if assignment and assignment.user:
                 trainer_name = assignment.user.full_name
@@ -348,7 +355,8 @@ def download_certificate_pdf(
         expiry_date=cert.expiry_date,
         company_name=company_name,
         trainer_name=trainer_name,
-        reissue_count=cert.reissue_count or 0
+        reissue_count=cert.reissue_count or 0,
+        venue=venue_label
     )
 
     return Response(

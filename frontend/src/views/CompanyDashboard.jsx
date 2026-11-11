@@ -19,6 +19,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
+import Reports from '../staff/pages/Reports';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import PageHeader from '../components/PageHeader';
 import '../styles/admin.css';
@@ -328,55 +329,9 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
         </div>
       )}
 
-      {/* 3. AUDIT CERTIFICATE TAB */}
+      {/* 3. CLIENT COMPLIANCE & AUDIT REPORTS TAB (FR-20, OI-04, U-03: PDF & Excel/CSV) */}
       {currentTab === 'audit_certificate' && (
-        <div 
-          style={{ 
-            background: isDark ? '#111827' : '#ffffff', 
-            borderRadius: '24px', 
-            padding: '28px 32px', 
-            border: isDark ? '1px solid #1f2937' : '1px solid var(--cq-line)',
-            boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.02)'
-          }}
-        >
-          <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ margin: '0 0 6px', fontSize: '18px', fontWeight: 800, color: isDark ? '#f8fafc' : '#0f172a' }}>
-              Data Privacy & Security Audit Certificate
-            </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: isDark ? '#94a3b8' : '#64748b' }}>
-              Cryptographically audited proof of zero cross-client record contamination and strict tenant isolation.
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', background: isDark ? 'rgba(5, 150, 105, 0.2)' : '#ecfdf5', borderRadius: '16px', border: isDark ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid #a7f3d0' }}>
-              <ShieldCheck size={24} color="#059669" style={{ flexShrink: 0 }} />
-              <div style={{ fontSize: '13px', color: isDark ? '#34d399' : '#065f46', lineHeight: 1.5 }}>
-                <strong>Security & Privacy Audit Guarantee</strong>
-                <div>All training records for {currentUser?.organization} are bound to strict organizational policies and defended by PostgreSQL Row-Level Security.</div>
-              </div>
-            </div>
-
-            <div style={{ background: isDark ? '#0f172a' : '#f8fafc', borderRadius: '16px', padding: '18px 22px', border: isDark ? '1px solid #1f2937' : '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '8px' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Assigned Organization Code:</span>
-                <code style={{ fontFamily: 'monospace', fontWeight: 700, color: '#1e293b' }}>{companyCode}</code>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '8px' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Audit Verification Hash:</span>
-                <code style={{ fontFamily: 'monospace', color: '#0284c7' }}>SHA256: 3c9b740...ef1a89b02</code>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '8px' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Certificate Authority:</span>
-                <span style={{ color: '#1e293b', fontWeight: 600 }}>Crossworks Training and Consulting Corp.</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '8px' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Audit Verification Timestamp:</span>
-                <span style={{ color: '#64748b' }}>2026-10-03 18:00:00 UTC</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Reports />
       )}
 
       {/* 4. FINANCE PILOT DATA IMPORT & RECONCILIATION DESK */}

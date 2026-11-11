@@ -174,7 +174,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                 Profile & System Settings
               </h2>
               <span style={{ fontSize: '12px', color: isDark ? '#94a3b8' : '#64748b' }}>
-                Personalize dark mode, notification preferences, security clearance & profile
+                Personalize dark mode, notification preferences, security settings & profile
               </span>
             </div>
           </div>
@@ -720,7 +720,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                     </div>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: '999px', background: '#eef2ff', color: '#4338ca', fontSize: '11px', fontWeight: '800' }}>
-                    {currentUser?.role === 'admin' ? 'LEVEL 3 ROOT CLEARANCE' : (currentUser?.role === 'account_manager' || currentUser?.role === 'finance') ? 'LEVEL 2 SUPERVISOR CLEARANCE' : 'LEVEL 1 STANDARD CLEARANCE'}
+                    UNIFORM SENSITIVITY • CP-ABE (SEC-11)
                   </span>
                 </div>
 

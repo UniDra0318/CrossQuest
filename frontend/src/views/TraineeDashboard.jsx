@@ -422,7 +422,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
   // Quiz finish handler with immediate state update, localStorage persistence & backend sync
   const handleQuizFinish = async (resultData) => {
-    const earnedPoints = resultData.pointsEarned || 250;
+    const alreadyScored = Boolean(quizScoreStatus[resultData.quizId]?.completed);
+    const earnedPoints = alreadyScored ? 0 : (resultData.pointsEarned || 250);
     const newPoints = (points ?? 0) + earnedPoints;
     setPoints(newPoints);
 
@@ -708,37 +709,37 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {/* 1. MAIN TRAINEE QUEST VIEW (Enterprise SaaS Layout) */}
       {(currentTab === 'trainee_quest') && (
         <>
-          {/* FOCAL HERO STAGE (Bolder Editorial Anchor) */}
+          {/* FOCAL HERO STAGE */}
           <div className="trainee-hero-stage">
             <div className="trainee-hero-content">
               <div className="trainee-hero-badge">
                 <Compass size={13} className="hero-badge-icon" />
-                <span>MISSION COMMAND &bull; ACTIVE CYCLE</span>
+                <span>TRAINEE WORKSPACE &bull; GAMIFIED LEARNING</span>
               </div>
               <h2 className="trainee-hero-headline">
-                Advance Your Security Clearance &amp; Mastery
+                Track Your Trainings, Credentials &amp; Gamified Quizzes
               </h2>
               <p className="trainee-hero-sub">
-                Track your real-time compliance posture, complete interactive modules verified under CP-ABE data protection, and build organizational standing.
+                Review your cross-company training records protected under CP-ABE, manage completion certificates and external credentials, and join online gamified quizzes.
               </p>
 
               <div className="trainee-hero-actions">
                 <button
                   type="button"
                   className="trainee-hero-primary-btn"
-                  onClick={() => featuredCourse ? handleStartQuizById(featuredCourse.id) : handleStartQuizById('act-1')}
+                  onClick={() => nextQuizItem ? handleStartQuizById(nextQuizItem.id) : handleStartQuizById('act-1')}
                   disabled={!isOnline}
                 >
                   <Play size={14} fill="currentColor" />
-                  <span>Resume Current Mission</span>
+                  <span>Start Gamified Quiz</span>
                   <ArrowRight size={14} className="hero-btn-arrow" />
                 </button>
                 <button
                   type="button"
                   className="trainee-hero-secondary-btn"
-                  onClick={() => setActiveView && setActiveView('trainee_quiz')}
+                  onClick={() => setActiveView && setActiveView('trainee_trainings')}
                 >
-                  <span>Browse Assessments</span>
+                  <span>View My Trainings</span>
                   <ArrowUpRight size={14} />
                 </button>
               </div>
@@ -746,86 +747,90 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
             <div className="trainee-hero-metrics-panel">
               <div className="hero-metric-cell">
-                <span className="metric-tag">ACCURACY &bull; SCORE</span>
-                <span className="metric-num">94.8<span className="metric-unit">%</span></span>
-                <span className="metric-sub-label">Exceeds 80% passing floor</span>
+                <span className="metric-tag">TRAINING RECORDS</span>
+                <span className="metric-num">{trainingsList.length}<span className="metric-unit">COURSES</span></span>
+                <span className="metric-sub-label">Cross-company transcript</span>
               </div>
               <div className="hero-metric-cell">
                 <span className="metric-tag">ACTIVE STREAK</span>
                 <span className="metric-num text-orange"><Flame size={20} style={{ display: 'inline', marginRight: 4 }} />{streakDays ?? 1}<span className="metric-unit">DAYS</span></span>
-                <span className="metric-sub-label">Weekly goal 7/7 on track</span>
+                <span className="metric-sub-label">Consecutive activity days</span>
               </div>
               <div className="hero-metric-cell">
                 <span className="metric-tag">VERIFIED CREDENTIALS</span>
                 <span className="metric-num text-emerald">{displayCertificates.length}<span className="metric-unit">ACTIVE</span></span>
-                <span className="metric-sub-label">Zero pending revocations</span>
+                <span className="metric-sub-label">Completion &amp; external</span>
               </div>
               <div className="hero-metric-cell">
-                <span className="metric-tag">REPUTATION SCORE</span>
+                <span className="metric-tag">GAMIFICATION POINTS</span>
                 <span className="metric-num">{(points ?? 0).toLocaleString()}<span className="metric-unit">PTS</span></span>
-                <span className="metric-sub-label">Rank #1 in company roster</span>
+                <span className="metric-sub-label">Separate from official records</span>
               </div>
             </div>
           </div>
 
-          {/* THREE FOCAL PILLARS */}
+          {/* THREE FOCAL PILLARS (Aligned to Figure 16: Training Record, Credential, Gamified Quiz) */}
           <div className="trainee-home-triad-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '32px' }}>
             
-            {/* PILLAR 1: CURRENT COURSE */}
-            <div className="trainee-pillar-card">
-              <div className="pillar-top-row">
-                <span className="pillar-kicker-pill kicker-indigo">
-                  Current Course
-                </span>
-                <span className="pillar-status-chip">
-                  <BookOpen size={13} style={{ color: '#4f46e5' }} /> In Progress
-                </span>
-              </div>
+            {/* PILLAR 1: LATEST OFFICIAL TRAINING RECORD (My Trainings) */}
+            {(() => {
+              const latestTraining = trainingsList && trainingsList.length > 0 ? trainingsList[0] : null;
+              const trStatus = latestTraining?.status || 'In progress';
+              return (
+                <div className="trainee-pillar-card">
+                  <div className="pillar-top-row">
+                    <span className="pillar-kicker-pill kicker-indigo">
+                      Latest Training
+                    </span>
+                    <span className="pillar-status-chip">
+                      <BookOpen size={13} style={{ color: '#4f46e5' }} /> {latestTraining ? trStatus : 'No Record Yet'}
+                    </span>
+                  </div>
 
-              <h3 className="pillar-heading">
-                {featuredCourse?.title || 'No active course enrollment'}
-              </h3>
-              
-              <div className="pillar-meta-row">
-                <span className="pillar-meta-item">
-                  Instructor: <strong>{featuredCourse?.instructor || 'Instructor not assigned'}</strong>
-                </span>
-                <span className="pillar-meta-item">
-                  Track: <strong>{featuredCourse?.category || 'General'}</strong>
-                </span>
-              </div>
+                  <h3 className="pillar-heading">
+                    {latestTraining?.course_name || 'No training sessions recorded yet'}
+                  </h3>
+                  
+                  <div className="pillar-meta-row">
+                    <span className="pillar-meta-item">
+                      Client: <strong>{latestTraining?.company_name || currentUser?.organization || 'Crossworks Partner'}</strong>
+                    </span>
+                    <span className="pillar-meta-item">
+                      Date: <strong>{latestTraining?.completion_date ? new Date(latestTraining.completion_date).toLocaleDateString() : 'Scheduled / In Progress'}</strong>
+                    </span>
+                  </div>
 
-              {/* Progress Container */}
-              <div className="pillar-progress-section">
-                <div className="pillar-progress-labels">
-                  <span className="pillar-progress-title">Module Progress</span>
-                  <span className="pillar-progress-pct">
-                    {featuredCourse?.completed ? '100% Completed' : (featuredCourse ? `${featuredCourse?.progressSegments?.filter(Boolean).length || 0} of ${featuredCourse?.progressSegments?.length || 0} Modules` : 'No modules active')}
-                  </span>
+                  <div className="pillar-progress-section">
+                    <div className="pillar-progress-labels">
+                      <span className="pillar-progress-title">Completion Status</span>
+                      <span className="pillar-progress-pct">
+                        {latestTraining ? `${trStatus}${latestTraining.score != null ? ` (${latestTraining.score}%)` : ''}` : 'Awaiting session enrollment'}
+                      </span>
+                    </div>
+                    <div className="pillar-meter-track">
+                      <div 
+                        className="pillar-meter-fill"
+                        style={{ 
+                          width: '100%',
+                          transform: `scaleX(${latestTraining ? (trStatus === 'Completed' ? 1 : trStatus === 'In progress' ? 0.5 : 0.15) : 0})`
+                        }} 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pillar-footer">
+                    <button
+                      type="button"
+                      className="trainee-pillar-btn pillar-btn-secondary"
+                      onClick={() => setActiveView && setActiveView('trainee_trainings')}
+                    >
+                      <BookOpen size={13} />
+                      <span>View Training Transcript</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="pillar-meter-track">
-                  <div 
-                    className="pillar-meter-fill"
-                    style={{ 
-                      width: '100%',
-                      transform: `scaleX(${Math.max(0, Math.min(1, (featuredCourse?.completed ? 1 : (featuredCourse ? ((featuredCourse?.progressSegments?.filter(Boolean).length || 0) / (featuredCourse?.progressSegments?.length || 1)) : 0))))})`
-                    }} 
-                  />
-                </div>
-              </div>
-
-              <div className="pillar-footer">
-                <button
-                  type="button"
-                  className="trainee-pillar-btn pillar-btn-secondary"
-                  onClick={() => featuredCourse && handleStartQuizById(featuredCourse.id)}
-                  disabled={!featuredCourse || !isOnline}
-                >
-                  <Play size={13} fill="currentColor" />
-                  <span>{featuredCourse?.completed ? 'Review Course Material' : 'Continue Course'}</span>
-                </button>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* PILLAR 2: EXPIRING / VERIFIED CREDENTIAL */}
             <div className="trainee-pillar-card">
@@ -834,7 +839,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   {expiringCredential ? (expiringCredential.isRenewalApproaching ? 'Expiring Credential' : 'Verified Credential') : 'Active Credential'}
                 </span>
                 <span className="pillar-status-chip">
-                  <Shield size={13} style={{ color: expiringCredential ? '#059669' : '#64748b' }} /> {expiringCredential ? 'Certified' : 'Ready'}
+                  <Shield size={13} style={{ color: expiringCredential ? '#059669' : '#64748b' }} /> {expiringCredential ? expiringCredential.status : 'Ready'}
                 </span>
               </div>
 
@@ -847,11 +852,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   Authority: <strong>{expiringCredential ? (expiringCredential.clientCompany || currentUser?.organization || 'Crossworks Enterprise') : (currentUser?.organization || 'Crossworks Enterprise')}</strong>
                 </span>
                 <span className="pillar-meta-item">
-                  Integrity: <strong>{expiringCredential ? expiringCredential.hash : 'CP-ABE Cryptography Ready'}</strong>
+                  Serial: <strong>{expiringCredential ? expiringCredential.hash : 'AAAYYYYMMDD-NN'}</strong>
                 </span>
               </div>
 
-              {/* Expiration Notice Box */}
               {expiringCredential ? (
                 <div className={`pillar-callout-box ${expiringCredential.daysUntilExpiry && expiringCredential.daysUntilExpiry <= 60 ? 'callout-warning' : 'callout-neutral'}`}>
                   <div className="pillar-callout-header">
@@ -859,14 +863,14 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                     <span>
                       {expiringCredential.daysUntilExpiry !== null && expiringCredential.daysUntilExpiry !== undefined
                         ? `Renewal Window: ${expiringCredential.daysUntilExpiry} days remaining`
-                        : 'Accreditation Status: Active & Valid'}
+                        : 'Validity: Non-Expiring Completion Certificate'}
                     </span>
                   </div>
                   <div className="pillar-callout-sub">
                     {expiringCredential.expiresOn ? (
-                      <>Expires: <strong>{expiringCredential.expiresOn}</strong> &bull; Policy sweep active</>
+                      <>Expires: <strong>{expiringCredential.expiresOn}</strong> &bull; 90/60/30/0d sweep active</>
                     ) : (
-                      <>Issued: <strong>{expiringCredential.issuedOn || 'Verified'}</strong> &bull; CP-ABE Protected</>
+                      <>Issued: <strong>{expiringCredential.issuedOn || 'Verified'}</strong> &bull; Non-expiring PDF (OI-10)</>
                     )}
                   </div>
                 </div>
@@ -877,7 +881,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                     <span>No pending renewals</span>
                   </div>
                   <div className="pillar-callout-sub">
-                    Complete curriculum assessments or submit an external credential to earn verified certification.
+                    Completion certificates are issued upon Trainer session sign-off; external credentials can be self-reported.
                   </div>
                 </div>
               )}
@@ -894,31 +898,30 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
               </div>
             </div>
 
-            {/* PILLAR 3: NEXT ASSESSMENT */}
+            {/* PILLAR 3: NEXT GAMIFIED QUIZ */}
             <div className="trainee-pillar-card">
               <div className="pillar-top-row">
                 <span className="pillar-kicker-pill kicker-cyan">
                   Next Quiz
                 </span>
                 <span className="pillar-status-chip">
-                  <FileQuestion size={13} style={{ color: '#0891b2' }} /> Ready to Take
+                  <FileQuestion size={13} style={{ color: '#0891b2' }} /> Online Only (SEC-26)
                 </span>
               </div>
 
               <h3 className="pillar-heading">
-                {nextQuizItem?.title || 'Security Architecture Evaluation'}
+                {nextQuizItem?.title || 'Project Management & Risk Challenge'}
               </h3>
 
               <div className="pillar-meta-row">
                 <span className="pillar-meta-item">
-                  Category: <strong>{nextQuizItem?.category || 'Security Controls'}</strong>
+                  Category: <strong>{nextQuizItem?.category || 'Corporate Training'}</strong>
                 </span>
                 <span className="pillar-meta-item">
-                  Passing Score: <strong>{nextQuizItem?.passingScore || 80}%</strong>
+                  Target Score: <strong>{nextQuizItem?.passingScore || 80}%</strong>
                 </span>
               </div>
 
-              {/* Quiz Meta Chips */}
               <div className="pillar-chips-wrap">
                 <span className="pillar-chip">
                   {nextQuizItem?.questions?.length || 4} Questions
@@ -927,7 +930,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                   {nextQuizItem?.timePerQuestion || 30}s / Question
                 </span>
                 <span className="pillar-chip chip-highlight">
-                  Official Evaluation
+                  Gamified Quiz (Pilot)
                 </span>
               </div>
 
@@ -935,26 +938,26 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 <button
                   type="button"
                   className="trainee-pillar-btn pillar-btn-primary"
-                  onClick={() => handleStartQuizById(nextQuizItem?.id || 'quiz_cloud_sec')}
+                  onClick={() => handleStartQuizById(nextQuizItem?.id || 'act-1')}
                   disabled={!isOnline}
                 >
                   <Play size={13} fill="currentColor" />
-                  <span>Start Assessment Arena</span>
+                  <span>Enter Quiz Arena</span>
                 </button>
               </div>
             </div>
 
           </div>
 
-          {/* 2. ASSIGNED COURSE ACTIVITIES (Clean Linear/SaaS Component Table/Grid) */}
+          {/* 2. AVAILABLE GAMIFIED QUIZZES (Replaces Out-of-Scope "Assigned Course Activities") */}
           <div className="modern-section-shell">
             <div className="modern-section-head">
               <div>
-                <h3 className="modern-section-title">Assigned Course Activities</h3>
-                <p className="modern-section-desc">Course modules and evaluations assigned to your active enterprise curriculum.</p>
+                <h3 className="modern-section-title">Available Gamified Quizzes</h3>
+                <p className="modern-section-desc">Online-only gamified quizzes for points, badges, and streaks (kept separate from official training records per Chapter III Section M8).</p>
               </div>
               <span className="modern-section-badge">
-                ASSIGNED BY CROSSWORKS INSTRUCTORS
+                ONE SCORED ATTEMPT PER VERSION (SEC-26)
               </span>
             </div>
 
@@ -968,18 +971,17 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                           {act.category}
                         </span>
                         <span className="activity-question-count">
-                          {act.questionsCount} items
+                          {act.questionsCount}
                         </span>
                       </div>
 
                       <h4 className="activity-card-title">{act.title}</h4>
                       <div className="activity-card-instructor">
-                        Instructor: <strong>{act.instructor}</strong>
+                        Author: <strong>{act.instructor}</strong>
                       </div>
 
-                      {/* Clean Question Step Dots */}
                       <div className="activity-dots-container">
-                        <div className="activity-dots-label">Module Progress:</div>
+                        <div className="activity-dots-label">Question Progress:</div>
                         <div className="activity-dots-row">
                           {act.progressSegments.map((isFilled, idx) => (
                             <div 
@@ -998,7 +1000,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                           <>
                             <span className="activity-status-badge status-success">
                               <Check size={12} strokeWidth={3} />
-                              <span>{act.score}% accuracy</span>
+                              <span>{act.score}% scored</span>
                             </span>
                             <button
                               type="button"
@@ -1007,14 +1009,14 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                               disabled={!isOnline}
                               title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
                             >
-                              <span>Replay</span>
+                              <span>Practice</span>
                               <ArrowRight size={12} />
                             </button>
                           </>
                         ) : (
                           <>
                             <span className="activity-status-badge status-pending">
-                              <span>Assigned &bull; Due in 3d</span>
+                              <span>Online Quiz &bull; Ready</span>
                             </span>
                             <button
                               type="button"
@@ -1023,7 +1025,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                               disabled={!isOnline}
                               title={!isOnline ? 'Requires network connection (SEC-26)' : undefined}
                             >
-                              <span>Start</span>
+                              <span>Start Quiz</span>
                               <Play size={11} fill="currentColor" />
                             </button>
                           </>
@@ -1034,9 +1036,9 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                 })
               ) : (
                 <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8', gridColumn: '1 / -1' }}>
-                  <BookOpen size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-                  <h4 style={{ fontWeight: '600', marginBottom: '6px', color: '#64748b', fontSize: '15px' }}>No course activities assigned yet</h4>
-                  <p style={{ fontSize: '13px', margin: 0 }}>You are all caught up! New instructor module assignments will appear here.</p>
+                  <FileQuestion size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                  <h4 style={{ fontWeight: '600', marginBottom: '6px', color: '#64748b', fontSize: '15px' }}>No gamified quizzes available yet</h4>
+                  <p style={{ fontSize: '13px', margin: 0 }}>Approved session quizzes published by your Trainer or Administrator will appear here.</p>
                 </div>
               )}
             </div>
@@ -1051,11 +1053,11 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
             <div>
               <div className="catalog-badge-pill">
                 <FileQuestion size={14} className="text-cyan" />
-                <span>OFFICIAL EVALUATIONS</span>
+                <span>GAMIFIED QUIZZES &bull; M8</span>
               </div>
               <h2>Enterprise Knowledge Quizzes</h2>
               <p className="catalog-subtitle">
-                Select an assessment to enter the dedicated distraction-free testing arena. Each quiz includes interactive Kahoot-style questions, sequence ordering, term identification, and architecture diagrams.
+                Online-only gamified quizzes with server-side answer keys (SEC-26). Overall score is shown immediately; per-question feedback is released after the quiz closes (OI-23). Quiz points and scores remain separate from official training records.
               </p>
             </div>
           </div>
@@ -1256,10 +1258,10 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                       isYou: item.display_name === currentUser?.name || item.display_name?.includes(currentUser?.name)
                     }))
                   : [
-                      { rank: 1, name: currentUser?.name || 'Andrea Aguilar', initials: currentUser?.initials || 'AA', points: points || 3055, isYou: true },
-                      { rank: 2, name: 'Ricardo Ocampo', initials: 'RO', points: 2850, isYou: false },
-                      { rank: 3, name: 'Bea Macaraeg', initials: 'BM', points: 2620, isYou: false },
-                      { rank: 4, name: 'Adrian Natividad', initials: 'AN', points: 2190, isYou: false }
+                      { rank: 1, name: currentUser?.display_name || 'Trainee_You', initials: currentUser?.initials || 'TY', points: points || 3055, isYou: true },
+                      { rank: 2, name: 'RicardoOps', initials: 'RO', points: 2850, isYou: false },
+                      { rank: 3, name: 'BeaMacaraeg', initials: 'BM', points: 2620, isYou: false },
+                      { rank: 4, name: 'RowenaEW', initials: 'RE', points: 2190, isYou: false }
                     ]
                 ).map((row) => (
                   <div key={row.rank} className={`modern-leaderboard-item ${row.isYou ? 'is-user' : ''}`}>
@@ -1585,8 +1587,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                         <span className="meta-val">{cert.issuedOn}</span>
                       </div>
                       <div className="cert-meta-item">
-                        <span className="meta-label">Valid Until (36m):</span>
-                        <span className="meta-val">{cert.expiresOn}</span>
+                        <span className="meta-label">{cert.expiresOn ? 'Valid Until (36m):' : 'Validity:'}</span>
+                        <span className="meta-val">{cert.expiresOn || 'Non-Expiring (Lifetime)'}</span>
                       </div>
 
                       {cert.isSelfReported && (

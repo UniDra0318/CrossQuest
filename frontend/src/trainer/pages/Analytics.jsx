@@ -23,10 +23,12 @@ export default function Analytics({ onNavigateTab }) {
       <div className="stf-controls">
         <div className="stf-select">
           <select value={selectedScope} onChange={(e) => setSelectedScope(e.target.value)}>
-            <option value="ALL">All Cohort Organizations</option>
-            <option value="CORP_ALPHA">San Miguel Conglomerate (CORP_ALPHA)</option>
-            <option value="FINTECH_BETA">Maya FinTech Innovations (FINTECH_BETA)</option>
-            <option value="RETAIL_GAMMA">Ayala Retail Omnichannel (RETAIL_GAMMA)</option>
+            <option value="ALL">All Assigned Cohort Organizations</option>
+            {(analytics?.orgs || []).map((org) => (
+              <option key={org.id} value={org.id}>
+                {org.org} ({org.id})
+              </option>
+            ))}
           </select>
         </div>
       </div>

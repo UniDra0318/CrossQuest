@@ -405,7 +405,7 @@ export default function Sidebar({
                 >
                   <span className="btn-left">
                     <Lock size={14} color="#6366f1" />
-                    <span>Security & Clearance Details</span>
+                    <span>Security & Access Details</span>
                   </span>
                   <ExternalLink size={12} color="#94a3b8" />
                 </button>
@@ -503,7 +503,7 @@ export default function Sidebar({
                   <Shield size={20} />
                 </div>
                 <div>
-                  <h3 className="modal-title">Security & Clearance Profile</h3>
+                  <h3 className="modal-title">Security & Access Profile</h3>
                   <span className="modal-sub">CrossQuest Zero-Trust Attribute Authority</span>
                 </div>
               </div>
