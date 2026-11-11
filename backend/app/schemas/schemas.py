@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import List, Optional, Any, Dict, Union
-from pydantic import BaseModel, EmailStr, ConfigDict, model_validator
+from typing import List, Optional, Any, Dict
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 
 # Auth & Token
@@ -77,8 +77,6 @@ class UserResponse(UserBase):
     created_at: Optional[datetime] = None
     streak: Optional[int] = None
     company_name: Optional[str] = None
-    company_code: Optional[str] = None
-    affiliations: Optional[List[Dict[str, Any]]] = None
     attributes: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -227,49 +225,11 @@ class QuizCreate(BaseModel):
     course_id: Optional[str] = None
 
 class QuizQuestionCreate(BaseModel):
-    question_type: str = 'multiple_choice'
     question_text: str
-    options: List[str] = []
+    options: List[str]
     correct_option: int = 0
-    payload: Optional[Dict[str, Any]] = None
-    answer_payload: Optional[Dict[str, Any]] = None
     points: int = 10
     explanation: Optional[str] = None
-
-    @model_validator(mode='after')
-    def validate_question_type_fields(self):
-        qtype = (self.question_type or 'multiple_choice').strip().lower()
-        self.question_type = qtype
-        if qtype == 'multiple_choice':
-            if not (2 <= len(self.options) <= 6):
-                raise ValueError('multiple_choice requires 2 to 6 options.')
-            if not (0 <= self.correct_option < len(self.options)):
-                raise ValueError('correct_option must be a valid option index.')
-        elif qtype == 'true_false':
-            self.options = ['True', 'False']
-            if self.correct_option not in (0, 1):
-                raise ValueError('true_false correct_option must be 0 (True) or 1 (False).')
-        elif qtype == 'identification':
-            accepted = (self.answer_payload or {}).get('accepted') or []
-            cleaned = [str(a).strip() for a in accepted if str(a).strip()]
-            if not cleaned:
-                raise ValueError('identification requires at least 1 accepted answer.')
-            self.answer_payload = {**(self.answer_payload or {}), 'accepted': cleaned}
-        elif qtype == 'sequence':
-            steps = (self.payload or {}).get('steps') or []
-            cleaned_steps = [str(s).strip() for s in steps if str(s).strip()]
-            if not (2 <= len(cleaned_steps) <= 8):
-                raise ValueError('sequence requires 2 to 8 steps.')
-            self.payload = {**(self.payload or {}), 'steps': cleaned_steps}
-            order = (self.answer_payload or {}).get('order')
-            if order is None:
-                order = list(range(len(cleaned_steps)))
-            if sorted(order) != list(range(len(cleaned_steps))):
-                raise ValueError('sequence answer_payload.order must be a permutation of step indices.')
-            self.answer_payload = {**(self.answer_payload or {}), 'order': order}
-        else:
-            raise ValueError(f'Unsupported question_type for Phase 1: {qtype}')
-        return self
 
 
 # Certification
@@ -331,7 +291,7 @@ class QuizSubmitRequest(BaseModel):
     attempt_id: Optional[str] = None # Client-generated UUID for idempotency
     trainee_id: str
     quiz_id: str
-    answers: Optional[Dict[str, Union[int, str, List[Any]]]] = None
+    answers: Optional[Dict[str, int]] = None
     score: Optional[float] = None
     total_questions: Optional[int] = None
     submitted_offline: bool = False
@@ -351,19 +311,16 @@ class LeaderboardEntry(BaseModel):
 class QuizQuestionTraineeView(BaseModel):
     id: str
     quiz_id: str
-    question_type: str = 'multiple_choice'
     question_text: str
-    options: List[str] = []
-    payload: Optional[Dict[str, Any]] = None
+    options: List[str]
     points: int
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class QuizQuestionStaffView(QuizQuestionTraineeView):
-    """Trainer/Admin authoring view. correct_answer/answer_payload/explanation stay None for trainees (SEC-26)."""
+    """Trainer/Admin authoring view. correct_answer/explanation stay None for trainees (SEC-26)."""
     correct_answer: Optional[int] = None
-    answer_payload: Optional[Dict[str, Any]] = None
     explanation: Optional[str] = None
 
 class QuizQuestionReview(BaseModel):

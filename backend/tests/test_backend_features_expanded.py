@@ -341,15 +341,9 @@ def test_gamification_quiz_approval_and_teams(client: TestClient, feature_fixtur
     trainer_hdr = _auth_headers(feature_fixture["trainer"], db_session)
     trainee = feature_fixture["trainee"]
 
-    # 1. Create a course & quiz (course-scoped per Round 9)
-    from app.models.entities import Course
-    test_course = Course(course_code=f"CRS-{uuid.uuid4().hex[:4].upper()}", name="Cloud Security Architecture", acronym_3="CSA")
-    db_session.add(test_course)
-    db_session.commit()
-
+    # 1. Create a quiz
     quiz_resp = client.post("/api/v1/gamification/quizzes", headers=admin_hdr, json={
-        "title": "Cloud Security Architecture Assessment",
-        "course_id": test_course.id
+        "title": "Cloud Security Architecture Assessment"
     })
     assert quiz_resp.status_code == 200
     quiz_id = quiz_resp.json()["id"]

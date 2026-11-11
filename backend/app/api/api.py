@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from app.core.config import settings
 from app.api.endpoints import (
     auth,
     users,
@@ -11,8 +10,7 @@ from app.api.endpoints import (
     reports,
     imports,
     attributes,
-    crypto_lab,
-    dev
+    crypto_lab
 )
 
 api_router = APIRouter()
@@ -28,6 +26,3 @@ api_router.include_router(reports.router, prefix="/reports", tags=["Client Repor
 api_router.include_router(imports.router, prefix="/imports", tags=["Pilot CSV Import"])
 api_router.include_router(attributes.router, prefix="/attributes", tags=["CP-ABE Attributes & Tier-2 Revocation"])
 api_router.include_router(crypto_lab.router, prefix="/crypto-lab", tags=["CP-ABE Interactive Sandbox"])
-
-if settings.ENVIRONMENT != "production" and settings.ALLOW_DEV_SCENARIOS:
-    api_router.include_router(dev.router, prefix="/dev", tags=["Dev Scenarios"])

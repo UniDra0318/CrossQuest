@@ -11,7 +11,7 @@ from app.core.security import get_password_hash, verify_password
 from app.models.entities import (
     User, Trainee, AccessLog, UserSession, PasswordResetToken, UserAbeKey, GamificationProgress,
     ClientCompany, TrainingRecord, AnomalyAlert, AccountManagerAssignment, UserKeyAttribute,
-    Course, TrainerProgram, TraineeAffiliation
+    Course, TrainerProgram
 )
 from app.schemas.schemas import (
     UserResponse, UserAttributeUpdate, UserCreateAdmin, UserActivationResponse, PasswordChangeRequest,
@@ -36,63 +36,27 @@ def read_current_user(
     db: Session = Depends(get_db)
 ):
     if current_user.role == "trainee":
-        from app.core.database import admin_engine
-        from sqlalchemy.orm import sessionmaker as _sm
-        with _sm(bind=admin_engine)() as adm_db:
-            trainee = adm_db.query(Trainee).filter(
-                (Trainee.user_id == current_user.id) | (Trainee.email == current_user.email)
-            ).first()
-            streak = (trainee.current_streak if trainee else 7) or 7
-            company_name, company_code = None, None
-            aff_list, codes = [], []
-            if trainee:
-                comps = {c.id: c for c in adm_db.query(ClientCompany).all()}
-                if trainee.current_company_id and trainee.current_company_id in comps:
-                    company_name = comps[trainee.current_company_id].name
-                    company_code = comps[trainee.current_company_id].code
-                aff_rows = adm_db.query(TraineeAffiliation).filter(
-                    TraineeAffiliation.trainee_id == trainee.id
-                ).order_by(TraineeAffiliation.valid_from.desc()).all()
-                seen_cids = set()
-                for a in aff_rows:
-                    c = comps.get(a.company_id)
-                    if not c or c.id in seen_cids:
-                        continue
-                    seen_cids.add(c.id)
-                    codes.append(c.code)
-                    aff_list.append({
-                        "company_id": c.id,
-                        "company_code": c.code,
-                        "company_name": c.name,
-                        "is_current": c.id == trainee.current_company_id,
-                    })
-                for (cid,) in adm_db.query(TrainingRecord.company_at_completion_id).filter(
-                    TrainingRecord.trainee_id == trainee.id, TrainingRecord.deleted_at == None
-                ).distinct().all():
-                    c = comps.get(cid)
-                    if c and c.id not in seen_cids:
-                        seen_cids.add(c.id)
-                        codes.append(c.code)
-                        aff_list.append({
-                            "company_id": c.id,
-                            "company_code": c.code,
-                            "company_name": c.name,
-                            "is_current": c.id == trainee.current_company_id,
-                        })
+        trainee = db.query(Trainee).filter(
+            (Trainee.user_id == current_user.id) | (Trainee.email == current_user.email)
+        ).first()
+        streak = (trainee.current_streak if trainee else 7) or 7
+        company_name = None
+        if trainee and trainee.current_company_id:
+            cc = db.query(ClientCompany).filter(ClientCompany.id == trainee.current_company_id).first()
+            if cc:
+                company_name = cc.name
         return {
             "id": current_user.id,
             "email": current_user.email,
             "full_name": current_user.full_name,
             "role": current_user.role,
-            "assigned_client_accounts": codes or current_user.assigned_client_accounts or ([company_code] if company_code else []),
+            "assigned_client_accounts": current_user.assigned_client_accounts or [],
             "is_active": current_user.is_active,
             "force_password_change": current_user.force_password_change,
             "mfa_enabled": current_user.mfa_enabled,
             "created_at": current_user.created_at,
             "streak": streak,
-            "company_name": company_name,
-            "company_code": company_code,
-            "affiliations": aff_list,
+            "company_name": company_name
         }
     return current_user
 

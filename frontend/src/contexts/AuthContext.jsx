@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authFetch, SESSION_EXPIRED_EVENT, switchMyCompanyApi, setAccessToken } from '../services/api';
+import { authFetch, SESSION_EXPIRED_EVENT } from '../services/api';
 
 export const DEMO_USERS = {
   // --- ADMINISTRATORS ---
@@ -95,18 +95,22 @@ export const DEMO_USERS = {
     name: "Andrea Aguilar",
     title: "Vertiv Holdings Ltd (VHL)",
     role: "trainee",
-    organization: "Vertiv (Singapore) Holdings PTE LTD-ROHQ",
+    organization: "Vertiv Holdings Ltd",
     trainee_code: "TRN-8000",
     display_name: "AndreaVertiv",
     company_code: "VHL",
-    assigned_companies: ["VHL", "AOS", "ROP"],
-    affiliations: [
-      { company_code: "VHL", company_name: "Vertiv (Singapore) Holdings PTE LTD-ROHQ", is_current: true },
-      { company_code: "ROP", company_name: "Red Oak Properties, Inc.", is_current: false },
-      { company_code: "AOS", company_name: "Acen Operations Services Inc.", is_current: false }
-    ],
-    demo_note: "Completed · In progress · Not completed · 3 Companies (VHL, ROP, AOS)",
-    streak: 8, points: 13500, level: 4, quizzes_completed: 1, quiz_progress: {}, initials: "AA"
+    assigned_companies: ["VHL"],
+    streak: 8,
+    points: 13500,
+    level: 4,
+    quizzes_completed: 3,
+    quiz_progress: {
+      'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 90, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "AA"
   },
   trainee_ricardo: {
     id: "35076d4f-7548-4131-8dd1-6fc07389b17d",
@@ -114,18 +118,22 @@ export const DEMO_USERS = {
     name: "Ricardo Ocampo",
     title: "IPRoyal Services (IPROY_SERVI)",
     role: "trainee",
-    organization: "IPRoyal Services FZE LLC",
+    organization: "IPRoyal Services",
     trainee_code: "TRN-8001",
     display_name: "RicardoOps",
     company_code: "IPROY_SERVI",
-    assigned_companies: ["IPROY_SERVI", "AMIHAN_SOLUTI", "VHL"],
-    affiliations: [
-      { company_code: "IPROY_SERVI", company_name: "IPRoyal Services FZE LLC", is_current: true },
-      { company_code: "VHL", company_name: "Vertiv (Singapore) Holdings PTE LTD-ROHQ", is_current: false },
-      { company_code: "AMIHAN_SOLUTI", company_name: "Amihan Solutions (OPC)", is_current: false }
-    ],
-    demo_note: "Completed · In progress · Not completed · 3 Companies (IPROY, VHL, AMIHAN)",
-    streak: 6, points: 10200, level: 3, quizzes_completed: 1, quiz_progress: {}, initials: "RO"
+    assigned_companies: ["IPROY_SERVI"],
+    streak: 6,
+    points: 10200,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "RO"
   },
   trainee_bea: {
     id: "82dd244c-84c5-4831-9381-279bd9fd5c37",
@@ -133,13 +141,22 @@ export const DEMO_USERS = {
     name: "Bea Macaraeg",
     title: "IPRoyal Services (IPROY_SERVI)",
     role: "trainee",
-    organization: "IPRoyal Services FZE LLC",
+    organization: "IPRoyal Services",
     trainee_code: "TRN-8002",
     display_name: "BeaMacaraeg",
     company_code: "IPROY_SERVI",
     assigned_companies: ["IPROY_SERVI"],
-    demo_note: "Completed · In progress · Not completed",
-    streak: 11, points: 14800, level: 5, quizzes_completed: 0, quiz_progress: {}, initials: "BM"
+    streak: 11,
+    points: 14800,
+    level: 5,
+    quizzes_completed: 4,
+    quiz_progress: {
+      'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-4': { completed: true, score: 92, segments: [true, true, true, true] }
+    },
+    initials: "BM"
   },
   trainee_rafael: {
     id: "d4799846-9779-4b67-acc5-09a5d69a0ade",
@@ -147,18 +164,22 @@ export const DEMO_USERS = {
     name: "Rafael Dizon",
     title: "Amihan Solutions (AMIHAN_SOLUTI)",
     role: "trainee",
-    organization: "Amihan Solutions (OPC)",
+    organization: "Amihan Solutions",
     trainee_code: "TRN-8015",
     display_name: "RafaelDev",
     company_code: "AMIHAN_SOLUTI",
-    assigned_companies: ["AMIHAN_SOLUTI", "SECURI_BANK_CORPOR", "ROP"],
-    affiliations: [
-      { company_code: "AMIHAN_SOLUTI", company_name: "Amihan Solutions (OPC)", is_current: true },
-      { company_code: "ROP", company_name: "Red Oak Properties, Inc.", is_current: false },
-      { company_code: "SECURI_BANK_CORPOR", company_name: "Security Bank Corporation", is_current: false }
-    ],
-    demo_note: "Completed · In progress · Not completed · 3 Companies (AMIHAN, ROP, SECB)",
-    streak: 4, points: 8100, level: 2, quizzes_completed: 0, quiz_progress: {}, initials: "RD"
+    assigned_companies: ["AMIHAN_SOLUTI"],
+    streak: 4,
+    points: 8100,
+    level: 2,
+    quizzes_completed: 1,
+    quiz_progress: {
+      'act-1': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-2': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "RD"
   },
   trainee_rowena: {
     id: "7084364a-d26c-4154-b10f-b5c0cac75fe5",
@@ -166,18 +187,22 @@ export const DEMO_USERS = {
     name: "Rowena Cabrera",
     title: "EastWest Ageas (EWALIC)",
     role: "trainee",
-    organization: "East West Ageas Life Insurance Corporation",
+    organization: "EastWest Ageas Life Insurance",
     trainee_code: "TRN-8032",
     display_name: "RowenaEW",
     company_code: "EWALIC",
-    assigned_companies: ["EWALIC", "VHL", "BIBSP"],
-    affiliations: [
-      { company_code: "EWALIC", company_name: "East West Ageas Life Insurance Corporation", is_current: true },
-      { company_code: "BIBSP", company_name: "Boehringer Ingelheim Business Services Philippines Inc.", is_current: false },
-      { company_code: "VHL", company_name: "Vertiv (Singapore) Holdings PTE LTD-ROHQ", is_current: false }
-    ],
-    demo_note: "Completed · In progress · Not completed · 3 Companies (EWALIC, BIBSP, VHL)",
-    streak: 9, points: 12400, level: 4, quizzes_completed: 1, quiz_progress: {}, initials: "RC"
+    assigned_companies: ["EWALIC"],
+    streak: 9,
+    points: 12400,
+    level: 4,
+    quizzes_completed: 3,
+    quiz_progress: {
+      'act-1': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 90, segments: [true, true, true, false] },
+      'act-3': { completed: true, score: 88, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "RC"
   },
   trainee_joshua: {
     id: "0244b2b1-e722-4461-a5a2-4c1299e7f439",
@@ -190,8 +215,17 @@ export const DEMO_USERS = {
     display_name: "JoshuaLPG",
     company_code: "ISLA_LPG_CORPOR",
     assigned_companies: ["ISLA_LPG_CORPOR"],
-    demo_note: "Completed · In progress · Not completed",
-    streak: 5, points: 9900, level: 3, quizzes_completed: 0, quiz_progress: {}, initials: "JJ"
+    streak: 5,
+    points: 9900,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 80, segments: [true, true, false, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "JJ"
   },
   trainee_arvin: {
     id: "78ef52e6-69f3-4be7-88fa-e8c6b78984be",
@@ -204,8 +238,17 @@ export const DEMO_USERS = {
     display_name: "ArvinURC",
     company_code: "UNIVER_ROBINA_CORPOR",
     assigned_companies: ["UNIVER_ROBINA_CORPOR"],
-    demo_note: "Completed · In progress · Not completed",
-    streak: 7, points: 11800, level: 3, quizzes_completed: 0, quiz_progress: {}, initials: "AN"
+    streak: 7,
+    points: 11800,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "AN"
   },
   trainee_camille: {
     id: "d0068942-b729-4ae4-8611-916b94884110",
@@ -213,13 +256,22 @@ export const DEMO_USERS = {
     name: "Camille Morales",
     title: "Boehringer Ingelheim (BIBSP)",
     role: "trainee",
-    organization: "Boehringer Ingelheim Business Services Philippines Inc.",
+    organization: "Boehringer Ingelheim",
     trainee_code: "TRN-8071",
     display_name: "CamilleBI",
     company_code: "BIBSP",
     assigned_companies: ["BIBSP"],
-    demo_note: "Completed · In progress · Not completed",
-    streak: 10, points: 14200, level: 4, quizzes_completed: 0, quiz_progress: {}, initials: "CM"
+    streak: 10,
+    points: 14200,
+    level: 4,
+    quizzes_completed: 3,
+    quiz_progress: {
+      'act-1': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 90, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "CM"
   },
   trainee_vincent: {
     id: "7ee5f39e-efb0-4c1a-afdd-0b680128e924",
@@ -227,122 +279,23 @@ export const DEMO_USERS = {
     name: "Vincent Santos",
     title: "Ayala Land (AYALA_LAND_INC)",
     role: "trainee",
-    organization: "Ayala Land, Inc.",
+    organization: "Ayala Land Inc",
     trainee_code: "TRN-8088",
     display_name: "VincentAyala",
     company_code: "AYALA_LAND_INC",
     assigned_companies: ["AYALA_LAND_INC"],
-    demo_note: "Completed · In progress · Not completed",
-    streak: 6, points: 10500, level: 3, quizzes_completed: 0, quiz_progress: {}, initials: "VS"
-  },
-
-  // --- SYNTHETIC SCENARIO TRAINEES (Round 11) ---
-  scn_mia: {
-    id: "u-scn_mia",
-    email: "scn_mia@demo.crossquest.test",
-    name: "Mia Villanueva",
-    title: "Vertiv Holdings Ltd (VHL)",
-    role: "trainee",
-    organization: "Vertiv (Singapore) Holdings PTE LTD-ROHQ",
-    trainee_code: "TRN-9001",
-    display_name: "MiaV",
-    company_code: "VHL",
-    assigned_companies: ["VHL"],
-    scenario_ids: ["SCN-01", "SCN-05", "SCN-06"],
-    demo_note: "SCN-01: 2/3 quizzes done, Present, In progress",
-    streak: 3, points: 200, level: 3, quizzes_completed: 2, quiz_progress: {}, initials: "MV"
-  },
-  scn_noel: {
-    id: "u-scn_noel",
-    email: "scn_noel@demo.crossquest.test",
-    name: "Noel Castillo",
-    title: "Vertiv Holdings Ltd (VHL)",
-    role: "trainee",
-    organization: "Vertiv (Singapore) Holdings PTE LTD-ROHQ",
-    trainee_code: "TRN-9002",
-    display_name: "NoelC",
-    company_code: "VHL",
-    assigned_companies: ["VHL"],
-    scenario_ids: ["SCN-02"],
-    demo_note: "SCN-02: 3/3 quizzes done, Absent (OI-02)",
-    streak: 3, points: 300, level: 4, quizzes_completed: 3, quiz_progress: {}, initials: "NC"
-  },
-  scn_paolo: {
-    id: "u-scn_paolo",
-    email: "scn_paolo@demo.crossquest.test",
-    name: "Paolo Reyes",
-    title: "Red Oak Properties (ROP)",
-    role: "trainee",
-    organization: "Red Oak Properties, Inc.",
-    trainee_code: "TRN-9003",
-    display_name: "PaoloR",
-    company_code: "ROP",
-    assigned_companies: ["ROP"],
-    scenario_ids: ["SCN-03"],
-    demo_note: "SCN-03: Future-dated session (sign-off blocked)",
-    streak: 1, points: 0, level: 1, quizzes_completed: 0, quiz_progress: {}, initials: "PR"
-  },
-  scn_carla: {
-    id: "u-scn_carla",
-    email: "scn_carla@demo.crossquest.test",
-    name: "Carla Mendoza",
-    title: "EastWest Ageas (EWALIC)",
-    role: "trainee",
-    organization: "East West Ageas Life Insurance Corporation",
-    trainee_code: "TRN-9004",
-    display_name: "CarlaM",
-    company_code: "EWALIC",
-    assigned_companies: ["EWALIC"],
-    scenario_ids: ["SCN-04"],
-    demo_note: "SCN-04: Completed with wrong score (62%) for Admin correction",
-    streak: 4, points: 400, level: 5, quizzes_completed: 1, quiz_progress: {}, initials: "CM"
-  },
-  scn_ines: {
-    id: "u-scn_ines",
-    email: "scn_ines@demo.crossquest.test",
-    name: "Ines Bautista",
-    title: "Vertiv Holdings Ltd (VHL)",
-    role: "trainee",
-    organization: "Vertiv (Singapore) Holdings PTE LTD-ROHQ",
-    trainee_code: "TRN-9005",
-    display_name: "InesB",
-    company_code: "VHL",
-    assigned_companies: ["VHL"],
-    scenario_ids: ["SCN-08"],
-    demo_note: "SCN-08: Expiring PMP (25d) & Expired CAPM",
-    streak: 2, points: 100, level: 2, quizzes_completed: 1, quiz_progress: {}, initials: "IB"
-  },
-  scn_gabe: {
-    id: "u-scn_gabe",
-    email: "scn_gabe@demo.crossquest.test",
-    name: "Gabe Soriano",
-    title: "Red Oak Properties (ROP)",
-    role: "trainee",
-    organization: "Red Oak Properties, Inc.",
-    trainee_code: "TRN-9006",
-    display_name: "GabeS",
-    company_code: "ROP",
-    assigned_companies: ["ROP"],
-    scenario_ids: ["SCN-10"],
-    demo_note: "SCN-10: Pending single-use activation & account lifecycle",
-    streak: 0, points: 0, level: 1, quizzes_completed: 0, quiz_progress: {}, initials: "GS"
-  },
-  scn_ivy: {
-    id: "u-scn_ivy",
-    email: "scn_ivy@demo.crossquest.test",
-    name: "Ivy Navarro",
-    title: "Individual Client (BIBSP)",
-    role: "trainee",
-    organization: "Boehringer Ingelheim Business Services Philippines Inc.",
-    trainee_code: "TRN-9007",
-    display_name: "IvyN",
-    company_code: "BIBSP",
-    assigned_companies: ["BIBSP"],
-    scenario_ids: ["SCN-12"],
-    demo_note: "SCN-12: Individual self-paying client assigned to Sharon",
-    streak: 2, points: 100, level: 2, quizzes_completed: 0, quiz_progress: {}, initials: "IN"
+    streak: 6,
+    points: 10500,
+    level: 3,
+    quizzes_completed: 2,
+    quiz_progress: {
+      'act-1': { completed: true, score: 85, segments: [true, true, true, false] },
+      'act-2': { completed: true, score: 80, segments: [true, true, false, false] },
+      'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    },
+    initials: "VS"
   }
-
 };
 
 export function normalizeRole(role) {
@@ -404,39 +357,7 @@ export function AuthProvider({ children }) {
     }
   });
 
-  const [token, setToken] = useState(null);
-  const [personas, setPersonas] = useState(DEMO_USERS);
-
-  useEffect(() => {
-    try { localStorage.removeItem('crossquest_auth_token'); } catch {}
-    if (!import.meta.env.DEV) return;
-    fetch('http://localhost:8000/api/v1/dev/personas', { credentials: 'include' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!data || !Array.isArray(data.personas)) return;
-        setPersonas((prev) => {
-          const next = { ...prev };
-          const byEmail = {};
-          Object.entries(next).forEach(([k, v]) => { if (v?.email) byEmail[v.email.toLowerCase()] = k; });
-          data.personas.forEach((dp) => {
-            const existingKey = next[dp.key] ? dp.key : byEmail[(dp.email || '').toLowerCase()];
-            if (existingKey) {
-              next[existingKey] = {
-                ...next[existingKey],
-                id: dp.id || next[existingKey].id,
-                email: dp.email || next[existingKey].email,
-                name: dp.name || next[existingKey].name,
-                company_code: dp.company_code || next[existingKey].company_code,
-                trainee_code: dp.trainee_code || next[existingKey].trainee_code,
-                display_name: dp.display_name || next[existingKey].display_name,
-              };
-            }
-          });
-          return next;
-        });
-      })
-      .catch(() => {});
-  }, []);
+  const [token, setToken] = useState(() => localStorage.getItem('crossquest_auth_token') || null);
 
   // Listen for transparent re-authentications from api.js
   useEffect(() => {
@@ -467,27 +388,32 @@ export function AuthProvider({ children }) {
 
 
   const loginRole = async (roleKey) => {
-    const baseUser = personas[roleKey] || DEMO_USERS[roleKey] || personas.admin || DEMO_USERS.admin;
+    const baseUser = DEMO_USERS[roleKey] || DEMO_USERS.admin;
     const user = { ...baseUser };
     user.role = normalizeRole(user.role);
 
+    // Re-hydrate any persisted progress for this persona across role switches
     try {
-      Object.keys(localStorage)
-        .filter((k) => k.startsWith('crossquest_trainee_progress_'))
-        .forEach((k) => localStorage.removeItem(k));
-    } catch (e) {}
-
-    // Drop the previous persona's refresh cookie + in-memory token BEFORE signing in as the next one. Otherwise,
-    // if the new login fails, every API call silently refreshes with the old user's cookie and the new persona
-    // shows that user's (often Administrator) data.
-    setAccessToken(null);
-    setToken(null);
-    try {
-      await fetch('http://localhost:8000/api/v1/auth/logout', {
-        method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      });
-    } catch {}
-    let acquired = false;
+      const uid = user.id || user.email;
+      const savedRaw = localStorage.getItem(`crossquest_trainee_progress_${uid}`);
+      if (savedRaw) {
+        const saved = JSON.parse(savedRaw);
+        if (saved.quiz_progress) {
+          user.quiz_progress = { ...(user.quiz_progress || {}), ...saved.quiz_progress };
+        }
+        if (saved.points !== undefined) {
+          user.points = saved.points;
+        }
+        if (saved.level !== undefined) {
+          user.level = saved.level;
+        }
+        if (saved.quizzes_completed !== undefined) {
+          user.quizzes_completed = saved.quizzes_completed;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not re-hydrate persona progress:", e);
+    }
 
     try {
       const formData = new URLSearchParams();
@@ -518,34 +444,15 @@ export function AuthProvider({ children }) {
           }
         }
         if (activeToken) {
-          try { localStorage.removeItem('crossquest_auth_token'); } catch {}
+          localStorage.setItem('crossquest_auth_token', activeToken);
           localStorage.setItem('crossquest_auth_email', user.email);
-          acquired = true;
-          setAccessToken(activeToken);
           setToken(activeToken);
-          try {
-            const meRes = await fetch('http://localhost:8000/api/v1/users/me', {
-              headers: { Authorization: `Bearer ${activeToken}` }
-            });
-            if (meRes.ok) {
-              const meData = await meRes.json();
-              if (meData.company_name) user.organization = meData.company_name;
-              if (meData.company_code) user.company_code = meData.company_code;
-              if (Array.isArray(meData.affiliations) && meData.affiliations.length > 0) user.affiliations = meData.affiliations;
-              if (Array.isArray(meData.assigned_client_accounts) && meData.assigned_client_accounts.length > 0) {
-                user.assigned_companies = meData.assigned_client_accounts;
-              }
-            }
-          } catch {}
         }
       }
     } catch (e) {
       console.warn("Could not acquire backend token for role switch:", e);
     }
 
-    if (!acquired) {
-      throw new Error(`Could not sign in as ${user.email}. Is the backend up and the persona seeded?`);
-    }
     localStorage.setItem('crossquest_auth_user', JSON.stringify(user));
     setCurrentUser(user);
     return user;
@@ -587,9 +494,8 @@ export function AuthProvider({ children }) {
           };
         }
 
-        setAccessToken(data.access_token);
         setToken(data.access_token);
-        try { localStorage.removeItem('crossquest_auth_token'); } catch {}
+        localStorage.setItem('crossquest_auth_token', data.access_token);
 
         const userRes = await fetch('http://localhost:8000/api/v1/users/me', {
           headers: { 'Authorization': `Bearer ${data.access_token}` }
@@ -638,9 +544,8 @@ export function AuthProvider({ children }) {
       }
 
       const data = await res.json();
-      setAccessToken(data.access_token);
       setToken(data.access_token);
-      try { localStorage.removeItem('crossquest_auth_token'); } catch {}
+      localStorage.setItem('crossquest_auth_token', data.access_token);
 
       const userRes = await fetch('http://localhost:8000/api/v1/users/me', {
         headers: { 'Authorization': `Bearer ${data.access_token}` }
@@ -668,32 +573,12 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const switchCompany = async (companyCode) => {
-    if (!currentUser || !companyCode) return null;
-    const res = await switchMyCompanyApi(companyCode, token);
-    const nextAffs = (currentUser.affiliations || []).map((a) => ({
-      ...a,
-      is_current: a.company_code === res.company_code,
-    }));
-    const updated = {
-      ...currentUser,
-      company_code: res.company_code,
-      organization: res.company_name,
-      title: `${res.company_name} (${res.company_code})`,
-      affiliations: nextAffs,
-    };
-    setCurrentUser(updated);
-    localStorage.setItem('crossquest_auth_user', JSON.stringify(updated));
-    return updated;
-  };
-
   const logout = (reason) => {
     if (reason === 'idle' || reason === 'expired') sessionStorage.setItem('crossquest_logout_reason', reason);
     fetch('http://localhost:8000/api/v1/auth/logout', {
       method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).catch(() => {});
     setCurrentUser(null);
-    setAccessToken(null);
     setToken(null);
     localStorage.removeItem('crossquest_auth_user');
     localStorage.removeItem('crossquest_auth_token');
@@ -711,7 +596,7 @@ export function AuthProvider({ children }) {
       // Keep the server-side idle clock aligned with real UI activity (throttled)
       if (Date.now() - lastPing > 4 * 60 * 1000) {
         lastPing = Date.now();
-        authFetch('http://localhost:8000/api/v1/users/me', {}, token).catch(() => {});
+        authFetch('http://localhost:8000/api/v1/users/me', {}, localStorage.getItem('crossquest_auth_token')).catch(() => {});
       }
     };
     const evts = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
@@ -727,7 +612,7 @@ export function AuthProvider({ children }) {
   }, [currentUser]);
 
   return (
-    <AuthContext.Provider value={{ currentUser, token, loginRole, loginWithCredentials, completeMfaLogin, logout, switchCompany, DEMO_USERS: personas }}>
+    <AuthContext.Provider value={{ currentUser, token, loginRole, loginWithCredentials, completeMfaLogin, logout, DEMO_USERS }}>
       {children}
     </AuthContext.Provider>
   );

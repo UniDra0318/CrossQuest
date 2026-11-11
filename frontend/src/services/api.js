@@ -47,44 +47,31 @@ const emitExpired = (reason) => {
 };
 const IDLE_RE = /inactiv|timed out|idle/i;
 
-// Access token lives in memory only (capstone rule 8: no tokens in script-readable storage).
-let _accessToken = null;
-export function setAccessToken(t) { _accessToken = t || null; }
-export function getAccessToken() { return _accessToken; }
-
-// One refresh at a time. The server rotates the refresh cookie on every call, so two parallel refreshes make
-// the second one fail with "revoked refresh session" and log the person out (this was the Erika Bana logout).
-let _refreshInFlight = null;
-
 /** Renews the 10-min access token via the server refresh cookie. Server enforces idle + 12h max (SEC-07, OI-17). */
-export function refreshAuthToken() {
-  if (_refreshInFlight) return _refreshInFlight;
-  _refreshInFlight = (async () => {
-    try {
-      const res = await fetch(`${API_BASE}/auth/refresh`, {
-        method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      });
-      if (res.ok) {
-        const d = await res.json();
-        if (d.access_token) {
-          _accessToken = d.access_token;
-          window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: d.access_token } }));
-          return d.access_token;
-        }
+export async function refreshAuthToken() {
+  try {
+    const res = await fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (res.ok) {
+      const d = await res.json();
+      if (d.access_token) {
+        localStorage.setItem('crossquest_auth_token', d.access_token);
+        window.dispatchEvent(new CustomEvent('crossquest_token_refreshed', { detail: { token: d.access_token } }));
+        return d.access_token;
       }
-      if (res.status === 401 || res.status === 403) {
-        let detail = ''; try { detail = (await res.json()).detail || ''; } catch {}
-        emitExpired(IDLE_RE.test(detail) ? 'idle' : 'expired');
-      }
-    } catch (e) { console.warn('Token refresh failed:', e); }
-    return null;
-  })().finally(() => { _refreshInFlight = null; });
-  return _refreshInFlight;
+    }
+    if (res.status === 401 || res.status === 403) {
+      let detail = ''; try { detail = (await res.json()).detail || ''; } catch {}
+      emitExpired(IDLE_RE.test(detail) ? 'idle' : 'expired');
+    }
+  } catch (e) { console.warn('Token refresh failed:', e); }
+  return null;
 }
 
 /** Authenticated fetch. NEVER silently re-logs in: a timed-out/revoked session ends at /login. */
 export async function authFetch(url, options = {}, token) {
-  let activeToken = token || _accessToken;
+  let activeToken = token || localStorage.getItem('crossquest_auth_token');
   if (!activeToken || isTokenExpired(activeToken)) activeToken = await refreshAuthToken();
   if (!activeToken) return new Response(JSON.stringify({ detail: 'Session expired' }), { status: 401 });
 
@@ -235,7 +222,7 @@ export async function toggleLeaderboardOptOut(optOut, token) {
 export async function fetchTraineeGamification(traineeId, token) {
   try {
     const headers = {};
-    const authToken = token || _accessToken;
+    const authToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('crossquest_auth_token') : null);
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -524,7 +511,7 @@ export async function triggerExpirySweep(token) {
 }
 
 export async function downloadCertificatePdf(certificateId, token) {
-  const authToken = token || _accessToken;
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const res = await fetch(`${API_BASE}/certifications/${encodeURIComponent(certificateId)}/pdf`, {
     headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
   });
@@ -538,7 +525,7 @@ export async function downloadCertificatePdf(certificateId, token) {
 }
 
 export async function downloadBatchReconciliationPdf(batchId, token) {
-  const authToken = token || _accessToken;
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const res = await fetch(`${API_BASE}/imports/batches/${encodeURIComponent(batchId)}/reconciliation/pdf`, {
     headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
   });
@@ -552,7 +539,7 @@ export async function downloadBatchReconciliationPdf(batchId, token) {
 }
 
 export async function downloadBatchReconciliationCsv(batchId, token) {
-  const authToken = token || _accessToken;
+  const authToken = token || localStorage.getItem('crossquest_auth_token');
   const res = await fetch(`${API_BASE}/imports/batches/${encodeURIComponent(batchId)}/reconciliation/csv`, {
     headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
   });
@@ -777,7 +764,7 @@ export async function fetchExecutiveAnomalyReport(token) {
 
 export async function downloadAnomalyReportPdf(token) {
   try {
-    const authToken = token || _accessToken;
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
     const headers = {};
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
     const res = await fetch(`${API_BASE}/anomalies/report/pdf`, { headers });
@@ -793,7 +780,7 @@ export async function downloadAnomalyReportPdf(token) {
 
 export async function downloadAnomalyReportCsv(token) {
   try {
-    const authToken = token || _accessToken;
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
     const headers = {};
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
     const res = await fetch(`${API_BASE}/anomalies/report/csv`, { headers });
@@ -978,25 +965,31 @@ export async function fetchQuizCoursesApi(token) {
 }
 
 export async function addQuizQuestionApi(quizId, payload, token) {
-  const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  }, token);
-  if (res.ok) return await res.json();
-  const err = await res.json().catch(() => ({}));
-  throw new Error(err.detail || 'Failed to add quiz question.');
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error adding quiz question:", err);
+  }
+  return null;
 }
 
 export async function updateQuizQuestionApi(quizId, questionId, payload, token) {
-  const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions/${questionId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  }, token);
-  if (res.ok) return await res.json();
-  const err = await res.json().catch(() => ({}));
-  throw new Error(err.detail || 'Failed to update quiz question.');
+  try {
+    const res = await authFetch(`${API_BASE}/gamification/quizzes/${quizId}/questions/${questionId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }, token);
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("API error updating quiz question:", err);
+  }
+  return null;
 }
 
 export async function deleteQuizQuestionApi(quizId, questionId, token) {
@@ -1025,7 +1018,7 @@ export async function deleteQuizApi(quizId, token) {
 
 export async function exportAuditLogsCsv(token) {
   try {
-    const authToken = token || _accessToken;
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
     // First try dedicated backend CSV endpoint
     try {
       const resCsv = await fetch(`${API_BASE}/anomalies/logs/csv`, {
@@ -1070,7 +1063,7 @@ export async function exportAuditLogsCsv(token) {
 
 export async function exportVaultRecordsCsv(token) {
   try {
-    const authToken = token || _accessToken;
+    const authToken = token || localStorage.getItem('crossquest_auth_token');
     try {
       const resCsv = await fetch(`${API_BASE}/records/export/csv`, {
         headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
@@ -1391,26 +1384,3 @@ export async function saveTrainerPrograms(userId, courseIds, token) {
   } catch { return false; }
 }
 
-
-export async function switchMyCompanyApi(companyCode, token) {
-  const res = await authFetch(`${API_BASE}/trainees/me/switch-company`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ company_code: companyCode })
-  }, token);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || 'Could not switch company');
-  }
-  return res.json();
-}
-
-export async function fetchQuizAnalyticsApi(token) {
-  try {
-    const res = await authFetch(`${API_BASE}/gamification/quiz-analytics`, {}, token);
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn('API error fetching quiz analytics:', err);
-  }
-  return null;
-}

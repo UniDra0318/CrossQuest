@@ -74,7 +74,6 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     ENFORCE_PRIVILEGED_MFA: bool = True      # Admin/Finance must enroll TOTP before receiving an access token (SEC-01, OI-26)
     ALLOW_DEV_MFA_BYPASS: bool = False       # Dev-only escape hatch; ignored unless ENVIRONMENT == "development"
-    ALLOW_DEV_SCENARIOS: bool = False        # Dev-only scenario endpoints; ignored unless ENVIRONMENT != "production"
     CONTEXT_SIGNING_SECRET: str = "crossquest_internal_context_signing_secret_key_change_in_prod"
 
     # Gamification & PWA Security (SEC-26, Phase 6)

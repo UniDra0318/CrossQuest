@@ -120,7 +120,12 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
   const [quizScoreStatus, setQuizScoreStatus] = useState(() => {
     const saved = getSavedUserProgress(currentUser);
-    const defaultProg = {};
+    const defaultProg = {
+      'act-1': { completed: true, score: 100, segments: [true, true, true, true] },
+      'act-2': { completed: true, score: 95, segments: [true, true, true, true] },
+      'act-3': { completed: true, score: 90, segments: [true, true, true, false] },
+      'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+    };
     return {
       ...defaultProg,
       ...(currentUser?.quiz_progress || {}),
@@ -152,7 +157,12 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       setLevel(curLevel);
       if (onStreakLoad) onStreakLoad(curStreak);
 
-      const defaultProg = {};
+      const defaultProg = {
+        'act-1': { completed: false, score: null, segments: [false, false, false, false] },
+        'act-2': { completed: false, score: null, segments: [false, false, false, false] },
+        'act-3': { completed: false, score: null, segments: [false, false, false, false] },
+        'act-4': { completed: false, score: null, segments: [false, false, false, false] }
+      };
 
       const mergedProg = {
         ...defaultProg,
@@ -333,7 +343,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       }
     }
     loadLeaderboard();
-  }, [token, currentUser?.company_code]);
+  }, [token]);
 
   const handleToggleOptOut = async () => {
     const nextVal = !leaderboardOptOut;
@@ -350,8 +360,8 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
         return 0;
       });
       return sorted.slice(0, 4).map((q, idx) => {
-        const status = quizScoreStatus[q.id] || {};
-        const qCount = q.questions_count ?? 0;
+        const status = quizScoreStatus[q.id] || quizScoreStatus[`act-${idx + 1}`] || {};
+        const qCount = q.questions_count || 5;
         const trackFallback = idx === 0 ? TRACKS.infosec : idx === 1 ? TRACKS.access : idx === 2 ? TRACKS.privacy : TRACKS.database;
         const defaultTrainer = 'Instructor not assigned';
         const defaultCat = idx === 0 ? 'Project Management' : idx === 1 ? 'Executive Leadership' : idx === 2 ? 'Supervisory Mastery' : 'Risk & Governance';
@@ -417,19 +427,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       timePerQuestion: 45, passingScore: 80, showCorrectAnswers: false, serverScored: true,
       description: meta.course_name || '', learningObjectives: [],
       // NOTE: no correctAnswer on purpose, so QuizArena does not shuffle options (server scores by original index)
-      questions: qs.map(q => {
-        const qt = q.question_type || 'multiple_choice';
-        const steps = Array.isArray(q.payload?.steps) ? q.payload.steps : [];
-        return {
-          id: q.id,
-          type: qt === 'sequence' ? 'sequence_order' : qt,
-          question: q.question_text,
-          options: q.options || [],
-          steps,
-          initialOrder: steps,
-          points: q.points
-        };
-      })
+      questions: qs.map(q => ({ id: q.id, type: 'multiple_choice', question: q.question_text, options: q.options, points: q.points }))
     });
   };
 
@@ -705,7 +703,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                     <button 
                       type="button"
                       className={`template-cta-btn template-cta-btn--primary${!isOnline ? ' btn-disabled' : ''}`}
-                      onClick={() => nextQuizItem && handleStartQuizById(nextQuizItem.id)}
+                      onClick={() => handleStartQuizById('act-1')}
                       disabled={!isOnline}
                       style={{ padding: '8px 14px', fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
@@ -798,10 +796,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
                       Latest Training
                     </span>
                     <span className="pillar-status-chip">
-                      <BookOpen size={13} style={{ color: '#4f46e5' }} />{' '}
-                      {realQuizzes && realQuizzes.length > 0 && realQuizzes.every(q => q.completed || quizScoreStatus[q.id]?.completed) && trStatus !== 'Completed'
-                        ? 'Awaiting trainer sign-off'
-                        : (latestTraining ? trStatus : 'No Record Yet')}
+                      <BookOpen size={13} style={{ color: '#4f46e5' }} /> {latestTraining ? trStatus : 'No Record Yet'}
                     </span>
                   </div>
 
@@ -942,7 +937,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
 
               <div className="pillar-chips-wrap">
                 <span className="pillar-chip">
-                  {nextQuizItem?.questions_count ?? nextQuizItem?.questions?.length ?? 0} Questions
+                  {nextQuizItem?.questions?.length || 4} Questions
                 </span>
                 <span className="pillar-chip">
                   {nextQuizItem?.timePerQuestion || 30}s / Question
@@ -1315,19 +1310,6 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
       {/* 4. MY TRAININGS SUB-VIEW (U-10: Cross-company training history) */}
       {currentTab === 'trainee_trainings' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {currentUser?.affiliations?.length > 1 && (
-            <div className="card section-card" style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <Building2 size={16} color="#4f46e5" />
-                <span style={{ fontSize: 12.5, fontWeight: 800 }}>EMPLOYER AFFILIATION HISTORY (FR-15 / DD-01):</span>
-                {currentUser.affiliations.map((a) => (
-                  <span key={a.company_code} className={`adm-chip ${a.company_code === currentUser.company_code ? 'adm-chip--green' : 'adm-chip--blue'}`} style={{ fontSize: 11.5 }}>
-                    {a.company_name} ({a.company_code}) {a.company_code === currentUser.company_code ? '• Current' : '• Historical'}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
           <div className="card section-card">
             <div className="card-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div>

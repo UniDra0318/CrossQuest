@@ -5,9 +5,7 @@ import {
   deriveRoster,
   gradeTrainee,
   getQuizzes,
-  getQuizQuestions,
   getQuizCourses,
-  getQuizAnalytics,
   createQuiz,
   addQuestion,
   deleteQuestion,
@@ -49,7 +47,6 @@ export function TrainerProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [quizzesLoading, setQuizzesLoading] = useState(false);
-  const [quizAnalytics, setQuizAnalytics] = useState(null);
 
   const analytics = useMemo(() => computeAnalytics(selectedScope, sessions), [selectedScope, sessions]);
 
@@ -88,23 +85,6 @@ export function TrainerProvider({ children }) {
     finally { setQuizzesLoading(false); }
   }, [token]);
 
-  const loadQuizQuestions = useCallback(async (quizId, force = false) => {
-    if (!quizId) return [];
-    const qs = await getQuizQuestions(quizId, token);
-    setQuizzes((prev) => prev.map((q) => (
-      q.id === quizId && (force || !q.questionsLoaded)
-        ? { ...q, questions: qs, questionsCount: qs.length, questionsLoaded: true }
-        : q
-    )));
-    return qs;
-  }, [token]);
-
-  const loadQuizAnalytics = useCallback(async () => {
-    const data = await getQuizAnalytics(token);
-    if (data) setQuizAnalytics(data);
-    return data;
-  }, [token]);
-
   const refreshSessions = async () => {
     await loadData(true);
   };
@@ -132,33 +112,27 @@ export function TrainerProvider({ children }) {
   };
 
   const handleAddQuestion = async (quizId, q) => {
-    const added = await addQuestion(quizId, q, token);
-    setQuizzes((prev) => prev.map((quiz) => {
-      if (quiz.id !== quizId) return quiz;
-      const nextQs = [...(quiz.questions || []), added];
-      return { ...quiz, questions: nextQs, questionsCount: nextQs.length };
-    }));
-    await loadQuizQuestions(quizId, true);
+    await addQuestion(quizId, q, token);
+    const updated = await getQuizzes(token);
+    setQuizzes(updated);
   };
 
   const handleUpdateQuestion = async (quizId, qid, q) => {
     await updateQuestion(quizId, qid, q, token);
-    await loadQuizQuestions(quizId, true);
+    const updated = await getQuizzes(token);
+    setQuizzes(updated);
   };
 
   const handleDeleteQuestion = async (quizId, qid) => {
     await deleteQuestion(quizId, qid, token);
-    setQuizzes((prev) => prev.map((quiz) => {
-      if (quiz.id !== quizId) return quiz;
-      const nextQs = (quiz.questions || []).filter((item) => item.id !== qid);
-      return { ...quiz, questions: nextQs, questionsCount: nextQs.length };
-    }));
-    await loadQuizQuestions(quizId, true);
+    const updated = await getQuizzes(token);
+    setQuizzes(updated);
   };
 
   const handleUpdateSettings = async (quizId, settings) => {
     await updateQuizSettings(quizId, settings);
-    setQuizzes((prev) => prev.map((q) => (q.id === quizId ? { ...q, ...settings } : q)));
+    const updated = await getQuizzes(token);
+    setQuizzes(updated);
   };
 
   const handleResetQuizzes = async () => {
@@ -239,10 +213,7 @@ export function TrainerProvider({ children }) {
         loadError,
         loadData,
         loadQuizzes,
-        loadQuizQuestions,
         quizzesLoading,
-        quizAnalytics,
-        loadQuizAnalytics,
         handleGrade,
         handleCreateQuiz,
         handleAddQuestion,

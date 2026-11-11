@@ -73,28 +73,32 @@ admin_engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Re-inject transaction-local session settings on every transaction begin (SEC-08, TC-RLS-07).
-# The identity lives on the Session (session.info) because FastAPI runs sync dependencies and endpoints in
-# separate thread contexts, so a ContextVar set inside a dependency never reaches the endpoint. Every
-# transaction is re-signed with a fresh expiry, and a Session with no identity gets EMPTY settings so a
-# pooled connection can never inherit a previous user's role (fail closed).
+# Re-inject transaction-local session settings on every transaction begin (SEC-08, TC-RLS-07)
 @event.listens_for(Session, "after_begin")
 def receive_after_begin(session, transaction, connection):
-    if connection.dialect.name != "postgresql":
-        return
-    ident = session.info.get("rls_identity")
-    if ident:
-        ctx = sign_context(user_id=ident["user_id"], role=ident["role"], trainee_id=ident.get("trainee_id"))
-    else:
-        ctx = request_context_var.get() or {}
-    for key, val in (
-        ("crossquest.current_user_id", ctx.get("user_id", "")),
-        ("crossquest.current_role", ctx.get("role", "")),
-        ("crossquest.current_trainee_id", ctx.get("trainee_id", "")),
-        ("crossquest.context_expiry", str(ctx.get("expiry", ""))),
-        ("crossquest.context_signature", ctx.get("signature", "")),
-    ):
-        connection.execute(text("SELECT set_config(:k, :v, true)"), {"k": key, "v": val or ""})
+    if connection.dialect.name == "postgresql":
+        ctx = request_context_var.get()
+        if ctx:
+            connection.execute(
+                text("SELECT set_config('crossquest.current_user_id', :uid, true)"),
+                {"uid": ctx.get("user_id", "")}
+            )
+            connection.execute(
+                text("SELECT set_config('crossquest.current_role', :role, true)"),
+                {"role": ctx.get("role", "")}
+            )
+            connection.execute(
+                text("SELECT set_config('crossquest.current_trainee_id', :tid, true)"),
+                {"tid": ctx.get("trainee_id", "")}
+            )
+            connection.execute(
+                text("SELECT set_config('crossquest.context_expiry', :exp, true)"),
+                {"exp": str(ctx.get("expiry", ""))}
+            )
+            connection.execute(
+                text("SELECT set_config('crossquest.context_signature', :sig, true)"),
+                {"sig": ctx.get("signature", "")}
+            )
 
 import os
 

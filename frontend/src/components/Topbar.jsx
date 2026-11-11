@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Building2,
   Flame,
   PanelLeftClose,
   PanelLeftOpen
@@ -22,7 +21,7 @@ export default function Topbar({
   onToggleSidebar
 }) {
   const navigate = useNavigate();
-  const { currentUser, switchCompany } = useAuth();
+  const { currentUser } = useAuth();
   const { isDark } = useTheme();
 
   return (
@@ -49,29 +48,9 @@ export default function Topbar({
             {currentUser?.organization && (
               <>
                 <span style={{ color: isDark ? '#475569' : '#94a3b8', fontSize: '13px' }}>•</span>
-                {currentUser?.role === 'trainee' && (currentUser?.affiliations?.length > 1) ? (
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700,
-                    padding: '4px 10px', borderRadius: 999, background: isDark ? '#1e293b' : '#eef2ff',
-                    border: isDark ? '1px solid #334155' : '1px solid #c7d2fe', color: isDark ? '#e2e8f0' : '#3730a3' }}
-                    title="Switch active employer affiliation (FR-15 / DD-01)">
-                    <Building2 size={13} />
-                    <select
-                      value={currentUser.company_code || ''}
-                      onChange={(e) => switchCompany(e.target.value)}
-                      style={{ background: 'transparent', border: 'none', color: 'inherit', fontWeight: 700, fontSize: 12, cursor: 'pointer', outline: 'none' }}
-                    >
-                      {currentUser.affiliations.map((a) => (
-                        <option key={a.company_code} value={a.company_code} style={{ color: '#0f172a' }}>
-                          {a.company_name} ({a.company_code})
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ) : (
-                  <span style={{ fontSize: '13px', fontWeight: '600', color: isDark ? '#cbd5e1' : '#334155' }}>
-                    {currentUser.organization}
-                  </span>
-                )}
+                <span style={{ fontSize: '13px', fontWeight: '600', color: isDark ? '#cbd5e1' : '#334155' }}>
+                  {currentUser.organization}
+                </span>
               </>
             )}
           </div>
