@@ -57,7 +57,6 @@ const getVenueDisplay = (sess) => {
   return 'Crossworks Makati Learning Hub';
 };
 
-const PAGE_SIZE = 6;
 const stageOf = (s) => s.board_stage || (s.trainer_signed_off ? 'completed' : 'awaiting_signoff');
 const byParticipants = (a, b) => (b.participant_count || 0) - (a.participant_count || 0);
 
@@ -107,12 +106,6 @@ export default function Sessions() {
   const [activeSession, setActiveSession] = useState(null);
   const [savingAttendance, setSavingAttendance] = useState(false);
   const [attendanceEdits, setAttendanceEdits] = useState({});
-  const [visibleCounts, setVisibleCounts] = useState({ needs: PAGE_SIZE, awaiting: PAGE_SIZE, completed: PAGE_SIZE });
-  const showMore = (key) => setVisibleCounts(prev => ({ ...prev, [key]: prev[key] + PAGE_SIZE }));
-  const showLess = (key) => setVisibleCounts(prev => ({ ...prev, [key]: PAGE_SIZE }));
-  useEffect(() => {
-    setVisibleCounts({ needs: PAGE_SIZE, awaiting: PAGE_SIZE, completed: PAGE_SIZE });
-  }, [selectedClient]);
 
   const loadData = async () => {
     setLoading(true);
@@ -184,10 +177,6 @@ export default function Sessions() {
   const columnCompleted = useMemo(() => {
     return clientFilteredSessions.filter(s => stageOf(s) === 'completed').sort(byParticipants);
   }, [clientFilteredSessions]);
-
-  const visibleNeeds = columnNeedsAttendance.slice(0, visibleCounts.needs);
-  const visibleAwaiting = columnAwaitingSignOff.slice(0, visibleCounts.awaiting);
-  const visibleCompleted = columnCompleted.slice(0, visibleCounts.completed);
 
   const handleOpenNewModal = () => {
     setFormError(null);
@@ -295,6 +284,12 @@ export default function Sessions() {
 
   return (
     <div className="am-sessions-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <style>{`
+        .am-kanban-scroll::-webkit-scrollbar { width: 8px; }
+        .am-kanban-scroll::-webkit-scrollbar-track { background: transparent; }
+        .am-kanban-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 8px; }
+        .am-kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+      `}</style>
       {/* Account Manager Sessions Cockpit Hero Stage (Sunset Amber / Deep Bronze) */}
       <section className="trainee-hero-stage am-sessions-hero-stage">
         <div className="trainee-hero-content">
@@ -509,7 +504,7 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', maxHeight: 'calc(100vh - 340px)', overflowY: 'auto', overflowX: 'hidden', paddingRight: '8px', scrollbarWidth: 'thin' }}>
             {columnNeedsAttendance.length === 0 ? (
               <div
                 style={{
@@ -549,7 +544,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              visibleNeeds.map(sess => (
+              columnNeedsAttendance.map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -635,18 +630,6 @@ export default function Sessions() {
                 </div>
               ))
             )}
-            {columnNeedsAttendance.length > PAGE_SIZE && (
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', paddingTop: '4px' }}>
-                {visibleCounts.needs < columnNeedsAttendance.length && (
-                  <button type="button" className="adm-chip" onClick={() => showMore('needs')}>
-                    Show {Math.min(PAGE_SIZE, columnNeedsAttendance.length - visibleCounts.needs)} more ({columnNeedsAttendance.length - visibleCounts.needs} remaining)
-                  </button>
-                )}
-                {visibleCounts.needs > PAGE_SIZE && (
-                  <button type="button" className="adm-chip" onClick={() => showLess('needs')}>Show less</button>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -680,7 +663,7 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', maxHeight: 'calc(100vh - 340px)', overflowY: 'auto', overflowX: 'hidden', paddingRight: '8px', scrollbarWidth: 'thin' }}>
             {columnAwaitingSignOff.length === 0 ? (
               <div
                 style={{
@@ -720,7 +703,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              visibleAwaiting.map(sess => (
+              columnAwaitingSignOff.map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -806,18 +789,6 @@ export default function Sessions() {
                 </div>
               ))
             )}
-            {columnAwaitingSignOff.length > PAGE_SIZE && (
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', paddingTop: '4px' }}>
-                {visibleCounts.awaiting < columnAwaitingSignOff.length && (
-                  <button type="button" className="adm-chip" onClick={() => showMore('awaiting')}>
-                    Show {Math.min(PAGE_SIZE, columnAwaitingSignOff.length - visibleCounts.awaiting)} more ({columnAwaitingSignOff.length - visibleCounts.awaiting} remaining)
-                  </button>
-                )}
-                {visibleCounts.awaiting > PAGE_SIZE && (
-                  <button type="button" className="adm-chip" onClick={() => showLess('awaiting')}>Show less</button>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -851,7 +822,7 @@ export default function Sessions() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+          <div className="am-kanban-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: '320px', maxHeight: 'calc(100vh - 340px)', overflowY: 'auto', overflowX: 'hidden', paddingRight: '8px', scrollbarWidth: 'thin' }}>
             {columnCompleted.length === 0 ? (
               <div
                 style={{
@@ -891,7 +862,7 @@ export default function Sessions() {
                 </p>
               </div>
             ) : (
-              visibleCompleted.map(sess => (
+              columnCompleted.map(sess => (
                 <div
                   key={sess.id}
                   onClick={() => handleOpenDetail(sess)}
@@ -975,18 +946,6 @@ export default function Sessions() {
                   </div>
                 </div>
               ))
-            )}
-            {columnCompleted.length > PAGE_SIZE && (
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', paddingTop: '4px' }}>
-                {visibleCounts.completed < columnCompleted.length && (
-                  <button type="button" className="adm-chip" onClick={() => showMore('completed')}>
-                    Show {Math.min(PAGE_SIZE, columnCompleted.length - visibleCounts.completed)} more ({columnCompleted.length - visibleCounts.completed} remaining)
-                  </button>
-                )}
-                {visibleCounts.completed > PAGE_SIZE && (
-                  <button type="button" className="adm-chip" onClick={() => showLess('completed')}>Show less</button>
-                )}
-              </div>
             )}
           </div>
         </div>
