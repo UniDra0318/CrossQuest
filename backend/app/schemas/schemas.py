@@ -77,6 +77,8 @@ class UserResponse(UserBase):
     created_at: Optional[datetime] = None
     streak: Optional[int] = None
     company_name: Optional[str] = None
+    company_code: Optional[str] = None
+    affiliations: Optional[List[Dict[str, Any]]] = None
     attributes: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(from_attributes=True)

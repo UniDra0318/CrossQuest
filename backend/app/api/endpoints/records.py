@@ -267,15 +267,28 @@ def list_training_records(
         query = query.filter(TrainingRecord.trainee_id == trainee_id)
 
     records = query.all()
+    if not records:
+        return []
+
+    from app.core.database import admin_engine
+    from sqlalchemy.orm import sessionmaker as _sm
+    t_ids = {r.trainee_id for r in records if r.trainee_id}
+    c_ids = {r.company_at_completion_id for r in records if r.company_at_completion_id}
+    with _sm(bind=admin_engine)() as adm_db:
+        trainees_map = {t.id: t for t in adm_db.query(Trainee).filter(Trainee.id.in_(t_ids)).all()} if t_ids else {}
+        companies_map = {c.id: c for c in adm_db.query(ClientCompany).filter(ClientCompany.id.in_(c_ids)).all()} if c_ids else {}
+
     results = []
     for r in records:
-        t_name = f"{r.trainee.first_name} {r.trainee.last_name}".strip() if r.trainee else "Unknown Trainee"
-        t_email = r.trainee.email if r.trainee else ""
-        t_code = r.trainee.trainee_code if r.trainee else ""
-        c_name = r.company_at_completion.name if r.company_at_completion else "Unknown Organization"
-        c_code = r.company_at_completion.code if r.company_at_completion else "CRO"
+        t_obj = trainees_map.get(r.trainee_id)
+        c_obj = companies_map.get(r.company_at_completion_id)
+        t_name = f"{t_obj.first_name} {t_obj.last_name}".strip() if t_obj else "Unknown Trainee"
+        t_email = t_obj.email if t_obj else ""
+        t_code = t_obj.trainee_code if t_obj else ""
+        c_name = c_obj.name if c_obj else "Unknown Organization"
+        c_code = c_obj.code if c_obj else "CRO"
 
-        item = TrainingRecordResponse(
+        results.append(TrainingRecordResponse(
             id=r.id,
             trainee_id=r.trainee_id,
             trainee_name=t_name,
@@ -296,8 +309,7 @@ def list_training_records(
             deleted_at=r.deleted_at,
             deleted_by=r.deleted_by,
             created_at=r.created_at
-        )
-        results.append(item)
+        ))
     return results
 
 
@@ -384,7 +396,10 @@ def decrypt_training_record(
         raise HTTPException(status_code=404, detail="Training record not found")
 
     client_ip = _get_client_ip(request)
-    company = db.query(ClientCompany).filter(ClientCompany.id == record.company_at_completion_id).first()
+    from app.core.database import admin_engine
+    from sqlalchemy.orm import sessionmaker as _sm
+    with _sm(bind=admin_engine)() as adm_db:
+        company = adm_db.query(ClientCompany).filter(ClientCompany.id == record.company_at_completion_id).first()
     company_code = company.code if company else ""
 
     # 1. Scope check (Application-Level Authorization: SEC-02)

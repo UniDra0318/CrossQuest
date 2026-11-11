@@ -1384,3 +1384,16 @@ export async function saveTrainerPrograms(userId, courseIds, token) {
   } catch { return false; }
 }
 
+
+export async function switchMyCompanyApi(companyCode, token) {
+  const res = await authFetch(`${API_BASE}/trainees/me/switch-company`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ company_code: companyCode })
+  }, token);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || 'Could not switch company');
+  }
+  return res.json();
+}

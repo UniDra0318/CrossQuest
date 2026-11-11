@@ -353,6 +353,17 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
                     {u.organization || u.company_code}
                   </span>
 
+                  {u.assigned_companies?.length > 1 && u.role === 'trainee' && (
+                    <span style={{
+                      padding: '2px 8px', borderRadius: '6px', fontSize: '10.5px', fontWeight: '800',
+                      background: isDark ? 'rgba(99,102,241,0.2)' : '#eef2ff',
+                      color: isDark ? '#a5b4fc' : '#4338ca',
+                      border: `1px solid ${isDark ? 'rgba(99,102,241,0.4)' : '#c7d2fe'}`
+                    }}>
+                      Multi-Company: {u.assigned_companies.join(' · ')}
+                    </span>
+                  )}
+
                   {u.streak !== undefined && (
                     <span style={{
                       display: 'inline-flex',
@@ -371,6 +382,12 @@ export default function DevRoleSwitcherModal({ isOpen, onClose }) {
                     </span>
                   )}
                 </div>
+
+                {u.demo_note && (
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: isDark ? '#94a3b8' : '#64748b' }}>
+                    {u.demo_note}
+                  </div>
+                )}
               </div>
             );
           })}
