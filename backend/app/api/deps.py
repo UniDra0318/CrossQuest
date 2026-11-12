@@ -90,13 +90,17 @@ def get_current_user(
     rls_role = "ACCOUNT_MANAGER" if user.role == "company_staff" else user.role
     signed_ctx = sign_context(user_id=user.id, role=rls_role, trainee_id=trainee_id)
     request_context_var.set(signed_ctx)
+    # ContextVar changes made in a threadpool dependency are not visible to the endpoint's thread, so
+    # also bind the signed context to this request's Session; after_begin re-injects it on every
+    # new transaction (e.g. after db.commit()) so RLS never depends on pooled-connection leftovers.
+    db.info["rls_ctx"] = signed_ctx
     if db.bind and db.bind.dialect.name == "postgresql":
         from sqlalchemy import text
-        db.execute(text("SELECT set_config('crossquest.current_user_id', :uid, false)"), {"uid": signed_ctx["user_id"]})
-        db.execute(text("SELECT set_config('crossquest.current_role', :role, false)"), {"role": signed_ctx["role"]})
-        db.execute(text("SELECT set_config('crossquest.current_trainee_id', :tid, false)"), {"tid": signed_ctx["trainee_id"]})
-        db.execute(text("SELECT set_config('crossquest.context_expiry', :exp, false)"), {"exp": str(signed_ctx["expiry"])})
-        db.execute(text("SELECT set_config('crossquest.context_signature', :sig, false)"), {"sig": signed_ctx["signature"]})
+        db.execute(text("SELECT set_config('crossquest.current_user_id', :uid, true)"), {"uid": signed_ctx["user_id"]})
+        db.execute(text("SELECT set_config('crossquest.current_role', :role, true)"), {"role": signed_ctx["role"]})
+        db.execute(text("SELECT set_config('crossquest.current_trainee_id', :tid, true)"), {"tid": signed_ctx["trainee_id"]})
+        db.execute(text("SELECT set_config('crossquest.context_expiry', :exp, true)"), {"exp": str(signed_ctx["expiry"])})
+        db.execute(text("SELECT set_config('crossquest.context_signature', :sig, true)"), {"sig": signed_ctx["signature"]})
 
     return user
 

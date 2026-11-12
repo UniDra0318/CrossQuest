@@ -651,6 +651,7 @@ export default function TraineeDashboard({ activeSubView, setActiveView, onStrea
           onFinish={handleQuizFinish}
           onExit={handleQuizExit}
           onSubmitServer={handleServerSubmit}
+          userOrg={currentUser?.organization || 'Crossworks Enterprise'}
         />
       </div>
     );

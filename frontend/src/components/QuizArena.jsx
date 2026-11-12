@@ -109,7 +109,7 @@ function prepareQuizQuestions(quiz, initialSession) {
   });
 }
 
-export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSubmitServer }) {
+export default function QuizArena({ quiz, initialSession, onFinish, onExit, onSubmitServer, userOrg = 'Crossworks Enterprise' }) {
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   const { theme, effectiveTheme } = useTheme();

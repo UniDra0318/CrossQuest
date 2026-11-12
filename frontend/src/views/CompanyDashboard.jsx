@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import FinanceReconciliationDesk from '../components/FinanceReconciliationDesk';
 import Reports from '../staff/pages/Reports';
+import { StaffProvider } from '../staff/StaffContext';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import PageHeader from '../components/PageHeader';
 import '../styles/admin.css';
@@ -386,7 +387,9 @@ export default function CompanyDashboard({ activeSubView, setActiveView }) {
 
       {/* 3. CLIENT COMPLIANCE & AUDIT REPORTS TAB (FR-20, OI-04, U-03: PDF & Excel/CSV) */}
       {currentTab === 'audit_certificate' && (
-        <Reports />
+        <StaffProvider>
+          <Reports />
+        </StaffProvider>
       )}
 
       {/* 4. FINANCE PILOT DATA IMPORT & RECONCILIATION DESK */}
